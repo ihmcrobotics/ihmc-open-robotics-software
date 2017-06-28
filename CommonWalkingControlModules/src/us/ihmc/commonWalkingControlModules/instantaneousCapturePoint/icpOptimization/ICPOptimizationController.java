@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,12 +33,14 @@ import java.util.List;
 
 public abstract class ICPOptimizationController
 {
-   protected static final boolean VISUALIZE = false;
+   protected static final boolean VISUALIZE = true;
    protected static final boolean COMPUTE_COST_TO_GO = false;
    protected static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
 
    protected static final String yoNamePrefix = "controller";
+
+   private static final  double maxICPVelocityAtTransferStart = 0.4;
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -155,8 +158,8 @@ public abstract class ICPOptimizationController
    protected final double dynamicRelaxationDoubleSupportWeightModifier;
    protected final int maximumNumberOfFootstepsToConsider;
 
-   protected final boolean useDifferentSplitRatioForBigAdjustment;
-   protected final double minimumTimeOnInitialCMPForBigAdjustment;
+   protected boolean useDifferentSplitRatioForBigAdjustment;
+   protected double minimumTimeOnInitialCMPForBigAdjustment;
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
@@ -419,6 +422,11 @@ public abstract class ICPOptimizationController
       }
    }
 
+   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   {
+      solutionHandler.setReferenceICPVelocity(desiredICPVelocity);
+   }
+
 
    /**
     * Initializes the controller to smoothly re-center the ICP in the support polygon preparing the
@@ -607,7 +615,6 @@ public abstract class ICPOptimizationController
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider);
          reachabilityConstraintHandler.updateReachabilityConstraint(solver);
       }
-
 
       submitFeedbackTaskConditionsToSolver();
       submitAngularMomentumTaskConditionsToSolver();
