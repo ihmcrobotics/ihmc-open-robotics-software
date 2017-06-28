@@ -750,7 +750,7 @@ public abstract class ICPOptimizationController
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(supportSide.getEnumValue(), upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
    }
 
 
