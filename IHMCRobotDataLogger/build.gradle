@@ -74,16 +74,20 @@ dependencies {
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
    compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2.6'
    compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.2.4'
+   compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
+   
    
    compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
+    
+        testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+    
 }
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
@@ -117,7 +121,7 @@ task compileIDL(type: us.ihmc.idl.generator.IDLGeneratorTask) {
 	packagePrefix = ""
 }
 
-compileJava.dependsOn compileIDL
+//compileJava.dependsOn compileIDL
 
 distributions {
    logger {
