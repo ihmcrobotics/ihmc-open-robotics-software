@@ -871,4 +871,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       walkingMessageHandler.clearFootsteps();
 
    }
+
+   /**
+    * Returns the currently active walking state. This is used for unit testing.
+    * @return WalkingStateEnum
+    */
+   public WalkingStateEnum getWalkingStateEnum()
+   {
+      return stateMachine.getCurrentStateEnum();
+   }
 }
