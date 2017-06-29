@@ -41,7 +41,7 @@ public class Ramp3dTest
          double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Ramp3D box3d = new Ramp3D(transform, width, length, height);
+         Ramp3D box3d = new Ramp3D(transform, length, width, height);
          testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
    }
@@ -416,7 +416,7 @@ public class Ramp3dTest
       rampCopy.applyTransform(transformAppliedOnlyToCopy);
       assertFalse(rampCopy.equals(ramp));
 
-      Ramp3D rampCopyBySet = new Ramp3D(5.0, 6.0, 7.0);
+      Ramp3D rampCopyBySet = new Ramp3D(6.0, 5.0, 7.0);
       rampCopyBySet.set(ramp);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
@@ -430,8 +430,8 @@ public class Ramp3dTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationRollAndZeroTranslation(Math.PI / 6);
-      Ramp3D ramp = new Ramp3D(transform, 2.0, 3.0, 4.0);
-      Ramp3D rampCopyBySet = new Ramp3D(5.0, 6.0, 7.0);
+      Ramp3D ramp = new Ramp3D(transform, 3.0, 2.0, 4.0);
+      Ramp3D rampCopyBySet = new Ramp3D(6.0, 5.0, 7.0);
       rampCopyBySet.set(ramp);
       Point3D pointProjectedOntoRamp = new Point3D(1.0, 0.0, 5.0);
       Point3D pointProjectedOntoRampCopy = new Point3D(pointProjectedOntoRamp);
@@ -448,7 +448,7 @@ public class Ramp3dTest
       double length = RandomNumbers.nextDouble(random, 0.05, 1.0);
       double height = RandomNumbers.nextDouble(random, 0.05, 1.0);
 
-      return new Ramp3D(configuration, length, width, height);
+      return new Ramp3D(configuration, width, length, height);
    }
 
    private static RigidBodyTransform createRandomTransform(Random random)
