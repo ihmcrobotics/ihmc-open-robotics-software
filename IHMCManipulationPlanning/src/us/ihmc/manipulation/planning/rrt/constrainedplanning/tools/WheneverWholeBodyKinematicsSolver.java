@@ -144,7 +144,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
    
-   private static int maximumCntForUpdateInternal = 250;
+   private static int maximumCntForUpdateInternal = 1000;
    private static int cntForUpdateInternal = 0;
    
    private static int numberOfTest = 0;

@@ -28,7 +28,7 @@ public class TaskNodeTree
    private double matricRatioTimeToTask = 0.5;
    
    private double maximumDisplacementOfStep = 0.1;
-   private double maximumTimeGapOfStep = 0.1;
+   private double maximumTimeGapOfStep = 0.05;
    
    private int dimensionOfTask;
 
@@ -131,8 +131,30 @@ public class TaskNodeTree
          PrintTools.info("expanding process "+i);         
          if(expandingTree())
          {
-            
             PrintTools.info("expanding is done "+i);
+            ArrayList<TaskNode> revertedPath = new ArrayList<TaskNode>();
+            TaskNode currentNode = newNode;
+            revertedPath.add(currentNode);            
+            
+            while(true)
+            {
+               currentNode = currentNode.getParentNode();
+               if(currentNode != null)
+               {
+                  revertedPath.add(currentNode);                  
+               }
+               else
+                  break;
+            }
+            
+            int revertedPathSize = revertedPath.size();
+            
+            path.clear();
+            for(int j=0;j<revertedPathSize;j++)
+               path.add(revertedPath.get(revertedPathSize - 1 - j));
+            
+            PrintTools.info("Constructed Tree size is "+revertedPathSize);
+            
             break;
          }
       }
@@ -308,6 +330,7 @@ public class TaskNodeTree
    {
       this.newNode.convertNormalizedDataToData(nodeRegion);
       this.newNode.setParentNode(this.nearNode);
+      
       if(this.newNode.isValidNode())
       {
          nearNode.addChildNode(this.newNode);
@@ -323,7 +346,7 @@ public class TaskNodeTree
       {
          this.newNode.clearParentNode();
          failNodes.add(this.newNode);
-         PrintTools.info("this new Configuration cannot be added on tree");
+//         PrintTools.info("this new Configuration cannot be added on tree");
          return false;
       }
    }
