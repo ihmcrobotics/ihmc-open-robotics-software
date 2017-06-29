@@ -13,31 +13,31 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class Sphere3d extends Shape3D<Sphere3d>
+public class Sphere3D extends Shape3D<Sphere3D>
 {
    private double radius;
 
-   public Sphere3d()
+   public Sphere3D()
    {
       this(0.0, 0.0, 0.0, 1.0);
    }
 
-   public Sphere3d(double radius)
+   public Sphere3D(double radius)
    {
       this(0.0, 0.0, 0.0, radius);
    }
 
-   public Sphere3d(Sphere3d sphere3d)
+   public Sphere3D(Sphere3D sphere3d)
    {
       this(sphere3d.getPositionX(), sphere3d.getPositionY(), sphere3d.getPositionZ(), sphere3d.getRadius());
    }
 
-   public Sphere3d(Point3DReadOnly center, double radius)
+   public Sphere3D(Point3DReadOnly center, double radius)
    {
       this(center.getX(), center.getY(), center.getZ(), radius);
    }
 
-   public Sphere3d(double x, double y, double z, double radius)
+   public Sphere3D(double x, double y, double z, double radius)
    {
       this.radius = radius;
       setPosition(x, y, z);
@@ -54,7 +54,7 @@ public class Sphere3d extends Shape3D<Sphere3d>
    }
 
    @Override
-   public void set(Sphere3d sphere3d)
+   public void set(Sphere3D sphere3d)
    {
       setPose(sphere3d);
       radius = sphere3d.radius;
@@ -127,7 +127,7 @@ public class Sphere3d extends Shape3D<Sphere3d>
    }
 
    @Override
-   public boolean epsilonEquals(Sphere3d other, double epsilon)
+   public boolean epsilonEquals(Sphere3D other, double epsilon)
    {
       return MathTools.epsilonEquals(radius, other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }

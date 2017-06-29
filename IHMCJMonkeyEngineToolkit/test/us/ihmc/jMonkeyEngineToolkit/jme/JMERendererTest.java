@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
 import us.ihmc.jMonkeyEngineToolkit.utils.CoordinateFrameNode;
 import us.ihmc.jMonkeyEngineToolkit.utils.FlatHeightMap;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3D;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMERendererTest
@@ -74,7 +74,7 @@ public class JMERendererTest
       
       world.startWithGui();
 
-      final Graphics3DNode sphereNode = new Graphics3DNode("SphereNode", new Graphics3DObject(new Sphere3d(1.0), YoAppearance.Green()));
+      final Graphics3DNode sphereNode = new Graphics3DNode("SphereNode", new Graphics3DObject(new Sphere3D(1.0), YoAppearance.Green()));
       world.addChild(sphereNode);
 
       world.addChild(new CoordinateFrameNode());

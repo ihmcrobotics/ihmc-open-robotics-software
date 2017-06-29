@@ -32,7 +32,7 @@ public class Sphere3dTest
       {
          Point3D center = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
          double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Sphere3d sphere3d = new Sphere3d(center, radius);
+         Sphere3D sphere3d = new Sphere3D(center, radius);
          testHelper.runSimpleTests(sphere3d, random, numberOfPoints);
       }
    }
@@ -41,7 +41,7 @@ public class Sphere3dTest
 	@Test(timeout = 30000)
    public void testSimpleConstructor()
    {
-      Sphere3d sphere3d = new Sphere3d();
+      Sphere3D sphere3d = new Sphere3D();
       
       double epsilon = 1e-14;
       assertEquals(sphere3d.getRadius(), 1.0, epsilon);
@@ -54,7 +54,7 @@ public class Sphere3dTest
 	@Test(timeout = 30000)
    public void testIsInside()
    {
-      Sphere3d sphere3d = new Sphere3d();
+      Sphere3D sphere3d = new Sphere3D();
 
       double justInside = 0.999;
       double justOutside = 1.001;
@@ -78,7 +78,7 @@ public class Sphere3dTest
       Point3D center = new Point3D(1.0, 2.1, 3.2);
       double radius = 0.7634;
       
-      Sphere3d sphere3d = new Sphere3d(center, radius);
+      Sphere3D sphere3d = new Sphere3D(center, radius);
 
       Point3D randomPoint = new Point3D(17.3, 19.2, 11.4);
       Point3D orthogonalProjection = new Point3D(randomPoint);
