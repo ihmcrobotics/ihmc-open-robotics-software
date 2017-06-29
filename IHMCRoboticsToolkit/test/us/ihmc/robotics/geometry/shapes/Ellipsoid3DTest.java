@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class Ellipsoid3dTest
+public class Ellipsoid3DTest
 {
    private static final double epsilon = 1e-4;    // This epsilon is meant small changes in coordinates. Use Ellipsoid3d's DEFAULT_EPSILON for error handling.
    private static final int iterations = 100;

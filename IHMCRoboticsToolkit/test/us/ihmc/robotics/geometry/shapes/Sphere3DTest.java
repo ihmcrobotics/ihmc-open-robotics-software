@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class Sphere3dTest
+public class Sphere3DTest
 {
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.3)

@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class Ramp3dTest
+public class Ramp3DTest
 {
    private static final boolean DEBUG = false;
 
