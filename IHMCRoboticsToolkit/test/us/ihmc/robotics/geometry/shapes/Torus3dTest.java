@@ -32,7 +32,7 @@ public class Torus3dTest
       transform.setRotationRollAndZeroTranslation(Math.PI/2.0);
       transform.setTranslation(new Vector3D(2.0, 0.0, 3.0));
       
-      Torus3d torus3d = new Torus3d(transform, radius, thickness);
+      Torus3D torus3d = new Torus3D(transform, radius, thickness);
       Point3D pointToCheck = new Point3D(2.0, 0.0, 4.0);
       
       assertTrue(torus3d.isInsideOrOnSurface(pointToCheck));
@@ -45,7 +45,7 @@ public class Torus3dTest
       double radius = 1.0;
       double thickness = 0.1;
       
-      Torus3d torus3d = new Torus3d(radius, thickness);
+      Torus3D torus3d = new Torus3D(radius, thickness);
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, 0.0);
    }
 
@@ -74,7 +74,7 @@ public class Torus3dTest
          double radius = radiusAndThickness[0];
          double thickness = radiusAndThickness[1];
          
-         Torus3d torus3d = new Torus3d(radius, thickness);
+         Torus3D torus3d = new Torus3D(radius, thickness);
          testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, 0.0);
          
          testTranslatedPointsOnOrInside();
@@ -89,7 +89,7 @@ public class Torus3dTest
       double radius = 1.0;
       double thickness = 0.1;
     
-      Torus3d torus3d = new Torus3d(radius, thickness);
+      Torus3D torus3d = new Torus3D(radius, thickness);
       
       Point3D testPoint = new Point3D(1.0, 0.0, 0.0);
       Point3D projectedPoint = new Point3D(testPoint);
@@ -134,7 +134,7 @@ public class Torus3dTest
       // also tests orthogonalProjection() and surfaceNormalAt()
       double radius = 1.0;
       double thickness = 0.1;
-      Torus3d torus3d = new Torus3d(radius, thickness);
+      Torus3D torus3d = new Torus3D(radius, thickness);
       Point3D closestPointToPack = new Point3D();
       Vector3D normalToPack = new Vector3D();
  
@@ -247,7 +247,7 @@ public class Torus3dTest
          double radius = radiusAndThickness[0];
          double thickness = radiusAndThickness[1];
          
-         Torus3d torus3d = new Torus3d(radius, thickness);
+         Torus3D torus3d = new Torus3D(radius, thickness);
          
          // center point should always be false
          assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
@@ -302,7 +302,7 @@ public class Torus3dTest
             break;
          }
          
-         Torus3d torus3d = new Torus3d(radius, thickness);
+         Torus3D torus3d = new Torus3D(radius, thickness);
          
          // center point should always be false
          assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
@@ -318,7 +318,7 @@ public class Torus3dTest
          {
             //System.out.println("Radius = " + radius + " thickness = " + thickness);
             
-            torus3d.set(new Torus3d(radius, thickness));
+            torus3d.set(new Torus3D(radius, thickness));
 
             assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
 
@@ -396,7 +396,7 @@ public class Torus3dTest
    
    public void testPointsInsideWhenTranslated(double radius, double thickness)
    {
-      Torus3d torus3d = new Torus3d(radius, thickness);
+      Torus3D torus3d = new Torus3D(radius, thickness);
       
       Random random = new Random(1892L);
       double translation = (random.nextDouble() - 0.5) * 100.0;
@@ -427,7 +427,7 @@ public class Torus3dTest
       testPointsInsideWhenOffsetBy(torus3d, translation, translationY, translationZ);
    }
    
-   public void testPointsInsideWhenOffsetBy(Torus3d torus3d, double tx, double ty, double tz)
+   public void testPointsInsideWhenOffsetBy(Torus3D torus3d, double tx, double ty, double tz)
    {
       double radius = torus3d.getRadius();
       double thickness = torus3d.getThickness();
@@ -485,15 +485,15 @@ public class Torus3dTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationRollAndZeroTranslation(Math.PI / 6);
-      Torus3d torus = new Torus3d(transform, 7.0, 2.0);
+      Torus3D torus = new Torus3D(transform, 7.0, 2.0);
       
-      Torus3d torusCopy = new Torus3d(torus);
+      Torus3D torusCopy = new Torus3D(torus);
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
       assertFalse(torusCopy.equals(torus));
       
-      Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
+      Torus3D torusCopyBySet = new Torus3D(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);

@@ -11,9 +11,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 
 /**
+ * 
  * The torus is built in the XY plane, around the z axis
  */
-public class Torus3d extends Shape3D<Torus3d>
+public class Torus3D extends Shape3D<Torus3D>
 {
    private double radius;
    private double tubeRadius;
@@ -21,7 +22,7 @@ public class Torus3d extends Shape3D<Torus3d>
    private static final double SMALLEST_ALLOWABLE_THICKNESS = 5e-3;
    private static final double SMALLEST_ALLOWABLE_RADIUS_MINUS_THICKNESS = 1e-4;
 
-   public Torus3d(Torus3d torus3d)
+   public Torus3D(Torus3D torus3d)
    {
       setPose(torus3d);
       this.radius = torus3d.radius;
@@ -30,7 +31,7 @@ public class Torus3d extends Shape3D<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d()
+   public Torus3D()
    {
       radius = 1.0;
       tubeRadius = 0.1;
@@ -38,7 +39,7 @@ public class Torus3d extends Shape3D<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d(double radius, double thickness)
+   public Torus3D(double radius, double thickness)
    {
       this.radius = radius;
       this.tubeRadius = thickness;
@@ -46,7 +47,7 @@ public class Torus3d extends Shape3D<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d(RigidBodyTransform transform, double radius, double thickness)
+   public Torus3D(RigidBodyTransform transform, double radius, double thickness)
    {
       setPose(transform);
       this.radius = radius;
@@ -55,7 +56,7 @@ public class Torus3d extends Shape3D<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d(Pose3D pose, double radius, double thickness)
+   public Torus3D(Pose3D pose, double radius, double thickness)
    {
       setPose(pose);
       this.radius = radius;
@@ -65,7 +66,7 @@ public class Torus3d extends Shape3D<Torus3d>
    }
 
    @Override
-   public void set(Torus3d torus3d)
+   public void set(Torus3D torus3d)
    {
       setPose(torus3d);
       this.radius = torus3d.radius;
@@ -103,7 +104,7 @@ public class Torus3d extends Shape3D<Torus3d>
    }
 
    @Override
-   public boolean epsilonEquals(Torus3d other, double epsilon)
+   public boolean epsilonEquals(Torus3D other, double epsilon)
    {
       return MathTools.epsilonEquals(radius, other.radius, epsilon) && MathTools.epsilonEquals(tubeRadius, other.tubeRadius, epsilon);
    }
