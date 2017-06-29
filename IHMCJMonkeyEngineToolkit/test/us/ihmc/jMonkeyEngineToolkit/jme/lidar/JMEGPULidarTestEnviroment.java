@@ -18,7 +18,7 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.utils.lidar.Graphics3DLidarScan;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3D;
 import us.ihmc.robotics.lidar.LidarScan;
 
 public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
@@ -62,7 +62,7 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
    {
       world = new Graphics3DWorld("LidarTest", new JMEGraphics3DAdapter());
 
-      sphereNode = new Graphics3DNode("sphere", new Graphics3DObject(new Sphere3d(5.0), YoAppearance.Glass()));
+      sphereNode = new Graphics3DNode("sphere", new Graphics3DObject(new Sphere3D(5.0), YoAppearance.Glass()));
       // sphereNode.getGraphics3DObject().addCoordinateSystem(3);
 
       wallNode = new Graphics3DNode("wall", new Graphics3DObject());

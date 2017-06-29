@@ -53,7 +53,7 @@ import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.shapes.Shape3D;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.robotics.geometry.shapes.Sphere3D;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DObject
@@ -485,9 +485,9 @@ public class Graphics3DObject
 
    public PrimitiveGraphics3DInstruction add(Shape3D<?> shape, AppearanceDefinition app)
    {
-      if (shape instanceof Sphere3d)
+      if (shape instanceof Sphere3D)
       {
-         return addSphere(((Sphere3d) shape).getRadius(), app);
+         return addSphere(((Sphere3D) shape).getRadius(), app);
       }
       else
       {
