@@ -11,11 +11,11 @@ import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.tools.FormattingTools;
 
@@ -44,11 +44,11 @@ public abstract class AbstractBehavior implements RobotController
     */
    protected final YoVariableRegistry registry;
 
-   protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
-   protected final BooleanYoVariable hasBeenInitialized;
-   protected final BooleanYoVariable isPaused;
-   protected final BooleanYoVariable isAborted;
-   protected final DoubleYoVariable percentCompleted;
+   protected final YoEnum<BehaviorStatus> yoBehaviorStatus;
+   protected final YoBoolean hasBeenInitialized;
+   protected final YoBoolean isPaused;
+   protected final YoBoolean isAborted;
+   protected final YoDouble percentCompleted;
 
    private final List<BehaviorService> behaviorsServices;
 
@@ -64,11 +64,11 @@ public abstract class AbstractBehavior implements RobotController
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
 
-      yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
-      hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
-      isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
-      isAborted = new BooleanYoVariable("isAborted" + behaviorName, registry);
-      percentCompleted = new DoubleYoVariable("percentCompleted", registry);
+      yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
+      hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
+      isPaused = new YoBoolean("isPaused" + behaviorName, registry);
+      isAborted = new YoBoolean("isAborted" + behaviorName, registry);
+      percentCompleted = new YoDouble("percentCompleted", registry);
 
       behaviorsServices = new ArrayList<>();
    }

@@ -1,7 +1,7 @@
 package us.ihmc.avatar.sensors.microphone;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 

@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,14 +10,14 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class AppearanceDefinitionMessage implements IDLStruct<AppearanceDefinitionMessage>
+public class AppearanceDefinitionMessage
 {
     public AppearanceDefinitionMessage()
     {
         
         
     }
-    @Override
+
     public void set(AppearanceDefinitionMessage other)
     {
         	r_ = other.r_;
@@ -76,101 +73,7 @@ public class AppearanceDefinitionMessage implements IDLStruct<AppearanceDefiniti
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(AppearanceDefinitionMessage data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(AppearanceDefinitionMessage data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_6(r_);
-
-	    cdr.write_type_6(g_);
-
-	    cdr.write_type_6(b_);
-
-	    cdr.write_type_6(transparency_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	r_ = cdr.read_type_6();	
-
-	    	g_ = cdr.read_type_6();	
-
-	    	b_ = cdr.read_type_6();	
-
-	    	transparency_ = cdr.read_type_6();	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_6("r", r_);
-			    
-			    ser.write_type_6("g", g_);
-			    
-			    ser.write_type_6("b", b_);
-			    
-			    ser.write_type_6("transparency", transparency_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			r_ = ser.read_type_6("r");	
-	    	    
-	    			g_ = ser.read_type_6("g");	
-	    	    
-	    			b_ = ser.read_type_6("b");	
-	    	    
-	    			transparency_ = ser.read_type_6("transparency");	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

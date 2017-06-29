@@ -1,7 +1,7 @@
 package us.ihmc.steppr.hardware.controllers;
 
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class StepprStateCommunicator implements StepprController
 {

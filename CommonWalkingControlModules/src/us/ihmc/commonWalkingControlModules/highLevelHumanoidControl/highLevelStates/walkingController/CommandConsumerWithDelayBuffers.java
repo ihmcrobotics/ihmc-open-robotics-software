@@ -8,8 +8,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.PriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -22,16 +23,17 @@ public class CommandConsumerWithDelayBuffers
 {
    public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 10;
 
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CommandInputManager commandInputManager;
    
    /** Controller's copy of the new commands to be processed. */
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> queuedCommands = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
 
-   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, DoubleYoVariable yoTime)
+   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, YoDouble yoTime)
    {
       this.yoTime = yoTime;
       this.commandInputManager = commandInputManager;
@@ -44,7 +46,12 @@ public class CommandConsumerWithDelayBuffers
    {
       for (int i = 0; i < commandClasses.size(); i++)
       {
-         registerNewCommand((Class<C>) commandClasses.get(i));
+         Class<? extends Command<?, ?>> commandClass = commandClasses.get(i);
+         registerNewCommand((Class<C>) commandClass);
+
+         Builder<? extends Command<?, ?>> commandConstructor = CommandInputManager.createBuilderWithEmptyConstructor(commandClass);
+         Command<?, ?> command = commandConstructor.newInstance();
+         messageToCommandMap.put(command.getMessageClass(), commandClass);
       }
    }
 
@@ -66,11 +73,11 @@ public class CommandConsumerWithDelayBuffers
       {
          Class<? extends Command<?, ?>> commandClass = listOfSupportedCommands.get(i);
          RecyclingArrayList<C> newCommands = (RecyclingArrayList<C>) commandInputManager.pollNewCommands((Class<C>) commandClass);
-         
+
          for(int commandIndex = 0; commandIndex < newCommands.size(); commandIndex++)
          {
             C command = newCommands.get(commandIndex);
-            
+
             if(commandClass == ClearDelayQueueCommand.class)
             {
                ClearDelayQueueCommand clearDelayQueueCommand = (ClearDelayQueueCommand) command;
@@ -83,7 +90,7 @@ public class CommandConsumerWithDelayBuffers
    }
 
    /**
-    * Clears either all of the delay queues or a single delay queue depending on the 
+    * Clears either all of the delay queues or a single delay queue depending on the
     * ClearDelayQueueCommand
     * @param clearDelayQueueCommand a command that dictates which queues to clear
     */
@@ -97,7 +104,14 @@ public class CommandConsumerWithDelayBuffers
             clearDelayQueue(commandClassToFlush);
          }
       }
-      Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getClazz();
+      Class<? extends Packet<?>> messageClassToClear = clearDelayQueueCommand.getMessageClassToClear();
+      if(messageClassToClear != null)
+      {
+         Class<? extends Command<?, ?>> commandClassToClear = messageToCommandMap.get(messageClassToClear);
+         clearDelayQueueCommand.setCommandClassToClear(commandClassToClear);
+      }
+
+      Class<? extends Command<?, ?>> classToClear = clearDelayQueueCommand.getCommandClassToClear();
       if(classToClear != null)
       {
          clearDelayQueue(classToClear);
@@ -115,7 +129,7 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(commandClassToFlush);
       recyclingArrayList.clear();
    }
-   
+
    /**
     * Check if a new command is available.
     * @param clazz class of the command to check availability.
@@ -152,7 +166,7 @@ public class CommandConsumerWithDelayBuffers
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
       Command commandCopy = recyclingArrayList.add();
       commandCopy.set(command);
-      
+
       //not all commands implement setExecution time, if they don't the execution time will be 0 and should move to the front of the queue
       if(commandCopy.isDelayedExecutionSupported())
       {

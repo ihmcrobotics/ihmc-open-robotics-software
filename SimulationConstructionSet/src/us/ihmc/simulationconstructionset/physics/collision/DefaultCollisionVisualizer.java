@@ -8,8 +8,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -109,12 +109,12 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
    {
       List<YoGraphicVector> active = isRed ? activeRedYoGraphicVectors : activeBlueYoGraphicVectors;
 
-      DoubleYoVariable yo0 = new DoubleYoVariable("locX_" + num, registry);
-      DoubleYoVariable yo1 = new DoubleYoVariable("locY_" + num, registry);
-      DoubleYoVariable yo2 = new DoubleYoVariable("locZ_" + num, registry);
-      DoubleYoVariable yo3 = new DoubleYoVariable("vecX_" + num, registry);
-      DoubleYoVariable yo4 = new DoubleYoVariable("vecY_" + num, registry);
-      DoubleYoVariable yo5 = new DoubleYoVariable("vecZ_" + num, registry);
+      YoDouble yo0 = new YoDouble("locX_" + num, registry);
+      YoDouble yo1 = new YoDouble("locY_" + num, registry);
+      YoDouble yo2 = new YoDouble("locZ_" + num, registry);
+      YoDouble yo3 = new YoDouble("vecX_" + num, registry);
+      YoDouble yo4 = new YoDouble("vecY_" + num, registry);
+      YoDouble yo5 = new YoDouble("vecZ_" + num, registry);
 
       String name = "ContactVisualized" + num;
       AppearanceDefinition appearance = isRed ? YoAppearance.Red() : YoAppearance.Blue();

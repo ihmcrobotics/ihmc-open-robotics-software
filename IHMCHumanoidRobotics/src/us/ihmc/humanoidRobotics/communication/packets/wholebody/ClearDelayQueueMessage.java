@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 
@@ -11,7 +10,7 @@ import us.ihmc.communication.packets.VisualizablePacket;
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> implements VisualizablePacket
 {   
    /** the class you want to clear **/
-   public Class<Command<?,?>> clazz;
+   public Class<? extends Packet<?>> clazz;
    
    /** clear all the delay buffers **/
    public boolean clearAllDelayBuffers;
@@ -21,22 +20,24 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     */
    public ClearDelayQueueMessage()
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
 
    /**
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public ClearDelayQueueMessage(Class<Command<?,?>> clazz)
+   public ClearDelayQueueMessage(Class<Packet<?>> clazz)
    {
       this.clazz = clazz;
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
    
    /**
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public void setClazz(Class<Command<?, ?>> clazz)
+   public void setClassToClear(Class<? extends Packet<?>> clazz)
    {
       this.clazz = clazz;
    }
@@ -45,7 +46,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
     * get the class to clear
     * @param clazz the class to clear
     */
-   public Class<Command<?, ?>> getClazz()
+   public Class<? extends Packet<?>> getClassToClear()
    {
       return clazz;
    }

@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class JointDefinition implements IDLStruct<JointDefinition>
+public class JointDefinition
 {
     public JointDefinition()
     {
@@ -21,7 +18,7 @@ public class JointDefinition implements IDLStruct<JointDefinition>
         
         
     }
-    @Override
+
     public void set(JointDefinition other)
     {
         	name_.setLength(0);
@@ -60,82 +57,7 @@ public class JointDefinition implements IDLStruct<JointDefinition>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(JointDefinition data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(JointDefinition data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
-
-	    cdr.write_type_c(type_.ordinal());
-
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	cdr.read_type_d(name_);	
-
-	    	type_ = us.ihmc.robotDataLogger.JointType.values[cdr.read_type_c()];
-	    	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_d("name", name_);
-			    
-			    ser.write_type_c("type", type_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			ser.read_type_d("name", name_);	
-	    	    
-	    			type_ = (us.ihmc.robotDataLogger.JointType)ser.read_type_c("type", us.ihmc.robotDataLogger.JointType.class);
-	    	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

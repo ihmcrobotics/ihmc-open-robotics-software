@@ -13,9 +13,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -27,7 +27,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public abstract class LinearMomentumRateOfChangeControlModule
@@ -42,13 +41,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final YoFrameVector angularMomentumRateWeight;
    protected final YoFrameVector linearMomentumRateWeight;
 
-   protected final EnumYoVariable<RobotSide> supportLegPreviousTick;
-   protected final BooleanYoVariable minimizeAngularMomentumRateZ;
+   protected final YoEnum<RobotSide> supportLegPreviousTick;
+   protected final YoBoolean minimizeAngularMomentumRateZ;
 
    protected final YoFrameVector controlledCoMAcceleration;
 
    protected final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   protected final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
    protected final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
    protected final SelectionMatrix6D linearXYSelectionMatrix = new SelectionMatrix6D();
    protected final SelectionMatrix6D linearXYAndAngularZSelectionMatrix = new SelectionMatrix6D();
@@ -75,7 +73,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
-   protected final BooleanYoVariable desiredCMPinSafeArea;
+   protected final YoBoolean desiredCMPinSafeArea;
 
    private boolean controlHeightWithMomentum;
 
@@ -115,10 +113,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
-      supportLegPreviousTick = EnumYoVariable.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
-      minimizeAngularMomentumRateZ = new BooleanYoVariable(namePrefix + "MinimizeAngularMomentumRateZ", registry);
+      supportLegPreviousTick = YoEnum.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
+      minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
+      desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);
 
       yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
       yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
@@ -384,4 +382,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
    public abstract ICPOptimizationController getICPOptimizationController();
+
+   public abstract double getOptimizedTimeRemaining();
 }

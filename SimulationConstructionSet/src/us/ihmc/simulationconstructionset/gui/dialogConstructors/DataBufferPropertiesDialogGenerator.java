@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
 import javafx.application.Platform;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 import us.ihmc.simulationconstructionset.gui.dialogs.DataBufferPropertiesDialog;
 

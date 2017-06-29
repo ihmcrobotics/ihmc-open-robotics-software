@@ -2,10 +2,10 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.robotController.RobotController;
@@ -30,38 +30,38 @@ public class PeterPlanarWalkerController implements RobotController
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipControllers = new SideDependentList<PIDController>();
 
-   private DoubleYoVariable desiredKneeExtension = new DoubleYoVariable("desiredKneeExtension", registry);
-   private DoubleYoVariable desiredPitch = new DoubleYoVariable("desiredPitch", registry);
-   private DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
-   private DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
-   private DoubleYoVariable desiredSwingLegHipAngle = new DoubleYoVariable("desiredSwingLegHipAngle", registry);
-   private DoubleYoVariable scaleForVelToAngle = new DoubleYoVariable("scaleForVelToAngle", registry);
-   private DoubleYoVariable desiredKneeStance = new DoubleYoVariable("desiredKneeStance", registry);
-   private DoubleYoVariable angleForCapture = new DoubleYoVariable("angleForCapture", registry);
-   private DoubleYoVariable feedForwardAngle = new DoubleYoVariable("feedForwardAngle", registry);
-   private DoubleYoVariable velocityErrorAngle = new DoubleYoVariable("velocityErrorAngle", registry);
-   private DoubleYoVariable feedForwardGain = new DoubleYoVariable("feedForwardGain", registry);
-   private DoubleYoVariable lastStepHipAngle = new DoubleYoVariable("lastStepHipAngle", registry);
-   private DoubleYoVariable stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
+   private YoDouble desiredKneeExtension = new YoDouble("desiredKneeExtension", registry);
+   private YoDouble desiredPitch = new YoDouble("desiredPitch", registry);
+   private YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
+   private YoDouble swingTime = new YoDouble("swingTime", registry);
+   private YoDouble desiredSwingLegHipAngle = new YoDouble("desiredSwingLegHipAngle", registry);
+   private YoDouble scaleForVelToAngle = new YoDouble("scaleForVelToAngle", registry);
+   private YoDouble desiredKneeStance = new YoDouble("desiredKneeStance", registry);
+   private YoDouble angleForCapture = new YoDouble("angleForCapture", registry);
+   private YoDouble feedForwardAngle = new YoDouble("feedForwardAngle", registry);
+   private YoDouble velocityErrorAngle = new YoDouble("velocityErrorAngle", registry);
+   private YoDouble feedForwardGain = new YoDouble("feedForwardGain", registry);
+   private YoDouble lastStepHipAngle = new YoDouble("lastStepHipAngle", registry);
+   private YoDouble stepToStepHipAngleDelta = new YoDouble("stepToStepHipAngleDelta", registry);
 
-   private DoubleYoVariable swingTimeForThisStep = new DoubleYoVariable("swingTimeForThisStep", registry);
-   private BooleanYoVariable initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
-   private BooleanYoVariable initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
+   private YoDouble swingTimeForThisStep = new YoDouble("swingTimeForThisStep", registry);
+   private YoBoolean initalizedKneeExtension = new YoBoolean("initalizedKneeExtension", registry);
+   private YoBoolean initalizedKneeDoubleExtension = new YoBoolean("initalizedKneeDoubleExtension", registry);
 
-   private DoubleYoVariable kneeMoveStartTime = new DoubleYoVariable("kneeMoveStartTime", registry);
-   private DoubleYoVariable startingHipAngle = new DoubleYoVariable("startingHipAngle", registry);
-   private DoubleYoVariable timeInState = new DoubleYoVariable("timeInState", registry);
-   private DoubleYoVariable maxVelocityErrorAngle = new DoubleYoVariable("maxVelocityErrorAngle", registry);
+   private YoDouble kneeMoveStartTime = new YoDouble("kneeMoveStartTime", registry);
+   private YoDouble startingHipAngle = new YoDouble("startingHipAngle", registry);
+   private YoDouble timeInState = new YoDouble("timeInState", registry);
+   private YoDouble maxVelocityErrorAngle = new YoDouble("maxVelocityErrorAngle", registry);
 
-   private DoubleYoVariable desiredBodyVelocity = new DoubleYoVariable("desiredBodyVelocity", registry);
-   private DoubleYoVariable alphaFilterVariable = new DoubleYoVariable("alphaFilterVariable", registry);
+   private YoDouble desiredBodyVelocity = new YoDouble("desiredBodyVelocity", registry);
+   private YoDouble alphaFilterVariable = new YoDouble("alphaFilterVariable", registry);
    private AlphaFilteredYoVariable filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable, desiredBodyVelocity);
    
    
    private YoMinimumJerkTrajectory trajectorySwingHip;
    private YoMinimumJerkTrajectory trajectorySwingKnee;
     
-   private EnumYoVariable<RobotSide> swingLeg = new EnumYoVariable<RobotSide>("swingLeg", registry, RobotSide.class);
+   private YoEnum<RobotSide> swingLeg = new YoEnum<RobotSide>("swingLeg", registry, RobotSide.class);
 
    private StateMachine<ControllerState> stateMachine;
 

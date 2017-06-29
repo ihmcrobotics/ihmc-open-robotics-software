@@ -28,9 +28,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -89,11 +89,11 @@ public class HighLevelHumanoidControllerToolbox
    private final Collection<ReferenceFrame> trajectoryFrames;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
-   private final DoubleYoVariable desiredCoPAlpha;
+   private final YoDouble desiredCoPAlpha;
    private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredFootDesiredCenterOfPressures = new LinkedHashMap<>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final double controlDT;
    private final double gravity;
 
@@ -108,22 +108,22 @@ public class HighLevelHumanoidControllerToolbox
    private final FrameVector tempWristForce = new FrameVector();
    private final FrameVector tempWristTorque = new FrameVector();
 
-   private final SideDependentList<DoubleYoVariable> handsMass;
+   private final SideDependentList<YoDouble> handsMass;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final SideDependentList<ForceSensorDataReadOnly> wristForceSensors;
-   private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
-   private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
+   private final YoDouble alphaCoPControl = new YoDouble("alphaCoPControl", registry);
+   private final YoDouble maxAnkleTorqueCoPControl = new YoDouble("maxAnkleTorqueCoPControl", registry);
 
    private final SideDependentList<Double> xSignsForCoPControl, ySignsForCoPControl;
    private final double minZForceForCoPControlScaling;
 
    private final SideDependentList<YoFrameVector2d> yoCoPError;
-   private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(new DoubleYoVariable("leftFootCoPErrorMagnitude",
+   private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude",
                                                                                                                                         registry),
-                                                                                                                   new DoubleYoVariable("rightFootCoPErrorMagnitude",
+                                                                                                                   new YoDouble("rightFootCoPErrorMagnitude",
                                                                                                                                         registry));
-   private final SideDependentList<DoubleYoVariable> copControlScales;
+   private final SideDependentList<YoDouble> copControlScales;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -141,12 +141,12 @@ public class HighLevelHumanoidControllerToolbox
                                                                                                                             createFramePoint2dArrayList());
 
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
-   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+   private final YoDouble omega0 = new YoDouble("omega0", registry);
 
    private final MomentumCalculator momentumCalculator;
    private final YoFrameVector yoAngularMomentum;
    private final AlphaFilteredYoFrameVector filteredYoAngularMomentum;
-   private final DoubleYoVariable totalMass = new DoubleYoVariable("TotalMass", registry);
+   private final YoDouble totalMass = new YoDouble("TotalMass", registry);
 
    private final FramePoint2d centerOfPressure = new FramePoint2d();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
@@ -155,7 +155,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
+                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ,
                                              double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
                                              ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies,
                                              YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
@@ -203,7 +203,7 @@ public class HighLevelHumanoidControllerToolbox
       RigidBody elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      desiredCoPAlpha = new DoubleYoVariable("desiredCoPAlpha", registry);
+      desiredCoPAlpha = new YoDouble("desiredCoPAlpha", registry);
       desiredCoPAlpha.set(0.9);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -252,7 +252,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCoPError = new SideDependentList<YoFrameVector2d>();
       xSignsForCoPControl = new SideDependentList<Double>();
       ySignsForCoPControl = new SideDependentList<Double>();
-      copControlScales = new SideDependentList<DoubleYoVariable>();
+      copControlScales = new SideDependentList<YoDouble>();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -280,7 +280,7 @@ public class HighLevelHumanoidControllerToolbox
             ySignsForCoPControl.put(robotSide, 0.0);
          }
 
-         copControlScales.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "CoPControlScale", registry));
+         copControlScales.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "CoPControlScale", registry));
       }
 
       minZForceForCoPControlScaling = 0.20 * totalMass * gravityZ;
@@ -337,7 +337,7 @@ public class HighLevelHumanoidControllerToolbox
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame handCoMFrame = new CenterOfMassReferenceFrame(sidePrefix + "HandCoMFrame", measurementFrame, handBodies);
             handCenterOfMassFrames.put(robotSide, handCoMFrame);
-            DoubleYoVariable handMass = new DoubleYoVariable(sidePrefix + "HandTotalMass", registry);
+            YoDouble handMass = new YoDouble(sidePrefix + "HandTotalMass", registry);
             handsMass.put(robotSide, handMass);
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }
@@ -358,7 +358,7 @@ public class HighLevelHumanoidControllerToolbox
       this.totalMass.set(totalMass);
       momentumCalculator = new MomentumCalculator(ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
       yoAngularMomentum = new YoFrameVector("AngularMomentum", centerOfMassFrame, registry);
-      DoubleYoVariable alpha = new DoubleYoVariable("filteredAngularMomentumAlpha", registry);
+      YoDouble alpha = new YoDouble("filteredAngularMomentumAlpha", registry);
       alpha.set(0.95); // switch to break frequency and move to walking parameters
       filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha,
                                                                                               yoAngularMomentum);
@@ -497,7 +497,7 @@ public class HighLevelHumanoidControllerToolbox
    }
 
    private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
-   private final DoubleYoVariable momentumGain = new DoubleYoVariable("MomentumGain", registry);
+   private final YoDouble momentumGain = new YoDouble("MomentumGain", registry);
 
    public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
    {
@@ -530,11 +530,11 @@ public class HighLevelHumanoidControllerToolbox
    private final Wrench footWrench = new Wrench();
    private final FrameVector footForceVector = new FrameVector();
 
-   private final BooleanYoVariable enableHighCoPDampingForShakies = new BooleanYoVariable("enableHighCoPDampingForShakies", registry);
-   private final BooleanYoVariable isCoPTrackingBad = new BooleanYoVariable("isCoPTrackingBad", registry);
-   private final DoubleYoVariable highCoPDampingErrorTrigger = new DoubleYoVariable("highCoPDampingErrorTrigger", registry);
-   private final DoubleYoVariable highCoPDampingStartTime = new DoubleYoVariable("highCoPDampingStartTime", registry);
-   private final DoubleYoVariable highCoPDampingDuration = new DoubleYoVariable("highCoPDampingDuration", registry);
+   private final YoBoolean enableHighCoPDampingForShakies = new YoBoolean("enableHighCoPDampingForShakies", registry);
+   private final YoBoolean isCoPTrackingBad = new YoBoolean("isCoPTrackingBad", registry);
+   private final YoDouble highCoPDampingErrorTrigger = new YoDouble("highCoPDampingErrorTrigger", registry);
+   private final YoDouble highCoPDampingStartTime = new YoDouble("highCoPDampingStartTime", registry);
+   private final YoDouble highCoPDampingDuration = new YoDouble("highCoPDampingDuration", registry);
 
    public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2d> desiredCoPs)
    {
@@ -781,7 +781,7 @@ public class HighLevelHumanoidControllerToolbox
       return referenceFrames;
    }
 
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return yoTime;
    }
@@ -969,12 +969,17 @@ public class HighLevelHumanoidControllerToolbox
       return omega0.getDoubleValue();
    }
 
-   public void getCop(FramePoint2d copToPack)
+   public void getCoP(FramePoint copToPack)
+   {
+      yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
+   }
+
+   public void getCoP(FramePoint2d copToPack)
    {
       yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
 
-   public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
+   public void getAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
    }

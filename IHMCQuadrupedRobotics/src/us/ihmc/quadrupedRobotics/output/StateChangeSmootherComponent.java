@@ -9,8 +9,8 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -23,14 +23,14 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
 
    private final ArrayList<OneDoFJoint> allJoints = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new LinkedHashMap<>();
-   private final DoubleYoVariable alphaJointTorqueForStateChanges = new DoubleYoVariable("alphaJointTorqueForStateChanges", registry);
+   private final YoDouble alphaJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
 
    private final AtomicBoolean hasHighLevelControllerStateChanged = new AtomicBoolean(false);
-   private final DoubleYoVariable timeAtHighLevelControllerStateChange = new DoubleYoVariable("timeAtControllerStateChange", registry);
+   private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
    private final double controlDT;
-   private final DoubleYoVariable controlTimestamp;
+   private final YoDouble controlTimestamp;
 
-   public StateChangeSmootherComponent(double controlDT, DoubleYoVariable controlTimestamp, YoVariableRegistry parentRegistry)
+   public StateChangeSmootherComponent(double controlDT, YoDouble controlTimestamp, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.controlTimestamp = controlTimestamp;

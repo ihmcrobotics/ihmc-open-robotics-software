@@ -7,8 +7,8 @@ import java.text.NumberFormat;
 
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoint>
@@ -16,16 +16,16 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
    private final String namePrefix;
    private final String nameSuffix;
 
-   private final DoubleYoVariable position;
-   private final DoubleYoVariable velocity;
+   private final YoDouble position;
+   private final YoDouble velocity;
 
    public YoOneDoFWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      position = new DoubleYoVariable(createName(namePrefix, "position", nameSuffix), registry);
-      velocity = new DoubleYoVariable(createName(namePrefix, "velocity", nameSuffix), registry);
+      position = new YoDouble(createName(namePrefix, "position", nameSuffix), registry);
+      velocity = new YoDouble(createName(namePrefix, "velocity", nameSuffix), registry);
    }
 
    @Override

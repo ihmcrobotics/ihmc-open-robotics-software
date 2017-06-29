@@ -9,8 +9,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -33,17 +33,17 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
  */
 public class IMUBasedJointVelocityEstimator
 {
-   private final DoubleYoVariable alphaVelocity;
-   private final DoubleYoVariable alphaPosition;
+   private final YoDouble alphaVelocity;
+   private final YoDouble alphaPosition;
    private final GeometricJacobian jacobian;
    private final IMUSensorReadOnly pelvisIMU;
    private final IMUSensorReadOnly chestIMU;
    private final SensorOutputMapReadOnly sensorMap;
-   private final DoubleYoVariable slopTime;
+   private final YoDouble slopTime;
    private final Map<OneDoFJoint, BacklashProcessingYoVariable> jointVelocities = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesFromIMUOnly = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointPositions = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointPositionsFromIMUOnly = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointVelocitiesFromIMUOnly = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
    private final OneDoFJoint[] joints;
    private final FrameVector chestAngularVelocity = new FrameVector();
    private final FrameVector pelvisAngularVelocity = new FrameVector();
@@ -65,22 +65,22 @@ public class IMUBasedJointVelocityEstimator
       joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
 
       String namePrefix = "imuBasedJointVelocityEstimator";
-      alphaVelocity = new DoubleYoVariable(namePrefix + "AlphaFuseVelocity", registry);
+      alphaVelocity = new YoDouble(namePrefix + "AlphaFuseVelocity", registry);
       alphaVelocity.set(0.0);
-      alphaPosition = new DoubleYoVariable(namePrefix + "AlphaFusePosition", registry);
+      alphaPosition = new YoDouble(namePrefix + "AlphaFusePosition", registry);
       alphaPosition.set(0.0);
 
       this.estimatorDT = estimatorDT;
-      this.slopTime = new DoubleYoVariable(namePrefix + "SlopTime", registry);
+      this.slopTime = new YoDouble(namePrefix + "SlopTime", registry);
       this.slopTime.set(slopTime);
 
       for (OneDoFJoint joint : joints)
       {
-         jointVelocitiesFromIMUOnly.put(joint, new DoubleYoVariable("qd_" + joint.getName() + "_IMUBased", registry));
+         jointVelocitiesFromIMUOnly.put(joint, new YoDouble("qd_" + joint.getName() + "_IMUBased", registry));
          jointVelocities.put(joint, new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, this.slopTime, registry));
 
-         jointPositionsFromIMUOnly.put(joint, new DoubleYoVariable("q_" + joint.getName() + "_IMUBased", registry));
-         jointPositions.put(joint, new DoubleYoVariable("q_" + joint.getName() + "_FusedWithIMU", registry));
+         jointPositionsFromIMUOnly.put(joint, new YoDouble("q_" + joint.getName() + "_IMUBased", registry));
+         jointPositions.put(joint, new YoDouble("q_" + joint.getName() + "_FusedWithIMU", registry));
       }
    }
 
@@ -141,7 +141,7 @@ public class IMUBasedJointVelocityEstimator
 
    public double getEstimatedJointPosition(OneDoFJoint joint)
    {
-      DoubleYoVariable estimatedJointPosition = jointPositions.get(joint);
+      YoDouble estimatedJointPosition = jointPositions.get(joint);
       if (estimatedJointPosition != null)
          return estimatedJointPosition.getDoubleValue();
       else

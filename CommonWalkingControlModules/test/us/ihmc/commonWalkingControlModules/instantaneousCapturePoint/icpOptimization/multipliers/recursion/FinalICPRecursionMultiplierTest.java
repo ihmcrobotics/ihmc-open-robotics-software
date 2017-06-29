@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -18,7 +18,7 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -28,22 +28,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -87,7 +87,7 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepTwoCMPCalculationFinalStep()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -97,22 +97,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -154,7 +154,7 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -164,21 +164,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -217,7 +217,7 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepOneCMPCalculationFinalStep()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -227,21 +227,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -279,7 +279,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepOneStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -289,22 +289,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -346,7 +346,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepTwoStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -356,22 +356,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -417,7 +417,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepThreeStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -427,22 +427,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -493,7 +493,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepOneStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -503,21 +503,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -557,7 +557,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepTwoStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -567,21 +567,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -621,7 +621,7 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepThreeStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -631,21 +631,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -687,7 +687,7 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -696,22 +696,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -762,7 +762,7 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepTwoCMPCalculationFinalTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -771,22 +771,22 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
+         YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
@@ -849,7 +849,7 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -858,21 +858,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }
@@ -917,7 +917,7 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepOneCMPCalculationFinalTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+      YoDouble yoOmega = new YoDouble("omega", registry);
 
       double omega = 3.0;
       yoOmega.set(omega);
@@ -926,21 +926,21 @@ public class FinalICPRecursionMultiplierTest
       int iters = 100;
 
       Random random = new Random();
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+      ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
-         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         YoDouble doubleSupportDuration = new YoDouble("doubleSupportDuration" + i, registry);
+         YoDouble singleSupportDuration = new YoDouble("singleSupportDuration" + i, registry);
          doubleSupportDuration.setToNaN();
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
 
-         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
       }

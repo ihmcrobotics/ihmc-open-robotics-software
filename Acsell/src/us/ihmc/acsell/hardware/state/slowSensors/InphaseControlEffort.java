@@ -1,16 +1,16 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InphaseControlEffort implements AcsellSlowSensor
 {
-   private final DoubleYoVariable inphaseControlEffort;
+   private final YoDouble inphaseControlEffort;
    private final double conversionFactor;
    
    public InphaseControlEffort(String name, double conversionFactor, YoVariableRegistry registry)
    {
-      inphaseControlEffort = new DoubleYoVariable(name + "InphaseControlEffort", registry);
+      inphaseControlEffort = new YoDouble(name + "InphaseControlEffort", registry);
       this.conversionFactor = conversionFactor;
    }
 

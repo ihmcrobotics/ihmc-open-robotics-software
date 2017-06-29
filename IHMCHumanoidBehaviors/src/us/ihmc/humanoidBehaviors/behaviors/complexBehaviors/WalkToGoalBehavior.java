@@ -22,9 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Sta
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -37,15 +36,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class WalkToGoalBehavior extends AbstractBehavior
 {
 
-   private final BooleanYoVariable DEBUG = new BooleanYoVariable("DEBUG", registry);
-   private final DoubleYoVariable yoTime;
+   private final YoBoolean DEBUG = new YoBoolean("DEBUG", registry);
+   private final YoDouble yoTime;
    private double searchStartTime = 0;
 
    private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> inputListeningQueue = new ConcurrentListeningQueue<WalkToGoalBehaviorPacket>(20);
    private final ConcurrentListeningQueue<FootstepPathPlanPacket> plannedPathListeningQueue = new ConcurrentListeningQueue<FootstepPathPlanPacket>(20);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(100);
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable hasInputBeenSet;
+   private final YoBoolean isDone;
+   private final YoBoolean hasInputBeenSet;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private FootstepDataMessage startFootstep;
@@ -54,13 +53,13 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final BooleanYoVariable hasNewPlan = new BooleanYoVariable("hasNewPlan", registry);
-   private final BooleanYoVariable stepCompleted = new BooleanYoVariable("stepCompleted", registry);
-   private final BooleanYoVariable allStepsCompleted = new BooleanYoVariable("allStepsCompleted", registry);
-   private final BooleanYoVariable requestQuickSearch = new BooleanYoVariable("requestQuickSearch", registry);
-   private final BooleanYoVariable waitingForValidPlan = new BooleanYoVariable("waitingForValidPlan", registry);
-   private final BooleanYoVariable executePlan = new BooleanYoVariable("executePlan", registry);
-   private final BooleanYoVariable executeUnknownFirstStep = new BooleanYoVariable("executeUnknownFirstStep", registry);
+   private final YoBoolean hasNewPlan = new YoBoolean("hasNewPlan", registry);
+   private final YoBoolean stepCompleted = new YoBoolean("stepCompleted", registry);
+   private final YoBoolean allStepsCompleted = new YoBoolean("allStepsCompleted", registry);
+   private final YoBoolean requestQuickSearch = new YoBoolean("requestQuickSearch", registry);
+   private final YoBoolean waitingForValidPlan = new YoBoolean("waitingForValidPlan", registry);
+   private final YoBoolean executePlan = new YoBoolean("executePlan", registry);
+   private final YoBoolean executeUnknownFirstStep = new YoBoolean("executeUnknownFirstStep", registry);
 
    //	private ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
 
@@ -72,7 +71,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
-   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime,
+   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime,
                              double ankleHeight)
    {
       super(outgoingCommunicationBridge);
@@ -80,8 +79,8 @@ public class WalkToGoalBehavior extends AbstractBehavior
       this.yoTime = yoTime;
       this.ankleHeight = ankleHeight;
 
-      isDone = new BooleanYoVariable("isDone", registry);
-      hasInputBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
+      isDone = new YoBoolean("isDone", registry);
+      hasInputBeenSet = new YoBoolean("hasInputsBeenSet", registry);
 
       this.fullRobotModel = fullRobotModel;
 

@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,14 +10,14 @@ import java.util.Arrays;
 * Do not update this file directly, edit VariableChangeRequest.idl instead.
 *
 */
-public class VariableChangeRequest implements IDLStruct<VariableChangeRequest>
+public class VariableChangeRequest
 {
     public VariableChangeRequest()
     {
         
         
     }
-    @Override
+
     public void set(VariableChangeRequest other)
     {
         	variableID_ = other.variableID_;
@@ -52,77 +49,7 @@ public class VariableChangeRequest implements IDLStruct<VariableChangeRequest>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(VariableChangeRequest data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(VariableChangeRequest data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_2(variableID_);
-
-	    cdr.write_type_6(requestedValue_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	variableID_ = cdr.read_type_2();	
-
-	    	requestedValue_ = cdr.read_type_6();	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_2("variableID", variableID_);
-			    
-			    ser.write_type_6("requestedValue", requestedValue_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			variableID_ = ser.read_type_2("variableID");	
-	    	    
-	    			requestedValue_ = ser.read_type_6("requestedValue");	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

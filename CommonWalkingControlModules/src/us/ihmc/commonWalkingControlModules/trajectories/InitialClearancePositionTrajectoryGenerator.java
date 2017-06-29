@@ -13,11 +13,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -36,9 +36,9 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable leaveTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble leaveTime;
    private final YoPolynomial xyPolynomial, zPolynomial;
 
    private final YoFramePointInMultipleFrames initialPosition;
@@ -49,7 +49,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    private final YoFrameVectorInMultipleFrames currentVelocity;
    private final YoFrameVectorInMultipleFrames currentAcceleration;
 
-   private final DoubleYoVariable leaveDistance;
+   private final YoDouble leaveDistance;
 
    private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
    /** The current trajectory frame chosen by the user. */
@@ -67,7 +67,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    private final FramePoint ballPosition = new FramePoint();
    private final int numberOfBalls = 50;
 
-   private final BooleanYoVariable showViz;
+   private final YoBoolean showViz;
 
    public InitialClearancePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -92,9 +92,9 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.allowMultipleFrames = allowMultipleFrames;
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      leaveTime = new DoubleYoVariable(namePrefix + "LeaveTime", registry);
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      leaveTime = new YoDouble(namePrefix + "LeaveTime", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
       xyPolynomial = new YoPolynomial(namePrefix + "PositionPolynomial", 4, registry);
       zPolynomial = new YoPolynomial(namePrefix + "VelocityPolynomial", 7, registry);
 
@@ -118,7 +118,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame, tangentialPlane);
       currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame, tangentialPlane);
 
-      leaveDistance = new DoubleYoVariable(namePrefix + "LeaveDistance", registry);
+      leaveDistance = new YoDouble(namePrefix + "LeaveDistance", registry);
 
       multipleFramesHolders = new ArrayList<YoMultipleFramesHolder>();
       registerMultipleFramesHolders(initialPosition, finalPosition, currentPosition, currentVelocity, currentAcceleration);
@@ -144,7 +144,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
 
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
-         showViz = new BooleanYoVariable(namePrefix + "ShowViz", registry);
+         showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             public void variableChanged(YoVariable<?> v)

@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 
@@ -32,7 +32,7 @@ public class StateMachineTest
       SimpleState[] arrayOfStates = new SimpleState[States.values().length];
 
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable time = new DoubleYoVariable("time", registry);
+      YoDouble time = new YoDouble("time", registry);
 
       StateMachine<States> stateMachine = new StateMachine<States>("stateMachine", "switchTime", States.class, time, registry);
 

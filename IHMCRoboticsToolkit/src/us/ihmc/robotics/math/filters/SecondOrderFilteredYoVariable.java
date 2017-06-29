@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * A discrete-time second order filter using the bilinear transform
@@ -33,14 +33,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  * omega = 2 * PI * naturalFrequencyInHz
  * xi = dampingRatio
  */
-public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class SecondOrderFilteredYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private final double dt;
    private final SecondOrderFilteredYoVariableParameters parameters;
-   protected final BooleanYoVariable hasBeenCalled;
-   private final DoubleYoVariable inputVariable;
-   private final DoubleYoVariable[] input;
-   private final DoubleYoVariable[] output;
+   protected final YoBoolean hasBeenCalled;
+   private final YoDouble inputVariable;
+   private final YoDouble[] input;
+   private final YoDouble[] output;
    private final double a[];
    private final double b[];
 
@@ -56,27 +56,27 @@ public class SecondOrderFilteredYoVariable extends DoubleYoVariable implements P
    }
 
    public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, double naturalFrequencyInHz, double dampingRatio,
-         SecondOrderFilterType filterType, DoubleYoVariable inputVariable)
+         SecondOrderFilterType filterType, YoDouble inputVariable)
    {
       this(name, registry, dt, new SecondOrderFilteredYoVariableParameters(name, registry, naturalFrequencyInHz, dampingRatio, filterType), inputVariable);
    }
 
    public SecondOrderFilteredYoVariable(String name, YoVariableRegistry registry, double dt, SecondOrderFilteredYoVariableParameters parameters,
-         DoubleYoVariable inputVariable)
+         YoDouble inputVariable)
    {
       super(name, registry);
       this.dt = dt;
       this.parameters = parameters;
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
       this.inputVariable = inputVariable;
-      this.input = new DoubleYoVariable[3];
-      this.output = new DoubleYoVariable[3];
+      this.input = new YoDouble[3];
+      this.output = new YoDouble[3];
       this.a = new double[3];
       this.b = new double[3];
       for (int i = 0; i < 3; i++)
       {
-         this.input[i] = new DoubleYoVariable(name + "input" + i, registry);
-         this.output[i] = new DoubleYoVariable(name + "output" + i, registry);
+         this.input[i] = new YoDouble(name + "input" + i, registry);
+         this.output[i] = new YoDouble(name + "output" + i, registry);
       }
       reset();
    }

@@ -1,9 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForcePerturbance implements DirectedPerturbance
 {
@@ -12,8 +11,8 @@ public class ForcePerturbance implements DirectedPerturbance
 
    private final ForcePerturbable forcePerturbable;
 
-   private final DoubleYoVariable disturbanceMagnitude = new DoubleYoVariable("disturbanceMagnitude", registry);
-   private final DoubleYoVariable disturbanceDuration = new DoubleYoVariable("disturbanceDuration", registry);
+   private final YoDouble disturbanceMagnitude = new YoDouble("disturbanceMagnitude", registry);
+   private final YoDouble disturbanceDuration = new YoDouble("disturbanceDuration", registry);
 
    private final double ballVelocityMagnitude;
 

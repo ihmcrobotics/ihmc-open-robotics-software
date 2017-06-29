@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class Step2Controller implements RobotController
@@ -18,10 +18,10 @@ public class Step2Controller implements RobotController
    private double deltaT;
    private PIDController controllerBodyZ;
    private PIDController controllerBodyPitch;
-   private DoubleYoVariable desiredBodyZ;
-   private DoubleYoVariable desiredBodyPitch;
-   private DoubleYoVariable controlKneeTau;
-   private DoubleYoVariable controlHipTau;
+   private YoDouble desiredBodyZ;
+   private YoDouble desiredBodyPitch;
+   private YoDouble controlKneeTau;
+   private YoDouble controlHipTau;
    
    /**
     * Constructor
@@ -35,16 +35,16 @@ public class Step2Controller implements RobotController
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(1e4);
       controllerBodyZ.setDerivativeGain(1e3);
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", controllerRegistry);
       desiredBodyZ.set(1.4);
-      controlKneeTau = new DoubleYoVariable("controlKneeTau",controllerRegistry);
+      controlKneeTau = new YoDouble("controlKneeTau",controllerRegistry);
       
       controllerBodyPitch = new PIDController("bodyPitch", controllerRegistry);
       controllerBodyPitch.setProportionalGain(1e3);
       controllerBodyPitch.setDerivativeGain(1e2);
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(-0.1);
-      controlHipTau = new DoubleYoVariable("controlHipTau", controllerRegistry);
+      controlHipTau = new YoDouble("controlHipTau", controllerRegistry);
       
    }
    

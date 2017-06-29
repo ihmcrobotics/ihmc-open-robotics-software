@@ -3,12 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DenseMatrixBool;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
-import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -111,9 +109,7 @@ public class ICPQPOptimizationSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private static final boolean useQuadProg = true;
-   private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleDiagonalActiveSetQPSolver();
-   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
+   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
@@ -253,8 +249,10 @@ public class ICPQPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
+      /*
       if (!useQuadProg)
          activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
+      */
    }
 
    /**
@@ -636,8 +634,10 @@ public class ICPQPOptimizationSolver
     */
    public void resetOnContactChange()
    {
+      /*
       if (!useQuadProg)
          activeSetSolver.resetActiveConstraints();
+         */
    }
 
    /**
@@ -866,21 +866,12 @@ public class ICPQPOptimizationSolver
             throw new RuntimeException("Hey this is bad.");
       }
 
-      if (!useQuadProg)
-      {
-         activeSetSolver.clear();
-         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
-         activeSetSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-         activeSetSolver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
+      solver.clear();
+      solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
+      solver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
-         numberOfIterations = activeSetSolver.solve(solutionToPack);
-      }
-      else
-      {
-         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Aineq, solverInput_bineq, solverInput_Lb, solverInput_Ub,
-               solutionToPack, false);
-         numberOfIterations = 1;
-      }
+      numberOfIterations = solver.solve(solutionToPack);
 
 
       if (MatrixTools.containsNaN(solutionToPack))

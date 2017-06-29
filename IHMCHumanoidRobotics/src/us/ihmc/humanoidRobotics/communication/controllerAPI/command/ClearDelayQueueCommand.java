@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 
 /**
@@ -9,7 +10,9 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueM
  */
 public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, ClearDelayQueueMessage>
 {
-   private Class<? extends Command<?, ?>> clazz;
+   private Class<? extends Command<?, ?>> commandClassToClear;
+   private Class<? extends Packet<?>> messageClassToClear;
+   
    private boolean clearAllDelayBuffers;
    
    /**
@@ -25,7 +28,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     */
    public ClearDelayQueueCommand(Class<Command<?,?>> clazz)
    {
-      this.clazz = clazz;
+      this.commandClassToClear = clazz;
    }
 
    /**
@@ -41,18 +44,27 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
     * set the class you want to clear
     * @param clazz the class you want to clear
     */
-   public void setClazz(Class<? extends Command<?, ?>> clazz)
+   public void setCommandClassToClear(Class<? extends Command<?, ?>> clazz)
    {
-      this.clazz = clazz;
+      this.commandClassToClear = clazz;
    }
 
    /**
     * get the class to clear
-    * @param clazz the class to clear
+    * @param commandClassToClear the class to clear
     */
-   public Class<? extends Command<?, ?>> getClazz()
+   public Class<? extends Command<?, ?>> getCommandClassToClear()
    {
-      return clazz;
+      return commandClassToClear;
+   }
+
+   /**
+    * get the class to clear
+    * @param commandClassToClear the class to clear
+    */
+   public Class<? extends Packet<?>> getMessageClassToClear()
+   {
+      return messageClassToClear;
    }
    
    /**
@@ -80,7 +92,8 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    @Override
    public void set(ClearDelayQueueCommand other)
    {
-      clazz = other.clazz;
+      commandClassToClear = other.commandClassToClear;
+      messageClassToClear = other.messageClassToClear;
       clearAllDelayBuffers = other.clearAllDelayBuffers;
    }
 
@@ -90,7 +103,8 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    @Override
    public void clear()
    {
-      clazz = null;
+      commandClassToClear = null;
+      messageClassToClear = null;
       clearAllDelayBuffers = false;
    }
 
@@ -101,7 +115,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    @Override
    public void set(ClearDelayQueueMessage message)
    {
-      clazz = message.clazz;
+      messageClassToClear = message.clazz;
       clearAllDelayBuffers = message.clearAllDelayBuffers;
    }
 

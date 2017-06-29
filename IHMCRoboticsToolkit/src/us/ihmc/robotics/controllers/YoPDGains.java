@@ -1,31 +1,31 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoPDGains implements PDGainsInterface
 {
-   protected final DoubleYoVariable kp;
-   private final DoubleYoVariable zeta;
-   protected final DoubleYoVariable kd;
-   private final DoubleYoVariable maximumOutput;
-   private final DoubleYoVariable maximumFeedback;
-   private final DoubleYoVariable maximumFeedbackRate;
-   private final DoubleYoVariable positionDeadband;
+   protected final YoDouble kp;
+   private final YoDouble zeta;
+   protected final YoDouble kd;
+   private final YoDouble maximumOutput;
+   private final YoDouble maximumFeedback;
+   private final YoDouble maximumFeedbackRate;
+   private final YoDouble positionDeadband;
 
    public YoPDGains(String suffix, YoVariableRegistry registry)
    {
-      kp = new DoubleYoVariable("kp" + suffix, registry);
-      zeta = new DoubleYoVariable("zeta" + suffix, registry);
-      kd = new DoubleYoVariable("kd" + suffix, registry);
+      kp = new YoDouble("kp" + suffix, registry);
+      zeta = new YoDouble("zeta" + suffix, registry);
+      kd = new YoDouble("kd" + suffix, registry);
 
-      maximumOutput = new DoubleYoVariable("maximumOutput" + suffix, registry);
-      maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
-      maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
+      maximumOutput = new YoDouble("maximumOutput" + suffix, registry);
+      maximumFeedback = new YoDouble("maximumFeedback" + suffix, registry);
+      maximumFeedbackRate = new YoDouble("maximumFeedbackRate" + suffix, registry);
 
-      positionDeadband = new DoubleYoVariable("positionDeadband" + suffix, registry);
+      positionDeadband = new YoDouble("positionDeadband" + suffix, registry);
 
       maximumOutput.set(Double.POSITIVE_INFINITY);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
@@ -113,37 +113,37 @@ public class YoPDGains implements PDGainsInterface
       return maximumFeedbackRate.getDoubleValue();
    }
 
-   public DoubleYoVariable getYoKp()
+   public YoDouble getYoKp()
    {
       return kp;
    }
 
-   public DoubleYoVariable getYoZeta()
+   public YoDouble getYoZeta()
    {
       return zeta;
    }
 
-   public DoubleYoVariable getYoKd()
+   public YoDouble getYoKd()
    {
       return kd;
    }
 
-   public DoubleYoVariable getYoMaximumOutput()
+   public YoDouble getYoMaximumOutput()
    {
       return maximumOutput;
    }
 
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
    }
 
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maximumFeedbackRate;
    }
 
-   public DoubleYoVariable getPositionDeadband()
+   public YoDouble getPositionDeadband()
    {
       return positionDeadband;
    }

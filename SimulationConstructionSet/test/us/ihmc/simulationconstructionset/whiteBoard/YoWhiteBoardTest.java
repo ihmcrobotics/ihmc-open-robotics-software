@@ -10,14 +10,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class YoWhiteBoardTest
 {
@@ -408,21 +404,21 @@ public class YoWhiteBoardTest
          {
             case DOUBLE :
             {
-               variablesToCopyTo.add(new DoubleYoVariable(name, registry));
+               variablesToCopyTo.add(new YoDouble(name, registry));
 
                break;
             }
 
             case INTEGER :
             {
-               variablesToCopyTo.add(new IntegerYoVariable(name, registry));
+               variablesToCopyTo.add(new YoInteger(name, registry));
 
                break;
             }
 
             case BOOLEAN :
             {
-               variablesToCopyTo.add(new BooleanYoVariable(name, registry));
+               variablesToCopyTo.add(new YoBoolean(name, registry));
 
                break;
             }
@@ -431,9 +427,9 @@ public class YoWhiteBoardTest
             {
                throw new RuntimeException("Help Twan!");
 
-//             EnumYoVariable enumYoVariable = (EnumYoVariable) variable;
+//             YoEnum enumYoVariable = (YoEnum) variable;
 //             
-//             variablesToCopyTo.add(new EnumYoVariable(name, registry));
+//             variablesToCopyTo.add(new YoEnum(name, registry));
 //             break;
             }
 
@@ -480,21 +476,21 @@ public class YoWhiteBoardTest
          {
             case 0 :
             {
-               variables.add(new DoubleYoVariable(name, registry));
+               variables.add(new YoDouble(name, registry));
 
                break;
             }
 
             case 1 :
             {
-               variables.add(new IntegerYoVariable(name, registry));
+               variables.add(new YoInteger(name, registry));
 
                break;
             }
 
             case 2 :
             {
-               variables.add(new BooleanYoVariable(name, registry));
+               variables.add(new YoBoolean(name, registry));
 
                break;
             }

@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ public class TransferStateEndMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable singleSupportSplitRatio = new DoubleYoVariable("singleSupportSplitRatio", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble singleSupportSplitRatio = new YoDouble("singleSupportSplitRatio", registry);
       swingSplitFractions.add(singleSupportSplitRatio);
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble doubleSupportSplitRatio = new YoDouble("doubleSupportSplitRatio", registry);
       transferSplitFractions.add(doubleSupportSplitRatio);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
@@ -46,21 +46,21 @@ public class TransferStateEndMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction1 = new DoubleYoVariable("swingSplitFraction1", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction1 = new YoDouble("swingSplitFraction1", registry);
       swingSplitFractions.add(swingSplitFraction1);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
 
@@ -134,21 +134,21 @@ public class TransferStateEndMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
-      DoubleYoVariable swingSplitFraction1 = new DoubleYoVariable("swingSplitFraction1", registry);
+      List<YoDouble> swingSplitFractions = new ArrayList<>();
+      YoDouble swingSplitFraction1 = new YoDouble("swingSplitFraction1", registry);
       swingSplitFractions.add(swingSplitFraction1);
 
-      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
-      DoubleYoVariable transferSplitFraction1 = new DoubleYoVariable("transferSplitFraction1", registry);
-      DoubleYoVariable transferSplitFraction2 = new DoubleYoVariable("transferSplitFraction2", registry);
+      List<YoDouble> transferSplitFractions = new ArrayList<>();
+      YoDouble transferSplitFraction1 = new YoDouble("transferSplitFraction1", registry);
+      YoDouble transferSplitFraction2 = new YoDouble("transferSplitFraction2", registry);
       transferSplitFractions.add(transferSplitFraction1);
       transferSplitFractions.add(transferSplitFraction2);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration1", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration2", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
+      ArrayList<YoDouble> doubleSupportDurations = new ArrayList<>();
+      ArrayList<YoDouble> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration1", registry));
+      doubleSupportDurations.add(new YoDouble("doubleSupportDuration2", registry));
+      singleSupportDurations.add(new YoDouble("singleSupportDuration", registry));
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
 

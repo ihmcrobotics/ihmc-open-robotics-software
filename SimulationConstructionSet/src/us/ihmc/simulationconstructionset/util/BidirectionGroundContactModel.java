@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
@@ -19,10 +19,10 @@ public class BidirectionGroundContactModel implements GroundContactModel
 
    private static final double DEFAULT_K_XY = 1422, DEFAULT_B_XY = 15.6, DEFAULT_K_Z = 125, DEFAULT_B_Z = 300;
 
-   private final DoubleYoVariable groundKxy = new DoubleYoVariable("groundKxy", "BidirectionGroundContactModel x and y spring constant", registry);
-   private final DoubleYoVariable groundBxy = new DoubleYoVariable("groundBxy", "BidirectionalGroundContactModel x and y damping constant", registry);
-   private final DoubleYoVariable groundKz = new DoubleYoVariable("groundKz", "BidirectionalGroundContactModel z spring constant", registry);
-   private final DoubleYoVariable groundBz = new DoubleYoVariable("groundBz", "BidirectionalGroundContactModel z damping constant", registry);
+   private final YoDouble groundKxy = new YoDouble("groundKxy", "BidirectionGroundContactModel x and y spring constant", registry);
+   private final YoDouble groundBxy = new YoDouble("groundBxy", "BidirectionalGroundContactModel x and y damping constant", registry);
+   private final YoDouble groundKz = new YoDouble("groundKz", "BidirectionalGroundContactModel z spring constant", registry);
+   private final YoDouble groundBz = new YoDouble("groundBz", "BidirectionalGroundContactModel z damping constant", registry);
 
    private ArrayList<GroundContactPoint> groundContactPoints;
    private GroundProfile3D groundProfile3D;

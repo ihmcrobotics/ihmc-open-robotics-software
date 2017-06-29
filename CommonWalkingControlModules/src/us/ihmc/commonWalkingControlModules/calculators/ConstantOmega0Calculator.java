@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -9,7 +9,7 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 public class ConstantOmega0Calculator implements Omega0CalculatorInterface
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable constantOmega0 = new DoubleYoVariable("constantOmega0", registry);
+   private final YoDouble constantOmega0 = new YoDouble("constantOmega0", registry);
 
    public ConstantOmega0Calculator(double constantOmega0, YoVariableRegistry parentRegistry)
    {

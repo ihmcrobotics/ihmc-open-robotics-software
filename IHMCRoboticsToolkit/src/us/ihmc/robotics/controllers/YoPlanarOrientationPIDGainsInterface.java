@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public interface YoPlanarOrientationPIDGainsInterface extends OrientationPIDGainsInterface
 {
@@ -29,11 +29,11 @@ public interface YoPlanarOrientationPIDGainsInterface extends OrientationPIDGain
 
    public abstract void setMaxProportionalError(double maxProportionalError);
 
-   public abstract DoubleYoVariable getYoMaximumFeedback();
+   public abstract YoDouble getYoMaximumFeedback();
 
-   public abstract DoubleYoVariable getYoMaximumFeedbackRate();
+   public abstract YoDouble getYoMaximumFeedbackRate();
 
-   public abstract DoubleYoVariable getYoMaximumDerivativeError();
+   public abstract YoDouble getYoMaximumDerivativeError();
 
-   public abstract DoubleYoVariable getYoMaximumProportionalError();
+   public abstract YoDouble getYoMaximumProportionalError();
 }

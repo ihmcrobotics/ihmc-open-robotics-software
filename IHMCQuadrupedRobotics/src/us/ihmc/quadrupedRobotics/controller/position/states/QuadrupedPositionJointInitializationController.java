@@ -4,8 +4,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -20,16 +20,16 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
     * array.
     */
-   private final BooleanYoVariable[] initialized;
+   private final YoBoolean[] initialized;
 
    public QuadrupedPositionJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
 
-      this.initialized = new BooleanYoVariable[fullRobotModel.getOneDoFJoints().length];
+      this.initialized = new YoBoolean[fullRobotModel.getOneDoFJoints().length];
       for (int i = 0; i < initialized.length; i++)
       {
-         initialized[i] = new BooleanYoVariable(fullRobotModel.getOneDoFJoints()[i].getName() + "Initialized", registry);
+         initialized[i] = new YoBoolean(fullRobotModel.getOneDoFJoints()[i].getName() + "Initialized", registry);
       }
 
       environment.getParentRegistry().addChild(registry);

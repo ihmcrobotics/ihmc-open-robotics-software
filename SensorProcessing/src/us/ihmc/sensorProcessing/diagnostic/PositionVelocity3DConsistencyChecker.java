@@ -4,8 +4,8 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 
 import java.util.EnumMap;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
@@ -23,13 +23,13 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 
    private final EnumMap<Direction, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Direction.class);
 
-   private final DoubleYoVariable dummyAlpha;
+   private final YoDouble dummyAlpha;
 
    public PositionVelocity3DConsistencyChecker(String namePrefix, YoFramePoint position, YoFrameVector angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "PositionVelocity3DCheck");
-      dummyAlpha = new DoubleYoVariable("dummyAlpha", registry);
+      dummyAlpha = new YoDouble("dummyAlpha", registry);
       localVelocityFromFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
             position);
       int windowSize = 10;

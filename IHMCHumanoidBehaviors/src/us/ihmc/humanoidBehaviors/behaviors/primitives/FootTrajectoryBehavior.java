@@ -6,21 +6,21 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootTrajectoryBehavior extends AbstractBehavior
 {
    private FootTrajectoryMessage outgoingFootTrajectoryMessage;
 
-   private final BooleanYoVariable hasPacketBeenSent;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final BooleanYoVariable trajectoryTimeElapsed;
-   private final BooleanYoVariable doubleSupport;
+   private final YoBoolean hasPacketBeenSent;
+   private final YoDouble yoTime;
+   private final YoDouble startTime;
+   private final YoDouble trajectoryTime;
+   private final YoBoolean trajectoryTimeElapsed;
+   private final YoBoolean doubleSupport;
 
-   public FootTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
+   public FootTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport)
    {
       super(outgoingCommunicationBridge);
 
@@ -28,12 +28,12 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       this.doubleSupport = yoDoubleSupport;
 
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      hasPacketBeenSent = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
-      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      hasPacketBeenSent = new YoBoolean(behaviorNameFirstLowerCase + "HasPacketBeenSent", registry);
+      startTime = new YoDouble(behaviorNameFirstLowerCase + "StartTime", registry);
       startTime.set(Double.NaN);
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
    public void setInput(FootTrajectoryMessage message)

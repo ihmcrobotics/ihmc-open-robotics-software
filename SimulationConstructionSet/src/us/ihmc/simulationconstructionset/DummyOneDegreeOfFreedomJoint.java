@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.DummyOneDegreeOfFreedomJointPhysics;
 
 public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
@@ -29,7 +29,7 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    @SuppressWarnings("unused")
    private double tau_max;
 
-   private final DoubleYoVariable q, qd, qdd, tau;
+   private final YoDouble q, qd, qdd, tau;
 
    private YoVariableList jointVars;
 
@@ -43,10 +43,10 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
       physics.u_i.normalize();
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
-      q = new DoubleYoVariable("q_" + jname, "PinJoint angle", registry);
-      qd = new DoubleYoVariable("qd_" + jname, "PinJoint anglular velocity", registry);
-      qdd = new DoubleYoVariable("qdd_" + jname, "PinJoint angular acceleration", registry);
-      tau = new DoubleYoVariable("tau_" + jname, "PinJoint torque", registry);
+      q = new YoDouble("q_" + jname, "PinJoint angle", registry);
+      qd = new YoDouble("qd_" + jname, "PinJoint anglular velocity", registry);
+      qdd = new YoDouble("qdd_" + jname, "PinJoint angular acceleration", registry);
+      tau = new YoDouble("tau_" + jname, "PinJoint torque", registry);
 
       this.setPinTransform3D(this.jointTransform3D, physics.u_i); // jaxis);
    }
@@ -80,19 +80,19 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    }
 
    @Override
-   public DoubleYoVariable getQDDYoVariable()
+   public YoDouble getQDDYoVariable()
    {
       return qdd;
    }
 
    @Override
-   public DoubleYoVariable getQDYoVariable()
+   public YoDouble getQDYoVariable()
    {
       return qd;
    }
 
    @Override
-   public DoubleYoVariable getQYoVariable()
+   public YoDouble getQYoVariable()
    {
       return q;
    }
@@ -120,7 +120,7 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    }
 
    @Override
-   public DoubleYoVariable getTauYoVariable()
+   public YoDouble getTauYoVariable()
    {
       return tau;
    }

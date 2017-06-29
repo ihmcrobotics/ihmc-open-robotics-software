@@ -1,14 +1,14 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class FlyballGovernorCommonControllerParameters
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable k_feedback = new DoubleYoVariable("k_feedback", registry);
-   private final DoubleYoVariable q_d_cylinder_z = new DoubleYoVariable("q_d_cylinder_z", registry);
+   private final YoDouble k_feedback = new YoDouble("k_feedback", registry);
+   private final YoDouble q_d_cylinder_z = new YoDouble("q_d_cylinder_z", registry);
    
    public FlyballGovernorCommonControllerParameters()
    {
@@ -21,12 +21,12 @@ public class FlyballGovernorCommonControllerParameters
       q_d_cylinder_z.set(0.1);
    }
 
-   public DoubleYoVariable getK_feedback()
+   public YoDouble getK_feedback()
    {
       return k_feedback;
    }
 
-   public DoubleYoVariable getQ_d_cylinder_z()
+   public YoDouble getQ_d_cylinder_z()
    {
       return q_d_cylinder_z;
    }

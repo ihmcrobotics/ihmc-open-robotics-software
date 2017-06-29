@@ -1,48 +1,48 @@
 package us.ihmc.robotics.math.functionGenerator;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class YoFunctionGeneratorVisualizer implements RobotController
 {
    private YoVariableRegistry registry = new YoVariableRegistry("YoFunGenViz");
    
-   private DoubleYoVariable valueCheck;
+   private YoDouble valueCheck;
    
    private YoFunctionGenerator yoFunctionGenerator;
-   private DoubleYoVariable time;
+   private YoDouble time;
    
-   private DoubleYoVariable resetTime;
-   private DoubleYoVariable maxSweepFreq;
-   private DoubleYoVariable amplitude;
+   private YoDouble resetTime;
+   private YoDouble maxSweepFreq;
+   private YoDouble amplitude;
 
-   private BooleanYoVariable hasBeenReset;
+   private YoBoolean hasBeenReset;
 
-   private final EnumYoVariable<YoFunctionGeneratorMode> mode;
+   private final YoEnum<YoFunctionGeneratorMode> mode;
 
    
    public YoFunctionGeneratorVisualizer(YoFunctionGenerator yoFunctionGenerator)
    {
       this.yoFunctionGenerator = yoFunctionGenerator;
       
-      mode = EnumYoVariable.create("Mode", YoFunctionGeneratorMode.class, registry);
+      mode = YoEnum.create("Mode", YoFunctionGeneratorMode.class, registry);
       
-      resetTime = new DoubleYoVariable("resetTime", registry);
+      resetTime = new YoDouble("resetTime", registry);
       
       resetTime.set(20.0);
       
-      maxSweepFreq = new DoubleYoVariable("maxSweepFreq", registry);
+      maxSweepFreq = new YoDouble("maxSweepFreq", registry);
       maxSweepFreq.set(60.0);
       
-      amplitude = new DoubleYoVariable("amplitude", registry);
+      amplitude = new YoDouble("amplitude", registry);
       amplitude.set(1.0);
       
-      valueCheck = new DoubleYoVariable("valueCheck", registry);
+      valueCheck = new YoDouble("valueCheck", registry);
       
-      hasBeenReset = new BooleanYoVariable("hasBeenReset", registry);
+      hasBeenReset = new YoBoolean("hasBeenReset", registry);
       hasBeenReset.set(true);
    }
    
@@ -70,7 +70,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
       return null;
    }
    
-   public void setTimeVariable(DoubleYoVariable time)
+   public void setTimeVariable(YoDouble time)
    {
       this.time = time;
    }

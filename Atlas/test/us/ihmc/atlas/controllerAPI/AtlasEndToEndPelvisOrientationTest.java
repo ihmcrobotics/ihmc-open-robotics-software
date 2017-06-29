@@ -17,6 +17,14 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test
+   public void testGoHome() throws SimulationExceededMaximumTimeException
+   {
+      super.testGoHome();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleTrajectoryPoint();

@@ -19,8 +19,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -74,11 +74,11 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameOrientation testOrientationForwardKinematics = new YoFrameOrientation("testOrientationForwardKinematics",
                                                                           ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable yoErrorScalar = new DoubleYoVariable("errorScalar", registry);
-   private final DoubleYoVariable positionError = new DoubleYoVariable("positionError", registry);
-   private final DoubleYoVariable orientationError = new DoubleYoVariable("orientationError", registry);
+   private final YoDouble yoErrorScalar = new YoDouble("errorScalar", registry);
+   private final YoDouble positionError = new YoDouble("positionError", registry);
+   private final YoDouble orientationError = new YoDouble("orientationError", registry);
 
-   private final DoubleYoVariable numberOfIterations = new DoubleYoVariable("numberOfIterations", registry);
+   private final YoDouble numberOfIterations = new YoDouble("numberOfIterations", registry);
 
    private final YoFramePoint testPositionInverseKinematics = new YoFramePoint("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameOrientation testOrientationInverseKinematics = new YoFrameOrientation("testOrientationInverseKinematics",

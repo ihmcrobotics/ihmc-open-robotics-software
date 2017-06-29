@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -73,7 +73,7 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       double dt = 0.002;
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      DoubleYoVariable testTime = new DoubleYoVariable("testTime", registry);
+      YoDouble testTime = new YoDouble("testTime", registry);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -166,10 +166,10 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       double dt = 0.002;
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      DoubleYoVariable testTime = new DoubleYoVariable("testTime", registry);
+      YoDouble testTime = new YoDouble("testTime", registry);
 
-      DoubleYoVariable amplitude = new DoubleYoVariable("amplitude", registry);
-      DoubleYoVariable frequency = new DoubleYoVariable("frequency", registry);
+      YoDouble amplitude = new YoDouble("amplitude", registry);
+      YoDouble frequency = new YoDouble("frequency", registry);
 
       amplitude.set(0.2);
       frequency.set(1.0);

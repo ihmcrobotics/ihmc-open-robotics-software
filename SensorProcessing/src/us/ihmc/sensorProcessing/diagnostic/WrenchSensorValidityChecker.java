@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 

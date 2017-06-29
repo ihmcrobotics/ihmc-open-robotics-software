@@ -8,10 +8,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.UI)
 public class MidiSliderBoardTest
@@ -34,7 +34,7 @@ public class MidiSliderBoardTest
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
 
       //need one of these for each DOF
-      DoubleYoVariable yoVariable = new DoubleYoVariable("test", registry);
+      YoDouble yoVariable = new YoDouble("test", registry);
       midiSliderBoard.setSlider(3, yoVariable, 1.5, 2.5); //set scale
       yoVariable.addVariableChangedListener(new VariableChangedListener()
       {

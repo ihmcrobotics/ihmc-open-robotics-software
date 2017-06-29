@@ -3,29 +3,29 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MasterVariableChangedListener implements VariableChangedListener
 {
-   private final Collection<DoubleYoVariable> slaves;
+   private final Collection<YoDouble> slaves;
 
-   public MasterVariableChangedListener(Collection<DoubleYoVariable> slaves)
+   public MasterVariableChangedListener(Collection<YoDouble> slaves)
    {
       this.slaves = slaves;
    }
    
-   public MasterVariableChangedListener(DoubleYoVariable slave)
+   public MasterVariableChangedListener(YoDouble slave)
    {
-      this.slaves = new ArrayList<DoubleYoVariable>(1);
+      this.slaves = new ArrayList<YoDouble>(1);
       slaves.add(slave);
    }
 
    @Override
    public void variableChanged(YoVariable<?> master)
    {
-      for (DoubleYoVariable slave : slaves)
+      for (YoDouble slave : slaves)
       {
          slave.set(master.getValueAsDouble());
       }

@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -73,7 +73,7 @@ public class ComposableStateEstimatorEvaluator
          @Override
          public void configureSensorProcessing(SensorProcessing sensorProcessing)
          {
-            DoubleYoVariable alphaFilter = sensorProcessing.createAlphaFilter("defaultAlphaFilter", 12.0);
+            YoDouble alphaFilter = sensorProcessing.createAlphaFilter("defaultAlphaFilter", 12.0);
 
             sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_POSITION);
             sensorProcessing.addSensorAlphaFilter(alphaFilter, false, SensorType.JOINT_VELOCITY);
