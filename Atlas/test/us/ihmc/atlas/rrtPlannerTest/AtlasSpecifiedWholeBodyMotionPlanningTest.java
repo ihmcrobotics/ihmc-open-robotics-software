@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 
 public class AtlasSpecifiedWholeBodyMotionPlanningTest extends SpecifiedWholeBodyMotionPlanningTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
 
    @Override
    public DRCRobotModel getRobotModel()

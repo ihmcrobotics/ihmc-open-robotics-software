@@ -43,6 +43,7 @@ public class PushDoorPose implements EndEffectorPose
       
       endEffectorRigidBody.appendTranslation(0.0, pushDoor.getRadius(), pushDoor.getKnobHeight());
       
+      endEffectorRigidBody.appendRollRotation(-Math.PI*1.0);
       endEffectorRigidBody.appendPitchRotation(pitchAngle);
       
       return new Pose(endEffectorRigidBody);

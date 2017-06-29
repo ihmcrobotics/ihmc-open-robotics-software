@@ -81,7 +81,7 @@ public class PushDoor
       knobGraphics.rotate(knobOrientation);
       knobGraphics.translate(new Point3D(0.0, rotationRadius, knobHeight));
       
-      knobGraphics.addSphere(0.05, YoAppearance.Red());
+      knobGraphics.addSphere(0.03, YoAppearance.Red());
       
       ret.add(axisGraphics);
       ret.add(planeGraphics);

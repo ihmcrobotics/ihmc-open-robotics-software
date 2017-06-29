@@ -1,17 +1,43 @@
 package us.ihmc.manipulation.planning.trajectory;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /*
- * Considering articulated trajectory should be added in near future.
  * 170627 Inho Lee.
  */
 
-public interface EndEffectorTrajectory
+public abstract class EndEffectorTrajectory
 {  
-   public double getTrajectoryTime();
-   public Pose getEndEffectorPose(double time);
-   public RobotSide getRobotSide();
-   public RobotSide getAnotherRobotSide();
+   protected double trajectoryTime = 0;
+   protected RobotSide robotSideOfEndEffector;
+   protected HandTrajectoryMessage endEffectorTrajectoryMessage;
+   
+   public abstract Pose getEndEffectorPose(double time);
+   public abstract HandTrajectoryMessage getEndEffectorTrajectoryMessage(ReferenceFrame midFeetFrame);
+   
+   public double getTrajectoryTime()
+   {   
+      return trajectoryTime;
+   }
+   
+   public void setRobotSideOfEndEffector(RobotSide robotSide)
+   {
+      robotSideOfEndEffector = robotSide;
+   }
+
+   public RobotSide getRobotSide()
+   {
+      return robotSideOfEndEffector;
+   }
+
+   public RobotSide getAnotherRobotSide()
+   {
+      if(robotSideOfEndEffector == RobotSide.RIGHT)
+         return RobotSide.LEFT;
+      else
+         return RobotSide.RIGHT;
+   }
 }
