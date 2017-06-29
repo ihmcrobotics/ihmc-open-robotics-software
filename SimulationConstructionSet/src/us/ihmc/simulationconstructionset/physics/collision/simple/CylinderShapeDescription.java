@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
-import us.ihmc.robotics.geometry.shapes.Cylinder3d;
+import us.ihmc.robotics.geometry.shapes.Cylinder3D;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -27,7 +27,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    private boolean boundingBoxNeedsUpdating = true;
 
    //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
-   private final Cylinder3d cylinder3d;
+   private final Cylinder3D cylinder3d;
 
    public CylinderShapeDescription(double radius, double height)
    {
@@ -36,7 +36,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       this.radius = radius;
       this.height = height;
 
-      cylinder3d = new Cylinder3d(height, radius);
+      cylinder3d = new Cylinder3D(height, radius);
 
       cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
       cylinder3d.setPose(cylinderConsistencyTransform);

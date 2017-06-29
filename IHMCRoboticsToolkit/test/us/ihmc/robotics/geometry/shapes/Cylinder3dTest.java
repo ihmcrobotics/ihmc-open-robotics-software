@@ -36,7 +36,7 @@ public class Cylinder3dTest
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
+         Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
 
          testHelper.runSimpleTests(cylinder3d, random, numberOfPoints);
       }
@@ -57,8 +57,8 @@ public class Cylinder3dTest
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
-         Cylinder3d cylinder3d2 = new Cylinder3d(cylinder3d);
+         Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
+         Cylinder3D cylinder3d2 = new Cylinder3D(cylinder3d);
          testHelper.runSimpleTests(cylinder3d2, random, numberOfPoints);
       }
    }
@@ -78,7 +78,7 @@ public class Cylinder3dTest
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
+         Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
 
          assertEquals(cylinder3d.getRadius(), radius, 1e-7);
          assertEquals(cylinder3d.getHeight(), height, 1e-7);
@@ -121,7 +121,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 0.2;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
 
       Point3D pointToCheck = new Point3D(0.0, 0.0, 0.0001);
       assertTrue(cylinder3d.isInsideOrOnSurface(pointToCheck));
@@ -165,7 +165,7 @@ public class Cylinder3dTest
       double translateZ = 1.4;
       transform.setTranslation(new Vector3D(translateX, translateY, translateZ));
 
-      Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
 
       Point3D pointToCheck = new Point3D(translateX, translateY, translateZ + 0.0001);
       assertTrue(cylinder3d.isInsideOrOnSurface(pointToCheck));
@@ -201,7 +201,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Point3D pointToCheckAndPack = new Point3D(1, 1, 1);
 
       cylinder3d.orthogonalProjection(pointToCheckAndPack);
@@ -216,7 +216,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Point3D pointToCheckAndPack = new Point3D(0.5, 0.25, 3);
 
       Point3D expectedProjection = new Point3D(pointToCheckAndPack.getX(), pointToCheckAndPack.getY(), height);
@@ -230,7 +230,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Point3D pointToCheckAndPack = new Point3D(0.5, 0.25, -1);
 
       Point3D expectedProjection = new Point3D(pointToCheckAndPack.getX(), pointToCheckAndPack.getY(), 0);
@@ -253,7 +253,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -269,7 +269,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -285,7 +285,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -301,7 +301,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -317,7 +317,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -333,7 +333,7 @@ public class Cylinder3dTest
    {
       double height = 2.0;
       double radius = 1.0;
-      Cylinder3d cylinder3d = new Cylinder3d(height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -354,7 +354,7 @@ public class Cylinder3dTest
       double tx = 1.5, ty = 1, tz = 2;
       Vector3D translation = new Vector3D(tx, ty, tz);
       transform.setTranslationAndIdentityRotation(translation);
-      Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
@@ -374,7 +374,7 @@ public class Cylinder3dTest
       double tx = 1.5, ty = 1, tz = 2;
       Vector3D translation = new Vector3D(tx, ty, tz);
       transform.setTranslationAndIdentityRotation(translation);
-      Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
+      Cylinder3D cylinder3d = new Cylinder3D(transform, height, radius);
       Vector3D normalToPack = new Vector3D();
       Point3D closestPointToPack = new Point3D();
 
