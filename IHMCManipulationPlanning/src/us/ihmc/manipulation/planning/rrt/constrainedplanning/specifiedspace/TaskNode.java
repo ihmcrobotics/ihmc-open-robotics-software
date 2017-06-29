@@ -168,7 +168,7 @@ public abstract class TaskNode implements TaskNodeInterface
       }
    }
    
-   protected void setConfigurationJoints(FullHumanoidRobotModel robot)
+   public void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
       this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
       
