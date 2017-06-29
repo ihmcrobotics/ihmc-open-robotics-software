@@ -658,7 +658,8 @@ public class YoPolynomial
    public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
    {
       setXPowers(xPowers, x);
-      
+      xPowersDerivativeVector.zero();
+
       int derivativeCoefficient = 0;
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
       {
@@ -671,7 +672,7 @@ public class YoPolynomial
    
    // Returns the constant coefficient at the exponent-th entry of the order-th derivative vector
    // Example: order = 4, exponent = 5 ==> returns 5*4*3*2
-   private int getDerivativeCoefficient(int order, int exponent)
+   public int getDerivativeCoefficient(int order, int exponent)
    {
       int coeff = 1;
       for(int i = exponent; i > exponent - order; i--)
