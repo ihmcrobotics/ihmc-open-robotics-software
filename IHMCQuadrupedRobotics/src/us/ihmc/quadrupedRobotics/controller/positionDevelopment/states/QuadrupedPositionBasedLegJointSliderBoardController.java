@@ -7,8 +7,8 @@ import java.util.Map;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -20,7 +20,7 @@ public class QuadrupedPositionBasedLegJointSliderBoardController implements Quad
    private final ArrayList<String> jointMapKeySet = new ArrayList<>();
 
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
-   private final Map<String, DoubleYoVariable> QDesiredMap = new HashMap<>();
+   private final Map<String, YoDouble> QDesiredMap = new HashMap<>();
 
    public QuadrupedPositionBasedLegJointSliderBoardController(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
@@ -29,8 +29,8 @@ public class QuadrupedPositionBasedLegJointSliderBoardController implements Quad
 
       for (String key : jointMap.keySet())
       {
-         DoubleYoVariable qDesired = new DoubleYoVariable(key + "_q_d", sliderBoardRegistry);
-         DoubleYoVariable qDesiredAlpha = new DoubleYoVariable(key + "_q_d_alpha", sliderBoardRegistry);
+         YoDouble qDesired = new YoDouble(key + "_q_d", sliderBoardRegistry);
+         YoDouble qDesiredAlpha = new YoDouble(key + "_q_d_alpha", sliderBoardRegistry);
          qDesiredAlpha.set(0.99);
          AlphaFilteredYoVariable alphaFilteredQDesired = new AlphaFilteredYoVariable(key + "_alpha_filtered_q_d", sliderBoardRegistry, qDesiredAlpha, qDesired);
          alphaFilteredQDesiredMap.put(key, alphaFilteredQDesired);
@@ -62,7 +62,7 @@ public class QuadrupedPositionBasedLegJointSliderBoardController implements Quad
          String key = jointMapKeySet.get(i);
          OneDoFJoint joint = jointMap.get(key);
 
-         DoubleYoVariable desiredQ = QDesiredMap.get(key);
+         YoDouble desiredQ = QDesiredMap.get(key);
          AlphaFilteredYoVariable alphaFilteredYoVariable = alphaFilteredQDesiredMap.get(key);
 
          desiredQ.set(joint.getQ());

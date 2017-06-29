@@ -5,8 +5,8 @@ import java.util.List;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -36,7 +36,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameOrientation yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
-   private final DoubleYoVariable rootJointYawOffsetFromFrozenState;
+   private final YoDouble rootJointYawOffsetFromFrozenState;
 
    private final YoFrameVector yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector yoRootJointAngularVelocity;
@@ -78,7 +78,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
 
-      rootJointYawOffsetFromFrozenState = new DoubleYoVariable("rootJointYawOffsetFromFrozenState", registry);
+      rootJointYawOffsetFromFrozenState = new YoDouble("rootJointYawOffsetFromFrozenState", registry);
 
       yoRootJointAngularVelocity = new YoFrameVector("estimatedRootJointAngularVelocity", rootJointFrame, registry);
       yoRootJointAngularVelocityInWorld = new YoFrameVector("estimatedRootJointAngularVelocityWorld", worldFrame, registry);

@@ -8,8 +8,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public abstract class AbstractMeasurementModelElement implements MeasurementModelElement
@@ -18,7 +18,7 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
    private final Map<ControlFlowOutputPort<?>, DenseMatrix64F> outputMatrixBlocks;
    private final DenseMatrix64F measurementCovarianceMatrixBlock;
    private final DenseMatrix64F scaledMeasurementCovarianceMatrixBlock;
-   private final DoubleYoVariable covarianceMatrixScaling;
+   private final YoDouble covarianceMatrixScaling;
 
    public AbstractMeasurementModelElement(int covarianceMatrixSize, String name, YoVariableRegistry registry)
    {
@@ -26,7 +26,7 @@ public abstract class AbstractMeasurementModelElement implements MeasurementMode
       scaledMeasurementCovarianceMatrixBlock = new DenseMatrix64F(covarianceMatrixSize, covarianceMatrixSize);
       controlFlowOutputPortList = new ArrayList<ControlFlowOutputPort<?>>();
       outputMatrixBlocks = new LinkedHashMap<ControlFlowOutputPort<?>, DenseMatrix64F>();
-      covarianceMatrixScaling = new DoubleYoVariable(name + "CovScaling", registry);
+      covarianceMatrixScaling = new YoDouble(name + "CovScaling", registry);
       covarianceMatrixScaling.set(1.0);
    }
 

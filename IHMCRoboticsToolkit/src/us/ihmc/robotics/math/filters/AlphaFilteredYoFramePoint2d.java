@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
@@ -31,12 +31,12 @@ public class AlphaFilteredYoFramePoint2d extends YoFramePoint2d
       return ret;
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable alpha, ReferenceFrame referenceFrame)
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble alpha, ReferenceFrame referenceFrame)
    {
       return createAlphaFilteredYoFramePoint2d(namePrefix, nameSuffix, "", registry, alpha, referenceFrame);
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, DoubleYoVariable alpha, ReferenceFrame referenceFrame)
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, YoDouble alpha, ReferenceFrame referenceFrame)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry, alpha);
@@ -58,7 +58,7 @@ public class AlphaFilteredYoFramePoint2d extends YoFramePoint2d
       return ret;
    }
 
-   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable alpha, YoFramePoint2d unfilteredPoint)
+   public static AlphaFilteredYoFramePoint2d createAlphaFilteredYoFramePoint2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble alpha, YoFramePoint2d unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());

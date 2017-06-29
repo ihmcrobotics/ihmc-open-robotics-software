@@ -17,8 +17,8 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -72,7 +72,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private RobotVisualizer robotVisualizer;
    private SimulationConstructionSet scs;
    
-   private  BooleanYoVariable enablePushing;
+   private YoBoolean enablePushing;
 
 
    @After
@@ -271,7 +271,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       cameraConfiguration.setCameraTracking(true, true, false, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
-      enablePushing = new BooleanYoVariable("enablePushing", scs.getRootRegistry());
+      enablePushing = new YoBoolean("enablePushing", scs.getRootRegistry());
       enablePushing.set(false);
 
       if (VISUALIZE_FORCE)
@@ -282,18 +282,18 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0);
 
       // get YoVariables
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean walk = (YoBoolean) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       for (RobotSide robotSide : RobotSide.values)
       {
          //         System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: made it to the for loop " + robotSide.toString());
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
                + "State");
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
 
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -341,9 +341,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<ConstraintType> footConstraintType;
+      private final YoEnum<ConstraintType> footConstraintType;
 
-      public SingleSupportStartCondition(EnumYoVariable<ConstraintType> footConstraintType)
+      public SingleSupportStartCondition(YoEnum<ConstraintType> footConstraintType)
       {
          this.footConstraintType = footConstraintType;
       }
@@ -357,10 +357,10 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingStateEnum> walkingState;
+      private final YoEnum<WalkingStateEnum> walkingState;
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;

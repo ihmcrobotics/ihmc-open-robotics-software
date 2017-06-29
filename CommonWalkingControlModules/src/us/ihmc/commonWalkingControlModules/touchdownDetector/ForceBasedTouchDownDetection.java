@@ -7,9 +7,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,9 +30,9 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    private final DenseMatrix64F footLinearForce = new DenseMatrix64F(3, 1);
    private final List<OneDoFJoint> legOneDoFJoints;
    
-   private final BooleanYoVariable isInContact;
-   private final DoubleYoVariable zForceThreshold;
-   private final DoubleYoVariable measuredZForce;
+   private final YoBoolean isInContact;
+   private final YoDouble zForceThreshold;
+   private final YoDouble measuredZForce;
    private final FrameVector footForce = new FrameVector();
    
    public ForceBasedTouchDownDetection(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame, YoVariableRegistry parentRegistry)
@@ -40,9 +40,9 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       String prefix = robotQuadrant.getCamelCaseName() + name;
       registry = new YoVariableRegistry(prefix);
       
-      isInContact = new BooleanYoVariable(prefix + "isInContact", registry);
-      zForceThreshold = new DoubleYoVariable(prefix + "zForceThreshold", registry);
-      measuredZForce = new DoubleYoVariable(prefix + "measuredZForce", registry);
+      isInContact = new YoBoolean(prefix + "isInContact", registry);
+      zForceThreshold = new YoDouble(prefix + "zForceThreshold", registry);
+      measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
       
       zForceThreshold.set(80.0);
       

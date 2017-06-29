@@ -4,12 +4,12 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -22,10 +22,10 @@ public class UserDesiredFootPoseControllerCommandGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable userDoFootPose = new BooleanYoVariable("userDoFootPose", registry);
-   private final DoubleYoVariable userDesiredFootPoseTrajectoryTime = new DoubleYoVariable("userDesiredFootPoseTrajectoryTime", registry);
+   private final YoBoolean userDoFootPose = new YoBoolean("userDoFootPose", registry);
+   private final YoDouble userDesiredFootPoseTrajectoryTime = new YoDouble("userDesiredFootPoseTrajectoryTime", registry);
 
-   private final EnumYoVariable<RobotSide> userFootPoseSide = new EnumYoVariable<RobotSide>("userFootPoseSide", registry, RobotSide.class);
+   private final YoEnum<RobotSide> userFootPoseSide = new YoEnum<RobotSide>("userFootPoseSide", registry, RobotSide.class);
 
    private final YoFramePose userDesiredFootPose;
    

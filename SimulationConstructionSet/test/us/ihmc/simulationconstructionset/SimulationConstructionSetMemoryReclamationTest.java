@@ -10,8 +10,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.tools.MemoryTools;
 
@@ -135,7 +135,7 @@ public class SimulationConstructionSetMemoryReclamationTest
 
          for (int i = 0; i < 5000; i++)
          {
-            new DoubleYoVariable("variable" + i, registry);
+            new YoDouble("variable" + i, registry);
          }
 
          robot.addYoVariableRegistry(registry);

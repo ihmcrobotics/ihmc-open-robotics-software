@@ -2,7 +2,7 @@ package us.ihmc.robotics.robotController;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class AbstractModularRobotController implements RobotController
 {

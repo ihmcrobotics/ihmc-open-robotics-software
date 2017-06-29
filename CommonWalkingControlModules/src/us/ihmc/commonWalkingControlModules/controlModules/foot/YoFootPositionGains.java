@@ -8,36 +8,36 @@ import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.TangentialDampingGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoTangentialDampingGains;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoFootPositionGains implements YoPositionPIDGainsInterface
 {
-   private final DoubleYoVariable proportionalXYGain, proportionalZGain;
-   private final DoubleYoVariable derivativeXYGain, derivativeZGain;
-   private final DoubleYoVariable dampingRatio;
+   private final YoDouble proportionalXYGain, proportionalZGain;
+   private final YoDouble derivativeXYGain, derivativeZGain;
+   private final YoDouble dampingRatio;
 
-   private final DoubleYoVariable maximumFeedback;
-   private final DoubleYoVariable maximumFeedbackRate;
-   private final DoubleYoVariable maxDerivativeError;
-   private final DoubleYoVariable maxProportionalError;
+   private final YoDouble maximumFeedback;
+   private final YoDouble maximumFeedbackRate;
+   private final YoDouble maxDerivativeError;
+   private final YoDouble maxProportionalError;
 
    private final YoTangentialDampingGains tangentialDampingGains;
 
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
-      proportionalXYGain = new DoubleYoVariable("kpXYLinear" + suffix, registry);
-      proportionalZGain = new DoubleYoVariable("kpZLinear" + suffix, registry);
-      derivativeXYGain = new DoubleYoVariable("kdXYLinear" + suffix, registry);
-      derivativeZGain = new DoubleYoVariable("kdZLinear" + suffix, registry);
-      dampingRatio = new DoubleYoVariable("zetaLinear" + suffix, registry);
+      proportionalXYGain = new YoDouble("kpXYLinear" + suffix, registry);
+      proportionalZGain = new YoDouble("kpZLinear" + suffix, registry);
+      derivativeXYGain = new YoDouble("kdXYLinear" + suffix, registry);
+      derivativeZGain = new YoDouble("kdZLinear" + suffix, registry);
+      dampingRatio = new YoDouble("zetaLinear" + suffix, registry);
 
-      maximumFeedback = new DoubleYoVariable("maximumLinearFeedback" + suffix, registry);
-      maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
-      maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
-      maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
+      maximumFeedback = new YoDouble("maximumLinearFeedback" + suffix, registry);
+      maximumFeedbackRate = new YoDouble("maximumLinearFeedbackRate" + suffix, registry);
+      maxDerivativeError = new YoDouble("maximumLinearDerivativeError" + suffix, registry);
+      maxProportionalError = new YoDouble("maximumLinearProportionalError" + suffix, registry);
 
       tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
@@ -227,25 +227,25 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maximumFeedbackRate;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumDerivativeError()
+   public YoDouble getYoMaximumDerivativeError()
    {
       return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumProportionalError()
+   public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
    }

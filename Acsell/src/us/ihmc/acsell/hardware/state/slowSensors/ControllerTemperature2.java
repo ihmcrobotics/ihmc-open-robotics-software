@@ -1,11 +1,11 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerTemperature2 implements AcsellSlowSensor
 {
-   private final DoubleYoVariable mcbTemperature2;
+   private final YoDouble mcbTemperature2;
    private final double THERM_B;// = 3730;
    private final double THERM_R_25C;// = 22000;
    private final double SERIES_RESISTANCE;// = 100.0e3;
@@ -15,7 +15,7 @@ public class ControllerTemperature2 implements AcsellSlowSensor
    
    public ControllerTemperature2(String name, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry parentRegistry)
    {
-      mcbTemperature2 = new DoubleYoVariable(name + "MCBTemperature2", parentRegistry);
+      mcbTemperature2 = new YoDouble(name + "MCBTemperature2", parentRegistry);
       this.THERM_B = slowSensorConstants.getBoardThermistorBeta();
       this.THERM_R_25C = slowSensorConstants.getBoardThermistorRoomTempResistance();
       this.SERIES_RESISTANCE = slowSensorConstants.getBoardThermistorSeriesResistance();

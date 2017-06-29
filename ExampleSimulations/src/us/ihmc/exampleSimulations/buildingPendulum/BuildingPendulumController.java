@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -11,17 +11,17 @@ public class BuildingPendulumController extends SimpleRobotController
    public static String variableName = "MySliderBoardTest";
 
    private final BuildingPendulumRobot robot;
-   private final BooleanYoVariable atCenter = new BooleanYoVariable("AtCenter", registry);
+   private final YoBoolean atCenter = new YoBoolean("AtCenter", registry);
 
    private RobotSide activeSide;
-   private final EnumYoVariable<RobotSide> yoActiveSide = new EnumYoVariable<>("ActiveSide", registry, RobotSide.class);
+   private final YoEnum<RobotSide> yoActiveSide = new YoEnum<>("ActiveSide", registry, RobotSide.class);
 
    private double pendulumAngle;
    private double pendulumAngleSwitch;
    private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
 
 
-   private final DoubleYoVariable mySliderBoardTest = new DoubleYoVariable(variableName, registry);
+   private final YoDouble mySliderBoardTest = new YoDouble(variableName, registry);
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
    {

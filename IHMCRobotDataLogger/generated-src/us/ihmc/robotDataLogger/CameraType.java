@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public enum CameraType implements IDLStruct<CameraType>
+public enum CameraType
 {
         	CAPTURE_CARD,
         

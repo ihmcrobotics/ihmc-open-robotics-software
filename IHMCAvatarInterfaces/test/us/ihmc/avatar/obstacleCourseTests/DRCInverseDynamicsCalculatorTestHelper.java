@@ -14,8 +14,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -61,9 +61,9 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final SimulationConstructionSet scs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> differenceJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> differenceJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
    private final YoFrameVector computedRootJointLinearAcceleration = new YoFrameVector("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector computedRootJointAngularAcceleration;
@@ -109,13 +109,13 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
-         DoubleYoVariable computedJointTorque = new DoubleYoVariable("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble computedJointTorque = new YoDouble("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointTorques.put(oneDoFJoint, computedJointTorque);
 
-         DoubleYoVariable differenceJointTorque = new DoubleYoVariable("tau_difference_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble differenceJointTorque = new YoDouble("tau_difference_" + oneDegreeOfFreedomJoint.getName(), registry);
          differenceJointTorques.put(oneDoFJoint, differenceJointTorque);
 
-         DoubleYoVariable computedJointAcceleration = new DoubleYoVariable("qdd_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble computedJointAcceleration = new YoDouble("qdd_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
@@ -180,7 +180,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
       }
    }
@@ -203,12 +203,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
 
          double otherRobotJointTorque = otherOneDegreeOfFreedomJoint.getTauYoVariable().getDoubleValue();
 
-         DoubleYoVariable differenceJointTorque = differenceJointTorques.get(oneDoFJoint);
+         YoDouble differenceJointTorque = differenceJointTorques.get(oneDoFJoint);
          differenceJointTorque.set(otherRobotJointTorque - inverseDynamicsTorque);
          if (Math.abs(differenceJointTorque.getDoubleValue()) > epsilon)
          {
@@ -256,7 +256,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsAcceleration = oneDoFJoint.getQddDesired();
          double simulatedRobotAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
 
-         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
          computedJointAcceleration.set(inverseDynamicsAcceleration);
 
          boolean accelerationsMatch = Math.abs(inverseDynamicsAcceleration - simulatedRobotAcceleration) < epsilon;
@@ -316,7 +316,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          double simulatedRobotTorque = oneDegreeOfFreedomJoint.getTauYoVariable().getDoubleValue();
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
 
          boolean torquesMatch = Math.abs(inverseDynamicsTorque - simulatedRobotTorque) < epsilon;
@@ -468,7 +468,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double robotJointAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
          oneDoFJoint.setQddDesired(robotJointAcceleration);
 
-         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
          computedJointAcceleration.set(robotJointAcceleration);
       }
    }

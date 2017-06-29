@@ -22,7 +22,7 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 

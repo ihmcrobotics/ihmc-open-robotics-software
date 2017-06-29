@@ -14,9 +14,9 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -38,7 +38,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoseUsingQuaternions yoDesiredPose;
    private final YoFramePoseUsingQuaternions yoCurrentPose;
@@ -125,8 +125,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
-      DoubleYoVariable maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
-      DoubleYoVariable maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
+      YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
+      YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
       kpLinear = positionGains.createProportionalGainMatrix();
       kdLinear = positionGains.createDerivativeGainMatrix();
@@ -138,7 +138,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isSpatialFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isSpatialFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredPose = feedbackControllerToolbox.getPose(endEffector, DESIRED, isEnabled);

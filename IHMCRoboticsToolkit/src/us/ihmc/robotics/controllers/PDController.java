@@ -1,83 +1,81 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-
-
 
 public class PDController
 {
-   private final DoubleYoVariable proportionalGain;
-   private final DoubleYoVariable derivativeGain;
-   private final DoubleYoVariable positionError;
-   private final DoubleYoVariable rateError;
-   private final DoubleYoVariable positionDeadband;
+   private final YoDouble proportionalGain;
+   private final YoDouble derivativeGain;
+   private final YoDouble positionError;
+   private final YoDouble rateError;
+   private final YoDouble positionDeadband;
 
-   private final DoubleYoVariable actionP;
-   private final DoubleYoVariable actionD;
+   private final YoDouble actionP;
+   private final YoDouble actionD;
 
    public PDController(String suffix, YoVariableRegistry registry)
    {
-      proportionalGain = new DoubleYoVariable("kp_" + suffix,  registry);
+      proportionalGain = new YoDouble("kp_" + suffix,  registry);
       proportionalGain.set(0.0);
 
-      derivativeGain = new DoubleYoVariable("kd_" + suffix,  registry);
+      derivativeGain = new YoDouble("kd_" + suffix,  registry);
       derivativeGain.set(0.0);
 
-      positionDeadband = new DoubleYoVariable("positionDeadband_" + suffix, registry);
+      positionDeadband = new YoDouble("positionDeadband_" + suffix, registry);
       positionDeadband.set(0.0);
 
-      positionError = new DoubleYoVariable("positionError_" + suffix,  registry);
+      positionError = new YoDouble("positionError_" + suffix,  registry);
       positionError.set(0.0);
 
-      rateError = new DoubleYoVariable("rateError_" + suffix,  registry);
+      rateError = new YoDouble("rateError_" + suffix,  registry);
       rateError.set(0.0);
       
-      actionP = new DoubleYoVariable("action_P_" + suffix, registry);
+      actionP = new YoDouble("action_P_" + suffix, registry);
       actionP.set(0.0);
       
-      actionD = new DoubleYoVariable("action_D_" + suffix, registry);
+      actionD = new YoDouble("action_D_" + suffix, registry);
       actionD.set(0.0);
    }
 
-   public PDController(DoubleYoVariable proportionalGain, DoubleYoVariable derivativeGain, String suffix, YoVariableRegistry registry)
+   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, String suffix, YoVariableRegistry registry)
    {
       this.proportionalGain = proportionalGain;
       this.derivativeGain = derivativeGain;
 
-      positionDeadband = new DoubleYoVariable("positionDeadband_" + suffix, registry);
+      positionDeadband = new YoDouble("positionDeadband_" + suffix, registry);
       positionDeadband.set(0.0);
 
-      positionError = new DoubleYoVariable("positionError_" + suffix,  registry);
+      positionError = new YoDouble("positionError_" + suffix,  registry);
       positionError.set(0.0);
 
-      rateError = new DoubleYoVariable("rateError_" + suffix,  registry);
+      rateError = new YoDouble("rateError_" + suffix,  registry);
       rateError.set(0.0);
       
-      actionP = new DoubleYoVariable("action_P_" + suffix, registry);
+      actionP = new YoDouble("action_P_" + suffix, registry);
       actionP.set(0.0);
       
-      actionD = new DoubleYoVariable("action_D_" + suffix, registry);
+      actionD = new YoDouble("action_D_" + suffix, registry);
       actionD.set(0.0);
    }
 
-   public PDController(DoubleYoVariable proportionalGain, DoubleYoVariable derivativeGain, DoubleYoVariable positionDeadband, String suffix, YoVariableRegistry registry)
+   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, YoDouble positionDeadband, String suffix, YoVariableRegistry registry)
    {
       this.proportionalGain = proportionalGain;
       this.derivativeGain = derivativeGain;
       this.positionDeadband = positionDeadband;
 
-      positionError = new DoubleYoVariable("positionError_" + suffix,  registry);
+      positionError = new YoDouble("positionError_" + suffix,  registry);
       positionError.set(0.0);
 
-      rateError = new DoubleYoVariable("rateError_" + suffix,  registry);
+      rateError = new YoDouble("rateError_" + suffix,  registry);
       rateError.set(0.0);
 
-      actionP = new DoubleYoVariable("action_P_" + suffix, registry);
+      actionP = new YoDouble("action_P_" + suffix, registry);
       actionP.set(0.0);
 
-      actionD = new DoubleYoVariable("action_D_" + suffix, registry);
+      actionD = new YoDouble("action_D_" + suffix, registry);
       actionD.set(0.0);
    }
 
@@ -87,16 +85,16 @@ public class PDController
       this.derivativeGain = pdGains.getYoKd();
       this.positionDeadband = pdGains.getPositionDeadband();
 
-      positionError = new DoubleYoVariable("positionError_" + suffix,  registry);
+      positionError = new YoDouble("positionError_" + suffix,  registry);
       positionError.set(0.0);
 
-      rateError = new DoubleYoVariable("rateError_" + suffix,  registry);
+      rateError = new YoDouble("rateError_" + suffix,  registry);
       rateError.set(0.0);
 
-      actionP = new DoubleYoVariable("action_P_" + suffix, registry);
+      actionP = new YoDouble("action_P_" + suffix, registry);
       actionP.set(0.0);
 
-      actionD = new DoubleYoVariable("action_D_" + suffix, registry);
+      actionD = new YoDouble("action_D_" + suffix, registry);
       actionD.set(0.0);
    }
 

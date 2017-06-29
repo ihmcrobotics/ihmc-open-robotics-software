@@ -8,25 +8,25 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RateLimitedYoVariableTest
 {
    YoVariableRegistry registry = new YoVariableRegistry("registry");
    RateLimitedYoVariable rateLimitedYoVariable1, rateLimitedYoVariable2, rateLimitedYoVariable3, rateLimitedYoVariable4;
-   DoubleYoVariable maxRate2, maxRate4;
-   DoubleYoVariable position3, position4;
+   YoDouble maxRate2, maxRate4;
+   YoDouble position3, position4;
    double maxRate1, maxRate3;
    double dt1, dt2, dt3, dt4;
 
    @Before
    public void setUp()
    {
-      maxRate2 = new DoubleYoVariable("maxRate2", registry);
-      maxRate4 = new DoubleYoVariable("maxRate4", registry);
-      position3 = new DoubleYoVariable("position3", registry);
-      position4 = new DoubleYoVariable("position4", registry);
+      maxRate2 = new YoDouble("maxRate2", registry);
+      maxRate4 = new YoDouble("maxRate4", registry);
+      position3 = new YoDouble("position3", registry);
+      position4 = new YoDouble("position4", registry);
 
       maxRate1 = 10.0;
       maxRate2.set(9.0);

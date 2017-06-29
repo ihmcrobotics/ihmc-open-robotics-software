@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoubleGlobalParameter extends GlobalParameter
 {
@@ -8,8 +8,8 @@ public class DoubleGlobalParameter extends GlobalParameter
    {
       super(listener);
 
-      yoVariable = new DoubleYoVariable(name, description, registry);
-      ((DoubleYoVariable)yoVariable).set(value);
+      yoVariable = new YoDouble(name, description, registry);
+      ((YoDouble)yoVariable).set(value);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -19,7 +19,7 @@ public class DoubleGlobalParameter extends GlobalParameter
    {
       super(parents, listener);
 
-      yoVariable = new DoubleYoVariable(name, description,registry);
+      yoVariable = new YoDouble(name, description,registry);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);
@@ -27,7 +27,7 @@ public class DoubleGlobalParameter extends GlobalParameter
 
    public double getValue()
    {
-      return  ((DoubleYoVariable)yoVariable).getDoubleValue();
+      return  ((YoDouble)yoVariable).getDoubleValue();
    }
 
    protected int getNumberOfCharactersForDisplay()
@@ -45,7 +45,7 @@ public class DoubleGlobalParameter extends GlobalParameter
       verifyNoParents();
 
       // check if the value is the same as the current value
-      if (value ==  ((DoubleYoVariable)yoVariable).getDoubleValue())
+      if (value ==  ((YoDouble)yoVariable).getDoubleValue())
          return;
       else
          setDoubleValue(value, comment);
@@ -65,7 +65,7 @@ public class DoubleGlobalParameter extends GlobalParameter
    @Override
    public String getValueInStringFormat()
    {
-      String ret = Double.toString( ((DoubleYoVariable)yoVariable).getDoubleValue());
+      String ret = Double.toString( ((YoDouble)yoVariable).getDoubleValue());
 
       return padWithSpaces(ret, numberOfCharactersForDisplay);
    }
@@ -76,8 +76,8 @@ public class DoubleGlobalParameter extends GlobalParameter
    {
 //    checkIfThereAreParents();
 
-      double previousValue =  ((DoubleYoVariable)yoVariable).getDoubleValue();
-      ((DoubleYoVariable)yoVariable).set(newValue);
+      double previousValue =  ((YoDouble)yoVariable).getDoubleValue();
+      ((YoDouble)yoVariable).set(newValue);
 
       if (changedListener != null)
       {

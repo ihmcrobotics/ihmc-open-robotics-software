@@ -3,8 +3,7 @@ package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * @author twan
@@ -13,21 +12,21 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 public class StateMachineTools
 {
    @SafeVarargs
-   public static <T extends Enum<T>> void addRequestedStateTransition(final EnumYoVariable<T> requestedState, boolean waitUntilDone,
+   public static <T extends Enum<T>> void addRequestedStateTransition(final YoEnum<T> requestedState, boolean waitUntilDone,
            final FinishableState<T> initialState, final FinishableState<T>... statePath)
    {
       addRequestedStateTransition(requestedState, waitUntilDone, new ArrayList<StateTransitionAction>(), initialState, statePath);
    }
 
    @SafeVarargs
-   public static <T extends Enum<T>> void addRequestedStateTransition(final EnumYoVariable<T> requestedState, boolean waitUntilDone,
+   public static <T extends Enum<T>> void addRequestedStateTransition(final YoEnum<T> requestedState, boolean waitUntilDone,
          StateTransitionAction stateTransitionAction, final FinishableState<T> initialState, final FinishableState<T>... statePath)
    {
       addRequestedStateTransition(requestedState, waitUntilDone, createListWithOneElement(stateTransitionAction), initialState, statePath);
    }
 
    @SafeVarargs
-   public static <T extends Enum<T>> void addRequestedStateTransition(final EnumYoVariable<T> requestedState, boolean waitUntilDone,
+   public static <T extends Enum<T>> void addRequestedStateTransition(final YoEnum<T> requestedState, boolean waitUntilDone,
            List<? extends StateTransitionAction> stateTransitionActions, final FinishableState<T> initialState, final FinishableState<T>... statePath)
    {
       final State<T> finalState = statePath[statePath.length - 1];
@@ -67,9 +66,9 @@ public class StateMachineTools
       private final FinishableState<T> fromState;
       private final T requestedStateTrigger;
       private final boolean waitUntilDone;
-      private final EnumYoVariable<T> requestedState;
+      private final YoEnum<T> requestedState;
 
-      public RequestedStateTransitionCondition(FinishableState<T> fromState, T requestedStateTrigger, EnumYoVariable<T> requestedState, boolean waitUntilDone)
+      public RequestedStateTransitionCondition(FinishableState<T> fromState, T requestedStateTrigger, YoEnum<T> requestedState, boolean waitUntilDone)
       {
          this.fromState = fromState;
          this.requestedStateTrigger = requestedStateTrigger;

@@ -9,12 +9,12 @@ import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineB
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -23,12 +23,12 @@ public class QuadrupedFootStateMachine
 
    // control variables
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable timestamp;
+   private final YoDouble timestamp;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
    private final FrameVector soleForceCommand;
    private final YoQuadrupedTimedStep stepCommand;
-   private final BooleanYoVariable stepCommandIsValid;
+   private final YoBoolean stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedFootStateMachineParameters parameters;
 
@@ -46,7 +46,7 @@ public class QuadrupedFootStateMachine
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedFootStateMachine(QuadrupedFootStateMachineParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
-         DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
+         YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
@@ -56,7 +56,7 @@ public class QuadrupedFootStateMachine
       this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
       this.soleForceCommand = new FrameVector();
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
-      this.stepCommandIsValid = new BooleanYoVariable(prefix + "StepCommandIsValid", registry);
+      this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       this.parameters = parameters;
       // state machine
@@ -170,14 +170,14 @@ public class QuadrupedFootStateMachine
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
       private final FramePoint goalPosition;
-      private final GlitchFilteredBooleanYoVariable touchdownTrigger;
+      private final GlitchFilteredYoBoolean touchdownTrigger;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
          this.goalPosition = new FramePoint();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
-         this.touchdownTrigger = new GlitchFilteredBooleanYoVariable(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
+         this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                parameters.getTouchdownTriggerWindowParameter());
       }
 

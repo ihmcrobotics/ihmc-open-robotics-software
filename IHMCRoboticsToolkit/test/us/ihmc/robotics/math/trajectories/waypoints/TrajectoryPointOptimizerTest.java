@@ -12,8 +12,8 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryPointOptimizerTest
@@ -76,7 +76,7 @@ public class TrajectoryPointOptimizerTest
       YoVariableRegistry registry = new YoVariableRegistry("");
       new TrajectoryPointOptimizer(dimensions, order, registry);
 
-      DoubleYoVariable timeGain = (DoubleYoVariable) registry.getVariable("TimeGain");
+      YoDouble timeGain = (YoDouble) registry.getVariable("TimeGain");
       assertTrue(timeGain.getDoubleValue() != 0.0);
 
    }

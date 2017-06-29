@@ -10,9 +10,9 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Helper class to test that variables in a registry are only changed by a single thread
@@ -42,7 +42,7 @@ public class YoVariableThreadAccessValidator
          yoVariable.toClass();
 
          
-         CtClass doubleYoVariable = pool.get("us.ihmc.simulationconstructionset.DoubleYoVariable");
+         CtClass doubleYoVariable = pool.get("us.ihmc.simulationconstructionset.YoDouble");
          CtMethod method = doubleYoVariable.getDeclaredMethod("getDoubleValue");
          method.insertBefore("if(validator != null) { validator.validateReadAccess(this); }");
          doubleYoVariable.toClass();

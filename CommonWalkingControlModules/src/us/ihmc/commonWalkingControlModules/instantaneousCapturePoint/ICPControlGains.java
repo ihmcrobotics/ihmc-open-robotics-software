@@ -1,28 +1,28 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPControlGains
 {
    private final String suffix;
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable kpParallelToMotion;
-   private final DoubleYoVariable kpOrthogonalToMotion;
-   private final DoubleYoVariable ki;
-   private final DoubleYoVariable kiBleedOff;
-   private DoubleYoVariable feedbackPartMaxRate;
+   private final YoDouble kpParallelToMotion;
+   private final YoDouble kpOrthogonalToMotion;
+   private final YoDouble ki;
+   private final YoDouble kiBleedOff;
+   private YoDouble feedbackPartMaxRate;
 
    public ICPControlGains(String suffix, YoVariableRegistry registry)
    {
       this.suffix = suffix;
       this.registry = registry;
 
-      kpParallelToMotion = new DoubleYoVariable("captureKpParallel" + suffix, registry);
-      kpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal" + suffix, registry);
-      ki = new DoubleYoVariable("captureKi" + suffix, registry);
-      kiBleedOff = new DoubleYoVariable("captureKiBleedOff" + suffix, registry);
+      kpParallelToMotion = new YoDouble("captureKpParallel" + suffix, registry);
+      kpOrthogonalToMotion = new YoDouble("captureKpOrthogonal" + suffix, registry);
+      ki = new YoDouble("captureKi" + suffix, registry);
+      kiBleedOff = new YoDouble("captureKiBleedOff" + suffix, registry);
       kiBleedOff.set(1.0);
    }
 
@@ -49,31 +49,31 @@ public class ICPControlGains
    public void setFeedbackPartMaxRate(double maxRate)
    {
       if (feedbackPartMaxRate == null)
-         feedbackPartMaxRate = new DoubleYoVariable("feedbackPartMaxRate" + suffix, registry);
+         feedbackPartMaxRate = new YoDouble("feedbackPartMaxRate" + suffix, registry);
       feedbackPartMaxRate.set(maxRate);
    }
 
-   public DoubleYoVariable getYoKpParallelToMotion()
+   public YoDouble getYoKpParallelToMotion()
    {
       return kpParallelToMotion;
    }
 
-   public DoubleYoVariable getYoKpOrthogonalToMotion()
+   public YoDouble getYoKpOrthogonalToMotion()
    {
       return kpOrthogonalToMotion;
    }
 
-   public DoubleYoVariable getYoKi()
+   public YoDouble getYoKi()
    {
       return ki;
    }
 
-   public DoubleYoVariable getYoKiBleedOff()
+   public YoDouble getYoKiBleedOff()
    {
       return kiBleedOff;
    }
 
-   public DoubleYoVariable getFeedbackPartMaxRate()
+   public YoDouble getFeedbackPartMaxRate()
    {
       return feedbackPartMaxRate;
    }

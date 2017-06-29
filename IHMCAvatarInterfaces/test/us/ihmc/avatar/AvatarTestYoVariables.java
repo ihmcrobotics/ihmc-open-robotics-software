@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -9,67 +9,67 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public abstract class AvatarTestYoVariables
 {
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    
-   private final DoubleYoVariable pelvisX;
-   private final DoubleYoVariable pelvisY;
-   private final DoubleYoVariable pelvisZ;
-   private final DoubleYoVariable pelvisYaw;
+   private final YoDouble pelvisX;
+   private final YoDouble pelvisY;
+   private final YoDouble pelvisZ;
+   private final YoDouble pelvisYaw;
    
-   private final DoubleYoVariable midFeetZUpZ;
-   private final DoubleYoVariable desiredCOMHeight;
+   private final YoDouble midFeetZUpZ;
+   private final YoDouble desiredCOMHeight;
    
    private final SideDependentList<YoFramePoint> solePositions = new SideDependentList<>();
 
    public AvatarTestYoVariables(SimulationConstructionSet scs)
    {
-      yoTime = (DoubleYoVariable) scs.getVariable("t");
+      yoTime = (YoDouble) scs.getVariable("t");
 
-      pelvisX = (DoubleYoVariable) scs.getVariable("q_x");
-      pelvisY = (DoubleYoVariable) scs.getVariable("q_y");
-      pelvisZ = (DoubleYoVariable) scs.getVariable("q_z");
-      pelvisYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
+      pelvisX = (YoDouble) scs.getVariable("q_x");
+      pelvisY = (YoDouble) scs.getVariable("q_y");
+      pelvisZ = (YoDouble) scs.getVariable("q_z");
+      pelvisYaw = (YoDouble) scs.getVariable("q_yaw");
       
-      midFeetZUpZ = (DoubleYoVariable) scs.getVariable("midFeetZUpZ");
-      desiredCOMHeight = (DoubleYoVariable) scs.getVariable("desiredCOMHeight");
+      midFeetZUpZ = (YoDouble) scs.getVariable("midFeetZUpZ");
+      desiredCOMHeight = (YoDouble) scs.getVariable("desiredCOMHeight");
 
-      solePositions.set(RobotSide.LEFT, new YoFramePoint((DoubleYoVariable) scs.getVariable("leftSoleX"), (DoubleYoVariable) scs.getVariable("leftSoleY"),
-                                                         (DoubleYoVariable) scs.getVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
-      solePositions.set(RobotSide.RIGHT, new YoFramePoint((DoubleYoVariable) scs.getVariable("rightSoleX"), (DoubleYoVariable) scs.getVariable("rightSoleY"),
-                                                         (DoubleYoVariable) scs.getVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.LEFT, new YoFramePoint((YoDouble) scs.getVariable("leftSoleX"), (YoDouble) scs.getVariable("leftSoleY"),
+                                                         (YoDouble) scs.getVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.RIGHT, new YoFramePoint((YoDouble) scs.getVariable("rightSoleX"), (YoDouble) scs.getVariable("rightSoleY"),
+                                                         (YoDouble) scs.getVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
    }
 
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return yoTime;
    }
 
-   public DoubleYoVariable getPelvisX()
+   public YoDouble getPelvisX()
    {
       return pelvisX;
    }
 
-   public DoubleYoVariable getPelvisY()
+   public YoDouble getPelvisY()
    {
       return pelvisY;
    }
 
-   public DoubleYoVariable getPelvisZ()
+   public YoDouble getPelvisZ()
    {
       return pelvisZ;
    }
 
-   public DoubleYoVariable getPelvisYaw()
+   public YoDouble getPelvisYaw()
    {
       return pelvisYaw;
    }
 
-   public DoubleYoVariable getMidFeetZUpZ()
+   public YoDouble getMidFeetZUpZ()
    {
       return midFeetZUpZ;
    }
 
-   public DoubleYoVariable getDesiredCOMHeight()
+   public YoDouble getDesiredCOMHeight()
    {
       return desiredCOMHeight;
    }

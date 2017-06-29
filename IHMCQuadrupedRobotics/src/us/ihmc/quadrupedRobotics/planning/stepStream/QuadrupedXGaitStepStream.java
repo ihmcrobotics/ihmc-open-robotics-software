@@ -11,8 +11,8 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -38,9 +38,9 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame worldFrame;
    private final double controlDT;
-   private final DoubleYoVariable timestamp;
+   private final YoDouble timestamp;
 
-   private final DoubleYoVariable bodyYaw;
+   private final YoDouble bodyYaw;
    private final YoFrameOrientation bodyOrientation;
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
@@ -49,7 +49,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider,
-         QuadrupedReferenceFrames referenceFrames, double controlDT, DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
+         QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       this.planarVelocityProvider = planarVelocityProvider;
       this.xGaitSettingsProvider = xGaitSettingsProvider;
@@ -60,7 +60,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       this.controlDT = controlDT;
       this.timestamp = timestamp;
 
-      this.bodyYaw = new DoubleYoVariable("bodyYaw", registry);
+      this.bodyYaw = new YoDouble("bodyYaw", registry);
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
       this.xGaitSettings = new QuadrupedXGaitSettings();
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner();

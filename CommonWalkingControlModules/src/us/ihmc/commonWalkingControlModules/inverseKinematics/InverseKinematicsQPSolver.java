@@ -5,10 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -16,7 +16,7 @@ public class InverseKinematicsQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable firstCall = new BooleanYoVariable("firstCall", registry);
+   private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
@@ -33,12 +33,12 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F desiredJointVelocities;
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
-   private final IntegerYoVariable numberOfEqualityConstraints = new IntegerYoVariable("numberOfEqualityConstraints", registry);
-   private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
-   private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
-   private final DoubleYoVariable jointVelocityRegularization = new DoubleYoVariable("jointVelocityRegularization", registry);
-   private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
+   private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
+   private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
+   private final YoInteger numberOfConstraints = new YoInteger("numberOfConstraints", registry);
+   private final YoDouble jointVelocityRegularization = new YoDouble("jointVelocityRegularization", registry);
+   private final YoDouble jointAccelerationRegularization = new YoDouble("jointAccelerationRegularization", registry);
 
    private final int numberOfDoFs;
 

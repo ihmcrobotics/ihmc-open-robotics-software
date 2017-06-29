@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * A finite state machine implementation capable of holding states of type {@link S} and firing events of any arbitrary enum type.
@@ -54,7 +54,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    /**
     * The present state.
     */
-   private EnumYoVariable<S> state;
+   private YoEnum<S> state;
 
    /**
     * Whether or not the current state's {@link FiniteStateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This
@@ -77,7 +77,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
       this.stateChangedListeners = new ArrayList<>();
       this.initialState = initialState;
       this.standardEventType = standardEventType;
-      this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
+      this.state = new YoEnum<>(yoVariableName, registry, enumType);
       this.state.set(initialState);
    }
 

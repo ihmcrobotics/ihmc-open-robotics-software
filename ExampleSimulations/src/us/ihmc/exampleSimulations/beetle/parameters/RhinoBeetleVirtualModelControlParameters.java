@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;

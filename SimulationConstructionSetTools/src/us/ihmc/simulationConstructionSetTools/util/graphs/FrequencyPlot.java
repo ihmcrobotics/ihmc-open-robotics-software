@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.graphs;
 
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 public class FrequencyPlot extends JFreePlot

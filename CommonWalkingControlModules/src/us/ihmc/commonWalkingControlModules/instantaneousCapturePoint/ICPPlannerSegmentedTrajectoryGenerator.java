@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingConstantCMP;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingCubicICP;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -9,9 +10,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -26,18 +27,18 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 {
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable omega0;
+   private final YoDouble omega0;
 
-   private final DoubleYoVariable maximumSplineDuration;
-   private final DoubleYoVariable minimumSplineDuration;
-   private final DoubleYoVariable minimumTimeToSpendOnFinalCMP;
-   private final DoubleYoVariable totalTrajectoryTime;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable timeSpentOnInitialCMP;
-   private final DoubleYoVariable timeSpentOnFinalCMP;
-   private final DoubleYoVariable progressionInPercent;
-   private final DoubleYoVariable startOfSplineTime;
-   private final DoubleYoVariable endOfSplineTime;
+   private final YoDouble maximumSplineDuration;
+   private final YoDouble minimumSplineDuration;
+   private final YoDouble minimumTimeToSpendOnFinalCMP;
+   private final YoDouble totalTrajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble timeSpentOnInitialCMP;
+   private final YoDouble timeSpentOnFinalCMP;
+   private final YoDouble progressionInPercent;
+   private final YoDouble startOfSplineTime;
+   private final YoDouble endOfSplineTime;
 
    private final YoFramePoint yoStartOfSplineICP;
    private final YoFramePoint yoEndOfSplineICP;
@@ -45,7 +46,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final YoFramePoint2d yoStartOfSplineCoM;
    private final YoFramePoint2d yoEndOfSplineCoM;
 
-   private final IntegerYoVariable currentSegment;
+   private final YoInteger currentSegment;
 
    private ReferenceFrame trajectoryFrame;
    private ReferenceFrame initialFrame;
@@ -97,7 +98,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private final VelocityConstrainedPositionTrajectoryGenerator spline;
 
-   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, DoubleYoVariable omega0, YoVariableRegistry parentRegistry)
+   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoDouble omega0, YoVariableRegistry parentRegistry)
    {
       this.trajectoryFrame = trajectoryFrame;
       initialFrame = trajectoryFrame;
@@ -106,19 +107,19 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       this.omega0 = omega0;
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
-      minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
+      maximumSplineDuration = new YoDouble(namePrefix + "MaximumSplineDuration", registry);
+      minimumSplineDuration = new YoDouble(namePrefix + "MinimumSplineDuration", registry);
       minimumSplineDuration.set(0.1);
-      minimumTimeToSpendOnFinalCMP = new DoubleYoVariable(namePrefix + "MinimumTimeToSpendOnFinalCMP", registry);
-      totalTrajectoryTime = new DoubleYoVariable(namePrefix + "TotalTrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
-      timeSpentOnInitialCMP = new DoubleYoVariable(namePrefix + "TimeSpentOnInitialCMP", registry);
-      timeSpentOnFinalCMP = new DoubleYoVariable(namePrefix + "TimeSpentOnFinalCMP", registry);
-      progressionInPercent = new DoubleYoVariable(namePrefix + "ProgressionInPercent", registry);
-      startOfSplineTime = new DoubleYoVariable(namePrefix + "StartOfSplineTime", registry);
-      endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
+      minimumTimeToSpendOnFinalCMP = new YoDouble(namePrefix + "MinimumTimeToSpendOnFinalCMP", registry);
+      totalTrajectoryTime = new YoDouble(namePrefix + "TotalTrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
+      timeSpentOnInitialCMP = new YoDouble(namePrefix + "TimeSpentOnInitialCMP", registry);
+      timeSpentOnFinalCMP = new YoDouble(namePrefix + "TimeSpentOnFinalCMP", registry);
+      progressionInPercent = new YoDouble(namePrefix + "ProgressionInPercent", registry);
+      startOfSplineTime = new YoDouble(namePrefix + "StartOfSplineTime", registry);
+      endOfSplineTime = new YoDouble(namePrefix + "EndOfSplineTime", registry);
 
-      currentSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
+      currentSegment = new YoInteger(namePrefix + "CurrentSegment", registry);
 
       spline = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, trajectoryFrame, registry);
 

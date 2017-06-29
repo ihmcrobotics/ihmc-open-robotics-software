@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
@@ -12,8 +12,8 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
    private final RateLimitedYoFrameVector rateLimitedLinearPart;
    private final RateLimitedYoFrameVector rateLimitedAngularPart;
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maximumLinearRate,
-                                     DoubleYoVariable maximumAngularRate, double dt, YoFrameVector rawLinearPart, YoFrameVector rawAngularPart)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maximumLinearRate,
+                                     YoDouble maximumAngularRate, double dt, YoFrameVector rawLinearPart, YoFrameVector rawAngularPart)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawLinearPart),
             new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawAngularPart));
@@ -21,8 +21,8 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
       this.rateLimitedAngularPart = (RateLimitedYoFrameVector) angularPart;
    }
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maximumLinearRate,
-                                     DoubleYoVariable maximumAngularRate, double dt, YoSpatialVector rawSpatialVector)
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maximumLinearRate,
+                                     YoDouble maximumAngularRate, double dt, YoSpatialVector rawSpatialVector)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumLinearRate, dt, rawSpatialVector.getYoLinearPart()),
             new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawSpatialVector.getYoAngularPart()));

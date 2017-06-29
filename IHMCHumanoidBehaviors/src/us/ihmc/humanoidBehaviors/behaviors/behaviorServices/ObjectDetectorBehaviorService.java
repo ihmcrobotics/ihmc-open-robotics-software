@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -37,10 +37,10 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    private final ObjectDetectorFromCameraImages objectDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;
 
-   private final BooleanYoVariable locationEnabled;
+   private final YoBoolean locationEnabled;
 
    private final Path videoFilesRecordingLocation = Paths.get(System.getProperty("user.home"), "diagnostic", "behaviors", "valveDetector");
-   private final BooleanYoVariable shouldRecordVideoPackets;
+   private final YoBoolean shouldRecordVideoPackets;
    private final VideoPacketToImageFilesRecorder imageFilesRecorder = new VideoPacketToImageFilesRecorder(videoFilesRecordingLocation);
 
    public ObjectDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
@@ -59,9 +59,9 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       getCommunicationBridge().attachListener(ObjectDetectorResultPacket.class, objectDetectorFromCameraImages);
       
       String prefix = "fiducial";
-      locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", getYoVariableRegistry());
+      locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());
 
-      shouldRecordVideoPackets = new BooleanYoVariable("ShouldRecordVideoPackets", getYoVariableRegistry());
+      shouldRecordVideoPackets = new YoBoolean("ShouldRecordVideoPackets", getYoVariableRegistry());
       shouldRecordVideoPackets.set(false);
       
       locationEnabled.set(false);

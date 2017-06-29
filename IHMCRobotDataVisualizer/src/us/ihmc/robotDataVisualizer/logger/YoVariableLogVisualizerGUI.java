@@ -23,9 +23,9 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.videos.VideoFileFilter;
@@ -323,7 +323,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             synchronized (seekLock)
             {
                isSeeking = true;
-               slider.setValue((int) ((IntegerYoVariable) v).getIntegerValue());
+               slider.setValue((int) ((YoInteger) v).getIntegerValue());
                isSeeking = false;
             }
          }

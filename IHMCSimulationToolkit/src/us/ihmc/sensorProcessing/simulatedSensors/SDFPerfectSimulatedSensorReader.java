@@ -10,8 +10,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
@@ -42,9 +42,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
-   private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
-   private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
+   private final YoLong timestamp = new YoLong("timestamp", registry);
+   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
+   private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 

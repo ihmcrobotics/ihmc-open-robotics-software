@@ -9,7 +9,7 @@ import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
@@ -192,7 +192,7 @@ public class M2Simulation implements SimulationDoneListener
 
          else
          {
-            boolean xGotToSameValue = Math.abs(((DoubleYoVariable)sim.getVariable("q_x")).getDoubleValue() - 4.32420) < 1e-4;
+            boolean xGotToSameValue = Math.abs(((YoDouble)sim.getVariable("q_x")).getDoubleValue() - 4.32420) < 1e-4;
 
             String message = "Sims are different. xGotToSameValue = " + xGotToSameValue + "\n" + VariableDifference.allVariableDifferencesToString(variableDifferences);
             System.err.println(message);

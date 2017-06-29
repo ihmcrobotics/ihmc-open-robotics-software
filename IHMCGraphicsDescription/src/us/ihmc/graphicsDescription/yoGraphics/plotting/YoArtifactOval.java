@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -22,17 +22,17 @@ public class YoArtifactOval extends YoArtifact
    private final Point2D tempCenter = new Point2D();
    private final Vector2D tempRadii = new Vector2D();
 
-   public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radius, Color color)
+   public YoArtifactOval(String name, YoDouble centerX, YoDouble centerY, YoDouble radius, Color color)
    {
       this(name, centerX, centerY, radius, radius, color);
    }
 
-   public YoArtifactOval(String name, YoFramePoint center, DoubleYoVariable radius, Color color)
+   public YoArtifactOval(String name, YoFramePoint center, YoDouble radius, Color color)
    {
       this(name, center.getYoX(), center.getYoY(), radius, radius, color);
    }
    
-   private YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radiusX, DoubleYoVariable radiusY, Color color)
+   private YoArtifactOval(String name, YoDouble centerX, YoDouble centerY, YoDouble radiusX, YoDouble radiusY, Color color)
    {
       this(name, new YoFramePoint2d(centerX, centerY, ReferenceFrame.getWorldFrame()),
                  new YoFrameVector2d(radiusX, radiusY, ReferenceFrame.getWorldFrame()), color);

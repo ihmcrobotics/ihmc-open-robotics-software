@@ -7,13 +7,12 @@ import java.util.Map;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointPositionDataObject;
-
 
 /**
  * @author twan
@@ -23,7 +22,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
 {
    private final YoVariableRegistry registry;
    private final ArrayList<YoPointPositionDataObject> yoPointPositionDataObjects = new ArrayList<YoPointPositionDataObject>();
-   private final Map<YoPointPositionDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointPositionDataObject, BooleanYoVariable>();
+   private final Map<YoPointPositionDataObject, YoBoolean> validMap = new LinkedHashMap<YoPointPositionDataObject, YoBoolean>();
    private final String namePrefix;
    private final AfterJointReferenceFrameNameMap referenceFrameMap;  
 
@@ -83,7 +82,7 @@ public class YoPointPositionDataObjectListOutputPort extends ControlFlowOutputPo
             ReferenceFrame frame = referenceFrameMap.getFrameByName(referenceFrameName);
             yoPointPositionDataObjectToUse = new YoPointPositionDataObject(namePrefix + index, frame, registry);
             yoPointPositionDataObjects.add(yoPointPositionDataObjectToUse);
-            validMap.put(yoPointPositionDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
+            validMap.put(yoPointPositionDataObjectToUse, new YoBoolean(namePrefix + "Valid" + index, registry));
          }
 
          yoPointPositionDataObjectToUse.set(pointPositionDataObject);

@@ -22,7 +22,9 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero**/
-   public double adjustedExecutionTime;
+   private double adjustedExecutionTime;
+   /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
+   private boolean trustHeightOfFootsteps = true;
 
    public FootstepDataListCommand()
    {
@@ -49,6 +51,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       executionMode = message.executionMode;
       executionTiming = message.executionTiming;
       executionDelayTime = message.executionDelayTime;
+      trustHeightOfFootsteps = message.trustHeightOfFootsteps;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
@@ -70,6 +73,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       executionTiming = other.executionTiming;
       executionDelayTime = other.executionDelayTime;
       adjustedExecutionTime = other.adjustedExecutionTime;
+      trustHeightOfFootsteps = other.trustHeightOfFootsteps;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -210,4 +214,8 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       return true;
    }
 
+   public boolean isTrustHeightOfFootsteps()
+   {
+      return trustHeightOfFootsteps;
+   }
 }

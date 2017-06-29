@@ -6,17 +6,17 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticLoggerFormatter extends Formatter
 {
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final NumberFormat doubleFormat = new DecimalFormat("0.000");
    private final String separator = " - ";
 
    private final int maxLevelNameLength;
 
-   public DiagnosticLoggerFormatter(DoubleYoVariable yoTime)
+   public DiagnosticLoggerFormatter(YoDouble yoTime)
    {
       this.yoTime = yoTime;
       Level[] allLevels = new Level[]{Level.SEVERE, Level.WARNING, Level.INFO, Level.CONFIG, Level.FINE, Level.FINER, Level.FINEST};

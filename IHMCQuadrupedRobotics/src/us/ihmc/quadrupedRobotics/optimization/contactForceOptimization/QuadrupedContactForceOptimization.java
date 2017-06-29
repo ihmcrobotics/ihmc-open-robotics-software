@@ -7,8 +7,8 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -42,7 +42,7 @@ public class QuadrupedContactForceOptimization
    private final QuadrantDependentList<YoFrameVector> yoContactForceCommand = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> yoContactForceSolution = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> yoContactPosition = new QuadrantDependentList<>();
-   private final QuadrantDependentList<EnumYoVariable<ContactState>> yoContactState = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoEnum<ContactState>> yoContactState = new QuadrantDependentList<>();
 
    private final DenseMatrix64F comWrenchCommandVector;
    private final DenseMatrix64F comWrenchSolutionVector;
@@ -89,7 +89,7 @@ public class QuadrupedContactForceOptimization
          yoContactForceCommand.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceCommand", worldFrame, registry));
          yoContactForceSolution.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceSolution", worldFrame, registry));
          yoContactPosition.set(robotQuadrant, new YoFramePoint(prefix + "ContactPosition", worldFrame, registry));
-         yoContactState.set(robotQuadrant, new EnumYoVariable<>(prefix + "ContactState", registry, ContactState.class));
+         yoContactState.set(robotQuadrant, new YoEnum<>(prefix + "ContactState", registry, ContactState.class));
       }
 
       comWrenchCommandVector = new DenseMatrix64F(6, 1);

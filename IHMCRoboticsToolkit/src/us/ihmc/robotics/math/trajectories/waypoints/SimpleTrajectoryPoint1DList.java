@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import java.util.Random;
+
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
@@ -13,6 +15,15 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
    public SimpleTrajectoryPoint1DList(int initialCapacity)
    {
       super(SimpleTrajectoryPoint1D.class, initialCapacity);
+   }
+
+   public SimpleTrajectoryPoint1DList(Random random)
+   {
+      super(SimpleTrajectoryPoint1D.class, 10);
+      for(int i = 0; i < 10; i++)
+      {
+         addTrajectoryPoint(i + random.nextDouble(), random.nextDouble() * 2.0 * Math.PI, random.nextDouble() * random.nextInt(20));
+      }
    }
 
    public void set(SimpleTrajectoryPoint1DList trajectory)

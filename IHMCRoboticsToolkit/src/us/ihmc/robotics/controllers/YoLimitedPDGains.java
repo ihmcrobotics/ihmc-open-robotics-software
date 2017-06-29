@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 
 public class YoLimitedPDGains extends YoPDGains
@@ -9,15 +9,15 @@ public class YoLimitedPDGains extends YoPDGains
    private final RateLimitedYoVariable limitedKp;
    private final RateLimitedYoVariable limitedKd;
 
-   private final DoubleYoVariable maxKpRate;
-   private final DoubleYoVariable maxKdRate;
+   private final YoDouble maxKpRate;
+   private final YoDouble maxKdRate;
 
    public YoLimitedPDGains(String suffix, double controlDT, YoVariableRegistry registry)
    {
       super(suffix, registry);
 
-      maxKpRate = new DoubleYoVariable("maxKpRate" + suffix, registry);
-      maxKdRate = new DoubleYoVariable("maxKdRate" + suffix, registry);
+      maxKpRate = new YoDouble("maxKpRate" + suffix, registry);
+      maxKdRate = new YoDouble("maxKdRate" + suffix, registry);
 
       limitedKp = new RateLimitedYoVariable("limitedKp" + suffix, registry, maxKpRate, kp, controlDT);
       limitedKd = new RateLimitedYoVariable("limitedKd" + suffix, registry, maxKdRate, kd, controlDT);
@@ -49,13 +49,13 @@ public class YoLimitedPDGains extends YoPDGains
    }
 
    @Override
-   public DoubleYoVariable getYoKp()
+   public YoDouble getYoKp()
    {
       return limitedKp;
    }
 
    @Override
-   public DoubleYoVariable getYoKd()
+   public YoDouble getYoKd()
    {
       return limitedKd;
    }

@@ -6,36 +6,36 @@ import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
 {
-   private final DoubleYoVariable proportionalXGain, proportionalYZGain;
-   private final DoubleYoVariable derivativeXGain, derivativeYZGain;
-   private final DoubleYoVariable dampingRatioX, dampingRatioYZ;
+   private final YoDouble proportionalXGain, proportionalYZGain;
+   private final YoDouble derivativeXGain, derivativeYZGain;
+   private final YoDouble dampingRatioX, dampingRatioYZ;
 
-   private final DoubleYoVariable maxDerivativeError;
-   private final DoubleYoVariable maxProportionalError;
+   private final YoDouble maxDerivativeError;
+   private final YoDouble maxProportionalError;
 
-   private final DoubleYoVariable maximumFeedback;
-   private final DoubleYoVariable maximumFeedbackRate;
+   private final YoDouble maximumFeedback;
+   private final YoDouble maximumFeedbackRate;
 
    public YoValkyrieHeadPIDGains(String suffix, YoVariableRegistry registry)
    {
-      proportionalXGain = new DoubleYoVariable("kpXAngular" + suffix, registry);
-      proportionalYZGain = new DoubleYoVariable("kpYZAngular" + suffix, registry);
-      derivativeXGain = new DoubleYoVariable("kdXAngular" + suffix, registry);
-      derivativeYZGain = new DoubleYoVariable("kdYZAngular" + suffix, registry);
-      dampingRatioX = new DoubleYoVariable("zetaXAngular" + suffix, registry);
-      dampingRatioYZ = new DoubleYoVariable("zetaYZAngular" + suffix, registry);
+      proportionalXGain = new YoDouble("kpXAngular" + suffix, registry);
+      proportionalYZGain = new YoDouble("kpYZAngular" + suffix, registry);
+      derivativeXGain = new YoDouble("kdXAngular" + suffix, registry);
+      derivativeYZGain = new YoDouble("kdYZAngular" + suffix, registry);
+      dampingRatioX = new YoDouble("zetaXAngular" + suffix, registry);
+      dampingRatioYZ = new YoDouble("zetaYZAngular" + suffix, registry);
 
-      maximumFeedback = new DoubleYoVariable("maximumAngularFeedback" + suffix, registry);
-      maximumFeedbackRate = new DoubleYoVariable("maximumAngularFeedbackRate" + suffix, registry);
-      maxDerivativeError = new DoubleYoVariable("maximumAngularDerivativeError" + suffix, registry);
-      maxProportionalError = new DoubleYoVariable("maximumAngularProportionalError" + suffix, registry);
+      maximumFeedback = new YoDouble("maximumAngularFeedback" + suffix, registry);
+      maximumFeedbackRate = new YoDouble("maximumAngularFeedbackRate" + suffix, registry);
+      maxDerivativeError = new YoDouble("maximumAngularDerivativeError" + suffix, registry);
+      maxProportionalError = new YoDouble("maximumAngularProportionalError" + suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -227,25 +227,25 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maximumFeedbackRate;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumDerivativeError()
+   public YoDouble getYoMaximumDerivativeError()
    {
       return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumProportionalError()
+   public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
    }

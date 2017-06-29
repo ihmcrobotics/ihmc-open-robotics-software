@@ -3,9 +3,9 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,10 +28,10 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
    private final FloatingJoint rootJoint;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final MockQuadrupedReferenceFrames referenceFrames = new MockQuadrupedReferenceFrames();
-   private final EnumYoVariable<RobotQuadrant> swingLeg = new EnumYoVariable<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
+   private final YoEnum<RobotQuadrant> swingLeg = new YoEnum<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
    private final QuadrupedPathPreview pathPreview;
    private final YoFrameVector desiredVelocity = new YoFrameVector("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable desiredYawRate = new DoubleYoVariable("desiredYawRate", registry);
+   private final YoDouble desiredYawRate = new YoDouble("desiredYawRate", registry);
    private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
    
    

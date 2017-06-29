@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PeterPlanarWalkerSimulation

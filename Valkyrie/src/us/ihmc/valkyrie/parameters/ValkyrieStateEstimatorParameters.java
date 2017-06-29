@@ -14,8 +14,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -112,34 +112,34 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
       if (DEBUG_VELOCITY_WITH_FD)
       {
-         DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummyAlpha", registry);
+         YoDouble dummyAlpha = new YoDouble("dummyAlpha", registry);
          sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlpha, true);
       }
 
-      DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
-      DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
-      DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
+      YoDouble orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
+      YoDouble angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);
+      YoDouble linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", linearAccelerationFilterFrequencyHz);
 
       // Lower body: For the joints using the output encoders: Compute velocity from the joint position using finite difference.
-      DoubleYoVariable jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", jointOutputEncoderVelocityFilterFrequencyHz);
+      YoDouble jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityAlphaFilter", jointOutputEncoderVelocityFilterFrequencyHz);
       sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false, namesOfJointsUsingOutputEncoder);
 
       // Lower body: Then apply for all velocity: 1- alpha filter 2- backlash compensator 3- elasticity compensation.
-      DoubleYoVariable lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter", lowerBodyJointVelocityFilterFrequencyHz);
-      DoubleYoVariable lowerBodyJointVelocitySlopTime = new DoubleYoVariable("lowerBodyJointVelocityBacklashSlopTime", registry);
+      YoDouble lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityAlphaFilter", lowerBodyJointVelocityFilterFrequencyHz);
+      YoDouble lowerBodyJointVelocitySlopTime = new YoDouble("lowerBodyJointVelocityBacklashSlopTime", registry);
       lowerBodyJointVelocitySlopTime.set(lowerBodyJointVelocityBacklashSlopTime);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
       sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
 
       // Lower body: Apply an alpha filter on the position to be in phase with the velocity
-      DoubleYoVariable lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionAlphaFilter", lowerBodyJointPositionFilterFrequencyHz);
+      YoDouble lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionAlphaFilter", lowerBodyJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
       if (doElasticityCompensation)
       {
-         DoubleYoVariable elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
-         DoubleYoVariable maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-         Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+         YoDouble elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
+         YoDouble maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
+         Map<OneDoFJoint, YoDouble> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
 
          Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
          sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
@@ -147,12 +147,12 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       }
 
       // Arm joints: Apply for all velocity: 1- backlash compensator.
-      DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointVelocityBacklashSlopTime", registry);
+      YoDouble armJointVelocitySlopTime = new YoDouble("armJointVelocityBacklashSlopTime", registry);
       armJointVelocitySlopTime.set(armJointVelocityBacklashSlopTime);
       sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
 
       // Arm joints: Apply an alpha filter on the position to be in phase with the velocity
-      DoubleYoVariable armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
+      YoDouble armJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("armJointPositionAlphaFilter", armJointPositionFilterFrequencyHz);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(armJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
 
       //imu

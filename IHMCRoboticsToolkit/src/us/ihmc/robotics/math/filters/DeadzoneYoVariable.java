@@ -1,21 +1,21 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DeadzoneYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class DeadzoneYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final DoubleYoVariable deadzoneSize;
-   private final DoubleYoVariable inputVariable;
+   private final YoDouble deadzoneSize;
+   private final YoDouble inputVariable;
 
-   public DeadzoneYoVariable(String name, DoubleYoVariable deadzoneSize, YoVariableRegistry registry)
+   public DeadzoneYoVariable(String name, YoDouble deadzoneSize, YoVariableRegistry registry)
    {
       super(name, registry);
       this.inputVariable = null;
       this.deadzoneSize = deadzoneSize;
    }
 
-   public DeadzoneYoVariable(String name, DoubleYoVariable inputVariable, DoubleYoVariable deadzoneSize, YoVariableRegistry registry)
+   public DeadzoneYoVariable(String name, YoDouble inputVariable, YoDouble deadzoneSize, YoVariableRegistry registry)
    {
       super(name, registry);
       this.inputVariable = inputVariable;
@@ -49,8 +49,8 @@ public class DeadzoneYoVariable extends DoubleYoVariable implements ProcessingYo
    public static void main(String[] args)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DoubleYoVariable deadzoneSize = new DoubleYoVariable("deadzoneSize", registry);
-      DoubleYoVariable input = new DoubleYoVariable("input", registry);
+      YoDouble deadzoneSize = new YoDouble("deadzoneSize", registry);
+      YoDouble input = new YoDouble("input", registry);
       deadzoneSize.set(2.0);
       DeadzoneYoVariable testDeadzone = new DeadzoneYoVariable("testDeadZone", input,deadzoneSize,registry);
 

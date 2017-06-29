@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -29,7 +29,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable visualize;
+   private final YoBoolean visualize;
 
    private final int numberOfBallsInBag = 30;
    private final BagOfBalls bagOfBalls;
@@ -41,8 +41,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    private final PositionProvider[] positionSources = new PositionProvider[2];
    private final VectorProvider[] velocitySources = new VectorProvider[2];
 
-   private final DoubleYoVariable swingTime;
-   private final DoubleYoVariable timeIntoStep;
+   private final YoDouble swingTime;
+   private final YoDouble timeIntoStep;
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -75,16 +75,16 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 6, registry);
       yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 6, registry);
 
-      swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
+      swingTime = new YoDouble(namePrefix + "SwingTime", registry);
       swingTime.set(swingTimeProvider.getValue());
 
-      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
 
-      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
+      this.visualize = new YoBoolean(namePrefix + "Visualize", registry);
       this.visualize.set(VISUALIZE);
 
       this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;

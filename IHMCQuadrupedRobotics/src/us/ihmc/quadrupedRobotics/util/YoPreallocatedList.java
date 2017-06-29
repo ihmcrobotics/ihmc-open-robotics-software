@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.util;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
@@ -19,10 +19,10 @@ public class YoPreallocatedList<E> extends PreallocatedList<E>
       for (int i = 0; i < capacity; i++)
       {
          super.elements.add(defaultElementFactory.createDefaultElement(prefix + "ListElement" + i, registry));
-         super.indexes.add(new YoIntegerWrapper(new IntegerYoVariable(prefix + "ListIndex" + i, registry)));
+         super.indexes.add(new YoIntegerWrapper(new YoInteger(prefix + "ListIndex" + i, registry)));
          super.indexes.get(i).setValue(i);
       }
-      super.size = new YoIntegerWrapper(new IntegerYoVariable(prefix + "ListSize", registry));
+      super.size = new YoIntegerWrapper(new YoInteger(prefix + "ListSize", registry));
    }
 
    public YoPreallocatedList(final String prefix, final YoVariableRegistry registry, ArrayList<E> elements)
@@ -31,18 +31,18 @@ public class YoPreallocatedList<E> extends PreallocatedList<E>
       for (int i = 0; i < elements.size(); i++)
       {
          super.elements.add(elements.get(i));
-         super.indexes.add(new YoIntegerWrapper(new IntegerYoVariable(prefix + "ListIndex" + i, registry)));
+         super.indexes.add(new YoIntegerWrapper(new YoInteger(prefix + "ListIndex" + i, registry)));
          super.indexes.get(i).setValue(i);
       }
-      super.size = new YoIntegerWrapper(new IntegerYoVariable(prefix + "ListSize", registry));
+      super.size = new YoIntegerWrapper(new YoInteger(prefix + "ListSize", registry));
       super.size.setValue(elements.size());
    }
 
    protected class YoIntegerWrapper extends IntegerWrapper
    {
-      private final IntegerYoVariable yoValue;
+      private final YoInteger yoValue;
 
-      public YoIntegerWrapper(IntegerYoVariable yoValue)
+      public YoIntegerWrapper(YoInteger yoValue)
       {
          super(yoValue.getIntegerValue());
          this.yoValue = yoValue;

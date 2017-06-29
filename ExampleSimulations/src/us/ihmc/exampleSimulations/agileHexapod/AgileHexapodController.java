@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class AgileHexapodController extends AgileHexapodControllerBase implements RobotController
@@ -28,192 +28,192 @@ public class AgileHexapodController extends AgileHexapodControllerBase implement
 
    private final YoVariableRegistry registry = new YoVariableRegistry("AgileHexapodController");
 
-   public DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry), q_roll = new DoubleYoVariable("q_roll", registry), q_yaw = new DoubleYoVariable("q_yaw", registry);
-   public DoubleYoVariable qd_pitch = new DoubleYoVariable("qd_pitch", registry), qd_roll = new DoubleYoVariable("qd_roll", registry),
-                     qd_yaw = new DoubleYoVariable("qd_yaw", registry);
+   public YoDouble q_pitch = new YoDouble("q_pitch", registry), q_roll = new YoDouble("q_roll", registry), q_yaw = new YoDouble("q_yaw", registry);
+   public YoDouble qd_pitch = new YoDouble("qd_pitch", registry), qd_roll = new YoDouble("qd_roll", registry),
+                     qd_yaw = new YoDouble("qd_yaw", registry);
 
-   private DoubleYoVariable state = new DoubleYoVariable("state", registry), walk_state = new DoubleYoVariable("walk_state", registry);
-   private DoubleYoVariable vel_ang = new DoubleYoVariable("vel_ang", registry), vel_mag = new DoubleYoVariable("vel_mag", registry),
-                      vel_ramp = new DoubleYoVariable("vel_ramp", registry), vel_off = new DoubleYoVariable("vel_off", registry);
+   private YoDouble state = new YoDouble("state", registry), walk_state = new YoDouble("walk_state", registry);
+   private YoDouble vel_ang = new YoDouble("vel_ang", registry), vel_mag = new YoDouble("vel_mag", registry),
+                      vel_ramp = new YoDouble("vel_ramp", registry), vel_off = new YoDouble("vel_off", registry);
 
-   private DoubleYoVariable e_ramp = new DoubleYoVariable("e_ramp", registry);
+   private YoDouble e_ramp = new YoDouble("e_ramp", registry);
 
-   private DoubleYoVariable poda_x = new DoubleYoVariable("poda_x", registry);
-   private DoubleYoVariable poda_y = new DoubleYoVariable("poda_y", registry);
-   private DoubleYoVariable poda_theta = new DoubleYoVariable("poda_theta", registry);
-   private DoubleYoVariable poda_mag = new DoubleYoVariable("poda_mag", registry);
-   private DoubleYoVariable poda_h = new DoubleYoVariable("poda_h", registry);
+   private YoDouble poda_x = new YoDouble("poda_x", registry);
+   private YoDouble poda_y = new YoDouble("poda_y", registry);
+   private YoDouble poda_theta = new YoDouble("poda_theta", registry);
+   private YoDouble poda_mag = new YoDouble("poda_mag", registry);
+   private YoDouble poda_h = new YoDouble("poda_h", registry);
 
-   private DoubleYoVariable podb_x = new DoubleYoVariable("podb_x", registry);
-   private DoubleYoVariable podb_y = new DoubleYoVariable("podb_y", registry);
-   private DoubleYoVariable podb_theta = new DoubleYoVariable("podb_theta", registry);
-   private DoubleYoVariable podb_mag = new DoubleYoVariable("podb_mag", registry);
-   private DoubleYoVariable podb_h = new DoubleYoVariable("podb_h", registry);
+   private YoDouble podb_x = new YoDouble("podb_x", registry);
+   private YoDouble podb_y = new YoDouble("podb_y", registry);
+   private YoDouble podb_theta = new YoDouble("podb_theta", registry);
+   private YoDouble podb_mag = new YoDouble("podb_mag", registry);
+   private YoDouble podb_h = new YoDouble("podb_h", registry);
 
-   private DoubleYoVariable pod_thresh_up = new DoubleYoVariable("pod_thresh_up", registry);
-   private DoubleYoVariable pod_thresh_down = new DoubleYoVariable("pod_thresh_down", registry);
+   private YoDouble pod_thresh_up = new YoDouble("pod_thresh_up", registry);
+   private YoDouble pod_thresh_down = new YoDouble("pod_thresh_down", registry);
 
-   private DoubleYoVariable tripod_xa_d = new DoubleYoVariable("tripod_xa_d", registry);
-   private DoubleYoVariable tripod_ya_d = new DoubleYoVariable("tripod_ya_d", registry);
-   private DoubleYoVariable tripod_za_d = new DoubleYoVariable("tripod_za_d", registry);
-   private DoubleYoVariable tripod_thetaa_d = new DoubleYoVariable("tripod_thetaa_d", registry);
+   private YoDouble tripod_xa_d = new YoDouble("tripod_xa_d", registry);
+   private YoDouble tripod_ya_d = new YoDouble("tripod_ya_d", registry);
+   private YoDouble tripod_za_d = new YoDouble("tripod_za_d", registry);
+   private YoDouble tripod_thetaa_d = new YoDouble("tripod_thetaa_d", registry);
 
-   private DoubleYoVariable tripod_xb_d = new DoubleYoVariable("tripod_xb_d", registry);
-   private DoubleYoVariable tripod_yb_d = new DoubleYoVariable("tripod_yb_d", registry);
-   private DoubleYoVariable tripod_zb_d = new DoubleYoVariable("tripod_zb_d", registry);
-   private DoubleYoVariable tripod_thetab_d = new DoubleYoVariable("tripod_thetab_d", registry);
+   private YoDouble tripod_xb_d = new YoDouble("tripod_xb_d", registry);
+   private YoDouble tripod_yb_d = new YoDouble("tripod_yb_d", registry);
+   private YoDouble tripod_zb_d = new YoDouble("tripod_zb_d", registry);
+   private YoDouble tripod_thetab_d = new YoDouble("tripod_thetab_d", registry);
 
-   private DoubleYoVariable switch_time = new DoubleYoVariable("switch_time", registry);
-   private DoubleYoVariable double_time = new DoubleYoVariable("double_time", registry);
-   private DoubleYoVariable swing_time = new DoubleYoVariable("swing_time", registry);
+   private YoDouble switch_time = new YoDouble("switch_time", registry);
+   private YoDouble double_time = new YoDouble("double_time", registry);
+   private YoDouble swing_time = new YoDouble("swing_time", registry);
 
-   private DoubleYoVariable lift_up = new DoubleYoVariable("lift_up", registry);
-   private DoubleYoVariable ground_height = new DoubleYoVariable("ground_height", registry);
-   private DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
-   private DoubleYoVariable beta = new DoubleYoVariable("beta", registry);
+   private YoDouble lift_up = new YoDouble("lift_up", registry);
+   private YoDouble ground_height = new YoDouble("ground_height", registry);
+   private YoDouble alpha = new YoDouble("alpha", registry);
+   private YoDouble beta = new YoDouble("beta", registry);
 
-   private DoubleYoVariable dfoot_z_d = new DoubleYoVariable("dfoot_z_d", registry);
-   private DoubleYoVariable dfoot_z1_d = new DoubleYoVariable("dfoot_z1_d", registry);
-   private DoubleYoVariable dfoot_z2_d = new DoubleYoVariable("dfoot_z2_d", registry);
-   private DoubleYoVariable dfoot_z3_d = new DoubleYoVariable("dfoot_z3_d", registry);
-   private DoubleYoVariable dfoot_z4_d = new DoubleYoVariable("dfoot_z4_d", registry);
-   private DoubleYoVariable dfoot_z5_d = new DoubleYoVariable("dfoot_z5_d", registry);
-   private DoubleYoVariable dfoot_z6_d = new DoubleYoVariable("dfoot_z6_d", registry);
+   private YoDouble dfoot_z_d = new YoDouble("dfoot_z_d", registry);
+   private YoDouble dfoot_z1_d = new YoDouble("dfoot_z1_d", registry);
+   private YoDouble dfoot_z2_d = new YoDouble("dfoot_z2_d", registry);
+   private YoDouble dfoot_z3_d = new YoDouble("dfoot_z3_d", registry);
+   private YoDouble dfoot_z4_d = new YoDouble("dfoot_z4_d", registry);
+   private YoDouble dfoot_z5_d = new YoDouble("dfoot_z5_d", registry);
+   private YoDouble dfoot_z6_d = new YoDouble("dfoot_z6_d", registry);
 
-   private DoubleYoVariable proja_h_x = new DoubleYoVariable("proja_h_x", registry);
-   private DoubleYoVariable proja_h_y = new DoubleYoVariable("proja_h_y", registry);
-   private DoubleYoVariable proja_h_theta = new DoubleYoVariable("proja_h_theta", registry);
-   private DoubleYoVariable ha_hat_x = new DoubleYoVariable("ha_hat_x", registry);
-   private DoubleYoVariable ha_hat_y = new DoubleYoVariable("ha_hat_y", registry);
-   private DoubleYoVariable ha_hat_theta = new DoubleYoVariable("ha_hat_theta", registry);
+   private YoDouble proja_h_x = new YoDouble("proja_h_x", registry);
+   private YoDouble proja_h_y = new YoDouble("proja_h_y", registry);
+   private YoDouble proja_h_theta = new YoDouble("proja_h_theta", registry);
+   private YoDouble ha_hat_x = new YoDouble("ha_hat_x", registry);
+   private YoDouble ha_hat_y = new YoDouble("ha_hat_y", registry);
+   private YoDouble ha_hat_theta = new YoDouble("ha_hat_theta", registry);
 
-   private DoubleYoVariable projb_h_x = new DoubleYoVariable("projb_h_x", registry);
-   private DoubleYoVariable projb_h_y = new DoubleYoVariable("projb_h_y", registry);
-   private DoubleYoVariable projb_h_theta = new DoubleYoVariable("projb_h_theta", registry);
-   private DoubleYoVariable hb_hat_x = new DoubleYoVariable("hb_hat_x", registry);
-   private DoubleYoVariable hb_hat_y = new DoubleYoVariable("hb_hat_y", registry);
-   private DoubleYoVariable hb_hat_theta = new DoubleYoVariable("hb_hat_theta", registry);
+   private YoDouble projb_h_x = new YoDouble("projb_h_x", registry);
+   private YoDouble projb_h_y = new YoDouble("projb_h_y", registry);
+   private YoDouble projb_h_theta = new YoDouble("projb_h_theta", registry);
+   private YoDouble hb_hat_x = new YoDouble("hb_hat_x", registry);
+   private YoDouble hb_hat_y = new YoDouble("hb_hat_y", registry);
+   private YoDouble hb_hat_theta = new YoDouble("hb_hat_theta", registry);
 
-   private DoubleYoVariable pend_x = new DoubleYoVariable("pend_x", registry), pend_y = new DoubleYoVariable("pend_y", registry), pend_dx = new DoubleYoVariable("pend_dx", registry),
-                      pend_dy = new DoubleYoVariable("pend_dy", registry);
-   private DoubleYoVariable fXa = new DoubleYoVariable("fXa", registry), fYa = new DoubleYoVariable("fYa", registry), fZa = new DoubleYoVariable("fZa", registry),
-                      tXa = new DoubleYoVariable("tXa", registry), tYa = new DoubleYoVariable("tYa", registry), tZa = new DoubleYoVariable("tZa", registry);
-   private DoubleYoVariable fXb = new DoubleYoVariable("fXb", registry), fYb = new DoubleYoVariable("fYb", registry), fZb = new DoubleYoVariable("fZb", registry),
-                      tXb = new DoubleYoVariable("tXb", registry), tYb = new DoubleYoVariable("tYb", registry), tZb = new DoubleYoVariable("tZb", registry);
-   private DoubleYoVariable fX = new DoubleYoVariable("fX", registry), fY = new DoubleYoVariable("fY", registry), fZ = new DoubleYoVariable("fZ", registry),
-                      tX = new DoubleYoVariable("tX", registry), tY = new DoubleYoVariable("tY", registry), tZ = new DoubleYoVariable("tZ", registry);
-   private DoubleYoVariable ffZa = new DoubleYoVariable("ffZa", registry), ffZb = new DoubleYoVariable("ffZb", registry);
+   private YoDouble pend_x = new YoDouble("pend_x", registry), pend_y = new YoDouble("pend_y", registry), pend_dx = new YoDouble("pend_dx", registry),
+                      pend_dy = new YoDouble("pend_dy", registry);
+   private YoDouble fXa = new YoDouble("fXa", registry), fYa = new YoDouble("fYa", registry), fZa = new YoDouble("fZa", registry),
+                      tXa = new YoDouble("tXa", registry), tYa = new YoDouble("tYa", registry), tZa = new YoDouble("tZa", registry);
+   private YoDouble fXb = new YoDouble("fXb", registry), fYb = new YoDouble("fYb", registry), fZb = new YoDouble("fZb", registry),
+                      tXb = new YoDouble("tXb", registry), tYb = new YoDouble("tYb", registry), tZb = new YoDouble("tZb", registry);
+   private YoDouble fX = new YoDouble("fX", registry), fY = new YoDouble("fY", registry), fZ = new YoDouble("fZ", registry),
+                      tX = new YoDouble("tX", registry), tY = new YoDouble("tY", registry), tZ = new YoDouble("tZ", registry);
+   private YoDouble ffZa = new YoDouble("ffZa", registry), ffZb = new YoDouble("ffZb", registry);
 
-   private DoubleYoVariable PK1 = new DoubleYoVariable("PK1", registry), PK2 = new DoubleYoVariable("PK2", registry), PK3 = new DoubleYoVariable("PK3", registry),
-                      PK4 = new DoubleYoVariable("PK4", registry);
+   private YoDouble PK1 = new YoDouble("PK1", registry), PK2 = new YoDouble("PK2", registry), PK3 = new YoDouble("PK3", registry),
+                      PK4 = new YoDouble("PK4", registry);
 
-   private DoubleYoVariable q_d_x = new DoubleYoVariable("q_d_x", registry);
-   private DoubleYoVariable q_d_y = new DoubleYoVariable("q_d_y", registry);
-   private DoubleYoVariable q_d_z = new DoubleYoVariable("q_d_z", registry);
-   private DoubleYoVariable q_d_yaw = new DoubleYoVariable("q_d_yaw", registry);
-   private DoubleYoVariable q_d_pitch = new DoubleYoVariable("q_d_pitch", registry);
-   private DoubleYoVariable q_d_roll = new DoubleYoVariable("q_d_roll", registry);
+   private YoDouble q_d_x = new YoDouble("q_d_x", registry);
+   private YoDouble q_d_y = new YoDouble("q_d_y", registry);
+   private YoDouble q_d_z = new YoDouble("q_d_z", registry);
+   private YoDouble q_d_yaw = new YoDouble("q_d_yaw", registry);
+   private YoDouble q_d_pitch = new YoDouble("q_d_pitch", registry);
+   private YoDouble q_d_roll = new YoDouble("q_d_roll", registry);
 
-   private DoubleYoVariable forward_angle = new DoubleYoVariable("forward_angle", registry);
+   private YoDouble forward_angle = new YoDouble("forward_angle", registry);
 
-   private DoubleYoVariable vel_d_x = new DoubleYoVariable("vel_d_x", registry), vel_d_y = new DoubleYoVariable("vel_d_y", registry), vel_x = new DoubleYoVariable("vel_x", registry),
-                      vel_y = new DoubleYoVariable("vel_y", registry);
-   private DoubleYoVariable qd_d_yaw = new DoubleYoVariable("qd_d_yaw", registry);
-   private DoubleYoVariable hug_parallel = new DoubleYoVariable("hug_parallel", registry);
+   private YoDouble vel_d_x = new YoDouble("vel_d_x", registry), vel_d_y = new YoDouble("vel_d_y", registry), vel_x = new YoDouble("vel_x", registry),
+                      vel_y = new YoDouble("vel_y", registry);
+   private YoDouble qd_d_yaw = new YoDouble("qd_d_yaw", registry);
+   private YoDouble hug_parallel = new YoDouble("hug_parallel", registry);
 
-   private DoubleYoVariable x_damp = new DoubleYoVariable("x_damp", registry), x_gain = new DoubleYoVariable("x_gain", registry);
-   private DoubleYoVariable y_damp = new DoubleYoVariable("y_damp", registry), y_gain = new DoubleYoVariable("y_gain", registry);
-   private DoubleYoVariable z_damp = new DoubleYoVariable("z_damp", registry), z_gain = new DoubleYoVariable("z_gain", registry);
-   private DoubleYoVariable yaw_damp = new DoubleYoVariable("yaw_damp", registry), yaw_gain = new DoubleYoVariable("yaw_gain", registry);
-   private DoubleYoVariable pitch_damp = new DoubleYoVariable("pitch_damp", registry), pitch_gain = new DoubleYoVariable("pitch_gain", registry);
-   private DoubleYoVariable roll_damp = new DoubleYoVariable("roll_damp", registry), roll_gain = new DoubleYoVariable("roll_gain", registry);
+   private YoDouble x_damp = new YoDouble("x_damp", registry), x_gain = new YoDouble("x_gain", registry);
+   private YoDouble y_damp = new YoDouble("y_damp", registry), y_gain = new YoDouble("y_gain", registry);
+   private YoDouble z_damp = new YoDouble("z_damp", registry), z_gain = new YoDouble("z_gain", registry);
+   private YoDouble yaw_damp = new YoDouble("yaw_damp", registry), yaw_gain = new YoDouble("yaw_gain", registry);
+   private YoDouble pitch_damp = new YoDouble("pitch_damp", registry), pitch_gain = new YoDouble("pitch_gain", registry);
+   private YoDouble roll_damp = new YoDouble("roll_damp", registry), roll_gain = new YoDouble("roll_gain", registry);
 
-   private DoubleYoVariable foot_x1 = new DoubleYoVariable("foot_x1", registry), foot_y1 = new DoubleYoVariable("foot_y1", registry),
-                      foot_z1 = new DoubleYoVariable("foot_z1", registry);
-   private DoubleYoVariable foot_x2 = new DoubleYoVariable("foot_x2", registry), foot_y2 = new DoubleYoVariable("foot_y2", registry),
-                      foot_z2 = new DoubleYoVariable("foot_z2", registry);
-   private DoubleYoVariable foot_x3 = new DoubleYoVariable("foot_x3", registry), foot_y3 = new DoubleYoVariable("foot_y3", registry),
-                      foot_z3 = new DoubleYoVariable("foot_z3", registry);
-   private DoubleYoVariable foot_x4 = new DoubleYoVariable("foot_x4", registry), foot_y4 = new DoubleYoVariable("foot_y4", registry),
-                      foot_z4 = new DoubleYoVariable("foot_z4", registry);
-   private DoubleYoVariable foot_x5 = new DoubleYoVariable("foot_x5", registry), foot_y5 = new DoubleYoVariable("foot_y5", registry),
-                      foot_z5 = new DoubleYoVariable("foot_z5", registry);
-   private DoubleYoVariable foot_x6 = new DoubleYoVariable("foot_x6", registry), foot_y6 = new DoubleYoVariable("foot_y6", registry),
-                      foot_z6 = new DoubleYoVariable("foot_z6", registry);
+   private YoDouble foot_x1 = new YoDouble("foot_x1", registry), foot_y1 = new YoDouble("foot_y1", registry),
+                      foot_z1 = new YoDouble("foot_z1", registry);
+   private YoDouble foot_x2 = new YoDouble("foot_x2", registry), foot_y2 = new YoDouble("foot_y2", registry),
+                      foot_z2 = new YoDouble("foot_z2", registry);
+   private YoDouble foot_x3 = new YoDouble("foot_x3", registry), foot_y3 = new YoDouble("foot_y3", registry),
+                      foot_z3 = new YoDouble("foot_z3", registry);
+   private YoDouble foot_x4 = new YoDouble("foot_x4", registry), foot_y4 = new YoDouble("foot_y4", registry),
+                      foot_z4 = new YoDouble("foot_z4", registry);
+   private YoDouble foot_x5 = new YoDouble("foot_x5", registry), foot_y5 = new YoDouble("foot_y5", registry),
+                      foot_z5 = new YoDouble("foot_z5", registry);
+   private YoDouble foot_x6 = new YoDouble("foot_x6", registry), foot_y6 = new YoDouble("foot_y6", registry),
+                      foot_z6 = new YoDouble("foot_z6", registry);
 
-   private DoubleYoVariable dfoot_x1 = new DoubleYoVariable("dfoot_x1", registry), dfoot_y1 = new DoubleYoVariable("dfoot_y1", registry),
-                      dfoot_z1 = new DoubleYoVariable("dfoot_z1", registry);
-   private DoubleYoVariable dfoot_x2 = new DoubleYoVariable("dfoot_x2", registry), dfoot_y2 = new DoubleYoVariable("dfoot_y2", registry),
-                      dfoot_z2 = new DoubleYoVariable("dfoot_z2", registry);
-   private DoubleYoVariable dfoot_x3 = new DoubleYoVariable("dfoot_x3", registry), dfoot_y3 = new DoubleYoVariable("dfoot_y3", registry),
-                      dfoot_z3 = new DoubleYoVariable("dfoot_z3", registry);
-   private DoubleYoVariable dfoot_x4 = new DoubleYoVariable("dfoot_x4", registry), dfoot_y4 = new DoubleYoVariable("dfoot_y4", registry),
-                      dfoot_z4 = new DoubleYoVariable("dfoot_z4", registry);
-   private DoubleYoVariable dfoot_x5 = new DoubleYoVariable("dfoot_x5", registry), dfoot_y5 = new DoubleYoVariable("dfoot_y5", registry),
-                      dfoot_z5 = new DoubleYoVariable("dfoot_z5", registry);
-   private DoubleYoVariable dfoot_x6 = new DoubleYoVariable("dfoot_x6", registry), dfoot_y6 = new DoubleYoVariable("dfoot_y6", registry),
-                      dfoot_z6 = new DoubleYoVariable("dfoot_z6", registry);
+   private YoDouble dfoot_x1 = new YoDouble("dfoot_x1", registry), dfoot_y1 = new YoDouble("dfoot_y1", registry),
+                      dfoot_z1 = new YoDouble("dfoot_z1", registry);
+   private YoDouble dfoot_x2 = new YoDouble("dfoot_x2", registry), dfoot_y2 = new YoDouble("dfoot_y2", registry),
+                      dfoot_z2 = new YoDouble("dfoot_z2", registry);
+   private YoDouble dfoot_x3 = new YoDouble("dfoot_x3", registry), dfoot_y3 = new YoDouble("dfoot_y3", registry),
+                      dfoot_z3 = new YoDouble("dfoot_z3", registry);
+   private YoDouble dfoot_x4 = new YoDouble("dfoot_x4", registry), dfoot_y4 = new YoDouble("dfoot_y4", registry),
+                      dfoot_z4 = new YoDouble("dfoot_z4", registry);
+   private YoDouble dfoot_x5 = new YoDouble("dfoot_x5", registry), dfoot_y5 = new YoDouble("dfoot_y5", registry),
+                      dfoot_z5 = new YoDouble("dfoot_z5", registry);
+   private YoDouble dfoot_x6 = new YoDouble("dfoot_x6", registry), dfoot_y6 = new YoDouble("dfoot_y6", registry),
+                      dfoot_z6 = new YoDouble("dfoot_z6", registry);
 
-   private DoubleYoVariable foot_x1_d = new DoubleYoVariable("foot_x1_d", registry), foot_y1_d = new DoubleYoVariable("foot_y1_d", registry),
-                      foot_z1_d = new DoubleYoVariable("foot_z1_d", registry);
-   private DoubleYoVariable foot_x2_d = new DoubleYoVariable("foot_x2_d", registry), foot_y2_d = new DoubleYoVariable("foot_y2_d", registry),
-                      foot_z2_d = new DoubleYoVariable("foot_z2_d", registry);
-   private DoubleYoVariable foot_x3_d = new DoubleYoVariable("foot_x3_d", registry), foot_y3_d = new DoubleYoVariable("foot_y3_d", registry),
-                      foot_z3_d = new DoubleYoVariable("foot_z3_d", registry);
-   private DoubleYoVariable foot_x4_d = new DoubleYoVariable("foot_x4_d", registry), foot_y4_d = new DoubleYoVariable("foot_y4_d", registry),
-                      foot_z4_d = new DoubleYoVariable("foot_z4_d", registry);
-   private DoubleYoVariable foot_x5_d = new DoubleYoVariable("foot_x5_d", registry), foot_y5_d = new DoubleYoVariable("foot_y5_d", registry),
-                      foot_z5_d = new DoubleYoVariable("foot_z5_d", registry);
-   private DoubleYoVariable foot_x6_d = new DoubleYoVariable("foot_x6_d", registry), foot_y6_d = new DoubleYoVariable("foot_y6_d", registry),
-                      foot_z6_d = new DoubleYoVariable("foot_z6_d", registry);
+   private YoDouble foot_x1_d = new YoDouble("foot_x1_d", registry), foot_y1_d = new YoDouble("foot_y1_d", registry),
+                      foot_z1_d = new YoDouble("foot_z1_d", registry);
+   private YoDouble foot_x2_d = new YoDouble("foot_x2_d", registry), foot_y2_d = new YoDouble("foot_y2_d", registry),
+                      foot_z2_d = new YoDouble("foot_z2_d", registry);
+   private YoDouble foot_x3_d = new YoDouble("foot_x3_d", registry), foot_y3_d = new YoDouble("foot_y3_d", registry),
+                      foot_z3_d = new YoDouble("foot_z3_d", registry);
+   private YoDouble foot_x4_d = new YoDouble("foot_x4_d", registry), foot_y4_d = new YoDouble("foot_y4_d", registry),
+                      foot_z4_d = new YoDouble("foot_z4_d", registry);
+   private YoDouble foot_x5_d = new YoDouble("foot_x5_d", registry), foot_y5_d = new YoDouble("foot_y5_d", registry),
+                      foot_z5_d = new YoDouble("foot_z5_d", registry);
+   private YoDouble foot_x6_d = new YoDouble("foot_x6_d", registry), foot_y6_d = new YoDouble("foot_y6_d", registry),
+                      foot_z6_d = new YoDouble("foot_z6_d", registry);
 
-   private DoubleYoVariable x_max = new DoubleYoVariable("x_max", registry), y_max = new DoubleYoVariable("y_max", registry), theta_max = new DoubleYoVariable("theta_max", registry);
-
-
-   private DoubleYoVariable leg_x_off = new DoubleYoVariable("leg_x_off", registry), leg_y_off = new DoubleYoVariable("leg_y_off", registry);
-
-   private DoubleYoVariable Ffoot_x1 = new DoubleYoVariable("Ffoot_x1", registry), Ffoot_y1 = new DoubleYoVariable("Ffoot_y1", registry),
-                      Ffoot_z1 = new DoubleYoVariable("Ffoot_z1", registry);
-   private DoubleYoVariable Ffoot_x2 = new DoubleYoVariable("Ffoot_x2", registry), Ffoot_y2 = new DoubleYoVariable("Ffoot_y2", registry),
-                      Ffoot_z2 = new DoubleYoVariable("Ffoot_z2", registry);
-   private DoubleYoVariable Ffoot_x3 = new DoubleYoVariable("Ffoot_x3", registry), Ffoot_y3 = new DoubleYoVariable("Ffoot_y3", registry),
-                      Ffoot_z3 = new DoubleYoVariable("Ffoot_z3", registry);
-   private DoubleYoVariable Ffoot_x4 = new DoubleYoVariable("Ffoot_x4", registry), Ffoot_y4 = new DoubleYoVariable("Ffoot_y4", registry),
-                      Ffoot_z4 = new DoubleYoVariable("Ffoot_z4", registry);
-   private DoubleYoVariable Ffoot_x5 = new DoubleYoVariable("Ffoot_x5", registry), Ffoot_y5 = new DoubleYoVariable("Ffoot_y5", registry),
-                      Ffoot_z5 = new DoubleYoVariable("Ffoot_z5", registry);
-   private DoubleYoVariable Ffoot_x6 = new DoubleYoVariable("Ffoot_x6", registry), Ffoot_y6 = new DoubleYoVariable("Ffoot_y6", registry),
-                      Ffoot_z6 = new DoubleYoVariable("Ffoot_z6", registry);
-
-   private DoubleYoVariable K_leg = new DoubleYoVariable("K_leg", registry), Kz_leg = new DoubleYoVariable("Kz_leg", registry);
-   private DoubleYoVariable B_leg = new DoubleYoVariable("B_leg", registry), Bz_leg = new DoubleYoVariable("Bz_leg", registry);
+   private YoDouble x_max = new YoDouble("x_max", registry), y_max = new YoDouble("y_max", registry), theta_max = new YoDouble("theta_max", registry);
 
 
-   public DoubleYoVariable ff_hip1_x = new DoubleYoVariable("ff_hip1_x", registry), ff_hip1_z = new DoubleYoVariable("ff_hip1_z", registry),
-                     ff_knee1 = new DoubleYoVariable("ff_knee1", registry);
-   public DoubleYoVariable ff_hip2_x = new DoubleYoVariable("ff_hip2_x", registry), ff_hip2_z = new DoubleYoVariable("ff_hip2_z", registry),
-                     ff_knee2 = new DoubleYoVariable("ff_knee2", registry);
-   public DoubleYoVariable ff_hip3_x = new DoubleYoVariable("ff_hip3_x", registry), ff_hip3_z = new DoubleYoVariable("ff_hip3_z", registry),
-                     ff_knee3 = new DoubleYoVariable("ff_knee3", registry);
-   public DoubleYoVariable ff_hip4_x = new DoubleYoVariable("ff_hip4_x", registry), ff_hip4_z = new DoubleYoVariable("ff_hip4_z", registry),
-                     ff_knee4 = new DoubleYoVariable("ff_knee4", registry);
-   public DoubleYoVariable ff_hip5_x = new DoubleYoVariable("ff_hip5_x", registry), ff_hip5_z = new DoubleYoVariable("ff_hip5_z", registry),
-                     ff_knee5 = new DoubleYoVariable("ff_knee5", registry);
-   public DoubleYoVariable ff_hip6_x = new DoubleYoVariable("ff_hip6_x", registry), ff_hip6_z = new DoubleYoVariable("ff_hip6_z", registry),
-                     ff_knee6 = new DoubleYoVariable("ff_knee6", registry);
+   private YoDouble leg_x_off = new YoDouble("leg_x_off", registry), leg_y_off = new YoDouble("leg_y_off", registry);
 
-   public DoubleYoVariable fx1 = new DoubleYoVariable("fx1", registry), fy1 = new DoubleYoVariable("fy1", registry), fz1 = new DoubleYoVariable("fz1", registry);
-   public DoubleYoVariable tx1 = new DoubleYoVariable("tx1", registry), ty1 = new DoubleYoVariable("ty1", registry), tz1 = new DoubleYoVariable("tz1", registry);
-   public DoubleYoVariable fx2 = new DoubleYoVariable("fx2", registry), fy2 = new DoubleYoVariable("fy2", registry), fz2 = new DoubleYoVariable("fz2", registry);
-   public DoubleYoVariable tx2 = new DoubleYoVariable("tx2", registry), ty2 = new DoubleYoVariable("ty2", registry), tz2 = new DoubleYoVariable("tz2", registry);
-   public DoubleYoVariable fx3 = new DoubleYoVariable("fx3", registry), fy3 = new DoubleYoVariable("fy3", registry), fz3 = new DoubleYoVariable("fz3", registry);
-   public DoubleYoVariable tx3 = new DoubleYoVariable("tx3", registry), ty3 = new DoubleYoVariable("ty3", registry), tz3 = new DoubleYoVariable("tz3", registry);
-   public DoubleYoVariable fx4 = new DoubleYoVariable("fx4", registry), fy4 = new DoubleYoVariable("fy4", registry), fz4 = new DoubleYoVariable("fz4", registry);
-   public DoubleYoVariable tx4 = new DoubleYoVariable("tx4", registry), ty4 = new DoubleYoVariable("ty4", registry), tz4 = new DoubleYoVariable("tz4", registry);
-   public DoubleYoVariable fx5 = new DoubleYoVariable("fx5", registry), fy5 = new DoubleYoVariable("fy5", registry), fz5 = new DoubleYoVariable("fz5", registry);
-   public DoubleYoVariable tx5 = new DoubleYoVariable("tx5", registry), ty5 = new DoubleYoVariable("ty5", registry), tz5 = new DoubleYoVariable("tz5", registry);
-   public DoubleYoVariable fx6 = new DoubleYoVariable("fx6", registry), fy6 = new DoubleYoVariable("fy6", registry), fz6 = new DoubleYoVariable("fz6", registry);
-   public DoubleYoVariable tx6 = new DoubleYoVariable("tx6", registry), ty6 = new DoubleYoVariable("ty6", registry), tz6 = new DoubleYoVariable("tz6", registry);
+   private YoDouble Ffoot_x1 = new YoDouble("Ffoot_x1", registry), Ffoot_y1 = new YoDouble("Ffoot_y1", registry),
+                      Ffoot_z1 = new YoDouble("Ffoot_z1", registry);
+   private YoDouble Ffoot_x2 = new YoDouble("Ffoot_x2", registry), Ffoot_y2 = new YoDouble("Ffoot_y2", registry),
+                      Ffoot_z2 = new YoDouble("Ffoot_z2", registry);
+   private YoDouble Ffoot_x3 = new YoDouble("Ffoot_x3", registry), Ffoot_y3 = new YoDouble("Ffoot_y3", registry),
+                      Ffoot_z3 = new YoDouble("Ffoot_z3", registry);
+   private YoDouble Ffoot_x4 = new YoDouble("Ffoot_x4", registry), Ffoot_y4 = new YoDouble("Ffoot_y4", registry),
+                      Ffoot_z4 = new YoDouble("Ffoot_z4", registry);
+   private YoDouble Ffoot_x5 = new YoDouble("Ffoot_x5", registry), Ffoot_y5 = new YoDouble("Ffoot_y5", registry),
+                      Ffoot_z5 = new YoDouble("Ffoot_z5", registry);
+   private YoDouble Ffoot_x6 = new YoDouble("Ffoot_x6", registry), Ffoot_y6 = new YoDouble("Ffoot_y6", registry),
+                      Ffoot_z6 = new YoDouble("Ffoot_z6", registry);
+
+   private YoDouble K_leg = new YoDouble("K_leg", registry), Kz_leg = new YoDouble("Kz_leg", registry);
+   private YoDouble B_leg = new YoDouble("B_leg", registry), Bz_leg = new YoDouble("Bz_leg", registry);
+
+
+   public YoDouble ff_hip1_x = new YoDouble("ff_hip1_x", registry), ff_hip1_z = new YoDouble("ff_hip1_z", registry),
+                     ff_knee1 = new YoDouble("ff_knee1", registry);
+   public YoDouble ff_hip2_x = new YoDouble("ff_hip2_x", registry), ff_hip2_z = new YoDouble("ff_hip2_z", registry),
+                     ff_knee2 = new YoDouble("ff_knee2", registry);
+   public YoDouble ff_hip3_x = new YoDouble("ff_hip3_x", registry), ff_hip3_z = new YoDouble("ff_hip3_z", registry),
+                     ff_knee3 = new YoDouble("ff_knee3", registry);
+   public YoDouble ff_hip4_x = new YoDouble("ff_hip4_x", registry), ff_hip4_z = new YoDouble("ff_hip4_z", registry),
+                     ff_knee4 = new YoDouble("ff_knee4", registry);
+   public YoDouble ff_hip5_x = new YoDouble("ff_hip5_x", registry), ff_hip5_z = new YoDouble("ff_hip5_z", registry),
+                     ff_knee5 = new YoDouble("ff_knee5", registry);
+   public YoDouble ff_hip6_x = new YoDouble("ff_hip6_x", registry), ff_hip6_z = new YoDouble("ff_hip6_z", registry),
+                     ff_knee6 = new YoDouble("ff_knee6", registry);
+
+   public YoDouble fx1 = new YoDouble("fx1", registry), fy1 = new YoDouble("fy1", registry), fz1 = new YoDouble("fz1", registry);
+   public YoDouble tx1 = new YoDouble("tx1", registry), ty1 = new YoDouble("ty1", registry), tz1 = new YoDouble("tz1", registry);
+   public YoDouble fx2 = new YoDouble("fx2", registry), fy2 = new YoDouble("fy2", registry), fz2 = new YoDouble("fz2", registry);
+   public YoDouble tx2 = new YoDouble("tx2", registry), ty2 = new YoDouble("ty2", registry), tz2 = new YoDouble("tz2", registry);
+   public YoDouble fx3 = new YoDouble("fx3", registry), fy3 = new YoDouble("fy3", registry), fz3 = new YoDouble("fz3", registry);
+   public YoDouble tx3 = new YoDouble("tx3", registry), ty3 = new YoDouble("ty3", registry), tz3 = new YoDouble("tz3", registry);
+   public YoDouble fx4 = new YoDouble("fx4", registry), fy4 = new YoDouble("fy4", registry), fz4 = new YoDouble("fz4", registry);
+   public YoDouble tx4 = new YoDouble("tx4", registry), ty4 = new YoDouble("ty4", registry), tz4 = new YoDouble("tz4", registry);
+   public YoDouble fx5 = new YoDouble("fx5", registry), fy5 = new YoDouble("fy5", registry), fz5 = new YoDouble("fz5", registry);
+   public YoDouble tx5 = new YoDouble("tx5", registry), ty5 = new YoDouble("ty5", registry), tz5 = new YoDouble("tz5", registry);
+   public YoDouble fx6 = new YoDouble("fx6", registry), fy6 = new YoDouble("fy6", registry), fz6 = new YoDouble("fz6", registry);
+   public YoDouble tx6 = new YoDouble("tx6", registry), ty6 = new YoDouble("ty6", registry), tz6 = new YoDouble("tz6", registry);
 
    private String name;
 

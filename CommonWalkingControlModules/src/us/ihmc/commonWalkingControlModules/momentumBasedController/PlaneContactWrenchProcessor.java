@@ -12,8 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -35,8 +35,8 @@ public class PlaneContactWrenchProcessor
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final Map<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<>();
-   private final Map<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoDouble> normalTorques = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoDouble> groundReactionForceMagnitudes = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
@@ -56,10 +56,10 @@ public class PlaneContactWrenchProcessor
          soleFrames.put(contactableBody.getRigidBody(), contactableBody.getSoleFrame());
 
          String name = contactableBody.getSoleFrame().getName();
-         DoubleYoVariable forceMagnitude = new DoubleYoVariable(name + "ForceMagnitude", registry);
+         YoDouble forceMagnitude = new YoDouble(name + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 
-         DoubleYoVariable normalTorque = new DoubleYoVariable(name + "NormalTorque", registry);
+         YoDouble normalTorque = new YoDouble(name + "NormalTorque", registry);
          normalTorques.put(contactableBody, normalTorque);
 
          String copName = name + "CoP";

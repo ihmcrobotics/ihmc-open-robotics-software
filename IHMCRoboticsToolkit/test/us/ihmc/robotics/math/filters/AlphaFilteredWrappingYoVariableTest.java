@@ -12,8 +12,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AlphaFilteredWrappingYoVariableTest
@@ -26,10 +26,10 @@ public class AlphaFilteredWrappingYoVariableTest
    public void testInputModulo()
    {
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
+      YoDouble alpha = new YoDouble("alpha", registry);
       alpha.set(0.0); //sets the alpha to 0.0 so that the correction is instantaneous to check the result which is in fact the input with modulo
       
-      DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
+      YoDouble positionVariable = new YoDouble("positionVariable", registry);
       AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, -2.0, 8.0);
 
       //test at the boundaries
@@ -75,10 +75,10 @@ public class AlphaFilteredWrappingYoVariableTest
    {
       // Use a reasonably large alpha for a reasonably large amount of noise
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-      DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
+      YoDouble alpha = new YoDouble("alpha", registry);
       alpha.set(0.8);
       
-      DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
+      YoDouble positionVariable = new YoDouble("positionVariable", registry);
       AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, 0.0, 20.0);
 
       double pseudoNoise = 0;
@@ -104,10 +104,10 @@ public class AlphaFilteredWrappingYoVariableTest
 	{
 	   // Use a reasonably large alpha for a reasonably large amount of noise
 	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
-	   DoubleYoVariable alpha = new DoubleYoVariable("alpha", registry);
+	   YoDouble alpha = new YoDouble("alpha", registry);
 	   alpha.set(0.999999);
 
-	   DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
+	   YoDouble positionVariable = new YoDouble("positionVariable", registry);
 	   double lowerLimit = RandomNumbers.nextDouble(random, -100.0, 100.0);
       double upperLimit = RandomNumbers.nextDouble(random, -100.0, 100.0);
       if(upperLimit < lowerLimit)

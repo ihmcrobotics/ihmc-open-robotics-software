@@ -1,15 +1,15 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class IMUGyroSensor implements AcsellSlowSensor
 {
-   private final DoubleYoVariable imuGyro;
+   private final YoDouble imuGyro;
    
    public IMUGyroSensor(String name, String axis, YoVariableRegistry registry)
    {
-      imuGyro = new DoubleYoVariable(name + "IMUGyro" + axis, registry);
+      imuGyro = new YoDouble(name + "IMUGyro" + axis, registry);
    }
 
    @Override

@@ -1,17 +1,17 @@
 package us.ihmc.simulationConstructionSetTools.util.gui;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 public class YoVariableToggler implements NewDataListener
 {
    private YoVariableToggleContainer parentContainer;
 
-   private final EnumYoVariable<ToggleMode> toggleMode;
-   public BooleanYoVariable currentState = null;
+   private final YoEnum<ToggleMode> toggleMode;
+   public YoBoolean currentState = null;
 
    private boolean currentStateValue;
 
@@ -19,12 +19,12 @@ public class YoVariableToggler implements NewDataListener
    private String falseString = "Turn Off";
    private boolean firstRun = true;
 
-   public YoVariableToggler(String name, YoVariableRegistry parent, YoVariableToggleContainer parentContainer, BooleanYoVariable currentStateVariable)
+   public YoVariableToggler(String name, YoVariableRegistry parent, YoVariableToggleContainer parentContainer, YoBoolean currentStateVariable)
    {
       if (currentStateVariable != null)
          this.currentState = currentStateVariable;
       this.parentContainer = parentContainer;
-      toggleMode = (EnumYoVariable<ToggleMode>) parent.getVariable(name);
+      toggleMode = (YoEnum<ToggleMode>) parent.getVariable(name);
 
       toggleMode.set(ToggleMode.NO_CHANGE);
 

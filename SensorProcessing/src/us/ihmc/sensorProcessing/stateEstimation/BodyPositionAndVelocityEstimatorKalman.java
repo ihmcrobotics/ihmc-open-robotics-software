@@ -10,8 +10,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.kalman.KalmanFilter;
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -43,8 +43,8 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    private final EnumMap<Direction, DenseMatrix64F> inputs = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
    private final EnumMap<Direction, DenseMatrix64F> measurements = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
 
-   private final DoubleYoVariable accelerationCovariance = new DoubleYoVariable("accelerationCovariance", registry);
-   private final DoubleYoVariable velocityCovariance = new DoubleYoVariable("velocityCovariance", registry);
+   private final YoDouble accelerationCovariance = new YoDouble("accelerationCovariance", registry);
+   private final YoDouble velocityCovariance = new YoDouble("velocityCovariance", registry);
 
    private final FramePoint bodyPosition = new FramePoint(world);
    private final FrameVector bodyVelocity = new FrameVector(world);

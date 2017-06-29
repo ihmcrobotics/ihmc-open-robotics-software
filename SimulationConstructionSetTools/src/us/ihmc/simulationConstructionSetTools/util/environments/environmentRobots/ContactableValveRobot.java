@@ -15,9 +15,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -49,7 +49,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    private double valveNumberOfPossibleTurns;
 
-   private final DoubleYoVariable valveClosePercentage;
+   private final YoDouble valveClosePercentage;
    
    private double valveMass;
    private Matrix3D inertiaMatrix;
@@ -60,7 +60,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    protected Link valveLink;
    private PinJoint valvePinJoint;
    protected Graphics3DObject valveLinkGraphics = new Graphics3DObject();
-   private final DoubleYoVariable valveDamping;
+   private final YoDouble valveDamping;
 
    protected PoseReferenceFrame valveFrame;
 
@@ -74,9 +74,9 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       setValveProperties(valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, valveNumberOfPossibleTurns, valveMass);
       setPoseInWorld(valvePoseInWorld);
       setMass(valveMass);
-      valveDamping = new DoubleYoVariable(getName() + "ValveDamping", yoVariableRegistry);
+      valveDamping = new YoDouble(getName() + "ValveDamping", yoVariableRegistry);
       valveDamping.set(DEFAULT_DAMPING);
-      valveClosePercentage = new DoubleYoVariable("valveClosePercentage", yoVariableRegistry);
+      valveClosePercentage = new YoDouble("valveClosePercentage", yoVariableRegistry);
       valveClosePercentage.set(0.0);
    }
 
