@@ -430,7 +430,7 @@ public class Torus3dTest
    public void testPointsInsideWhenOffsetBy(Torus3D torus3d, double tx, double ty, double tz)
    {
       double radius = torus3d.getRadius();
-      double thickness = torus3d.getThickness();
+      double thickness = torus3d.getTubeRadius();
       
 //      System.out.println("Testing points for offsets " + tx + "," + ty + "," + tz + " for torus : " + torus3d);
       // center point is false
