@@ -43,7 +43,7 @@ import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -964,7 +964,7 @@ public class FootstepSnapperSimulationTest
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 

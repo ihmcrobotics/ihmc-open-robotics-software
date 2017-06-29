@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
  */
 public class Ramp3d extends Shape3D<Ramp3d>
 {
-   private final Size3d size = new Size3d();
+   private final Size3D size = new Size3D();
 
    private double rampLength;
    private double angleOfRampIncline;

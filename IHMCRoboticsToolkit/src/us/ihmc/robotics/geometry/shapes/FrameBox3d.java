@@ -10,9 +10,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
+public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 {
-   private Box3d box3d;
+   private Box3D box3d;
 
    public FrameBox3d(FrameBox3d other)
    {
@@ -21,35 +21,35 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public FrameBox3d(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Box3d());
+      super(referenceFrame, new Box3D());
       box3d = getGeometryObject();
    }
 
-   public FrameBox3d(ReferenceFrame referenceFrame, Box3d box3d)
+   public FrameBox3d(ReferenceFrame referenceFrame, Box3D box3d)
    {
-      super(referenceFrame, new Box3d(box3d));
+      super(referenceFrame, new Box3D(box3d));
       this.box3d = getGeometryObject();
    }
 
    public FrameBox3d(ReferenceFrame referenceFrame, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
    public FrameBox3d(ReferenceFrame referenceFrame, RigidBodyTransform configuration, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(configuration, lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(configuration, lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
    public FrameBox3d(ReferenceFrame referenceFrame, Pose3D pose, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(pose.getPosition(), pose.getOrientation(), lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(pose.getPosition(), pose.getOrientation(), lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
-   public Box3d getBox3d()
+   public Box3D getBox3d()
    {
       return box3d;
    }

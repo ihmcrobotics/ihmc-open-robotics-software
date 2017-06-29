@@ -23,7 +23,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

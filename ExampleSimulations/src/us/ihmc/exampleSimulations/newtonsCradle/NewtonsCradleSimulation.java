@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -185,7 +185,7 @@ public class NewtonsCradleSimulation
       robots.toArray(robotArray);
 
       CombinedTerrainObject3D boxTerrain = new CombinedTerrainObject3D("BoxTerrain");
-      Box3d box = new Box3d(2.0, 1.0, 0.1);
+      Box3D box = new Box3D(2.0, 1.0, 0.1);
       box.setPosition(new Point3D(0.0, 1.0, 0.0));
       box.setOrientationYawPitchRoll(0.0, groundAngle, 0.0);
       boxTerrain.addRotatableBox(box, YoAppearance.Blue());

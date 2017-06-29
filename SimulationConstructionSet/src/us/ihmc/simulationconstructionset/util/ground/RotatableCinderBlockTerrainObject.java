@@ -4,12 +4,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 
 
 public class RotatableCinderBlockTerrainObject extends RotatableBoxTerrainObject
 {
-   public RotatableCinderBlockTerrainObject(Box3d box, AppearanceDefinition appearance)
+   public RotatableCinderBlockTerrainObject(Box3D box, AppearanceDefinition appearance)
    {
       super(box, appearance);
    }

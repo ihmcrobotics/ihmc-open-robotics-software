@@ -6,10 +6,9 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 /**
- * Extension of Vector3d where x, y, and z have aliases for
- * length, width, and height, respectively.
+ * Extension of Vector3d where x, y, and z have aliases for length, width, and height, respectively.
  */
-class Size3d implements Vector3DBasics, Serializable
+class Size3D implements Vector3DBasics, Serializable
 {
    private static final long serialVersionUID = -6792410294569029172L;
 
@@ -17,15 +16,15 @@ class Size3d implements Vector3DBasics, Serializable
    private double width;
    private double height;
 
-   public Size3d()
+   public Size3D()
    {
       setToZero();
    }
 
    /**
-   * Alias for X, Y, Z
-   */
-   public Size3d(double length, double width, double height)
+    * Alias for X, Y, Z
+    */
+   public Size3D(double length, double width, double height)
    {
       this.length = length;
       this.width = width;
@@ -41,48 +40,48 @@ class Size3d implements Vector3DBasics, Serializable
    }
 
    /**
-   * Alias for Y
-   */
+    * Alias for Y
+    */
    public double getWidth()
    {
       return getY();
    }
 
    /**
-   * Alias for Z
-   */
+    * Alias for Z
+    */
    public double getHeight()
    {
       return getZ();
    }
 
    /**
-   * Alias for X
-   */
+    * Alias for X
+    */
    public void setLength(double length)
    {
       setX(length);
    }
 
    /**
-   * Alias for Y
-   */
+    * Alias for Y
+    */
    public void setWidth(double width)
    {
       setY(width);
    }
 
    /**
-   * Alias for Z
-   */
+    * Alias for Z
+    */
    public void setHeight(double height)
    {
       setZ(height);
    }
 
    /**
-   * Alias for X, Y, Z
-   */
+    * Alias for X, Y, Z
+    */
    public void setLengthWidthHeight(double length, double width, double height)
    {
       set(length, width, height);

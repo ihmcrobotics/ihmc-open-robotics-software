@@ -41,7 +41,7 @@ public class Box3dTest
          double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
          double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
-         Box3d box3d = new Box3d(transform, length, width, height);
+         Box3D box3d = new Box3D(transform, length, width, height);
 
          testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
@@ -53,8 +53,8 @@ public class Box3dTest
    public void testCopyConstructor()
    {
       Random random = new Random(12434L);
-      Box3d box1 = createRandomBox(random);
-      Box3d box2 = new Box3d(box1);
+      Box3D box1 = createRandomBox(random);
+      Box3D box2 = new Box3D(box1);
 
       assertBoxEquals(box1, box2, 1e-14);
 
@@ -75,9 +75,9 @@ public class Box3dTest
       double width = random.nextDouble();
       double height = random.nextDouble();
 
-      Box3d box1 = new Box3d(transform, length, width, height);
-      Box3d box2 = new Box3d(transform, new double[] {length, width, height});
-      Box3d box3 = new Box3d(length, width, height);
+      Box3D box1 = new Box3D(transform, length, width, height);
+      Box3D box2 = new Box3D(transform, new double[] {length, width, height});
+      Box3D box3 = new Box3D(length, width, height);
       box3.setPose(transform);
 
       assertBoxEquals(box1, box2, 0.0);
@@ -89,7 +89,7 @@ public class Box3dTest
    public void testSetTransform3DAndGetters()
    {
       Random random = new Random(351235L);
-      Box3d box = new Box3d();
+      Box3D box = new Box3D();
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       box.setPose(transform);
 
@@ -117,7 +117,7 @@ public class Box3dTest
    public void testIsInsideOrOnSurfaceConvexCombinationOfVertices()
    {
       Random random = new Random(123234L);
-      Box3d box = createRandomBox(random);
+      Box3D box = createRandomBox(random);
 
       Point3D[] vertices = new Point3D[8];
       for (int i = 0; i < vertices.length; i++)
@@ -141,7 +141,7 @@ public class Box3dTest
    public void testVerticesProjection()
    {
       Random random = new Random(123234L);
-      Box3d box = createRandomBox(random);
+      Box3D box = createRandomBox(random);
 
       Point3D[] vertices = new Point3D[8];
       for (int i = 0; i < vertices.length; i++)
@@ -164,7 +164,7 @@ public class Box3dTest
    public void testIsInsideOrOnSurfaceVertices()
    {
       Random random = new Random(123234L);
-      Box3d box = createRandomBox(random);
+      Box3D box = createRandomBox(random);
 
       Point3D[] vertices = new Point3D[8];
       for (int i = 0; i < vertices.length; i++)
@@ -189,7 +189,7 @@ public class Box3dTest
       int nTests = 300;
       for (int testIndex = 0; testIndex < nTests; testIndex++)
       {
-         Box3d box = createRandomBox(random);
+         Box3D box = createRandomBox(random);
 
          Point3D[] vertices = new Point3D[8];
          for (int i = 0; i < vertices.length; i++)
@@ -228,7 +228,7 @@ public class Box3dTest
       double width = random.nextDouble();
       double height = random.nextDouble();
       RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      Box3d box3d = new Box3d(configuration, length, width, height);
+      Box3D box3d = new Box3D(configuration, length, width, height);
 
       ArrayList<Point3D> expectedVertices = new ArrayList<Point3D>(8);
       expectedVertices.add(new Point3D(length / 2.0, width / 2.0, height / 2.0));
@@ -277,8 +277,8 @@ public class Box3dTest
       int nTestsPerBox = 1000;
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
-         Box3d box = createRandomBox(random);
-         Box3d biggerBox = new Box3d(box);
+         Box3D box = createRandomBox(random);
+         Box3D biggerBox = new Box3D(box);
          biggerBox.scale(2.0);
 
          Point3D[] vertices = new Point3D[8];
@@ -361,11 +361,11 @@ public class Box3dTest
       int nTestsPerBox = 1000;
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
-         Box3d box = createRandomBox(random);
+         Box3D box = createRandomBox(random);
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         Box3d boxTransformed = new Box3d(box);
+         Box3D boxTransformed = new Box3D(box);
          boxTransformed.applyTransform(transform);
-         Box3d biggerBox = new Box3d(box);
+         Box3D biggerBox = new Box3D(box);
          biggerBox.scale(2.0);
 
          Point3D[] vertices = new Point3D[8];
@@ -391,7 +391,7 @@ public class Box3dTest
    @Test(timeout = 30000)
    public void testApplyTransform2()
    {
-      Box3d box3d = new Box3d();
+      Box3D box3d = new Box3D();
       RigidBodyTransform transform = new RigidBodyTransform();
       Point3D point = new Point3D();
       point.set(1.0, 1.0, 1.0);
@@ -424,7 +424,7 @@ public class Box3dTest
       for (int i = 0; i < nTests; i++)
       {
          Random random = new Random(562346L);
-         Box3d box = new Box3d();
+         Box3D box = new Box3D();
 
          double yaw = random.nextDouble();
          double pitch = random.nextDouble();
@@ -441,17 +441,17 @@ public class Box3dTest
       }
    }
 
-   private static Box3d createRandomBox(Random random)
+   private static Box3D createRandomBox(Random random)
    {
       RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       double lengthX = random.nextDouble();
       double widthY = random.nextDouble();
       double heightZ = random.nextDouble();
 
-      return new Box3d(configuration, lengthX, widthY, heightZ);
+      return new Box3D(configuration, lengthX, widthY, heightZ);
    }
 
-   private static void assertEverythingDifferent(Box3d box1, Box3d box2, double epsilon)
+   private static void assertEverythingDifferent(Box3D box1, Box3D box2, double epsilon)
    {
       assertFalse(box1.getOrientation().epsilonEquals(box2.getOrientation(), epsilon));
       assertFalse(box1.getPosition().epsilonEquals(box2.getPosition(), epsilon));
@@ -461,7 +461,7 @@ public class Box3dTest
       assertFalse(MathTools.epsilonEquals(box1.getSizeZ(), box2.getSizeZ(), epsilon));
    }
 
-   private static void assertBoxEquals(Box3d box1, Box3d box2, double epsilon)
+   private static void assertBoxEquals(Box3D box1, Box3D box2, double epsilon)
    {
       assertTrue(box1.getOrientation().epsilonEquals(box2.getOrientation(), epsilon));
       assertTrue(box1.getPosition().epsilonEquals(box2.getPosition(), epsilon));
