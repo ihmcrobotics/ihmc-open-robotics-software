@@ -12,35 +12,35 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
-public class Cylinder3d extends Shape3D<Cylinder3d>
+public class Cylinder3D extends Shape3D<Cylinder3D>
 {
    private double radius;
    private double height;
 
-   public Cylinder3d()
+   public Cylinder3D()
    {
       this(1.0, 0.5);
    }
 
-   public Cylinder3d(Cylinder3d cylinder3d)
+   public Cylinder3D(Cylinder3D cylinder3d)
    {
       this(cylinder3d.radius, cylinder3d.height);
    }
 
-   public Cylinder3d(double height, double radius)
+   public Cylinder3D(double height, double radius)
    {
       this.height = height;
       this.radius = radius;
    }
 
-   public Cylinder3d(RigidBodyTransform transform, double height, double radius)
+   public Cylinder3D(RigidBodyTransform transform, double height, double radius)
    {
       setPose(transform);
       this.height = height;
       this.radius = radius;
    }
 
-   public Cylinder3d(Pose3D pose, double height, double radius)
+   public Cylinder3D(Pose3D pose, double height, double radius)
    {
       setPose(pose);
       this.height = height;
@@ -48,7 +48,7 @@ public class Cylinder3d extends Shape3D<Cylinder3d>
    }
 
    @Override
-   public void set(Cylinder3d cylinder3d)
+   public void set(Cylinder3D cylinder3d)
    {
       if (this != cylinder3d)
       {
@@ -101,7 +101,7 @@ public class Cylinder3d extends Shape3D<Cylinder3d>
    }
 
    @Override
-   public boolean epsilonEquals(Cylinder3d other, double epsilon)
+   public boolean epsilonEquals(Cylinder3D other, double epsilon)
    {
       return MathTools.epsilonEquals(height, other.height, epsilon) && MathTools.epsilonEquals(radius, other.radius, epsilon);
    }
