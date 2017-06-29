@@ -1,6 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,8 +12,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.shapes.Box3D;
-import us.ihmc.robotics.geometry.shapes.Cylinder3D;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.multilevelGround;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 
 public class MarbleRunGround extends CombinedTerrainObject3D
