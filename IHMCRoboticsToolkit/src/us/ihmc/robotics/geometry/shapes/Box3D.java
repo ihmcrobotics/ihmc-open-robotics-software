@@ -473,9 +473,12 @@ public class Box3D extends Shape3D<Box3D>
     * Applies the given scale factor to the size of this box.
     * 
     * @param scale the scale factor to use.
+    * @throws IllegalArgumentException if {@code scale} is negative.
     */
    public void scale(double scale)
    {
+      if (scale < 0.0)
+         throw new IllegalArgumentException("Cannot apply a negative scale: " + scale);
       size.scale(scale);
    }
 
@@ -497,9 +500,17 @@ public class Box3D extends Shape3D<Box3D>
     * @param length the size of this box along the x-axis.
     * @param width the size of this box along the y-axis.
     * @param height the size of this box along the z-axis.
+    * @throws IllegalArgumentException if any of the three arguments is negative.
     */
    public void setSize(double length, double width, double height)
    {
+      if (length < 0.0)
+         throw new IllegalArgumentException("A Box3D cannot have a negative length: " + length);
+      if (width < 0.0)
+         throw new IllegalArgumentException("A Box3D cannot have a negative width: " + width);
+      if (height < 0.0)
+         throw new IllegalArgumentException("A Box3D cannot have a negative height: " + height);
+
       size.setLengthWidthHeight(length, width, height);
    }
 
