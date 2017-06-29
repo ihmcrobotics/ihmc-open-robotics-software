@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
-public class Cylinder3dTest
+public class Cylinder3DTest
 {
    double eps = 1e-14;
 

@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class Torus3dTest
+public class Torus3DTest
 {
    private final double MIN_THICKNESS = 0.005;
    private final double epsilon = 0.0001;
