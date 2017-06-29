@@ -12,28 +12,28 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class Ellipsoid3d extends Shape3D<Ellipsoid3d>
+public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
 {
    private final Vector3D radius = new Vector3D();
 
-   public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
+   public Ellipsoid3D(double xRadius, double yRadius, double zRadius)
    {
       radius.set(xRadius, yRadius, zRadius);
    }
 
-   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, Pose3D pose)
+   public Ellipsoid3D(double xRadius, double yRadius, double zRadius, Pose3D pose)
    {
       setPose(pose);
       radius.set(xRadius, yRadius, zRadius);
    }
 
-   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
+   public Ellipsoid3D(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
       setPose(transform);
       radius.set(xRadius, yRadius, zRadius);
    }
 
-   public Ellipsoid3d(Ellipsoid3d other)
+   public Ellipsoid3D(Ellipsoid3D other)
    {
       setPose(other);
       radius.set(other.radius);
@@ -46,7 +46,7 @@ public class Ellipsoid3d extends Shape3D<Ellipsoid3d>
    }
 
    @Override
-   public boolean epsilonEquals(Ellipsoid3d other, double epsilon)
+   public boolean epsilonEquals(Ellipsoid3D other, double epsilon)
    {
       return radius.epsilonEquals(other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
@@ -156,7 +156,7 @@ public class Ellipsoid3d extends Shape3D<Ellipsoid3d>
    }
 
    @Override
-   public void set(Ellipsoid3d other)
+   public void set(Ellipsoid3D other)
    {
       if (this != other)
       {
