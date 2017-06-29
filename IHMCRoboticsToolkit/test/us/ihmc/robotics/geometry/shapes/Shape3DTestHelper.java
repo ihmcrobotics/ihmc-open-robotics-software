@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class Shape3dTestHelper
+public class Shape3DTestHelper
 {
-   public Shape3dTestHelper()
+   public Shape3DTestHelper()
    {
 
    }
