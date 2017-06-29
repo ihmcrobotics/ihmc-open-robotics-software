@@ -20,13 +20,13 @@ public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3D>
 
    public FrameRamp3d(ReferenceFrame referenceFrame, double width, double length, double height)
    {
-      super(referenceFrame, new Ramp3D(width, length, height));
+      super(referenceFrame, new Ramp3D(length, width, height));
       ramp3d = getGeometryObject();
    }
 
    public FrameRamp3d(ReferenceFrame referenceFrame, RigidBodyTransform configuration, double width, double length, double height)
    {
-      super(referenceFrame, new Ramp3D(configuration, width, length, height));
+      super(referenceFrame, new Ramp3D(configuration, length, width, height));
       ramp3d = getGeometryObject();
    }
 

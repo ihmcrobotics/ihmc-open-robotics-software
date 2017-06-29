@@ -10,87 +10,171 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 
 /**
- * Ramp where the center of ramp start side is origin. 0 to X -Y/2 +Y/2 0 to Z
+ * {@code Ramp3D} represents a 3D shape with a triangular section in the XZ-plane.
+ * <p>
+ * Shape description:
+ * <ul>
+ * <li>The slope face starts from {@code x=0.0}, {@code z=0.0} to end at {@code x=size.getX()},
+ * {@code z=size.getZ()}.
+ * <li>The bottom face is horizontal (XY-plane) at {@code z=0.0}.
+ * <li>The rear face is vertical (YZ-plane) at {@code x=size.getX()}.
+ * <li>The left face is vertical (XZ-plane) at {@code y=-size.getY()/2.0}.
+ * <li>The right face is vertical (XZ-plane) at {@code y=size.getY()/2.0}.
+ * </ul>
+ * </p>
  */
 public class Ramp3D extends Shape3D<Ramp3D>
 {
+   /** Size of this ramp's bounding box. */
    private final Size3D size = new Size3D();
 
+   /** Length of the slope face of this ramp. */
    private double rampLength;
+   /**
+    * Positive angle in [0, <i>pi</i>] representing the angle formed by the bottom face and the
+    * slope face.
+    */
    private double angleOfRampIncline;
 
-   public Ramp3D(Ramp3D ramp3d)
+   /**
+    * Creates a new ramp 3D and initializes its length, width, and height to {@code 1.0}.
+    */
+   public Ramp3D()
    {
-      setPose(ramp3d);
-      setSize(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
+      this(1.0, 1.0, 1.0);
    }
 
-   public Ramp3D(double width, double length, double height)
+   /**
+    * Creates a new ramp 3D identical to {@code other}.
+    * 
+    * @param other the other ramp to copy. Not modified.
+    */
+   public Ramp3D(Ramp3D other)
+   {
+      set(other);
+   }
+
+   /**
+    * Creates a new ramp 3D and initializes its size.
+    * 
+    * @param length the size of this ramp along the x-axis.
+    * @param width the size of this ramp along the y-axis.
+    * @param height the size of this ramp along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is
+    *            negative.
+    */
+   public Ramp3D(double length, double width, double height)
    {
       setSize(length, width, height);
    }
 
-   public Ramp3D(RigidBodyTransform transform, double width, double length, double height)
-   {
-      setPose(transform);
-      setSize(length, width, height);
-   }
-
-   public Ramp3D(Pose3D pose, double width, double length, double height)
+   /**
+    * Creates a new ramp 3D and initializes its pose and size.
+    * 
+    * @param pose the position and orientation for this ramp. Not modified.
+    * @param length the size of this ramp along the x-axis.
+    * @param width the size of this ramp along the y-axis.
+    * @param height the size of this ramp along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is
+    *            negative.
+    */
+   public Ramp3D(RigidBodyTransform pose, double length, double width, double height)
    {
       setPose(pose);
       setSize(length, width, height);
    }
 
+   /**
+    * Creates a new ramp 3D and initializes its pose and size.
+    * 
+    * @param pose the position and orientation for this ramp. Not modified.
+    * @param length the size of this ramp along the x-axis.
+    * @param width the size of this ramp along the y-axis.
+    * @param height the size of this ramp along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is
+    *            negative.
+    */
+   public Ramp3D(Pose3D pose, double length, double width, double height)
+   {
+      setPose(pose);
+      setSize(length, width, height);
+   }
+
+   /**
+    * Copies the {@code other} ramp data into {@code this}.
+    * 
+    * @param other the other ramp to copy. Not modified.
+    */
    @Override
-   public void set(Ramp3D ramp3d)
+   public void set(Ramp3D other)
    {
-      if (this != ramp3d)
-      {
-         setPose(ramp3d);
-         setSize(ramp3d.size);
-      }
+      setPose(other);
+      setSize(other.size);
    }
 
-   public double getWidth()
-   {
-      return size.getWidth();
-   }
-
-   public void setWidth(double width)
-   {
-      size.setWidth(width);
-   }
-
-   public double getHeight()
-   {
-      return size.getHeight();
-   }
-
-   public void setHeight(double height)
-   {
-      size.setHeight(height);
-      updateRamp();
-   }
-
-   public double getLength()
-   {
-      return size.getLength();
-   }
-
+   /**
+    * Sets the size along the x-axis for this ramp.
+    * 
+    * @param length the size of this ramp along the x-axis.
+    * @throws IllegalArgumentException if {@code length} is negative.
+    */
    public void setLength(double length)
    {
+      checkLength(length);
       size.setLength(length);
       updateRamp();
    }
 
+   /**
+    * Sets the size along the y-axis for this ramp.
+    * 
+    * @param width the size of this ramp along the y-axis.
+    * @throws IllegalArgumentException if {@code width} is negative.
+    */
+   public void setWidth(double width)
+   {
+      checkWidth(width);
+      size.setWidth(width);
+   }
+
+   /**
+    * Sets the size along the z-axis for this ramp.
+    * 
+    * @param height the size of this ramp along the z-axis.
+    * @throws IllegalArgumentException if {@code height} is negative.
+    */
+   public void setHeight(double height)
+   {
+      checkHeight(height);
+      size.setHeight(height);
+      updateRamp();
+   }
+
+   /**
+    * Sets the size of this ramp.
+    * 
+    * @param size tuple with the new size for this ramp. Not modified.
+    * @throws IllegalArgumentException if any of {@code size} components is negative.
+    */
    public void setSize(Tuple3DReadOnly size)
    {
       setSize(size.getX(), size.getY(), size.getZ());
    }
 
+   /**
+    * Sets the size of this ramp.
+    * 
+    * @param length the size of this ramp along the x-axis.
+    * @param width the size of this ramp along the y-axis.
+    * @param height the size of this ramp along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is
+    *            negative.
+    */
    public void setSize(double length, double width, double height)
    {
+      checkLength(length);
+      checkWidth(width);
+      checkHeight(height);
       size.setLengthWidthHeight(length, width, height);
       updateRamp();
    }
@@ -101,22 +185,75 @@ public class Ramp3D extends Shape3D<Ramp3D>
       angleOfRampIncline = Math.atan(size.getHeight() / size.getLength());
    }
 
+   /**
+    * Gets the size of this ramp along the x-axis.
+    * 
+    * @return this ramp's length.
+    */
+   public double getLength()
+   {
+      return size.getLength();
+   }
+
+   /**
+    * Gets the size of this ramp along the y-axis.
+    * 
+    * @return this ramp's width.
+    */
+   public double getWidth()
+   {
+      return size.getWidth();
+   }
+
+   /**
+    * Gets the size of this ramp along the z-axis.
+    * 
+    * @return this ramp's height.
+    */
+   public double getHeight()
+   {
+      return size.getHeight();
+   }
+
+   /**
+    * Gets the length of this ramp's slope part.
+    * <p>
+    * Note that this is different than {@link #getLength()}. The returned value is equal to:
+    * &radic;(this.length<sup>2</sup> + this.height<sup>2</sup>)
+    * </p>
+    * 
+    * @return the length of the slope.
+    */
    public double getRampLength()
    {
       return rampLength;
    }
 
+   /**
+    * Computes and packs the surface normal of the slope face of this ramp.
+    * 
+    * @param surfaceNormalToPack the surface normal of the slope. Modified.
+    */
    public void getRampSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
       surfaceNormalToPack.set(-size.getHeight() / rampLength, 0.0, size.getLength() / rampLength);
       transformToWorld(surfaceNormalToPack);
    }
 
+   /**
+    * Gets the angle formed by the slope and the bottom face.
+    * <p>
+    * The angle is positive and in [0, <i>pi</i>].
+    * </p>
+    * 
+    * @return the slope angle.
+    */
    public double getRampIncline()
    {
       return angleOfRampIncline;
    }
 
+   /** {@inheritDoc} */
    @Override
    protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
@@ -329,8 +466,8 @@ public class Ramp3D extends Shape3D<Ramp3D>
       }
    }
 
-   private double computeNormalAndDistanceFromClosestPoint(double x, double y, double z, double xClosest, double yClosest, double zClosest,
-                                                           Vector3DBasics normalToPack)
+   private static double computeNormalAndDistanceFromClosestPoint(double x, double y, double z, double xClosest, double yClosest, double zClosest,
+                                                                  Vector3DBasics normalToPack)
    {
       double dx = x - xClosest;
       double dy = y - yClosest;
@@ -347,21 +484,22 @@ public class Ramp3D extends Shape3D<Ramp3D>
       return distance;
    }
 
-   private boolean isFirstValueMinimum(double possibleMin, double value1, double value2, double value3, double value4)
+   private static boolean isFirstValueMinimum(double possibleMin, double value1, double value2, double value3, double value4)
    {
       return possibleMin <= value1 && possibleMin <= value2 && possibleMin <= value3 && possibleMin <= value4;
    }
 
-   private boolean isFirstValueMinimum(double possibleMin, double value1, double value2, double value3)
+   private static boolean isFirstValueMinimum(double possibleMin, double value1, double value2, double value3)
    {
       return possibleMin <= value1 && possibleMin <= value2 && possibleMin <= value3;
    }
 
-   private boolean isFirstValueMinimum(double possibleMin, double value1, double value2)
+   private static boolean isFirstValueMinimum(double possibleMin, double value1, double value2)
    {
       return possibleMin <= value1 && possibleMin <= value2;
    }
 
+   /** {@inheritDoc} */
    @Override
    protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
@@ -386,12 +524,22 @@ public class Ramp3D extends Shape3D<Ramp3D>
       return true;
    }
 
+   /**
+    * Tests separately and on a per component basis if the pose and the size of this ramp and
+    * {@code other}'s pose and size are equal to an {@code epsilon}.
+    * 
+    * @param other the other ramp which pose and size is to be compared against this ramp pose and
+    *           size. Not modified.
+    * @param epsilon tolerance to use when comparing each component.
+    * @return {@code true} if the two ramps are equal component-wise, {@code false} otherwise.
+    */
    @Override
    public boolean epsilonEquals(Ramp3D other, double epsilon)
    {
-      return size.epsilonEquals(other.size, epsilon);
+      return size.epsilonEquals(other.size, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setToZero()
    {
@@ -399,6 +547,7 @@ public class Ramp3D extends Shape3D<Ramp3D>
       size.setToZero();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setToNaN()
    {
@@ -406,15 +555,43 @@ public class Ramp3D extends Shape3D<Ramp3D>
       size.setToNaN();
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean containsNaN()
    {
       return super.containsNaN() || size.containsNaN();
    }
 
+   private static void checkLength(double length)
+   {
+      if (length < 0.0)
+         throw new IllegalArgumentException("A Ramp3D cannot have a negative length: " + length);
+   }
+
+   private static void checkWidth(double width)
+   {
+      if (width < 0.0)
+         throw new IllegalArgumentException("A Ramp3D cannot have a negative width: " + width);
+   }
+
+   private static void checkHeight(double height)
+   {
+      if (height < 0.0)
+         throw new IllegalArgumentException("A Ramp3D cannot have a negative height: " + height);
+   }
+
+   /**
+    * Provides a {@code String} representation of this ramp 3D as follows:<br>
+    * Ramp 3D: size = (length, width, height), pose = <br>
+    * m00, m01, m02 | m03 <br>
+    * m10, m11, m12 | m13 <br>
+    * m20, m21, m22 | m23
+    *
+    * @return the {@code String} representing this box 3D.
+    */
    @Override
    public String toString()
    {
-      return "size = " + size + ", + transform = " + getPoseString() + "\n";
+      return "Ramp 3D: size = " + size + ", + pose =\n" + getPoseString();
    }
 }
