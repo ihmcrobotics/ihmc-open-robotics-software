@@ -21,12 +21,17 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.pushDoor.PushDoor;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.pushDoor.PushDoorPose;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.pushDoor.PushDoorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode3D;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.TaskNodeTreeVisualizer;
@@ -133,8 +138,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    
    public ArrayList<Graphics3DObject> getXYZAxis(Pose pose)
    {      
-      double axisHeight = 0.2;
-      double axisRadius = 0.005;
+      double axisHeight = 0.1;
+      double axisRadius = 0.01;
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
       Graphics3DObject retX = new Graphics3DObject();
@@ -219,18 +224,18 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       Pose pose3 = new Pose(new Point3D(1.0, 2.0, 2.0), new Quaternion());
       Pose pose4 = new Pose(new Point3D(2.0, 2.0, 2.0), new Quaternion());
        
-      EndEffectorLinearTrajectory constrainedEndEffectorPose = new EndEffectorLinearTrajectory();
+      EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
        
-      constrainedEndEffectorPose.setInitialPose(pose1);
-      constrainedEndEffectorPose.addLinearTrajectory(pose2, 1.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose3, 1.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose4, 1.0);      
+      constrainedEndEffectorTrajectory.setInitialPose(pose1);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose2, 1.0);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose3, 1.0);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose4, 1.0);      
        
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(-1.0));
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.0));
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(2.5));
+      System.out.println(constrainedEndEffectorTrajectory.getEndEffectorPose(-1.0));
+      System.out.println(constrainedEndEffectorTrajectory.getEndEffectorPose(2.0));
+      System.out.println(constrainedEndEffectorTrajectory.getEndEffectorPose(2.5));
        
-      System.out.println(constrainedEndEffectorPose.getEndEffectorPose(5.5));
+      System.out.println(constrainedEndEffectorTrajectory.getEndEffectorPose(5.5));
    }
    
 //   @Test
@@ -395,15 +400,15 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       Pose pose3 = new Pose(new Point3D(0.6, -0.5, 1.1), new Quaternion());
       Pose pose4 = new Pose(new Point3D(0.6, -0.4, 1.1), new Quaternion());
       
-      EndEffectorLinearTrajectory constrainedEndEffectorPose = new EndEffectorLinearTrajectory();
+      EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
       
-      constrainedEndEffectorPose.setInitialPose(pose1);
-      constrainedEndEffectorPose.addLinearTrajectory(pose2, 3.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose3, 3.0);
-      constrainedEndEffectorPose.addLinearTrajectory(pose4, 3.0); 
-      constrainedEndEffectorPose.setRobotSideOfEndEffector(RobotSide.RIGHT);
+      constrainedEndEffectorTrajectory.setInitialPose(pose1);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose2, 3.0);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose3, 3.0);
+      constrainedEndEffectorTrajectory.addLinearTrajectory(pose4, 3.0); 
+      constrainedEndEffectorTrajectory.setRobotSideOfEndEffector(RobotSide.RIGHT);
             
-      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorPose;      
+      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorTrajectory;      
       
       /*
        * Tree expanding.
@@ -439,9 +444,112 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
    
+
+      
+   
 //   @Test
-//   public void testForCleaningPlanning() throws SimulationExceededMaximumTimeException, IOException
-//   {
+   public void testForPushDoorKinematics() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+   
+      drcBehaviorTestHelper.updateRobotModel();
+            
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      
+      Point3D pushDoorLocation = new Point3D(1.4, -0.5, 0.0);
+      Quaternion pushDoorOrientation = new Quaternion();
+      pushDoorOrientation.appendYawRotation(Math.PI/180*10);
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      PushDoor pushDoor = new PushDoor(pushDoorFramePose, 1.0, 0.9);
+      
+      
+      PushDoorPose pushDoorPose1 = new PushDoorPose(pushDoor, 0.0*Math.PI/180, 0.0*Math.PI/180);
+      PushDoorPose pushDoorPose2 = new PushDoorPose(pushDoor, -10.0*Math.PI/180, 0.0*Math.PI/180);
+      PushDoorPose pushDoorPose3 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, 0.0*Math.PI/180);
+      PushDoorPose pushDoorPose4 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, 10.0*Math.PI/180);
+      PushDoorPose pushDoorPose5 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, -20.0*Math.PI/180);
+      
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());
+      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose1.getEndEffectorPose()));
+      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose2.getEndEffectorPose()));
+      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose3.getEndEffectorPose()));
+      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose4.getEndEffectorPose()));
+      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose5.getEndEffectorPose()));
+      
+      PrintTools.info("END");     
+   } 
+   
+//   @Test
+   public void testForBasicPushDoorOpeningTask() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+   
+      drcBehaviorTestHelper.updateRobotModel();
+            
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      
+      Point3D pushDoorLocation = new Point3D(0.5, -0.6, 0.0);
+      Quaternion pushDoorOrientation = new Quaternion();
+      pushDoorOrientation.appendYawRotation(Math.PI/180*0);
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      PushDoor pushDoor = new PushDoor(pushDoorFramePose, 1.0, 0.9);
+      
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -30*Math.PI/180);
+      pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
+            
+      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      HandTrajectoryMessage handTrajectoryMessage = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFootZUpGroundFrame());
+      
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(2);
+      chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
+      chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
+
+         
+      chestTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Quaternion(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
+      Quaternion chestOrientation = new Quaternion();
+      chestOrientation.appendYawRotation(-Math.PI*30/180);
+      chestOrientation.appendPitchRotation(Math.PI*20/180);
+      chestTrajectoryMessage.setTrajectoryPoint(1, 10.0, chestOrientation, new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
+                  
+      wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
+      wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
+                  
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());
+      System.out.println(handTrajectoryMessage.getNumberOfTrajectoryPoints());
+      for(int i=0;i<handTrajectoryMessage.getNumberOfTrajectoryPoints();i++)
+      {
+         Point3D point = new Point3D();
+         handTrajectoryMessage.getTrajectoryPoints()[i].getPosition(point);
+         
+         Quaternion orientation = new Quaternion();
+         handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
+         
+         Pose pose = new Pose(point, orientation);
+         scs.addStaticLinkGraphics(getXYZAxis(pose));
+      }
+            
+      drcBehaviorTestHelper.send(wholebodyTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(19.0);
+      
+      PrintTools.info("END");     
+   } 
+   
+   @Test
+   public void testForPlannerPushDoorOpeningTask() throws SimulationExceededMaximumTimeException, IOException
+   {
 //      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 //      assertTrue(success);
 //
@@ -495,15 +603,15 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 //      Pose pose3 = .getPose();
 //      Pose pose4 = .getPose();
 //      
-//      EndEffectorLinearTrajectory constrainedEndEffectorPose = new EndEffectorLinearTrajectory();
+//      EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
 //      
-//      constrainedEndEffectorPose.setInitialPose(pose1);
-//      constrainedEndEffectorPose.addLinearTrajectory(pose2, 3.0);
-//      constrainedEndEffectorPose.addLinearTrajectory(pose3, 3.0);
-//      constrainedEndEffectorPose.addLinearTrajectory(pose4, 3.0); 
-//      constrainedEndEffectorPose.setRobotSideOfEndEffector(RobotSide.RIGHT);
+//      constrainedEndEffectorTrajectory.setInitialPose(pose1);
+//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose2, 3.0);
+//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose3, 3.0);
+//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose4, 3.0); 
+//      constrainedEndEffectorTrajectory.setRobotSideOfEndEffector(RobotSide.RIGHT);
 //            
-//      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorPose;      
+//      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorTrajectory;      
 //      
 //      /*
 //       * Tree expanding.
@@ -516,7 +624,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 //      
 //      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
 //      
-//      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, constrainedEndEffectorPose.getTrajectoryTime());
+//      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, constrainedEndEffectorTrajectory.getTrajectoryTime());
 //      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.9);
 //      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
 //      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
@@ -548,50 +656,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 //      scs.addStaticLinkGraphics(getGraphicsSphere(pose2));
 //      scs.addStaticLinkGraphics(getGraphicsSphere(pose3));
 //      scs.addStaticLinkGraphics(getGraphicsSphere(pose4));
-//   }
-      
-   
-   @Test
-   public void testForPushDoorKinematics() throws SimulationExceededMaximumTimeException, IOException
-   {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-   
-      drcBehaviorTestHelper.updateRobotModel();
-            
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-      referenceFrames.updateFrames();
-      
-      Point3D pushDoorLocation = new Point3D(1.4, -0.5, 0.0);
-      Quaternion pushDoorOrientation = new Quaternion();
-      pushDoorOrientation.appendYawRotation(Math.PI/180*10);
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
-      PushDoor pushDoor = new PushDoor(pushDoorFramePose, 1.0, 0.9);
-      
-      
-      PushDoorPose pushDoorPose1 = new PushDoorPose(pushDoor, 0.0*Math.PI/180, 0.0*Math.PI/180);
-      PushDoorPose pushDoorPose2 = new PushDoorPose(pushDoor, -10.0*Math.PI/180, 0.0*Math.PI/180);
-      PushDoorPose pushDoorPose3 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, 0.0*Math.PI/180);
-      PushDoorPose pushDoorPose4 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, 10.0*Math.PI/180);
-      PushDoorPose pushDoorPose5 = new PushDoorPose(pushDoor, -20.0*Math.PI/180, -20.0*Math.PI/180);
-      
-      
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      
-      scs.addStaticLinkGraphics(pushDoor.getGraphics());
-      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose1.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose2.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose3.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose4.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(pushDoorPose5.getEndEffectorPose()));
-      
-      PrintTools.info("END");     
-   } 
-   
-
-   
+   }
    
    
    

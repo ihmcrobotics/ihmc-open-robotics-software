@@ -3,34 +3,26 @@ package us.ihmc.manipulation.planning.trajectory;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
+public class EndEffectorLinearTrajectory extends EndEffectorTrajectory
 {
-   private ArrayList<LinearTrajectory> trajectories = new ArrayList<LinearTrajectory>();
-   private double trajectoryTime = 0;
-   private Pose initialPose;
-   private RobotSide robotSideOfEndEffector;
+   private ArrayList<LinearTrajectory> trajectories = new ArrayList<LinearTrajectory>();   
+   private Pose initialPose;   
    
    public EndEffectorLinearTrajectory()
    {
       
    }
-   
-   public void setRobotSideOfEndEffector(RobotSide robotSide)
-   {
-      robotSideOfEndEffector = robotSide;
-   }
-   
-   public void clearTrajectories()
-   {
-      trajectories.clear();
-   }
-   
+       
    public void setInitialPose(Pose pose)
    {
+      trajectories.clear();
       initialPose = pose;
+      trajectoryTime = 0;
    }
    
    public void addLinearTrajectory(Pose pose, double trajectoryTime)
@@ -47,25 +39,16 @@ public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
          LinearTrajectory appendTrajectory = new LinearTrajectory(localInitialPose, pose, trajectoryTime);
          addLinearTrajectory(appendTrajectory);
       }
+      this.trajectoryTime = this.trajectoryTime + trajectoryTime;
    }
    
    public void addLinearTrajectory(LinearTrajectory appendTrajectory)
    {
       trajectories.add(appendTrajectory);
+      this.trajectoryTime = this.trajectoryTime + appendTrajectory.getTrajectoryTime();
    }
    
-   @Override
-   public double getTrajectoryTime()
-   {
-      trajectoryTime = 0;
-      
-      for(int i=0;i<trajectories.size();i++)
-      {
-         trajectoryTime = trajectoryTime + trajectories.get(i).getTrajectoryTime();
-      }
-      
-      return trajectoryTime;
-   }
+
 
    @Override
    public Pose getEndEffectorPose(double time)
@@ -93,18 +76,14 @@ public class EndEffectorLinearTrajectory implements EndEffectorTrajectory
       return lastTrajectory.getPose(lastTrajectory.getTrajectoryTime());
    }
 
+   /*
+    * 
+    */
    @Override
-   public RobotSide getRobotSide()
+   public HandTrajectoryMessage getEndEffectorTrajectoryMessage(ReferenceFrame midFeetFrame)
    {
-      return robotSideOfEndEffector;
+      return new HandTrajectoryMessage();
    }
+   
 
-   @Override
-   public RobotSide getAnotherRobotSide()
-   {
-      if(robotSideOfEndEffector == RobotSide.RIGHT)
-         return RobotSide.LEFT;
-      else
-         return RobotSide.RIGHT;
-   }
 }
