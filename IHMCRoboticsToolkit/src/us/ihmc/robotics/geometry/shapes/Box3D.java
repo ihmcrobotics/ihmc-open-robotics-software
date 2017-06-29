@@ -86,6 +86,7 @@ public class Box3D extends Shape3D<Box3D>
     * @param length the size of this box along the x-axis.
     * @param width the size of this box along the y-axis.
     * @param height the size of this box along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is negative.
     */
    public Box3D(double length, double width, double height)
    {
@@ -100,6 +101,7 @@ public class Box3D extends Shape3D<Box3D>
     * @param length the size of this box along the x-axis.
     * @param width the size of this box along the y-axis.
     * @param height the size of this box along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is negative.
     */
    public Box3D(Point3DReadOnly position, QuaternionReadOnly orientation, double length, double width, double height)
    {
@@ -114,6 +116,7 @@ public class Box3D extends Shape3D<Box3D>
     * @param length the size of this box along the x-axis.
     * @param width the size of this box along the y-axis.
     * @param height the size of this box along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is negative.
     */
    public Box3D(Pose3D pose, double length, double width, double height)
    {
@@ -128,6 +131,7 @@ public class Box3D extends Shape3D<Box3D>
     * @param length the size of this box along the x-axis.
     * @param width the size of this box along the y-axis.
     * @param height the size of this box along the z-axis.
+    * @throws IllegalArgumentException if any of {@code length}, {@code width}, or {@code height} is negative.
     */
    public Box3D(RigidBodyTransform pose, double length, double width, double height)
    {
@@ -140,6 +144,7 @@ public class Box3D extends Shape3D<Box3D>
     * 
     * @param pose the position and orientation of this box. Not modified.
     * @param size the size of this box along in order the x, y, and z axes.
+    * @throws IllegalArgumentException if any of {@code size}'s elements is negative.
     */
    public Box3D(RigidBodyTransform pose, double[] size)
    {
