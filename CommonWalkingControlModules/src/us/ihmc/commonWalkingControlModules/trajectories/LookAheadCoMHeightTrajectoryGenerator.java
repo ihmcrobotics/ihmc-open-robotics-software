@@ -362,7 +362,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       FrameVector fromContactFrameDrift = null;
 
-      if (correctForCoMHeightDrift.getBooleanValue() && (transferFromDesiredFootstep != null))
+      if (correctForCoMHeightDrift.getBooleanValue() && transferToFootstep.getTrustHeight() && (transferFromDesiredFootstep != null))
       {
          if (transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide())
          {
@@ -372,7 +372,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
                      "transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide() in LookAheadCoMHeightTrajectoryGenerator.initialize()");
             }
          }
-
          else
          {
             FramePoint transferFromDesiredContactFramePosition = new FramePoint();
