@@ -26,7 +26,7 @@ public class FrameEllipsoid3d extends FrameShape3d<FrameEllipsoid3d, Ellipsoid3D
    
    public FrameEllipsoid3d(ReferenceFrame referenceFrame, double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
-      super(referenceFrame, new Ellipsoid3D(xRadius, yRadius, zRadius, transform));
+      super(referenceFrame, new Ellipsoid3D(transform, xRadius, yRadius, zRadius));
       ellipsoid = getGeometryObject();
    }
 
