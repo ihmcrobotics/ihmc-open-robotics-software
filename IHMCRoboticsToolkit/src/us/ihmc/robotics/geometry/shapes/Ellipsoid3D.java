@@ -9,52 +9,106 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+/**
+ * {@code Ellipsoid3D} represents a 3D ellipsoid defined by its three main radii and with its origin
+ * at its center.
+ */
 public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
 {
-   private final Vector3D radius = new Vector3D();
+   /** The three radii of this ellipsoid. */
+   private final Vector3D radii = new Vector3D();
 
-   public Ellipsoid3D(double xRadius, double yRadius, double zRadius)
+   /**
+    * Creates a new ellipsoid 3D with its 3 radii initialized to {@code 1}.
+    */
+   public Ellipsoid3D()
    {
-      radius.set(xRadius, yRadius, zRadius);
+      this(1.0, 1.0, 1.0);
    }
 
-   public Ellipsoid3D(double xRadius, double yRadius, double zRadius, Pose3D pose)
-   {
-      setPose(pose);
-      radius.set(xRadius, yRadius, zRadius);
-   }
-
-   public Ellipsoid3D(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
-   {
-      setPose(transform);
-      radius.set(xRadius, yRadius, zRadius);
-   }
-
+   /**
+    * Creates a new ellipsoid 3D identical to {@code other}.
+    * 
+    * @param other the other ellipsoid to copy. Not modified.
+    */
    public Ellipsoid3D(Ellipsoid3D other)
    {
-      setPose(other);
-      radius.set(other.radius);
+      set(other);
    }
 
+   /**
+    * Creates a new 3D ellipsoid and initializes its radii.
+    * 
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public Ellipsoid3D(double radiusX, double radiusY, double radiusZ)
+   {
+      setRadii(radiusX, radiusY, radiusZ);
+   }
+
+   /**
+    * Creates a new 3D ellipsoid and initializes its pose and radii.
+    * 
+    * @param pose the position and orientation of this ellipsoid. Not modified.
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public Ellipsoid3D(Pose3D pose, double radiusX, double radiusY, double radiusZ)
+   {
+      set(pose, radiusX, radiusY, radiusZ);
+   }
+
+   /**
+    * Creates a new 3D ellipsoid and initializes its pose and radii.
+    * 
+    * @param pose the position and orientation of this ellipsoid. Not modified.
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public Ellipsoid3D(RigidBodyTransform pose, double radiusX, double radiusY, double radiusZ)
+   {
+      set(pose, radiusX, radiusY, radiusZ);
+   }
+
+   /** {@inheritDoc} */
    @Override
    public boolean containsNaN()
    {
-      return super.containsNaN() || radius.containsNaN();
+      return super.containsNaN() || radii.containsNaN();
    }
 
+   /**
+    * Tests separately and on a per component basis if the pose and the radii of this ellipsoid and
+    * {@code other}'s pose and size are equal to an {@code epsilon}.
+    * 
+    * @param other the other ellipsoid which pose and radii is to be compared against this ellipsoid
+    *           pose and radii. Not modified.
+    * @param epsilon tolerance to use when comparing each component.
+    * @return {@code true} if the two ellipsoids are equal component-wise, {@code false} otherwise.
+    */
    @Override
    public boolean epsilonEquals(Ellipsoid3D other, double epsilon)
    {
-      return radius.epsilonEquals(other.radius, epsilon) && super.epsilonEqualsPose(other, epsilon);
+      return radii.epsilonEquals(other.radii, epsilon) && super.epsilonEqualsPose(other, epsilon);
    }
 
+   /** {@inheritDoc} */
    @Override
    protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
-      double sumOfSquares = EuclidCoreTools.normSquared(x / radius.getX(), y / radius.getY(), z / radius.getZ());
+      double sumOfSquares = EuclidCoreTools.normSquared(x / radii.getX(), y / radii.getY(), z / radii.getZ());
       double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
 
       if (sumOfSquares > 1.0e-10)
@@ -67,9 +121,9 @@ public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
 
          if (normalToPack != null)
          {
-            double xScale = 1.0 / (radius.getX() * radius.getX());
-            double yScale = 1.0 / (radius.getY() * radius.getY());
-            double zScale = 1.0 / (radius.getZ() * radius.getZ());
+            double xScale = 1.0 / (radii.getX() * radii.getX());
+            double yScale = 1.0 / (radii.getY() * radii.getY());
+            double zScale = 1.0 / (radii.getZ() * radii.getZ());
 
             normalToPack.set(x, y, z);
             normalToPack.scale(xScale, yScale, zScale);
@@ -82,7 +136,7 @@ public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
       {
          if (closestPointToPack != null)
          {
-            closestPointToPack.set(0.0, 0.0, radius.getZ());
+            closestPointToPack.set(0.0, 0.0, radii.getZ());
          }
 
          if (normalToPack != null)
@@ -90,40 +144,88 @@ public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
             normalToPack.set(0.0, 0.0, 1.0);
          }
 
-         return z - radius.getZ();
+         return z - radii.getZ();
       }
    }
 
-   public void getCenter(Point3DBasics centerToPack)
+   /**
+    * Packs the 3 radii of this ellipsoid in the given tuple.
+    * 
+    * @param radiiToPack the tuple in which the radii are stored. Modified.
+    */
+   public void getRadii(Tuple3DBasics radiiToPack)
    {
-      getPosition(centerToPack);
+      radiiToPack.set(radii);
    }
 
-   public void getRadii(Vector3DBasics radiiToPack)
+   /**
+    * Gets the radius along the x-axis.
+    * 
+    * @return the x radius.
+    */
+   public double getRadiusX()
    {
-      radiiToPack.set(radius);
+      return radii.getX();
    }
 
-   public double getXRadius()
+   /**
+    * Gets the radius along the y-axis.
+    * 
+    * @return the y radius.
+    */
+   public double getRadiusY()
    {
-      return radius.getX();
+      return radii.getY();
    }
 
-   public double getYRadius()
+   /**
+    * Gets the radius along the z-axis.
+    * 
+    * @return the z radius.
+    */
+   public double getRadiusZ()
    {
-      return radius.getY();
+      return radii.getZ();
    }
 
-   public double getZRadius()
-   {
-      return radius.getZ();
-   }
-
+   /**
+    * Computes the coordinates of the possible intersections between a line and this ellipsoid.
+    * <p>
+    * In the case the line and this box do not intersect, this method returns {@code 0} and
+    * {@code firstIntersectionToPack} and {@code secondIntersectionToPack} remain unmodified.
+    * </p>
+    * 
+    * @param line the line expressed in world coordinates that may intersect this ellipsoid. Not
+    *           modified.
+    * @param firstIntersectionToPack the coordinate in world of the first intersection. Can be
+    *           {@code null}. Modified.
+    * @param secondIntersectionToPack the coordinate in world of the second intersection. Can be
+    *           {@code null}. Modified.
+    * @return the number of intersections between the line and this ellipsoid. It is either equal to
+    *         0, 1, or 2.
+    */
    public int intersectionWith(Line3D line, Point3DBasics firstIntersectionToPack, Point3DBasics secondIntersectionToPack)
    {
       return intersectionWith(line.getPoint(), line.getDirection(), firstIntersectionToPack, secondIntersectionToPack);
    }
 
+   /**
+    * Computes the coordinates of the possible intersections between a line and this ellipsoid.
+    * <p>
+    * In the case the line and this box do not intersect, this method returns {@code 0} and
+    * {@code firstIntersectionToPack} and {@code secondIntersectionToPack} remain unmodified.
+    * </p>
+    * 
+    * @param pointOnLine a point expressed in world located on the infinitely long line. Not
+    *           modified.
+    * @param lineDirection the direction expressed in world of the line. Not modified.
+    * @param firstIntersectionToPack the coordinate in world of the first intersection. Can be
+    *           {@code null}. Modified.
+    * @param secondIntersectionToPack the coordinate in world of the second intersection. Can be
+    *           {@code null}. Modified.
+    * @return the number of intersections between the line and this ellipsoid. It is either equal to
+    *         0, 1, or 2.
+    */
    public int intersectionWith(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection, Point3DBasics firstIntersectionToPack,
                                Point3DBasics secondIntersectionToPack)
    {
@@ -135,8 +237,8 @@ public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
       double dyLocal = TransformationTools.computeTransformedY(shapePose, true, lineDirection);
       double dzLocal = TransformationTools.computeTransformedZ(shapePose, true, lineDirection);
 
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndEllipsoid3D(radius.getX(), radius.getY(), radius.getZ(), xLocal, yLocal,
-                                                                                              zLocal, dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenLine3DAndEllipsoid3D(radii.getX(), radii.getY(), radii.getZ(), xLocal, yLocal, zLocal,
+                                                                                              dxLocal, dyLocal, dzLocal, firstIntersectionToPack,
                                                                                               secondIntersectionToPack);
       if (firstIntersectionToPack != null && numberOfIntersections >= 1)
          transformToWorld(firstIntersectionToPack);
@@ -145,58 +247,154 @@ public class Ellipsoid3D extends Shape3D<Ellipsoid3D>
       return numberOfIntersections;
    }
 
+   /** {@inheritDoc} */
    @Override
    protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
-      double scaledX = x / (radius.getX() + epsilon);
-      double scaledY = y / (radius.getY() + epsilon);
-      double scaledZ = z / (radius.getZ() + epsilon);
+      double scaledX = x / (radii.getX() + epsilon);
+      double scaledY = y / (radii.getY() + epsilon);
+      double scaledZ = z / (radii.getZ() + epsilon);
 
       return EuclidCoreTools.normSquared(scaledX, scaledY, scaledZ) <= 1.0;
    }
 
+   /**
+    * Copies the {@code other} ellipsoid data into {@code this}.
+    * 
+    * @param other the other ellipsoid to copy. Not modified.
+    */
    @Override
    public void set(Ellipsoid3D other)
    {
-      if (this != other)
-      {
-         setPose(other);
-         radius.set(other.radius);
-      }
+      setPose(other);
+      radii.set(other.radii);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setToNaN()
    {
       super.setToNaN();
-      radius.setToNaN();
+      radii.setToNaN();
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setToZero()
    {
       super.setToZero();
-      radius.setToZero();
+      radii.setToZero();
    }
 
-   public void setXRadius(double xRadius)
+   /**
+    * Sets the pose and radii of this ellipsoid.
+    * 
+    * @param pose the position and orientation of this ellipsoid. Not modified.
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public void set(Pose3D pose, double radiusX, double radiusY, double radiusZ)
    {
-      radius.setX(xRadius);
+      setPose(pose);
+      setRadii(radiusX, radiusY, radiusZ);
    }
 
-   public void setYRadius(double yRadius)
+   /**
+    * Sets the pose and radii of this ellipsoid.
+    * 
+    * @param pose the position and orientation of this ellipsoid. Not modified.
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public void set(RigidBodyTransform pose, double radiusX, double radiusY, double radiusZ)
    {
-      radius.setY(yRadius);
+      setPose(pose);
+      setRadii(radiusX, radiusY, radiusZ);
    }
 
-   public void setZRadius(double zRadius)
+   /**
+    * Sets the radii of this ellipsoid.
+    * 
+    * @param radii tuple holding the 3 radii of the ellipsoid.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public void setRadii(Tuple3DReadOnly radii)
    {
-      radius.setZ(zRadius);
+      setRadiusX(radii.getX());
+      setRadiusY(radii.getY());
+      setRadiusZ(radii.getZ());
    }
 
+   /**
+    * Sets the radii of this ellipsoid.
+    * 
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if any of the three radii is negative.
+    */
+   public void setRadii(double radiusX, double radiusY, double radiusZ)
+   {
+      setRadiusX(radiusX);
+      setRadiusY(radiusY);
+      setRadiusZ(radiusZ);
+   }
+
+   /**
+    * Sets the radius along the x-axis for this ellipsoid.
+    * 
+    * @param radiusX radius of the ellipsoid along the x-axis.
+    * @throws IllegalArgumentException if the argument is negative.
+    */
+   public void setRadiusX(double radiusX)
+   {
+      if (radiusX < 0.0)
+         throw new IllegalArgumentException("The x-radius of an Ellipsoid3D cannot be negative: " + radiusX);
+      radii.setX(radiusX);
+   }
+
+   /**
+    * Sets the radius along the y-axis for this ellipsoid.
+    * 
+    * @param radiusY radius of the ellipsoid along the y-axis.
+    * @throws IllegalArgumentException if the argument is negative.
+    */
+   public void setRadiusY(double radiusY)
+   {
+      if (radiusY < 0.0)
+         throw new IllegalArgumentException("The y-radius of an Ellipsoid3D cannot be negative: " + radiusY);
+      radii.setY(radiusY);
+   }
+
+   /**
+    * Sets the radius along the z-axis for this ellipsoid.
+    * 
+    * @param radiusZ radius of the ellipsoid along the z-axis.
+    * @throws IllegalArgumentException if the argument is negative.
+    */
+   public void setRadiusZ(double radiusZ)
+   {
+      if (radiusZ < 0.0)
+         throw new IllegalArgumentException("The z-radius of an Ellipsoid3D cannot be negative: " + radiusZ);
+      radii.setZ(radiusZ);
+   }
+
+   /**
+    * Provides a {@code String} representation of this ellipsoid 3D as follows:<br>
+    * Ellipsoid 3D: radii = (rx, ry, rz), pose = <br>
+    * m00, m01, m02 | m03 <br>
+    * m10, m11, m12 | m13 <br>
+    * m20, m21, m22 | m23
+    *
+    * @return the {@code String} representing this ellipsoid 3D.
+    */
    @Override
    public String toString()
    {
-      return "radius = " + radius + ", \npose = " + getPoseString() + "\n";
+      return "Ellipsoid 3D: radii = " + radii + ", pose =\n" + getPoseString();
    }
 }
