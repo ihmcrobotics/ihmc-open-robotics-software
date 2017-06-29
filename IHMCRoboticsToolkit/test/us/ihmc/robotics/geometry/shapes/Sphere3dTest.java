@@ -22,7 +22,7 @@ public class Sphere3dTest
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
-      Shape3dTestHelper testHelper = new Shape3dTestHelper();
+      Shape3DTestHelper testHelper = new Shape3DTestHelper();
       Random random = new Random(1776L);
       
       int numberOfShapes = 1000;

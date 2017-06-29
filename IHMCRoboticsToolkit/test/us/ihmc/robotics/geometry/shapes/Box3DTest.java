@@ -22,14 +22,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class Box3dTest
+public class Box3DTest
 {
 
    @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
-      Shape3dTestHelper testHelper = new Shape3dTestHelper();
+      Shape3DTestHelper testHelper = new Shape3DTestHelper();
       Random random = new Random(1776L);
 
       int numberOfShapes = 1000;
