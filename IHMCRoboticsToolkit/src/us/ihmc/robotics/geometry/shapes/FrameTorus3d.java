@@ -48,7 +48,7 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
 
    public double getThickness()
    {
-      return torus3d.getThickness();
+      return torus3d.getTubeRadius();
    }
 
    @Override
