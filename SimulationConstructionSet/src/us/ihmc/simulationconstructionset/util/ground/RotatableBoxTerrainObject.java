@@ -7,12 +7,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 
 public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    protected final BoundingBox3D boundingBox = new BoundingBox3D();
-   protected final Box3d box;
+   protected final Box3D box;
    public AppearanceDefinition appearance;
    protected Graphics3DObject linkGraphics;
 
@@ -22,7 +22,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    private final Point3D intersectionA = new Point3D();
    private final Point3D intersectionB = new Point3D();
 
-   public RotatableBoxTerrainObject(Box3d box, AppearanceDefinition appearance)
+   public RotatableBoxTerrainObject(Box3D box, AppearanceDefinition appearance)
    {
       this.box = box;
       this.appearance = appearance;
@@ -34,7 +34,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
 
    public RotatableBoxTerrainObject(RigidBodyTransform configuration, double lengthX, double widthY, double heightZ, AppearanceDefinition appearance)
    {
-      this(new Box3d(configuration, lengthX, widthY, heightZ), appearance);
+      this(new Box3D(configuration, lengthX, widthY, heightZ), appearance);
    }
 
    protected void addGraphics()

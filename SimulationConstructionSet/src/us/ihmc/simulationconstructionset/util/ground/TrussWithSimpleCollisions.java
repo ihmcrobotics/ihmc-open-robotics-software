@@ -5,11 +5,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 
 public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 {
-	public TrussWithSimpleCollisions(Box3d box, AppearanceDefinition appearance)
+	public TrussWithSimpleCollisions(Box3D box, AppearanceDefinition appearance)
 	{
 		super(box, appearance);
 	}
@@ -17,7 +17,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	public TrussWithSimpleCollisions(double[] newPoint, double trussLength,
 			double trussSide, double courseAngleDeg, AppearanceDefinition color)
 	{
-		this(new Box3d(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2), courseAngleDeg, 0),
+		this(new Box3D(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2), courseAngleDeg, 0),
 				trussSide, trussLength, trussSide), color);
 	}
 //	// TODO Auto-generated constructor stub

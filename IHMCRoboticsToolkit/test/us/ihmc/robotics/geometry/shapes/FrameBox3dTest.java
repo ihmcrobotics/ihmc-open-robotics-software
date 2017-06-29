@@ -130,7 +130,7 @@ public class FrameBox3dTest
       ReferenceFrame[] frames = {worldFrame, frameA, frameB, frameC, frameD};
 
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      Box3d expectedBox = new Box3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Box3D expectedBox = new Box3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
       FramePose actualBoxPose = new FramePose();
       FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);

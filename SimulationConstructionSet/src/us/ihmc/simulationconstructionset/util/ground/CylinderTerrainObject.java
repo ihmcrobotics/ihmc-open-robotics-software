@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
@@ -35,7 +35,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       RigidBodyTransform bottomTransform = transformToBottomOfCylinder();
       cylinder = new Cylinder3d(bottomTransform, height, radius);
 
-      Box3d box = new Box3d(location, radius * 2, radius * 2, height);
+      Box3D box = new Box3D(location, radius * 2, radius * 2, height);
       Point3D[] vertices = box.getVertices();
       Point3D minPoint = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point3D maxPoint = new Point3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);

@@ -28,7 +28,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -1254,7 +1254,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 

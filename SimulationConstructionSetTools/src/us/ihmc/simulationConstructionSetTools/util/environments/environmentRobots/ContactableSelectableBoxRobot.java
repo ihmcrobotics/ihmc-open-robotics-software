@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3D;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
@@ -66,7 +66,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
       frameBox = new FrameBox3d(ReferenceFrame.getWorldFrame(), length, width, height);
 
-      Box3d box = frameBox.getBox3d();
+      Box3D box = frameBox.getBox3d();
       boxGraphics = linkGraphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ());
       setUpGroundContactPoints(frameBox);
 
