@@ -1,5 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.utils.lidar;
 
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.shapes.Sphere3D;
 import us.ihmc.robotics.lidar.LidarScan;
 
 public class Graphics3DLidarScan

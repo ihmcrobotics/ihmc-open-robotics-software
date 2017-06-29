@@ -8,6 +8,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
 
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -18,7 +19,6 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.utils.lidar.Graphics3DLidarScan;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.shapes.Sphere3D;
 import us.ihmc.robotics.lidar.LidarScan;
 
 public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener

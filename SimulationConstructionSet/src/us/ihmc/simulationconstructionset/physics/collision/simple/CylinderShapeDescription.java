@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -9,7 +10,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
-import us.ihmc.robotics.geometry.shapes.Cylinder3D;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> implements CollisionShapeDescription<T>

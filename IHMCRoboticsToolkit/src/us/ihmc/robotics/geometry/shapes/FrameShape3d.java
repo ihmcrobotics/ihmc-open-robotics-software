@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.AbstractFrameObject;

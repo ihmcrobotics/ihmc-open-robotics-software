@@ -3,6 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.examples;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.Ellipsoid3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,7 +13,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapterTools;
-import us.ihmc.robotics.geometry.shapes.Ellipsoid3D;
 
 public class Graphics3DStaticEllipsoidExample
 {

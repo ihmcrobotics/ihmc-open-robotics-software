@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.geometry.shapes.Sphere3D;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;

@@ -4,12 +4,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.geometry.shapes.Sphere3D;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class Graphics3DWorldTest
