@@ -12,38 +12,38 @@ import us.ihmc.robotics.MathTools;
 /**
  * Ramp where the center of ramp start side is origin. 0 to X -Y/2 +Y/2 0 to Z
  */
-public class Ramp3d extends Shape3D<Ramp3d>
+public class Ramp3D extends Shape3D<Ramp3D>
 {
    private final Size3D size = new Size3D();
 
    private double rampLength;
    private double angleOfRampIncline;
 
-   public Ramp3d(Ramp3d ramp3d)
+   public Ramp3D(Ramp3D ramp3d)
    {
       setPose(ramp3d);
       setSize(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
    }
 
-   public Ramp3d(double width, double length, double height)
+   public Ramp3D(double width, double length, double height)
    {
       setSize(length, width, height);
    }
 
-   public Ramp3d(RigidBodyTransform transform, double width, double length, double height)
+   public Ramp3D(RigidBodyTransform transform, double width, double length, double height)
    {
       setPose(transform);
       setSize(length, width, height);
    }
 
-   public Ramp3d(Pose3D pose, double width, double length, double height)
+   public Ramp3D(Pose3D pose, double width, double length, double height)
    {
       setPose(pose);
       setSize(length, width, height);
    }
 
    @Override
-   public void set(Ramp3d ramp3d)
+   public void set(Ramp3D ramp3d)
    {
       if (this != ramp3d)
       {
@@ -387,7 +387,7 @@ public class Ramp3d extends Shape3D<Ramp3d>
    }
 
    @Override
-   public boolean epsilonEquals(Ramp3d other, double epsilon)
+   public boolean epsilonEquals(Ramp3D other, double epsilon)
    {
       return size.epsilonEquals(other.size, epsilon);
    }
