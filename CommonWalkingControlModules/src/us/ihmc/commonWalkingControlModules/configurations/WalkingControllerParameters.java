@@ -581,6 +581,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownAcceleration();
 
+   /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
+   public double getBlindFootstepsHeightOffset()
+   {
+      return 0.03;
+   }
+
    public abstract double getContactThresholdForce();
 
    public abstract double getSecondContactThresholdForceIgnoringCoP();

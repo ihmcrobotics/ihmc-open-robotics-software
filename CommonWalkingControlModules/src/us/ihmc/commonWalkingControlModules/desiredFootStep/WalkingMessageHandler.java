@@ -23,11 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -40,6 +35,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WalkingMessageHandler
 {
@@ -155,16 +155,19 @@ public class WalkingMessageHandler
       }
 
       double commandFinalTransferTime = command.getFinalTransferDuration();
+
       if (commandFinalTransferTime >= 0.0)
          finalTransferTime.set(commandFinalTransferTime);
       else
          finalTransferTime.set(defaultTransferTime.getDoubleValue());
 
+      boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
+
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
          FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
-         Footstep newFootstep = createFootstep(command.getFootstep(i), newFootstepTiming.getSwingTime());
+         Footstep newFootstep = createFootstep(command.getFootstep(i), trustHeightOfFootsteps, newFootstepTiming.getSwingTime());
          upcomingFootsteps.add(newFootstep);
       }
 
@@ -530,7 +533,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataCommand footstepData, double swingTime)
+   private Footstep createFootstep(FootstepDataCommand footstepData, boolean trustHeight, double swingTime)
    {
       FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
 
@@ -550,7 +553,8 @@ public class WalkingMessageHandler
       ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, true, contactPoints);
+      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, trustHeight, contactPoints);
+
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          if (footstepData.getCustomPositionWaypoints() == null)

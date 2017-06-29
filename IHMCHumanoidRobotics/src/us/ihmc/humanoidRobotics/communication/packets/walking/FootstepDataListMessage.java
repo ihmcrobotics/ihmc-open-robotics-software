@@ -65,6 +65,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
+   /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
+   public boolean trustHeightOfFootsteps = true;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -302,6 +305,11 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public void setExecutionDelayTime(double delayTime)
    {
       this.executionDelayTime = delayTime;
+   }
+
+   public void setTrustHeightOfFootsteps(boolean trustHeight)
+   {
+      trustHeightOfFootsteps = trustHeight;
    }
 
    public FootstepDataListMessage(Random random)
