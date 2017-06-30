@@ -116,7 +116,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          HeightQuadTreeToolboxRequestCommand command = commandInputManager.pollNewestCommand(HeightQuadTreeToolboxRequestCommand.class);
 
          if (command.isQuadTreeUpdateRequested())
-            quadTreeUpdateRequested.setTrue();
+            quadTreeUpdateRequested.setValue(true);
 
          if (command.isClearQuadTreeRequested())
          {
@@ -180,7 +180,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          rootJoint.getTranslation(rootJointPosition);
          robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
          reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
-         quadTreeUpdateRequested.setFalse();
+         quadTreeUpdateRequested.setValue(false);
       }
    }
 
