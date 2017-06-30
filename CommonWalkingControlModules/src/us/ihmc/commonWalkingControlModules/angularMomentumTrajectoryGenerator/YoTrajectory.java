@@ -363,10 +363,10 @@ public class YoTrajectory
     */
    public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
    {
-      if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
+      //if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
          return polynomial.getXPowersDerivativeVector(order, x);
-      else
-         return null;
+      //else
+      //   return null;
    }
 
    public String toString()
