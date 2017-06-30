@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SwingCoPTrajectory implements CoPTrajectory
 {
@@ -21,11 +21,11 @@ public class SwingCoPTrajectory implements CoPTrajectory
    private final YoInteger numberOfSegments;
    private final YoInteger currentSegment;
 
-   private final YoFramePolynomial3D swingShiftSegment;
-   private final YoFramePolynomial3D swingToeShiftSegment;
-   private final YoFramePolynomial3D swingConstantSegment;
+   private final YoFrameTrajectory3D swingShiftSegment;
+   private final YoFrameTrajectory3D swingToeShiftSegment;
+   private final YoFrameTrajectory3D swingConstantSegment;
 
-   private final List<YoFramePolynomial3D> swingSegments = new ArrayList<>();
+   private final List<YoFrameTrajectory3D> swingSegments = new ArrayList<>();
 
    private final FramePoint intermediatePoint = new FramePoint();
 
@@ -41,9 +41,9 @@ public class SwingCoPTrajectory implements CoPTrajectory
       numberOfSegments = new YoInteger(namePrefix + stepNumber + "SwingNumberOfSegments", registry);
       currentSegment = new YoInteger(namePrefix + stepNumber + "SwingCurrentSegment", registry);
 
-      swingShiftSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingShiftSegment", 5, referenceFrame, registry);
-      swingToeShiftSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingToeShiftSegment", 5, referenceFrame, registry);
-      swingConstantSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "SwingConstantSegment", 1, referenceFrame, registry);
+      swingShiftSegment = new YoFrameTrajectory3D(namePrefix + stepNumber + "SwingShiftSegment", 5, referenceFrame, registry);
+      swingToeShiftSegment = new YoFrameTrajectory3D(namePrefix + stepNumber + "SwingToeShiftSegment", 5, referenceFrame, registry);
+      swingConstantSegment = new YoFrameTrajectory3D(namePrefix + stepNumber + "SwingConstantSegment", 1, referenceFrame, registry);
    }
 
    @Override
@@ -139,7 +139,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
    }
 
    @Override
-   public List<YoFramePolynomial3D> getPolynomials()
+   public List<YoFrameTrajectory3D> getPolynomials()
    {
       return swingSegments;
    }
