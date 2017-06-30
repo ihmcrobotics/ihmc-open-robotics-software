@@ -297,6 +297,12 @@ public class YoTrajectory3D
       zTrajectory.setConstant(z.getZ());
    }
    
+   public void setConstant(double t0, double tFinal, Point3DReadOnly z)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
+   }
+   
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)

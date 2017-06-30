@@ -152,7 +152,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
 
    public void computeOnePointPerFoot(FramePoint cop)
    {
-      swingConstantSegment.setConstant(cop);
+      swingConstantSegment.setConstant(0.0, swingDuration.getDoubleValue(), cop);
       swingSegments.add(swingConstantSegment);
 
       numberOfSegments.set(1);
@@ -169,7 +169,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
       {
       case CUBIC:
          swingShiftSegment.setCubicUsingIntermediatePoint(0.0, intermediateDuration, shiftDuration, heelCoP, intermediatePoint, ballCoP);
-         swingConstantSegment.setConstant(ballCoP);
+         swingConstantSegment.setConstant(shiftDuration, swingDuration.getDoubleValue(), ballCoP);
 
          swingSegments.add(swingShiftSegment);
          swingSegments.add(swingConstantSegment);
@@ -179,7 +179,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
       default:
          swingShiftSegment.setLinear(0.0, intermediateDuration, heelCoP, intermediatePoint);
          swingToeShiftSegment.setLinear(intermediateDuration, shiftDuration,  intermediatePoint, ballCoP);
-         swingConstantSegment.setConstant(ballCoP);
+         swingConstantSegment.setConstant(shiftDuration, swingDuration.getDoubleValue(), ballCoP);
 
          swingSegments.add(swingShiftSegment);
          swingSegments.add(swingToeShiftSegment);
@@ -209,7 +209,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
          break;
       }
 
-      swingConstantSegment.setConstant(toeCoP);
+      swingConstantSegment.setConstant(shiftDuration, swingDuration.getDoubleValue(), toeCoP);
 
       swingSegments.add(swingShiftSegment);
       swingSegments.add(swingToeShiftSegment);

@@ -122,6 +122,13 @@ public class YoFrameTrajectory3D extends YoTrajectory3D // TODO implements Frame
 
       setConstant(z.getPoint());
    }
+   
+   public void setConstant(double t0, double tFinal, FramePoint z)
+   {
+      z.checkReferenceFrameMatch(referenceFrame);
+
+      setConstant(t0, tFinal, z.getPoint());
+   }
 
    public void setCubic(double t0, double tFinal, FramePoint z0, FramePoint zFinal)
    {
