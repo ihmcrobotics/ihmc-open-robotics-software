@@ -253,10 +253,10 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpAccelerationDesiredCurrent, ACCELERATION, timeCurrentPhase.getDoubleValue());
          
          timeCurrentPhase.set(timeCurrentPhase.getDoubleValue() + 0.006);
-         if(timeCurrentPhase.getDoubleValue() > 0.8)
-         {
-            timeCurrentPhase.set(0.8);
-         }
+//         if(timecurrentphase.getdoublevalue() > 0.8)
+//         {
+//            timecurrentphase.set(0.8);
+//         }
       }
    }
 
