@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ReferenceCMPTrajectoryGenerator
 {
@@ -112,8 +111,8 @@ public class ReferenceCMPTrajectoryGenerator
 
          for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
-            YoFramePolynomial3D cmpSegment = transferCMPTrajectory.getNextSegment();
-            YoFramePolynomial3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
 
             cmpSegment.set(copSegment);
          }
@@ -122,8 +121,8 @@ public class ReferenceCMPTrajectoryGenerator
          CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
          for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
-            YoFramePolynomial3D cmpSegment = swingCMPTrajectory.getNextSegment();
-            YoFramePolynomial3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
+            YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
+            YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
 
             cmpSegment.set(copSegment);
          }
@@ -135,7 +134,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFramePolynomial3D cmpSegment = transferCMPTrajectory.getNextSegment();
+         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
          cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
       }
 
@@ -153,8 +152,8 @@ public class ReferenceCMPTrajectoryGenerator
       CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(0);
       for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFramePolynomial3D cmpSegment = swingCMPTrajectory.getNextSegment();
-         YoFramePolynomial3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
+         YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
+         YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
 
          cmpSegment.set(copSegment);
       }
@@ -167,8 +166,8 @@ public class ReferenceCMPTrajectoryGenerator
 
          for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
-            YoFramePolynomial3D cmpSegment = transferCMPTrajectory.getNextSegment();
-            YoFramePolynomial3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
 
             cmpSegment.set(copSegment);
          }
@@ -177,8 +176,8 @@ public class ReferenceCMPTrajectoryGenerator
          swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
          for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
-            YoFramePolynomial3D cmpSegment = swingCMPTrajectory.getNextSegment();
-            YoFramePolynomial3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
+            YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
+            YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
 
             cmpSegment.set(copSegment);
          }
@@ -190,8 +189,8 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFramePolynomial3D cmpSegment = transferCMPTrajectory.getNextSegment();
-         YoFramePolynomial3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
+         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+         YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
 
          cmpSegment.set(copSegment);
       }

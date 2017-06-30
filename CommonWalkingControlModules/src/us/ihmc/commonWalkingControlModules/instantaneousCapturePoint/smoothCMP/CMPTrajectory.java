@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CMPTrajectory
 {
@@ -19,9 +19,9 @@ public class CMPTrajectory
    private final YoInteger trajectoryIndex;
    private final YoDouble timeIntoStep;
 
-   private final YoFramePolynomial3D[] availablePolynomials = new YoFramePolynomial3D[maxNumberOfWaypoints];
+   private final YoFrameTrajectory3D[] availablePolynomials = new YoFrameTrajectory3D[maxNumberOfWaypoints];
 
-   private final List<YoFramePolynomial3D> segments = new ArrayList<>();
+   private final List<YoFrameTrajectory3D> segments = new ArrayList<>();
    private boolean haveSetActiveSegments = false;
 
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
@@ -33,7 +33,7 @@ public class CMPTrajectory
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
 
       for (int i = 0; i < maxNumberOfWaypoints; i++)
-         availablePolynomials[i] = new YoFramePolynomial3D(namePrefix + i + "Polynomial", 5, referenceFrame, registry);
+         availablePolynomials[i] = new YoFrameTrajectory3D(namePrefix + i + "Polynomial", 5, referenceFrame, registry);
    }
 
    public void reset()
@@ -47,9 +47,9 @@ public class CMPTrajectory
       haveSetActiveSegments = false;
    }
 
-   public YoFramePolynomial3D getNextSegment()
+   public YoFrameTrajectory3D getNextSegment()
    {
-      YoFramePolynomial3D activeSegment = availablePolynomials[numberOfSegments.getIntegerValue()];
+      YoFrameTrajectory3D activeSegment = availablePolynomials[numberOfSegments.getIntegerValue()];
       numberOfSegments.increment();
 
       return activeSegment;
@@ -82,7 +82,7 @@ public class CMPTrajectory
          trajectoryIndex.increment();
       }
 
-      YoFramePolynomial3D currentPolynomial = availablePolynomials[trajectoryIndex.getIntegerValue()];
+      YoFrameTrajectory3D currentPolynomial = availablePolynomials[trajectoryIndex.getIntegerValue()];
       currentPolynomial.compute(timeInState);
       currentPolynomial.getFramePosition(desiredCMPToPack);
       currentPolynomial.getFrameVelocity(desiredCMPVelocityToPack);
@@ -99,7 +99,7 @@ public class CMPTrajectory
       return currentIsLast && currentIsDone;
    }
 
-   public List<YoFramePolynomial3D> getPolynomials()
+   public List<YoFrameTrajectory3D> getPolynomials()
    {
       if (!haveSetActiveSegments)
       {

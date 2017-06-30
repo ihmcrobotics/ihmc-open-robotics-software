@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TransferCoPTrajectory implements CoPTrajectory
 {
@@ -20,14 +20,14 @@ public class TransferCoPTrajectory implements CoPTrajectory
    private final YoInteger numberOfSegments;
    private final YoInteger currentSegment;
 
-   private final YoFramePolynomial3D transferInitialSegment;
-   private final YoFramePolynomial3D transferEndSegment;
+   private final YoFrameTrajectory3D transferInitialSegment;
+   private final YoFrameTrajectory3D transferEndSegment;
 
    private final FramePoint intermediatePoint = new FramePoint();
 
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
-   private final List<YoFramePolynomial3D> transferSegments = new ArrayList<>();
+   private final List<YoFrameTrajectory3D> transferSegments = new ArrayList<>();
 
    public TransferCoPTrajectory(String namePrefix, int stepNumber, YoDouble transferDuration, YoDouble transferSplitFraction, YoVariableRegistry registry)
    {
@@ -37,8 +37,8 @@ public class TransferCoPTrajectory implements CoPTrajectory
       numberOfSegments = new YoInteger(namePrefix + stepNumber + "TransferNumberOfSegments", registry);
       currentSegment = new YoInteger(namePrefix + stepNumber + "TransferCurrentSegment", registry);
 
-      transferInitialSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "TransferInitialSegment", 5, referenceFrame, registry);
-      transferEndSegment = new YoFramePolynomial3D(namePrefix + stepNumber + "TransferEndSegment", 5, referenceFrame, registry);
+      transferInitialSegment = new YoFrameTrajectory3D(namePrefix + stepNumber + "TransferInitialSegment", 5, referenceFrame, registry);
+      transferEndSegment = new YoFrameTrajectory3D(namePrefix + stepNumber + "TransferEndSegment", 5, referenceFrame, registry);
    }
 
    @Override
@@ -110,7 +110,7 @@ public class TransferCoPTrajectory implements CoPTrajectory
    }
 
    @Override
-   public List<YoFramePolynomial3D> getPolynomials()
+   public List<YoFrameTrajectory3D> getPolynomials()
    {
       return transferSegments;
    }

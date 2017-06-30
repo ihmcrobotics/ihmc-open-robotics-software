@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
-
-import java.util.List;
 
 public interface CoPTrajectory
 {
@@ -14,6 +14,6 @@ public interface CoPTrajectory
    public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
    public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack, FrameVector desiredCoPAccelerationToPack);
 
-   public List<YoFramePolynomial3D> getPolynomials();
+   public List<YoFrameTrajectory3D> getPolynomials();
    public int getNumberOfSegments();
 }

@@ -67,6 +67,18 @@ public class CoPPointsInFoot
    {
       copLocations.get(waypointNumber).set(location);
    }
+   
+   public void set(CoPPointsInFoot copPoints)
+   {      
+      List<YoFramePointInMultipleFrames> newCoPLocations = copPoints.copLocations;
+      if(newCoPLocations.size() >  this.maxNumberOfPointsPerFoot)
+         return;      
+      int index = 0;
+      for(; index < newCoPLocations.size(); index++)
+         copLocations.get(index).setIncludingFrame(newCoPLocations.get(index));      
+      for(;index < this.maxNumberOfPointsPerFoot; index++)
+         copLocations.get(index).setToNaN();
+   }
 
    public void set(int waypointNumber, YoFramePoint location)
    {
