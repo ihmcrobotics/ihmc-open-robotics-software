@@ -39,14 +39,14 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    @Override
    public void set(T other)
    {
-      setQueueqableCommandVariables(other);
+      setQueueableCommandVariables(other);
       set(other.getTrajectoryPointLists());
    }
 
    @Override
    public void set(M message)
    {
-      setQueueqableCommandVariables(message);
+      setQueueableCommandVariables(message);
       set(message.getTrajectoryPointLists());
    }
 

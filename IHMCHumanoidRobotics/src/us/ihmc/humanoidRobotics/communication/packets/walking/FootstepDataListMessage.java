@@ -7,6 +7,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -26,18 +27,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
-public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
+public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
-
-   @RosExportedField(documentation = "When OVERRIDE is chosen:"
-         + "\n - All previously sent footstep lists will be overriden, regardless of their execution mode"
-         + "\n - A footstep can be overridden up to end of transfer. Once the swing foot leaves the ground it cannot be overridden"
-         + "\n When QUEUE is chosen:"
-         + "\n This footstep list will be queued with previously sent footstep lists, regardless of their execution mode"
-         + "\n - The trajectory time and swing time of all queued footsteps will be overwritten with this message's values.")
-   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
 
    @RosExportedField(documentation = "When CONTROL_DURATIONS is chosen:"
          + "\n The controller will try to achieve the swingDuration and the transferDuration specified in the message. If a"
@@ -77,6 +70,11 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double finalTransferDuration)
+   {
+      this(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
+   }
+
    /**
     *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -110,7 +108,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       this.defaultSwingDuration = defaultSwingDuration;
       this.defaultTransferDuration = defaultTransferDuration;
       this.finalTransferDuration = finalTransferDuration;
-      this.executionMode = executionMode;
+      setExecutionMode(executionMode, Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -137,7 +135,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       this.defaultSwingDuration = defaultSwingDuration;
       this.defaultTransferDuration = defaultTransferDuration;
       this.finalTransferDuration = finalTransferDuration;
-      this.executionMode = ExecutionMode.OVERRIDE;
+      setExecutionMode(ExecutionMode.OVERRIDE, Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    public ArrayList<FootstepDataMessage> getDataList()
@@ -187,11 +185,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          return false;
       }
 
-      if (this.executionMode != otherList.executionMode)
-      {
-         return false;
-      }
-
       if (this.executionTiming != otherList.executionTiming)
       {
          return false;
@@ -202,7 +195,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          return false;
       }
 
-      return true;
+      return super.epsilonEquals(otherList, epsilon);
    }
 
    @Override
@@ -231,7 +224,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       else
       {
          return ("Starting Footstep: " + startingFootstep + "\n"
-               + "\tExecution Mode: " + this.executionMode + "\n"
+               + "\tExecution Mode: " + getExecutionMode().toString() + "\n"
                + "\tExecution Timing: " + this.executionTiming + "\n"
                + "\tTransfer Duration: " + this.defaultTransferDuration + "\n"
                + "\tSwing Duration: " + this.defaultSwingDuration + "\n"
@@ -276,7 +269,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
    public void setExecutionMode(ExecutionMode executionMode)
    {
-      this.executionMode = executionMode;
+      setExecutionMode(executionMode, VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void setExecutionTiming(ExecutionTiming executionTiming)
@@ -288,20 +281,22 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    {
       return executionTiming;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
     * @return the time to delay this command in seconds
     */
+   @Override
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
+   @Override
    public void setExecutionDelayTime(double delayTime)
    {
       this.executionDelayTime = delayTime;
