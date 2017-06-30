@@ -5,10 +5,12 @@ import java.util.List;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameTrajectory3D extends YoTrajectory3D // TODO implements FrameObject<YoFrameTrajectory3D>
+public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder// TODO implements FrameObject<YoFrameTrajectory3D>
 {
    private ReferenceFrame referenceFrame;
 
@@ -40,6 +42,74 @@ public class YoFrameTrajectory3D extends YoTrajectory3D // TODO implements Frame
       this.referenceFrame = referenceFrame;
    }
 
+   /**
+    * Returns the cross product of two trajectories {@code trajTopack} = {@code traj1} x {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public static void crossProduct(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+   }
+   
+   /**
+    * Returns the cross product of two trajectories {@code trajTopack} = {@code traj1} x {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public static void multiply(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      
+   }
+   
+   /**
+    * Returns the difference of two trajectories {@code trajTopack} = {@code traj1} - {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public static void subtract(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      
+   }
+   
+   /**
+    * Returns the sum of two trajectories {@code trajTopack} = {@code traj1} + {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public static void add(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      
+   }
+   
+   /**
+    * Scales the given trajectory by the specified amount
+    * @param trajToScale
+    * @param scalar
+    */
+   public static void scale(YoFrameTrajectory3D trajToScale, double scalar)
+   {
+      
+   }
+   
+   /**
+    * Scales the given trajectory by the specified amount in each axis
+    * @param trajToScale
+    * @param scalar
+    */
+   public static void scale(YoFrameTrajectory3D trajToScale, double xScalar, double yScalar, double zScalar)
+   {
+      
+   }
+
+   
    public static YoFrameTrajectory3D[] createYoFrameTrajectory3DArray(YoTrajectory[] xTrajectory, YoTrajectory[] yTrajectory, YoTrajectory[] zTrajectory,
                                                                       ReferenceFrame referenceFrame)
    {
@@ -534,5 +604,17 @@ public class YoFrameTrajectory3D extends YoTrajectory3D // TODO implements Frame
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
+   }
+   
+   @Override
+   public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
+   {
+      getReferenceFrame().checkReferenceFrameMatch(referenceFrameHolder.getReferenceFrame());
+   }
+
+   @Override
+   public void checkReferenceFrameMatch(ReferenceFrame frame) throws ReferenceFrameMismatchException
+   {
+      getReferenceFrame().checkReferenceFrameMatch(referenceFrame);
    }
 }
