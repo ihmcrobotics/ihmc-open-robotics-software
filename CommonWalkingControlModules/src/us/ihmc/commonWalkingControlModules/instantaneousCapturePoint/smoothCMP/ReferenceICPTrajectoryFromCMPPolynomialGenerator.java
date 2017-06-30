@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -10,6 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -177,7 +176,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
       icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
       
-      YoPolynomial cmpPolynomial = cmpTrajectories.get(0).getYoPolynomial(0);
+      YoTrajectory cmpPolynomial = cmpTrajectories.get(0).getYoTrajectory(0);
 //      PrintTools.debug("Number of segments (transfer) = " + totalNumberOfSegments.getIntegerValue());
 //      PrintTools.debug("Segment time: (initial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
    }
@@ -226,7 +225,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
       icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
       
-      YoPolynomial cmpPolynomial = cmpTrajectories.get(0).getYoPolynomial(0);
+      YoTrajectory cmpPolynomial = cmpTrajectories.get(0).getYoTrajectory(0);
 //      PrintTools.debug("Number of segments (swing) = " + totalNumberOfSegments.getIntegerValue());
 //      PrintTools.debug("Segment time: (initial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
    }
@@ -350,7 +349,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          {
             YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(dir.ordinal());
             double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
-            double time = cmpPolynomial.getXInitial();
+            double time = cmpPolynomial.getInitialTime();
             
             double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinal, time);
             icpPositionDesiredInitialMatrix.set(i, dir.ordinal(), icpPositionDesiredInitial);
@@ -363,23 +362,23 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          
          if(i == totalNumberOfSegments.getIntegerValue() - 1)
          {
-            YoPolynomial cmpPolynomial = cmpTrajectories.get(i).getYoPolynomial(0);
-            timeICPFinalSegmentInitial.set(cmpPolynomial.getXInitial());
-            timeICPFinalSegmentFinal.set(cmpPolynomial.getXFinal());
+            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+            timeICPFinalSegmentInitial.set(cmpPolynomial.getInitialTime());
+            timeICPFinalSegmentFinal.set(cmpPolynomial.getFinalTime());
 //            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
          }
          if(i == totalNumberOfSegments.getIntegerValue() - 2)
          {
-            YoPolynomial cmpPolynomial = cmpTrajectories.get(i).getYoPolynomial(0);
-            timeICPPenultimateSegmentInitial.set(cmpPolynomial.getXInitial());
-            timeICPPenultimateSegmentFinal.set(cmpPolynomial.getXFinal());
+            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+            timeICPPenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
+            timeICPPenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
 //            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
          }
          if(i == totalNumberOfSegments.getIntegerValue() - 3)
          {
-            YoPolynomial cmpPolynomial = cmpTrajectories.get(i).getYoPolynomial(0);
-            timeICPAntepenultimateSegmentInitial.set(cmpPolynomial.getXInitial());
-            timeICPAntepenultimateSegmentFinal.set(cmpPolynomial.getXFinal());
+            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+            timeICPAntepenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
+            timeICPAntepenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
 //            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
          }
          
@@ -606,13 +605,13 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       for(int i = 0; i < cmpTrajectories.size(); i++)
       {
-         YoPolynomial cmpPolynomialX = cmpTrajectories.get(i).getYoPolynomial(0);
-         YoPolynomial cmpPolynomialY = cmpTrajectories.get(i).getYoPolynomial(1);
-         YoPolynomial cmpPolynomialZ = cmpTrajectories.get(i).getYoPolynomial(2);
+         YoTrajectory cmpPolynomialX = cmpTrajectories.get(i).getYoTrajectory(0);
+         YoTrajectory cmpPolynomialY = cmpTrajectories.get(i).getYoTrajectory(1);
+         YoTrajectory cmpPolynomialZ = cmpTrajectories.get(i).getYoTrajectory(2);
          
-         cmpPolynomialX.compute(cmpPolynomialX.getXFinal());
-         cmpPolynomialY.compute(cmpPolynomialY.getXFinal());
-         cmpPolynomialZ.compute(cmpPolynomialZ.getXFinal());
+         cmpPolynomialX.compute(cmpPolynomialX.getFinalTime());
+         cmpPolynomialY.compute(cmpPolynomialY.getFinalTime());
+         cmpPolynomialZ.compute(cmpPolynomialZ.getFinalTime());
          
          FramePoint cmpPositionDesired = cmpDesiredFinalPositions.get(i);
          cmpPositionDesired.set(cmpPolynomialX.getPosition(), cmpPolynomialY.getPosition(), cmpPolynomialZ.getPosition());

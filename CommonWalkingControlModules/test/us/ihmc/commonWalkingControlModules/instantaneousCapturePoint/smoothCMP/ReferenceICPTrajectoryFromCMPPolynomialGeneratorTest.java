@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import cern.colt.Arrays;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -26,7 +27,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       //linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
-      YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
+      YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       
       int numTrials = 9;
       for(int i = 0; i < numTrials; i++)
@@ -54,7 +55,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
          
          DenseMatrix64F polynomialCoefficientVector =  linear.getCoefficientsVector();
          
-         linear.compute(linear.getXFinal());
+         linear.compute(linear.getFinalTime());
          double icpPositionDesiredFinal = linear.getPosition();
          
          double icpPolynomial = calculateICPQuantityScalar(alphaBetaPrime, gammaPrime, polynomialCoefficientVector, icpPositionDesiredFinal);
@@ -76,7 +77,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       //linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
-      YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
+      YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       
       int numTrials = 9;
       for(int i = 0; i < numTrials; i++)
@@ -123,17 +124,17 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       }
    }
    
-   public double calculateICPLinearManual(YoPolynomial linear, double icpPositionDesiredFinal, double t, double omega0)
+   public double calculateICPLinearManual(YoTrajectory linear, double icpPositionDesiredFinal, double t, double omega0)
    {
       double icpManual = 0.0;
       
-      linear.compute(linear.getXInitial());
+      linear.compute(linear.getInitialTime());
       double cmpRefInit = linear.getPosition();
       
-      linear.compute(linear.getXFinal());
+      linear.compute(linear.getFinalTime());
       double cmpRefFinal = linear.getPosition();
       
-      double T = linear.getXFinal();
+      double T = linear.getFinalTime();
       
       double sigmat = calculateSigmaLinear(t, T, omega0);
       double sigmaT = calculateSigmaLinear(T, T, omega0);
@@ -151,7 +152,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       return sigmaLinear;
    }
    
-   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoPolynomial cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       
@@ -171,10 +172,10 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       }
    }
    
-   private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoPolynomial cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {            
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
-      double timeSegmentTotal = cmpPolynomial.getXFinal() - cmpPolynomial.getXInitial();
+      double timeSegmentTotal = cmpPolynomial.getFinalTime() - cmpPolynomial.getInitialTime();
       
       DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(numberOfCoefficients, 1);
       DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(1, numberOfCoefficients);
@@ -192,9 +193,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
       }
    }
    
-   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoPolynomial cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {      
-      double timeSegmentTotal = cmpPolynomial.getXFinal() - cmpPolynomial.getXInitial();
+      double timeSegmentTotal = cmpPolynomial.getFinalTime() - cmpPolynomial.getInitialTime();
       
       double ddGamaPrimeValue = Math.pow(omega0, gammaDerivativeOrder)*Math.exp(omega0 * (time - timeSegmentTotal));
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
