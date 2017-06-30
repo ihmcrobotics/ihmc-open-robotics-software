@@ -9,7 +9,6 @@ import us.ihmc.util.RealtimeTools;
 
 public class FullStateBuffer extends RegistryBuffer
 {
-   private long uid = 0;
    private final double[] jointStates;
    private final List<JointHolder> jointHolders;
    private final int numberOfJointStates;
@@ -22,11 +21,6 @@ public class FullStateBuffer extends RegistryBuffer
       this.jointHolders = jointHolders;
    }
 
-   public long getUid()
-   {
-      return uid;
-   }
-   
    public static int getNumberOfJointStates(List<JointHolder> jointHolders)
    {
       int numberOfJointStates = 0;
@@ -39,8 +33,7 @@ public class FullStateBuffer extends RegistryBuffer
 
    public void update(long timestamp, long uid)
    {
-      super.update(timestamp);
-      this.uid = uid;
+      super.update(timestamp, uid);
       int offset = 0;
       
       for (int i = 0; i < jointHolders.size(); i++)
@@ -59,7 +52,7 @@ public class FullStateBuffer extends RegistryBuffer
       }
    }
 
-   public static class Builder implements us.ihmc.concurrent.Builder<FullStateBuffer>
+   public static class Builder implements us.ihmc.concurrent.Builder<FullStateBuffer> 
    {
       private final List<JointHolder> jointHolders;
       private final int variableOffset;

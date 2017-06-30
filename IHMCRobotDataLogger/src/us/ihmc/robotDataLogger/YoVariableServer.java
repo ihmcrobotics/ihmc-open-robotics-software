@@ -280,7 +280,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       RegistryBuffer buffer = ringBuffer.next();
       if(buffer != null)
       {
-         buffer.update(timestamp);
+         buffer.update(timestamp, 0);
          ringBuffer.commit();
       }
       else
@@ -290,7 +290,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    }
    private void updateMainVariableBuffer(long timestamp)
    {
-      FullStateBuffer buffer = mainBuffer.next();
+      RegistryBuffer buffer = mainBuffer.next();
       if(buffer != null)
       {
          buffer.update(timestamp, uid);
