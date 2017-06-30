@@ -6,5 +6,5 @@ public interface FootstepNodeChecker
 {
    public void setPlanarRegions(PlanarRegionsList planarRegions);
 
-   public boolean isNodeValid(FootstepNode node);
+   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode);
 }
