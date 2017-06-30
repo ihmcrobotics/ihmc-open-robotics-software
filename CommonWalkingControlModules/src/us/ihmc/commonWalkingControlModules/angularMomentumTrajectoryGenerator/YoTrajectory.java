@@ -78,8 +78,8 @@ public class YoTrajectory
    public void reset()
    {
       polynomial.reset();
-      tInitial.setToNaN();
-      tFinal.setToNaN();
+      tInitial.set(0.0);
+      tFinal.set(0.0);
    }
 
    public double getCoefficient(int i)
@@ -343,14 +343,15 @@ public class YoTrajectory
 
    public void compute(double x)
    {
-      if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
+      //FIXME if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
          polynomial.compute(x);
    }
 
    public double getIntegral(double from, double to)
    {
-      if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
-         return Double.NaN;
+      // FIXME
+      //if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
+      //   return Double.NaN;
 
       return polynomial.getIntegral(from, to);
    }
