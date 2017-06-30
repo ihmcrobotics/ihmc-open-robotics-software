@@ -350,7 +350,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
             YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(dir.ordinal());
             double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
             double time = cmpPolynomial.getInitialTime();
-            
+                        
             double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinal, time);
             icpPositionDesiredInitialMatrix.set(i, dir.ordinal(), icpPositionDesiredInitial);
             
@@ -459,9 +459,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       calculateGeneralizedGammaPrimeOnCMPSegment(generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
       CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
       
-//      PrintTools.debug(generalizedAlphaPrimeMatrix.toString());
-//      PrintTools.debug(generalizedBetaPrimeMatrix.toString());
-//      PrintTools.debug(generalizedGammaPrimeMatrix.toString());
+//      PrintTools.debug("A: " +generalizedAlphaPrimeMatrix.toString());
+//      PrintTools.debug("B: " +generalizedBetaPrimeMatrix.toString());
+//      PrintTools.debug("C: " +generalizedGammaPrimeMatrix.toString());
 //      PrintTools.debug("AB: " + generalizedAlphaBetaPrimeMatrix.toString());
 //      PrintTools.debug("P: " + polynomialCoefficientVector.toString());
 //      PrintTools.debug("ICP: " + icpPositionDesiredFinal);
