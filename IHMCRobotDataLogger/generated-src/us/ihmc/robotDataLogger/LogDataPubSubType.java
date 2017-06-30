@@ -60,7 +60,15 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    current_alignment += (100 * 1) + CDR.alignment(current_alignment, 1);
+
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += (100 * 8) + CDR.alignment(current_alignment, 8);
 
 
 	
@@ -82,7 +90,15 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    current_alignment += (data.getData().size() * 1) + CDR.alignment(current_alignment, 1);
+
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += (data.getJointStates().size() * 8) + CDR.alignment(current_alignment, 8);
 
 
 	
@@ -96,9 +112,18 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 
 	    cdr.write_type_11(data.getTimestamp());
 
+	    cdr.write_type_c(data.getType().ordinal());
+
+
+	    cdr.write_type_2(data.getRegistry());
+
 	    if(data.getData().size() <= 100)
 	    cdr.write_type_e(data.getData());else
 	        throw new RuntimeException("data field exceeds the maximum length");
+
+	    if(data.getJointStates().size() <= 100)
+	    cdr.write_type_e(data.getJointStates());else
+	        throw new RuntimeException("jointStates field exceeds the maximum length");
    }
 
    public static void read(us.ihmc.robotDataLogger.LogData data, CDR cdr)
@@ -110,7 +135,15 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    	data.setTimestamp(cdr.read_type_11());
 	    	
 
+	    	data.setType(us.ihmc.robotDataLogger.LogDataType.values[cdr.read_type_c()]);
+	    	
+
+	    	data.setRegistry(cdr.read_type_2());
+	    	
+
 	    	cdr.read_type_e(data.getData());	
+
+	    	cdr.read_type_e(data.getJointStates());	
    }
    
 	@Override
@@ -120,7 +153,13 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 			    
 			    ser.write_type_11("timestamp", data.getTimestamp());
 			    
+			    ser.write_type_c("type", data.getType());
+			    
+			    ser.write_type_2("registry", data.getRegistry());
+			    
 			    ser.write_type_e("data", data.getData());
+			    
+			    ser.write_type_e("jointStates", data.getJointStates());
 			    
 	}
 	
@@ -131,7 +170,14 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    	    
 	    			data.setTimestamp(ser.read_type_11("timestamp"));	
 	    	    
+	    			data.setType((us.ihmc.robotDataLogger.LogDataType)ser.read_type_c("type", us.ihmc.robotDataLogger.LogDataType.class));
+	    	
+	    	    
+	    			data.setRegistry(ser.read_type_2("registry"));	
+	    	    
 	    			ser.read_type_e("data", data.getData());	
+	    	    
+	    			ser.read_type_e("jointStates", data.getJointStates());	
 	    	    
 	}
 

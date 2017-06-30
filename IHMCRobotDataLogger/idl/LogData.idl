@@ -1,11 +1,24 @@
 module us{
 module ihmc{
 module robotDataLogger{
+
+	enum LogDataType
+	{
+	   	KEEP_ALIVE_PACKET,
+   	   	DATA_PACKET,
+   		VIDEO_PACKET
+	};
+
 	struct LogData
 	{
-		long long uid;
-   		long long timestamp;
+	
+	   	long long uid;
+	   	long long timestamp;
+	   	LogDataType type;
+	   	long registry;
+	
 		sequence<octet> data;
+		sequence<double> jointStates;
 	};
 };
 };
