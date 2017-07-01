@@ -27,7 +27,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointListA = new ArrayList<Point3D>();
-      Plane3D plane3dA = new Plane3D();
+      Plane3D plane3dA = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointListA.add(new Point3D( 1.0,  1.0,  0.1));
       pointListA.add(new Point3D( 1.0, -1.0,  0.1));
@@ -38,7 +38,7 @@ public class LeastSquaresZPlaneFitterTest
       Vector3D normalA = plane3dA.getNormalCopy();
       
       List<Point3D> pointListB = new ArrayList<Point3D>();
-      Plane3D plane3dB = new Plane3D();
+      Plane3D plane3dB = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       pointListB.add(new Point3D( 1.0 + 4.0,  1.0 + 4.0,  0.1));
       pointListB.add(new Point3D( 1.0 + 4.0, -1.0 + 4.0,  0.1));
       pointListB.add(new Point3D(-1.0 + 4.0,  1.0 + 4.0, -0.1));
@@ -57,7 +57,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3D plane3d = new Plane3D();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -144,7 +144,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3D plane3d = new Plane3D();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -162,7 +162,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3D plane3d = new Plane3D();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -192,7 +192,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3D plane3d = new Plane3D();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
