@@ -3,6 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.examples;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.Ellipsoid3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,11 +13,10 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapterTools;
-import us.ihmc.robotics.geometry.shapes.Ellipsoid3d;
 
 public class Graphics3DStaticEllipsoidExample
 {
-   private final ArrayList<Ellipsoid3d> ellipsoids = new ArrayList<Ellipsoid3d>();
+   private final ArrayList<Ellipsoid3D> ellipsoids = new ArrayList<Ellipsoid3D>();
    
    public void createWorld(Graphics3DAdapter graphics3DAdapter, Random random, int numberOfEllipsoids)
    {
@@ -35,7 +35,7 @@ public class Graphics3DStaticEllipsoidExample
         double yRadius = generateRandomDoubleBetween(random, minRadius, maxRadius);
         double zRadius = generateRandomDoubleBetween(random, minRadius, maxRadius);
          
-         Ellipsoid3d definition = new Ellipsoid3d(xRadius, yRadius, zRadius);
+         Ellipsoid3D definition = new Ellipsoid3D(xRadius, yRadius, zRadius);
          
          ellipsoids.add(definition);
          
@@ -53,9 +53,9 @@ public class Graphics3DStaticEllipsoidExample
    
    public boolean isPointNearSurfaceOfAnEllipsoid(Point3D point, double epsilon)
    {
-      for (Ellipsoid3d ellipsoid : ellipsoids)
+      for (Ellipsoid3D ellipsoid : ellipsoids)
       {
-         if (ellipsoid.isInsideOrOnSurface(point, epsilon)) return true;
+         if (ellipsoid.isInsideEpsilon(point, epsilon)) return true;
       }
 
       return false;
@@ -63,9 +63,9 @@ public class Graphics3DStaticEllipsoidExample
    
    public boolean isPointInsideAnEllipsoid(Point3D point, double epsilon)
    {
-      for (Ellipsoid3d ellipsoid : ellipsoids)
+      for (Ellipsoid3D ellipsoid : ellipsoids)
       {
-         if (ellipsoid.isInsideOrOnSurface(point, epsilon)) return true;
+         if (ellipsoid.isInsideEpsilon(point, epsilon)) return true;
       }
 
       return false;

@@ -5,9 +5,9 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 /**
  * Created by agrabertilton on 11/13/14.
@@ -22,7 +22,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    {
    }
 
-   public static boolean checkDistanceThreshold(List<Point3D> point3dList, Plane3d plane3d, double threshold)
+   public static boolean checkDistanceThreshold(List<Point3D> point3dList, Plane3D plane3d, double threshold)
    {
       if (plane3d.containsNaN())
          return false;
@@ -57,7 +57,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       return true;
    }
 
-   public double fitPlaneToPoints(Point2D center, List<Point3D> pointList, Plane3d planeToPack)
+   public double fitPlaneToPoints(Point2D center, List<Point3D> pointList, Plane3D planeToPack)
    {
       double squareError = fitPlaneToPoints(pointList, planeToPack);
 
@@ -68,7 +68,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    }
    
    @Override
-   public double fitPlaneToPoints(List<Point3D> pointList, Plane3d planeToPack)
+   public double fitPlaneToPoints(List<Point3D> pointList, Plane3D planeToPack)
    {
       // Given plane equation Ax+By+z +C = 0
       // find coefficients of plane that best fits the points using least squared in the z direction

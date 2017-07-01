@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -14,7 +15,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
@@ -41,7 +41,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(node.getNodeData(0));
       
-      Pose desiredHandPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D desiredHandPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       
       if(node.getDimensionOfNodeData() == 2)
       {
@@ -62,17 +62,17 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    {
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D aPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    
-   public void setWholeBodyPose(Pose desiredHandPose, double chestYaw)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double chestYaw)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -92,13 +92,13 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       this.holdCurrentPelvisHeight();
    }
 
-   public void setWholeBodyPose(Pose desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
