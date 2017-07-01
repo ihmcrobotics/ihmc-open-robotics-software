@@ -7,6 +7,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -20,7 +21,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarScanVisualizer;
 import us.ihmc.jMonkeyEngineToolkit.utils.FlatHeightMap;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
@@ -44,7 +44,7 @@ public class JMEGPULidarParallelSceneGraphTest
 
       AppearanceDefinition invisibleSphereAppearance = YoAppearance.Blue();
       invisibleSphereAppearance.setTransparency(0.5);
-      Graphics3DObject invisibleSphereObject = new Graphics3DObject(new Sphere3d(0.5), invisibleSphereAppearance);
+      Graphics3DObject invisibleSphereObject = new Graphics3DObject(new Sphere3D(0.5), invisibleSphereAppearance);
       final Graphics3DNode invisibleSphereNode = new Graphics3DNode("InvisibleSphereNode", Graphics3DNodeType.VISUALIZATION, invisibleSphereObject);
       invisibleSphereNode.translate(1.5, 1.0, 1.0);
 
@@ -52,7 +52,7 @@ public class JMEGPULidarParallelSceneGraphTest
       
       AppearanceDefinition visibleSphereAppearance = YoAppearance.Red();
       invisibleSphereAppearance.setTransparency(0.5);
-      Graphics3DObject visibleSphereObject = new Graphics3DObject(new Sphere3d(0.5), visibleSphereAppearance);
+      Graphics3DObject visibleSphereObject = new Graphics3DObject(new Sphere3D(0.5), visibleSphereAppearance);
       final Graphics3DNode visibleSphereNode = new Graphics3DNode("VisibleSphereNode", Graphics3DNodeType.JOINT, visibleSphereObject);
       visibleSphereNode.translate(1.5, -1.0, 1.0);
 
@@ -90,14 +90,14 @@ public class JMEGPULidarParallelSceneGraphTest
 
             RigidBodyTransform newTransform = new RigidBodyTransform(currentTransform);
 
-            TransformTools.rotate(newTransform, Math.PI / 1e2, Axis.X);
+            TransformTools.appendRotation(newTransform, Math.PI / 1e2, Axis.X);
 
             renderer.enqueue(new Callable<Object>()
             {
                @Override
                public Object call() throws Exception
                {
-                  TransformTools.rotate(lidarNode.getTransform(), Math.PI / 1e2, Axis.X);
+                  TransformTools.appendRotation(lidarNode.getTransform(), Math.PI / 1e2, Axis.X);
 
                   return null;
                }

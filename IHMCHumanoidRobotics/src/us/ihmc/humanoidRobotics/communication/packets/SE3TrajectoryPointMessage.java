@@ -200,6 +200,15 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      transform.inverseTransform(position);
+      transform.inverseTransform(orientation);
+      transform.inverseTransform(linearVelocity);
+      transform.inverseTransform(angularVelocity);
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");

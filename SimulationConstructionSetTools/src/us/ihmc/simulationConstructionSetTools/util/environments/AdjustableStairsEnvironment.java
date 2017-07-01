@@ -2,11 +2,11 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -141,7 +141,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -156,7 +156,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       location.multiply(tilt);
 
       location.setTranslation(new Vector3D(xCenter, yCenter, zCenter));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
