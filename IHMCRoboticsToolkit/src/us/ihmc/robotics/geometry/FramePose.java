@@ -353,7 +353,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
 
    public void rotatePoseAboutAxis(FrameVector rotatationAxis, FramePoint rotationAxisOrigin, double angle)
    {
-      ReferenceFrame frameWhoseZAxisIsRotationAxis = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
+      ReferenceFrame frameWhoseZAxisIsRotationAxis = GeometryTools.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);
 
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle);

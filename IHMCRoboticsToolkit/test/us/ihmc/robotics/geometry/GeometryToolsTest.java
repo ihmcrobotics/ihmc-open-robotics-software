@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -383,6 +384,33 @@ public class GeometryToolsTest
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, -z), epsilon));
       }
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testConstructFrameFromPointAndAxis()
+   {
+      Random random = new Random(1776L);
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FramePoint randomPoint = new FramePoint(worldFrame);
+
+      FrameVector randomVector = new FrameVector(worldFrame);
+
+      int numberOfTests = 100000;
+
+      for (int i = 0; i < numberOfTests; i++)
+      {
+         randomPoint.setIncludingFrame(FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0));
+         randomVector.setIncludingFrame(FrameVector.generateRandomFrameVector(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+
+         ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
+         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
+
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
+      }
+   }
+
 
    public static void main(String[] args)
    {

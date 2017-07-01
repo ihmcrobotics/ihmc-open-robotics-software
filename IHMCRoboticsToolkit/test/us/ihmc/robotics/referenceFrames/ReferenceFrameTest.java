@@ -15,9 +15,6 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameTest
@@ -356,35 +353,6 @@ public class ReferenceFrameTest
       tearDown();
    }
 	
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
-   public void testConstructFrameFromPointAndAxis()
-   {
-      setUp();
-      Random random = new Random(1776L);
-      updateAllFrames();
-
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      FramePoint randomPoint = new FramePoint(worldFrame);
-
-      FrameVector randomVector = new FrameVector(worldFrame);
-
-      int numberOfTests = 100000;
-
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         randomPoint.setIncludingFrame(FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0));
-         randomVector.setIncludingFrame(FrameVector.generateRandomFrameVector(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
-
-         ReferenceFrame frameA = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
-         ReferenceFrame frameB = ReferenceFrame.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
-
-         verifyTransformsAreEpsilonEqual(frameA.getTransformToWorldFrame(), frameB.getTransformToWorldFrame());
-      }
-      tearDown();
-   }
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWorldFrameSerializable()
