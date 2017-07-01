@@ -3,6 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 {

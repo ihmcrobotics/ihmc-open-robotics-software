@@ -1,7 +1,7 @@
 package us.ihmc.robotics.hyperCubeTree;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalLinearResolutionProvider implements ResolutionProvider
 {

@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on points occur

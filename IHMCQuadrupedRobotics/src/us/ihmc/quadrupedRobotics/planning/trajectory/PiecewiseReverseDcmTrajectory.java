@@ -1,9 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.List;

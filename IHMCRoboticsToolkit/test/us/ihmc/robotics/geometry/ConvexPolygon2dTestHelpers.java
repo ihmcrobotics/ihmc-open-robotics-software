@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class ConvexPolygon2dTestHelpers
 {

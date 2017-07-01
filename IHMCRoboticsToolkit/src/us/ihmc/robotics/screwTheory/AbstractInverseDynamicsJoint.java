@@ -2,9 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Base implementation for any {@link InverseDynamicsJoint} that gathers all the basic setup for a

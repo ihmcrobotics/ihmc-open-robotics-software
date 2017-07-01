@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.frames;
 import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 

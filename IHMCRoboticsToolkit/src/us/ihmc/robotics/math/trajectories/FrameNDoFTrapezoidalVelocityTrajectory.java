@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
 
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 public abstract class FrameNDoFTrapezoidalVelocityTrajectory implements ReferenceFrameHolder

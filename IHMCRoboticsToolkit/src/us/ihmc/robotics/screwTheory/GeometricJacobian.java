@@ -3,9 +3,9 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of

@@ -3,12 +3,12 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class YoFrameTrajectoryPoint<Y extends YoFrameTrajectoryPoint<Y, F, S>, F extends FrameTrajectoryPoint<F, S>, S extends Transformable & TrajectoryPointInterface<S>>
       extends YoFrameWaypoint<Y, F, S> implements TrajectoryPointInterface<Y>
