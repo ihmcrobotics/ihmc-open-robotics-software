@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
