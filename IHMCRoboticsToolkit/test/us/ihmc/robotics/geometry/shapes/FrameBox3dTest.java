@@ -147,6 +147,7 @@ public class FrameBox3dTest
          ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
 
          expectedBoxPose.changeFrame(newFrame);
+         expectedBox.setPose(expectedBoxPose.getGeometryObject());
          frameBox.changeFrame(newFrame);
          frameBox.getFramePose(actualBoxPose);
 
