@@ -2,21 +2,21 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
  * since they contain YoVariables.
  */
-public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
+public class YoFrameLineSegment2d implements ReferenceFrameHolder
 {
    /** This is where the data is stored. All operations must act on these numbers. */
    private final YoDouble firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY;

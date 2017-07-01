@@ -6,14 +6,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePlane3d extends AbstractReferenceFrameHolder
+public class FramePlane3d implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private Plane3D plane3d;
