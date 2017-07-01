@@ -14,22 +14,46 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 
 /**
+ * {@code ReferenceFrame} represents a reference coordinate frame.
  * <p>
- * ReferenceFrame
+ * {@code ReferenceFrame}s are organized as a tree structure. A root reference frame such
+ * {@link #worldFrame} represents a global coordinate system with not parent. From this root frame,
+ * children frame, with constant or variable transforms to the root, can be added recursively to
+ * form the tree structure. This structure allows to define each reference frame with a unmodifiable
+ * parent frame and their transform, i.e, a {@code RigidBodyTransform} providing both position and
+ * orientation, with respect to that same parent frame. The transform to the root reference frame is
+ * then internally computed by computing the path from each reference frame to the root.
  * </p>
- *
  * <p>
- * Description: ReferenceFrame is used to represent a reference coordinate frame. One constructor
- * allows the creation of a "root" frame with no parent. The other creates a child frame that has a
- * reference and transform to a parent. HumanoidReferenceFrames are used in classes like FramePoint
- * to indicate which frame the point is defined in.
+ * The most common ways to create a new {@code ReferenceFrame} are:
+ * <ul>
+ * <li>Using one of the constructors to create either a root reference frame or a child reference
+ * frame. In both cases, the method {@link #updateTransformToParent(RigidBodyTransform)} has to be
+ * overrided. When creating a root reference frame, the method should be empty, while creating a
+ * child reference frame the implementation of the method is used to update the transform of the
+ * child frame with respect to its parent.
+ * <li>Using one of the static methods to create a reference frame with an unchanging transform with
+ * respect to its parent.
+ * <li>Look for extensions of {@code ReferenceFrame}.
+ * </ul>
  * </p>
- *
+ * <p>
+ * Using {@code ReferenceFrame}, a geometry, such as a point, a line, or a convex polygon, can
+ * easily be expressed in its local coordinate system and then transformed to know its coordinates
+ * from another coordinate system perspective. For instance, the location of the toes of a bipedal
+ * robot can be easily determined in the local foot reference frame, then can be easily transformed
+ * to the world frame or pelvis frame to know its location from the perspective of world or the
+ * pelvis.
+ * </p>
+ * <p>
+ * {@code ReferenceFrame} is only the base class of the reference frame framework. Several classes
+ * allows for avoiding the burden of tracking to what frame a geometry is attached and how to
+ * express a geometry in a different frame.
+ * </p>
  */
 public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeHolder
 {
@@ -180,11 +204,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint point, FrameVector zAxis)
    {
-      point.checkReferenceFrameMatch(zAxis.getReferenceFrame());
-
-      RigidBodyTransform transformToParent = TransformTools.createTransformFromPointAndZAxis(point, zAxis);
-
-      return constructFrameWithUnchangingTransformToParent(frameName, point.getReferenceFrame(), transformToParent);
+      return constructReferenceFrameFromPointAndAxis(frameName, point, Axis.Z, zAxis);
    }
 
    /**
@@ -207,36 +227,15 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     */
    public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint point, Axis axisToAlign, FrameVector alignAxisWithThis)
    {
-      point.checkReferenceFrameMatch(alignAxisWithThis.getReferenceFrame());
-
-      FrameVector referenceNormal = new FrameVector();
-
-      switch (axisToAlign)
-      {
-      case X:
-         referenceNormal.setIncludingFrame(point.getReferenceFrame(), 1.0, 0.0, 0.0);
-         break;
-      case Y:
-         referenceNormal.setIncludingFrame(point.getReferenceFrame(), 0.0, 1.0, 0.0);
-         break;
-      case Z:
-         referenceNormal.setIncludingFrame(point.getReferenceFrame(), 0.0, 0.0, 1.0);
-         break;
-
-      default:
-         break;
-      }
+      ReferenceFrame parentFrame = point.getReferenceFrame();
+      alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
 
       AxisAngle rotationToDesired = new AxisAngle();
-      alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign.getAxisVector(), alignAxisWithThis.getVector(), rotationToDesired);
 
-      RigidBodyTransform transformToDesired = new RigidBodyTransform();
+      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point.getPoint());
 
-      transformToDesired.setRotation(rotationToDesired);
-      transformToDesired.setTranslation(point.getPoint());
-
-      return constructFrameWithUnchangingTransformToParent(frameName, point.getReferenceFrame(), transformToDesired);
+      return constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }
 
    /**
@@ -719,10 +718,10 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       try
       {
          verifySameRoots(desiredFrame);
-         
+
          efficientComputeTransform();
          desiredFrame.efficientComputeTransform();
-         
+
          if (desiredFrame.inverseTransformToRoot != null)
          {
             if (transformToRoot != null)
@@ -749,7 +748,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
       catch (NotARotationMatrixException e)
       {
-         throw new NotARotationMatrixException("Caught exception, this frame: " + frameName + ", other frame: " + desiredFrame.getName() + ", exception:/n" + e.getMessage());
+         throw new NotARotationMatrixException("Caught exception, this frame: " + frameName + ", other frame: " + desiredFrame.getName() + ", exception:/n"
+               + e.getMessage());
       }
    }
 
