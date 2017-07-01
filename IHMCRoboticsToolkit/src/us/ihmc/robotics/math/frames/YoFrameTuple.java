@@ -10,10 +10,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -21,11 +17,15 @@ import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder implements Clearable
+public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> implements ReferenceFrameHolder, Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;

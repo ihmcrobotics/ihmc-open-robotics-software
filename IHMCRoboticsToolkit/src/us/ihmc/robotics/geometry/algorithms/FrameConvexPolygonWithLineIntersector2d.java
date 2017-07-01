@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry.algorithms;
 
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 
 public class FrameConvexPolygonWithLineIntersector2d
 {
@@ -64,7 +64,7 @@ public class FrameConvexPolygonWithLineIntersector2d
       }
    }
 
-   private void checkAndSetFrames(AbstractReferenceFrameHolder frameObject1, AbstractReferenceFrameHolder frameObject2)
+   private void checkAndSetFrames(ReferenceFrameHolder frameObject1, ReferenceFrameHolder frameObject2)
    {
       frameObject1.checkReferenceFrameMatch(frameObject2);
       intersectionPointOne.setToZero(frameObject1.getReferenceFrame());

@@ -12,9 +12,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 
 /**
@@ -884,7 +884,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @param referenceFrameHolder the query holding a reference frame.
     * @throws ReferenceFrameMismatchException if the query holds onto a different frame than this.
     */
-   public void checkReferenceFrameMatch(AbstractReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
+   public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
    {
       checkReferenceFrameMatch(referenceFrameHolder.getReferenceFrame());
    }

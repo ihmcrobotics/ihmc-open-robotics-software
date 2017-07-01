@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements FrameObject<F>
+public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G extends GeometryObject<G>> implements ReferenceFrameHolder, FrameObject<F>
 {
    private final G geometryObject;
    protected ReferenceFrame referenceFrame;

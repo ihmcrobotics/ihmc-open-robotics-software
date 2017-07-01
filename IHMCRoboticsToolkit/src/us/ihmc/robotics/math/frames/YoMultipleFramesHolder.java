@@ -2,9 +2,10 @@ package us.ihmc.robotics.math.frames;
 
 import java.util.List;
 
+import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public interface YoMultipleFramesHolder
+public interface YoMultipleFramesHolder extends ReferenceFrameHolder
 {
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame);
 
@@ -22,5 +23,6 @@ public interface YoMultipleFramesHolder
 
    public void setToNaN(ReferenceFrame desiredReferenceFrame);
 
+   @Override
    public ReferenceFrame getReferenceFrame();
 }
