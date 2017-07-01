@@ -7,6 +7,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -96,7 +97,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
     */
    public static void scale(YoFrameTrajectory3D trajToScale, double scalar)
    {
-      
+      trajToScale.xTrajectory.scale(scalar);
+      trajToScale.yTrajectory.scale(scalar);
+      trajToScale.zTrajectory.scale(scalar);
    }
    
    /**
@@ -106,7 +109,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
     */
    public static void scale(YoFrameTrajectory3D trajToScale, double xScalar, double yScalar, double zScalar)
    {
-      
+      trajToScale.xTrajectory.scale(xScalar);
+      trajToScale.yTrajectory.scale(yScalar);
+      trajToScale.zTrajectory.scale(zScalar);
    }
 
    
@@ -616,5 +621,10 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    public void checkReferenceFrameMatch(ReferenceFrame frame) throws ReferenceFrameMismatchException
    {
       getReferenceFrame().checkReferenceFrameMatch(referenceFrame);
+   }
+   
+   public int getNumberOfCoefficients()
+   {      
+      return Math.max(Math.max(xTrajectory.getNumberOfCoefficients(), yTrajectory.getNumberOfCoefficients()), zTrajectory.getNumberOfCoefficients());
    }
 }

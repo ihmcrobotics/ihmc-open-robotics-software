@@ -197,6 +197,23 @@ public class YoTrajectory3D
       return yoTrajectory3Ds;
    }
 
+   public static void scale(YoTrajectory3D traj, double scalarX, double scalarY, double scalarZ)
+   {
+      traj.xTrajectory.scale(scalarX);
+      traj.yTrajectory.scale(scalarY);
+      traj.zTrajectory.scale(scalarX);
+   }
+   
+   public static void scale(YoTrajectory3D traj, double scalar)
+   {
+      scale(traj, scalar, scalar, scalar);
+   }
+   
+   public void scale(double scalar)
+   {
+      scale(this, scalar);
+   }
+   
    public void compute(double t)
    {
       xTrajectory.compute(t);
