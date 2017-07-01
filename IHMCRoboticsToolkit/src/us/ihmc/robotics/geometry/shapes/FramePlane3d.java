@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,8 +12,6 @@ import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePlane3d implements ReferenceFrameHolder
 {

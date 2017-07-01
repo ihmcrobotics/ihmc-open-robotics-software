@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public interface FramePoint2dReadOnly
 {

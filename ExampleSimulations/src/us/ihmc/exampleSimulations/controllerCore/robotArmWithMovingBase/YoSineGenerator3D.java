@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -9,7 +10,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoSineGenerator3D implements PositionTrajectoryGenerator
 {

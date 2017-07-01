@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.math.frames.YoFrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoArtifactDemo
 {

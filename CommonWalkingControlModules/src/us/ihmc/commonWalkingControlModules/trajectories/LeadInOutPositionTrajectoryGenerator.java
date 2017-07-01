@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -25,7 +26,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {

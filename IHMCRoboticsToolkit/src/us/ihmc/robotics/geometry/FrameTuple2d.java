@@ -5,13 +5,13 @@ import java.io.Serializable;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2DBasics & GeometryObject<T>> extends AbstractFrameObject<S, T>
       implements Serializable

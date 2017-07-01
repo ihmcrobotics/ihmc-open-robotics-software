@@ -4,6 +4,7 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleF
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {

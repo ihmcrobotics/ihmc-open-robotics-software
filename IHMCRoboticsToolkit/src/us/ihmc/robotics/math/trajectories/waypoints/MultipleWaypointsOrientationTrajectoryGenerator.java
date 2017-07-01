@@ -4,6 +4,7 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectory
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MultipleWaypointsOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {

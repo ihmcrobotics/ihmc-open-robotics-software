@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState

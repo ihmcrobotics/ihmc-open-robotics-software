@@ -5,12 +5,12 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends AbstractFrameObject<F, S>, S extends GeometryObject<S>>

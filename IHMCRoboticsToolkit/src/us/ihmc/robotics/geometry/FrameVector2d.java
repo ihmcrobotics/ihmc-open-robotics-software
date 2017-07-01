@@ -3,10 +3,10 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on vectors occur

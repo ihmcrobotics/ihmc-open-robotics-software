@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.frameObjects;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -10,7 +11,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameEuclideanWaypoint extends AbstractFrameObject<FrameEuclideanWaypoint, EuclideanWaypoint>
       implements EuclideanWaypointInterface<FrameEuclideanWaypoint>

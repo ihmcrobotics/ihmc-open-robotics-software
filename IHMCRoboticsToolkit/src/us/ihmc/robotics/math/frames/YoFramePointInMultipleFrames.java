@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -10,7 +11,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameTuple2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMultipleFramesHolder
 {

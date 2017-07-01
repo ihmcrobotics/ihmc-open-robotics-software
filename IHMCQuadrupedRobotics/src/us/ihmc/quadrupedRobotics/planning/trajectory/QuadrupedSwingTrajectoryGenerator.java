@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -14,7 +15,6 @@ import us.ihmc.robotics.math.trajectories.Finishable;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 

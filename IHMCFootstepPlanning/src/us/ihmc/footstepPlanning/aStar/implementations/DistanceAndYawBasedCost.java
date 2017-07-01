@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.aStar.implementations;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.aStar.FootstepCost;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
@@ -7,7 +8,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DistanceAndYawBasedCost implements FootstepCost
 {

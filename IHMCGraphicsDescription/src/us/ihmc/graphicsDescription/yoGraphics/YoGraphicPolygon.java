@@ -1,6 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
 

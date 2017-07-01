@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>

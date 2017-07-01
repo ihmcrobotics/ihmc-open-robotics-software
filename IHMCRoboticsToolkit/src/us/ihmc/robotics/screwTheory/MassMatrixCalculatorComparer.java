@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MassMatrixCalculatorComparer
 {

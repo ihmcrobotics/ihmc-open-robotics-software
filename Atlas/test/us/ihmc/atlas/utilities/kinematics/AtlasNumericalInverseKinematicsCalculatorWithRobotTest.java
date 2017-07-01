@@ -11,10 +11,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.NumericalInverseKinematicsCalculatorWithRobotTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends NumericalInverseKinematicsCalculatorWithRobotTest

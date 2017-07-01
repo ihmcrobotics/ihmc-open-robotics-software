@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public interface ContactPointInterface
 {

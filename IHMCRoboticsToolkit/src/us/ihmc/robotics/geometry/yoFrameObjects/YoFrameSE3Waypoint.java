@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, FrameSE3Waypoint, SE3Waypoint>
       implements SE3WaypointInterface<YoFrameSE3Waypoint>
