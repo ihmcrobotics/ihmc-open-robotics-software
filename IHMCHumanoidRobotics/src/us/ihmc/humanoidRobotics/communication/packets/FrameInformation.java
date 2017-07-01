@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.geometry.FrameObject;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
