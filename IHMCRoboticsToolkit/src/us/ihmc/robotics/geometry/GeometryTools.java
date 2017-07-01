@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -16,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -845,5 +848,56 @@ public class GeometryTools
       if (!MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon))
          return false;
       return true;
+   }
+
+   /**
+    * Creates a new reference frame such that it is centered at the given {@code point} and with its
+    * z-axis aligned with the given {@code zAxis} vector.
+    * <p>
+    * Note that the parent frame is set to the reference frame the given {@code point} and
+    * {@code zAxis} are expressed in.
+    * </p>
+    *
+    * @param frameName the name of the new frame.
+    * @param point location of the reference frame's origin. Not modified.
+    * @param zAxis orientation the reference frame's z-axis. Not modified.
+    * @return the new reference frame.
+    * @throws ReferenceFrameMismatchException if {@code point} and {@code zAxis} are not expressed
+    *            in the same reference frame.
+    */
+   public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint point, FrameVector zAxis)
+   {
+      return constructReferenceFrameFromPointAndAxis(frameName, point, Axis.Z, zAxis);
+   }
+
+   /**
+    * Creates a new reference frame such that it is centered at the given {@code point} and with one
+    * of its axes aligned with the given {@code alignAxisWithThis} vector.
+    * <p>
+    * Note that the parent frame is set to the reference frame the given {@code point} and
+    * {@code alignAxisWithThis} are expressed in.
+    * </p>
+    *
+    * @param frameName the name of the new frame.
+    * @param point location of the reference frame's origin. Not modified.
+    * @param axisToAlign defines which axis of the new reference frame is to be aligned with the
+    *           given {@code alignAxisWithThis} vector.
+    * @param alignAxisWithThis the vector to which the reference frame chosen axis should be aligned
+    *           with. Not modified.
+    * @return the new reference frame.
+    * @throws ReferenceFrameMismatchException if {@code point} and {@code alignAxisWithThis} are not
+    *            expressed in the same reference frame.
+    */
+   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint point, Axis axisToAlign, FrameVector alignAxisWithThis)
+   {
+      ReferenceFrame parentFrame = point.getReferenceFrame();
+      alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
+   
+      AxisAngle rotationToDesired = new AxisAngle();
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign.getAxisVector(), alignAxisWithThis.getVector(), rotationToDesired);
+   
+      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point.getPoint());
+   
+      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }
 }
