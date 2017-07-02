@@ -23,6 +23,7 @@ public class YoTrajectory
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
+      this.name = name;      
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
       polynomial = new YoPolynomial(name + "Poly", maximumNumberOfCoefficients, registry);
@@ -131,6 +132,7 @@ public class YoTrajectory
    @Deprecated
    public void setConstant(double z)
    {
+      //FIXME
       polynomial.setConstant(z);
    }
 
@@ -386,106 +388,39 @@ public class YoTrajectory
       scale(this, scalar);
    }
 
+   public void scale(YoTrajectory traj, double scalar)
+   {
+      TrajectoryMathClass.scale(this, traj, scalar);
+   }
+
+   public void add(YoTrajectory traj1, YoTrajectory traj2)
+   {
+      TrajectoryMathClass.add(this, traj1, traj2);
+   }
+   
    public void add(YoTrajectory addTraj)
    {
-      add(this, this, addTraj);
+      add(this, addTraj);
+   }
+
+   public void subtract(YoTrajectory traj1, YoTrajectory traj2)
+   {
+      TrajectoryMathClass.subtract(this, traj1, traj2);
    }
 
    public void subtract(YoTrajectory subTraj)
    {
-      subtract(this, this, subTraj);
+      subtract(this, subTraj);
    }
-
-   public static void scale(YoTrajectory traj, double scalar)
+   
+   public void multiply(YoTrajectory traj1, YoTrajectory traj2)
    {
-      for (int i = 0; i < traj.getNumberOfCoefficients(); i++)
-         traj.polynomial.setDirectlyFast(i, traj.getCoefficient(i) * scalar);
+      TrajectoryMathClass.multiply(this, traj1, traj2);
    }
-
-   public static void add(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
+   
+   public void multiply(YoTrajectory mulTraj)
    {
-      validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
-      validateTrajectoryTimes(traj1, traj2);
-      int numberOfCoeffsToSet = Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients());
-      for (int i = 0; i < numberOfCoeffsToSet; i++)
-      {
-         tempVal = 0.0;
-         if (i < traj1.getNumberOfCoefficients())
-            tempVal += traj1.getCoefficient(i);
-         if (i < traj2.getNumberOfCoefficients())
-            tempVal += traj2.getCoefficient(i);
-         trajToPack.polynomial.setDirectlyFast(i, tempVal);
-      }
-      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
-   }
-
-   public static void subtract(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
-   {
-      validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
-      validateTrajectoryTimes(traj1, traj2);
-      int numberOfCoeffsToSet = Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients());
-      for (int i = 0; i < numberOfCoeffsToSet; i++)
-      {
-         tempVal = 0.0;
-         if (i < traj1.getNumberOfCoefficients())
-            tempVal += traj1.getCoefficient(i);
-         if (i < traj2.getNumberOfCoefficients())
-            tempVal -= traj2.getCoefficient(i);
-         trajToPack.polynomial.setDirectlyFast(i, tempVal);
-      }
-      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
-   }
-
-   private static double tempVal;
-
-   public static void multiply(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
-   {
-      validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
-      validateTrajectoryTimes(traj1, traj2);
-      int numberOfCoeffsToSet = traj1.getNumberOfCoefficients() + traj2.getNumberOfCoefficients() - 1;
-      for (int i = 0; i < numberOfCoeffsToSet; i++)
-      {
-         tempVal = 0.0;
-         for (int j = i; j >= 0; j--)
-         {
-            if (traj1.getNumberOfCoefficients() > j && traj2.getNumberOfCoefficients() > i - j)
-            {
-               System.out.println(" " + j + " " + (i - j));
-               tempVal += traj1.getCoefficient(j) * traj2.getCoefficient(i - j);
-            }
-         }
-         trajToPack.polynomial.setDirectlyFast(i, tempVal);
-      }
-      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
-   }
-
-   public static void validateTrajectoryTimes(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      if (!MathTools.epsilonCompare(traj1.getInitialTime(), traj2.getInitialTime(), Epsilons.ONE_THOUSANDTH)
-            || !MathTools.epsilonCompare(traj1.getFinalTime(), traj2.getFinalTime(), Epsilons.ONE_THOUSANDTH))
-      {
-         PrintTools.warn("Time mismatch in trajectories being added");
-         throw new InvalidParameterException();
-      }
-   }
-
-   public static void validatePackingTrajectoryForLinearCombination(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
-   {
-      if (trajToPack.getMaximumNumberOfCoefficients() < traj1.getNumberOfCoefficients()
-            || trajToPack.getMaximumNumberOfCoefficients() < traj2.getNumberOfCoefficients())
-      {
-         PrintTools.warn("Not enough coefficients to store result of trajectory addition");
-         throw new InvalidParameterException();
-      }
-   }
-
-   public static void validatePackingTrajectoryForMultiplication(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
-   {
-      if (trajToPack.getMaximumNumberOfCoefficients() < traj1.getNumberOfCoefficients() + traj2.getNumberOfCoefficients() - 1)
-      {
-         PrintTools.warn("Not enough coefficients to store result of trajectory multplication");
-         throw new InvalidParameterException();
-      }
-   }
-
+      multiply(this, mulTraj);
+   }   
+   
 }

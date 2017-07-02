@@ -580,17 +580,16 @@ public class YoPolynomial
    }
    
    /**
-    * Set a specific coefficient of the polynomial.
-    * This method should be avoided as much as possible. Use the alternative safer method {@code setDirectly(int, double)}
+    * Set a specific coefficient of the polynomial. A sequence of calls to this function should typically be followed by a call to {@code reshape(int)} later.
     * @param power
     * @param coefficient
     */   
    public void setDirectlyFast(int power, double coefficient)
    {
       if(power >= maximumNumberOfCoefficients)
-         return;      
+         return;
       if(power >= getNumberOfCoefficients())
-         numberOfCoefficients.set(power + 1);      
+         numberOfCoefficients.set(power + 1);
       a[power].set(coefficient);
    }
 
@@ -767,7 +766,7 @@ public class YoPolynomial
    public String toString()
    {
       String inString = "Polynomial: " + a[0].getDoubleValue();
-      for (int i = 1; i < a.length; i++)
+      for (int i = 1; i < getNumberOfCoefficients(); i++)
       {
          inString += " ";
          if (a[i].getDoubleValue() >= 0)
