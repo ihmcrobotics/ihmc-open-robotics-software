@@ -135,10 +135,4 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       checkReferenceFrameMatch(other);
       return pose.getOrientationDistance(other.pose);
    }
-
-   @Override
-   public String toString()
-   {
-      return "FramePose2D: " + pose + "-" + referenceFrame;
-   }
 }

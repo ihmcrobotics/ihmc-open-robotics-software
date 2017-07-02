@@ -492,17 +492,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
       return quaternion.normSquared();
    }
 
-   @Override
-   public String toString()
-   {
-      String stringToReturn = "";
-
-      stringToReturn = stringToReturn + toStringAsYawPitchRoll() + "\n";
-      stringToReturn = stringToReturn + toStringAsQuaternion();
-
-      return stringToReturn;
-   }
-
    public String toStringAsYawPitchRoll()
    {
       double[] yawPitchRoll = getYawPitchRoll();

@@ -168,12 +168,6 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
       matrix.transform(frameTupleToPack.tuple);
    }
 
-   @Override
-   public String toString()
-   {
-      return "Expressed in frame: " + referenceFrame + "\n" + matrix.toString();
-   }
-
    public void setMainDiagonal(double x, double y, double z)
    {
       setElement(0, 0, x);

@@ -306,12 +306,6 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       return new FrameLine2d(newFrame, this.line.applyTransformAndProjectToXYPlaneCopy(transform));
    }
 
-   @Override
-   public String toString()
-   {
-      return "" + this.line;
-   }
-
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);

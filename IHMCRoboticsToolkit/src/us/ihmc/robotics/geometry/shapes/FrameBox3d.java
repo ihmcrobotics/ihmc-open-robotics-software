@@ -117,17 +117,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
       box3d.setPose(transform3D);
    }
 
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(box3d.toString());
-
-      return builder.toString();
-   }
-
    public void getFramePose(FramePose framePoseToPack)
    {
       framePoseToPack.setToZero(referenceFrame);

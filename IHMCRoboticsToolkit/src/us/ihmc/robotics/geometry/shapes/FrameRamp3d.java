@@ -40,15 +40,4 @@ public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3D>
    {
       ramp3d.setPose(transform3D);
    }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(ramp3d.toString());
-
-      return builder.toString();
-   }
 }

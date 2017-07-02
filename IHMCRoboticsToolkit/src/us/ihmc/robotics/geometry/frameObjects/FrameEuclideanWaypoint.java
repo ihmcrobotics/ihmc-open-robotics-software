@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
 public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWaypoint, EuclideanWaypoint>
       implements EuclideanWaypointInterface<FrameEuclideanWaypoint>
@@ -176,11 +175,5 @@ public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWa
    {
       euclideanWaypoint.setPosition(geometryObject.getPosition());
       euclideanWaypoint.setLinearVelocity(geometryObject.getLinearVelocity());
-   }
-
-   @Override
-   public String toString()
-   {
-      return WaypointToStringTools.waypointToString(this);
    }
 }

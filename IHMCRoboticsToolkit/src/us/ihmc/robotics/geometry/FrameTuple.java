@@ -753,17 +753,4 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    {
       return new double[] {tuple.getX(), tuple.getY(), tuple.getZ()};
    }
-
-   /**
-    * toString
-    * <p/>
-    * String representation of a FrameVector (x,y,z):reference frame name
-    *
-    * @return String
-    */
-   @Override
-   public final String toString()
-   {
-      return "" + tuple + "-" + referenceFrame.getName();
-   }
 }

@@ -324,12 +324,6 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       return copy;
    }
 
-   @Override
-   public String toString()
-   {
-      return "" + lineSegment;
-   }
-
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);

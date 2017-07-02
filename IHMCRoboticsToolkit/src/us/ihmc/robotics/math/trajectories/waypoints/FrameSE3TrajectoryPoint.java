@@ -1,8 +1,5 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -427,13 +424,4 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    {
       return geometryObject.getAngularVelocityZ();
    }
-
-   @Override
-   public String toString()
-   {
-      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(getTime());
-      return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
-   }
-
 }

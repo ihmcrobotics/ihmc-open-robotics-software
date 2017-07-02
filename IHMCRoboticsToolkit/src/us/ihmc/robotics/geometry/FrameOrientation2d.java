@@ -61,12 +61,6 @@ public class FrameOrientation2d extends FrameGeometryObject<FrameOrientation2d, 
       orientation.setYaw(yaw);
    }
 
-   @Override
-   public String toString()
-   {
-      return "FrameOrientation2D: " + orientation + "-" + referenceFrame;
-   }
-
    public double difference(FrameOrientation2d other)
    {
       checkReferenceFrameMatch(other);
