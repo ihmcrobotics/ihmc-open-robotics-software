@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /**
  * @author Twan Koolen
  */
-public class FrameLine2d extends AbstractFrameObject<FrameLine2d, Line2D>
+public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 {
    private RigidBodyTransform temporaryTransformToDesiredFrame;
    protected final Line2D line;

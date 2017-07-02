@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends AbstractFrameObject<S, T> implements Serializable
+public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 

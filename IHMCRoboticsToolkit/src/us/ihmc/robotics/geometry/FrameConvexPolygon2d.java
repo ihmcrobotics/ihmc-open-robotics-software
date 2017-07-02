@@ -28,7 +28,7 @@ import us.ihmc.robotics.lists.FrameTuple2dArrayList;
  * @author IHMC Biped Team
  * @version 1.0
  */
-public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon2d, ConvexPolygon2D>
+public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon2d, ConvexPolygon2D>
 {
    protected final ConvexPolygon2D convexPolygon;
 

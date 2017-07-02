@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class FrameOrientation2d extends AbstractFrameObject<FrameOrientation2d, Orientation2D>
+public class FrameOrientation2d extends FrameGeometryObject<FrameOrientation2d, Orientation2D>
 {
    private final Orientation2D orientation;
 

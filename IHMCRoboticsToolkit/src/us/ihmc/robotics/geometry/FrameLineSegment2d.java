@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 /**
  * @author Twan Koolen
  */
-public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, LineSegment2D>
+public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, LineSegment2D>
 {
    protected final LineSegment2D lineSegment;
 

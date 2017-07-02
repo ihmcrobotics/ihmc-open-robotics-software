@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
+public class FrameLine extends FrameGeometryObject<FrameLine, Line3D>
 {
    private final Line3D line;
 

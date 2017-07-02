@@ -8,12 +8,12 @@ import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
+import us.ihmc.robotics.geometry.FrameGeometryObject;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends AbstractFrameObject<F, S>, S extends GeometryObject<S>>
+public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends FrameGeometryObject<F, S>, S extends GeometryObject<S>>
       implements YoMultipleFramesHolder, GeometryObject<Y>
 {
    private final String namePrefix;

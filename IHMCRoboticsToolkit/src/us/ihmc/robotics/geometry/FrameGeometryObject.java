@@ -6,17 +6,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 
-public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G extends GeometryObject<G>> implements ReferenceFrameHolder, FrameObject<F>
+public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G extends GeometryObject<G>> implements ReferenceFrameHolder, FrameObject<F>
 {
    private final G geometryObject;
    protected ReferenceFrame referenceFrame;
 
-   public AbstractFrameObject(G geometryObject)
+   public FrameGeometryObject(G geometryObject)
    {
       this(ReferenceFrame.getWorldFrame(), geometryObject);
    }
 
-   public AbstractFrameObject(ReferenceFrame referenceFrame, G geometryObject)
+   public FrameGeometryObject(ReferenceFrame referenceFrame, G geometryObject)
    {
       this.geometryObject = geometryObject;
       this.referenceFrame = referenceFrame;
