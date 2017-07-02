@@ -8,6 +8,7 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -987,7 +988,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       FramePoint2d[] ret = new FramePoint2d[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
-         ret[i] = new FramePoint2d(line.referenceFrame, intersection[i]);
+         ret[i] = new FramePoint2d(line.getReferenceFrame(), intersection[i]);
       }
 
       return ret;
@@ -1053,7 +1054,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       FramePoint2d[] ret = new FramePoint2d[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
-         ret[i] = new FramePoint2d(lineSegment.referenceFrame, intersection[i]);
+         ret[i] = new FramePoint2d(lineSegment.getReferenceFrame(), intersection[i]);
       }
 
       return ret;
@@ -1096,7 +1097,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    {
       checkReferenceFrameMatch(point);
 
-      closestEdgeToPack.referenceFrame = referenceFrame;
+      closestEdgeToPack.setToZero(referenceFrame);
       convexPolygon.getClosestEdge(point.getPoint(), closestEdgeToPack.lineSegment);
    }
 

@@ -66,7 +66,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
    public FrameTuple<?, ?> createFrameTuple(FrameTuple<?, ?> frameTuple)
    {
-      return createFrameTuple(frameTuple.referenceFrame, frameTuple.tuple);
+      return createFrameTuple(frameTuple.getReferenceFrame(), frameTuple.tuple);
    }
 
    protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
@@ -117,7 +117,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       testGetters(frameTuple, x, y, z);
 
       frameTuple.setIncludingFrame(randomFrame, x, y, z);
-      assertEquals(randomFrame, frameTuple.referenceFrame);
+      assertEquals(randomFrame, frameTuple.getReferenceFrame());
       assertEquals(randomFrame, frameTuple.getReferenceFrame());
       testGetters(frameTuple, x, y, z);
    }
@@ -136,7 +136,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       testGetters(frameTuple, randomTuple);
 
       frameTuple.setIncludingFrame(randomFrame, randomTuple);
-      assertEquals(randomFrame, frameTuple.referenceFrame);
+      assertEquals(randomFrame, frameTuple.getReferenceFrame());
       assertEquals(randomFrame, frameTuple.getReferenceFrame());
       testGetters(frameTuple, randomTuple);
 
@@ -211,7 +211,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    private final void assertTuplesEqual(FrameTuple<?, ?> frameTupleToTest, FrameTuple<?, ?> frameTuple2)
    {
       testGetters(frameTupleToTest, frameTuple2.getPointCopy());
-      assertEquals(frameTuple2.referenceFrame, frameTupleToTest.referenceFrame);
+      assertEquals(frameTuple2.getReferenceFrame(), frameTupleToTest.getReferenceFrame());
       assertEquals(frameTuple2.name, frameTupleToTest.name);
       assertTrue(frameTupleToTest.epsilonEquals(frameTuple2, epsilon));
    }
@@ -1419,7 +1419,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple<?, ?> frameTuple5 = createFrameTuple(theFrame, 0.0, -1.0, 8.2);
       double alpha = 0.57;
 
-      FrameTuple<?, ?> resultTuple = createFrameTuple(frameTuple4.referenceFrame, frameTuple4.getX(), frameTuple4.getY(), frameTuple4.getZ());
+      FrameTuple<?, ?> resultTuple = createFrameTuple(frameTuple4.getReferenceFrame(), frameTuple4.getX(), frameTuple4.getY(), frameTuple4.getZ());
       resultTuple.interpolate(frameTuple4, frameTuple5, alpha);
 
       assertEquals((1.0 - alpha) * frameTuple4.getX() + alpha * frameTuple5.getX(), resultTuple.getX(), epsilon);

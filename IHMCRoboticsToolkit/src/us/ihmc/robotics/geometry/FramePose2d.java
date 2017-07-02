@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;

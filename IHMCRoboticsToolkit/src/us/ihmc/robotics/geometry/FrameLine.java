@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
