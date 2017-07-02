@@ -99,7 +99,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(FrameTuple<?, ?> frameTuple)
    {
-      super(frameTuple.referenceFrame, new Point3D(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple.tuple), frameTuple.name);
    }
 
    /**
@@ -109,7 +109,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
    {
-      super(frameTuple2d.referenceFrame, new Point3D(), frameTuple2d.name);
+      super(frameTuple2d.getReferenceFrame(), new Point3D(), frameTuple2d.name);
       setXY(frameTuple2d);
    }
 

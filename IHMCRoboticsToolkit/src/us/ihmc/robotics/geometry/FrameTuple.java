@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;

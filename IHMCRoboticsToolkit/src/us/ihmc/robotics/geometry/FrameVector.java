@@ -99,7 +99,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(FrameTuple<?, ?> frameTuple)
    {
-      super(frameTuple.referenceFrame, new Vector3D(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.getReferenceFrame(), new Vector3D(frameTuple.tuple), frameTuple.name);
    }
 
    /**

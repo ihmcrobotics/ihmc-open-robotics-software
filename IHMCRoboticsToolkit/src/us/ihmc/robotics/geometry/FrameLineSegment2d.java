@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -380,7 +381,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       FramePoint2d[] ret = new FramePoint2d[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
-         ret[i] = new FramePoint2d(convexPolygon.referenceFrame, intersection[i]);
+         ret[i] = new FramePoint2d(convexPolygon.getReferenceFrame(), intersection[i]);
       }
 
       return ret;

@@ -88,7 +88,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     */
    public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
 
    /**
@@ -98,7 +98,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     */
    public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
    {
-      this(endFramePoint.referenceFrame, endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
+      this(endFramePoint.getReferenceFrame(), endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       sub(startFramePoint);
    }

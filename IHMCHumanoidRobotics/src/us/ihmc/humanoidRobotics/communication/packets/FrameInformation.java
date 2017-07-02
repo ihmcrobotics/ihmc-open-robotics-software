@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FrameGeometryObject;
 
 /**
  * This is a holder for frame related information that is passed through packages that implement

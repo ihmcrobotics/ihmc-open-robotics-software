@@ -5,10 +5,10 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.geometry.FrameGeometryObject;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

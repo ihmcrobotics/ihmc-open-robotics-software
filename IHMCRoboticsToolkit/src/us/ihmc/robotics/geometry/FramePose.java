@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -143,7 +144,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void setPoseIncludingFrame(FramePoint position, FrameOrientation orientation)
    {
       position.checkReferenceFrameMatch(orientation);
-      referenceFrame = position.referenceFrame;
+      referenceFrame = position.getReferenceFrame();
       setPose(position.getPoint(), orientation.getQuaternion());
    }
 

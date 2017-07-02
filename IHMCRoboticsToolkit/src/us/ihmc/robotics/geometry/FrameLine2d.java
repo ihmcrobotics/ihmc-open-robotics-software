@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -67,7 +68,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public FrameLine2d(FrameLineSegment2d frameLineSegment2d)
    {
-      this(frameLineSegment2d.referenceFrame, frameLineSegment2d.lineSegment.getFirstEndpoint(), frameLineSegment2d.lineSegment.getSecondEndpoint());
+      this(frameLineSegment2d.getReferenceFrame(), frameLineSegment2d.lineSegment.getFirstEndpoint(), frameLineSegment2d.lineSegment.getSecondEndpoint());
    }
 
    public Line2D getLine2d()
@@ -193,7 +194,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public void setIncludingFrame(FramePoint2d endpoint0, FramePoint2d endpoint1)
    {
       endpoint0.checkReferenceFrameMatch(endpoint1);
-      this.referenceFrame = endpoint0.referenceFrame;
+      this.referenceFrame = endpoint0.getReferenceFrame();
       this.line.set(endpoint0.getPoint(), endpoint1.getPoint());
    }
 
@@ -357,7 +358,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       FramePoint2d[] ret = new FramePoint2d[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
-         ret[i] = new FramePoint2d(convexPolygon.referenceFrame, intersection[i]);
+         ret[i] = new FramePoint2d(convexPolygon.getReferenceFrame(), intersection[i]);
       }
 
       return ret;
