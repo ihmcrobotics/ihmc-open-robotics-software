@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 
-public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G extends GeometryObject<G>> implements ReferenceFrameHolder, FrameObject<F>
+public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G extends GeometryObject<G>> implements ReferenceFrameHolder, GeometryObject<F>
 {
    private final G geometryObject;
    protected ReferenceFrame referenceFrame;
@@ -35,7 +35,19 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       geometryObject.set(other.getGeometryObject());
    }
 
-   @Override
+   /**
+    * Sets this frame object to zero at the origin of the given reference frame, then changes back
+    * to this objects current frame.
+    * 
+    * @param referenceFrame reference frame to set to
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      ReferenceFrame thisReferenceFrame = getReferenceFrame();
+      setToZero(referenceFrame);
+      changeFrame(thisReferenceFrame);
+   }
+
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       if (desiredFrame != referenceFrame)
@@ -59,7 +71,6 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       // otherwise: in the right frame already, so do nothing
    }
 
-   @Override
    public void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
    {
       geometryObject.applyTransform(transformToNewFrame);
@@ -84,7 +95,6 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       geometryObject.setToZero();
    }
 
-   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -97,7 +107,6 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       geometryObject.setToNaN();
    }
 
-   @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -140,8 +149,10 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
    @Override
    public boolean epsilonEquals(F other, double epsilon)
    {
-      if (other == null) return false;
-      if (referenceFrame != other.referenceFrame) return false;
+      if (other == null)
+         return false;
+      if (referenceFrame != other.referenceFrame)
+         return false;
       return this.geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
    }
 
