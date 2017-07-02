@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -636,6 +637,12 @@ public class CapturePointTools
          nextEntryCornerPoint = entryCornerPoint;
       }
    }
+   
+   //TODO: implement
+   public static void computeDesiredCornerPointsPolynomialSegment()
+   {
+      
+   }
 
    /**
     * Given a desired capturePoint location and an initial position of the capture point, compute
@@ -725,6 +732,12 @@ public class CapturePointTools
       else
          desiredCapturePointToPack.set(initialCapturePoint);
    }
+   
+   //TODO: implement
+   public static void computeDesiredCapturePointPositionPolynomialSegment(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, YoFramePoint desiredCapturePointToPack)
+   {
+      
+   }
 
    /**
     * Compute the desired capture point velocity at a given time. ICPv_d = w * e^{w*t} * ICP0 - p0 *
@@ -789,6 +802,12 @@ public class CapturePointTools
          desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
       else
          desiredCapturePointVelocityToPack.setToZero();
+   }
+   
+   //TODO: implement
+   public static void computeDesiredCapturePointVelocityPolynomialSegment()
+   {
+      
    }
 
    /**
@@ -868,6 +887,12 @@ public class CapturePointTools
          desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
       else
          desiredCapturePointAccelerationToPack.setToZero();
+   }
+   
+   //TODO: implement
+   public static void computeDesiredCapturePointAccelerationPolynomialSegment()
+   {
+      
    }
 
    /**

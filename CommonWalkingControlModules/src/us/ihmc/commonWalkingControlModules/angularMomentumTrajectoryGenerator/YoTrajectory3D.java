@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoTrajectory3D
 {
@@ -274,6 +275,14 @@ public class YoTrajectory3D
    public boolean timeIntervalContains(double timeToCheck)
    {
       return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime());
+   }
+   
+   public int getNumberOfCoefficients()
+   {
+      if(xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients() && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
+         return xTrajectory.getNumberOfCoefficients();
+      else
+         return -1;
    }
 
    public void reset()
