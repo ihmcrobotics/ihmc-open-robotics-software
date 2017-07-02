@@ -204,19 +204,6 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       this.lineSegment.set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
 
-   // TODO change to setIncludingFrame
-   public void setAndChangeFrame(FrameLineSegment2d lineSegment)
-   {
-      this.referenceFrame = lineSegment.referenceFrame;
-      this.lineSegment.set(lineSegment.lineSegment);
-   }
-
-   public void set(ReferenceFrame referenceFrame, LineSegment2D lineSegment2d)
-   {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment.set(lineSegment2d);
-   }
-
    public void flipDirection()
    {
       this.lineSegment.flipDirection();
