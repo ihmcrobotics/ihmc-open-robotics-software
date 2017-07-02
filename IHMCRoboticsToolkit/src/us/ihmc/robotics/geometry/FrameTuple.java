@@ -152,22 +152,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       this.tuple.set(frameTuple.tuple);
    }
 
-   @Override
-   public final void set(Tuple3DBasics tuple)
-   {
-      this.tuple.set(tuple);
-   }
-
    public final void set(Tuple3DReadOnly tuple)
    {
       this.tuple.set(tuple);
-   }
-
-   @Override
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DBasics tuple)
-   {
-      this.referenceFrame = referenceFrame;
-      set(tuple);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
@@ -334,42 +321,10 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       tuple3dToPack.set(tuple);
    }
 
-   @Override
-   public final void setToZero()
-   {
-      tuple.setToZero();
-   }
-
-   @Override
-   public final void setToZero(ReferenceFrame referenceFrame)
-   {
-      setToZero();
-      this.referenceFrame = referenceFrame;
-   }
-
-   @Override
-   public final void setToNaN()
-   {
-      this.tuple.setToNaN();
-   }
-
-   @Override
-   public final void setToNaN(ReferenceFrame referenceFrame)
-   {
-      this.tuple.setToNaN();
-      this.referenceFrame = referenceFrame;
-   }
-
    public final void checkForNaN()
    {
       if (containsNaN())
          throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
-   }
-
-   @Override
-   public final boolean containsNaN()
-   {
-      return tuple.containsNaN();
    }
 
    public final boolean containsInfinity()
@@ -792,16 +747,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       checkReferenceFrameMatch(frameTuple2d);
 
       return epsilonEquals(frameTuple2d.tuple, threshold);
-   }
-
-   /**
-    * Returns this FrameTuple's ReferenceFrame.
-    * @return ReferenceFrame
-    */
-   @Override
-   public final ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
    }
 
    public final double[] toArray()

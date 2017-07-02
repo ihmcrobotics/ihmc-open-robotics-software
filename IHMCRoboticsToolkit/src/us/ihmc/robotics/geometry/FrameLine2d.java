@@ -190,13 +190,6 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       this.line.set(endpoints[0].getPoint(), endpoints[1].getPoint());
    }
 
-   @Override
-   public void setIncludingFrame(FrameLine2d otherFrameLine2d)
-   {
-      this.referenceFrame = otherFrameLine2d.referenceFrame;
-      this.line.set(otherFrameLine2d.line);
-   }
-
    public void setIncludingFrame(FramePoint2d endpoint0, FramePoint2d endpoint1)
    {
       endpoint0.checkReferenceFrameMatch(endpoint1);
@@ -221,13 +214,6 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       this.referenceFrame = referenceFrame;
       this.line.set(pointX, pointY, vectorX, vectorY);
-   }
-
-   @Override
-   public void set(FrameLine2d frameLine2d)
-   {
-      checkReferenceFrameMatch(frameLine2d);
-      this.line.set(frameLine2d.line);
    }
 
    public FrameLine2d interiorBisector(FrameLine2d secondLine)

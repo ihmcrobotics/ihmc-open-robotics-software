@@ -71,14 +71,6 @@ public class FrameLine extends FrameGeometryObject<FrameLine, Line3D>
       return new Vector3D(line.getDirection());
    }
 
-   @Override
-   public boolean epsilonEquals(FrameLine otherLine, double epsilon)
-   {
-      checkReferenceFrameMatch(otherLine);
-
-      return line.epsilonEquals(otherLine.getGeometryObject(), epsilon);
-   }
-
    public void setPoint(FramePoint point)
    {
       checkReferenceFrameMatch(point);

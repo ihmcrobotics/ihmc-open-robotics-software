@@ -1165,13 +1165,6 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       return convexPolygon.isEmpty();
    }
 
-   @Override
-   public void set(FrameConvexPolygon2d other)
-   {
-      convexPolygon.set(other.convexPolygon);
-      update();
-   }
-
    public FramePoint2d[] getLineOfSightVerticesCopy(FramePoint2d observer)
    {
       checkReferenceFrameMatch(observer);

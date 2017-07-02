@@ -23,13 +23,13 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
    }
 
    @Override
-   public void set(F other)
+   public final void set(F other)
    {
       checkReferenceFrameMatch(other);
       geometryObject.set(other.getGeometryObject());
    }
 
-   public void setIncludingFrame(F other)
+   public final void setIncludingFrame(F other)
    {
       referenceFrame = other.getReferenceFrame();
       geometryObject.set(other.getGeometryObject());
@@ -38,17 +38,17 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
    /**
     * Sets this frame object to zero at the origin of the given reference frame, then changes back
     * to this objects current frame.
-    * 
+    *
     * @param referenceFrame reference frame to set to
     */
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   public final void setFromReferenceFrame(ReferenceFrame referenceFrame)
    {
       ReferenceFrame thisReferenceFrame = getReferenceFrame();
       setToZero(referenceFrame);
       changeFrame(thisReferenceFrame);
    }
 
-   public void changeFrame(ReferenceFrame desiredFrame)
+   public final void changeFrame(ReferenceFrame desiredFrame)
    {
       if (desiredFrame != referenceFrame)
       {
@@ -71,66 +71,66 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       // otherwise: in the right frame already, so do nothing
    }
 
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
+   public final void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
    {
       geometryObject.applyTransform(transformToNewFrame);
       referenceFrame = desiredFrame;
    }
 
    @Override
-   public void applyTransform(Transform transform)
+   public final void applyTransform(Transform transform)
    {
       geometryObject.applyTransform(transform);
    }
 
    @Override
-   public void applyInverseTransform(Transform transform)
+   public final void applyInverseTransform(Transform transform)
    {
       geometryObject.applyInverseTransform(transform);
    }
 
    @Override
-   public void setToZero()
+   public final void setToZero()
    {
       geometryObject.setToZero();
    }
 
-   public void setToZero(ReferenceFrame referenceFrame)
+   public final void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
       setToZero();
    }
 
    @Override
-   public void setToNaN()
+   public final void setToNaN()
    {
       geometryObject.setToNaN();
    }
 
-   public void setToNaN(ReferenceFrame referenceFrame)
+   public final void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
       setToNaN();
    }
 
    @Override
-   public boolean containsNaN()
+   public final boolean containsNaN()
    {
       return geometryObject.containsNaN();
    }
 
    @Override
-   public ReferenceFrame getReferenceFrame()
+   public final ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
    }
 
-   public void set(G geometryObject)
+   public final void set(G geometryObject)
    {
       this.geometryObject.set(geometryObject);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, G geometryObject)
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, G geometryObject)
    {
       this.referenceFrame = referenceFrame;
       this.geometryObject.set(geometryObject);
@@ -141,19 +141,16 @@ public abstract class FrameGeometryObject<F extends FrameGeometryObject<F, G>, G
       geometryObject.set(this.geometryObject);
    }
 
-   public G getGeometryObject()
+   public final G getGeometryObject()
    {
       return geometryObject;
    }
 
    @Override
-   public boolean epsilonEquals(F other, double epsilon)
+   public final boolean epsilonEquals(F other, double epsilon)
    {
-      if (other == null)
-         return false;
       if (referenceFrame != other.referenceFrame)
          return false;
-      return this.geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
+      return geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
    }
-
 }

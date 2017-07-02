@@ -204,13 +204,6 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       this.lineSegment.set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
 
-   @Override
-   public void set(FrameLineSegment2d lineSegment)
-   {
-      checkReferenceFrameMatch(lineSegment);
-      this.lineSegment.set(lineSegment.lineSegment);
-   }
-
    // TODO change to setIncludingFrame
    public void setAndChangeFrame(FrameLineSegment2d lineSegment)
    {
@@ -484,11 +477,5 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       FramePoint2d randomPoint2 = FramePoint2d.generateRandomFramePoint2d(random, zUpFrame, xMin, xMax, yMin, yMax);
 
       return new FrameLineSegment2d(randomPoint1, randomPoint2);
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      lineSegment.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    }
 }

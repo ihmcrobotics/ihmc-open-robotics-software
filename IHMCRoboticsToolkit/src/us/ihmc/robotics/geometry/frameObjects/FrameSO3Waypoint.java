@@ -53,17 +53,6 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
       geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
    }
 
-   public void set(FrameSO3Waypoint so3Waypoint)
-   {
-      checkReferenceFrameMatch(so3Waypoint);
-      geometryObject.set(so3Waypoint);
-   }
-   
-   public void set(SO3Waypoint so3Waypoint)
-   {
-      geometryObject.set(so3Waypoint);
-   }
-
    public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3Waypoint)
    {
       setToZero(referenceFrame);
