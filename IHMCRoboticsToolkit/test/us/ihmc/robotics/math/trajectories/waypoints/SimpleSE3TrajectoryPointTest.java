@@ -12,6 +12,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -270,7 +271,7 @@ public class SimpleSE3TrajectoryPointTest
 
       for (int i = 0; i < 10000; i++)
       {
-         expectedFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
+         expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
 
          expectedPosition.applyTransform(worldFrame.getTransformToDesiredFrame(expectedFrame));
          expectedOrientation.applyTransform(worldFrame.getTransformToDesiredFrame(expectedFrame));

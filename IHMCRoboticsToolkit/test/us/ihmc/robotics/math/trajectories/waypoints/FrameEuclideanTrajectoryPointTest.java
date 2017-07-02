@@ -12,6 +12,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -74,7 +75,7 @@ public class FrameEuclideanTrajectoryPointTest
       double epsilon = 1.0e-20;
       Random random = new Random(21651016L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame aFrame = ReferenceFrame.generateRandomReferenceFrame("aFrame", random, worldFrame);
+      ReferenceFrame aFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("aFrame", random, worldFrame);
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = 0.0;
@@ -139,7 +140,7 @@ public class FrameEuclideanTrajectoryPointTest
       double epsilon = 1.0e-20;
       Random random = new Random(21651016L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame aFrame = ReferenceFrame.generateRandomReferenceFrame("aFrame", random, worldFrame);
+      ReferenceFrame aFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("aFrame", random, worldFrame);
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = 0.0;
@@ -232,7 +233,7 @@ public class FrameEuclideanTrajectoryPointTest
 
       for (int i = 0; i < 10000; i++)
       {
-         expectedFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
+         expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
 
          expectedPosition.changeFrame(expectedFrame);
          expectedLinearVelocity.changeFrame(expectedFrame);
@@ -263,7 +264,7 @@ public class FrameEuclideanTrajectoryPointTest
 
       assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity, testedFrameEuclideanTrajectoryPoint, epsilon);
 
-      expectedFrame = ReferenceFrame.generateRandomReferenceFrame("blop", random, worldFrame);
+      expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop", random, worldFrame);
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
       expectedPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       expectedLinearVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
@@ -294,7 +295,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(Double.isNaN(testedFrameEuclideanTrajectoryPoint.getTime()));
       assertTrue(testedFrameEuclideanTrajectoryPoint.containsNaN());
 
-      expectedFrame = ReferenceFrame.generateRandomReferenceFrame("blop", random, worldFrame);
+      expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop", random, worldFrame);
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
       expectedPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       expectedLinearVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);

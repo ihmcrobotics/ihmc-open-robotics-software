@@ -12,6 +12,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -202,7 +203,7 @@ public class YoFrameSE3TrajectoryPointTest
       ReferenceFrame[] randomFrames = new ReferenceFrame[10];
       randomFrames[0] = worldFrame;
       for (int i = 1; i < 10; i++)
-         randomFrames[i] = ReferenceFrame.generateRandomReferenceFrame("randomFrame" + i, random,
+         randomFrames[i] = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame" + i, random,
                random.nextBoolean() ? worldFrame : randomFrames[random.nextInt(i)]);
 
       for (int i = 0; i < 10000; i++)
@@ -251,7 +252,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity, testedYoFrameSE3TrajectoryPoint, epsilon);
 
-      expectedFrame = ReferenceFrame.generateRandomReferenceFrame("blop", random, worldFrame);
+      expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop", random, worldFrame);
       testedYoFrameSE3TrajectoryPoint.registerReferenceFrame(expectedFrame);
 
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
@@ -300,7 +301,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(testedYoFrameSE3TrajectoryPoint.getLinearVelocity().containsNaN());
       assertTrue(testedYoFrameSE3TrajectoryPoint.getAngularVelocity().containsNaN());
 
-      expectedFrame = ReferenceFrame.generateRandomReferenceFrame("blop", random, worldFrame);
+      expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop", random, worldFrame);
       testedYoFrameSE3TrajectoryPoint.registerReferenceFrame(expectedFrame);
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
       expectedPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);

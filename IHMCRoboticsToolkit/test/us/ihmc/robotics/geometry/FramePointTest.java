@@ -19,6 +19,7 @@ import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -501,7 +502,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       double yaw;
       FramePoint result;
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -512,7 +513,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertEquals("not equal", -1528.2007328131492, result.getY(), epsilon);
       assertEquals("not equal", 2998.298763316407, result.getZ(), epsilon);
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -523,7 +524,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertEquals("not equal", -3773.703916968001, result.getY(), epsilon);
       assertEquals("not equal", -3313.247345650209, result.getZ(), epsilon);
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -548,7 +549,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       double pitch;
       FramePoint result;
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
@@ -559,7 +560,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
       assertEquals("not equal", 11103.259343203952, result.getZ(), epsilon);
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
@@ -570,7 +571,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
       assertEquals("not equal", -3513.344540982049, result.getZ(), epsilon);
 
-      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
