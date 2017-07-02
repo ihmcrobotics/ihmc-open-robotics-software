@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
 public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
 {
@@ -164,11 +163,5 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    {
       so3Waypoint.setOrientation(geometryObject.getOrientation());
       so3Waypoint.setAngularVelocity(geometryObject.getAngularVelocity());
-   }
-
-   @Override
-   public String toString()
-   {
-      return WaypointToStringTools.waypointToString(this);
    }
 }

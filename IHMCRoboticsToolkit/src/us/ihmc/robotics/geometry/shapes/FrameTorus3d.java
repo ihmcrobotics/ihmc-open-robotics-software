@@ -51,15 +51,4 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
    {
       return torus3d.getTubeRadius();
    }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(torus3d.toString());
-
-      return builder.toString();
-   }
 }

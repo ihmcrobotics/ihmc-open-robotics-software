@@ -946,21 +946,6 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       return ret;
    }
 
-   @Override
-   public String toString()
-   {
-      FramePoint2d vertex = new FramePoint2d();
-
-      String ret = "";
-      for (int i = 0; i < getNumberOfVertices(); i++)
-      {
-         this.getFrameVertex(i, vertex);
-         ret = ret + vertex.toString() + "\n";
-      }
-
-      return ret;
-   }
-
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);

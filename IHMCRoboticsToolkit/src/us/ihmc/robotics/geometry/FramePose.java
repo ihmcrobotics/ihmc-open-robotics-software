@@ -670,12 +670,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return TransformTools.getSizeOfTransformBetweenTwoWithRotationScaled(transformThis, transformThat, radiusOfRotation);
    }
 
-   @Override
-   public String toString()
-   {
-      return "Position: " + pose.getPosition().toString() + "\n" + pose.getOrientation().toString() + "  -- " + referenceFrame.getName();
-   }
-
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)
    {
       return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);

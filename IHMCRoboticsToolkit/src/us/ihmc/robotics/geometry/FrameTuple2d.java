@@ -580,17 +580,4 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    {
       return new double[] {tuple.getX(), tuple.getY()};
    }
-
-   /**
-    * toString
-    * <p/>
-    * String representation of a FrameVector (x,y):reference frame name
-    *
-    * @return String
-    */
-   @Override
-   public final String toString()
-   {
-      return "" + tuple + "-" + referenceFrame;
-   }
 }

@@ -122,28 +122,6 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
       return this.tuple;
    }
 
-   @Override
-   public boolean equals(Object frameVector)
-   {
-      if (frameVector instanceof FrameVector2d)
-      {
-         boolean referenceFrameMatches = referenceFrame.equals(((FrameVector2d) frameVector).getReferenceFrame());
-         boolean pointEquals = tuple.equals(((FrameVector2d) frameVector).tuple);
-         return referenceFrameMatches && pointEquals;
-      }
-      else
-      {
-         return super.equals(frameVector);
-      }
-   }
-
-   public boolean eplilonEquals(FrameVector2d frameVector, double epsilon)
-   {
-      boolean referenceFrameMatches = referenceFrame.equals(frameVector.getReferenceFrame());
-      boolean pointEquals = tuple.epsilonEquals(frameVector.tuple, epsilon);
-      return referenceFrameMatches && pointEquals;
-   }
-
    public void rotate90()
    {
       double x = -tuple.getY();

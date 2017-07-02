@@ -51,15 +51,4 @@ public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
    {
       return cylinder3d.getHeight();
    }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(cylinder3d.toString());
-
-      return builder.toString();
-   }
 }
