@@ -107,16 +107,9 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
    public void testFrameChanges()
    {
       FrameVector frameVector = new FrameVector(theFrame);
-      RigidBodyTransform transform3d = new RigidBodyTransform();
-      
-      frameVector.changeFrameUsingTransform(childFrame, transform3d);
-      frameVector.checkReferenceFrameMatch(childFrame);
       
       FrameVector result = new FrameVector(frameVector);
 
-      result.changeFrameUsingTransform(theFrame, transform3d);
-      result.checkReferenceFrameMatch(theFrame);
-      
       result = new FrameVector(frameVector);
       result.changeFrame(childFrame);
       result.checkReferenceFrameMatch(childFrame);

@@ -395,25 +395,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testChangeFrameUsingTransform_ReferenceFrame_Transform3D()
-   { 
-	   Random random = new Random(234L);
-      double[] matrix = {6.0, 7.0, 0.0};
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
-
-      Vector3D vectorToTransform = new Vector3D(matrix);
-      FrameVector2d vectorToTest = new FrameVector2d(aFrame, matrix);
-
-      transform.transform(vectorToTransform);
-      vectorToTest.changeFrameUsingTransform(theFrame, transform);
-
-      assertEquals("Should be equal", vectorToTransform.getX(), vectorToTest.getX(), epsilon);
-      assertEquals("Should be equal", vectorToTransform.getY(), vectorToTest.getY(), epsilon);
-      vectorToTest.checkReferenceFrameMatch(theFrame);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testSets()
    {
       FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);

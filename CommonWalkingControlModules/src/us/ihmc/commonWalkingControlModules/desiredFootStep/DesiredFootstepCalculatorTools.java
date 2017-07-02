@@ -100,69 +100,6 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
-   public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
-   {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
-
-      ReferenceFrame bodyFrame = contactableBody.getFrameAfterParentJoint();
-
-      return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
-   }
-
-   public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame,
-         ReferenceFrame frame)
-   {
-      FramePoint minFramePoint = new FramePoint(frame);
-      minFramePoint.setZ(Double.POSITIVE_INFINITY);
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      boolean pointFound = false;
-      for (FramePoint footPoint : footPoints)
-      {
-         tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(bodyFrame);
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
-         tempFramePoint.changeFrame(frame);
-
-         if (tempFramePoint.getZ() < minFramePoint.getZ())
-         {
-            minFramePoint.set(tempFramePoint);
-            pointFound = true;
-         }
-      }
-
-      if (!pointFound)
-         throw new RuntimeException();
-
-      return minFramePoint;
-   }
-
-   public static FramePoint computeMaxXPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
-   {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
-      FramePoint maxFramePoint = new FramePoint(frame);
-      maxFramePoint.setX(Double.NEGATIVE_INFINITY);
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      boolean pointFound = false;
-      for (FramePoint footPoint : footPoints)
-      {
-         tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
-         tempFramePoint.changeFrame(frame);
-
-         if (tempFramePoint.getX() > maxFramePoint.getX())
-         {
-            maxFramePoint.set(tempFramePoint);
-            pointFound = true;
-         }
-      }
-
-      if (!pointFound)
-         throw new RuntimeException();
-
-      return maxFramePoint;
-   }
-
    public static List<FramePoint> computeMaximumPointsInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
    {
       if (framePoints.size() < nPoints)

@@ -377,18 +377,11 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testFrameChanges()
    {
       FramePoint framePoint = new FramePoint(theFrame);
-      RigidBodyTransform transform3d = new RigidBodyTransform();
       FramePoint result = new FramePoint(framePoint);
-
-      result.changeFrameUsingTransform(childFrame, transform3d);
-      result.checkReferenceFrameMatch(childFrame);
 
       result = new FramePoint(framePoint);
       result.changeFrame(theFrame);
       result.checkReferenceFrameMatch(theFrame);
-
-      framePoint.changeFrameUsingTransform(childFrame, transform3d);
-      framePoint.checkReferenceFrameMatch(childFrame);
 
       framePoint.changeFrame(theFrame); //cause of failure
       framePoint.checkReferenceFrameMatch(theFrame);
