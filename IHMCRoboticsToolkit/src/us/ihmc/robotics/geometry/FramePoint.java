@@ -328,13 +328,4 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
    {
       this.set(point);
    }
-
-   /**
-    * Sets this point to the location of the origin of passed in referenceFrame.
-    */
-   @Override
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      super.setFromReferenceFrame(referenceFrame);
-   }
 }

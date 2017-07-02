@@ -103,12 +103,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
       quaternion.set(axisAngle4d);
    }
 
-   @Override
-   public void set(Quaternion quaternion)
-   {
-      this.quaternion.set(quaternion);
-   }
-
    public void set(QuaternionReadOnly quaternion)
    {
       this.quaternion.set(quaternion);
@@ -146,20 +140,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
    public void appendRollRotation(double rollToAppend)
    {
       quaternion.appendRollRotation(rollToAppend);
-   }
-
-   @Override
-   public void set(FrameOrientation orientation)
-   {
-      referenceFrame.checkReferenceFrameMatch(orientation.referenceFrame);
-      quaternion.set(orientation.quaternion);
-   }
-
-   @Override
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Quaternion quaternion)
-   {
-      this.referenceFrame = referenceFrame;
-      set(quaternion);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, QuaternionReadOnly quaternion)
@@ -201,19 +181,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
    {
       this.referenceFrame = referenceFrame;
       setYawPitchRoll(yaw, pitch, roll);
-   }
-
-   @Override
-   public void setIncludingFrame(FrameOrientation orientation)
-   {
-      referenceFrame = orientation.referenceFrame;
-      quaternion.set(orientation.quaternion);
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return quaternion.containsNaN();
    }
 
    public void getQuaternion(QuaternionBasics quaternionToPack)
@@ -508,15 +475,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       quaternion.get(frameRotationVectorToPack.getVector());
-   }
-
-   @Override
-   public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
-   {
-      boolean referenceFramesMatch = referenceFrame == frameOrientation.referenceFrame;
-      boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quaternion, frameOrientation.quaternion, epsilon);
-
-      return referenceFramesMatch && quaternionsAreEqual;
    }
 
    public boolean epsilonEquals(QuaternionReadOnly quaternion, double epsilon)

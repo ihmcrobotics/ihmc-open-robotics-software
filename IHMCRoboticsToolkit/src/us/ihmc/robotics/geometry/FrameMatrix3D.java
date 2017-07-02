@@ -40,12 +40,6 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
       setIncludingFrame(referenceFrame, matrix);
    }
 
-   public void set(FrameMatrix3D frameMatrix3D)
-   {
-      checkReferenceFrameMatch(frameMatrix3D);
-      matrix.set(frameMatrix3D.matrix);
-   }
-
    public void set(Matrix3DReadOnly matrix)
    {
       this.matrix.set(matrix);
@@ -111,27 +105,10 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
       this.matrix.setColumn(column, x, y, z);
    }
 
-   public void setIncludingFrame(FrameMatrix3D frameMatrix3D)
-   {
-      referenceFrame = frameMatrix3D.referenceFrame;
-      matrix.set(frameMatrix3D.matrix);
-   }
-
    public void setIncludingFrame(ReferenceFrame referenceFrame, Matrix3DReadOnly matrix)
    {
       this.referenceFrame = referenceFrame;
       this.matrix.set(matrix);
-   }
-
-   public void setToZero()
-   {
-      matrix.setToZero();
-   }
-
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToZero();
    }
 
    public void setToIdentity()
@@ -143,25 +120,6 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
    {
       this.referenceFrame = referenceFrame;
       setToIdentity();
-   }
-
-   public void setToNaN()
-   {
-      setElement(0, 0, Double.NaN);
-      setElement(0, 1, Double.NaN);
-      setElement(0, 2, Double.NaN);
-      setElement(1, 0, Double.NaN);
-      setElement(1, 1, Double.NaN);
-      setElement(1, 2, Double.NaN);
-      setElement(2, 0, Double.NaN);
-      setElement(2, 1, Double.NaN);
-      setElement(2, 2, Double.NaN);
-   }
-
-   public void setToNaN(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToNaN();
    }
 
    public double getElement(int row, int column)
@@ -208,20 +166,6 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
       checkReferenceFrameMatch(frameTupleOriginal);
       frameTupleToPack.setIncludingFrame(frameTupleOriginal);
       matrix.transform(frameTupleToPack.tuple);
-   }
-
-   public boolean containsNaN()
-   {
-      if (Double.isNaN(matrix.getElement(0, 0))) return true;
-      if (Double.isNaN(matrix.getElement(0, 1))) return true;
-      if (Double.isNaN(matrix.getElement(0, 2))) return true;
-      if (Double.isNaN(matrix.getElement(1, 0))) return true;
-      if (Double.isNaN(matrix.getElement(1, 1))) return true;
-      if (Double.isNaN(matrix.getElement(1, 2))) return true;
-      if (Double.isNaN(matrix.getElement(2, 0))) return true;
-      if (Double.isNaN(matrix.getElement(2, 1))) return true;
-      if (Double.isNaN(matrix.getElement(2, 2))) return true;
-      return false;
    }
 
    @Override

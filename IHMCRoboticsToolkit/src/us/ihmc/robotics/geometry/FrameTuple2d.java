@@ -139,22 +139,9 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
       tuple.set(startRow, column, tupleDenseMatrix);
    }
 
-   @Override
-   public final void set(Tuple2DBasics tuple)
-   {
-      this.tuple.set(tuple);
-   }
-
    public final void set(Tuple2DReadOnly tuple)
    {
       this.tuple.set(tuple);
-   }
-
-   @Override
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple2DBasics tuple)
-   {
-      this.referenceFrame = referenceFrame;
-      set(tuple);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
@@ -307,42 +294,10 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
       tuple.get(startRow, column, tupleMatrixToPack);
    }
 
-   @Override
-   public final void setToZero()
-   {
-      tuple.setToZero();
-   }
-
-   @Override
-   public final void setToZero(ReferenceFrame referenceFrame)
-   {
-      setToZero();
-      this.referenceFrame = referenceFrame;
-   }
-
-   @Override
-   public final void setToNaN()
-   {
-      tuple.setToNaN();
-   }
-
-   @Override
-   public final void setToNaN(ReferenceFrame referenceFrame)
-   {
-      setToNaN();
-      this.referenceFrame = referenceFrame;
-   }
-
    public final void checkForNaN()
    {
       if (containsNaN())
          throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
-   }
-
-   @Override
-   public final boolean containsNaN()
-   {
-      return tuple.containsNaN();
    }
 
    /**
@@ -620,27 +575,6 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
       return epsilonEquals(frameTuple1.tuple, threshold);
    }
-
-   /**
-    * Returns this FrameTuple's ReferenceFrame.
-    *
-    * @return ReferenceFrame
-    */
-   @Override
-   public final ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
-   //   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-   //
-   //   public abstract FrameTuple2d<?, ?> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-   //
-   //   public abstract void applyTransform(RigidBodyTransform transform);
-   //
-   //   public abstract FrameTuple2d<?, ?> applyTransformCopy(RigidBodyTransform transform);
-   //
-   //   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {

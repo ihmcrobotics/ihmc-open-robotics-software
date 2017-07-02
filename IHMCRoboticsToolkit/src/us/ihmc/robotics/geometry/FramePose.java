@@ -93,12 +93,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return randomFramePose;
    }
 
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
    public void setX(double x)
    {
       pose.setX(x);
@@ -220,13 +214,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void setXYFromPosition2d(FramePoint2d position2d)
    {
       pose.setPositionXY(position2d.getPoint());
-   }
-
-   @Override
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      super.setToZero();
-      this.referenceFrame = referenceFrame;
    }
 
    public void getPose(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
@@ -693,11 +680,4 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    {
       return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
    }
-
-   @Override
-   public boolean epsilonEquals(FramePose other, double epsilon)
-   {
-      return pose.epsilonEquals(other.pose, epsilon);
-   }
-
 }
