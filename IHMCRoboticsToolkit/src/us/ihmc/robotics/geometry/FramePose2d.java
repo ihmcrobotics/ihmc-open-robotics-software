@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
-public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
+public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
 {
    private final Pose2D pose;
 

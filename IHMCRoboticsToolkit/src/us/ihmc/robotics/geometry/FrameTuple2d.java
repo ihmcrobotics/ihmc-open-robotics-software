@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
-public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2DBasics & GeometryObject<T>> extends AbstractFrameObject<S, T>
+public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T>
       implements Serializable
 {
    private static final long serialVersionUID = 6275308250031489785L;

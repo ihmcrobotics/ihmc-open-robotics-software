@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quaternion>
+public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quaternion>
 {
    private final Quaternion quaternion;
 

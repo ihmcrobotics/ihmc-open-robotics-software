@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  * 
  * @author dcalvert
  */
-public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, LineSegment3D>
+public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, LineSegment3D>
 {
    private final LineSegment3D lineSegment3d;
 

@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
+import us.ihmc.robotics.geometry.FrameGeometryObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 
-public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
+public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
 {
    private final SE3Waypoint geometryObject;
    

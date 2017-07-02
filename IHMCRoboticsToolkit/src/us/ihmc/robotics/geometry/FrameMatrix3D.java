@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  * This method checks for one matrix argument.
  *
  */
-public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Matrix3D>
+public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
 {
    private final Matrix3D matrix;
 

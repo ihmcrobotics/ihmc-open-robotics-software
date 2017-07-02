@@ -4,11 +4,11 @@ import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
+import us.ihmc.robotics.geometry.FrameGeometryObject;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 
-public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends AbstractFrameObject<F, G>
+public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends FrameGeometryObject<F, G>
 {
    public FrameShape3d(G shape3d)
    {
