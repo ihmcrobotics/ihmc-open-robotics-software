@@ -26,15 +26,15 @@ public class YoTrajectory3D
 
    public YoTrajectory3D(YoTrajectory xTrajectory, YoTrajectory yTrajectory, YoTrajectory zTrajectory)
    {
-      this.xTrajectory = xTrajectory ;
-      this.yTrajectory = yTrajectory ;
-      this.zTrajectory = zTrajectory ;
+      this.xTrajectory = xTrajectory;
+      this.yTrajectory = yTrajectory;
+      this.zTrajectory = zTrajectory;
    }
 
-   public YoTrajectory3D(YoTrajectory [] yoTrajectory)
+   public YoTrajectory3D(YoTrajectory[] yoTrajectory)
    {
-      if (yoTrajectory .length != 3)
-         throw new RuntimeException("Expected 3 YoTrajectories for representing the three axes X, Y, and Z, but had: " + yoTrajectory .length
+      if (yoTrajectory.length != 3)
+         throw new RuntimeException("Expected 3 YoTrajectories for representing the three axes X, Y, and Z, but had: " + yoTrajectory.length
                + " YoTrajectories.");
 
       this.xTrajectory = yoTrajectory[0];
@@ -197,23 +197,29 @@ public class YoTrajectory3D
       return yoTrajectory3Ds;
    }
 
+   public static void add(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      for(int direction = 0; direction < 3; direction++)
+         trajToPack.getYoTrajectory(direction).add(traj1.getYoTrajectory(direction), traj2.getYoTrajectory(direction));
+   }
+
    public static void scale(YoTrajectory3D traj, double scalarX, double scalarY, double scalarZ)
    {
       traj.xTrajectory.scale(scalarX);
       traj.yTrajectory.scale(scalarY);
-      traj.zTrajectory.scale(scalarX);
+      traj.zTrajectory.scale(scalarZ);
    }
-   
+
    public static void scale(YoTrajectory3D traj, double scalar)
    {
       scale(traj, scalar, scalar, scalar);
    }
-   
+
    public void scale(double scalar)
    {
       scale(this, scalar);
    }
-   
+
    public void compute(double t)
    {
       xTrajectory.compute(t);
@@ -314,7 +320,7 @@ public class YoTrajectory3D
       yTrajectory.set(other.getYoTrajectoryY());
       zTrajectory.set(other.getYoTrajectoryZ());
    }
-   
+
    @Deprecated
    public void setConstant(Point3DReadOnly z)
    {
@@ -322,7 +328,7 @@ public class YoTrajectory3D
       yTrajectory.setConstant(z.getY());
       zTrajectory.setConstant(z.getZ());
    }
-   
+
    public void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
       for (int index = 0; index < 3; index++)
