@@ -41,16 +41,16 @@ public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G
       if (desiredFrame != referenceFrame)
       {
          referenceFrame.verifySameRoots(desiredFrame);
-         RigidBodyTransform referenceFrameTransformToRoot, rootTransformToDesiredFrame;
+         RigidBodyTransform referenceFrameTransformToRoot, desiredFrameTransformToRoot;
 
          if ((referenceFrameTransformToRoot = referenceFrame.getTransformToRoot()) != null)
          {
             geometryObject.applyTransform(referenceFrameTransformToRoot);
          }
 
-         if ((rootTransformToDesiredFrame = desiredFrame.getInverseTransformToRoot()) != null)
+         if ((desiredFrameTransformToRoot = desiredFrame.getTransformToRoot()) != null)
          {
-            geometryObject.applyTransform(rootTransformToDesiredFrame);
+            geometryObject.applyInverseTransform(desiredFrameTransformToRoot);
          }
 
          referenceFrame = desiredFrame;

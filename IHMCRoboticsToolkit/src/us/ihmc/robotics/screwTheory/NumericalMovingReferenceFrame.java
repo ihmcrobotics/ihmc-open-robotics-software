@@ -80,9 +80,8 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
 
          transformToRoot.get(previousRotation, previousTranslation);
 
-         RigidBodyTransform inverseTransformToRoot = originalFrame.getInverseTransformToRoot();
-         inverseTransformToRoot.transform(angularVelocity);
-         inverseTransformToRoot.transform(linearVelocity);
+         transformToRoot.inverseTransform(angularVelocity);
+         transformToRoot.inverseTransform(linearVelocity);
       }
 
       twistRelativeToParentToPack.set(this, parentFrame, this, linearVelocity, angularVelocity);

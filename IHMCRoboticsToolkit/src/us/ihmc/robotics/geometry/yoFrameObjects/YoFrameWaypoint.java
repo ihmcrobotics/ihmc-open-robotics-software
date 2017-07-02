@@ -96,9 +96,9 @@ public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F exte
          frameWaypoint.applyTransform(referenceTf);
       }
 
-      if ((desiredTf = referenceFrame.getInverseTransformToRoot()) != null)
+      if ((desiredTf = referenceFrame.getTransformToRoot()) != null)
       {
-         frameWaypoint.applyTransform(desiredTf);
+         frameWaypoint.applyInverseTransform(desiredTf);
       }
 
       getYoValuesFromFrameWaypoint();
