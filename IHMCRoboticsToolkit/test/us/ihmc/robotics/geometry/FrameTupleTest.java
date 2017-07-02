@@ -1270,34 +1270,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public final void testChangeFrameUsingTransform()
-   {
-      FrameTuple<?, ?> framePoint = createFrameTuple(theFrame, 10, 100, 1000);
-
-      framePoint.changeFrameUsingTransform(childFrame, theFrameToChildFrame);
-
-      assertSame(childFrame, framePoint.getReferenceFrame());
-      assertEquals(10, framePoint.getX(), epsilon);
-      assertEquals(100, framePoint.getY(), epsilon);
-      assertEquals(1000, framePoint.getZ(), epsilon);
-   }
-
-   //	@DeployableTestMethod(estimatedDuration = 0.0)
-   //	@Test(timeout = 30000)
-   //   public final void testChangeFrameUsingTransformCopy()
-   //   {
-   //      FrameTuple<?, ?> framePoint = createFrameTuple(theFrame, 10, 100, 1000);
-   //      FrameTuple<?, ?> framePointCopy = createFrameTuple(framePoint);
-   //
-   //      framePointCopy.changeFrameUsingTransform(childFrame, theFrameToChildFrame);
-   //      FrameTuple<?, ?> framePointTransformedCopy = framePoint.changeFrameUsingTransformCopy(childFrame, theFrameToChildFrame);
-   //
-   //      assertNotSame(framePointCopy, framePointTransformedCopy);
-   //      assertTrue(framePointCopy.epsilonEquals(framePointTransformedCopy, epsilon));
-   //   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public final void testSubFramePoint()
    {
       FrameTuple<?, ?> framePoint1 = createFrameTuple(theFrame, 7.0, -1.5, -2.0);

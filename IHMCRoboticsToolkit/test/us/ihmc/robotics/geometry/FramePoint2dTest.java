@@ -436,17 +436,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testChangeFrameUsingTransform_ReferenceFrame_Transform3D()
-   {
-      Random random = new Random(398742498237598750L);
-      FramePoint2d frame = new FramePoint2d(aFrame);
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
-      frame.changeFrameUsingTransform(theFrame, transform);
-      frame.checkReferenceFrameMatch(theFrame);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testYawAboutPoint_FramePoint2d_double()
    {
       FramePoint2d original = new FramePoint2d(theFrame, 5.0, 7.0);
