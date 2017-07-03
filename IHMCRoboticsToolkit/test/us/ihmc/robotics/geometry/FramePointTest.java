@@ -44,12 +44,6 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       return new FramePoint(referenceFrame, x, y, z);
    }
 
-   @Override
-   public FramePoint createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
-   {
-      return new FramePoint(referenceFrame, x, y, z, name);
-   }
-
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testRunTestMain()
@@ -210,41 +204,29 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testOtherConstructors() //Brett was here
    {
       Tuple3DBasics position = new Point3D(1.0, 1.0, 1.0);
-      String name = "myName";
       FramePoint framePosition = new FramePoint(theFrame, position);
       assertEquals("These should be equal", position, framePosition.getPoint());
-      framePosition.setName(name);
-      assertEquals("These should be equal", name, framePosition.getName());
       assertEquals("These should be equal", theFrame, framePosition.getReferenceFrame());
 
-      FramePoint framePositionName = new FramePoint(aFrame, position, name);
+      FramePoint framePositionName = new FramePoint(aFrame, position);
       assertEquals("These should be equal", position, framePositionName.getPoint());
-      assertEquals("These should be equal", name, framePositionName.getName());
       assertEquals("These should be equal", aFrame, framePositionName.getReferenceFrame());
 
       double[] doubleArray = { 7.0, 7.0, 7.0 };
       Tuple3DBasics position2 = new Point3D(doubleArray);
-      String name2 = "name-O";
       FramePoint framePositionArray = new FramePoint(theFrame, doubleArray);
       assertEquals("These should be equal", position2, framePositionArray.getPoint());
-      framePositionArray.setName(name2);
-      assertEquals("These should be equal", name2, framePositionArray.getName());
       assertEquals("These should be equal", theFrame, framePositionArray.getReferenceFrame());
 
       double[] doubleArray2 = { -7.0, 14.0, 21.0 };
       Tuple3DBasics position3 = new Point3D(doubleArray2);
-      String name3 = "name-P";
       FramePoint framePositionArrayName = new FramePoint(theFrame, doubleArray2);
       assertEquals("These should be equal", position3, framePositionArrayName.getPoint());
-      framePositionArrayName.setName(name3);
-      assertEquals("These should be equal", name3, framePositionArrayName.getName());
       assertEquals("These should be equal", theFrame, framePositionArrayName.getReferenceFrame());
 
-      String name4 = "name-Q";
-      FramePoint frameName = new FramePoint(theFrame, name4);
+      FramePoint frameName = new FramePoint(theFrame);
       Tuple3DBasics position4 = new Point3D();
       assertEquals("These should be equal", position4, frameName.getPoint());
-      assertEquals("These should be equal", name4, frameName.getName());
       assertEquals("These should be equal", theFrame, frameName.getReferenceFrame());
    }
 
@@ -367,7 +349,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    {
       Point3D tuple3d = new Point3D(1.0, 1.0, 1.0);
       Point3D tuple3dCopy = new Point3D();
-      FramePoint framePoint = new FramePoint(theFrame, tuple3d, "framePoint");
+      FramePoint framePoint = new FramePoint(theFrame, tuple3d);
 
       tuple3dCopy = framePoint.getPoint();
       assertTrue(tuple3d.epsilonEquals(tuple3dCopy, epsilon));
@@ -474,16 +456,16 @@ public class FramePointTest extends FrameTupleTest<Point3D>
 
       double max = Double.MAX_VALUE / 2.0;
       point3dExpected = RandomGeometry.nextPoint3D(random, max, max, max);
-      pointToBeTested = new FramePoint(referenceFrame, point3dExpected, "");
+      pointToBeTested = new FramePoint(referenceFrame, point3dExpected);
 
-      pointToBeTested = new FramePoint(aFrame, point3dExpected, "");
+      pointToBeTested = new FramePoint(aFrame, point3dExpected);
       assertTrue(aFrame == pointToBeTested.getReferenceFrame());
       assertTrue("Expected: " + point3dExpected + ", actual: " + pointToBeTested.getPoint(), point3dExpected.epsilonEquals(pointToBeTested.getPoint(), epsilon));
 
       xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
-      pointToBeTested = new FramePoint(referenceFrame, xyz, "");
+      pointToBeTested = new FramePoint(referenceFrame, xyz);
 
-      pointToBeTested = new FramePoint(aFrame, xyz, "");
+      pointToBeTested = new FramePoint(aFrame, xyz);
       point3dExpected = new Point3D(xyz);
       assertTrue(aFrame == pointToBeTested.getReferenceFrame());
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));

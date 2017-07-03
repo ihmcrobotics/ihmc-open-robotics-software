@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -37,31 +33,19 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
    public abstract FrameTuple<?, ?> createEmptyFrameTuple();
 
-   public abstract FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name);
-
    public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z)
    {
-      return createFrameTuple(referenceFrame, x, y, z, null);
+      return createFrameTuple(referenceFrame, x, y, z);
    }
 
    public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame)
    {
-      return createFrameTuple(referenceFrame, 0.0, 0.0, 0.0, null);
-   }
-
-   public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, String name)
-   {
-      return createFrameTuple(referenceFrame, 0.0, 0.0, 0.0, name);
+      return createFrameTuple(referenceFrame, 0.0, 0.0, 0.0);
    }
 
    public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, Tuple3DBasics tuple)
    {
-      return createFrameTuple(referenceFrame, tuple.getX(), tuple.getY(), tuple.getZ(), null);
-   }
-
-   public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, Tuple3DBasics tuple, String name)
-   {
-      return createFrameTuple(referenceFrame, tuple.getX(), tuple.getY(), tuple.getZ(), name);
+      return createFrameTuple(referenceFrame, tuple.getX(), tuple.getY(), tuple.getZ());
    }
 
    public FrameTuple<?, ?> createFrameTuple(FrameTuple<?, ?> frameTuple)
@@ -82,20 +66,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    {
       theFrameToChildFrame = new RigidBodyTransform();
       childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testName()
-   {
-      FrameTuple<?, ?> frameTuple = createEmptyFrameTuple();
-
-      String test = "yoohoo";
-
-      frameTuple.setName(test);
-
-      assertSame("Strings should be the same", test, frameTuple.name);
-      assertSame("Strings should be the same", test, frameTuple.getName());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -212,7 +182,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    {
       testGetters(frameTupleToTest, frameTuple2.getPointCopy());
       assertEquals(frameTuple2.getReferenceFrame(), frameTupleToTest.getReferenceFrame());
-      assertEquals(frameTuple2.name, frameTupleToTest.name);
       assertTrue(frameTupleToTest.epsilonEquals(frameTuple2, epsilon));
    }
 
@@ -1429,63 +1398,10 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public final void testNameField()
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      FrameTuple<?, ?> point1 = createEmptyFrameTuple();
-      assertTrue(point1.getName() == null);
-
-      FrameTuple<?, ?> point2 = createFrameTuple(worldFrame, "shouldNotBeCopiedName");
-      point1 = createFrameTuple(point2);
-      assertTrue(point1.getName() == null);
-
-      FrameTuple<?, ?> vector = createFrameTuple(worldFrame, "sameWithThatOne");
-      point1 = createFrameTuple(vector);
-      assertTrue(point1.getName() == null);
-
-      point1 = createFrameTuple(worldFrame);
-      assertTrue(point1.getName() == null);
-
-      Random random = new Random(685685L);
-      double[] xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
-      point1 = createFrameTuple(worldFrame, xyz[0], xyz[1], xyz[2]);
-      assertTrue(point1.getName() == null);
-
-      String name = "hopeFullyItWillReturnThatOneToo2";
-      point1 = createFrameTuple(worldFrame, name);
-      assertTrue(name.equals(point1.getName()));
-
-      Tuple3DBasics tuple3d = new Vector3D();
-      point1 = createFrameTuple(worldFrame, tuple3d);
-      assertTrue(point1.getName() == null);
-
-      name = "hopeFullyItWillReturnThatOneToo3";
-      point1 = createFrameTuple(worldFrame, xyz[0], xyz[1], xyz[2], name);
-      assertTrue(name.equals(point1.getName()));
-
-      name = "hopeFullyItWillReturnThatOneToo4";
-      point1 = createFrameTuple(worldFrame, tuple3d, name);
-      assertTrue(name.equals(point1.getName()));
-
-      point1 = createFrameTuple(worldFrame, 0.0, 0.0, 0.0);
-      assertTrue(point1.getName() == null);
-
-      name = "hopeFullyItWillReturnThatOneToo5";
-      point1 = createFrameTuple(worldFrame, 0.0, 0.0, 0.0, name);
-      assertTrue(name.equals(point1.getName()));
-
-      name = "hopeFullyItWillReturnThatOneToo6";
-      point1.setName(name);
-      assertTrue(name.equals(point1.getName()));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public final void testPackMatrix() //Brett was here
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      FrameTuple<?, ?> frametuple = createFrameTuple(worldFrame, 10.0, 10.0, 10.0, "name");
+      FrameTuple<?, ?> frametuple = createFrameTuple(worldFrame, 10.0, 10.0, 10.0);
       Random ran = new Random(4564L);
       int numberOfIterations = 100;
       int startRow;

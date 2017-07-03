@@ -29,17 +29,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
    {
-      super(referenceFrame, new Vector3D(tuple), null);
-   }
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple, String name)
-   {
-      super(referenceFrame, new Vector3D(tuple), name);
+      super(referenceFrame, new Vector3D(tuple));
    }
 
    /**
@@ -49,17 +39,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(ReferenceFrame referenceFrame, double[] vector)
    {
-      super(referenceFrame, new Vector3D(vector), null);
-   }
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vector, String name)
-   {
-      super(referenceFrame, new Vector3D(vector), name);
+      super(referenceFrame, new Vector3D(vector));
    }
 
    /**
@@ -79,17 +59,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Vector3D(), null);
-   }
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, String name)
-   {
-      super(referenceFrame, new Vector3D(), name);
+      super(referenceFrame, new Vector3D());
    }
 
    /**
@@ -99,7 +69,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(FrameTuple<?, ?> frameTuple)
    {
-      super(frameTuple.getReferenceFrame(), new Vector3D(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.getReferenceFrame(), new Vector3D(frameTuple.tuple));
    }
 
    /**
@@ -109,17 +79,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     */
    public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
    {
-      this(referenceFrame, x, y, z, null);
-   }
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z, String name)
-   {
-      super(referenceFrame, new Vector3D(x, y, z), name);
+      super(referenceFrame, new Vector3D(x, y, z));
    }
 
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)

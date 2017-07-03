@@ -28,9 +28,8 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    private static final boolean DEBUG = false;
 
    protected final T tuple;
-   protected String name;
 
-   public FrameTuple(ReferenceFrame referenceFrame, T tuple, String name)
+   public FrameTuple(ReferenceFrame referenceFrame, T tuple)
    {
       super(referenceFrame, tuple);
 
@@ -44,17 +43,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       }
 
       this.tuple = getGeometryObject();
-      this.name = name;
-   }
-
-   public final void setName(String name)
-   {
-      this.name = name;
-   }
-
-   public final String getName()
-   {
-      return name;
    }
 
    public final void set(double x, double y, double z)

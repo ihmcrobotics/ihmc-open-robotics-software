@@ -39,61 +39,38 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
       return new FrameVector(referenceFrame, x, y, z);
    }
 
-   @Override
-   public FrameTuple<FrameVector, Vector3D> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
-   {
-      return new FrameVector(referenceFrame, x, y, z, name);
-   }
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void allConstructorsWork() //Brett
    {
       Tuple3DBasics tuple = new Point3D(1.0, 1.0, 1.0);
-      String name = "VectorName";
       double[] doubleArray = {10.0, -20.0, 35.0};
       Vector3D zeroVector = new Vector3D(0.0, 0.0, 0.0);
 
       FrameVector frameTuple = new FrameVector(theFrame, tuple);
       assertEquals("These should be equal", tuple, frameTuple.getVector());
-      frameTuple.setName(name);
-      assertEquals("These should be equal", name, frameTuple.getName());
       assertEquals("These should be equal", theFrame, frameTuple.getReferenceFrame());
-
-      FrameVector frameTupleString = new FrameVector(theFrame, tuple, name);
-      assertEquals("These should be equal", tuple, frameTupleString.getVector());
-      frameTupleString.setName(name);
-      assertEquals("These should be equal", name, frameTupleString.getName());
-      assertEquals("These should be equal", theFrame, frameTupleString.getReferenceFrame());
 
       FrameVector frameDoubles = new FrameVector(theFrame, doubleArray);
       Tuple3DBasics position = new Vector3D(doubleArray);
       assertEquals("These should be equal", position, frameDoubles.getVector());
-      frameDoubles.setName(name);
-      assertEquals("These should be equal", name, frameDoubles.getName());
       assertEquals("These should be equal", theFrame, frameDoubles.getReferenceFrame());
 
-      FrameVector frameDoublesString = new FrameVector(theFrame, doubleArray, name);
+      FrameVector frameDoublesString = new FrameVector(theFrame, doubleArray);
       assertEquals("These should be equal", position, frameDoublesString.getVector());
-      assertEquals("These should be equal", name, frameDoublesString.getName());
       assertEquals("These should be equal", theFrame, frameDoublesString.getReferenceFrame());
 
       FrameVector empty = new FrameVector();
-      empty.setName(name);
       empty.setIncludingFrame(theFrame, 10.0, -20.0, 35.0);
       assertEquals("These should be equal", position, empty.getVector());
-      assertEquals("These should be equal", name, empty.getName());
       assertEquals("These should be equal", theFrame, empty.getReferenceFrame());
 
       FrameVector frame = new FrameVector(theFrame);
-      frame.setName(name);
       frame.set(10.0, -20.0, 35.0);
       assertEquals("These should be equal", position, frame.getVector());
-      assertEquals("These should be equal", name, frame.getName());
       assertEquals("These should be equal", theFrame, frame.getReferenceFrame());
 
-      FrameVector frameString = new FrameVector(theFrame, name);
-      assertEquals("These should be equal", name, frameString.getName());
+      FrameVector frameString = new FrameVector(theFrame);
       assertEquals("These should be equal", theFrame, frameString.getReferenceFrame());
       assertEquals("These should be equal", zeroVector, frameString.getVector());
 
