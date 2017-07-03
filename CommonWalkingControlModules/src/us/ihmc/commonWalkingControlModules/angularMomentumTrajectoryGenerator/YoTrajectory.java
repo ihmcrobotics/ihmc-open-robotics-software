@@ -390,12 +390,12 @@ public class YoTrajectory
 
    public void scale(YoTrajectory traj, double scalar)
    {
-      TrajectoryMathClass.scale(this, traj, scalar);
+      TrajectoryMathTools.scale(this, traj, scalar);
    }
 
    public void add(YoTrajectory traj1, YoTrajectory traj2)
    {
-      TrajectoryMathClass.add(this, traj1, traj2);
+      TrajectoryMathTools.add(this, traj1, traj2);
    }
    
    public void add(YoTrajectory addTraj)
@@ -405,7 +405,7 @@ public class YoTrajectory
 
    public void subtract(YoTrajectory traj1, YoTrajectory traj2)
    {
-      TrajectoryMathClass.subtract(this, traj1, traj2);
+      TrajectoryMathTools.subtract(this, traj1, traj2);
    }
 
    public void subtract(YoTrajectory subTraj)
@@ -415,7 +415,7 @@ public class YoTrajectory
    
    public void multiply(YoTrajectory traj1, YoTrajectory traj2)
    {
-      TrajectoryMathClass.multiply(this, traj1, traj2);
+      TrajectoryMathTools.multiply(this, traj1, traj2);
    }
    
    public void multiply(YoTrajectory mulTraj)

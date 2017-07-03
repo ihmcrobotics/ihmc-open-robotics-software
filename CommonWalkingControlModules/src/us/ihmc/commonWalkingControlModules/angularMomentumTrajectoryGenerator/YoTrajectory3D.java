@@ -197,29 +197,6 @@ public class YoTrajectory3D
       return yoTrajectory3Ds;
    }
 
-   public static void add(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
-   {
-      for(int direction = 0; direction < 3; direction++)
-         trajToPack.getYoTrajectory(direction).add(traj1.getYoTrajectory(direction), traj2.getYoTrajectory(direction));
-   }
-
-   public static void scale(YoTrajectory3D traj, double scalarX, double scalarY, double scalarZ)
-   {
-      traj.xTrajectory.scale(scalarX);
-      traj.yTrajectory.scale(scalarY);
-      traj.zTrajectory.scale(scalarZ);
-   }
-
-   public static void scale(YoTrajectory3D traj, double scalar)
-   {
-      scale(traj, scalar, scalar, scalar);
-   }
-
-   public void scale(double scalar)
-   {
-      scale(this, scalar);
-   }
-
    public void compute(double t)
    {
       xTrajectory.compute(t);
@@ -227,6 +204,46 @@ public class YoTrajectory3D
       zTrajectory.compute(t);
    }
 
+   public void add(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.add(this, traj1, traj2);
+   }
+
+   public void add(YoTrajectory3D addTraj)
+   {
+      add(this, addTraj);
+   }
+   
+   public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.subtract(this, traj1, traj2);
+   }
+   
+   public void subtract(YoTrajectory3D subTraj)
+   {
+      subtract(this, subTraj);
+   }
+   
+   public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.dotProduct(this, traj1, traj2);
+   }
+   
+   public void dotProduct(YoTrajectory3D dotPTraj)
+   {
+      dotProduct(this, dotPTraj);
+   }
+
+   public void crossProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.crossProduct(this, traj1, traj2);
+   }
+   
+   public void crossProduct(YoTrajectory3D crossPTraj)
+   {
+      crossProduct(this, crossPTraj);
+   }
+   
    public Point3DReadOnly getPosition()
    {
       return position;

@@ -2,9 +2,12 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TrajectoryMathClass;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TrajectoryMathTools;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory3D;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectoryTest
@@ -19,7 +22,7 @@ public class YoTrajectoryTest
       YoTrajectory traj3 = new YoTrajectory("Trajectory3", 1, registry);
       traj1.setConstant(1, 10, 2);
       traj2.setConstant(1, 10, 3);      
-      TrajectoryMathClass.add(traj3, traj1, traj2);      
+      TrajectoryMathTools.add(traj3, traj1, traj2);      
       assert(traj3.getNumberOfCoefficients() == 1);
       assert(traj3.getCoefficient(0) == 5);
       
@@ -39,7 +42,7 @@ public class YoTrajectoryTest
       YoTrajectory traj3 = new YoTrajectory("Trajectory3", 2, registry);
       traj1.setLinear(1, 10, 2, 0);
       traj2.setConstant(1, 10, 3);
-      TrajectoryMathClass.multiply(traj3, traj1, traj2);   
+      TrajectoryMathTools.multiply(traj3, traj1, traj2);   
       assert(traj3.getNumberOfCoefficients() == 2);
       assert(traj3.getCoefficient(1) == -2.0/3.0);
       assert(traj3.getCoefficient(0) == 6 + 2.0/3.0);    
@@ -59,5 +62,13 @@ public class YoTrajectoryTest
       assert(traj1.getCoefficient(3) == 0);
       assert(traj1.getCoefficient(4) == 0);
       assert(traj1.getCoefficient(5) == 0);
+   }
+   
+   public void test()
+   {
+      YoFrameTrajectory3D t1, t2;
+      t1 = new YoFrameTrajectory3D("FrameTrajectory1", 10, ReferenceFrame.getWorldFrame(), registry);
+      t2 = new YoFrameTrajectory3D("FrameTrajectory2", 10, ReferenceFrame.getWorldFrame(), registry);
+      YoTrajectory3D t3 = new YoTrajectory3D("NonFrameTrajectory", 10, registry);
    }
 }

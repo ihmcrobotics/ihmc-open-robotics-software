@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder// TODO implements FrameObject<YoFrameTrajectory3D>
+public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
 
@@ -42,76 +42,99 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       super(yoTrajectories);
       this.referenceFrame = referenceFrame;
    }
-
-   /**
-    * Returns the cross product of two trajectories {@code trajTopack} = {@code traj1} x {@code traj2}
-    * @param trajToPack
-    * @param traj1
-    * @param traj2
-    */
-   public static void crossProduct(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
-   {
-      traj1.checkReferenceFrameMatch(traj2);
-   }
-   
-   /**
-    * Returns the cross product of two trajectories {@code trajTopack} = {@code traj1} x {@code traj2}
-    * @param trajToPack
-    * @param traj1
-    * @param traj2
-    */
-   public static void multiply(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
-   {
-      traj1.checkReferenceFrameMatch(traj2);
-      
-   }
-   
-   /**
-    * Returns the difference of two trajectories {@code trajTopack} = {@code traj1} - {@code traj2}
-    * @param trajToPack
-    * @param traj1
-    * @param traj2
-    */
-   public static void subtract(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
-   {
-      traj1.checkReferenceFrameMatch(traj2);
-      
-   }
-   
-   /**
-    * Returns the sum of two trajectories {@code trajTopack} = {@code traj1} + {@code traj2}
-    * @param trajToPack
-    * @param traj1
-    * @param traj2
-    */
-   public static void add(YoFrameTrajectory3D trajToPack, YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
-   {
-      traj1.checkReferenceFrameMatch(traj2);
-      
-   }
    
    /**
     * Scales the given trajectory by the specified amount
     * @param trajToScale
     * @param scalar
     */
-   public static void scale(YoFrameTrajectory3D trajToScale, double scalar)
+   public void scale(double scalar)
    {
-      trajToScale.xTrajectory.scale(scalar);
-      trajToScale.yTrajectory.scale(scalar);
-      trajToScale.zTrajectory.scale(scalar);
+      scale(scalar, scalar, scalar);
    }
    
    /**
     * Scales the given trajectory by the specified amount in each axis
-    * @param trajToScale
     * @param scalar
     */
-   public static void scale(YoFrameTrajectory3D trajToScale, double xScalar, double yScalar, double zScalar)
+   public void scale(double xScalar, double yScalar, double zScalar)
    {
-      trajToScale.xTrajectory.scale(xScalar);
-      trajToScale.yTrajectory.scale(yScalar);
-      trajToScale.zTrajectory.scale(zScalar);
+      this.xTrajectory.scale(xScalar);
+      this.yTrajectory.scale(yScalar);
+      this.zTrajectory.scale(zScalar);
+   }
+   
+   
+   /**
+    * Returns the sum of two trajectories {@code this} = {@code traj1} + {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public void add(YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      this.referenceFrame = traj1.getReferenceFrame();
+      TrajectoryMathTools.add(this, traj1, traj2);
+   } 
+
+   public void add(YoFrameTrajectory3D addTraj)
+   {
+      add(this, addTraj);
+   }
+   
+   /**
+    * Returns the difference of two trajectories {@code this} = {@code traj1} - {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public void subtract(YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      this.referenceFrame = traj1.getReferenceFrame();
+      TrajectoryMathTools.subtract(this, traj1, traj2);
+   }
+
+   public void subtract(YoFrameTrajectory3D subTraj)
+   {
+      subtract(this, subTraj);
+   }
+   
+   /**
+    * Returns the cross product of two trajectories {@code this} = {@code traj1} x {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public void dotProduct(YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      this.referenceFrame = traj1.getReferenceFrame();
+      TrajectoryMathTools.dotProduct(this, traj1, traj2);
+   }
+   
+   public void dotProduct(YoFrameTrajectory3D dotPTraj)
+   {
+      dotProduct(this, dotPTraj);
+   }
+   
+   /**
+    * Returns the cross product of two trajectories {@code this} = {@code traj1} x {@code traj2}
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
+   public void crossProduct(YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
+   {
+      traj1.checkReferenceFrameMatch(traj2);
+      this.referenceFrame = traj1.getReferenceFrame();
+      TrajectoryMathTools.crossProduct(this, traj1, traj2);
+   }
+   
+   public void crossProduct(YoFrameTrajectory3D crossPTraj)
+   {      
+      crossProduct(this, crossPTraj);
    }
 
    
