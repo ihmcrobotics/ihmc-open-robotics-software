@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FrameLine;
+import us.ihmc.robotics.geometry.FrameLine3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -264,7 +264,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       plane3d.setNormal(normalX, normalY, normalZ);
    }
    
-   public void getIntersectionWithLine(FramePoint pointToPack, FrameLine line)
+   public void getIntersectionWithLine(FramePoint pointToPack, FrameLine3D line)
    {
 	   checkReferenceFrameMatch(line.getReferenceFrame());
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());

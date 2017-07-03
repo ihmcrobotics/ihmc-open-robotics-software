@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameLine;
+import us.ihmc.robotics.geometry.FrameLine3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 
@@ -125,7 +125,7 @@ public class FramePlane3dTest
 	   
 	   FramePoint origin = new FramePoint(worldFrame, 0.0, 1.0, -1.0);
 	   FrameVector direction = new FrameVector(worldFrame, 1.0, 0.0, 1.0);
-	   FrameLine line = new FrameLine(origin, direction);
+	   FrameLine3D line = new FrameLine3D(origin, direction);
 	   
 	   FramePoint pointToPack = new FramePoint(worldFrame);
 	   plane.getIntersectionWithLine(pointToPack, line);
