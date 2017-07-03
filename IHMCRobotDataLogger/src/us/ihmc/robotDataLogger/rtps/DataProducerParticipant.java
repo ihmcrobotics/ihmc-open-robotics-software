@@ -38,9 +38,11 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicThreadScheduler;
 
 /**
  * This class implements all communication for a data producer inside a DDS logging network
@@ -69,6 +71,8 @@ public class DataProducerParticipant
    private final Publisher handshakePublisher;
 
    private final VariableChangedListener dataProducerListener;
+   
+   private final String partition;
 
    private class VariableChangeSubscriberListener implements SubscriberListener
    {
@@ -113,7 +117,7 @@ public class DataProducerParticipant
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
 
-      String partition = getUniquePartition();
+      partition = getUniquePartition();
       handshakePublisher = createPersistentPublisher(partition, LogParticipantSettings.handshakeTopic, new HandshakePubSubType());
       announcementPublisher = createPersistentPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic,
                                                         new AnnouncementPubSubType());
@@ -285,10 +289,10 @@ public class DataProducerParticipant
       {
          throw new IOException("This participant is already activated.");
       }
-      if (dataAddress == null || dataPort < 1024)
-      {
-         throw new RuntimeException("No data address and valid port (>=1024) provided");
-      }
+//      if (dataAddress == null || dataPort < 1024)
+//      {
+//         throw new RuntimeException("No data address and valid port (>=1024) provided");
+//      }
       if (handshake == null)
       {
          throw new RuntimeException("No handshake provided");
@@ -296,8 +300,8 @@ public class DataProducerParticipant
 
       announcement.setHostName(InetAddress.getLocalHost().getHostName());
       announcement.setIdentifier(guidString);
-      System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
-      announcement.setDataPort((short) dataPort);
+//      System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
+//      announcement.setDataPort((short) dataPort);
       announcement.setLog(log);
 
       for (CameraAnnouncement camera : cameras)
@@ -332,6 +336,21 @@ public class DataProducerParticipant
       this.timestamp.setTimestamp(timestamp);
       timestampPublisher.write(this.timestamp);
    }
+   
+   
+   public RegistryPublisher createRegistryPublisher(PeriodicThreadScheduler scheduler, RegistryBufferBuilder builder) throws IOException
+   {
+
+      
+      CustomLogDataPubSubType type = new CustomLogDataPubSubType(builder.getNumberOfVariables(), builder.getNumberOfJointStates(), builder.getRegistryID());
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, partition);
+      Publisher publisher = domain.createPublisher(participant, attr);
+
+      
+      
+      return new RegistryPublisher(scheduler, builder, publisher);
+   }
+   
 
    public static void main(String[] args) throws IOException
    {
