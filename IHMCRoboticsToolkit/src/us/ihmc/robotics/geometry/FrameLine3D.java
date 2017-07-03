@@ -24,21 +24,58 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
       line3D = getGeometryObject();
    }
 
-   public FrameLine3D(FramePoint point, FrameVector vector)
+   public FrameLine3D(double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX, double lineDirectionY, double lineDirectionZ)
    {
-      this(point.getReferenceFrame(), point.getGeometryObject(), vector.getGeometryObject());
-      point.checkReferenceFrameMatch(vector);
-   }
-
-   public FrameLine3D(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly vector)
-   {
-      super(referenceFrame, new Line3D(point, vector));
+      super(new Line3D(pointOnLineX, pointOnLineY, pointOnLineZ, lineDirectionX, lineDirectionY, lineDirectionZ));
       line3D = getGeometryObject();
    }
 
-   public FrameLine3D(FrameLine3D frameLine)
+   public FrameLine3D(ReferenceFrame referenceFrame, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
+                      double lineDirectionY, double lineDirectionZ)
    {
-      this(frameLine.getReferenceFrame(), frameLine.getGeometryObject());
+      super(referenceFrame, new Line3D(pointOnLineX, pointOnLineY, pointOnLineZ, lineDirectionX, lineDirectionY, lineDirectionZ));
+      line3D = getGeometryObject();
+   }
+
+   public FrameLine3D(Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection)
+   {
+      super(new Line3D(pointOnLine, lineDirection));
+      line3D = getGeometryObject();
+   }
+
+   public FrameLine3D(ReferenceFrame referenceFrame, Point3DReadOnly pointOnLine, Vector3DReadOnly lineDirection)
+   {
+      super(referenceFrame, new Line3D(pointOnLine, lineDirection));
+      line3D = getGeometryObject();
+   }
+
+   public FrameLine3D(Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine)
+   {
+      super(new Line3D(firstPointOnLine, secondPointOnLine));
+      line3D = getGeometryObject();
+   }
+
+   public FrameLine3D(ReferenceFrame referenceFrame, Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine)
+   {
+      super(referenceFrame, new Line3D(firstPointOnLine, secondPointOnLine));
+      line3D = getGeometryObject();
+   }
+
+   public FrameLine3D(FramePoint pointOnLine, FrameVector lineDirection)
+   {
+      this(pointOnLine.getReferenceFrame(), pointOnLine.getGeometryObject(), lineDirection.getGeometryObject());
+      pointOnLine.checkReferenceFrameMatch(lineDirection);
+   }
+
+   public FrameLine3D(FramePoint firstPointOnLine, FramePoint secondPointOnLine)
+   {
+      this(firstPointOnLine.getReferenceFrame(), firstPointOnLine.getGeometryObject(), secondPointOnLine.getGeometryObject());
+      firstPointOnLine.checkReferenceFrameMatch(secondPointOnLine);
+   }
+
+   public FrameLine3D(FrameLine3D other)
+   {
+      this(other.getReferenceFrame(), other.getGeometryObject());
    }
 
    public FrameLine3D(ReferenceFrame referenceFrame, Line3D line)
