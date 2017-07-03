@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +20,7 @@ import java.io.InputStream;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class AvatarStraightLegWalkingTest
+public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -57,8 +57,6 @@ public abstract class AvatarStraightLegWalkingTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-
-   protected abstract DRCRobotModel getRobotModel();
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
