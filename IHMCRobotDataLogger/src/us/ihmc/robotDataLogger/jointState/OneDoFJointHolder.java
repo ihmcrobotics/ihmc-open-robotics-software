@@ -28,4 +28,10 @@ public class OneDoFJointHolder implements JointHolder
       buffer[offset + 1] = joint.getQd();
    }
 
+   @Override
+   public String getName()
+   {
+      return joint.getName();
+   }
+
 }

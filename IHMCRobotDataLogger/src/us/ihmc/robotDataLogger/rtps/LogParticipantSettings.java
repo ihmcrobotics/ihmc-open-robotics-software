@@ -14,6 +14,7 @@ public class LogParticipantSettings
    public static final String variableChangeTopic = "changeVariable";
    public static final String clearLogTopic = "clearLog";
    public static final String timestampTopic = "timestamps";
+   public static final String dataTopic = "data";
    
    public static final String modelFileTypeName = "us::ihmc::robotDataLogger::modelFile";
    public static final String resourceBundleTypeName = "us::ihmc::robotDataLogger::resourceBundle";

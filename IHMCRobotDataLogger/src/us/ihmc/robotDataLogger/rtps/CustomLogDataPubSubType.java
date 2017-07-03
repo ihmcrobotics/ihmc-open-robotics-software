@@ -1,13 +1,15 @@
 package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import us.ihmc.idl.CDR;
 import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.robotDataLogger.LogDataType;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.tools.compression.SnappyUtilsTest;
 
 /**
 * 
@@ -16,100 +18,124 @@ import us.ihmc.tools.compression.SnappyUtilsTest;
 * This file has been modified from the generated version to provide higher performance.
 *
 */
-public class CustomLogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.LogData>
+public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
 {
    public static final String name = "us::ihmc::robotDataLogger::LogData";
 
+   private final int registryID;
    private final int numberOfVariables;
    private final int numberOfStates;
    private final int maximumCompressedSize;
 
-   public CustomLogDataPubSubType(int numberOfVariables, int numberOfStates)
+   private final ByteBuffer compressBuffer;
+
+   public CustomLogDataPubSubType(int numberOfVariables, int numberOfStates, int registryID)
    {
+      this.registryID = registryID;
       this.numberOfVariables = numberOfVariables;
       this.numberOfStates = numberOfStates;
-      
+
       maximumCompressedSize = SnappyUtils.maxCompressedLength(numberOfVariables * 8);
+
+      compressBuffer = ByteBuffer.allocate(maximumCompressedSize);
    }
 
    private final CDR serializeCDR = new CDR();
    private final CDR deserializeCDR = new CDR();
 
    @Override
-   public void serialize(us.ihmc.robotDataLogger.LogData data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(RegistryBuffer data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
+      serializeCDR.write_type_11(data.getUid());
+
+      serializeCDR.write_type_11(data.getTimestamp());
+
+      serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
+
+      serializeCDR.write_type_2(registryID);
+
+      ByteBuffer databuffer = data.getBuffer();
+      databuffer.clear();
+      compressBuffer.clear();
+      SnappyUtils.compress(databuffer, compressBuffer);
+      compressBuffer.flip();
+
+      // Write compressed data length
+      serializeCDR.write_type_2(compressBuffer.remaining());
+      serializedPayload.getData().put(compressBuffer);
+
+      // Write joint states length
+      double[] jointstates = data.getJointStates();
+      serializeCDR.write_type_2(jointstates.length);
+      for (int i = 0; i < jointstates.length; i++)
+      {
+         serializeCDR.write_type_6(jointstates[i]);
+      }
+
       serializeCDR.finishSerialize();
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.LogData data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, RegistryBuffer data) throws IOException
    {
       deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
+
+      data.setUid(deserializeCDR.read_type_11());
+
+      data.setTimestamp(deserializeCDR.read_type_11());
+
+      if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
+      {
+         throw new IOException("Invalid type for DATA_PACKET receive");
+      }
+
+      if (serializeCDR.read_type_2() != registryID)
+      {
+         throw new IOException("Invalid registry");
+      }
+
+      int dataLength = serializeCDR.read_type_2();
+
+      compressBuffer.clear();
+      serializedPayload.getData().get(compressBuffer.array(), 0, dataLength);
+      compressBuffer.limit(dataLength);
+
+      ByteBuffer databuffer = data.getBuffer();
+      databuffer.clear();
+
+      SnappyUtils.uncompress(compressBuffer, databuffer);
+
+      int stateLength = serializeCDR.read_type_2();
+      if (stateLength != numberOfStates)
+      {
+         throw new IOException("Invalid number of states");
+      }
+      double[] states = data.getJointStates();
+      for (int i = 0; i < stateLength; i++)
+      {
+         states[i] = deserializeCDR.read_type_6();
+      }
+
       deserializeCDR.finishDeserialize();
    }
 
-   public static void write(us.ihmc.robotDataLogger.LogData data, CDR cdr)
-   {
-
-      cdr.write_type_11(data.getUid());
-
-      cdr.write_type_11(data.getTimestamp());
-
-      cdr.write_type_c(data.getType().ordinal());
-
-
-      cdr.write_type_2(data.getRegistry());
-
-      if(data.getData().size() <= 100)
-      cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
-
-      if(data.getJointStates().size() <= 100)
-      cdr.write_type_e(data.getJointStates());else
-          throw new RuntimeException("jointStates field exceeds the maximum length");
-
-   }
-
-   public static void read(us.ihmc.robotDataLogger.LogData data, CDR cdr)
-   {
-
-
-      data.setUid(cdr.read_type_11());
-      
-
-      data.setTimestamp(cdr.read_type_11());
-      
-
-      data.setType(us.ihmc.robotDataLogger.LogDataType.values[cdr.read_type_c()]);
-      
-
-      data.setRegistry(cdr.read_type_2());
-      
-
-      cdr.read_type_e(data.getData()); 
-
-      cdr.read_type_e(data.getJointStates());
-   }
-
    @Override
-   public final void serialize(us.ihmc.robotDataLogger.LogData data, InterchangeSerializer ser)
+   public final void serialize(RegistryBuffer data, InterchangeSerializer ser)
    {
       throw new RuntimeException("Not implemented");
 
    }
 
    @Override
-   public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.LogData data)
+   public final void deserialize(InterchangeSerializer ser, RegistryBuffer data)
    {
       throw new RuntimeException("Not implemented");
 
    }
 
    @Override
-   public us.ihmc.robotDataLogger.LogData createData()
+   public RegistryBuffer createData()
    {
       return null;
    }
@@ -117,8 +143,8 @@ public class CustomLogDataPubSubType implements TopicDataType<us.ihmc.robotDataL
    @Override
    public int getTypeSize()
    {
-      int  current_alignment = 0;
-      
+      int current_alignment = 0;
+
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
@@ -130,12 +156,9 @@ public class CustomLogDataPubSubType implements TopicDataType<us.ihmc.robotDataL
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       current_alignment += (maximumCompressedSize * 1) + CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       current_alignment += (numberOfStates * 8) + CDR.alignment(current_alignment, 8);
 
-
-  
       return current_alignment;
    }
 
@@ -145,24 +168,27 @@ public class CustomLogDataPubSubType implements TopicDataType<us.ihmc.robotDataL
       return name;
    }
 
-   public void serialize(us.ihmc.robotDataLogger.LogData data, CDR cdr)
+   @Override
+   public CustomLogDataPubSubType newInstance()
    {
-      write(data, cdr);
+      return new CustomLogDataPubSubType(numberOfVariables, numberOfStates, registryID);
    }
 
-   public void deserialize(us.ihmc.robotDataLogger.LogData data, CDR cdr)
-   {
-      read(data, cdr);
-   }
-
-   public void copy(us.ihmc.robotDataLogger.LogData src, us.ihmc.robotDataLogger.LogData dest)
+   @Override
+   public void serialize(RegistryBuffer data, CDR cdr)
    {
       throw new RuntimeException("Not implemented");
    }
 
    @Override
-   public CustomLogDataPubSubType newInstance()
+   public void deserialize(RegistryBuffer data, CDR cdr)
    {
-      return new CustomLogDataPubSubType(numberOfVariables, numberOfStates);
+      throw new RuntimeException("Not implemented");
+   }
+
+   @Override
+   public void copy(RegistryBuffer src, RegistryBuffer dest)
+   {
+      throw new RuntimeException("Not implemented");
    }
 }
