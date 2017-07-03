@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine;
+import us.ihmc.robotics.geometry.FrameLine3D;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -29,7 +29,7 @@ public class FrameConvexPolygon2dIntersector
 {
    private final FramePlane3d planeOne;
    private final FramePlane3d planeTwo;
-   private final FrameLine intersectionOfPlanes;
+   private final FrameLine3D intersectionOfPlanes;
    private final FrameLine2d planeIntersectionOnPolygonPlane;
    private final Pair<FramePoint2d, FramePoint2d> lineIntersectionOnPolygonPlane;
    private final Pair<FramePoint, FramePoint> intersectionWithPolygonOne;
@@ -43,7 +43,7 @@ public class FrameConvexPolygon2dIntersector
    {
       planeOne = new FramePlane3d();
       planeTwo = new FramePlane3d();
-      intersectionOfPlanes = new FrameLine();
+      intersectionOfPlanes = new FrameLine3D();
       planeIntersectionOnPolygonPlane = new FrameLine2d();
       lineIntersectionOnPolygonPlane = new Pair<FramePoint2d, FramePoint2d>(new FramePoint2d(), new FramePoint2d());
       intersectionWithPolygonOne = new Pair<FramePoint, FramePoint>(new FramePoint(), new FramePoint());
@@ -309,7 +309,7 @@ public class FrameConvexPolygon2dIntersector
       }
    };
 
-   public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
+   public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine3D intersectionToPack)
    {
       ReferenceFrame previousPlaneTwoReferenceFrame = planeTwo.getReferenceFrame();
       planeTwo.changeFrame(planeOne.getReferenceFrame());

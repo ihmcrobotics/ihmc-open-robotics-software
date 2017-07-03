@@ -9,39 +9,39 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class FrameLine extends FrameGeometryObject<FrameLine, Line3D>
+public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
 {
    private final Line3D line3D;
 
-   public FrameLine()
+   public FrameLine3D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
-   public FrameLine(ReferenceFrame referenceFrame)
+   public FrameLine3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Line3D());
       line3D = getGeometryObject();
    }
 
-   public FrameLine(FramePoint point, FrameVector vector)
+   public FrameLine3D(FramePoint point, FrameVector vector)
    {
       this(point.getReferenceFrame(), point.getGeometryObject(), vector.getGeometryObject());
       point.checkReferenceFrameMatch(vector);
    }
 
-   public FrameLine(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly vector)
+   public FrameLine3D(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly vector)
    {
       super(referenceFrame, new Line3D(point, vector));
       line3D = getGeometryObject();
    }
 
-   public FrameLine(FrameLine frameLine)
+   public FrameLine3D(FrameLine3D frameLine)
    {
       this(frameLine.getReferenceFrame(), frameLine.getGeometryObject());
    }
 
-   public FrameLine(ReferenceFrame referenceFrame, Line3D line)
+   public FrameLine3D(ReferenceFrame referenceFrame, Line3D line)
    {
       super(referenceFrame, new Line3D(line));
       line3D = getGeometryObject();
