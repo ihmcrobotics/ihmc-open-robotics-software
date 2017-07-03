@@ -21,9 +21,9 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 {
 
    @Override
-   public FramePoint2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y, String name)
+   public FramePoint2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y)
    {
-      return new FramePoint2d(referenceFrame, x, y, name);
+      return new FramePoint2d(referenceFrame, x, y);
    }
 
    @After
@@ -37,9 +37,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       FramePoint2d point = new FramePoint2d(worldFrame, 1.0, 2.0);
 
-      point.setName("testPointOne");
-
-      assertEquals("testPointOne", point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -48,7 +45,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_double_double_String()
    {
-      FramePoint2d point = new FramePoint2d(worldFrame, 1.0, 2.0, "testPointOne");
+      FramePoint2d point = new FramePoint2d(worldFrame, 1.0, 2.0);
 
       point.checkReferenceFrameMatch(worldFrame);
 
@@ -61,7 +58,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       {
          //Good
       }
-      assertEquals("testPointOne", point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -70,7 +66,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_FrameTuple2d()
    {
-      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, "testPointOne");
+      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0);
       FramePoint2d point = new FramePoint2d(frameTuple);
 
       point.checkReferenceFrameMatch(theFrame);
@@ -85,7 +81,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
          //Good
       }
 
-      assertEquals("testPointOne", point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -106,7 +101,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       {
          //Good
       }
-      assertEquals(null, point.getName());
       assertEquals(0.0, point.getX(), 1e-7);
       assertEquals(0.0, point.getY(), 1e-7);
    }
@@ -128,7 +122,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       {
          //Good
       }
-      assertEquals(null, point.getName());
       assertEquals(0.0, point.getX(), 1e-7);
       assertEquals(0.0, point.getY(), 1e-7);
    }
@@ -138,8 +131,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    public void testFramePoint2d_ReferenceFrame_double_double()
    {
       FramePoint2d point = new FramePoint2d(worldFrame, 1.0, 2.0);
-      point.setName("testPointOne");
-      assertEquals("testPointOne", point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -150,8 +141,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       double[] position = { 1.0, 2.0 };
       FramePoint2d point = new FramePoint2d(worldFrame, position);
-      point.setName("testPointOne");
-      assertEquals("testPointOne", point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -162,8 +151,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       double[] position = { 1.0, 2.0 };
       String name = "testPointOne";
-      FramePoint2d point = new FramePoint2d(worldFrame, position, name);
-      assertEquals("testPointOne", point.getName());
+      FramePoint2d point = new FramePoint2d(worldFrame, position);
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -172,9 +160,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_String()
    {
-      String name = "testPointOne";
-      FramePoint2d point = new FramePoint2d(worldFrame, name);
-      assertEquals("testPointOne", point.getName());
+      FramePoint2d point = new FramePoint2d(worldFrame);
       assertEquals(0.0, point.getX(), 1e-7);
       assertEquals(0.0, point.getY(), 1e-7);
    }
@@ -185,7 +171,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       Point2D position = new Point2D(1.0, 2.0);
       FramePoint2d point = new FramePoint2d(worldFrame, position);
-      assertEquals(null, point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -195,9 +180,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    public void testFramePoint2d_ReferenceFrame_Tuple2d_String()
    {
       Point2D position = new Point2D(1.0, 2.0);
-      String name = "testPointOne";
-      FramePoint2d point = new FramePoint2d(worldFrame, position, name);
-      assertEquals("testPointOne", point.getName());
+      FramePoint2d point = new FramePoint2d(worldFrame, position);
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
    }
@@ -256,7 +239,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testGetPoint()
    {
-      FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0, "point1");
+      FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0);
       Point2D point2d = point1.getPoint();
       assertEquals("Should be equal", point1.getX(), point2d.getX(), epsilon);
       assertEquals("Should be equal", point1.getY(), point2d.getY(), epsilon);
@@ -266,7 +249,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testToFramePoint()
    {
-      FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0, "point1");
+      FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0);
       FramePoint framePoint = point1.toFramePoint();
       assertEquals("Should be equal", point1.getX(), framePoint.getX(), epsilon);
       assertEquals("Should be equal", point1.getY(), framePoint.getY(), epsilon);

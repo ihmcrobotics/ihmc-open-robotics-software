@@ -15,11 +15,6 @@ public class PlotterVector2d extends FrameVector2d
       super(frameTuple2d);
    }
 
-   public PlotterVector2d(PlotterReferenceFrame referenceFrame, double x, double y, String name)
-   {
-      super(referenceFrame, x, y, name);
-   }
-
    public PlotterVector2d(PlotterReferenceFrame referenceFrame, double x, double y)
    {
       super(referenceFrame, x, y);

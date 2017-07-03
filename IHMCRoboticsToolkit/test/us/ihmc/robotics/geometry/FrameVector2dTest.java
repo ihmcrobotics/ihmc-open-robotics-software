@@ -23,9 +23,9 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 {
    @Override
-   public FrameVector2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y, String name)
+   public FrameVector2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y)
    {
-      return new FrameVector2d(referenceFrame, x, y, name);
+      return new FrameVector2d(referenceFrame, x, y);
    }
 
    @After
@@ -38,11 +38,9 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testFrameVector2d_ReferenceFrame_double_double_String()
    {
       double x = 5.7, y = 56.3;
-      String name = "vector";
-      FrameVector2d frame = new FrameVector2d(theFrame, x, y, name);
+      FrameVector2d frame = new FrameVector2d(theFrame, x, y);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), name);
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
@@ -54,7 +52,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d(theFrame, x, y);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
@@ -65,7 +62,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d();
       assertEquals("Should be equal", frame.getX(), 0.0, epsilon);
       assertEquals("Should be equal", frame.getY(), 0.0, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), ReferenceFrame.getWorldFrame());
    }
 
@@ -78,7 +74,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d(theFrame, tuple);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
@@ -91,7 +86,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d(theFrame, vector);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
@@ -103,7 +97,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d(theFrame);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), theFrame);
    }
 
@@ -116,7 +109,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame = new FrameVector2d(frameTuple);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
-      assertEquals("Should be equal", frame.getName(), null);
       assertEquals("Should be equal", frame.getReferenceFrame(), frameTuple.getReferenceFrame());
    }
 
@@ -125,12 +117,11 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testFrameVector2d_FramePoint2d_FramePoint2d()
    {
       double x = 5.7, y = 56.3;
-      FramePoint2d startFramePoint = new FramePoint2d(theFrame, x, y, "start");
-      FramePoint2d endFramePoint = new FramePoint2d(theFrame, y, x, "end");
+      FramePoint2d startFramePoint = new FramePoint2d(theFrame, x, y);
+      FramePoint2d endFramePoint = new FramePoint2d(theFrame, y, x);
       FrameVector2d frame = new FrameVector2d(startFramePoint, endFramePoint);
       assertEquals("Should be equal", frame.getX(), endFramePoint.getX() - startFramePoint.getX(), epsilon);
       assertEquals("Should be equal", frame.getY(), endFramePoint.getY() - startFramePoint.getY(), epsilon);
-      assertEquals("Should be equal", frame.getName(), endFramePoint.getName());
       assertEquals("Should be equal", frame.getReferenceFrame(), startFramePoint.getReferenceFrame());
       try
       {
@@ -149,8 +140,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testGetVector()
    {
       double x = 5.6, y = 45.67;
-      String name = "woof";
-      FrameVector2d frame = new FrameVector2d(aFrame, x, y, name);
+      FrameVector2d frame = new FrameVector2d(aFrame, x, y);
       Vector2D vector2d = frame.getVector();
       assertEquals("Should be equal", frame.getX(), vector2d.getX(), epsilon);
       assertEquals("Should be equal", frame.getY(), vector2d.getY(), epsilon);
@@ -162,8 +152,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    {
       Random random = new Random(45456L);
       double x = random.nextDouble(), y = random.nextDouble();
-      String name = "woof";
-      FrameVector2d frame = new FrameVector2d(aFrame, x, y, name);
+      FrameVector2d frame = new FrameVector2d(aFrame, x, y);
       frame.rotate90();
       assertEquals("Should be equal", frame.getX(), -y, epsilon);
       assertEquals("Should be equal", frame.getY(), x, epsilon);

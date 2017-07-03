@@ -26,19 +26,9 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
-   {
-      super(referenceFrame, new Vector2D(x, y), name);
-   }
-
-   /**
-    * FrameVector2d
-    * <p/>
-    * A normal vector2d associated with a specific reference frame.
-    */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
    {
-      this(referenceFrame, x, y, null);
+      super(referenceFrame, new Vector2D(x, y));
    }
 
    /**
@@ -88,7 +78,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     */
    public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
    }
 
    /**
@@ -98,7 +88,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     */
    public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
    {
-      this(endFramePoint.getReferenceFrame(), endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
+      this(endFramePoint.getReferenceFrame(), endFramePoint.tuple.getX(), endFramePoint.tuple.getY());
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       sub(startFramePoint);
    }

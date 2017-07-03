@@ -40,12 +40,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
 
    protected ReferenceFrame childFrame;
 
-   public abstract T createFrameTuple(ReferenceFrame referenceFrame, double x, double y, String name);
-
-   public T createFrameTuple(ReferenceFrame referenceFrame, double x, double y)
-   {
-      return createFrameTuple(referenceFrame, x, y, null);
-   }
+   public abstract T createFrameTuple(ReferenceFrame referenceFrame, double x, double y);
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)

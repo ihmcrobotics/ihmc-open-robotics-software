@@ -15,34 +15,14 @@ public class PlotterPoint2d extends FramePoint2d
       super(frameTuple2d);
    }
 
-   public PlotterPoint2d(PlotterReferenceFrame referenceFrame, double x, double y, String name)
-   {
-      super(referenceFrame, x, y, name);
-   }
-
    public PlotterPoint2d(PlotterReferenceFrame referenceFrame, double x, double y)
    {
       super(referenceFrame, x, y);
    }
 
-   public PlotterPoint2d(PlotterReferenceFrame referenceFrame, double[] position, String name)
-   {
-      super(referenceFrame, position, name);
-   }
-
    public PlotterPoint2d(PlotterReferenceFrame referenceFrame, double[] position)
    {
       super(referenceFrame, position);
-   }
-
-   public PlotterPoint2d(PlotterReferenceFrame referenceFrame, String name)
-   {
-      super(referenceFrame, name);
-   }
-
-   public PlotterPoint2d(PlotterReferenceFrame referenceFrame, Tuple2DBasics position, String name)
-   {
-      super(referenceFrame, position, name);
    }
 
    public PlotterPoint2d(PlotterReferenceFrame referenceFrame, Tuple2DBasics position)
