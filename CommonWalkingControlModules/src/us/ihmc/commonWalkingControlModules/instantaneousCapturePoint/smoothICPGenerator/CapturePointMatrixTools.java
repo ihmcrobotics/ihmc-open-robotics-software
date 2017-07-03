@@ -18,12 +18,17 @@ public class CapturePointMatrixTools extends CapturePointTools
    private static final DenseMatrix64F generalizedAlphaPrimeRow = new DenseMatrix64F(1, defaultSize);
    private static final DenseMatrix64F generalizedBetaPrimeRow = new DenseMatrix64F(1, defaultSize);
    
-   private static final DenseMatrix64F polynomialCoefficientVector = new DenseMatrix64F(defaultSize, defaultSize);
+   private static final DenseMatrix64F polynomialCoefficientMatrix= new DenseMatrix64F(defaultSize, defaultSize);
+   private static final DenseMatrix64F polynomialCoefficientVector= new DenseMatrix64F(defaultSize, 1);
    
    private static final DenseMatrix64F generalizedAlphaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private static final DenseMatrix64F generalizedBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private static final DenseMatrix64F generalizedGammaPrimeMatrix = new DenseMatrix64F(1, 1);
    private static final DenseMatrix64F generalizedAlphaBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   
+   private static final DenseMatrix64F M1 = new DenseMatrix64F(defaultSize, defaultSize);
+   private static final DenseMatrix64F M2 = new DenseMatrix64F(defaultSize, defaultSize);
+   private static final DenseMatrix64F M3 = new DenseMatrix64F(defaultSize, defaultSize);
    
    /**
     * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
@@ -36,38 +41,101 @@ public class CapturePointMatrixTools extends CapturePointTools
     * @param time
     * @return
     */
-   public static void calculateICPQuantityFromCorrespondingCMPPolynomialScalar(double omega0, double time, int icpDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D, FrameTuple<?, ?> icpPositionDesiredFinal, FrameTuple<?, ?> icpPositionDesired)
+   public static void calculateICPQuantityFromCorrespondingCMPPolynomialScalar(double omega0, double time, int icpDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D, FrameTuple<?, ?> icpPositionDesiredFinal, FrameTuple<?, ?> icpQuantityDesired)
    {        
-//      int numberOfCoefficients = cmpPolynomial3D.getYoTrajectoryX().getNumberOfCoefficients(); //TODO: proper way to do it? x, y and z always same number of coefficients?
-//
-//      double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
-//      polynomialCoefficientVector.reshape(numberOfCoefficients, 1);
-//      polynomialCoefficientVector.setData(polynomialCoefficients);
-//      
-//      generalizedAlphaPrimeMatrix.reshape(3, numberOfCoefficients);
-//      generalizedBetaPrimeMatrix.reshape(3, numberOfCoefficients);
-//      generalizedAlphaBetaPrimeMatrix.reshape(3, numberOfCoefficients);
-//      generalizedGammaPrimeMatrix.reshape(1, 1);
-//
-//      generalizedAlphaPrimeMatrix.zero();
-//      generalizedBetaPrimeMatrix.zero();
-//      generalizedAlphaBetaPrimeMatrix.zero();
-//      generalizedGammaPrimeMatrix.zero();
-//
-//      calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-//      calculateGeneralizedBetaPrimeOnCMPSegment(generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-//      calculateGeneralizedGammaPrimeOnCMPSegment(generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-//      CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
-//      
-////      PrintTools.debug("A: " +generalizedAlphaPrimeMatrix.toString());
-////      PrintTools.debug("B: " +generalizedBetaPrimeMatrix.toString());
-////      PrintTools.debug("C: " +generalizedGammaPrimeMatrix.toString());
-////      PrintTools.debug("AB: " + generalizedAlphaBetaPrimeMatrix.toString());
-////      PrintTools.debug("P: " + polynomialCoefficientVector.toString());
-////      PrintTools.debug("ICP: " + icpPositionDesiredFinal);
-////      PrintTools.debug("");
-//      
-//      return calculateICPQuantityScalar(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal);
+      int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
+      if(numberOfCoefficients == -1)
+      {
+         icpQuantityDesired.setToNaN();
+      }
+      
+      initializeMatrices(numberOfCoefficients);
+      setPolynomialCoefficientMatrix(polynomialCoefficientMatrix, cmpPolynomial3D);
+
+      calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, time, generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
+      calculateGeneralizedBetaPrimeOnCMPSegment(omega0, time, generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
+      calculateGeneralizedGammaPrimeOnCMPSegment(omega0, time, generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
+      CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
+      
+//      PrintTools.debug("A: " +generalizedAlphaPrimeMatrix.toString());
+//      PrintTools.debug("B: " +generalizedBetaPrimeMatrix.toString());
+//      PrintTools.debug("C: " +generalizedGammaPrimeMatrix.toString());
+//      PrintTools.debug("AB: " + generalizedAlphaBetaPrimeMatrix.toString());
+//      PrintTools.debug("P: " + polynomialCoefficientVector.toString());
+//      PrintTools.debug("ICP: " + icpPositionDesiredFinal);
+//      PrintTools.debug("");
+      
+      calculateICPQuantityScalar(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal, icpQuantityDesired);
+   }
+   
+   /**
+    * Compute the i-th derivative of &xi;<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
+    * <P>
+    * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
+    * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
+    *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
+    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    * 
+    * @param generalizedAlphaBetaPrimeMatrix
+    * @param generalizedGammaPrimeMatrix
+    * @param polynomialCoefficientVector
+    * @param icpPositionDesiredFinal
+    * @return
+    */
+   private static void calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
+                                             DenseMatrix64F polynomialCoefficientVector, FrameTuple<?, ?> icpPositionDesiredFinal,
+                                             FrameTuple<?, ?> icpQuantityDesired)
+   {
+      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
+      M1.zero();
+
+      CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
+
+      M2.reshape(M1.getNumRows(),  M1.getNumCols());
+      M2.set(0, 0, generalizedGammaPrimeMatrix.getIndex(0, 0) * icpPositionDesiredFinal.getX());
+      M2.set(0, 1, generalizedGammaPrimeMatrix.getIndex(0, 0) * icpPositionDesiredFinal.getY());
+      M2.set(0, 2, generalizedGammaPrimeMatrix.getIndex(0, 0) * icpPositionDesiredFinal.getZ());
+            
+      CommonOps.addEquals(M1, M2);
+      
+      icpQuantityDesired.set(M1.get(0, 0), M1.get(0, 1), M1.get(0, 2));
+   }
+   
+   private static void initializeMatrices(int numberOfCoefficients)
+   {
+      polynomialCoefficientMatrix.reshape(numberOfCoefficients, 3);
+      polynomialCoefficientMatrix.zero();
+      
+      generalizedAlphaPrimeMatrix.reshape(3, numberOfCoefficients);
+      generalizedAlphaPrimeMatrix.zero();
+      
+      generalizedBetaPrimeMatrix.reshape(3, numberOfCoefficients);
+      generalizedBetaPrimeMatrix.zero();
+      
+      generalizedAlphaBetaPrimeMatrix.reshape(3, numberOfCoefficients);
+      generalizedAlphaBetaPrimeMatrix.zero();
+      
+      generalizedGammaPrimeMatrix.reshape(1, 1);
+      generalizedGammaPrimeMatrix.zero();
+   }
+   
+   private static void setPolynomialCoefficientMatrix(DenseMatrix64F polynomialCoefficientMatrix, YoFrameTrajectory3D cmpPolynomial3D)
+   {
+      for(Direction dir : Direction.values())
+      {
+         setPolynomialCoefficientVector(polynomialCoefficientVector, cmpPolynomial3D.getYoTrajectory(dir));
+         
+         CommonOps.insert(polynomialCoefficientVector, polynomialCoefficientMatrix, 0, dir.ordinal());
+      }
+   }
+   
+   private static void setPolynomialCoefficientVector(DenseMatrix64F polynomialCoefficientVector, YoTrajectory cmpPolynomial)
+   {
+      double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
+      
+      polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
+      
+      polynomialCoefficientVector.setData(polynomialCoefficients);
    }
    
    /**
