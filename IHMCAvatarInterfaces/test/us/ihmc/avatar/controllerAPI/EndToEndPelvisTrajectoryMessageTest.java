@@ -267,7 +267,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.15, 0.0, "desiredVelocityControlModule"));
+      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
       desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());

@@ -32,19 +32,9 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double x, double y, String name)
-   {
-      super(referenceFrame, new Point2D(x, y), name);
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
    public FramePoint2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
    }
 
    /**
@@ -54,7 +44,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, 0.0, 0.0, null);
+      this(referenceFrame, 0.0, 0.0);
    }
 
    /**
@@ -74,7 +64,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y)
    {
-      this(referenceFrame, x, y, null);
+      super(referenceFrame, new Point2D(x, y));
    }
 
    /**
@@ -84,27 +74,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(ReferenceFrame referenceFrame, double[] position)
    {
-      this(referenceFrame, position[0], position[1], null);
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
-   public FramePoint2d(ReferenceFrame referenceFrame, double[] position, String name)
-   {
-      this(referenceFrame, position[0], position[1], name);
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
-   public FramePoint2d(ReferenceFrame referenceFrame, String name)
-   {
-      this(referenceFrame, 0.0, 0.0, name);
+      this(referenceFrame, position[0], position[1]);
    }
 
    /**
@@ -114,17 +84,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position)
    {
-      this(referenceFrame, position.getX(), position.getY(), null);
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position, String name)
-   {
-      this(referenceFrame, position.getX(), position.getY(), name);
+      this(referenceFrame, position.getX(), position.getY());
    }
 
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
