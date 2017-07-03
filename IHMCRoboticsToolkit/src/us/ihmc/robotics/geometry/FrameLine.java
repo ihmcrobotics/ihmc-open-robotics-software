@@ -4,8 +4,6 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -13,110 +11,106 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class FrameLine extends FrameGeometryObject<FrameLine, Line3D>
 {
-   private final Line3D line;
+   private final Line3D line3D;
 
    public FrameLine()
    {
       this(ReferenceFrame.getWorldFrame());
    }
-   
+
    public FrameLine(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, new Line3D());
+      super(referenceFrame, new Line3D());
+      line3D = getGeometryObject();
    }
-   
+
    public FrameLine(FramePoint point, FrameVector vector)
    {
-      this(point.getReferenceFrame(), new Line3D(point.getGeometryObject(), vector.getGeometryObject()));
+      this(point.getReferenceFrame(), point.getGeometryObject(), vector.getGeometryObject());
       point.checkReferenceFrameMatch(vector);
    }
 
    public FrameLine(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly vector)
    {
-      this(referenceFrame, new Line3D(point, vector));
+      super(referenceFrame, new Line3D(point, vector));
+      line3D = getGeometryObject();
    }
 
    public FrameLine(FrameLine frameLine)
    {
-      this(frameLine.getReferenceFrame(), new Line3D(frameLine.getPoint(), frameLine.getNormalizedVector()));
+      this(frameLine.getReferenceFrame(), frameLine.getGeometryObject());
    }
 
    public FrameLine(ReferenceFrame referenceFrame, Line3D line)
    {
-      super(referenceFrame, line);
-      this.line = getGeometryObject();
+      super(referenceFrame, new Line3D(line));
+      line3D = getGeometryObject();
    }
 
    public FrameVector getFrameNormalizedVectorCopy()
    {
-      return new FrameVector(referenceFrame, line.getDirection());
+      return new FrameVector(referenceFrame, line3D.getDirection());
    }
 
    public Point3DReadOnly getPoint()
    {
-      return line.getPoint();
+      return line3D.getPoint();
    }
 
-   public Vector3DReadOnly getNormalizedVector()
+   public Vector3DReadOnly getDirection()
    {
-      return line.getDirection();
+      return line3D.getDirection();
    }
 
    public Point3D getPointCopy()
    {
-      return new Point3D(line.getPoint());
+      return new Point3D(line3D.getPoint());
    }
 
-   public Vector3D getNormalizedVectorCopy()
+   public Vector3D getDirectionCopy()
    {
-      return new Vector3D(line.getDirection());
+      return new Vector3D(line3D.getDirection());
    }
 
-   public void setPoint(FramePoint point)
+   public void setPoint(double pointOnLineX, double pointOnLineY, double pointOnLineZ)
    {
-      checkReferenceFrameMatch(point);
-
-      line.setPoint(point.getPoint());
-   }
-   
-   public void setPointWithoutChecks(Point3DReadOnly point)
-   {
-      line.setPoint(point);
+      line3D.setPoint(pointOnLineX, pointOnLineY, pointOnLineZ);
    }
 
-   public void setVector(FrameVector vector)
+   public void setPoint(Point3DReadOnly pointOnLine)
    {
-      checkReferenceFrameMatch(vector);
-      
-      line.setDirection(vector.getVector());
+      line3D.setPoint(pointOnLine);
    }
 
-   public void setVectorWithoutChecks(Vector3DReadOnly vector)
+   public void setPoint(FramePoint pointOnLine)
    {
-      line.setDirection(vector);
+      checkReferenceFrameMatch(pointOnLine);
+      line3D.setPoint(pointOnLine.getPoint());
    }
-   
-   public void projectOntoXYPlane(FrameLine2d lineToPack)
+
+   public void setDirection(double lineDirectionX, double lineDirectionY, double lineDirectionZ)
    {
-      lineToPack.set(getReferenceFrame(), line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
+      line3D.setDirection(lineDirectionX, lineDirectionY, lineDirectionZ);
    }
-   
+
+   public void setDirection(Vector3DReadOnly lineDirection)
+   {
+      line3D.setDirection(lineDirection);
+   }
+
+   public void setDirection(FrameVector lineDirection)
+   {
+      checkReferenceFrameMatch(lineDirection);
+      line3D.setDirection(lineDirection.getVector());
+   }
+
    public void projectOntoXYPlane(Line2D lineToPack)
    {
-      lineToPack.set(line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
+      lineToPack.set(line3D.getPointX(), line3D.getPointY(), line3D.getDirectionX(), line3D.getDirectionY());
    }
-   
-   public void projectOntoXYPlane(Point2DBasics pointToPack, Vector2DBasics normalizedVectorToPack)
+
+   public void projectOntoXYPlane(FrameLine2d lineToPack)
    {
-      pointToPack.set(line.getPoint().getX(), line.getPoint().getY());
-      normalizedVectorToPack.set(line.getDirection().getX(), line.getDirection().getY());
-      if (GeometryTools.isZero(normalizedVectorToPack, 1e-12))
-      {
-         normalizedVectorToPack.set(Double.NaN, Double.NaN);
-      }
-      else
-      {
-         normalizedVectorToPack.normalize();
-      }
+      lineToPack.set(getReferenceFrame(), line3D.getPointX(), line3D.getPointY(), line3D.getDirectionX(), line3D.getDirectionY());
    }
 }

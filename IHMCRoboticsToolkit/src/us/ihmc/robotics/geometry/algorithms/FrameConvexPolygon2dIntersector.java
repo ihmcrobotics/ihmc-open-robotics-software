@@ -320,8 +320,8 @@ public class FrameConvexPolygon2dIntersector
       if (success)
       {
          intersectionToPack.setToZero(planeOne.getReferenceFrame());
-         intersectionToPack.setPointWithoutChecks(pointOnIntersection);
-         intersectionToPack.setVectorWithoutChecks(intersectionDirection);
+         intersectionToPack.setPoint(pointOnIntersection);
+         intersectionToPack.setDirection(intersectionDirection);
       }
       else
       {
