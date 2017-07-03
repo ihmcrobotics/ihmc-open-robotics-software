@@ -52,7 +52,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
       
          CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, time, alphaPrimeAutomatic, 0, linear3D);
-         calculateAlphaPrimeLinear(omega0 , time, tFinal, alphaPrimeManual);
+         calculateAlphaPrimeByHandLinear(omega0 , time, tFinal, alphaPrimeManual);
 
          for(int j = 0; j < numberOfCoefficients; j++)
          {
@@ -66,7 +66,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
       
          CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment(omega0, time, betaPrimeAutomatic, 0, linear3D);
-         calculateBetaPrimeLinear(omega0 , time, tFinal, betaPrimeManual);
+         calculateBetaPrimeByHandLinear(omega0 , time, tFinal, betaPrimeManual);
          
          for(int j = 0; j < numberOfCoefficients; j++)
          {
@@ -80,7 +80,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
          CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment(omega0, time, gammaPrimeAutomatic, 0, linear3D);
-         calculateGammaPrimeLinear(omega0 , time, tFinal, gammaPrimeManual);
+         calculateGammaPrimeByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
          
          assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
          
@@ -116,10 +116,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
       
          CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
-         calculateAlphaPrimeCubic(omega0 , time, tFinal, alphaPrimeManual);
-         
-         PrintTools.debug("A auto: " + alphaPrimeAutomatic);
-         PrintTools.debug("A hand: " + alphaPrimeManual);
+         calculateAlphaPrimeByHandCubic(omega0 , time, tFinal, alphaPrimeManual);
 
          for(int j = 0; j < numberOfCoefficients; j++)
          {
@@ -133,10 +130,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
       
          CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment(omega0, time, betaPrimeAutomatic, 0, cubic3D);
-         calculateBetaPrimeCubic(omega0 , time, tFinal, betaPrimeManual);
-         
-         PrintTools.debug("B auto: " + betaPrimeAutomatic);
-         PrintTools.debug("B hand: " + betaPrimeManual);
+         calculateBetaPrimeByHandCubic(omega0 , time, tFinal, betaPrimeManual);
          
          for(int j = 0; j < numberOfCoefficients; j++)
          {
@@ -150,10 +144,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
          CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
-         calculateGammaPrimeCubic(omega0 , time, tFinal, gammaPrimeManual);
-         
-         PrintTools.debug("C auto: " + gammaPrimeAutomatic);
-         PrintTools.debug("C hand: " + gammaPrimeManual);
+         calculateGammaPrimeByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
          
          assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
          
@@ -162,7 +153,7 @@ public class CapturePointMatrixToolsTest
    }
       
       
-   public void calculateAlphaPrimeLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public void calculateAlphaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -174,7 +165,7 @@ public class CapturePointMatrixToolsTest
       alphaPrimeLinear.set(2, 1, time + 1.0/omega0);
    }
    
-   public void calculateBetaPrimeLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public void calculateBetaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -186,12 +177,12 @@ public class CapturePointMatrixToolsTest
       betaPrimeLinear.set(2, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
    }
    
-   public void calculateGammaPrimeLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public void calculateGammaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
    
-   public void calculateAlphaPrimeCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public void calculateAlphaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -209,7 +200,7 @@ public class CapturePointMatrixToolsTest
       alphaPrimeLinear.set(2, 3, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
    }
    
-   public void calculateBetaPrimeCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public void calculateBetaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -227,7 +218,7 @@ public class CapturePointMatrixToolsTest
       betaPrimeLinear.set(2, 3, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
    }
    
-   public void calculateGammaPrimeCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public void calculateGammaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
