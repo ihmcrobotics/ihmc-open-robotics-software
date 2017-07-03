@@ -29,17 +29,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly position)
    {
-      this(referenceFrame, position, null);
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly position, String name)
-   {
-      super(referenceFrame, new Point3D(position), name);
+      super(referenceFrame, new Point3D(position));
    }
 
    /**
@@ -49,17 +39,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(ReferenceFrame referenceFrame, double[] position)
    {
-      this(referenceFrame, position, null);
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, double[] position, String name)
-   {
-      super(referenceFrame, new Point3D(position), name);
+      super(referenceFrame, new Point3D(position));
    }
 
    /**
@@ -79,17 +59,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Point3D(), null);
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, String name)
-   {
-      super(referenceFrame, new Point3D(), name);
+      super(referenceFrame, new Point3D());
    }
 
    /**
@@ -99,7 +69,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(FrameTuple<?, ?> frameTuple)
    {
-      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple.tuple));
    }
 
    /**
@@ -109,7 +79,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
    {
-      super(frameTuple2d.getReferenceFrame(), new Point3D(), frameTuple2d.name);
+      super(frameTuple2d.getReferenceFrame(), new Point3D());
       setXY(frameTuple2d);
    }
 
@@ -120,17 +90,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     */
    public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
    {
-      this(referenceFrame, x, y, z, null);
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z, String name)
-   {
-      super(referenceFrame, new Point3D(x, y, z), name);
+      super(referenceFrame, new Point3D(x, y, z));
    }
 
    public static FramePoint average(List<? extends FramePoint> framePoints)
