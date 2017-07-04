@@ -216,6 +216,15 @@ public class CapturePointMatrixToolsTest
 //         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
          
          EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+         
+         // Dynamics
+         linear3D.compute(time);
+         FramePoint cmpPositionDesiredCurrent = new FramePoint(worldFrame, linear3D.getPosition());
+         
+         FrameVector icpVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
       }
    }
    
@@ -258,7 +267,7 @@ public class CapturePointMatrixToolsTest
 
          EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
-         //Velocity
+         // Velocity
          FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
          FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
          
@@ -269,6 +278,15 @@ public class CapturePointMatrixToolsTest
 //         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
          
          EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+         
+         // Dynamics
+         cubic3D.compute(time);
+         FramePoint cmpPositionDesiredCurrent = new FramePoint(worldFrame, cubic3D.getPosition());
+         
+         FrameVector icpVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
       }
    }
    
