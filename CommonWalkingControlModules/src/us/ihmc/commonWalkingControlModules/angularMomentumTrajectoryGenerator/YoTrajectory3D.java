@@ -214,6 +214,16 @@ public class YoTrajectory3D
       add(this, addTraj);
    }
    
+   public void addByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.addByTrimming(this, traj1, traj2);
+   }
+
+   public void addByTrimming(YoTrajectory3D addTraj)
+   {
+      addByTrimming(this, addTraj);
+   }
+   
    public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.subtract(this, traj1, traj2);
@@ -222,6 +232,16 @@ public class YoTrajectory3D
    public void subtract(YoTrajectory3D subTraj)
    {
       subtract(this, subTraj);
+   }
+   
+   public void subtractByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
+   }
+
+   public void subtractByTrimming(YoTrajectory3D subTraj)
+   {
+      subtractByTrimming(this, subTraj);
    }
    
    public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
@@ -233,6 +253,16 @@ public class YoTrajectory3D
    {
       dotProduct(this, dotPTraj);
    }
+   
+   public void dotProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.dotProductByTrimming(this, traj1, traj2);
+   }
+   
+   public void dotProductByTrimming(YoTrajectory3D dotPTraj)
+   {
+      dotProductByTrimming(this, dotPTraj);
+   }
 
    public void crossProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
@@ -240,6 +270,16 @@ public class YoTrajectory3D
    }
    
    public void crossProduct(YoTrajectory3D crossPTraj)
+   {
+      crossProduct(this, crossPTraj);
+   }
+   
+   public void crossProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.crossProductByTrimming(this, traj1, traj2);
+   }
+   
+   public void crossProductByTrimming(YoFrameTrajectory3D crossPTraj)
    {
       crossProduct(this, crossPTraj);
    }
@@ -346,10 +386,10 @@ public class YoTrajectory3D
       zTrajectory.setConstant(z.getZ());
    }
 
-   public void setConstant(double t0, double tFinal, Point3DReadOnly z)
+   public void setConstant(double t0, double tFinal, Point3DReadOnly z0)
    {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
+      for(int index = 0; index < 3; index ++)
+         getYoTrajectory(index).setConstant(t0, tFinal, z0.getElement(index));
    }
    
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
@@ -623,5 +663,16 @@ public class YoTrajectory3D
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
    }
-
+   
+   public void getDerivative(YoTrajectory3D dervTraj)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index));
+   }
+   
+   public void getDerivative(YoTrajectory3D dervTraj, int order)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
+   }
 }
