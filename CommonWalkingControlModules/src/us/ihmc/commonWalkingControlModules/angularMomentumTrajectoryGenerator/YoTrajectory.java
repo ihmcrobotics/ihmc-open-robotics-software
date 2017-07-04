@@ -1,14 +1,7 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import java.security.InvalidParameterException;
-
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
-import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,7 +16,7 @@ public class YoTrajectory
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
-      this.name = name;      
+      this.name = name;
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
       polynomial = new YoPolynomial(name + "Poly", maximumNumberOfCoefficients, registry);
@@ -106,6 +99,7 @@ public class YoTrajectory
 
    public YoInteger getYoNumberOfCoefficients()
    {
+
       return polynomial.getYoNumberOfCoefficients();
    }
 
@@ -135,7 +129,7 @@ public class YoTrajectory
       //FIXME
       polynomial.setConstant(z);
    }
-   
+
    /**
     * Sets the coefficients to zero. Initial and final time are retained.
     */
@@ -143,7 +137,7 @@ public class YoTrajectory
    {
       polynomial.setConstant(0.0);
    }
-   
+
    public void setConstant(double t0, double tFinal, double z)
    {
       setTime(t0, tFinal);
@@ -405,10 +399,20 @@ public class YoTrajectory
    {
       TrajectoryMathTools.add(this, traj1, traj2);
    }
-   
+
    public void add(YoTrajectory addTraj)
    {
       add(this, addTraj);
+   }
+   
+   public void addByTrimming(YoTrajectory traj1, YoTrajectory traj2)
+   {
+      TrajectoryMathTools.addByTrimming(this, traj1, traj2);
+   }
+
+   public void addByTrimming(YoTrajectory addTraj)
+   {
+      addByTrimming(this, addTraj);
    }
 
    public void subtract(YoTrajectory traj1, YoTrajectory traj2)
@@ -420,15 +424,61 @@ public class YoTrajectory
    {
       subtract(this, subTraj);
    }
+
+   public void subtractByTrimming(YoTrajectory traj1, YoTrajectory traj2)
+   {
+      TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
+   }
    
+   public void subtractByTrimming(YoTrajectory subTraj)
+   {
+      subtractByTrimming(this, subTraj);
+   }
+      
    public void multiply(YoTrajectory traj1, YoTrajectory traj2)
    {
       TrajectoryMathTools.multiply(this, traj1, traj2);
    }
-   
+
    public void multiply(YoTrajectory mulTraj)
    {
       multiply(this, mulTraj);
-   }   
+   }
+
+   public void multiplyByTrimming(YoTrajectory traj1, YoTrajectory traj2)
+   {
+      TrajectoryMathTools.multiplyByTrimming(this, traj1, traj2);
+   }
+
+   public void multiplyByTrimming(YoTrajectory mulTraj)
+   {
+      multiplyByTrimming(this, mulTraj);
+   }
+   
+   public void getDerivative(YoTrajectory dervTraj)
+   {
+      if (dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - 1)
+         return;
+      dervTraj.polynomial.reshape(this.getNumberOfCoefficients() - 1);
+      for (int i = 1; i < this.getNumberOfCoefficients(); i++)
+      {
+         dervTraj.polynomial.setDirectlyFast(i - 1, i * this.polynomial.getCoefficient(i));
+      }
+      dervTraj.setInitialTime(this.getInitialTime());
+      dervTraj.setFinalTime(this.getFinalTime());
+   }
+
+   public void getDerivative(YoTrajectory dervTraj, int order)
+   {
+      if(dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - order)
+         return;
+      dervTraj.polynomial.reshape(getNumberOfCoefficients() - order);
+      for(int i = order; i < this.getNumberOfCoefficients(); i++)
+      {
+         dervTraj.polynomial.setDirectlyFast(i - order, this.polynomial.getDerivativeCoefficient(order, i) * this.polynomial.getCoefficient(i));         
+      }
+      dervTraj.setInitialTime(this.getInitialTime());
+      dervTraj.setFinalTime(this.getFinalTime());
+   }
    
 }
