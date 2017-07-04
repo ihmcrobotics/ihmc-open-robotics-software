@@ -10,8 +10,10 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,9 +29,11 @@ public class CapturePointMatrixToolsTest
    
    String namePrefix = "ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest";
    
+   CapturePointMatrixTools icpM = new CapturePointMatrixTools();
+   
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testMatricesPrimeLinear()
+   public void testMatricesPrime3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
@@ -48,29 +52,35 @@ public class CapturePointMatrixToolsTest
          
          double time = t0 + Math.random() * (tFinal - t0);
          
-         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, numberOfCoefficients);
-         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
+         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, time, alphaPrimeAutomatic, 0, linear3D);
-         calculateAlphaPrimeByHandLinear(omega0 , time, tFinal, alphaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, linear3D);
+         calculateAlphaPrime3DByHandLinear(omega0 , time, tFinal, alphaPrimeManual);
+         
+//         PrintTools.debug("A linear calc: " + alphaPrimeAutomatic.toString());
+//         PrintTools.debug("A linear test: " + alphaPrimeManual.toString());
 
-         for(int j = 0; j < numberOfCoefficients; j++)
+         for(int j = 0; j < alphaPrimeAutomatic.getNumCols(); j++)
          {
-            for(int k = 0; k < 3; k++)
+            for(int k = 0; k < alphaPrimeAutomatic.getNumRows(); k++)
             {
                assertEquals(alphaPrimeAutomatic.get(k, j), alphaPrimeManual.get(k, j), EPSILON);
             }
          }
          
-         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, numberOfCoefficients);
-         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
+         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment(omega0, time, betaPrimeAutomatic, 0, linear3D);
-         calculateBetaPrimeByHandLinear(omega0 , time, tFinal, betaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, linear3D);
+         calculateBetaPrime3DByHandLinear(omega0 , time, tFinal, betaPrimeManual);
          
-         for(int j = 0; j < numberOfCoefficients; j++)
+//         PrintTools.debug("B linear calc: " + betaPrimeAutomatic.toString());
+//         PrintTools.debug("B linear test: " + betaPrimeManual.toString());
+         
+         for(int j = 0; j < betaPrimeAutomatic.getNumCols(); j++)
          {
-            for(int k = 0; k < 3; k++)
+            for(int k = 0; k < betaPrimeAutomatic.getNumRows(); k++)
             {
                assertEquals(betaPrimeAutomatic.get(k, j), betaPrimeManual.get(k, j), EPSILON);
             }
@@ -79,18 +89,19 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment(omega0, time, gammaPrimeAutomatic, 0, linear3D);
-         calculateGammaPrimeByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, linear3D);
+         calculateGammaPrime3DByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
+         
+//         PrintTools.debug("C linear calc: " + gammaPrimeAutomatic.toString());
+//         PrintTools.debug("C linear test: " + gammaPrimeManual.toString());
          
          assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
-         
-         //EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
       }
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testMatricesPrimeCubic()
+   public void testMatricesPrime3DCubic()
    {
       // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
@@ -112,29 +123,35 @@ public class CapturePointMatrixToolsTest
          
          double time = t0 + Math.random() * (tFinal - t0);
          
-         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, numberOfCoefficients);
-         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
+         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
-         calculateAlphaPrimeByHandCubic(omega0 , time, tFinal, alphaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
+         calculateAlphaPrime3DByHandCubic(omega0 , time, tFinal, alphaPrimeManual);
+         
+//         PrintTools.debug("A cubic calc: " + alphaPrimeAutomatic.toString());
+//         PrintTools.debug("A cubic test: " + alphaPrimeManual.toString());
 
-         for(int j = 0; j < numberOfCoefficients; j++)
+         for(int j = 0; j < alphaPrimeAutomatic.getNumCols(); j++)
          {
-            for(int k = 0; k < 3; k++)
+            for(int k = 0; k < alphaPrimeAutomatic.getNumRows(); k++)
             {
                assertEquals(alphaPrimeAutomatic.get(k, j), alphaPrimeManual.get(k, j), EPSILON);
             }
          }
          
-         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, numberOfCoefficients);
-         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, numberOfCoefficients);
+         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment(omega0, time, betaPrimeAutomatic, 0, cubic3D);
-         calculateBetaPrimeByHandCubic(omega0 , time, tFinal, betaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, cubic3D);
+         calculateBetaPrime3DByHandCubic(omega0 , time, tFinal, betaPrimeManual);
          
-         for(int j = 0; j < numberOfCoefficients; j++)
+//         PrintTools.debug("B cubic calc: " + betaPrimeAutomatic.toString());
+//         PrintTools.debug("B cubic test: " + betaPrimeManual.toString());
+         
+         for(int j = 0; j < betaPrimeAutomatic.getNumCols(); j++)
          {
-            for(int k = 0; k < 3; k++)
+            for(int k = 0; k < betaPrimeAutomatic.getNumRows(); k++)
             {
                assertEquals(betaPrimeAutomatic.get(k, j), betaPrimeManual.get(k, j), EPSILON);
             }
@@ -143,82 +160,191 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
-         calculateGammaPrimeByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
+         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
+         calculateGammaPrime3DByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
+         
+//         PrintTools.debug("C cubic calc: " + gammaPrimeAutomatic.toString());
+//         PrintTools.debug("C cubic test: " + gammaPrimeManual.toString());
          
          assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
-         
-         //EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
       }
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCalculateICPPositionAndVelocityOnSegment3DLinear()
+   {
+   // Linear polynomial: y(x) = a0 + a1*x
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      int numberOfCoefficients = 2;
+      YoFrameTrajectory3D linear3D = new YoFrameTrajectory3D(namePrefix + "Linear", numberOfCoefficients, worldFrame, registry);
+      
+      for(int i = 0; i < nTests; i++)
+      {
+         double scaleTFinal = 1.0 / Math.random();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+                    
+         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         
+         linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
+         
+         double time = t0 + Math.random() * (tFinal - t0);
+                  
+         FramePoint icpPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
+         
+         // Position
+         FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
+         FramePoint icpPositionDesiredCurrentByHand = new FramePoint(worldFrame);
+         
+         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
+         calculateICPPositionByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrentByHand);
+         
+//         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
+//         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
+
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         
+         //Velocity
+         FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
+         FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         
+         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
+         calculateICPVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
+         
+//         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());
+//         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
+         
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+      }
+   }
+   
+   public void calculateICPPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
+   {      
+      linear3D.compute(linear3D.getInitialTime());
+      FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
+      
+      linear3D.compute(linear3D.getFinalTime());
+      FramePoint cmpRefFinal = new FramePoint(linear3D.getFramePosition());
+      
+      double timeFinal = linear3D.getFinalTime();
+      
+      double sigmat = calculateSigmaLinear(time, timeFinal, omega0);
+      double sigmaT = calculateSigmaLinear(timeFinal, timeFinal, omega0);
+      
+      double alpha = (1.0 - sigmat - Math.exp(omega0*(time-timeFinal)) * (1.0 - sigmaT));
+      double beta = (sigmat - Math.exp(omega0*(time-timeFinal)) * sigmaT);
+      double gamma =  Math.exp(omega0*(time-timeFinal));
+      
+      icpPositionDesiredCurrent.setToZero();
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), alpha, cmpRefInit.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
+   }
+   
+   public void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   {      
+      //FIXME: fails
+      linear3D.compute(linear3D.getInitialTime());
+      FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
+      
+      linear3D.compute(linear3D.getFinalTime());
+      FramePoint cmpRefFinal = new FramePoint(linear3D.getFramePosition());
+      
+      double timeFinal = linear3D.getFinalTime();
+      
+      double dSigmat = calculateSigmaDotLinear(time, timeFinal, omega0);
+      double sigmaT = calculateSigmaLinear(timeFinal, timeFinal, omega0);
+      
+      double dAlpha = (-dSigmat - omega0 * Math.exp(omega0*(time-timeFinal)) * (1.0 - sigmaT));
+      double dBeta = (dSigmat - omega0 * Math.exp(omega0*(time-timeFinal)) * sigmaT);
+      double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
+      
+      icpVelocityDesiredCurrent.setToZero();
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dAlpha, cmpRefInit.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dBeta, cmpRefFinal.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
+   }
+   
+   public double calculateSigmaLinear(double t, double T, double omega0)
+   {
+      double sigmaLinear = t/T + 1.0/omega0 * 1/T;
+      return sigmaLinear;
+   }
+   
+   public double calculateSigmaDotLinear(double t, double T, double omega0)
+   {
+      double dSigmaLinear = 1.0/T;
+      return dSigmaLinear;
    }
       
       
-   public void calculateAlphaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public void calculateAlphaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
       
-      alphaPrimeLinear.set(1, 0, 1);
-      alphaPrimeLinear.set(1, 1, time + 1.0/omega0);
+      alphaPrimeLinear.set(1, 2, 1);
+      alphaPrimeLinear.set(1, 3, time + 1.0/omega0);
       
-      alphaPrimeLinear.set(2, 0, 1);
-      alphaPrimeLinear.set(2, 1, time + 1.0/omega0);
+      alphaPrimeLinear.set(2, 4, 1);
+      alphaPrimeLinear.set(2, 5, time + 1.0/omega0);
    }
    
-   public void calculateBetaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public void calculateBetaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
       
-      betaPrimeLinear.set(1, 0, Math.exp(omega0 * (time - timeTotal))*1);
-      betaPrimeLinear.set(1, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
+      betaPrimeLinear.set(1, 2, Math.exp(omega0 * (time - timeTotal))*1);
+      betaPrimeLinear.set(1, 3, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
       
-      betaPrimeLinear.set(2, 0, Math.exp(omega0 * (time - timeTotal))*1);
-      betaPrimeLinear.set(2, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
+      betaPrimeLinear.set(2, 4, Math.exp(omega0 * (time - timeTotal))*1);
+      betaPrimeLinear.set(2, 5, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
    }
    
-   public void calculateGammaPrimeByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public void calculateGammaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
    
-   public void calculateAlphaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public void calculateAlphaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
       alphaPrimeLinear.set(0, 2, Math.pow(time, 2) + 2.0 * time/omega0 + 2.0/Math.pow(omega0, 2));
       alphaPrimeLinear.set(0, 3, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
       
-      alphaPrimeLinear.set(1, 0, 1);
-      alphaPrimeLinear.set(1, 1, time + 1.0/omega0);
-      alphaPrimeLinear.set(1, 2, Math.pow(time, 2) + 2.0 * time/omega0 + 2.0/Math.pow(omega0, 2));
-      alphaPrimeLinear.set(1, 3, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
+      alphaPrimeLinear.set(1, 4, 1);
+      alphaPrimeLinear.set(1, 5, time + 1.0/omega0);
+      alphaPrimeLinear.set(1, 6, Math.pow(time, 2) + 2.0 * time/omega0 + 2.0/Math.pow(omega0, 2));
+      alphaPrimeLinear.set(1, 7, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
       
-      alphaPrimeLinear.set(2, 0, 1);
-      alphaPrimeLinear.set(2, 1, time + 1.0/omega0);
-      alphaPrimeLinear.set(2, 2, Math.pow(time, 2) + 2.0 * time/omega0 + 2.0/Math.pow(omega0, 2));
-      alphaPrimeLinear.set(2, 3, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
+      alphaPrimeLinear.set(2, 8, 1);
+      alphaPrimeLinear.set(2, 9, time + 1.0/omega0);
+      alphaPrimeLinear.set(2, 10, Math.pow(time, 2) + 2.0 * time/omega0 + 2.0/Math.pow(omega0, 2));
+      alphaPrimeLinear.set(2, 11, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
    }
    
-   public void calculateBetaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public void calculateBetaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
       betaPrimeLinear.set(0, 2, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 2) + 2.0 * timeTotal/omega0 + 2.0/Math.pow(omega0, 2)));
       betaPrimeLinear.set(0, 3, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
       
-      betaPrimeLinear.set(1, 0, Math.exp(omega0 * (time - timeTotal))*1);
-      betaPrimeLinear.set(1, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
-      betaPrimeLinear.set(1, 2, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 2) + 2.0 * timeTotal/omega0 + 2.0/Math.pow(omega0, 2)));
-      betaPrimeLinear.set(1, 3, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
+      betaPrimeLinear.set(1, 4, Math.exp(omega0 * (time - timeTotal))*1);
+      betaPrimeLinear.set(1, 5, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
+      betaPrimeLinear.set(1, 6, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 2) + 2.0 * timeTotal/omega0 + 2.0/Math.pow(omega0, 2)));
+      betaPrimeLinear.set(1, 7, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
       
-      betaPrimeLinear.set(2, 0, Math.exp(omega0 * (time - timeTotal))*1);
-      betaPrimeLinear.set(2, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
-      betaPrimeLinear.set(2, 2, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 2) + 2.0 * timeTotal/omega0 + 2.0/Math.pow(omega0, 2)));
-      betaPrimeLinear.set(2, 3, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
+      betaPrimeLinear.set(2, 8, Math.exp(omega0 * (time - timeTotal))*1);
+      betaPrimeLinear.set(2, 9, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
+      betaPrimeLinear.set(2, 10, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 2) + 2.0 * timeTotal/omega0 + 2.0/Math.pow(omega0, 2)));
+      betaPrimeLinear.set(2, 11, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
    }
    
-   public void calculateGammaPrimeByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public void calculateGammaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
