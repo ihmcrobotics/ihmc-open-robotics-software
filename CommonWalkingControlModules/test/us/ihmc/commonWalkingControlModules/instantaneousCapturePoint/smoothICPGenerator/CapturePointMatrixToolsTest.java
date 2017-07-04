@@ -45,10 +45,10 @@ public class CapturePointMatrixToolsTest
          double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
                     
-         FramePoint z0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FramePoint zFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
-         linear3D.setLinear(t0, tFinal, z0, zFinal);
+         linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
          double time = t0 + Math.random() * (tFinal - t0);
          
@@ -113,13 +113,13 @@ public class CapturePointMatrixToolsTest
          double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
                     
-         FramePoint z0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FramePoint zFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
-         FrameVector zd0 = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FrameVector zdFinal = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FrameVector cmpD0 = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FrameVector cmpDFinal = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
-         cubic3D.setCubic(t0, tFinal, z0, zd0, zFinal,zdFinal);
+         cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal,cmpDFinal);
          
          double time = t0 + Math.random() * (tFinal - t0);
          
@@ -219,6 +219,59 @@ public class CapturePointMatrixToolsTest
       }
    }
    
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCalculateICPPositionAndVelocityOnSegment3DCubic()
+   {
+      // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      int numberOfCoefficients = 4;
+      YoFrameTrajectory3D cubic3D = new YoFrameTrajectory3D(namePrefix + "Cubic", numberOfCoefficients, worldFrame, registry);
+      
+      for(int i = 0; i < nTests; i++)
+      {
+         double scaleTFinal = 1.0 / Math.random();
+         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+                    
+         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         
+         // !!! TESTING WITH 0 VELOCITIES !!!
+         FrameVector cmpD0 = new FrameVector(worldFrame);
+         FrameVector cmpDFinal = new FrameVector(worldFrame);
+         
+         cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal, cmpDFinal);
+         
+         double time = t0 + Math.random() * (tFinal - t0);
+                  
+         FramePoint icpPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
+         
+         // Position
+         FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
+         FramePoint icpPositionDesiredCurrentByHand = new FramePoint(worldFrame);
+         
+         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cubic3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
+         calculateICPPositionByHand3DCubic(omega0, time, cubic3D, icpPositionDesiredFinal, icpPositionDesiredCurrentByHand);
+         
+//         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
+//         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
+
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         
+         //Velocity
+         FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
+         FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         
+         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
+         calculateICPVelocityByHand3DCubic(omega0, time, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
+         
+//         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());
+//         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
+         
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+      }
+   }
+   
    public void calculateICPPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
@@ -242,9 +295,31 @@ public class CapturePointMatrixToolsTest
       icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
    }
    
+   public void calculateICPPositionByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
+   {      
+      cubic3D.compute(cubic3D.getInitialTime());
+      FramePoint cmpRefInit = new FramePoint(cubic3D.getFramePosition());
+      
+      cubic3D.compute(cubic3D.getFinalTime());
+      FramePoint cmpRefFinal = new FramePoint(cubic3D.getFramePosition());
+      
+      double timeFinal = cubic3D.getFinalTime();
+      
+      double sigmat = calculateSigmaCubic(time, timeFinal, omega0);
+      double sigmaT = calculateSigmaCubic(timeFinal, timeFinal, omega0);
+      
+      double alpha = (1.0 - sigmat - Math.exp(omega0*(time-timeFinal)) * (1.0 - sigmaT));
+      double beta = (sigmat - Math.exp(omega0*(time-timeFinal)) * sigmaT);
+      double gamma =  Math.exp(omega0*(time-timeFinal));
+      
+      icpPositionDesiredCurrent.setToZero();
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), alpha, cmpRefInit.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
+   }
+   
    public void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
    {      
-      //FIXME: fails
       linear3D.compute(linear3D.getInitialTime());
       FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
       
@@ -266,16 +341,60 @@ public class CapturePointMatrixToolsTest
       icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
    }
    
+   public void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   {      
+      cubic3D.compute(cubic3D.getInitialTime());
+      FramePoint cmpRefInit = new FramePoint(cubic3D.getFramePosition());
+      
+      cubic3D.compute(cubic3D.getFinalTime());
+      FramePoint cmpRefFinal = new FramePoint(cubic3D.getFramePosition());
+      
+      double timeFinal = cubic3D.getFinalTime();
+      
+      double dSigmat = calculateSigmaDotCubic(time, timeFinal, omega0);
+      double sigmaT = calculateSigmaCubic(timeFinal, timeFinal, omega0);
+      
+      double dAlpha = (-dSigmat - omega0 * Math.exp(omega0*(time-timeFinal)) * (1.0 - sigmaT));
+      double dBeta = (dSigmat - omega0 * Math.exp(omega0*(time-timeFinal)) * sigmaT);
+      double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
+      
+      icpVelocityDesiredCurrent.setToZero();
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dAlpha, cmpRefInit.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dBeta, cmpRefFinal.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
+   }
+   
    public double calculateSigmaLinear(double t, double T, double omega0)
    {
       double sigmaLinear = t/T + 1.0/omega0 * 1/T;
       return sigmaLinear;
    }
    
+   public double calculateSigmaCubic(double t, double T, double omega0)
+   {
+      double f = 3.0 * Math.pow(t, 2) / Math.pow(T, 2) - 2.0 * Math.pow(t, 3) / Math.pow(T, 3);
+      double df = 6.0 * Math.pow(t, 1) / Math.pow(T, 2) - 6.0 * Math.pow(t, 2) / Math.pow(T, 3);
+      double ddf = 6.0 * 1.0 / Math.pow(T, 2) - 12.0 * Math.pow(t, 1) / Math.pow(T, 3);
+      double dddf = -12.0 / Math.pow(T, 3);
+      
+      double sigmaCubic = f + Math.pow(1.0/omega0, 1) * df + Math.pow(1.0/omega0, 2) * ddf + Math.pow(1.0/omega0, 3) * dddf;
+      return sigmaCubic;
+   }
+   
    public double calculateSigmaDotLinear(double t, double T, double omega0)
    {
-      double dSigmaLinear = 1.0/T;
+      double dSigmaLinear = 1/T;
       return dSigmaLinear;
+   }
+   
+   public double calculateSigmaDotCubic(double t, double T, double omega0)
+   {
+      double df = 6.0 * Math.pow(t, 1) / Math.pow(T, 2) - 6.0 * Math.pow(t, 2) / Math.pow(T, 3);
+      double ddf = 6.0 * 1.0 / Math.pow(T, 2) - 12.0 * Math.pow(t, 1) / Math.pow(T, 3);
+      double dddf = -12.0 / Math.pow(T, 3);
+      
+      double dSigmaCubic = df + Math.pow(1.0/omega0, 1) * ddf + Math.pow(1.0/omega0, 2) * dddf;
+      return dSigmaCubic;
    }
       
       
