@@ -55,7 +55,7 @@ public class YoTrajectoryTest
       PrintTools.info(traj2.toString());
       traj1.multiply(traj2);
       PrintTools.info(traj1.toString());  
-      assert(traj1.getNumberOfCoefficients() == 6);
+      assert(traj1.getNumberOfCoefficients() == 7);
       assert(traj1.getCoefficient(0) == 0);
       assert(traj1.getCoefficient(1) == 0);
       assert(traj1.getCoefficient(2) == 0);
@@ -64,11 +64,9 @@ public class YoTrajectoryTest
       assert(traj1.getCoefficient(5) == 0);
    }
    
+   @Test
    public void test()
    {
-      YoFrameTrajectory3D t1, t2;
-      t1 = new YoFrameTrajectory3D("FrameTrajectory1", 10, ReferenceFrame.getWorldFrame(), registry);
-      t2 = new YoFrameTrajectory3D("FrameTrajectory2", 10, ReferenceFrame.getWorldFrame(), registry);
-      YoTrajectory3D t3 = new YoTrajectory3D("NonFrameTrajectory", 10, registry);
+      System.out.println(Double.POSITIVE_INFINITY > 1298723323246723234623324634286234234.0);  
    }
 }

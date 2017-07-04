@@ -135,7 +135,15 @@ public class YoTrajectory
       //FIXME
       polynomial.setConstant(z);
    }
-
+   
+   /**
+    * Sets the coefficients to zero. Initial and final time are retained.
+    */
+   public void setZero()
+   {
+      polynomial.setConstant(0.0);
+   }
+   
    public void setConstant(double t0, double tFinal, double z)
    {
       setTime(t0, tFinal);
