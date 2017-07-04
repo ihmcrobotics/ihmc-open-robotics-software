@@ -8,6 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -638,10 +639,28 @@ public class CapturePointTools
       }
    }
    
-   //TODO: implement
-   public static void computeDesiredCornerPointsPolynomialSegment()
+   //TODO: implement validity checks
+   public static void computeDesiredCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
+                                                 List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
+      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(cmpPolynomials3D.size() - 1);
       
+      cmpPolynomial3D.compute(cmpPolynomial3D.getFinalTime());
+      FramePoint nextEntryCornerPoint = cmpPolynomial3D.getFramePosition();
+            
+      for (int i = cmpPolynomials3D.size() - 1; i >= 0; i--)
+      {
+         cmpPolynomial3D = cmpPolynomials3D.get(i);
+         
+         FramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         FramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
+         
+         exitCornerPoint.set(nextEntryCornerPoint);
+         
+         computeDesiredCapturePointPosition(omega0, 0.0, exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
+
+         nextEntryCornerPoint = entryCornerPoint;
+      }
    }
 
    /**
@@ -733,10 +752,12 @@ public class CapturePointTools
          desiredCapturePointToPack.set(initialCapturePoint);
    }
    
-   //TODO: implement
-   public static void computeDesiredCapturePointPositionPolynomialSegment(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, YoFramePoint desiredCapturePointToPack)
-   {
-      
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                         FramePoint desiredCapturePointToPack)
+   {         
+      CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, 
+                                                                                   desiredCapturePointToPack);
    }
 
    /**
@@ -804,10 +825,12 @@ public class CapturePointTools
          desiredCapturePointVelocityToPack.setToZero();
    }
    
-   //TODO: implement
-   public static void computeDesiredCapturePointVelocityPolynomialSegment()
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
+                                                         FrameVector desiredCapturePointVelocityToPack)
    {
-      
+      CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, 
+                                                                                   desiredCapturePointVelocityToPack);
    }
 
    /**
@@ -889,10 +912,12 @@ public class CapturePointTools
          desiredCapturePointAccelerationToPack.setToZero();
    }
    
-   //TODO: implement
-   public static void computeDesiredCapturePointAccelerationPolynomialSegment()
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
+                                                             FrameVector desiredCapturePointAccelerationToPack)
    {
-      
+      CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, 
+                                                                                   desiredCapturePointAccelerationToPack);
    }
 
    /**

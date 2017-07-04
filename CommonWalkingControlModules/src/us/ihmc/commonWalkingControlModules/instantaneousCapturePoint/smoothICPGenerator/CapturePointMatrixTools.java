@@ -11,7 +11,9 @@ import us.ihmc.robotics.geometry.FrameTuple;
 
 public class CapturePointMatrixTools extends CapturePointTools
 {
-   private final static int defaultSize = 1000;
+   // private static final ThreadLocal<DenseMatrix64F> dummyName = new ThreadLocal<>();
+   
+   private static final int defaultSize = 1000;
    
    private static final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
    private static final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
@@ -158,7 +160,7 @@ public class CapturePointMatrixTools extends CapturePointTools
     * @param time
     */
    public static void calculateGeneralizedBetaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaPrime, 
-                                                                int betaDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
+                                                                  int betaDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {                  
       for(Direction dir : Direction.values())
       {
@@ -197,13 +199,13 @@ public class CapturePointMatrixTools extends CapturePointTools
     * 
     * @param generalizedGammaPrime
     * @param gammaDerivativeOrder
-    * @param cmpPolynomial
+    * @param cmpPolynomial3D
     * @param time
     */
    public static void calculateGeneralizedGammaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedGammaPrime, 
-                                                                 int gammaDerivativeOrder, YoFrameTrajectory3D cmpPolynomial)
+                                                                   int gammaDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {      
-      double timeSegmentTotal = cmpPolynomial.getFinalTime();
+      double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
       double ddGamaPrimeValue = Math.pow(omega0, gammaDerivativeOrder)*Math.exp(omega0 * (time - timeSegmentTotal));
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
    }
