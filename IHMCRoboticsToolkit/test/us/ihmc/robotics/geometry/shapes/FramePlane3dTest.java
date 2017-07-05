@@ -1,13 +1,12 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -23,7 +22,7 @@ public class FramePlane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
-      FramePlane3d plane = new FramePlane3d(worldFrame);
+      FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       FramePoint q = new FramePoint(worldFrame, 0.0, 0.0, 2.0);
       assertTrue(plane.isOnOrAbove(q));
       q = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
@@ -36,7 +35,7 @@ public class FramePlane3dTest
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
-      FramePlane3d plane = new FramePlane3d(worldFrame);
+      FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       FramePoint q = new FramePoint(worldFrame, 0.0, 0.0, -2.0);
       assertTrue(plane.isOnOrBelow(q));
       q.set(0.0, 0.0, 1.0);
@@ -49,7 +48,7 @@ public class FramePlane3dTest
    {
       FramePoint point = new FramePoint(worldFrame, 1.0, 2.0, -3.0);
       FramePoint expectedPoint = new FramePoint(worldFrame, 1.0, 2.0, 0.0);
-      FramePlane3d plane = new FramePlane3d(worldFrame);
+      FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       assertTrue(expectedPoint.epsilonEquals(plane.orthogonalProjectionCopy(point), 1e-14));
 
       point.set(3.0, 3.0, -4.0);
@@ -64,7 +63,7 @@ public class FramePlane3dTest
    public void testDistance()
    {
       FramePoint point = new FramePoint(worldFrame, 1.0, 1.0, 1.0);
-      FramePlane3d plane = new FramePlane3d(worldFrame);
+      FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       assertEquals(1.0, plane.distance(point), 1e-14);
 
       point.set(0.0, 0.0, 0.0);
@@ -79,7 +78,7 @@ public class FramePlane3dTest
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
       transformation.setRotationYawAndZeroTranslation(2.3);
-      FramePlane3d plane = new FramePlane3d(worldFrame);
+      FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       plane.applyTransform(transformation);
       FrameVector expectedNormal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
       FramePoint expectedPoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
@@ -87,7 +86,7 @@ public class FramePlane3dTest
 
       RigidBodyTransform transformation2 = new RigidBodyTransform();
       transformation2.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      FramePlane3d plane2 = new FramePlane3d(worldFrame);
+      FramePlane3d plane2 = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       plane2.applyTransform(transformation2);
       expectedNormal.set(0.0, 0.0, 1.0);
       expectedPoint.set(1.0, 2.0, 3.0);
@@ -96,7 +95,7 @@ public class FramePlane3dTest
       RigidBodyTransform transformation3 = new RigidBodyTransform();
       transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      FramePlane3d plane3 = new FramePlane3d(worldFrame);
+      FramePlane3d plane3 = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       plane3.applyTransform(transformation3);
       expectedNormal.set(1.0, 0.0, 0.0);
       expectedPoint.set(1.0, 2.0, 3.0);
@@ -105,7 +104,7 @@ public class FramePlane3dTest
       RigidBodyTransform transformation4 = new RigidBodyTransform();
       transformation4.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation4.setTranslation(new Vector3D(1.0, 2.0, 3.0));
-      FramePlane3d plane4 = new FramePlane3d(worldFrame);
+      FramePlane3d plane4 = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       FramePlane3d plane5 = plane4.applyTransformCopy(transformation4);
       expectedNormal.set(0.0, 0.0, 1.0);
       expectedPoint.set(0.0, 0.0, 0.0);

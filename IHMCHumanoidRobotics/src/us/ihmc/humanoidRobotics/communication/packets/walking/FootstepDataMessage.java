@@ -23,7 +23,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -521,17 +520,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       FootstepDataMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
       // Waypoints if they exist:
       if (positionWaypoints != null)
       {
          for (int i = 0; i < positionWaypoints.length; i++)
-            ret.positionWaypoints[i] = TransformTools.getTransformedPoint(positionWaypoints[i], transform);
+            ret.positionWaypoints[i].applyTransform(transform);
       }
 
       return ret;

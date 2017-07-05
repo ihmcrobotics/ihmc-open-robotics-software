@@ -160,4 +160,10 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
    {
       waypoint1d.applyTransform(transform);
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      waypoint1d.applyInverseTransform(transform);
+   }
 }

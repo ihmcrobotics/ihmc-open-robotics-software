@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
@@ -28,7 +29,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -102,7 +102,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                   if (t >= swingInitialTime + delayBeforeAdjusting)
                   {
                      Quaternion orientation = new Quaternion();
-                     Pose nextFootstepPose = findNextFootstepPose(scs);
+                     Pose3D nextFootstepPose = findNextFootstepPose(scs);
                      nextFootstepPose.getPosition(adjustedLocation);
                      nextFootstepPose.getOrientation(orientation);
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
@@ -116,7 +116,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                {
                   if (t >= swingInitialTime + delayBeforeAdjusting + delayBeforeChecking)
                   {
-                     Pose nextFootstepPose = findNextFootstepPose(scs);
+                     Pose3D nextFootstepPose = findNextFootstepPose(scs);
                      boolean xEquals = MathTools.epsilonEquals(adjustedLocation.getX(), nextFootstepPose.getX(), 1.0e-10);
                      boolean yEquals = MathTools.epsilonEquals(adjustedLocation.getY(), nextFootstepPose.getY(), 1.0e-10);
                      boolean zEquals = MathTools.epsilonEquals(adjustedLocation.getZ(), nextFootstepPose.getZ(), 1.0e-10);
@@ -177,13 +177,13 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return footstepDataListMessage;
    }
 
-   private static Pose findNextFootstepPose(SimulationConstructionSet scs)
+   private static Pose3D findNextFootstepPose(SimulationConstructionSet scs)
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
       FramePose framePose = new FramePose();
       findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
-      Pose pose = new Pose();
+      Pose3D pose = new Pose3D();
       framePose.get(pose);
       return pose;
    }
