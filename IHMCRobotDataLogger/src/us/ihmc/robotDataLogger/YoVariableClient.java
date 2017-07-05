@@ -5,25 +5,19 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
-import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.tools.compression.SnappyUtils;
 
-public class YoVariableClient implements LogPacketHandler
+public class YoVariableClient
 {
    private static final int RECEIVE_BUFFER_SIZE = 1024;
 
@@ -35,21 +29,14 @@ public class YoVariableClient implements LogPacketHandler
    private final DataConsumerParticipant dataConsumerParticipant;
    private final VariableChangedProducer variableChangedProducer;
 
-   // Streaming protocol
-   private final StreamingDataTCPClient streamingDataTCPClient;
-   private final ThreadedLogPacketHandler threadedLogPacketHandler;
    
    // Callback
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
    
    // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
-   private final List<YoVariable<?>> yoVariablesList;
-   private final List<JointState> jointStates;
    private final int displayOneInNPackets;
    
-   private ByteBuffer decompressed;
-   private long previous;
    private ClientState state = ClientState.WAITING;
    
    private enum ClientState
@@ -126,104 +113,20 @@ public class YoVariableClient implements LogPacketHandler
          throw new RuntimeException(e);
       }
 
-      threadedLogPacketHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
-      streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, request.getDataPort(), threadedLogPacketHandler, displayOneInNPackets);
       
       handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
-      yoVariablesList = handshakeParser.getYoVariablesList();
-      jointStates = handshakeParser.getJointStates();
-
       this.yoVariablesUpdatedListener.setYoVariableClient(this);
    }
 
-   @Override
-   public void newDataAvailable(LogDataHeader header, ByteBuffer buf)
-   {
-      if (header.getUid() > previous + displayOneInNPackets)
-      {
-         System.err.println("Skipped " + (header.getUid() - previous - displayOneInNPackets) + " packets");
-      }
-      else if (header.getUid() <= previous)
-      {
-         System.err.println("Packet skew detected " + header.getUid());
-      }
-
-      previous = header.getUid();
-      decompressed.clear();
-      buf.clear();
-
-      long checksum = header.getCrc32() & 0xFFFFFFFFL;
-      crc32.reset();
-      crc32.update(buf.array(), buf.position() + buf.arrayOffset(), buf.remaining());
-
-      if (crc32.getValue() != checksum)
-      {
-         System.err.println("[" + getClass().getSimpleName() + "] Checksum validation failure. Ignoring packet " + header.getUid() + ".");
-         return;
-      }
-
-      try
-      {
-         SnappyUtils.uncompress(buf, decompressed);
-         decompressed.flip();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         return;
-      }
-
-      long timestamp = decompressed.getLong();
-
-      if(this.yoVariablesUpdatedListener.updateYoVariables())
-      {
-         LongBuffer data = decompressed.asLongBuffer();
-         for (int i = 0; i < yoVariablesList.size(); i++)
-         {
-            YoVariable<?> variable = yoVariablesList.get(i);
-            long previousValue = variable.getValueAsLongBits();
-            long newValue = data.get();
-            variable.setValueFromLongBits(newValue, false);
-            if (previousValue != newValue)
-            {
-               ArrayList<VariableChangedListener> changedListeners = variable.getVariableChangedListeners();
-               if (changedListeners != null)
-               {
-                  for (int listener = 0; listener < changedListeners.size(); listener++)
-                  {
-                     VariableChangedListener changedListener = changedListeners.get(listener);
-                     if (!(changedListener instanceof VariableChangedProducer.VariableListener))
-                     {
-                        changedListener.variableChanged(variable);
-                     }
-                  }
-               }
-            }
-         }
-         
-         for (int i = 0; i < jointStates.size(); i++)
-         {
-            jointStates.get(i).update(data);
-         }         
-      }
-
-      yoVariablesUpdatedListener.receivedTimestampAndData(timestamp, decompressed);
-   }
    
    public String getServerName()
    {
       return serverName;
    }
 
-   @Override
-   public void timestampReceived(long timestamp)
-   {
-   }
 
-   @Override
    public void timeout()
    {
-      threadedLogPacketHandler.shutdown();
       yoVariablesUpdatedListener.receiveTimedOut();
       dataConsumerParticipant.remove();
    }
@@ -283,20 +186,14 @@ public class YoVariableClient implements LogPacketHandler
       dataConsumerParticipant.createClearLogPubSub(announcement, yoVariablesUpdatedListener);
       dataConsumerParticipant.createTimestampListener(announcement, yoVariablesUpdatedListener);
       
-      decompressed = ByteBuffer.allocate(handshakeParser.getBufferSize());
-
-      threadedLogPacketHandler.start();
-      streamingDataTCPClient.start();
+      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, yoVariablesUpdatedListener);
 
       state = ClientState.RUNNING;
    }
 
    public void requestStop()
    {
-      if (streamingDataTCPClient.isRunning())
-      {
-         streamingDataTCPClient.requestStop();
-      }
+
    }
    
    public void setSendingVariableChanges(boolean sendVariableChanges)
@@ -335,16 +232,6 @@ public class YoVariableClient implements LogPacketHandler
       {
          e.printStackTrace();
       }
-   }
-
-   @Override
-   public void keepAlive()
-   {
-   }
-
-   @Override
-   public void connected(InetSocketAddress localAddress)
-   {
    }
 
 }

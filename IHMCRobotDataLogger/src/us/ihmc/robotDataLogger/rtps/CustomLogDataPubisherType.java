@@ -8,7 +8,7 @@ import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.tools.compression.SnappyUtils;
 
 /**
@@ -18,20 +18,18 @@ import us.ihmc.tools.compression.SnappyUtils;
 * This file has been modified from the generated version to provide higher performance.
 *
 */
-public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
+public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuffer>
 {
    public static final String name = "us::ihmc::robotDataLogger::LogData";
 
-   private final int registryID;
    private final int numberOfVariables;
    private final int numberOfStates;
    private final int maximumCompressedSize;
 
    private final ByteBuffer compressBuffer;
 
-   public CustomLogDataPubSubType(int numberOfVariables, int numberOfStates, int registryID)
+   public CustomLogDataPubisherType(int numberOfVariables, int numberOfStates)
    {
-      this.registryID = registryID;
       this.numberOfVariables = numberOfVariables;
       this.numberOfStates = numberOfStates;
 
@@ -41,10 +39,9 @@ public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
    }
 
    private final CDR serializeCDR = new CDR();
-   private final CDR deserializeCDR = new CDR();
 
    @Override
-   public void serialize(RegistryBuffer data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(RegistrySendBuffer data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
       serializeCDR.write_type_11(data.getUid());
@@ -53,7 +50,7 @@ public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
 
       serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
 
-      serializeCDR.write_type_2(registryID);
+      serializeCDR.write_type_2(data.getRegistryID());
 
       ByteBuffer databuffer = data.getBuffer();
       databuffer.clear();
@@ -77,65 +74,27 @@ public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, RegistryBuffer data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, RegistrySendBuffer data) throws IOException
    {
-      deserializeCDR.deserialize(serializedPayload);
-
-      data.setUid(deserializeCDR.read_type_11());
-
-      data.setTimestamp(deserializeCDR.read_type_11());
-
-      if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
-      {
-         throw new IOException("Invalid type for DATA_PACKET receive");
-      }
-
-      if (serializeCDR.read_type_2() != registryID)
-      {
-         throw new IOException("Invalid registry");
-      }
-
-      int dataLength = serializeCDR.read_type_2();
-
-      compressBuffer.clear();
-      serializedPayload.getData().get(compressBuffer.array(), 0, dataLength);
-      compressBuffer.limit(dataLength);
-
-      ByteBuffer databuffer = data.getBuffer();
-      databuffer.clear();
-
-      SnappyUtils.uncompress(compressBuffer, databuffer);
-
-      int stateLength = serializeCDR.read_type_2();
-      if (stateLength != numberOfStates)
-      {
-         throw new IOException("Invalid number of states");
-      }
-      double[] states = data.getJointStates();
-      for (int i = 0; i < stateLength; i++)
-      {
-         states[i] = deserializeCDR.read_type_6();
-      }
-
-      deserializeCDR.finishDeserialize();
+      throw new RuntimeException("Not implemented");
    }
 
    @Override
-   public final void serialize(RegistryBuffer data, InterchangeSerializer ser)
+   public final void serialize(RegistrySendBuffer data, InterchangeSerializer ser)
    {
       throw new RuntimeException("Not implemented");
 
    }
 
    @Override
-   public final void deserialize(InterchangeSerializer ser, RegistryBuffer data)
+   public final void deserialize(InterchangeSerializer ser, RegistrySendBuffer data)
    {
       throw new RuntimeException("Not implemented");
 
    }
 
    @Override
-   public RegistryBuffer createData()
+   public RegistrySendBuffer createData()
    {
       return null;
    }
@@ -169,25 +128,25 @@ public class CustomLogDataPubSubType implements TopicDataType<RegistryBuffer>
    }
 
    @Override
-   public CustomLogDataPubSubType newInstance()
+   public CustomLogDataPubisherType newInstance()
    {
-      return new CustomLogDataPubSubType(numberOfVariables, numberOfStates, registryID);
+      return new CustomLogDataPubisherType(numberOfVariables, numberOfStates);
    }
 
    @Override
-   public void serialize(RegistryBuffer data, CDR cdr)
-   {
-      throw new RuntimeException("Not implemented");
-   }
-
-   @Override
-   public void deserialize(RegistryBuffer data, CDR cdr)
+   public void serialize(RegistrySendBuffer data, CDR cdr)
    {
       throw new RuntimeException("Not implemented");
    }
 
    @Override
-   public void copy(RegistryBuffer src, RegistryBuffer dest)
+   public void deserialize(RegistrySendBuffer data, CDR cdr)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
+   @Override
+   public void copy(RegistrySendBuffer src, RegistrySendBuffer dest)
    {
       throw new RuntimeException("Not implemented");
    }

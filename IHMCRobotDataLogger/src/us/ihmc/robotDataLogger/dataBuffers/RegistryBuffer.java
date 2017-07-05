@@ -1,63 +1,12 @@
 package us.ihmc.robotDataLogger.dataBuffers;
 
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
-import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.yoVariables.variable.YoVariable;
-
-public class RegistryBuffer
+public class RegistryBuffer implements Comparable<RegistryBuffer>
 {
 
-   private final ByteBuffer buffer;
-   private final LongBuffer data;
-   private final YoVariable<?>[] variables;
-
-   private final List<JointHolder> jointHolders;
-   protected final double[] jointStates;
-
-   private long timestamp;
-
-   private long uid = 0;
-
-   protected RegistryBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
-   {
-      this.buffer = ByteBuffer.allocate(variables.size() * 8);
-      this.data = this.buffer.asLongBuffer();
-
-      this.variables = variables.toArray(new YoVariable[variables.size()]);
-
-      this.jointHolders = jointHolders;
-      this.jointStates = new double[jointHolders.size()];
-
-   }
-
-   public void update(long timestamp, long uid)
-   {
-      this.uid = uid;
-      this.timestamp = timestamp;
-      data.clear();
-      for (int i = 0; i < variables.length; i++)
-      {
-         data.put(variables[i].getValueAsLongBits());
-      }
-
-      int offset = 0;
-      for (int i = 0; i < jointHolders.size(); i++)
-      {
-         JointHolder jointHolder = jointHolders.get(i);
-         jointHolder.get(jointStates, offset);
-         offset += jointHolder.getNumberOfStateVariables();
-      }
-
-   }
-
-   public ByteBuffer getBuffer()
-   {
-      return buffer;
-   }
+   protected int registryID;
+   protected double[] jointStates;
+   protected long timestamp;
+   protected long uid = 0;
 
    public long getTimestamp()
    {
@@ -82,6 +31,22 @@ public class RegistryBuffer
    public void setTimestamp(long timestamp)
    {
       this.timestamp = timestamp;
+   }
+
+   @Override
+   public int compareTo(RegistryBuffer o)
+   {
+      return Long.compare(this.timestamp, o.timestamp);
+   }
+   
+   public int getRegistryID()
+   {
+      return registryID;
+   }
+   
+   public void setRegistryID(int registryID)
+   {
+      this.registryID = registryID;
    }
 
 }

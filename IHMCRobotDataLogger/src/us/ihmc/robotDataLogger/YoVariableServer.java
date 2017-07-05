@@ -11,7 +11,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryBufferBuilder;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
@@ -33,7 +33,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final double dt;
 
    private YoVariableRegistry mainRegistry = null;
-   private final ArrayList<RegistryBufferBuilder> registeredBuffers = new ArrayList<>();
+   private final ArrayList<RegistrySendBufferBuilder> registeredBuffers = new ArrayList<>();
    private final HashMap<YoVariableRegistry, RegistryPublisher> publishers = new HashMap<>();
 
    // Change data
@@ -50,6 +50,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    private boolean sendKeepAlive = false;
 
+   private volatile long latestTimestamp;
+   
    private final SummaryProvider summaryProvider = new SummaryProvider();
 
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
@@ -110,7 +112,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       handshakeBuilder = new YoVariableHandShakeBuilder(dt);
       for (int i = 0; i < registeredBuffers.size(); i++)
       {
-         RegistryBufferBuilder builder = registeredBuffers.get(i);
+         RegistrySendBufferBuilder builder = registeredBuffers.get(i);
          YoVariableRegistry registry = builder.getYoVariableRegistry();
          handshakeBuilder.addRegistryBuffer(builder);
 
@@ -132,7 +134,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       {
          for (int i = 0; i < registeredBuffers.size(); i++)
          {
-            RegistryBufferBuilder builder = registeredBuffers.get(i);
+            RegistrySendBufferBuilder builder = registeredBuffers.get(i);
             YoVariableRegistry registry = builder.getYoVariableRegistry();
             publishers.get(registry).start();
          }
@@ -158,7 +160,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       {
          for (int i = 0; i < registeredBuffers.size(); i++)
          {
-            RegistryBufferBuilder builder = registeredBuffers.get(i);
+            RegistrySendBufferBuilder builder = registeredBuffers.get(i);
             YoVariableRegistry registry = builder.getYoVariableRegistry();
             publishers.get(registry).stop();
          }
@@ -205,6 +207,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          try
          {
             dataProducerParticipant.publishTimestamp(timestamp);
+            latestTimestamp = timestamp;
          }
          catch (IOException e)
          {
@@ -232,7 +235,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      registeredBuffers.add(new RegistryBufferBuilder(registry, null, yoGraphicsListRegistry));
+      registeredBuffers.add(new RegistrySendBufferBuilder(registry, null, yoGraphicsListRegistry));
    }
 
    @Override
@@ -242,14 +245,14 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       {
          throw new RuntimeException("Main registry is already set");
       }
-      registeredBuffers.add(new RegistryBufferBuilder(registry, rootBody, yoGraphicsListRegistry));
+      registeredBuffers.add(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry));
       this.mainRegistry = registry;
    }
 
    private YoVariable<?> findVariableInRegistries(String variableName)
    {
 
-      for (RegistryBufferBuilder buffer : registeredBuffers)
+      for (RegistrySendBufferBuilder buffer : registeredBuffers)
       {
          YoVariableRegistry registry = buffer.getYoVariableRegistry();
          YoVariable<?> ret = registry.getVariable(variableName);
@@ -309,6 +312,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          buffer.commit();
       }
 
+   }
+
+   @Override
+   public long getLatestTimestamp()
+   {
+      return latestTimestamp;
    }
 
 }

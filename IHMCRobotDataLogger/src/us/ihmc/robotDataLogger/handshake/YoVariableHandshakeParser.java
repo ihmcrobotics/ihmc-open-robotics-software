@@ -40,7 +40,7 @@ public abstract class YoVariableHandshakeParser
    {
       YoVariableHandshakeParser parser = create(type, "dummy");
       parser.parseFrom(data);
-      return parser.getNumberOfVariables();
+      return parser.getNumberOfStates();
    }
    
    protected final String registryPrefix;
@@ -48,6 +48,8 @@ public abstract class YoVariableHandshakeParser
    protected final ArrayList<JointState> jointStates = new ArrayList<>();
    protected double dt;
    protected int stateVariables;
+   protected int numberOfVariables;
+   protected int numberOfJointStateVariables;
    protected List<YoVariableRegistry> registries = new ArrayList<>();
    protected List<YoVariable<?>> variables = new ArrayList<>();
 
@@ -89,9 +91,21 @@ public abstract class YoVariableHandshakeParser
       return stateVariables * 8;
    }
 
-   public int getNumberOfVariables()
+   public int getNumberOfStates()
    {
       return stateVariables;
 
    }
+   
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables;
+   }
+
+   public int getNumberOfJointStateVariables()
+   {
+      return numberOfJointStateVariables;
+   }
+   
+   
 }

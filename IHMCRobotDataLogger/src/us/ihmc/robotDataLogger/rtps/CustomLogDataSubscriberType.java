@@ -1,0 +1,148 @@
+package us.ihmc.robotDataLogger.rtps;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.robotDataLogger.LogDataType;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
+import us.ihmc.tools.compression.SnappyUtils;
+
+/**
+* 
+* Topic data type of the struct "LogData" defined in "LogData.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file has been modified from the generated version to provide higher performance.
+*
+*/
+public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiveBuffer>
+{
+   public static final String name = "us::ihmc::robotDataLogger::LogData";
+
+   private final int numberOfVariables;
+   private final int numberOfStates;
+   private final int maximumCompressedSize;
+
+
+   public CustomLogDataSubscriberType(int maxNumberOfVariables, int maxNumberOfStates)
+   {
+      this.numberOfVariables = maxNumberOfVariables;
+      this.numberOfStates = maxNumberOfStates;
+
+      maximumCompressedSize = SnappyUtils.maxCompressedLength(maxNumberOfVariables * 8);
+   }
+
+   private final CDR deserializeCDR = new CDR();
+
+   @Override
+   public void serialize(RegistryReceiveBuffer data, SerializedPayload serializedPayload) throws IOException
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
+   @Override
+   public void deserialize(SerializedPayload serializedPayload, RegistryReceiveBuffer data) throws IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+
+      data.setUid(deserializeCDR.read_type_11());
+
+      data.setTimestamp(deserializeCDR.read_type_11());
+
+      if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
+      {
+         throw new IOException("Invalid type for DATA_PACKET receive");
+      }
+      
+      data.setRegistryID(deserializeCDR.read_type_2());
+      
+      int dataLength = deserializeCDR.read_type_2();
+      ByteBuffer buffer = data.allocateBuffer(dataLength);
+      serializedPayload.getData().get(buffer.array(), 0, dataLength);
+      buffer.limit(dataLength);
+
+      int stateLength = deserializeCDR.read_type_2();
+      double[] states = data.allocateStates(stateLength);
+      for (int i = 0; i < stateLength; i++)
+      {
+         states[i] = deserializeCDR.read_type_6();
+      }
+
+      deserializeCDR.finishDeserialize();
+   }
+
+   @Override
+   public final void serialize(RegistryReceiveBuffer data, InterchangeSerializer ser)
+   {
+      throw new RuntimeException("Not implemented");
+
+   }
+
+   @Override
+   public final void deserialize(InterchangeSerializer ser, RegistryReceiveBuffer data)
+   {
+      throw new RuntimeException("Not implemented");
+
+   }
+
+   @Override
+   public RegistryReceiveBuffer createData()
+   {
+      return null;
+   }
+
+   @Override
+   public int getTypeSize()
+   {
+      int current_alignment = 0;
+
+      current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
+      current_alignment += (maximumCompressedSize * 1) + CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
+      current_alignment += (numberOfStates * 8) + CDR.alignment(current_alignment, 8);
+
+      return current_alignment;
+   }
+
+   @Override
+   public String getName()
+   {
+      return name;
+   }
+
+   @Override
+   public CustomLogDataSubscriberType newInstance()
+   {
+      return new CustomLogDataSubscriberType(numberOfVariables, numberOfStates);
+   }
+
+   @Override
+   public void serialize(RegistryReceiveBuffer data, CDR cdr)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
+   @Override
+   public void deserialize(RegistryReceiveBuffer data, CDR cdr)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
+   @Override
+   public void copy(RegistryReceiveBuffer src, RegistryReceiveBuffer dest)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+}

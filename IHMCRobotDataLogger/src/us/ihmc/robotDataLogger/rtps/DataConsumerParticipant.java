@@ -37,6 +37,8 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
+import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
@@ -425,6 +427,15 @@ public class DataConsumerParticipant
       TimestampPubSubType pubSubType = new TimestampPubSubType();
       SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
       domain.createSubscriber(participant, attributes, new TimestampListenerImpl(listener));
+   }
+   
+   
+   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener) throws IOException
+   {
+      CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
+      SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
+      domain.createSubscriber(participant, attributes, new RegistryConsumer(parser, listener));
+
    }
    
    public static void main(String[] args) throws IOException, InterruptedException
