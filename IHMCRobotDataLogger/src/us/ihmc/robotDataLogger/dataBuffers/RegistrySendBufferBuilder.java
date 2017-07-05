@@ -12,7 +12,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class RegistryBufferBuilder implements us.ihmc.concurrent.Builder<RegistryBuffer>
+public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<RegistrySendBuffer>
 {
    private final YoVariableRegistry registry;
    private final RigidBody rootBody;
@@ -24,7 +24,7 @@ public class RegistryBufferBuilder implements us.ihmc.concurrent.Builder<Registr
    
    private int registryID = -1;
 
-   public RegistryBufferBuilder(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry graphics)
+   public RegistrySendBufferBuilder(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry graphics)
    {
       this.registry = registry;
       this.rootBody = rootBody;
@@ -68,11 +68,11 @@ public class RegistryBufferBuilder implements us.ihmc.concurrent.Builder<Registr
    }
 
    @Override
-   public RegistryBuffer newInstance()
+   public RegistrySendBuffer newInstance()
    {
       if(registryID == -1)
       {
-         throw new RuntimeException("RegistryBufferBuilder.build() not called");
+         throw new RuntimeException("RegistrySendBufferBuilder.build() not called");
       }
       
       if(variables.size() == 0)
@@ -80,7 +80,7 @@ public class RegistryBufferBuilder implements us.ihmc.concurrent.Builder<Registr
          throw new RuntimeException("Variables not populated");
       }
       
-      return new RegistryBuffer(registryID, variables, jointHolders);
+      return new RegistrySendBuffer(registryID, variables, jointHolders);
    }
    
    public int getRegistryID()

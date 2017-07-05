@@ -22,7 +22,7 @@ import us.ihmc.robotDataLogger.JointDefinition;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryBufferBuilder;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -118,7 +118,7 @@ public class YoVariableHandShakeBuilder
 
    public int getNumberOfJointStates()
    {
-      return RegistryBufferBuilder.getNumberOfJointStates(jointHolders);
+      return RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
    }
 
    private void createRootRegistry()
@@ -129,7 +129,7 @@ public class YoVariableHandShakeBuilder
       yoRegistryDescription.setParent((short) 0);
    }
 
-   public void addRegistryBuffer(RegistryBufferBuilder builder)
+   public void addRegistryBuffer(RegistrySendBufferBuilder builder)
    {
       YoVariableRegistry registry = builder.getYoVariableRegistry();
 

@@ -52,7 +52,7 @@ public class UDPAcsellStateReader
 
       if (receiveBuffer.remaining() != 1048)
       {
-         throw new IOException("ReceiveBuffer is not the correct size");
+         throw new IOException("RegistryReceiveBuffer is not the correct size");
       }
 
       long currentTime = RealtimeThread.getCurrentMonotonicClockTime();

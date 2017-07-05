@@ -6,7 +6,8 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
-import us.ihmc.robotDataLogger.dataBuffers.RegistryBufferBuilder;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 public class RegistryPublisher
@@ -14,14 +15,14 @@ public class RegistryPublisher
    private static final int BUFFER_CAPACITY = 128;
    
    private long uid = 0;
-   private final ConcurrentRingBuffer<RegistryBuffer> ringBuffer;
+   private final ConcurrentRingBuffer<RegistrySendBuffer> ringBuffer;
    
    private final Publisher publisher;
    
    private final PeriodicThreadScheduler scheduler;
    private final VariableUpdateThread variableUpdateThread = new VariableUpdateThread();
    
-   public RegistryPublisher(PeriodicThreadScheduler scheduler, RegistryBufferBuilder builder, Publisher publisher) throws IOException
+   public RegistryPublisher(PeriodicThreadScheduler scheduler, RegistrySendBufferBuilder builder, Publisher publisher) throws IOException
    {
       this.ringBuffer = new ConcurrentRingBuffer<>(builder, BUFFER_CAPACITY);
       
@@ -41,10 +42,10 @@ public class RegistryPublisher
    
    public void update(long timestamp)
    {
-      RegistryBuffer buffer = ringBuffer.next();
+      RegistrySendBuffer buffer = ringBuffer.next();
       if(buffer != null)
       {
-         buffer.update(timestamp, uid);
+         buffer.updateBufferFromVariables(timestamp, uid);
          ringBuffer.commit();
       }
       
