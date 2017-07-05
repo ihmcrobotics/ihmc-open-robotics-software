@@ -98,8 +98,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    /**
-    * This method checks if the upcoming step has a desired absolute start time. If that is the case the transfer time is
-    * adjusted such that the swing starts at the correct time.
+    * This method checks if the upcoming step has a desired absolute start time. If that is the case
+    * the transfer time is adjusted such that the swing starts at the correct time.
     */
    private void adjustTimings()
    {

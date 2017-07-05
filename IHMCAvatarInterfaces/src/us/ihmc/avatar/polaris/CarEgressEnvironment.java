@@ -3,12 +3,12 @@ package us.ihmc.avatar.polaris;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -31,12 +31,12 @@ public class CarEgressEnvironment implements CommonAvatarEnvironmentInterface
    {
       RigidBodyTransform locationStep = new RigidBodyTransform();
       locationStep.setTranslation(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + 0.5 * stepDimensions.getY(), stepDimensions.getZ() / 2.0));
-      Box3d stepBox = new Box3d(locationStep, stepDimensions.getX(), stepDimensions.getY(), stepDimensions.getZ());
+      Box3D stepBox = new Box3D(locationStep, stepDimensions.getX(), stepDimensions.getY(), stepDimensions.getZ());
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(stepBox, YoAppearance.DarkGray()));   
       
       RigidBodyTransform locationCar = new RigidBodyTransform();
       locationCar.setTranslation(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + stepDimensions.getY() + 0.5 * carDimensions.getY(), carDimensions.getZ() / 2.0));
-      Box3d carBox = new Box3d(locationCar, carDimensions.getX(), carDimensions.getY(), carDimensions.getZ());      
+      Box3D carBox = new Box3D(locationCar, carDimensions.getX(), carDimensions.getY(), carDimensions.getZ());      
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(carBox, YoAppearance.DarkGray()));   
       
       terrain.addTerrainObject(setUpGround("ground"));
@@ -82,7 +82,7 @@ public class CarEgressEnvironment implements CommonAvatarEnvironmentInterface
       RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3D(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 10, 10, 1), texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, 10, 10, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
 
       return combinedTerrainObject;

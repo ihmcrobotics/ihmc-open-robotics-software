@@ -161,7 +161,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       tempPose.changeFrame(controlFrame);
       tempPose.getPosition(tempPoint);
       
-      initialPose.translate(tempPoint);
+      initialPose.prependTranslation(tempPoint);
       
       return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
    }
@@ -238,7 +238,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       tempPose.changeFrame(controlFrame);
       tempPose.getPosition(tempPoint);
       
-      initialPose.translate(tempPoint);
+      initialPose.prependTranslation(tempPoint);
       
       if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose))
       {

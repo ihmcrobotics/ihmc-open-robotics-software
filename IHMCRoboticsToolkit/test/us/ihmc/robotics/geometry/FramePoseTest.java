@@ -413,7 +413,7 @@ public class FramePoseTest
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
          actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
 
-         thatPose.translate(actualTranslationNOTfromRotation.tuple);
+         thatPose.prependTranslation(actualTranslationNOTfromRotation.tuple);
 
          FrameVector translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
          FrameVector translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);

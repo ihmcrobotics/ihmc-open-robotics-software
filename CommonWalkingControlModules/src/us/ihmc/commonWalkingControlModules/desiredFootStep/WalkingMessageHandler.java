@@ -80,6 +80,8 @@ public class WalkingMessageHandler
 
    private final YoDouble yoTime;
    private final YoDouble footstepDataListRecievedTime = new YoDouble("footstepDataListRecievedTime", registry);
+   private final YoBoolean executingFootstep = new YoBoolean("ExecutingFootstep", registry);
+   private final FootstepTiming lastTimingExecuted = new FootstepTiming();
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -137,6 +139,11 @@ public class WalkingMessageHandler
                footstepDataListRecievedTime.set(yoTime.getDoubleValue());
             break;
          case QUEUE:
+            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
+            {
+               PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+               return;
+            }
             currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
             break;
          default:
@@ -231,7 +238,7 @@ public class WalkingMessageHandler
          updateVisualization();
          currentNumberOfFootsteps.decrement();
          currentFootstepIndex.increment();
-         upcomingFootstepTimings.remove(0);
+         lastTimingExecuted.set(upcomingFootstepTimings.remove(0));
          return upcomingFootsteps.remove(0);
       }
    }
@@ -355,6 +362,7 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue(),
             desiredFootPositionInWorld, desiredFootOrientationInWorld,
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
+      executingFootstep.set(true);
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
@@ -364,6 +372,7 @@ public class WalkingMessageHandler
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      executingFootstep.set(false);
    }
 
    public void reportWalkingStarted()
@@ -619,9 +628,14 @@ public class WalkingMessageHandler
          break;
       case CONTROL_ABSOLUTE_TIMINGS:
          int stepsInQueue = upcomingFootstepTimings.size();
-         if (stepsInQueue == 0)
+         if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
          {
             timing.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
+         }
+         else if (stepsInQueue == 0)
+         {
+            double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
+            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
          }
          else
          {
