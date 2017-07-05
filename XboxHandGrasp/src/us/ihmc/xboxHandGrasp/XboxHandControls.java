@@ -1,4 +1,4 @@
-package com;
+package us.ihmc.xboxHandGrasp;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -20,7 +20,7 @@ public class XboxHandControls extends JFrame implements JoystickStatusListener, 
    private Joystick joy;
    private QueueBasedStreamingDataProducer<HandDesiredConfigurationMessage> handServer;
    private HandDesiredConfigurationMessage handCommand;
-   
+
    public XboxHandControls()
    {
       super("Hand Controler");
@@ -31,7 +31,7 @@ public class XboxHandControls extends JFrame implements JoystickStatusListener, 
       this.add(panel);
       this.repaint();
       this.revalidate();
-      
+
       try
       {
          joy = new Joystick();
@@ -42,11 +42,11 @@ public class XboxHandControls extends JFrame implements JoystickStatusListener, 
       }
       joy.addJoystickEventListener(this);
       joy.addJoystickStatusListener(this);
-      
+
       handServer = new QueueBasedStreamingDataProducer<HandDesiredConfigurationMessage>("Xbox_Hand_Controller");
       handServer.startProducingData();
    }
-   
+
    @Override
    public void processEvent(Event e)
    {
@@ -68,9 +68,9 @@ public class XboxHandControls extends JFrame implements JoystickStatusListener, 
    public void updateConnectivity(boolean connected)
    {
       // TODO Auto-generated method stub
-      
+
    }
-   
+
    public static void main(String[] args)
    {
       new XboxHandControls();
