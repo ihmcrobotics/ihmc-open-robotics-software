@@ -10,6 +10,7 @@ import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableClient
@@ -28,6 +29,8 @@ public class YoVariableClient
    // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
    private final int displayOneInNPackets;
+   
+   private final YoVariableRegistry debugRegistry = new YoVariableRegistry("loggerStatus");
    
    private ClientState state = ClientState.WAITING;
    
@@ -178,7 +181,7 @@ public class YoVariableClient
       dataConsumerParticipant.createClearLogPubSub(announcement, yoVariablesUpdatedListener);
       dataConsumerParticipant.createTimestampListener(announcement, yoVariablesUpdatedListener);
       
-      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, yoVariablesUpdatedListener);
+      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, yoVariablesUpdatedListener, debugRegistry);
 
       state = ClientState.RUNNING;
    }
@@ -224,6 +227,11 @@ public class YoVariableClient
       {
          e.printStackTrace();
       }
+   }
+   
+   public YoVariableRegistry getDebugRegistry()
+   {
+      return debugRegistry;
    }
 
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.map.hash.TIntLongHashMap;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -20,6 +20,8 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
@@ -41,7 +43,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoVariablesUpdatedListener listener;
    
    
-   private final TIntHashSet uniqueRegistries = new TIntHashSet();
+   private final TIntLongHashMap uniqueRegistries = new TIntLongHashMap();
    
    // Standard deviation calculation
    private long previousTransmitTime = - 1;
@@ -51,14 +53,23 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private double averageTimeBetweenPackets = 0;
    
    private volatile int jitterBufferSamples = 1;
+   
+   private long previousTimestamp = -1;
+   private final YoInteger skippedPackets;
+   private final YoInteger nonIncreasingTimestamps;
+   private final YoInteger packetsOutOfOrder;
 
-   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener)
+   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener, YoVariableRegistry loggerDebugRegistry)
    {
       this.parser = parser;
       this.variables = parser.getYoVariablesList();
       this.jointStates = parser.getJointStates();
       this.decompressBuffer = ByteBuffer.allocate(variables.size() * 8);
       this.listener = listener;
+      
+      this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);
+      this.nonIncreasingTimestamps = new YoInteger("nonIncreasingTimestamps", loggerDebugRegistry);
+      this.packetsOutOfOrder = new YoInteger("packetsOutOfOrder", loggerDebugRegistry);
       start();
    }
    
@@ -105,7 +116,9 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private void decompressBuffer(RegistryReceiveBuffer buffer)
    {
-      uniqueRegistries.add(buffer.getRegistryID());
+      long previousUid = uniqueRegistries.put(buffer.getRegistryID(), buffer.getUid());
+      
+      updateDebugVariables(buffer, previousUid);
       
       decompressBuffer.clear();
       try
@@ -134,6 +147,27 @@ public class RegistryConsumer extends Thread implements SubscriberListener
          jointStates.get(i).update(jointStateBuffer);
       }
       
+   }
+
+   void updateDebugVariables(RegistryReceiveBuffer buffer, long previousUid)
+   {
+      if(previousUid != uniqueRegistries.getNoEntryValue() && buffer.getUid() != previousUid + 1)
+      {
+         if(buffer.getUid() < previousUid)
+         {
+            packetsOutOfOrder.increment();
+         }
+         else
+         {
+            skippedPackets.add((int) (buffer.getUid() - previousUid - 1));
+         }
+      }
+      
+      if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
+      {
+         nonIncreasingTimestamps.increment();         
+      }
+      previousTimestamp = buffer.getTimestamp();
    }
    
 

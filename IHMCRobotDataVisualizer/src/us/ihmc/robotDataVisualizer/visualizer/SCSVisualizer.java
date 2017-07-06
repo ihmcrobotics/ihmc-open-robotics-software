@@ -265,6 +265,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
+      this.registry.addChild(yoVariableClient.getDebugRegistry());
 
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
