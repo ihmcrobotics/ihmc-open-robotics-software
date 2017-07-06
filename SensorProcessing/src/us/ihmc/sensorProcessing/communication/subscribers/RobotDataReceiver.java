@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 {

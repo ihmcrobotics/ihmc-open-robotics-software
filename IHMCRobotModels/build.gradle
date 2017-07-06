@@ -43,7 +43,6 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version:'1.5.2'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
-    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
