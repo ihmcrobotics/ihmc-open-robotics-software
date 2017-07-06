@@ -1011,24 +1011,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testScaleAddVectorScaleVector() //Brett was here
-   {
-      FrameTuple<?, ?> framePoint = createFrameTuple(theFrame);
-      Tuple3DBasics tuple3d1 = new Point3D(1.0, 1.0, 1.0);
-      Tuple3DBasics tuple3d2 = new Point3D(-1.0, -1.0, -1.0);
-
-      double scale1 = 2.0;
-      double scale2 = 3.0;
-
-      framePoint.scaleAdd(scale1, tuple3d1, scale2, tuple3d2);
-      assertEquals("This should be equal", -1.0, framePoint.getX(), Double.MIN_VALUE);
-      assertEquals("This should be equal", -1.0, framePoint.getY(), Double.MIN_VALUE);
-      assertEquals("This should be equal", -1.0, framePoint.getZ(), Double.MIN_VALUE);
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorVectorException1()
    {
