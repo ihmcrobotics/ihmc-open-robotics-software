@@ -47,6 +47,7 @@ public class SiXDoFJointHolder implements JointHolder
       twist.getArray(buffer, offset + 7);
    }
 
+
    @Override
    public String getName()
    {

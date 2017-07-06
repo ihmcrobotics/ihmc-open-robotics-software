@@ -1,14 +1,11 @@
 package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -41,7 +38,6 @@ import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 /**
@@ -58,8 +54,6 @@ public class DataProducerParticipant
    private volatile boolean activated = false;
 
    private ArrayList<CameraAnnouncement> cameras = new ArrayList<>();
-   private InetAddress dataAddress;
-   private int dataPort;
    private boolean log = false;
 
    private Handshake handshake;
@@ -182,42 +176,6 @@ public class DataProducerParticipant
    public void remove()
    {
       domain.removeParticipant(participant);
-   }
-
-   /**
-    * Set the data producer IP address for streaming data 
-    * 
-    * Temporary till streaming is done over RTPS
-    * 
-    * Required
-    * 
-    * @param dataAddress
-    */
-   @Deprecated
-   public void setDataAddress(InetAddress dataAddress)
-   {
-      this.dataAddress = dataAddress;
-   }
-
-   /** 
-    * Set the data producer port for streaming data
-    * 
-    * Temporary till streaming is done over RTPS
-    * 
-    * Required
-    * 
-    * @param port
-    */
-   @Deprecated
-   public void setPort(int port)
-   {
-      this.dataPort = port;
-   }
-
-   @Deprecated
-   public int getPort()
-   {
-      return this.dataPort;
    }
 
    /**
@@ -350,30 +308,6 @@ public class DataProducerParticipant
       
       return new RegistryPublisher(scheduler, builder, publisher);
    }
-   
 
-   public static void main(String[] args) throws IOException
-   {
-      InputStream testStream = DataProducerParticipant.class.getClassLoader().getResourceAsStream("Models/unitBox.sdf");
-      String[] resourcesDirectories = {"Models"};
-      LogModelProvider logModelProvider = new SDFLogModelProvider("testModel", testStream, resourcesDirectories);
-      DataProducerParticipant participant = new DataProducerParticipant("testParticipant", logModelProvider, new VariableChangedListener()
-      {
-
-         @Override
-         public void changeVariable(int id, double newValue)
-         {
-            System.out.println("Required change for " + id + " to " + newValue);
-         }
-      });
-
-      participant.setDataAddress(Inet4Address.getLocalHost());
-      participant.setPort(2048);
-      participant.setHandshake(new Handshake());
-
-      participant.announce();
-
-      ThreadTools.sleepForever();
-   }
 
 }

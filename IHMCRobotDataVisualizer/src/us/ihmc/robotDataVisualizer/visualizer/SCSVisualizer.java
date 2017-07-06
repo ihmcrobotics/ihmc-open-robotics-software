@@ -2,7 +2,6 @@ package us.ihmc.robotDataVisualizer.visualizer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +91,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
+   public void receivedTimestampAndData(long timestamp)
    {
       long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
       delayValue.setText(delayFormat.format(delay));
