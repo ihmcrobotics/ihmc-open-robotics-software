@@ -1,8 +1,7 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
@@ -16,24 +15,21 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoVariableClient
 {
    private final String serverName;
-   
+
    //DDS
    private final Announcement announcement;
    private final DataConsumerParticipant dataConsumerParticipant;
    private final VariableChangedProducer variableChangedProducer;
 
-   
    // Callback
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
-   
+
    // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
-   private final int displayOneInNPackets;
-   
    private final YoVariableRegistry debugRegistry = new YoVariableRegistry("loggerStatus");
-   
+
    private ClientState state = ClientState.WAITING;
-   
+
    private enum ClientState
    {
       WAITING, RUNNING, STOPPED
@@ -50,7 +46,7 @@ public class YoVariableClient
          throw new RuntimeException(e);
       }
    }
-   
+
    /**
     * Start a new client while allowing the user to select a desired logging session
     * 
@@ -74,22 +70,19 @@ public class YoVariableClient
    {
       this(participant, request, yoVariablesUpdatedListener, registryPrefix, null);
    }
-   
-   
+
    private YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix, LogProducerDisplay.LogSessionFilter[] filters)
-   {   
+   {
       this.dataConsumerParticipant = participant;
-      if(request == null)
+      if (request == null)
       {
          request = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, filters);
       }
-      
-      
+
       this.serverName = request.getNameAsString();
       this.announcement = request;
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;
-      this.displayOneInNPackets = this.yoVariablesUpdatedListener.getDisplayOneInNPackets();
-      if(yoVariablesUpdatedListener.changesVariables())
+      if (yoVariablesUpdatedListener.changesVariables())
       {
          this.variableChangedProducer = new VariableChangedProducer(dataConsumerParticipant);
       }
@@ -98,34 +91,31 @@ public class YoVariableClient
          this.variableChangedProducer = null;
       }
 
-      InetAddress inetAddress;
-      try
-      {
-         inetAddress = InetAddress.getByAddress(request.getDataIP());
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
-
-      
-      handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
+      this.handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
       this.yoVariablesUpdatedListener.setYoVariableClient(this);
    }
 
-   
    public String getServerName()
    {
       return serverName;
    }
 
-
-   public void timeout()
+   public void connectionClosed()
    {
-      yoVariablesUpdatedListener.receiveTimedOut();
-      dataConsumerParticipant.remove();
+      if (state == ClientState.RUNNING)
+      {
+         System.out.println("Disconnected, closing client.");
+         if (variableChangedProducer != null)
+         {
+            variableChangedProducer.disconnect();
+         }
+
+         dataConsumerParticipant.remove();
+         yoVariablesUpdatedListener.disconnected();
+
+         state = ClientState.STOPPED;
+      }
    }
-   
 
    public void start()
    {
@@ -146,70 +136,52 @@ public class YoVariableClient
          throw new RuntimeException("Client already started");
       }
 
-      
-      
       System.out.println("Requesting handshake");
       Handshake handshake = dataConsumerParticipant.getHandshake(announcement, timeout);
-      
+
       handshakeParser.parseFrom(handshake);
 
       LogHandshake logHandshake = new LogHandshake();
       logHandshake.setHandshake(handshake);
-      if(announcement.getModelFileDescription().getHasModel())
+      if (announcement.getModelFileDescription().getHasModel())
       {
          logHandshake.setModelName(announcement.getModelFileDescription().getNameAsString());
          System.out.println("Requesting model file");
          logHandshake.setModel(dataConsumerParticipant.getModelFile(announcement, timeout));
          logHandshake.setModelLoaderClass(announcement.getModelFileDescription().getModelLoaderClassAsString());
          logHandshake.setResourceDirectories(announcement.getModelFileDescription().getResourceDirectories().toStringArray());
-         if(announcement.getModelFileDescription().getHasResourceZip())
+         if (announcement.getModelFileDescription().getHasResourceZip())
          {
             System.out.println("Requesting resource bundle");
             logHandshake.setResourceZip(dataConsumerParticipant.getResourceZip(announcement, timeout));
          }
          System.out.println("Received model");
-         
+
       }
-            
+
       yoVariablesUpdatedListener.start(logHandshake, handshakeParser);
       if (yoVariablesUpdatedListener.changesVariables())
       {
          List<YoVariable<?>> variablesList = handshakeParser.getYoVariablesList();
          variableChangedProducer.startVariableChangedProducers(announcement, variablesList);
       }
-      
+
       dataConsumerParticipant.createClearLogPubSub(announcement, yoVariablesUpdatedListener);
       dataConsumerParticipant.createTimestampListener(announcement, yoVariablesUpdatedListener);
-      
-      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, yoVariablesUpdatedListener, debugRegistry);
+
+      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, this, debugRegistry);
 
       state = ClientState.RUNNING;
    }
 
    public void requestStop()
    {
-
+      dataConsumerParticipant.remove();
    }
-   
+
    public void setSendingVariableChanges(boolean sendVariableChanges)
    {
       variableChangedProducer.setSendingChangesEnabled(sendVariableChanges);
-   }
-   
-   public synchronized void disconnected()
-   {
-      if (state == ClientState.RUNNING)
-      {
-         if(variableChangedProducer != null)
-         {
-            variableChangedProducer.disconnect();
-         }
-
-         dataConsumerParticipant.remove();
-         yoVariablesUpdatedListener.disconnected();
-
-         state = ClientState.STOPPED;
-      }
    }
 
    public synchronized boolean isRunning()
@@ -228,10 +200,15 @@ public class YoVariableClient
          e.printStackTrace();
       }
    }
-   
+
    public YoVariableRegistry getDebugRegistry()
    {
       return debugRegistry;
+   }
+
+   public void receivedTimestampAndData(long timestamp, ByteBuffer decompressBuffer)
+   {
+      yoVariablesUpdatedListener.receivedTimestampAndData(timestamp, decompressBuffer);
    }
 
 }

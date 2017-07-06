@@ -295,19 +295,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       this.yoVariableClient = client;
    }
 
-   public void receiveTimedOut()
-   {
-      if (connected)
-      {
-         System.out.println("Connection lost, closing client.");
-         yoVariableClient.disconnected();
-      }
-      else
-      {
-         System.out.println("Cannot connect to client, closing");
-         yoVariableClient.disconnected();
-      }
-   }
 
    public boolean updateYoVariables()
    {
