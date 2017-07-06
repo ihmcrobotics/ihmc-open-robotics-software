@@ -683,61 +683,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       return epsilonEquals(frameTuple1.tuple, threshold);
    }
 
-   /**
-     * Returns true if the L-infinite distance between this tuple and tuple1 is less than or equal to the epsilon parameter, otherwise returns false.
-     * The L-infinite distance is equal to MAX[abs(x1-x2), abs(y1-y2), abs(z1-0)].
-    * @param tuple1 Tuple3d
-    * @param threshold double
-    */
-   public final boolean epsilonEquals(Tuple2DReadOnly tuple1, double threshold)
-   {
-      if (tuple1 == null)
-      {
-         return false;
-      }
-
-      double diff;
-
-      diff = tuple.getX() - tuple1.getX();
-      if (Double.isNaN(diff))
-         return false;
-      if ((diff < 0 ? -diff : diff) > threshold)
-         return false;
-
-      diff = tuple.getY() - tuple1.getY();
-      if (Double.isNaN(diff))
-         return false;
-      if ((diff < 0 ? -diff : diff) > threshold)
-         return false;
-
-      diff = tuple.getZ();
-      if (Double.isNaN(diff))
-         return false;
-      if ((diff < 0 ? -diff : diff) > threshold)
-         return false;
-
-      return true;
-   }
-
-   /**
-     * Returns true if the L-infinite distance between this frameTuple and frameTuple1 is less than or equal to the epsilon parameter, otherwise returns false.
-     * The L-infinite distance is equal to MAX[abs(x1-x2), abs(y1-y2), abs(z1-0)].
-    * @param frameTuple1 FrameTuple<?, ?>
-    * @param threshold double
-    * @throws ReferenceFrameMismatchException
-    */
-   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
-   {
-      if (frameTuple2d == null)
-      {
-         return false;
-      }
-
-      checkReferenceFrameMatch(frameTuple2d);
-
-      return epsilonEquals(frameTuple2d.tuple, threshold);
-   }
-
    public final double[] toArray()
    {
       return new double[] {tuple.getX(), tuple.getY(), tuple.getZ()};

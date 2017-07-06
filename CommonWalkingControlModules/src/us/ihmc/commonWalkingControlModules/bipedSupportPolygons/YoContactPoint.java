@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -102,7 +103,12 @@ public class YoContactPoint implements ContactPointInterface
 
    public boolean epsilonEquals(FramePoint2d contactPointPosition2d, double threshold)
    {
-      return yoPosition.epsilonEquals(contactPointPosition2d, threshold);
+      yoPosition.checkReferenceFrameMatch(contactPointPosition2d);
+      if (!MathTools.epsilonEquals(yoPosition.getX(), contactPointPosition2d.getX(), threshold))
+         return false;
+      if (!MathTools.epsilonEquals(yoPosition.getY(), contactPointPosition2d.getY(), threshold))
+         return false;
+      return true;
    }
 
    @Override
