@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 
@@ -10,8 +11,13 @@ public class FramePointTrapezoidalVelocityTrajectory extends FrameNDoFTrapezoida
    public FramePointTrapezoidalVelocityTrajectory(double t0, FramePoint x0, FramePoint xF, FrameVector v0, FrameVector vF, FrameVector vMax, FrameVector aMax,
            AlphaToAlphaType alphaToAlphaType)
    {
-      super(x0.getReferenceFrame(), t0, x0.toArray(), xF.toArray(), v0.toArray(), vF.toArray(), vMax.toArray(), aMax.toArray(), alphaToAlphaType);
+      super(x0.getReferenceFrame(), t0, toArray(x0), toArray(xF), toArray(v0), toArray(vF), toArray(vMax), toArray(aMax), alphaToAlphaType);
       doReferenceFrameChecks(x0, xF, v0, vF, vMax, aMax);
+   }
+
+   private static double[] toArray(FrameTuple<?, ?> tuple)
+   {
+      return new double[]{tuple.getX(), tuple.getY(), tuple.getZ()};
    }
 
    public FramePoint getPosition(double t)

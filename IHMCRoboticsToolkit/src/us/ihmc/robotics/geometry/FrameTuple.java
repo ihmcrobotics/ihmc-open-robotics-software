@@ -645,9 +645,4 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
       return epsilonEquals(frameTuple1.tuple, threshold);
    }
-
-   public final double[] toArray()
-   {
-      return new double[] {tuple.getX(), tuple.getY(), tuple.getZ()};
-   }
 }
