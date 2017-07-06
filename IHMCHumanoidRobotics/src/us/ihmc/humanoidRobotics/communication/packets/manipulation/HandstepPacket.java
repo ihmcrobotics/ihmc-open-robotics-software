@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,10 +41,12 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
 
    public HandstepPacket(HandstepPacket handstepPacket)
    {
-      this.robotSide = handstepPacket.robotSide;
-      this.location = new Point3D(handstepPacket.location);
-      this.orientation = new Quaternion(handstepPacket.orientation);
-      this.surfaceNormal = new Vector3D(handstepPacket.surfaceNormal);
+      robotSide = handstepPacket.robotSide;
+      location = new Point3D(handstepPacket.location);
+      orientation = new Quaternion(handstepPacket.orientation);
+      surfaceNormal = new Vector3D(handstepPacket.surfaceNormal);
+      swingTrajectoryTime = handstepPacket.swingTrajectoryTime;
+      destination = handstepPacket.destination;
       orientation.checkIfUnitary();
    }
 
@@ -71,7 +72,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientationToPack.set(this.orientation);
+      orientationToPack.set(orientation);
    }
 
    public Vector3D getSurfaceNormal()
@@ -81,7 +82,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
 
    public void getSurfaceNormal(Vector3D surfaceNormalToPack)
    {
-      surfaceNormalToPack.set(this.surfaceNormal);
+      surfaceNormalToPack.set(surfaceNormal);
    }
 
    public void setOrientation(Quaternion orientation)
@@ -111,11 +112,12 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.swingTrajectoryTime = swingTrajectoryTime;
    }
 
+   @Override
    public String toString()
    {
       String ret = "";
 
-      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), this.orientation);
+      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation);
       double[] ypr = frameOrientation.getYawPitchRoll();
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
@@ -140,23 +142,14 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       return robotSideEquals && locationEquals && orientationEquals;
    }
 
+   @Override
    public HandstepPacket transform(RigidBodyTransform transform)
    {
-      HandstepPacket ret = new HandstepPacket();
+      HandstepPacket ret = new HandstepPacket(this);
 
-      // String rigidBodyName;
-      ret.robotSide = this.getRobotSide();
-
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
-
-      // Vector3d surface normal
-      ret.surfaceNormal = TransformTools.getTransformedVector(this.getSurfaceNormal(), transform);
-
-      ret.swingTrajectoryTime = this.getSwingTrajectoryTime();
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
+      ret.surfaceNormal.applyTransform(transform);
 
       return ret;
    }
@@ -166,10 +159,10 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       double TRAJECTORY_TIME_MIN = 0.5;
       double TRAJECTORY_TIME_MAX = 10;
 
-      this.robotSide = RobotSide.generateRandomRobotSide(random);
-      this.location = RandomGeometry.nextPoint3D(random, 0.5, 0.5, 0.5);
-      this.orientation = RandomGeometry.nextQuaternion(random, Math.PI / 4.0);
-      this.surfaceNormal = RandomGeometry.nextVector3D(random, 1.0);
-      this.swingTrajectoryTime = RandomNumbers.nextDouble(random, TRAJECTORY_TIME_MIN, TRAJECTORY_TIME_MAX);
+      robotSide = RobotSide.generateRandomRobotSide(random);
+      location = RandomGeometry.nextPoint3D(random, 0.5, 0.5, 0.5);
+      orientation = RandomGeometry.nextQuaternion(random, Math.PI / 4.0);
+      surfaceNormal = RandomGeometry.nextVector3D(random, 1.0);
+      swingTrajectoryTime = RandomNumbers.nextDouble(random, TRAJECTORY_TIME_MIN, TRAJECTORY_TIME_MAX);
    }
 }

@@ -131,7 +131,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          //         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
 
          // Without forgetting to put the foot back on the ground
-         footPoseCloseToActual.translate(0.0, 0.0, -0.15);
+         footPoseCloseToActual.prependTranslation(0.0, 0.0, -0.15);
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
@@ -333,7 +333,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
          // Without forgetting to put the foot back on the ground
-         footPoseCloseToActual.translate(0.0, 0.0, -0.15);
+         footPoseCloseToActual.prependTranslation(0.0, 0.0, -0.15);
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
@@ -662,7 +662,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          //         assertNumberOfWaypoints(robotSide, 1, scs);
 
          // Without forgetting to put the foot back on the ground
-         footPoseCloseToActual.translate(0.0, 0.0, -0.15);
+         footPoseCloseToActual.prependTranslation(0.0, 0.0, -0.15);
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
          trajectoryTime = 0.5;
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
@@ -815,7 +815,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          //         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
 
          // Without forgetting to put the foot back on the ground
-         footPoseCloseToActual.translate(0.0, 0.0, -0.15);
+         footPoseCloseToActual.prependTranslation(0.0, 0.0, -0.15);
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
          trajectoryTime = 0.5;
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);

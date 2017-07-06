@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,7 +33,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -224,7 +224,7 @@ public class GraphicsDemoTools
       for (int i = 0; i < worldPoints.size(); i++)
       {
          Graphics3DNode worldPointNode = new Graphics3DNode(name + "point" + i, Graphics3DNodeType.VISUALIZATION,
-               new Graphics3DObject(new Sphere3d(pointRadius), appearance));
+               new Graphics3DObject(new Sphere3D(pointRadius), appearance));
          worldPointNode.translate(worldPoints.get(i).getX(), worldPoints.get(i).getY(), worldPoints.get(i).getZ());
          
          pointCloud.addChild(worldPointNode);
