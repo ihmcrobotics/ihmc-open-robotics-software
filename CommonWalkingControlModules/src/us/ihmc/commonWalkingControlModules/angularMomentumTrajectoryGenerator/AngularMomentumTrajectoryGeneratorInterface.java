@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,18 +17,12 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void clear();
 
-   void addFootstepCoPsToPlan(List<FramePoint> entryCoPs, List<FramePoint> exitCoPs);
-   
-   void addFootstepCoPsToPlan(FramePoint entryCoP, FramePoint exitCo);
+   void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations);
    
    void addAngularMomentumWaypointsToPlan(List<AngularMomentumTrajectoryPoint> waypointList);
 
    void addAngularMomentumWaypointToPlan(AngularMomentumTrajectoryPoint waypoint);
    
-   int getNumberOfRegisteredEntryCoPs();
-
-   int getNumberOfRegisteredExitCoPs();
-
    void update(double currentTime);
 
    void getDesiredAngularMomentum(FrameVector desiredAngMomToPack);
