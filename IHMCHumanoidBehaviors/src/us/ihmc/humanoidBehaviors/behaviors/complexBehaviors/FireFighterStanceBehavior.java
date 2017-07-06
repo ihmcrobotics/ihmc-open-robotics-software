@@ -1,11 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,21 +14,22 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
@@ -41,6 +41,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 {
    private final FootstepListBehavior footListBehavior;
    private final PelvisHeightTrajectoryBehavior movePelvisBehavior;
+   private final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
    private final ChestTrajectoryBehavior yawChestBehavior;
    private final ArmTrajectoryBehavior leftArmBehavior;
    private final ArmTrajectoryBehavior rightArmBehavior;
@@ -50,7 +51,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
    public enum BasicStates
    {
-      SET_STANCE, MOVE_PELVIS, YAW_CHEST, LEFT_ARM_PRE, LEFT_ARM_FINAL, RIGHT_ARM_FINAL
+      SET_STANCE, MOVE_PELVIS, MOVE_PELVIS2, YAW_CHEST, LEFT_ARM_PRE, LEFT_ARM_FINAL, RIGHT_ARM_FINAL,DONE
    }
 
    private BasicStates currentState = BasicStates.SET_STANCE;
@@ -67,12 +68,13 @@ public class FireFighterStanceBehavior extends AbstractBehavior
       yawChestBehavior = atlasPrimitiveActions.chestTrajectoryBehavior;
       leftArmBehavior = atlasPrimitiveActions.leftArmTrajectoryBehavior;
       rightArmBehavior = atlasPrimitiveActions.rightArmTrajectoryBehavior;
+      pelvisTrajectoryBehavior = atlasPrimitiveActions.pelvisTrajectoryBehavior;
 
-      setUpPipeline();
    }
 
    private void setUpPipeline()
    {
+      pipeLine.clearAll();
       BehaviorAction setStanceTask = new BehaviorAction(footListBehavior)
       {
          @Override
@@ -81,26 +83,26 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
             ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
-
             referenceFrames.updateFrames();
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2,.1, 0,0,0,0));
+               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.LEFT),RobotSide.LEFT, desiredFootPose);
-              desiredFootsteps.add(desiredFootStep);
+               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.LEFT), RobotSide.LEFT, desiredFootPose);
+               desiredFootsteps.add(desiredFootStep);
             }
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.RIGHT), new Pose3D(-.2,-.1, 0,Math.toRadians(-45),0,0));
+               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.RIGHT), new Pose3D(-.2, -.1, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT),RobotSide.RIGHT, desiredFootPose);
-              desiredFootsteps.add(desiredFootStep);
+               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT), RobotSide.RIGHT, desiredFootPose);
+               desiredFootsteps.add(desiredFootStep);
             }
 
             PrintTools.debug(this, "Initializing Behavior");
             footListBehavior.initialize();
             footListBehavior.set(desiredFootsteps);
-
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Stance");
+            sendPacket(p1);
             currentState = BasicStates.SET_STANCE;
          }
       };
@@ -112,7 +114,26 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          {
             PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(1, 0.75);
             movePelvisBehavior.setInput(message);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Decrease heigth");
+            sendPacket(p1);
             currentState = BasicStates.MOVE_PELVIS;
+         }
+      };
+
+      BehaviorAction movePelvisTask2 = new BehaviorAction(pelvisTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            FrameOrientation orientation = new FrameOrientation(referenceFrames.getPelvisFrame(), new Quaternion());
+            FramePoint p = new FramePoint(referenceFrames.getPelvisZUpFrame(), new double[] {0.1, 0.05, 0});
+            orientation.changeFrame(ReferenceFrame.getWorldFrame());
+            p.changeFrame(ReferenceFrame.getWorldFrame());
+            PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p.getPoint(), orientation.getQuaternion());
+            pelvisTrajectoryBehavior.setInput(message);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Pelvis To Final Location");
+            sendPacket(p1);
+            currentState = BasicStates.MOVE_PELVIS2;
          }
       };
 
@@ -125,6 +146,8 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             rot.setEuler(0, 0, Math.toRadians(-10));
             ChestTrajectoryMessage chestOrientationPacket = new ChestTrajectoryMessage(2, rot, referenceFrames.getPelvisZUpFrame());
             yawChestBehavior.setInput(chestOrientationPacket);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Chest Yaw");
+            sendPacket(p1);
             currentState = BasicStates.YAW_CHEST;
          }
       };
@@ -134,9 +157,12 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            double[] joints = new double[]{-0.575835229010565, -0.8431219813508408, 1.1244418143633323, 1.4875149908528966, 0.9144564803413229, -1.0660904511124556, -2.8798335374002835};
+            double[] joints = new double[] {-0.575835229010565, -0.8431219813508408, 1.1244418143633323, 1.4875149908528966, 0.9144564803413229,
+                  -1.0660904511124556, -2.8798335374002835};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, joints);
             leftArmBehavior.setInput(armTrajectoryMessage);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Left Arm To First Location");
+            sendPacket(p1);
             currentState = BasicStates.LEFT_ARM_PRE;
          }
       };
@@ -145,9 +171,12 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            double[] joints = new double[]{-0.16142948917535702, -0.3569195815223205, 2.792275523125268, -1.026521125798761, -0.4724882991792226, -1.5848189434466957, -0.7292067346614854};
+            double[] joints = new double[] {-0.16142948917535702, -0.3569195815223205, 2.792275523125268, -1.026521125798761, -0.4724882991792226,
+                  -1.5848189434466957, -0.7292067346614854};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
             rightArmBehavior.setInput(armTrajectoryMessage);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Right Arm To First Location");
+            sendPacket(p1);
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
@@ -156,9 +185,11 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            double[] joints = new double[]{0.785398, -1.5708, 3.14159, 1.7671424999999998, 1.6892682660534968, -1.6755335374002835, -2.8798335374002835};
+            double[] joints = new double[] {0.785398, -1.5708, 3.14159, 1.7671424999999998, 1.6892682660534968, -1.6755335374002835, -2.8798335374002835};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, joints);
             leftArmBehavior.setInput(armTrajectoryMessage);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Left Arm To Final Location");
+            sendPacket(p1);
             currentState = BasicStates.LEFT_ARM_FINAL;
          }
       };
@@ -167,9 +198,12 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            double[] joints = new double[]{0.44195289340641664, 0.023372912207270436, 2.7755155866532912, -1.7857822888113926, 0.38678248792688286, -1.4980698118674458, -0.5046966801690266};
+            double[] joints = new double[] {0.44195289340641664, 0.023372912207270436, 2.7755155866532912, -1.7857822888113926, 0.38678248792688286,
+                  -1.4980698118674458, -0.5046966801690266};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
             rightArmBehavior.setInput(armTrajectoryMessage);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Right Arm To Final Location");
+            sendPacket(p1);
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
@@ -177,20 +211,20 @@ public class FireFighterStanceBehavior extends AbstractBehavior
       pipeLine.requestNewStage();
       pipeLine.submitSingleTaskStage(setStanceTask);
       pipeLine.requestNewStage();
-//      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,movePelvisTask);
-      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveChestTask);
-      pipeLine.submitTaskForPallelPipesStage(leftArmBehavior,moveLeftPreTask);
-      pipeLine.submitTaskForPallelPipesStage(leftArmBehavior,moveLeftPreTask);
+      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,movePelvisTask);
+//      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveChestTask);
+      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveRightPreTask);
+
+      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveLeftPreTask);
 
       pipeLine.requestNewStage();
       pipeLine.submitTaskForPallelPipesStage(leftArmBehavior,moveLeftFinalTask);
       pipeLine.submitTaskForPallelPipesStage(leftArmBehavior,moveRightFinalTask);
+      pipeLine.requestNewStage();
+
+      pipeLine.submitSingleTaskStage(movePelvisTask2);
 
 
-//      pipeLine.submitSingleTaskStage(setStanceTask);
-//      pipeLine.submitSingleTaskStage(setStanceTask);
-
-      
       //      pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToBallTask);
 
    }
@@ -208,8 +242,6 @@ public class FireFighterStanceBehavior extends AbstractBehavior
       return ret;
    }
 
-  
-
    @Override
    public void doControl()
    {
@@ -219,12 +251,17 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
+      
       return pipeLine.isDone();
    }
 
    @Override
    public void onBehaviorEntered()
    {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Ready To Fight Fires");
+      sendPacket(p1);
+      setUpPipeline();
+
    }
 
    @Override
@@ -245,6 +282,11 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
+
+         currentState = BasicStates.DONE;
+  
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Ready To Fight Fires");
+      sendPacket(p1);
    }
 
 }
