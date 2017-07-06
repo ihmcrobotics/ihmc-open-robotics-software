@@ -81,7 +81,6 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
             ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
-            double xOffset = 0.1;
 
             referenceFrames.updateFrames();
             {
@@ -148,7 +147,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          {
             double[] joints = new double[]{-0.16142948917535702, -0.3569195815223205, 2.792275523125268, -1.026521125798761, -0.4724882991792226, -1.5848189434466957, -0.7292067346614854};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
-            leftArmBehavior.setInput(armTrajectoryMessage);
+            rightArmBehavior.setInput(armTrajectoryMessage);
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
@@ -170,7 +169,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          {
             double[] joints = new double[]{0.44195289340641664, 0.023372912207270436, 2.7755155866532912, -1.7857822888113926, 0.38678248792688286, -1.4980698118674458, -0.5046966801690266};
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
-            leftArmBehavior.setInput(armTrajectoryMessage);
+            rightArmBehavior.setInput(armTrajectoryMessage);
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
