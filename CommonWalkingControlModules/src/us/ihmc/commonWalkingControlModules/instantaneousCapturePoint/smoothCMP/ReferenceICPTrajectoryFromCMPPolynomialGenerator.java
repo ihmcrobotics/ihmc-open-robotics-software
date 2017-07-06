@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -8,6 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointMatrixTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -34,6 +36,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
 
    private final static int defaultSize = 1000;
 
+   private final List<FramePoint> icpDesiredInitialPositionsNEW = new ArrayList<>();
+   private final List<FramePoint> icpDesiredFinalPositionsNEW = new ArrayList<>();
+   
    private final List<FramePoint> icpDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint> icpDesiredFinalPositions = new ArrayList<>();
    private final List<FramePoint> cmpDesiredFinalPositions = new ArrayList<>();
@@ -122,6 +127,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
+         icpDesiredInitialPositionsNEW.add(new FramePoint());
+         icpDesiredFinalPositionsNEW.add(new FramePoint());
+         
          icpDesiredInitialPositions.add(new FramePoint());
          icpDesiredFinalPositions.add(new FramePoint());
          cmpDesiredFinalPositions.add(new FramePoint());
@@ -235,7 +243,11 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       if (!isStanding.getBooleanValue())
       {
-         calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar();
+         CapturePointMatrixTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+         getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
+//         PrintTools.debug("ICP intial: " + icpDesiredInitialPositions.toString());
+//         PrintTools.debug("ICP final: " + icpDesiredFinalPositions.toString());
+//         calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar();
       }
    }
 
@@ -247,17 +259,48 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          initialize();
          
          timeInCurrentSegment = time; //TODO: use relative NOT absolute time
+         
+         YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(FIRST_SEGMENT);
 
-         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpPositionDesiredCurrent, POSITION, timeCurrentPhase.getDoubleValue());
-         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpVelocityDesiredCurrent, VELOCITY, timeCurrentPhase.getDoubleValue());
-         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpAccelerationDesiredCurrent, ACCELERATION, timeCurrentPhase.getDoubleValue());
+         CapturePointMatrixTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                    icpPositionDesiredCurrent);
+         CapturePointMatrixTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                    icpVelocityDesiredCurrent);
+         CapturePointMatrixTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                    icpAccelerationDesiredCurrent);
+         
+//         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpPositionDesiredCurrent, POSITION, timeCurrentPhase.getDoubleValue());
+//         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpVelocityDesiredCurrent, VELOCITY, timeCurrentPhase.getDoubleValue());
+//         calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(icpAccelerationDesiredCurrent, ACCELERATION, timeCurrentPhase.getDoubleValue());
+         
+         
+//         PrintTools.debug("");
+//         PrintTools.debug("ICP init original: " + icpDesiredInitialPositions.toString());
+//         PrintTools.debug("ICP final original: " + icpDesiredFinalPositions.toString());
+//         
+//         List<FramePoint> icpInitShortened = new ArrayList<FramePoint>();
+//         List<FramePoint> icpFinalShortened = new ArrayList<FramePoint>();
+//         for(int i = 0; i < 15; i++)
+//         {
+//            icpInitShortened.add(i, icpDesiredInitialPositions.get(i));
+//            icpFinalShortened.add(i, icpDesiredFinalPositions.get(i));
+//         }
+//         
+//         Collections.reverse(icpInitShortened);
+//         Collections.reverse(icpFinalShortened);
+//         PrintTools.debug("ICP init old: " + icpInitShortened.toString());
+//         PrintTools.debug("ICP init new: " + icpDesiredInitialPositionsNEW.subList(0, 40).toString());
+//         PrintTools.debug("ICP final old: " + icpFinalShortened.toString());
+//         PrintTools.debug("ICP final new: " + icpDesiredFinalPositionsNEW.subList(0, 40).toString());
          
          timeCurrentPhase.set(timeCurrentPhase.getDoubleValue() + 0.006);
-//         if(timecurrentphase.getdoublevalue() > 0.8)
-//         {
-//            timecurrentphase.set(0.8);
-//         }
       }
+   }
+   
+   public void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
+   {
+      icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment)); // for new boundary value calculation (wrong)
+//      icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(cmpTrajectories.size()-1-segment)); // for existing boundary value calculation
    }
 
    public void getDesiredICP(YoFramePoint desiredICPToPack) //TODO: not sure whether this one is needed
@@ -315,280 +358,280 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       return false;
    }
 
-   // SCALAR FORMULATION
-   /**
-    * Compute the i-th derivative of the reference ICP at the current time: &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
-    * @param icpQuantityDesiredOutput
-    * @param icpDerivativeOrder
-    * @param time
-    */
-   private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
-   {
-      for(Direction dir : Direction.values())
-      {
-         YoTrajectory cmpPolynomial = cmpTrajectories.get(FIRST_SEGMENT).getYoTrajectory(dir.ordinal());
-         double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, dir.ordinal());
-         
-         icpQuantityDesiredCurrent[dir.ordinal()] = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(icpDerivativeOrder, cmpPolynomial, icpPositionDesiredFinal, time);
-      }
-      icpQuantityDesiredOutput.setIncludingFrame(trajectoryFrame, icpQuantityDesiredCurrent);
-   }
-
-   /**
-    * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
-    */
-   private void calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar()
-   {
-      setICPTerminalConditionScalar();
-      
-//      PrintTools.debug("Number of segments = " + totalNumberOfSegments.getIntegerValue());
-      
-      for(int i = totalNumberOfSegments.getIntegerValue() - 1; i >= 0; i--)
-      {
-         for(Direction dir : Direction.values())
-         {
-            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(dir.ordinal());
-            double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
-            double time = cmpPolynomial.getInitialTime();
-                        
-            double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinal, time);
-            icpPositionDesiredInitialMatrix.set(i, dir.ordinal(), icpPositionDesiredInitial);
-            
-            if(i > 0)
-            {
-               icpPositionDesiredFinalMatrix.set(i-1, dir.ordinal(), icpPositionDesiredInitial);
-            }
-         }
-         
-         if(i == totalNumberOfSegments.getIntegerValue() - 1)
-         {
-            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
-            timeICPFinalSegmentInitial.set(cmpPolynomial.getInitialTime());
-            timeICPFinalSegmentFinal.set(cmpPolynomial.getFinalTime());
-//            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
-         }
-         if(i == totalNumberOfSegments.getIntegerValue() - 2)
-         {
-            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
-            timeICPPenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
-            timeICPPenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
-//            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
-         }
-         if(i == totalNumberOfSegments.getIntegerValue() - 3)
-         {
-            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
-            timeICPAntepenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
-            timeICPAntepenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
-//            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
-         }
-         
-         icpPositionDesiredInitialBackwardIteration.set(icpPositionDesiredInitialMatrix.get(i, Direction.X.ordinal()), 
-                                                        icpPositionDesiredInitialMatrix.get(i, Direction.Y.ordinal()), 
-                                                        icpPositionDesiredInitialMatrix.get(i, Direction.Z.ordinal()));
-         FramePoint icpPositionDesiredInitialBWI = icpDesiredInitialPositions.get(totalNumberOfSegments.getIntegerValue() - 1 - i);
-         icpPositionDesiredInitialBWI.set(icpPositionDesiredInitialBackwardIteration.getX(), icpPositionDesiredInitialBackwardIteration.getY(), icpPositionDesiredInitialBackwardIteration.getZ());
-         
-         icpPositionDesiredFinalBackwardIteration.set(icpPositionDesiredFinalMatrix.get(i, Direction.X.ordinal()), 
-                                                      icpPositionDesiredFinalMatrix.get(i, Direction.Y.ordinal()), 
-                                                      icpPositionDesiredFinalMatrix.get(i, Direction.Z.ordinal()));
-         FramePoint icpPositionDesiredFinalBWI = icpDesiredFinalPositions.get(totalNumberOfSegments.getIntegerValue() - 1 - i);
-         icpPositionDesiredFinalBWI.set(icpPositionDesiredFinalBackwardIteration.getX(), icpPositionDesiredFinalBackwardIteration.getY(), icpPositionDesiredFinalBackwardIteration.getZ());
-      }
-
-      icpPositionDesiredFinalFirstSegment.set(icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.X.ordinal()), 
-                                              icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Y.ordinal()), 
-                                              icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Z.ordinal()));
-   }
+//   // SCALAR FORMULATION
+//   /**
+//    * Compute the i-th derivative of the reference ICP at the current time: &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
+//    * @param icpQuantityDesiredOutput
+//    * @param icpDerivativeOrder
+//    * @param time
+//    */
+//   private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
+//   {            
+//      for(Direction dir : Direction.values())
+//      {
+//         YoTrajectory cmpPolynomial = cmpTrajectories.get(FIRST_SEGMENT).getYoTrajectory(dir.ordinal());
+//         double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, dir.ordinal());
+//         
+//         icpQuantityDesiredCurrent[dir.ordinal()] = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(icpDerivativeOrder, cmpPolynomial, icpPositionDesiredFinal, time);
+//      }
+//      icpQuantityDesiredOutput.setIncludingFrame(trajectoryFrame, icpQuantityDesiredCurrent);
+//   }
+//   
+//   /**
+//    * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
+//    */
+//   private void calculateICPDesiredBoundaryValuesRecursivelyFromCMPPolynomialScalar()
+//   {       
+//      setICPTerminalConditionScalar();
+//      
+////      PrintTools.debug("Number of segments = " + totalNumberOfSegments.getIntegerValue());
+//      
+//      for(int i = totalNumberOfSegments.getIntegerValue() - 1; i >= 0; i--)
+//      {
+//         for(Direction dir : Direction.values())
+//         {
+//            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(dir.ordinal());
+//            double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
+//            double time = cmpPolynomial.getInitialTime();
+//                        
+//            double icpPositionDesiredInitial = calculateICPQuantityFromCorrespondingCMPPolynomialScalar(POSITION, cmpPolynomial, icpPositionDesiredFinal, time);
+//            icpPositionDesiredInitialMatrix.set(i, dir.ordinal(), icpPositionDesiredInitial);
+//            
+//            if(i > 0)
+//            {
+//               icpPositionDesiredFinalMatrix.set(i-1, dir.ordinal(), icpPositionDesiredInitial);
+//            }
+//         }
+//         
+//         if(i == totalNumberOfSegments.getIntegerValue() - 1)
+//         {
+//            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+//            timeICPFinalSegmentInitial.set(cmpPolynomial.getInitialTime());
+//            timeICPFinalSegmentFinal.set(cmpPolynomial.getFinalTime());
+////            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
+//         }
+//         if(i == totalNumberOfSegments.getIntegerValue() - 2)
+//         {
+//            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+//            timeICPPenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
+//            timeICPPenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
+////            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
+//         }
+//         if(i == totalNumberOfSegments.getIntegerValue() - 3)
+//         {
+//            YoTrajectory cmpPolynomial = cmpTrajectories.get(i).getYoTrajectory(0);
+//            timeICPAntepenultimateSegmentInitial.set(cmpPolynomial.getInitialTime());
+//            timeICPAntepenultimateSegmentFinal.set(cmpPolynomial.getFinalTime());
+////            PrintTools.debug("Time (intial, final) = " + "(" + cmpPolynomial.getXInitial() + ", " + cmpPolynomial.getXFinal() + ")");
+//         }
+//         
+//         icpPositionDesiredInitialBackwardIteration.set(icpPositionDesiredInitialMatrix.get(i, Direction.X.ordinal()), 
+//                                                        icpPositionDesiredInitialMatrix.get(i, Direction.Y.ordinal()), 
+//                                                        icpPositionDesiredInitialMatrix.get(i, Direction.Z.ordinal()));
+//         FramePoint icpPositionDesiredInitialBWI = icpDesiredInitialPositions.get(totalNumberOfSegments.getIntegerValue() - 1 - i);
+//         icpPositionDesiredInitialBWI.set(icpPositionDesiredInitialBackwardIteration.getX(), icpPositionDesiredInitialBackwardIteration.getY(), icpPositionDesiredInitialBackwardIteration.getZ());
+//         
+//         icpPositionDesiredFinalBackwardIteration.set(icpPositionDesiredFinalMatrix.get(i, Direction.X.ordinal()), 
+//                                                      icpPositionDesiredFinalMatrix.get(i, Direction.Y.ordinal()), 
+//                                                      icpPositionDesiredFinalMatrix.get(i, Direction.Z.ordinal()));
+//         FramePoint icpPositionDesiredFinalBWI = icpDesiredFinalPositions.get(totalNumberOfSegments.getIntegerValue() - 1 - i);
+//         icpPositionDesiredFinalBWI.set(icpPositionDesiredFinalBackwardIteration.getX(), icpPositionDesiredFinalBackwardIteration.getY(), icpPositionDesiredFinalBackwardIteration.getZ());
+//      }
+//
+//      icpPositionDesiredFinalFirstSegment.set(icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.X.ordinal()), 
+//                                              icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Y.ordinal()), 
+//                                              icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, Direction.Z.ordinal()));
+//   }
+//   
+//   /**
+//    * Setting the terminal DCM equal to corresponding CMP to initialize the DCM backward iteration
+//    * <P>
+//    * &xi;<sub>ref,T,n<sub>&phi;</sub></sub> = &nu;<sub>ref,T,n<sub>&phi;</sub></sub>
+//    * 
+//    */
+//   private void setICPTerminalConditionScalar()
+//   {
+//      for(int i = 0; i < Direction.size; i++)
+//      {
+//         YoTrajectory cmpPolynomialFinalSegment = cmpTrajectories.get(totalNumberOfSegments.getIntegerValue() - 1).getYoTrajectory(i);
+//         cmpPolynomialFinalSegment.compute(cmpPolynomialFinalSegment.getFinalTime());
+//         icpPositionDesiredFinalMatrix.set(totalNumberOfSegments.getIntegerValue() - 1, i, cmpPolynomialFinalSegment.getPosition());
+//      }
+//      icpPositionDesiredTerminal.set(icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 0),
+//                                     icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 1),
+//                                     icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 2));
+////      PrintTools.debug("Final ICP = (" + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 0) + ", "
+////                                       + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 1) + ", "
+////                                       + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 2) 
+////                                       + ")");
+//   }
+//   
+//   /**
+//    * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
+//    * <br>
+//    * The approach for calculating DCMs is based on CMP polynomials instead of discrete waypoints
+//    * 
+//    * @param icpDerivativeOrder
+//    * @param cmpPolynomial
+//    * @param icpPositionDesiredFinal
+//    * @param time
+//    * @return
+//    */
+//   private double calculateICPQuantityFromCorrespondingCMPPolynomialScalar(int icpDerivativeOrder, YoTrajectory cmpPolynomial, double icpPositionDesiredFinal, double time)
+//   {  
+//      timeICPSegmentCurrent.set(time);
+//      
+//      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
+//
+//      double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
+//      polynomialCoefficientVector.reshape(numberOfCoefficients, 1);
+//      polynomialCoefficientVector.setData(polynomialCoefficients);
+//      
+//      generalizedAlphaPrimeMatrix.reshape(1, numberOfCoefficients);
+//      generalizedBetaPrimeMatrix.reshape(1, numberOfCoefficients);
+//      generalizedAlphaBetaPrimeMatrix.reshape(1, numberOfCoefficients);
+//      generalizedGammaPrimeMatrix.reshape(1, 1);
+//
+//      generalizedAlphaPrimeMatrix.zero();
+//      generalizedBetaPrimeMatrix.zero();
+//      generalizedAlphaBetaPrimeMatrix.zero();
+//      generalizedGammaPrimeMatrix.zero();
+//
+//      calculateGeneralizedAlphaPrimeOnCMPSegment(generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
+//      calculateGeneralizedBetaPrimeOnCMPSegment(generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
+//      calculateGeneralizedGammaPrimeOnCMPSegment(generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
+//      CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
+//      
+////      PrintTools.debug("A: " +generalizedAlphaPrimeMatrix.toString());
+////      PrintTools.debug("B: " +generalizedBetaPrimeMatrix.toString());
+////      PrintTools.debug("C: " +generalizedGammaPrimeMatrix.toString());
+////      PrintTools.debug("AB: " + generalizedAlphaBetaPrimeMatrix.toString());
+////      PrintTools.debug("P: " + polynomialCoefficientVector.toString());
+////      PrintTools.debug("ICP: " + icpPositionDesiredFinal);
+////      PrintTools.debug("");
+//      
+//      return calculateICPQuantityScalar(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal);
+//   }
+//   
+//   /**
+//    * Compute the i-th derivative of &xi;<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
+//    * <P>
+//    * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
+//    * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
+//    *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
+//    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+//    * 
+//    * @param generalizedAlphaBetaPrimeMatrix
+//    * @param generalizedGammaPrimeMatrix
+//    * @param polynomialCoefficientVector
+//    * @param icpPositionDesiredFinal
+//    * @return
+//    */
+//   private double calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
+//                                             DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
+//   {
+//      //fixme yeah this is wrong, TODO: why?
+//      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
+//      M1.zero();
+//
+//      CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
+//
+//      M2.set(generalizedGammaPrimeMatrix);
+//      CommonOps.scale(icpPositionDesiredFinal, M2);
+//      
+//      CommonOps.addEquals(M1, M2);
+//      
+//      return M1.get(0, 0);
+//   }
+//   
+//   /**
+//    * Compute the i-th derivative of &alpha;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+//    * <P>
+//    * &alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
+//    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
+//    * 
+//    * @param generalizedAlphaPrime
+//    * @param alphaDerivativeOrder
+//    * @param cmpPolynomial
+//    * @param time
+//    */
+//   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
+//   {
+//      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
+//      
+//      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
+//      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
+//
+//      for(int i = 0; i < numberOfCoefficients; i++)
+//      {
+//         tPowersDerivativeVector.zero();
+//         tPowersDerivativeVectorTranspose.zero();
+//         
+//         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
+//         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+//                  
+//         double scalar = Math.pow(omega0.getDoubleValue(), -i);
+//         CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
+//         
+////         PrintTools.debug("A = " + generalizedAlphaPrime .toString());
+//      }
+//   }
+//   
+//   /**
+//    * Compute the i-th derivative of &beta;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+//    * <P>
+//    * &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-(j-i)</sup> *
+//    * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
+//    * 
+//    * @param generalizedBetaPrime
+//    * @param betaDerivativeOrder
+//    * @param cmpPolynomial
+//    * @param time
+//    */
+//   private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
+//   {            
+//      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
+//      double timeSegmentTotal = cmpPolynomial.getFinalTime();
+//      
+//      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
+//      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
+//
+//      for(int i = 0; i < numberOfCoefficients; i++)
+//      {
+//         tPowersDerivativeVector.zero();
+//         tPowersDerivativeVectorTranspose.zero();
+//
+//         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
+//         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+//                  
+//         double scalar = Math.pow(omega0.getDoubleValue(), betaDerivativeOrder-i) * Math.exp(omega0.getDoubleValue()*(time-timeSegmentTotal));
+//         CommonOps.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVectorTranspose);
+//         
+////         PrintTools.debug("B = " + generalizedBetaPrime.toString());
+//      }
+//   }
+//
+//   /**
+//    * Compute the i-th derivative of &gamma;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+//    * <P>
+//    * &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
+//    * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
+//    * 
+//    * @param generalizedGammaPrime
+//    * @param gammaDerivativeOrder
+//    * @param cmpPolynomial
+//    * @param time
+//    */
+//   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
+//   {      
+//      double timeSegmentTotal = cmpPolynomial.getFinalTime();
+//      double ddGamaPrimeValue = Math.pow(omega0.getDoubleValue(), gammaDerivativeOrder)*Math.exp(omega0.getDoubleValue() * (time - timeSegmentTotal));
+//      generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
+//      
+////      PrintTools.debug("C = " + generalizedGammaPrime.toString());
+//   } 
    
-   /**
-    * Setting the terminal DCM equal to corresponding CMP to initialize the DCM backward iteration
-    * <P>
-    * &xi;<sub>ref,T,n<sub>&phi;</sub></sub> = &nu;<sub>ref,T,n<sub>&phi;</sub></sub>
-    * 
-    */
-   private void setICPTerminalConditionScalar()
-   {
-      for(int i = 0; i < Direction.size; i++)
-      {
-         YoTrajectory cmpPolynomialFinalSegment = cmpTrajectories.get(totalNumberOfSegments.getIntegerValue() - 1).getYoTrajectory(i);
-         cmpPolynomialFinalSegment.compute(cmpPolynomialFinalSegment.getFinalTime());
-         icpPositionDesiredFinalMatrix.set(totalNumberOfSegments.getIntegerValue() - 1, i, cmpPolynomialFinalSegment.getPosition());
-      }
-      icpPositionDesiredTerminal.set(icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 0),
-                                     icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 1),
-                                     icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 2));
-//      PrintTools.debug("Final ICP = (" + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 0) + ", "
-//                                       + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 1) + ", "
-//                                       + icpPositionDesiredFinalMatrix.get(totalNumberOfSegments.getIntegerValue() - 1, 2) 
-//                                       + ")");
-   }
-   
-   /**
-    * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
-    * <br>
-    * The approach for calculating DCMs is based on CMP polynomials instead of discrete waypoints
-    * 
-    * @param icpDerivativeOrder
-    * @param cmpPolynomial
-    * @param icpPositionDesiredFinal
-    * @param time
-    * @return
-    */
-   private double calculateICPQuantityFromCorrespondingCMPPolynomialScalar(int icpDerivativeOrder, YoTrajectory cmpPolynomial, double icpPositionDesiredFinal, double time)
-   {  
-      timeICPSegmentCurrent.set(time);
-      
-      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
 
-      double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
-      polynomialCoefficientVector.reshape(numberOfCoefficients, 1);
-      polynomialCoefficientVector.setData(polynomialCoefficients);
-      
-      generalizedAlphaPrimeMatrix.reshape(1, numberOfCoefficients);
-      generalizedBetaPrimeMatrix.reshape(1, numberOfCoefficients);
-      generalizedAlphaBetaPrimeMatrix.reshape(1, numberOfCoefficients);
-      generalizedGammaPrimeMatrix.reshape(1, 1);
-
-      generalizedAlphaPrimeMatrix.zero();
-      generalizedBetaPrimeMatrix.zero();
-      generalizedAlphaBetaPrimeMatrix.zero();
-      generalizedGammaPrimeMatrix.zero();
-
-      calculateGeneralizedAlphaPrimeOnCMPSegment(generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-      calculateGeneralizedBetaPrimeOnCMPSegment(generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-      calculateGeneralizedGammaPrimeOnCMPSegment(generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial, time);
-      CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
-      
-//      PrintTools.debug("A: " +generalizedAlphaPrimeMatrix.toString());
-//      PrintTools.debug("B: " +generalizedBetaPrimeMatrix.toString());
-//      PrintTools.debug("C: " +generalizedGammaPrimeMatrix.toString());
-//      PrintTools.debug("AB: " + generalizedAlphaBetaPrimeMatrix.toString());
-//      PrintTools.debug("P: " + polynomialCoefficientVector.toString());
-//      PrintTools.debug("ICP: " + icpPositionDesiredFinal);
-//      PrintTools.debug("");
-      
-      return calculateICPQuantityScalar(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal);
-   }
-   
-   /**
-    * Compute the i-th derivative of &xi;<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
-    * <P>
-    * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
-    * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
-    *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
-    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
-    * 
-    * @param generalizedAlphaBetaPrimeMatrix
-    * @param generalizedGammaPrimeMatrix
-    * @param polynomialCoefficientVector
-    * @param icpPositionDesiredFinal
-    * @return
-    */
-   private double calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
-                                             DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
-   {
-      //fixme yeah this is wrong, TODO: why?
-      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
-      M1.zero();
-
-      CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
-
-      M2.set(generalizedGammaPrimeMatrix);
-      CommonOps.scale(icpPositionDesiredFinal, M2);
-      
-      CommonOps.addEquals(M1, M2);
-      
-      return M1.get(0, 0);
-   }
-
-   /**
-    * Compute the i-th derivative of &alpha;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
-    * <P>
-    * &alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
-    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
-    * 
-    * @param generalizedAlphaPrime
-    * @param alphaDerivativeOrder
-    * @param cmpPolynomial
-    * @param time
-    */
-   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
-   {
-      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
-      
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-
-      for(int i = 0; i < numberOfCoefficients; i++)
-      {
-         tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-         
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
-         double scalar = Math.pow(omega0.getDoubleValue(), -i);
-         CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
-         
-//         PrintTools.debug("A = " + generalizedAlphaPrime .toString());
-      }
-   }
-   
-   /**
-    * Compute the i-th derivative of &beta;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
-    * <P>
-    * &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-(j-i)</sup> *
-    * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
-    * 
-    * @param generalizedBetaPrime
-    * @param betaDerivativeOrder
-    * @param cmpPolynomial
-    * @param time
-    */
-   private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
-   {            
-      int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
-      double timeSegmentTotal = cmpPolynomial.getFinalTime();
-      
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-
-      for(int i = 0; i < numberOfCoefficients; i++)
-      {
-         tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
-         double scalar = Math.pow(omega0.getDoubleValue(), betaDerivativeOrder-i) * Math.exp(omega0.getDoubleValue()*(time-timeSegmentTotal));
-         CommonOps.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVectorTranspose);
-         
-//         PrintTools.debug("B = " + generalizedBetaPrime.toString());
-      }
-   }
-
-   /**
-    * Compute the i-th derivative of &gamma;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
-    * <P>
-    * &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
-    * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
-    * 
-    * @param generalizedGammaPrime
-    * @param gammaDerivativeOrder
-    * @param cmpPolynomial
-    * @param time
-    */
-   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoTrajectory cmpPolynomial, double time)
-   {      
-      double timeSegmentTotal = cmpPolynomial.getFinalTime();
-      double ddGamaPrimeValue = Math.pow(omega0.getDoubleValue(), gammaDerivativeOrder)*Math.exp(omega0.getDoubleValue() * (time - timeSegmentTotal));
-      generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
-      
-//      PrintTools.debug("C = " + generalizedGammaPrime.toString());
-   } 
-
-   
    public List<FramePoint> getICPPositionDesiredInitialList()
    {
 //      PrintTools.debug("Size = " + icpDesiredInitialPositions.size());
@@ -630,48 +673,48 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    }
       
 
-   // MATRIX FORMULATION
-   // ICP = (M1)^(-1) * M2 * P = M3 * P
-   private void calculateICPFromCorrespondingCMPPolynomialMatrix(DenseMatrix64F icpVector, DenseMatrix64F identityMatrix, DenseMatrix64F gammaPrimeMatrix, DenseMatrix64F backwardIterationMatrix,
-                                                                 DenseMatrix64F alphaBetaPrimeMatrix, DenseMatrix64F terminalConstraintMatrix, DenseMatrix64F tPowersVector, DenseMatrix64F polynomialCoefficientVector)
-   {
-      M1.reshape(identityMatrix.getNumRows(), identityMatrix.getNumCols());
-      M1.zero();
+//   // MATRIX FORMULATION
+//   // ICP = (M1)^(-1) * M2 * P = M3 * P
+//   private void calculateICPFromCorrespondingCMPPolynomialMatrix(DenseMatrix64F icpVector, DenseMatrix64F identityMatrix, DenseMatrix64F gammaPrimeMatrix, DenseMatrix64F backwardIterationMatrix,
+//                                                                 DenseMatrix64F alphaBetaPrimeMatrix, DenseMatrix64F terminalConstraintMatrix, DenseMatrix64F tPowersVector, DenseMatrix64F polynomialCoefficientVector)
+//   {
+//      M1.reshape(identityMatrix.getNumRows(), identityMatrix.getNumCols());
+//      M1.zero();
+//      
+//      M2.reshape(alphaBetaPrimeMatrix.getNumRows(), alphaBetaPrimeMatrix.getNumCols());
+//      M2.zero();
+//      
+//      M3.reshape(identityMatrix.getNumRows(), alphaBetaPrimeMatrix.getNumCols());
+//      M3.zero();
+//      
+//      CommonOps.mult(gammaPrimeMatrix, backwardIterationMatrix, M1);
+//      CommonOps.subtract(identityMatrix, M1, M1);
+//      
+//      CommonOps.mult(terminalConstraintMatrix, tPowersVector, M2);
+//      CommonOps.mult(gammaPrimeMatrix, M2, M2);
+//      CommonOps.addEquals(M2, alphaBetaPrimeMatrix);
+//      
+//      CommonOps.invert(M1, M3);
+//      CommonOps.mult(M3, M2, M3);
+//      
+//      CommonOps.mult(M3, polynomialCoefficientVector, icpVector);
+//   }
+//   
+//   private void calculateAlphaPrimeMatrixOnSegment(DenseMatrix64F alphaPrimeMatrix, int segment, double time)
+//   {
+//      
+//   }
+//   
+//   private void calculateBetaPrimeMatrixOnSegment(DenseMatrix64F betaPrimeMatrix, int segment, double time)
+//   {
+//      
+//   }
+//   
+//   private void calculateGammaPrimeMatrixOnSegment(DenseMatrix64F gammaPrimeMatrix, int segment, double time)
+//   {
+//      
+//   }
 
-      M2.reshape(alphaBetaPrimeMatrix.getNumRows(), alphaBetaPrimeMatrix.getNumCols());
-      M2.zero();
-      
-      M3.reshape(identityMatrix.getNumRows(), alphaBetaPrimeMatrix.getNumCols());
-      M3.zero();
-      
-      CommonOps.mult(gammaPrimeMatrix, backwardIterationMatrix, M1);
-      CommonOps.subtract(identityMatrix, M1, M1);
-      
-      CommonOps.mult(terminalConstraintMatrix, tPowersVector, M2);
-      CommonOps.mult(gammaPrimeMatrix, M2, M2);
-      CommonOps.addEquals(M2, alphaBetaPrimeMatrix);
-      
-      CommonOps.invert(M1, M3);
-      CommonOps.mult(M3, M2, M3);
-      
-      CommonOps.mult(M3, polynomialCoefficientVector, icpVector);
-   }
-   
-   private void calculateAlphaPrimeMatrixOnSegment(DenseMatrix64F alphaPrimeMatrix, int segment, double time)
-   {
-      
-   }
-   
-   private void calculateBetaPrimeMatrixOnSegment(DenseMatrix64F betaPrimeMatrix, int segment, double time)
-   {
-      
-   }
-   
-   private void calculateGammaPrimeMatrixOnSegment(DenseMatrix64F gammaPrimeMatrix, int segment, double time)
-   {
-      
-   }
-   
    
 
    // TODO: FIRST IMPLEMENTATION --> check whether still usable

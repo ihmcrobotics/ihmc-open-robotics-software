@@ -640,6 +640,9 @@ public class CapturePointTools
    }
    
    //TODO: implement validity checks
+   /**
+    * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
+    */
    public static void computeDesiredCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                  List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
@@ -657,7 +660,7 @@ public class CapturePointTools
          
          exitCornerPoint.set(nextEntryCornerPoint);
          
-         computeDesiredCapturePointPosition(omega0, 0.0, exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
+         computeDesiredCapturePointPosition(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
 
          nextEntryCornerPoint = entryCornerPoint;
       }
