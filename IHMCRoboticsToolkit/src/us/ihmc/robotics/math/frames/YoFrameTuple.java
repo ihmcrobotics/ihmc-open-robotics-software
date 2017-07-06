@@ -646,12 +646,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> implements Ref
       return this.frameTuple.epsilonEquals(frameTuple, threshold);
    }
 
-   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
-   {
-      putYoValuesIntoFrameTuple();
-      return this.frameTuple.epsilonEquals(frameTuple2d, threshold);
-   }
-
    public final void checkForNaN()
    {
       putYoValuesIntoFrameTuple();
