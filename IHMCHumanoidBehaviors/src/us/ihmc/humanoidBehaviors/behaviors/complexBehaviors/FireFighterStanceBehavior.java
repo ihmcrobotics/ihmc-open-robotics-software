@@ -106,6 +106,37 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             currentState = BasicStates.SET_STANCE;
          }
       };
+      BehaviorAction setStanceTask2 = new BehaviorAction(footListBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+
+            ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
+
+            referenceFrames.updateFrames();
+            {
+               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
+               desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.LEFT), RobotSide.LEFT, desiredFootPose);
+               desiredFootsteps.add(desiredFootStep);
+            }
+            {
+               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.4, -.4, 0, Math.toRadians(-45), 0, 0));
+               desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT), RobotSide.RIGHT, desiredFootPose);
+               desiredFootsteps.add(desiredFootStep);
+            }
+
+            PrintTools.debug(this, "Initializing Behavior");
+            footListBehavior.initialize();
+            footListBehavior.set(desiredFootsteps);
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Stance");
+            sendPacket(p1);
+            currentState = BasicStates.SET_STANCE;
+         }
+      };
 
       BehaviorAction movePelvisTask = new BehaviorAction(movePelvisBehavior)
       {
@@ -186,7 +217,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             double[] joints = new double[] {0.785398, -1.5708, 3.14159, 1.7671424999999998, 1.6892682660534968, -1.6755335374002835, -2.8798335374002835};
-            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, joints);
+            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 3, joints);
             leftArmBehavior.setInput(armTrajectoryMessage);
             TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Left Arm To Final Location");
             sendPacket(p1);
@@ -200,7 +231,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          {
             double[] joints = new double[] {0.44195289340641664, 0.023372912207270436, 2.7755155866532912, -1.7857822888113926, 0.38678248792688286,
                   -1.4980698118674458, -0.5046966801690266};
-            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
+            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, joints);
             rightArmBehavior.setInput(armTrajectoryMessage);
             TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Right Arm To Final Location");
             sendPacket(p1);
@@ -209,13 +240,17 @@ public class FireFighterStanceBehavior extends AbstractBehavior
       };
 
       pipeLine.requestNewStage();
-      pipeLine.submitSingleTaskStage(setStanceTask);
-      pipeLine.requestNewStage();
-      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,movePelvisTask);
-//      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveChestTask);
-      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveRightPreTask);
+      //pipeLine.submitSingleTaskStage(setStanceTask);
+      pipeLine.submitSingleTaskStage(setStanceTask2);
 
-      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveLeftPreTask);
+      pipeLine.requestNewStage();
+      pipeLine.submitSingleTaskStage(movePelvisTask);
+//      pipeLine.submitTaskForPallelPipesStage(movePelvisBehavior,moveChestTask);
+      pipeLine.requestNewStage();
+
+      pipeLine.submitTaskForPallelPipesStage(rightArmBehavior,moveRightPreTask);
+
+      pipeLine.submitTaskForPallelPipesStage(rightArmBehavior,moveLeftPreTask);
 
       pipeLine.requestNewStage();
       pipeLine.submitTaskForPallelPipesStage(leftArmBehavior,moveLeftFinalTask);
