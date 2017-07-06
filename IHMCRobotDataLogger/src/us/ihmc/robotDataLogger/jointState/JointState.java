@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
+import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 import java.util.List;
 
@@ -27,8 +28,10 @@ public abstract class JointState
    {
       return type;
    }
-   
+
    public abstract void update(LongBuffer buffer);
+   
+   public abstract void update(DoubleBuffer buffer);
 
    public abstract void get(double[] array);
    
