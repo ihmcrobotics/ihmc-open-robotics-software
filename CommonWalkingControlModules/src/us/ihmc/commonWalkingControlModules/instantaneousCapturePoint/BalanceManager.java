@@ -679,7 +679,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   private void setFinalTransferTime(double finalTransferTime)
+   public void setFinalTransferTime(double finalTransferTime)
    {
       icpPlanner.setFinalTransferDuration(finalTransferTime);
       linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);
