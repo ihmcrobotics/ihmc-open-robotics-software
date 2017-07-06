@@ -67,14 +67,21 @@ public class XboxHandControls extends JPanel implements JoystickEventListener
    @Override
    public void processEvent(Event event)
    {
+      System.out.println(event.getComponent().toString());
       if (event.getValue() == 1)
       {
          switch (event.getComponent().toString())
          {
          case ("A"):
+            handCommand = new HandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.OPEN);
+            break;
+         case ("B"): 
+            handCommand = new HandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE);
+            break;
+         case ("X"):
             handCommand = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.OPEN);
             break;
-         case ("B"):
+         case ("Y"):
             handCommand = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
             break;
          }
