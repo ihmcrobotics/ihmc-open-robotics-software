@@ -15,8 +15,8 @@ import java.nio.channels.MembershipKey;
 import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.robotDataLogger.util.LogUtils;
 
 public class UDPAcsellStateReader
 {
