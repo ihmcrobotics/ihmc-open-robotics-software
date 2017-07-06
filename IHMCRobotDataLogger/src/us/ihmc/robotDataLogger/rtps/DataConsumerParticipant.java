@@ -42,6 +42,7 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This class implements all communication for a data consumer inside a DDS logging network
@@ -430,11 +431,11 @@ public class DataConsumerParticipant
    }
    
    
-   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener) throws IOException
+   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener, YoVariableRegistry loggerMainRegistry) throws IOException
    {
       CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
       SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
-      domain.createSubscriber(participant, attributes, new RegistryConsumer(parser, listener));
+      domain.createSubscriber(participant, attributes, new RegistryConsumer(parser, listener,loggerMainRegistry));
 
    }
    
