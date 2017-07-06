@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -18,7 +19,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingFiducialBoxRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -450,9 +450,9 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       // location2.setTranslation(new Vector3d(0, 0, -2));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, width1, width1, 1), texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, width1, width1, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location2, width2, width2, 1), texture);
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3D(location2, width2, width2, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox2);
    }
 
@@ -1483,7 +1483,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1496,7 +1496,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1509,7 +1509,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1570,7 +1570,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
-            new Box3d(location, cinderBlockLength + overlapToPreventGaps, cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps),
+            new Box3D(location, cinderBlockLength + overlapToPreventGaps, cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps),
             app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
@@ -1586,7 +1586,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.multiply(tilt);
 
       location.setTranslation(new Vector3D(xCenter, yCenter, zCenter));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1618,7 +1618,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
       location.setTranslation(new Vector3D(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
-            new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+            new Box3D(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1661,7 +1661,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(
-            new Box3d(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
+            new Box3D(location, cinderBlockLength, cinderBlockWidth, cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1686,7 +1686,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
       blockSupportLocation.setTranslation(
             new Vector3D(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
             cinderBlockAppearance);
       combinedTerrainObject.addTerrainObject(newBox);
 
@@ -1707,9 +1707,9 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3D(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, 45, 45, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3D(location, 200, 200, 0.75), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;
@@ -1726,7 +1726,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
       location.setTranslation(position);
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
       fiducualTerrainObject.addTerrainObject(newBox);
       return fiducualTerrainObject;
    }
@@ -1742,7 +1742,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
       location.setTranslation(position);
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), valveTexture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, boxSideLength, boxSideLength, boxSideLength), valveTexture);
       valveTerrainObject.addTerrainObject(newBox);
       return valveTerrainObject;
    }

@@ -9,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
 import us.ihmc.jMonkeyEngineToolkit.utils.CoordinateFrameNode;
 import us.ihmc.jMonkeyEngineToolkit.utils.FlatHeightMap;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMERendererTest
@@ -74,7 +74,7 @@ public class JMERendererTest
       
       world.startWithGui();
 
-      final Graphics3DNode sphereNode = new Graphics3DNode("SphereNode", new Graphics3DObject(new Sphere3d(1.0), YoAppearance.Green()));
+      final Graphics3DNode sphereNode = new Graphics3DNode("SphereNode", new Graphics3DObject(new Sphere3D(1.0), YoAppearance.Green()));
       world.addChild(sphereNode);
 
       world.addChild(new CoordinateFrameNode());

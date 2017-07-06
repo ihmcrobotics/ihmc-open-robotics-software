@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabili
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -403,9 +403,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * 
     * @return map containing home pose in base frame by body name
     */
-   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
-      return new HashMap<String, Pose>();
+      return new HashMap<String, Pose3D>();
    }
 
    /**
@@ -580,6 +580,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownAcceleration();
+
+   /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
+   public double getBlindFootstepsHeightOffset()
+   {
+      return 0.03;
+   }
 
    public abstract double getContactThresholdForce();
 

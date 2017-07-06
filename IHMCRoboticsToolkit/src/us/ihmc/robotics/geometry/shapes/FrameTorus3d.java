@@ -1,11 +1,12 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Torus3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3d>
+public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
 {
-   private Torus3d torus3d;
+   private Torus3D torus3d;
 
    public FrameTorus3d(FrameTorus3d other)
    {
@@ -14,29 +15,29 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3d>
 
    public FrameTorus3d(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Torus3d());
+      super(referenceFrame, new Torus3D());
       torus3d = getGeometryObject();
    }
 
-   public FrameTorus3d(ReferenceFrame referenceFrame, Torus3d torus3d)
+   public FrameTorus3d(ReferenceFrame referenceFrame, Torus3D torus3d)
    {
-      super(referenceFrame, new Torus3d(torus3d));
+      super(referenceFrame, new Torus3D(torus3d));
       torus3d = getGeometryObject();
    }
 
    public FrameTorus3d(ReferenceFrame referenceFrame, double radius, double thickness)
    {
-      super(referenceFrame, new Torus3d(radius, thickness));
+      super(referenceFrame, new Torus3D(radius, thickness));
       torus3d = getGeometryObject();
    }
 
    public FrameTorus3d(ReferenceFrame referenceFrame, RigidBodyTransform transform, double radius, double thickness)
    {
-      super(referenceFrame, new Torus3d(transform, radius, thickness));
+      super(referenceFrame, new Torus3D(transform, radius, thickness));
       torus3d = getGeometryObject();
    }
 
-   public Torus3d getTorus3d()
+   public Torus3D getTorus3d()
    {
       return torus3d;
    }
@@ -48,7 +49,7 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3d>
 
    public double getThickness()
    {
-      return torus3d.getThickness();
+      return torus3d.getTubeRadius();
    }
 
    @Override

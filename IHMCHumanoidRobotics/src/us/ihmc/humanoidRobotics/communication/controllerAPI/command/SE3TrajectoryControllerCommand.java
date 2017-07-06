@@ -84,7 +84,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public void set(M message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
-      setQueueqableCommandVariables(message);
+      setQueueableCommandVariables(message);
       message.getSelectionMatrix(selectionMatrix);
       message.getWeightMatrix(weightMatrix);
       useCustomControlFrame = message.useCustomControlFrame();
@@ -105,7 +105,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
     */
    public void setPropertiesOnly(T other)
    {
-      setQueueqableCommandVariables(other);
+      setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
       trajectoryFrame = other.getTrajectoryFrame();

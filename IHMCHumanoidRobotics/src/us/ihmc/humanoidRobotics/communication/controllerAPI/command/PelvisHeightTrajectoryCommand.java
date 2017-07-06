@@ -96,7 +96,7 @@ public class PelvisHeightTrajectoryCommand extends EuclideanTrajectoryController
    public void set(PelvisTrajectoryCommand command)
    {
       clear(command.getDataFrame());
-      setQueueqableCommandVariables(command);
+      setQueueableCommandVariables(command);
       
       WeightMatrix3D weightMatrix = command.getWeightMatrix().getLinearPart();
       double zAxisWeight = weightMatrix.getZAxisWeight();
