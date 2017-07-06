@@ -81,6 +81,27 @@ public class SixDoFState extends JointState
       twist.setLinearPartY(Double.longBitsToDouble(buffer.get()));
       twist.setLinearPartZ(Double.longBitsToDouble(buffer.get()));
    }
+   
+   
+   public void get(LongBuffer buffer)
+   {      
+      buffer.put(Double.doubleToLongBits(rotation.getS()));
+      buffer.put(Double.doubleToLongBits(rotation.getX()));
+      buffer.put(Double.doubleToLongBits(rotation.getY()));
+      buffer.put(Double.doubleToLongBits(rotation.getZ()));
+      
+      buffer.put(Double.doubleToLongBits(translation.getX()));
+      buffer.put(Double.doubleToLongBits(translation.getY()));
+      buffer.put(Double.doubleToLongBits(translation.getZ()));
+      
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartX()));
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartY()));
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartZ()));
+      
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartX()));
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartY()));
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartZ()));
+   }
 
    @Override
    public int getNumberOfStateVariables()

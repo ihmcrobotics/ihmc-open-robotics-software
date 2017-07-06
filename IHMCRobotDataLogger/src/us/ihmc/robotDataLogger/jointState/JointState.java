@@ -35,6 +35,8 @@ public abstract class JointState
 
    public abstract void get(double[] array);
    
+   public abstract void get(LongBuffer buffer);
+   
    public abstract int getNumberOfStateVariables();
 
    public static int getNumberOfVariables(JointType type)

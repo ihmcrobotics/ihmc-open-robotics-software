@@ -2,10 +2,11 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
+import us.ihmc.idl.InterchangeSerializer;
+import us.ihmc.idl.CDR;
+import us.ihmc.idl.IDLSequence;
 
 /**
 * 

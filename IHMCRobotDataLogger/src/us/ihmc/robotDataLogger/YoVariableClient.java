@@ -208,7 +208,7 @@ public class YoVariableClient
 
    public void receivedTimestampAndData(long timestamp, ByteBuffer decompressBuffer)
    {
-      yoVariablesUpdatedListener.receivedTimestampAndData(timestamp, decompressBuffer);
+      yoVariablesUpdatedListener.receivedTimestampAndData(timestamp);
    }
 
 }

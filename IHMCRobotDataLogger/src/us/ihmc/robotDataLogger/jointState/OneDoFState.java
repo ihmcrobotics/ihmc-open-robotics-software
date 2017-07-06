@@ -48,6 +48,12 @@ public class OneDoFState extends JointState
       array[0] = q;
       array[1] = qd;
    }
+   
+   public void get(LongBuffer buffer)
+   {
+      buffer.put(Double.doubleToLongBits(q));
+      buffer.put(Double.doubleToLongBits(qd));
+   }
 
    @Override
    public int getNumberOfStateVariables()
