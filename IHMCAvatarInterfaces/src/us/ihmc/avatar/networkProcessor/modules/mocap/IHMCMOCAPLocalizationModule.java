@@ -117,7 +117,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, drcRobotModel.getLogSettings(), MOCAP_SERVER_DT);
       fullRobotModel = drcRobotModel.createFullRobotModel();
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, null);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
 
       PrintTools.info("Starting server");
       yoVariableServer.start();

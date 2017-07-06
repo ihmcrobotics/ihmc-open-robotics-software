@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

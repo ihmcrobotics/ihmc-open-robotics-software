@@ -55,11 +55,22 @@ public class CircularLongMap
       }
    }
 
+   /**
+    * Get the size of the map
+    * 
+    * @return the current number of key/value pairs in this map
+    * 
+    */
    public int size()
    {
       return size;
    }
    
+   /**
+    * Get the latest key inserted in the map
+    * 
+    * @return The last key inserted in the map
+    */
    public long getLatestKey()
    {
       if (insertionIndex == 0 && size > 0)
@@ -72,6 +83,10 @@ public class CircularLongMap
       }
    }
 
+   /**
+    * 
+    * @return The last value inserted in the map
+    */
    public long getLatestValue()
    {
       if (insertionIndex == 0 && size > 0)
@@ -136,9 +151,9 @@ public class CircularLongMap
       }
 
    }
-
-   public void print()
+   
+   public String toString()
    {
-      System.out.println("index: " + insertionIndex + " keys: " + Arrays.toString(keys));
+      return "index: " + insertionIndex + " keys: " + Arrays.toString(keys);
    }
 }

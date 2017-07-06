@@ -1,4 +1,4 @@
-package us.ihmc.tools.gui;
+package us.ihmc.graphicsDescription;
 
 public interface GraphicsUpdatable
 {
