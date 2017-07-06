@@ -122,7 +122,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                desiredFootsteps.add(desiredFootStep);
             }
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.4, -.4, 0, Math.toRadians(-45), 0, 0));
+               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.2, -.3, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
                Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT), RobotSide.RIGHT, desiredFootPose);
@@ -157,7 +157,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             FrameOrientation orientation = new FrameOrientation(referenceFrames.getPelvisFrame(), new Quaternion());
-            FramePoint p = new FramePoint(referenceFrames.getPelvisZUpFrame(), new double[] {0.1, 0.05, 0});
+            FramePoint p = new FramePoint(referenceFrames.getPelvisZUpFrame(), new double[] {0.075, 0.04, 0});
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
             p.changeFrame(ReferenceFrame.getWorldFrame());
             PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p.getPoint(), orientation.getQuaternion());
