@@ -2,16 +2,11 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.zip.CRC32;
 
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
-import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
@@ -19,9 +14,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableClient
 {
-   private static final int RECEIVE_BUFFER_SIZE = 1024;
-
-   private final CRC32 crc32 = new CRC32();
    private final String serverName;
    
    //DDS
