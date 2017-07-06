@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
+import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -37,6 +38,28 @@ public class SixDoFState extends JointState
 
       twist.getArray(array, 7);
    }
+
+   public void update(DoubleBuffer buffer)
+   {
+      
+      double qs = (buffer.get());
+      double qx = (buffer.get());
+      double qy = (buffer.get());
+      double qz = (buffer.get());
+      rotation.set(qx, qy, qz, qs);
+      translation.setX((buffer.get()));
+      translation.setY((buffer.get()));
+      translation.setZ((buffer.get()));
+      
+      twist.setAngularPartX((buffer.get()));
+      twist.setAngularPartY((buffer.get()));
+      twist.setAngularPartZ((buffer.get()));
+      
+      twist.setLinearPartX((buffer.get()));
+      twist.setLinearPartY((buffer.get()));
+      twist.setLinearPartZ((buffer.get()));
+   }
+
 
    public void update(LongBuffer buffer)
    {

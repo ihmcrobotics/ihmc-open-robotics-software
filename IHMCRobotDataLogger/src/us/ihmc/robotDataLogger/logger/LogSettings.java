@@ -11,7 +11,7 @@ public class LogSettings
    public static final LogSettings VALKYRIE_IHMC = new LogSettings(true, "ValkyrieIHMCGUI");
    public static final LogSettings VALKYRIE_JSC = new LogSettings(true, "ValkyrieJSCGUI");
    public static final LogSettings STEPPR_IHMC = new LogSettings(true, "StepprIHMCGUI");
-   public static final LogSettings SIMULATION = new LogSettings(false, "SimulationGUI");
+   public static final LogSettings SIMULATION = new LogSettings(true, "SimulationGUI");
    public static final LogSettings TEST_LOGGER = new LogSettings(true);
    public static final LogSettings BEHAVIOR = new LogSettings(true);
    public static final LogSettings TOOLBOX = new LogSettings(false);

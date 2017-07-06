@@ -24,7 +24,7 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.variables = variables.toArray(new YoVariable[variables.size()]);
 
       this.jointHolders = jointHolders;
-      this.jointStates = new double[jointHolders.size()];
+      this.jointStates = new double[RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders)];
 
    }
 

@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private double averageTimeBetweenPackets = 0;
    
    private volatile int jitterBufferSamples = 1;
-   
+
    public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener)
    {
       this.parser = parser;
@@ -102,14 +103,14 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       }
    }
    
-   private void decompressBuffer(int registryID, ByteBuffer data)
+   private void decompressBuffer(RegistryReceiveBuffer buffer)
    {
-      uniqueRegistries.add(registryID);
+      uniqueRegistries.add(buffer.getRegistryID());
       
       decompressBuffer.clear();
       try
       {
-         SnappyUtils.uncompress(data, decompressBuffer);
+         SnappyUtils.uncompress(buffer.getData(), decompressBuffer);
       }
       catch (IllegalArgumentException | IOException e)
       {
@@ -121,10 +122,16 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       LongBuffer longData = decompressBuffer.asLongBuffer();
       int numberOfVariables = longData.remaining();
       
-      int offset = parser.getVariableOffset(registryID);
+      int offset = parser.getVariableOffset(buffer.getRegistryID());
       for(int i = 0; i < numberOfVariables; i++)
       {
          setAndNotify(variables.get(i + offset), longData.get());
+      }
+      
+      DoubleBuffer jointStateBuffer = DoubleBuffer.wrap(buffer.getJointStates());
+      for(int i = 0; i < jointStates.size(); i++)
+      {
+         jointStates.get(i).update(jointStateBuffer);
       }
       
    }
@@ -135,12 +142,12 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       RegistryReceiveBuffer buffer = orderedBuffers.take();
       long timestamp = buffer.getTimestamp();
       
-      decompressBuffer(buffer.getRegistryID(), buffer.getData());
+      decompressBuffer(buffer);
       
       while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
       {
          RegistryReceiveBuffer next = orderedBuffers.take();
-         decompressBuffer(next.getRegistryID(), next.getData());
+         decompressBuffer(next);
          
       }
       listener.receivedTimestampAndData(timestamp, decompressBuffer);
