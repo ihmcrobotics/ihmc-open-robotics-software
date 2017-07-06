@@ -551,10 +551,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          return false;
       }
 
+      if (!handleCommandInternal(jointspaceCommand))
+      {
+         return false;
+      }
+
       if (!jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
          return false;
       }
+
       if (!handlePoseTrajectoryCommand(command, initialPose))
       {
          return false;

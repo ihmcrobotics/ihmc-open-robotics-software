@@ -38,7 +38,7 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
       setTrajectoryFrame(command.getTrajectoryFrame());
       getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
       setEnableUserPelvisControlDuringWalking(command.isEnableUserPelvisControlDuringWalking());
-      setQueueqableCommandVariables(command);
+      setQueueableCommandVariables(command);
       setSelectionMatrix(command.getSelectionMatrix().getAngularPart());
    }
 

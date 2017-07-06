@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -130,7 +131,7 @@ public class FrameBox3dTest
       ReferenceFrame[] frames = {worldFrame, frameA, frameB, frameC, frameD};
 
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      Box3d expectedBox = new Box3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Box3D expectedBox = new Box3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
       FramePose actualBoxPose = new FramePose();
       FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);
@@ -146,6 +147,7 @@ public class FrameBox3dTest
          ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
 
          expectedBoxPose.changeFrame(newFrame);
+         expectedBox.setPose(expectedBoxPose.getGeometryObject());
          frameBox.changeFrame(newFrame);
          frameBox.getFramePose(actualBoxPose);
 
@@ -226,7 +228,7 @@ public class FrameBox3dTest
          FrameBox3d biggerBox = new FrameBox3d(box);
          biggerBox.scale(2.0);
 
-         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[8];
          for (int i = 0; i < vertices.length; i++)
          {
             vertices[i] = new Point3D();

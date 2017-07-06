@@ -9,14 +9,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ import java.util.List;
 public class GroundPlaneEstimator
 {
    public final static int MAX_GROUND_PLANE_POINTS = 100;
-   private final Plane3d groundPlane = new Plane3d();
+   private final Plane3D groundPlane = new Plane3D();
    private final Vector3D groundPlaneNormal = new Vector3D();
    private final Point3D groundPlanePoint = new Point3D();
    private final ArrayList<Point3D> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
@@ -101,7 +100,7 @@ public class GroundPlaneEstimator
    /**
     * @param plane3d : ground plane in World Frame
     */
-   public void getPlane(Plane3d plane3d)
+   public void getPlane(Plane3D plane3d)
    {
       plane3d.set(groundPlane);
    }

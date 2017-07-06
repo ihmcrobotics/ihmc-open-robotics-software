@@ -56,4 +56,10 @@ public class TexCoord2f implements Tuple2DBasics
    {
       throw new UnsupportedOperationException();
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform, boolean checkIfTransformInXYplane)
+   {
+      throw new UnsupportedOperationException();
+   }
 }

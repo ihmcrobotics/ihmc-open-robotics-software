@@ -42,7 +42,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Because in the paper the authors are using a specific type of quaternions, the expressions had to
  * be redefined for the general definition of unit-quaternions. Also, the expression for the angular
  * acceleration had to be derived. See the following Word document for more details:
- * <a href="https://1drv.ms/w/s!AtjeMRpLgFtkiPs2wgURmVReZVReAQ">Hermite Quaternion Curve
+ * <a href="https://1drv.ms/b/s!AtjeMRpLgFtkiP0oG_0fhZEg3cPhhA">Hermite Quaternion Curve
  * Revisited</a>.
  * </p>
  *

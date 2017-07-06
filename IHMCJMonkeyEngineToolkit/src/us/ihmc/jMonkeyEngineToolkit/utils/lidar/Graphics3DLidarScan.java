@@ -1,5 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.utils.lidar;
 
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.lidar.LidarScan;
 
 public class Graphics3DLidarScan
@@ -102,7 +102,7 @@ public class Graphics3DLidarScan
       for (int i = 0; i < scansPerSweep; i++)
       {
          points[i] = new Graphics3DNode(lidarName + "point" + i, Graphics3DNodeType.VISUALIZATION,
-                                        new Graphics3DObject(new Sphere3d(SPHERE_RADIUS), appearance));
+                                        new Graphics3DObject(new Sphere3D(SPHERE_RADIUS), appearance));
       }
    }
 

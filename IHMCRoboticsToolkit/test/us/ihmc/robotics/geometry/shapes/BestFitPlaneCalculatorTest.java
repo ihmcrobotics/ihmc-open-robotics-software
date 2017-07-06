@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -41,7 +42,7 @@ public class BestFitPlaneCalculatorTest
       );
       DataGridTools.fillMapWithMatrixCentered(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
-      Plane3d plane = calculator.calculatePlane(map, footCenterPoint.getPoint(), 2.0, 2.0);
+      Plane3D plane = calculator.calculatePlane(map, footCenterPoint.getPoint(), 2.0, 2.0);
       System.out.println("BestFitPlaneCalculatorTest: calculator.getPointList() = " + calculator.getPointList());
       Point3D point = plane.getPointCopy();
       Vector3D normal = plane.getNormalCopy();
@@ -73,7 +74,7 @@ public class BestFitPlaneCalculatorTest
       DataGridTools.fillMapWithMatrix(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       double xyCenter = 3.0;
-      Plane3d plane = calculator.calculatePlane(map, new Point2D(xyCenter, xyCenter), 2, 2);
+      Plane3D plane = calculator.calculatePlane(map, new Point2D(xyCenter, xyCenter), 2, 2);
       Point3D point = plane.getPointCopy();
       Vector3D normal = plane.getNormalCopy();
       if (!(MathTools.epsilonEquals(normal.getX(), Math.sqrt(2) / 2.0, 1e-7) && MathTools.epsilonEquals(normal.getZ(), -Math.sqrt(2) / 2.0, 1e-7))

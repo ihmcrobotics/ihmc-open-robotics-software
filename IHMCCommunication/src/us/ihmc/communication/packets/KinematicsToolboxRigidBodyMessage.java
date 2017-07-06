@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,7 +13,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -275,7 +275,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * 
     * @param desiredPose the pose the control frame should reach. Not modified.
     */
-   public void setDesiredPose(Pose pose)
+   public void setDesiredPose(Pose3D pose)
    {
       setDesiredPosition(pose.getPosition());
       setDesiredOrientation(pose.getOrientation());
@@ -531,7 +531,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @param controlFramePose the pose of the control frame expressed in
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setControlFramePose(Pose controlFramePose)
+   public void setControlFramePose(Pose3D controlFramePose)
    {
       setControlFramePosition(controlFramePose.getPosition());
       setControlFrameOrientation(controlFramePose.getOrientation());

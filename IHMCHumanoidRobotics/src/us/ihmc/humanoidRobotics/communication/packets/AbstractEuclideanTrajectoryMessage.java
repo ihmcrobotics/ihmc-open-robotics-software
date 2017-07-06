@@ -220,6 +220,16 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    }
 
    /**
+    * transform all the points
+    */
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         taskspaceTrajectoryPoints[i].applyInverseTransform(transform);
+   }
+
+   /**
     * Sets the selection matrix to use for executing this message.
     * <p>
     * The selection matrix is used to determinate which degree of freedom of the end-effector should
