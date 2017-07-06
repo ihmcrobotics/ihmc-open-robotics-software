@@ -56,6 +56,14 @@ public class TransferAngularMomentumTrajectory implements AngularMomentumTraject
    @Override
    public void update(double timeInState)
    {
+      for(int i = 0; i < numberOfSegments.getIntegerValue(); i++)
+      {
+         if(timeInState > polynomialCoefficients.get(i).getInitialTime() && timeInState < polynomialCoefficients.get(i).getFinalTime())
+         {
+            currentSegment.set(i);
+            break;
+         }
+      }
       polynomialCoefficients.get(currentSegment.getIntegerValue()).compute(timeInState);
    }
 
@@ -85,7 +93,7 @@ public class TransferAngularMomentumTrajectory implements AngularMomentumTraject
 
    }
 
-   public void computeFromCoPWaypoints(FramePoint zInitial, FramePoint zRefPoint1, FramePoint zRefPoint2, FramePoint zFinal)
+   public void computeFromCoPWaypoints(double t0, double tFinal, FramePoint zInitial, FramePoint zRefPoint1, FramePoint zRefPoint2, FramePoint zFinal)
    {
       polynomialCoefficients.get(0).setCubicBezier(t0, tFinal, zInitial, zRefPoint1, zRefPoint2, zFinal);
       numberOfSegments.set(1);
