@@ -15,6 +15,7 @@ import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -33,6 +34,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
 
    private final IDLYoVariableHandshakeParser parser;
    private final List<YoVariable<?>> variables;
+   private final List<JointState> jointStates;
    
    private final ByteBuffer decompressBuffer;
    private final YoVariablesUpdatedListener listener;
@@ -53,6 +55,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    {
       this.parser = parser;
       this.variables = parser.getYoVariablesList();
+      this.jointStates = parser.getJointStates();
       this.decompressBuffer = ByteBuffer.allocate(variables.size() * 8);
       this.listener = listener;
       start();
