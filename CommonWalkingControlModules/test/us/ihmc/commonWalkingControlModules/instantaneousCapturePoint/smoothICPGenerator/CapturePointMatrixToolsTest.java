@@ -290,7 +290,7 @@ public class CapturePointMatrixToolsTest
       }
    }
    
-   public void calculateICPPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
+   public static void calculateICPPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
@@ -313,7 +313,7 @@ public class CapturePointMatrixToolsTest
       icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public void calculateICPPositionByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
+   public static void calculateICPPositionByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
    {      
       cubic3D.compute(cubic3D.getInitialTime());
       FramePoint cmpRefInit = new FramePoint(cubic3D.getFramePosition());
@@ -336,7 +336,7 @@ public class CapturePointMatrixToolsTest
       icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   public static void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
@@ -359,7 +359,7 @@ public class CapturePointMatrixToolsTest
       icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   public static void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
    {      
       cubic3D.compute(cubic3D.getInitialTime());
       FramePoint cmpRefInit = new FramePoint(cubic3D.getFramePosition());
@@ -382,13 +382,13 @@ public class CapturePointMatrixToolsTest
       icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public double calculateSigmaLinear(double t, double T, double omega0)
+   public static double calculateSigmaLinear(double t, double T, double omega0)
    {
       double sigmaLinear = t/T + 1.0/omega0 * 1/T;
       return sigmaLinear;
    }
    
-   public double calculateSigmaCubic(double t, double T, double omega0)
+   public static double calculateSigmaCubic(double t, double T, double omega0)
    {
       double f = 3.0 * Math.pow(t, 2) / Math.pow(T, 2) - 2.0 * Math.pow(t, 3) / Math.pow(T, 3);
       double df = 6.0 * Math.pow(t, 1) / Math.pow(T, 2) - 6.0 * Math.pow(t, 2) / Math.pow(T, 3);
@@ -399,13 +399,13 @@ public class CapturePointMatrixToolsTest
       return sigmaCubic;
    }
    
-   public double calculateSigmaDotLinear(double t, double T, double omega0)
+   public static double calculateSigmaDotLinear(double t, double T, double omega0)
    {
       double dSigmaLinear = 1/T;
       return dSigmaLinear;
    }
    
-   public double calculateSigmaDotCubic(double t, double T, double omega0)
+   public static double calculateSigmaDotCubic(double t, double T, double omega0)
    {
       double df = 6.0 * Math.pow(t, 1) / Math.pow(T, 2) - 6.0 * Math.pow(t, 2) / Math.pow(T, 3);
       double ddf = 6.0 * 1.0 / Math.pow(T, 2) - 12.0 * Math.pow(t, 1) / Math.pow(T, 3);
@@ -416,7 +416,7 @@ public class CapturePointMatrixToolsTest
    }
       
       
-   public void calculateAlphaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public static void calculateAlphaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -428,7 +428,7 @@ public class CapturePointMatrixToolsTest
       alphaPrimeLinear.set(2, 5, time + 1.0/omega0);
    }
    
-   public void calculateBetaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public static void calculateBetaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -440,12 +440,12 @@ public class CapturePointMatrixToolsTest
       betaPrimeLinear.set(2, 5, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
    }
    
-   public void calculateGammaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public static void calculateGammaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
    
-   public void calculateAlphaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public static void calculateAlphaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -463,7 +463,7 @@ public class CapturePointMatrixToolsTest
       alphaPrimeLinear.set(2, 11, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
    }
    
-   public void calculateBetaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public static void calculateBetaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -481,7 +481,7 @@ public class CapturePointMatrixToolsTest
       betaPrimeLinear.set(2, 11, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
    }
    
-   public void calculateGammaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public static void calculateGammaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
