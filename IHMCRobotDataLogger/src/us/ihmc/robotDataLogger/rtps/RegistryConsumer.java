@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import us.ihmc.commons.Conversions;
+import gnu.trove.set.hash.TIntHashSet;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -22,8 +22,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
-   private static final long WINDOW_SIZE = 10000; // Window size to calculate standard deviation of time between incoming packets
-   private static final long DELAY = Conversions.millisecondsToNanoseconds(250);
    
    
   
@@ -40,11 +38,16 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoVariablesUpdatedListener listener;
    
    
+   private final TIntHashSet uniqueRegistries = new TIntHashSet();
+   
    // Standard deviation calculation
-   private long currentWindow = 1;
-   private long previousTimestamp = - 1;
-   private double average;
-   private double variance;
+   private long previousTransmitTime = - 1;
+   private long previousReceiveTime = - 1;
+   private double jitterEstimate = 0;
+   private double samples = 0;
+   private double averageTimeBetweenPackets = 0;
+   
+   private volatile int jitterBufferSamples = 1;
    
    public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener)
    {
@@ -61,9 +64,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          ThreadTools.sleep(1);
          
-         long currentTime = System.nanoTime();
-
-         while(orderedBuffers.size() > 250)
+         while(orderedBuffers.size() > (jitterBufferSamples + uniqueRegistries.size() + 1))
          {
             try
             {
@@ -100,6 +101,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private void decompressBuffer(int registryID, ByteBuffer data)
    {
+      uniqueRegistries.add(registryID);
+      
       decompressBuffer.clear();
       try
       {
@@ -168,21 +171,21 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          if(subscriber.takeNextData(buffer, sampleInfo))
          {
-            if(previousTimestamp != -1)
+            // RFC 1889 jitter estimate
+            if(previousTransmitTime != -1)
             {
-               double oldAverage = average;
-               double oldTime = previousTimestamp;
-               double newTime = buffer.getReceivedTimestamp();
-               average = oldAverage + (newTime - oldTime)/currentWindow;
-               variance = (newTime - oldTime) * (newTime - average + oldTime - oldAverage)/(currentWindow - 1);
-               System.out.println(Math.sqrt(variance));
+               long D = (buffer.getReceivedTimestamp() - previousReceiveTime) - (buffer.getTransmitTime() - previousTransmitTime);
+               if(D < 0) D = -D;
                
-               if(currentWindow < WINDOW_SIZE)
-               {
-                  currentWindow++;
-               }
+               jitterEstimate += (D - jitterEstimate)/16;
+               
+               ++samples;
+               averageTimeBetweenPackets += ((buffer.getTransmitTime() - previousTransmitTime) - averageTimeBetweenPackets) / samples;
+               
+               jitterBufferSamples = (int) (Math.ceil(jitterEstimate / averageTimeBetweenPackets) + 1);
             }
-            previousTimestamp = buffer.getReceivedTimestamp();
+            previousTransmitTime = buffer.getTransmitTime();
+            previousReceiveTime = buffer.getReceivedTimestamp();
             
             orderedBuffers.add(buffer);
          }

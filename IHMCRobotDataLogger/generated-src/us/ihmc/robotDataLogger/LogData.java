@@ -24,6 +24,7 @@ public class LogData
     {
         	uid_ = other.uid_;
         	timestamp_ = other.timestamp_;
+        	transmitTime_ = other.transmitTime_;
         	type_ = other.type_;
         	registry_ = other.registry_;
             data_.set(other.data_);	jointStates_.set(other.jointStates_);	
@@ -48,6 +49,17 @@ public class LogData
     public long getTimestamp()
     {
         return timestamp_;
+    }
+
+        
+    public void setTransmitTime(long transmitTime)
+    {
+        transmitTime_ = transmitTime;
+    }
+
+    public long getTransmitTime()
+    {
+        return transmitTime_;
     }
 
         
@@ -106,6 +118,9 @@ public class LogData
         returnedValue &= this.timestamp_ == otherMyClass.timestamp_;
 
                 
+        returnedValue &= this.transmitTime_ == otherMyClass.transmitTime_;
+
+                
         returnedValue &= this.type_ == otherMyClass.type_;
 
                 
@@ -134,6 +149,10 @@ public class LogData
         builder.append(this.timestamp_);
 
                 builder.append(", ");
+        builder.append("transmitTime=");
+        builder.append(this.transmitTime_);
+
+                builder.append(", ");
         builder.append("type=");
         builder.append(this.type_);
 
@@ -156,6 +175,7 @@ public class LogData
 
     private long uid_; 
     private long timestamp_; 
+    private long transmitTime_; 
     private us.ihmc.robotDataLogger.LogDataType type_; 
     private int registry_; 
     private IDLSequence.Byte  data_; 

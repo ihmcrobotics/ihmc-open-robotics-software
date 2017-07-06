@@ -38,6 +38,7 @@ public class RegistrySendBuffer extends RegistryBuffer
    {
       this.uid = uid;
       this.timestamp = timestamp;
+      this.transmitTime = System.nanoTime();
       data.clear();
       for (int i = 0; i < variables.length; i++)
       {

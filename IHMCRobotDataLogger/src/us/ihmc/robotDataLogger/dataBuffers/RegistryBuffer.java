@@ -6,6 +6,17 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    protected int registryID;
    protected double[] jointStates;
    protected long timestamp;
+   protected long transmitTime;
+   public long getTransmitTime()
+   {
+      return transmitTime;
+   }
+
+   public void setTransmitTime(long transmitTime)
+   {
+      this.transmitTime = transmitTime;
+   }
+
    protected long uid = 0;
 
    public long getTimestamp()
