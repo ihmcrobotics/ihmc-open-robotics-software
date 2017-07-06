@@ -25,31 +25,17 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
-   private static final boolean DEBUG = false;
-
    protected final T tuple;
 
    public FrameTuple(ReferenceFrame referenceFrame, T tuple)
    {
       super(referenceFrame, tuple);
-
-      if (DEBUG)
-      {
-         if (referenceFrame == null)
-         {
-            String errorMsg = "FrameTuple: created a " + "className" + " with a null reference frame.";
-            System.err.println(errorMsg);
-         }
-      }
-
       this.tuple = getGeometryObject();
    }
 
    public final void set(double x, double y, double z)
    {
-      tuple.setX(x);
-      tuple.setY(y);
-      tuple.setZ(z);
+      tuple.set(x, y, z);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double z)
@@ -135,15 +121,15 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       tuple.set(startRow, column, tupleDenseMatrix);
    }
 
-   public final void set(FrameTuple<?, ?> frameTuple)
-   {
-      checkReferenceFrameMatch(frameTuple);
-      this.tuple.set(frameTuple.tuple);
-   }
-
    public final void set(Tuple3DReadOnly tuple)
    {
       this.tuple.set(tuple);
+   }
+
+   public final void set(FrameTuple<?, ?> frameTuple)
+   {
+      checkReferenceFrameMatch(frameTuple);
+      set(frameTuple.tuple);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
@@ -264,9 +250,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
    public final void scale(double scaleXFactor, double scaleYFactor, double scaleZFactor)
    {
-      tuple.setX(tuple.getX() * scaleXFactor);
-      tuple.setY(tuple.getY() * scaleYFactor);
-      tuple.setZ(tuple.getZ() * scaleZFactor);
+      tuple.scale(scaleXFactor, scaleYFactor, scaleZFactor);
    }
 
    public final double getX()
@@ -301,7 +285,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     */
    public final Vector3D getVectorCopy()
    {
-      return new Vector3D(this.tuple);
+      return new Vector3D(tuple);
    }
 
    @Override
@@ -342,21 +326,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       tuple.scaleAdd(scaleFactor, tuple1, tuple2);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 and then adds the scalar multiplication of tuple2 (this = scaleFactor1 * tuple1 + scaleFactor2 * tuple2).
-    *
-    * @param scaleFactor1 double
-    * @param frameTuple1 Tuple3d
-    * @param scaleFactor2 double
-    * @param frameTuple2 Tuple3d
-    */
-   public final void scaleAdd(double scaleFactor1, Tuple3DReadOnly tuple1, double scaleFactor2, Tuple3DReadOnly tuple2)
-   {
-      tuple.setX(scaleFactor1 * tuple1.getX() + scaleFactor2 * tuple2.getX());
-      tuple.setY(scaleFactor1 * tuple1.getY() + scaleFactor2 * tuple2.getY());
-      tuple.setZ(scaleFactor1 * tuple1.getZ() + scaleFactor2 * tuple2.getZ());
    }
 
    /**
@@ -429,9 +398,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
 
-      set(frameTuple1);
-      scale(scaleFactor);
-      sub(frameTuple2);
+      tuple.scaleSub(scaleFactor, frameTuple1.tuple, frameTuple2.tuple);
    }
 
    /**  
@@ -449,9 +416,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     */
    public final void add(double x, double y, double z)
    {
-      tuple.setX(tuple.getX() + x);
-      tuple.setY(tuple.getY() + y);
-      tuple.setZ(tuple.getZ() + z);
+      tuple.add(x, y, z);
    }
 
    /**
@@ -495,9 +460,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     */
    public final void sub(double x, double y, double z)
    {
-      tuple.setX(tuple.getX() - x);
-      tuple.setY(tuple.getY() - y);
-      tuple.setZ(tuple.getZ() - z);
+      tuple.sub(x, y, z);
    }
 
    /**  
