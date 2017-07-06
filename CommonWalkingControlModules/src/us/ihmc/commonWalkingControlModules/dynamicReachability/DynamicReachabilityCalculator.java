@@ -1196,7 +1196,7 @@ public class DynamicReachabilityCalculator
 
       if (isInTransfer)
          icpPlanner.initializeForTransfer(currentInitialTime);
-      els
+      else
          icpPlanner.initializeForSingleSupport(currentInitialTime);
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
