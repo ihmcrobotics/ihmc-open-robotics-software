@@ -1455,15 +1455,4 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       assertEquals("Should be equal", expectedFrameTuple.getY(), actualFrameTuple.getY(), epsilon);
       assertEquals("Should be equal", expectedFrameTuple.getZ(), actualFrameTuple.getZ(), epsilon);
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testToArray() //Brett was here
-   {
-      FrameTuple<?, ?> frameTuple = createFrameTuple(ReferenceFrame.getWorldFrame(), -5.0, 0.0, 10.0);
-      double[] array = frameTuple.toArray();
-      assertEquals("Should be equal", frameTuple.getX(), array[0], epsilon);
-      assertEquals("Should be equal", frameTuple.getY(), array[1], epsilon);
-      assertEquals("Should be equal", frameTuple.getZ(), array[2], epsilon);
-   }
 }
