@@ -97,4 +97,10 @@ public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends Simple
    {
       waypointData.applyTransform(transform);
    }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      waypointData.applyInverseTransform(transform);
+   }
 }

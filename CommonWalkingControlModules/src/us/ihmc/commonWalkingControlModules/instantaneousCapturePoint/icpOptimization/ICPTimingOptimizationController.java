@@ -82,6 +82,9 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
 
+      useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
+      minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
+
       timingAdjustmentWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentWeight());
       timingAdjustmentRegularizationWeight.set(icpOptimizationParameters.getTimingAdjustmentGradientDescentRegularizationWeight());
       gradientThresholdForAdjustment.set(icpOptimizationParameters.getGradientThresholdForTimingAdjustment());

@@ -335,6 +335,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateFootstepParameters()
    {
+      feetManager.adjustHeightIfNeeded(nextFootstep);
+
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.setTrajectoryFromFootstep();
