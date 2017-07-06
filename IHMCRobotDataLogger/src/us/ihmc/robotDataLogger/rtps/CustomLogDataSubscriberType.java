@@ -51,6 +51,9 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
       data.setUid(deserializeCDR.read_type_11());
 
       data.setTimestamp(deserializeCDR.read_type_11());
+      
+      data.setTransmitTime(deserializeCDR.read_type_11());
+
 
       if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
       {
@@ -97,23 +100,7 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    @Override
    public int getTypeSize()
    {
-      int current_alignment = 0;
-
-      current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + CDR.alignment(current_alignment, 8);
-
-      current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + CDR.alignment(current_alignment, 4);
-      current_alignment += (maximumCompressedSize * 1) + CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + CDR.alignment(current_alignment, 4);
-      current_alignment += (numberOfStates * 8) + CDR.alignment(current_alignment, 8);
-
-      return current_alignment;
+      return CustomLogDataPubisherType.getTypeSize(maximumCompressedSize, numberOfStates);
    }
 
    @Override

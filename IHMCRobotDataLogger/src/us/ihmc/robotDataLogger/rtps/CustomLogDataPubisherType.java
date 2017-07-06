@@ -47,6 +47,9 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       serializeCDR.write_type_11(data.getUid());
 
       serializeCDR.write_type_11(data.getTimestamp());
+      
+      serializeCDR.write_type_11(data.getTransmitTime());
+
 
       serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
 
@@ -102,10 +105,17 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    @Override
    public int getTypeSize()
    {
+      return getTypeSize(maximumCompressedSize, numberOfStates);
+   }
+
+   static int getTypeSize(int maximumCompressedSize, int numberOfStates)
+   {
       int current_alignment = 0;
 
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + CDR.alignment(current_alignment, 8);
+      
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);

@@ -2,11 +2,10 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
 
 /**
 * 
@@ -59,6 +58,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -89,6 +90,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -111,6 +114,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    cdr.write_type_11(data.getUid());
 
 	    cdr.write_type_11(data.getTimestamp());
+
+	    cdr.write_type_11(data.getTransmitTime());
 
 	    cdr.write_type_c(data.getType().ordinal());
 
@@ -135,6 +140,9 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    	data.setTimestamp(cdr.read_type_11());
 	    	
 
+	    	data.setTransmitTime(cdr.read_type_11());
+	    	
+
 	    	data.setType(us.ihmc.robotDataLogger.LogDataType.values[cdr.read_type_c()]);
 	    	
 
@@ -153,6 +161,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 			    
 			    ser.write_type_11("timestamp", data.getTimestamp());
 			    
+			    ser.write_type_11("transmitTime", data.getTransmitTime());
+			    
 			    ser.write_type_c("type", data.getType());
 			    
 			    ser.write_type_2("registry", data.getRegistry());
@@ -169,6 +179,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    			data.setUid(ser.read_type_11("uid"));	
 	    	    
 	    			data.setTimestamp(ser.read_type_11("timestamp"));	
+	    	    
+	    			data.setTransmitTime(ser.read_type_11("transmitTime"));	
 	    	    
 	    			data.setType((us.ihmc.robotDataLogger.LogDataType)ser.read_type_c("type", us.ihmc.robotDataLogger.LogDataType.class));
 	    	

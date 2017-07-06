@@ -14,6 +14,7 @@ module robotDataLogger{
 	
 	   	long long uid;
 	   	long long timestamp;
+	   	long long transmitTime;
 	   	LogDataType type;
 	   	long registry;
 	
