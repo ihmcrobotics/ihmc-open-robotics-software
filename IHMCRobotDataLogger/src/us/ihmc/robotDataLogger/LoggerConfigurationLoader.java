@@ -6,7 +6,7 @@ import java.net.InetAddress;
 
 import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.idl.serializers.extra.PropertiesSerializer;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
+import us.ihmc.robotDataLogger.util.LogUtils;
 
 public class LoggerConfigurationLoader
 {
