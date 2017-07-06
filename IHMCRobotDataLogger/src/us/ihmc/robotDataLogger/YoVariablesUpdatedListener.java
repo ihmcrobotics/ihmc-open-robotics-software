@@ -28,8 +28,6 @@ public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogL
 
    void setYoVariableClient(YoVariableClient client);
 
-   void receiveTimedOut();
-
    /**
     * On connect, the return value of this function is send to the server. The server will only send
     * one in n packets to this client

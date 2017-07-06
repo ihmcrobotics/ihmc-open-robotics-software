@@ -3,7 +3,6 @@ package us.ihmc.robotDataLogger.rtps;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import us.ihmc.pubsub.Domain;
@@ -37,7 +36,7 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
-import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
+import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
@@ -55,12 +54,14 @@ public class DataConsumerParticipant
 
    private final ReentrantLock lock = new ReentrantLock();
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
-   private final Participant participant;
+   private Participant participant;
    private LogAnnouncementListener logAnnouncementListener;
    private final HashMap<GuidPrefix, Announcement> announcements = new HashMap<>();
    private Publisher variableChangeDataPublisher = null;
    
    private Publisher clearLogPublisher = null;
+   
+   private RegistryConsumer registryConsumer;
 
    private class TimestampListenerImpl implements SubscriberListener
    {
@@ -423,6 +424,13 @@ public class DataConsumerParticipant
    }
    
 
+   /**
+    * Create a listener for timestamps
+    * 
+    * @param announcement
+    * @param listener
+    * @throws IOException
+    */
    public void createTimestampListener(Announcement announcement, TimestampListener listener) throws IOException
    {
       TimestampPubSubType pubSubType = new TimestampPubSubType();
@@ -431,58 +439,41 @@ public class DataConsumerParticipant
    }
    
    
-   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener, YoVariableRegistry loggerMainRegistry) throws IOException
+   /**
+    * Create listener for log data
+    * 
+    * @param announcement
+    * @param parser
+    * @param yoVariableClient
+    * @param loggerMainRegistry
+    * @throws IOException
+    */
+   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerMainRegistry) throws IOException
    {
+      if(registryConsumer != null)
+      {
+         throw new RuntimeException("Registry consumer is not null, cannot make duplicate data consumer");
+      }
+      
       CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
       SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
-      domain.createSubscriber(participant, attributes, new RegistryConsumer(parser, listener,loggerMainRegistry));
+      registryConsumer = new RegistryConsumer(parser, yoVariableClient,loggerMainRegistry);
+      domain.createSubscriber(participant, attributes, registryConsumer);
 
    }
-   
-   public static void main(String[] args) throws IOException, InterruptedException
+
+   public synchronized void remove()
    {
-      DataConsumerParticipant dataConsumerParticipant = new DataConsumerParticipant("testConsumer");
-
-      ArrayBlockingQueue<Announcement> queue = new ArrayBlockingQueue<>(1);
-      dataConsumerParticipant.listenForAnnouncements(new LogAnnouncementListener()
+      if(participant != null)
       {
-
-         @Override
-         public void logSessionWentOffline(Announcement announcement)
-         {
-            System.out.println(announcement + " went offline");
-         }
-
-         @Override
-         public void logSessionCameOnline(Announcement announcement)
-         {
-            System.out.println(announcement + " came online");
-            try
-            {
-               queue.put(announcement);
-            }
-            catch (InterruptedException e)
-            {
-               e.printStackTrace();
-            }
-         }
-      });
-
-      Announcement received;
-      if((received = queue.take()) != null)
-      {
-         System.out.println(dataConsumerParticipant.getHandshake(received, 15000));
-         System.out.println(dataConsumerParticipant.getModelFile(received, 15000).length);
-         System.out.println(dataConsumerParticipant.getResourceZip(received, 15000).length);
+         variableChangeDataPublisher = null;
+         clearLogPublisher = null;
+         domain.removeParticipant(participant);
+         participant = null;
+         registryConsumer.stopImmediatly();
+         registryConsumer = null;
+         
       }
-
-   }
-
-   public void remove()
-   {
-      variableChangeDataPublisher = null;
-      clearLogPublisher = null;
-      domain.removeParticipant(participant);
    }
 
 }

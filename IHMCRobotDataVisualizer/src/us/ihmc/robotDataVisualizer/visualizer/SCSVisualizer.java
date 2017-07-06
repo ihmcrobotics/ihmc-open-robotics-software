@@ -140,12 +140,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return true;
    }
 
-   @Override
-   public void receiveTimedOut()
-   {
-      System.out.println("Connection lost, closing client.");
-      yoVariableClient.disconnected();
-   }
 
    @Override
    public boolean updateYoVariables()

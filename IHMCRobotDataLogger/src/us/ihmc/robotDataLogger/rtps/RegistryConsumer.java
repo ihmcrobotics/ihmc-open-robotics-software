@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import gnu.trove.map.hash.TIntLongHashMap;
+import us.ihmc.commons.Conversions;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
+import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
@@ -26,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
-   
+   private final static long TIMEOUT = Conversions.secondsToNanoseconds(10);
    
   
 //   private final ConcurrentSkipListSet<RegistryReceiveBuffer> orderedBuffers = new ConcurrentSkipListSet<>();
@@ -40,7 +42,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final List<JointState> jointStates;
    
    private final ByteBuffer decompressBuffer;
-   private final YoVariablesUpdatedListener listener;
+   private final YoVariableClient listener;
    
    
    private final TIntLongHashMap uniqueRegistries = new TIntLongHashMap();
@@ -58,23 +60,31 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoInteger skippedPackets;
    private final YoInteger nonIncreasingTimestamps;
    private final YoInteger packetsOutOfOrder;
+   private final YoInteger mergedPackets;
+   private final YoInteger totalPackets;
 
-   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariablesUpdatedListener listener, YoVariableRegistry loggerDebugRegistry)
+   private long lastPacketReceived;
+   
+   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerDebugRegistry)
    {
       this.parser = parser;
       this.variables = parser.getYoVariablesList();
       this.jointStates = parser.getJointStates();
       this.decompressBuffer = ByteBuffer.allocate(variables.size() * 8);
-      this.listener = listener;
+      this.listener = yoVariableClient;
       
       this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);
       this.nonIncreasingTimestamps = new YoInteger("nonIncreasingTimestamps", loggerDebugRegistry);
       this.packetsOutOfOrder = new YoInteger("packetsOutOfOrder", loggerDebugRegistry);
+      this.mergedPackets = new YoInteger("mergedPackets", loggerDebugRegistry);
+      this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
       start();
    }
    
    public void run()
    {
+      
+      lastPacketReceived = System.nanoTime();
       while(running)
       {
          ThreadTools.sleep(1);
@@ -90,7 +100,32 @@ public class RegistryConsumer extends Thread implements SubscriberListener
                // Try next time
             }
          }
+         
+         if(System.nanoTime() - lastPacketReceived > TIMEOUT)
+         {
+            running = false;
+         }
       }
+      
+      // Empty buffer
+      while(!orderedBuffers.isEmpty())
+      {
+         try
+         {
+            handlePackets();
+         }
+         catch (InterruptedException e)
+         {
+         }
+      }
+      
+      listener.connectionClosed();
+      
+   }
+   
+   public void stopImmediatly()
+   {
+      running = false;
    }
    
    private void setAndNotify(YoVariable<?> variable, long newValue)
@@ -163,11 +198,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
          }
       }
       
-      if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
-      {
-         nonIncreasingTimestamps.increment();         
-      }
-      previousTimestamp = buffer.getTimestamp();
+     
+      totalPackets.increment();
    }
    
 
@@ -182,24 +214,19 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          RegistryReceiveBuffer next = orderedBuffers.take();
          decompressBuffer(next);
+         mergedPackets.increment();
          
       }
+      
+      if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
+      {
+         nonIncreasingTimestamps.increment();         
+      }
+      previousTimestamp = buffer.getTimestamp();
+      
       listener.receivedTimestampAndData(timestamp, decompressBuffer);
       
-   }
-
-   public void close()
-   {
-      running = false;
-      try
-      {
-         join();
-      }
-      catch (InterruptedException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
+      
    }
    
    @Override
