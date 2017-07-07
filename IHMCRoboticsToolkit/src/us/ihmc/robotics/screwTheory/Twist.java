@@ -206,7 +206,7 @@ public class Twist extends SpatialMotionVector
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
-      point2dFixedInBodyFrame.get(freeVector);
+      freeVector.set(point2dFixedInBodyFrame, 0.0);
 
       linearVelocityToPack.setToZero(expressedInFrame);
       linearVelocityToPack.cross(angularPart, freeVector);
