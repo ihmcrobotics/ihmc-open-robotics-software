@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -18,7 +19,7 @@ import us.ihmc.robotics.random.RandomGeometry;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements VectorInterface
+public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements VectorInterface, Vector3DBasics
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -96,6 +97,12 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return randomVector;
    }
 
+   public void setAndNormalize(FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndNormalize(other);
+   }
+
    /**
     * Retrieves the vector inside this FrameVector
     *
@@ -153,6 +160,12 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return isEpsilonParallel(frameVector, 1e-7);
    }
 
+   public void cross(FrameVector frameTuple1)
+   {
+      checkReferenceFrameMatch(frameTuple1);
+      cross(this.tuple, this.tuple, frameTuple1.tuple);
+   }
+
    public void cross(FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
@@ -164,9 +177,11 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       cross(this.tuple, this.tuple, vector);
    }
 
-   public void cross(Vector3DReadOnly tuple1, Vector3DReadOnly tuple2)
+   public void cross(FrameVector frameTuple1, FrameVector frameTuple2)
    {
-      cross(this.tuple, tuple1, tuple2);
+      checkReferenceFrameMatch(frameTuple1);
+      checkReferenceFrameMatch(frameTuple2);
+      cross(this.tuple, frameTuple1.tuple, frameTuple2.tuple);
    }
 
    public void cross(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)

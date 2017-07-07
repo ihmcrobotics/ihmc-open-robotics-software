@@ -12,6 +12,8 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnlyTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -19,13 +21,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 
-//import us.ihmc.robotics.MathTools;
-//import MatrixTools;
-
-public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>>
+public abstract class FrameTupleTest<F extends FrameTuple3D<F, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameTuple3DReadOnlyTest<F>
 {
    private static final boolean VERBOSE = false;
 
@@ -156,8 +156,9 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
    private ReferenceFrame createRandomFrame(ReferenceFrame parentFrame, Random random)
    {
-      FrameOrientation orientation = new FrameOrientation(parentFrame, createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0), createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
-            createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0));
+      FrameOrientation orientation = new FrameOrientation(parentFrame, createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
+                                                          createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
+                                                          createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0));
 
       OrientationFrame frame = new OrientationFrame(orientation);
 
@@ -453,13 +454,13 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
+   @Test(timeout = 30000)
    public final void testEpsilonEqualsFrameTuple()
    {
       FrameTuple3D<?, ?> framePoint1 = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
       FrameTuple3D<?, ?> framePoint2 = createFrameTuple(aFrame, 1.0, 2.0, 3.0);
 
-      framePoint1.epsilonEquals(framePoint2, epsilon); //test with non-matching refernce frames
+      assertFalse(framePoint1.epsilonEquals(framePoint2, epsilon)); //test with non-matching refernce frames
 
       double threshold = 0.5;
       boolean expectedReturn = true;
@@ -1440,5 +1441,12 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       assertEquals("Should be equal", expectedFrameTuple.getX(), actualFrameTuple.getX(), epsilon);
       assertEquals("Should be equal", expectedFrameTuple.getY(), actualFrameTuple.getY(), epsilon);
       assertEquals("Should be equal", expectedFrameTuple.getZ(), actualFrameTuple.getZ(), epsilon);
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      assertSuperMethodsAreOverloaded(FrameTuple3DReadOnly.class, Tuple3DReadOnly.class, FrameTuple3D.class, Tuple3DBasics.class);
    }
 }

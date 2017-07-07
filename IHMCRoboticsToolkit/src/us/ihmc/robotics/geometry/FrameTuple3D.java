@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -15,13 +16,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
- * One of the main goals of this class is to check, at runtime, that operations on tuples occur within the same Frame.
- * This method checks for one Vector argument.
+ * One of the main goals of this class is to check, at runtime, that operations on tuples occur
+ * within the same Frame. This method checks for one Vector argument.
  *
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T> implements Serializable
+public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T>
+      implements FrameTuple3DReadOnly, Tuple3DBasics, Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
@@ -33,15 +35,89 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       this.tuple = getGeometryObject();
    }
 
-   public final void set(double x, double y, double z)
+   public final void set(FrameTuple3DReadOnly other)
    {
-      tuple.set(x, y, z);
+      checkReferenceFrameMatch(other);
+      tuple.set(other);
+   }
+
+   public final void setAndAbsolute(FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndAbsolute(other);
+   }
+
+   public final void setAndNegate(FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndNegate(other);
+   }
+
+   public final void setAndScale(double scaleFactor, FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndScale(scaleFactor, other);
+   }
+
+   public void setAndClipToMin(double min, FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndClipToMin(min, other);
+   }
+
+   public void setAndClipToMax(double max, FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndClipToMax(max, other);
+   }
+
+   public void setAndClipToMinMax(double min, double max, FrameTuple3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      tuple.setAndClipToMinMax(min, max, other);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
+   {
+      this.referenceFrame = referenceFrame;
+      this.tuple.set(tuple);
+   }
+
+   /**
+    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and
+    * sets the z component to zero.
+    * 
+    * @param tuple2d
+    */
+   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
+   {
+      this.referenceFrame = referenceFrame;
+      setXY(tuple);
+   }
+
+   /**
+    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y
+    * respectively, and sets the z component to zero. Changes the referenceFrame of this frameTuple
+    * to frameTuple2d.getReferenceFrame().
+    * 
+    * @param frameTuple2d
+    */
+   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   {
+      referenceFrame = frameTuple2d.getReferenceFrame();
+      setXY(frameTuple2d);
+   }
+
+   public final void setIncludingFrame(FrameTuple3DReadOnly other)
+   {
+      referenceFrame = other.getReferenceFrame();
+      tuple.set(other);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       this.referenceFrame = referenceFrame;
-      set(x, y, z);
+      tuple.set(x, y, z);
    }
 
    /**
@@ -121,82 +197,28 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.set(startRow, column, tupleDenseMatrix);
    }
 
-   public final void set(Tuple3DReadOnly tuple)
-   {
-      this.tuple.set(tuple);
-   }
-
-   public final void set(FrameTuple3D<?, ?> frameTuple)
-   {
-      checkReferenceFrameMatch(frameTuple);
-      set(frameTuple.tuple);
-   }
-
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
-   {
-      this.referenceFrame = referenceFrame;
-      set(tuple);
-   }
-
-   /**
-    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
-    * @param tuple2d
-    */
-   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
-   {
-      this.referenceFrame = referenceFrame;
-      setXY(tuple);
-   }
-
-   /**
-    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.
-    * Changes the referenceFrame of this frameTuple to frameTuple2d.getReferenceFrame().
-    * @param frameTuple2d
-    */
-   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
-   {
-      this.referenceFrame = frameTuple2d.getReferenceFrame();
-      setXY(frameTuple2d);
-   }
-
-   public final void setIncludingFrame(FrameTuple3D<?, ?> frameTuple)
-   {
-      setIncludingFrame(frameTuple.referenceFrame, frameTuple.tuple);
-   }
-
+   @Override
    public final void setX(double x)
    {
       tuple.setX(x);
    }
 
+   @Override
    public final void setY(double y)
    {
       tuple.setY(y);
    }
 
+   @Override
    public final void setZ(double z)
    {
       tuple.setZ(z);
    }
 
    /**
-    * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
-    * <p>
-    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
-    * is {@code z}.
-    * </p>
-    *
-    * @param index the index of the component to set.
-    * @param value the new value of the selected component.
-    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
-    */
-   public void setElement(int index, double value)
-   {
-      tuple.setElement(index, value);
-   }
-
-   /**
-    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
+    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and
+    * sets the z component to zero.
+    * 
     * @param tuple2d
     */
    public void setXY(Tuple2DReadOnly tuple2d)
@@ -207,7 +229,9 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    }
 
    /**
-    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.
+    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y
+    * respectively, and sets the z component to zero.
+    * 
     * @param frameTuple2d
     * @throws ReferenceFrameMismatchException
     */
@@ -217,47 +241,19 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       setXY(frameTuple2d.tuple);
    }
 
-   public final double get(Direction direction)
-   {
-      return Direction.get(tuple, direction);
-   }
-
-   /**
-    * Selects a component of this tuple based on {@code index} and returns its value.
-    * <p>
-    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
-    * is {@code z}.
-    * </p>
-    *
-    * @param index the index of the component to get.
-    * @return the value of the component.
-    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
-    */
-   public double getElement(int index)
-   {
-      return tuple.getElement(index);
-   }
-
-   public final void scale(double scaleFactor)
-   {
-      tuple.scale(scaleFactor);
-   }
-
-   public final void scale(double scaleXFactor, double scaleYFactor, double scaleZFactor)
-   {
-      tuple.scale(scaleXFactor, scaleYFactor, scaleZFactor);
-   }
-
+   @Override
    public final double getX()
    {
       return tuple.getX();
    }
 
+   @Override
    public final double getY()
    {
       return tuple.getY();
    }
 
+   @Override
    public final double getZ()
    {
       return tuple.getZ();
@@ -300,316 +296,117 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       return Double.isInfinite(tuple.getX()) || Double.isInfinite(tuple.getY()) || Double.isInfinite(tuple.getZ());
    }
 
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 (this = scaleFactor * tuple1).
-    *
-    * @param scaleFactor double
-    * @param tuple1 Tuple3d
-    */
-   public final void setAndScale(double scaleFactor, Tuple3DReadOnly tuple1)
+   public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly other)
    {
-      tuple.setAndScale(scaleFactor, tuple1);
+      checkReferenceFrameMatch(other);
+      tuple.scaleAdd(scaleFactor, other);
    }
 
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 and then adds tuple2 (this = scaleFactor * tuple1 + tuple2).
-    *
-    * @param scaleFactor double
-    * @param tuple1 Tuple3d
-    * @param tuple2 Tuple3d
-    */
-   public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly tuple1, FrameTuple3DReadOnly tuple2)
    {
+      checkReferenceFrameMatch(tuple1);
+      checkReferenceFrameMatch(tuple2);
       tuple.scaleAdd(scaleFactor, tuple1, tuple2);
    }
 
-   /**
-    * Sets the value of this tuple to the scalar multiplication of itself and then adds tuple1 (this = scaleFactor * this + tuple1).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param tuple1 Tuple3d
-    */
-   public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1)
+   public final void scaleSub(double scaleFactor, FrameTuple3DReadOnly other)
    {
-      tuple.scaleAdd(scaleFactor, tuple1);
+      checkReferenceFrameMatch(other);
+      tuple.scaleSub(scaleFactor, other);
    }
 
    /**
-    * Sets the value of this frameTuple to the scalar multiplication of frameTuple1 (this = scaleFactor * frameTuple1).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 FrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void setAndScale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      setAndScale(scaleFactor, frameTuple1.tuple);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of itself and then adds frameTuple1 (this = scaleFactor * this + frameTuple1).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 FrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      scaleAdd(scaleFactor, frameTuple1.tuple);
-   }
-
-   /**
-    * Sets the value of this frameTuple to the scalar multiplication of frameTuple1 and then adds frameTuple2 (this = scaleFactor * frameTuple1 + frameTuple2).
-    * Checks if reference frames match.
+    * Sets the value of this frameTuple to the scalar multiplication of frameTuple1 and then subs
+    * frameTuple2 (this = scaleFactor * frameTuple1 - frameTuple2). Checks if reference frames
+    * match.
     *
     * @param scaleFactor double
     * @param frameTuple1 FrameTuple<?, ?>
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void scaleSub(double scaleFactor, FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      scaleAdd(scaleFactor, frameTuple1.tuple, frameTuple2.tuple);
+      tuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
    }
 
    /**
-    * Sets the value of this frameTuple to the scalar multiplication of frameTuple1 and then subs frameTuple2 (this = scaleFactor * frameTuple1 - frameTuple2).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 FrameTuple<?, ?>
-    * @param frameTuple2 FrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void scaleSub(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      checkReferenceFrameMatch(frameTuple2);
-
-      tuple.scaleSub(scaleFactor, frameTuple1.tuple, frameTuple2.tuple);
-   }
-
-   /**  
-    * Sets the value of this tuple to the sum of itself and tuple1.
-    * @param tuple1 the other Tuple3d
-    */
-   public final void add(Tuple3DReadOnly tuple1)
-   {
-      tuple.add(tuple1);
-   }
-
-   /**  
-    * Sets the value of this tuple to the sum of itself and tuple1.
-    * @param tuple1 the other Tuple3d
-    */
-   public final void add(double x, double y, double z)
-   {
-      tuple.add(x, y, z);
-   }
-
-   /**
-    * Sets the value of this tuple to the sum of tuple1 and tuple2 (this = tuple1 + tuple2).
-    * @param tuple1 the first Tuple3d
-    * @param tuple2 the second Tuple3d
-    */
-   public final void add(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
-   {
-      tuple.add(tuple1, tuple2);
-   }
-
-   /**  
     * Sets the value of this frameTuple to the sum of itself and frameTuple1 (this += frameTuple1).
     * Checks if reference frames match.
-    * @param frameTuple1 the other Tuple3d
+    * 
+    * @param other the other Tuple3d
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple3D<?, ?> frameTuple1)
+   public final void add(FrameTuple3DReadOnly other)
    {
-      checkReferenceFrameMatch(frameTuple1);
-      add(frameTuple1.tuple);
+      checkReferenceFrameMatch(other);
+      tuple.add(other);
    }
 
    /**
-    * Sets the value of this frameTuple to the sum of frameTuple1 and frameTuple2 (this = frameTuple1 + frameTuple2).
+    * Sets the value of this frameTuple to the sum of frameTuple1 and frameTuple2 (this =
+    * frameTuple1 + frameTuple2).
+    * 
     * @param frameTuple1 the first FrameTuple<?, ?>
     * @param frameTuple2 the second FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void add(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      add(frameTuple1.tuple, frameTuple2.tuple);
+      tuple.add(frameTuple1, frameTuple2);
    }
 
-   /**  
-    * Sets the value of this tuple to the difference of itself and tuple1 (this -= tuple1).
-    * @param tuple1 the other Tuple3d
-    */
-   public final void sub(double x, double y, double z)
-   {
-      tuple.sub(x, y, z);
-   }
-
-   /**  
-    * Sets the value of this tuple to the difference of itself and tuple1 (this -= tuple1).
-    * @param tuple1 the other Tuple3d
-    */
-   public final void sub(Tuple3DReadOnly tuple1)
-   {
-      tuple.sub(tuple1);
-   }
-
-   /**  
-    * Sets the value of this tuple to the difference of tuple1 and tuple2 (this = tuple1 - tuple2).
-    * @param tuple1 the first Tuple3d
-    * @param tuple2 the second Tuple3d
-    */
-   public final void sub(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
-   {
-      tuple.sub(tuple1, tuple2);
-   }
-
-   /**  
-    * Sets the value of this frameTuple to the difference of itself and frameTuple1 (this -= frameTuple1).
-    * @param frameTuple1 the first FrameTuple<?, ?>
+   /**
+    * Sets the value of this frameTuple to the difference of itself and frameTuple1 (this -=
+    * frameTuple1).
+    * 
+    * @param other the first FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple3D<?, ?> frameTuple1)
+   public final void sub(FrameTuple3DReadOnly other)
    {
-      checkReferenceFrameMatch(frameTuple1);
-      sub(frameTuple1.tuple);
+      checkReferenceFrameMatch(other);
+      tuple.sub(other);
    }
 
-   /**  
-    * Sets the value of this frameTuple to the difference of frameTuple1 and frameTuple2 (this = frameTuple1 - frameTuple2).
+   /**
+    * Sets the value of this frameTuple to the difference of frameTuple1 and frameTuple2 (this =
+    * frameTuple1 - frameTuple2).
+    * 
     * @param frameTuple1 the first FrameTuple<?, ?>
     * @param frameTuple2 the second FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void sub(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      sub(frameTuple1.tuple, frameTuple2.tuple);
+      tuple.sub(frameTuple1, frameTuple2);
    }
 
-   /**
-     *  Linearly interpolates between tuples tuple1 and tuple2 and places the result into this tuple:  this = (1-alpha) * tuple1 + alpha * tuple2.
-     *  @param t1  the first tuple
-     *  @param t2  the second tuple  
-     *  @param alpha  the alpha interpolation parameter  
-    */
-   public final void interpolate(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2, double alpha)
+   public final void interpolate(FrameTuple3DReadOnly other, double alpha)
    {
-      tuple.interpolate(tuple1, tuple2, alpha);
+      checkReferenceFrameMatch(other);
+      tuple.interpolate(other, alpha);
    }
 
    /**
-     *  Linearly interpolates between tuples tuple1 and tuple2 and places the result into this tuple:  this = (1-alpha) * tuple1 + alpha * tuple2.
-     *  @param t1  the first tuple
-     *  @param t2  the second tuple  
-     *  @param alpha  the alpha interpolation parameter
+    * Linearly interpolates between tuples tuple1 and tuple2 and places the result into this tuple:
+    * this = (1-alpha) * tuple1 + alpha * tuple2.
+    * 
+    * @param t1 the first tuple
+    * @param t2 the second tuple
+    * @param alpha the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2, double alpha)
+   public final void interpolate(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2, double alpha)
    {
-      frameTuple1.checkReferenceFrameMatch(frameTuple2);
-
-      interpolate(frameTuple1.tuple, frameTuple2.tuple, alpha);
-      referenceFrame = frameTuple1.getReferenceFrame();
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * its first row index.
-    *
-    * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
-    */
-   public final void get(DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * {@code startRow}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param tupleMatrixToPack the column vector in which this frame tuple is stored. Modified.
-    */
-   public final void get(int startRow, DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(startRow, tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * {@code startRow} at the column index {@code column}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param column the column index to write in the dense-matrix.
-    * @param tupleMatrixToPack the matrix in which this frame tuple is stored. Modified.
-    */
-   public final void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(startRow, column, tupleMatrixToPack);
-   }
-
-   public final void clipToMinMax(double minValue, double maxValue)
-   {
-      this.tuple.clipToMinMax(minValue, maxValue);
-   }
-
-   public final void negate()
-   {
-      tuple.negate();
-   }
-
-   public final void absolute()
-   {
-      tuple.absolute();
-   }
-
-   /**
-     * Returns true if the L-infinite distance between this tuple and tuple1 is less than or equal to the epsilon parameter, otherwise returns false.
-     * The L-infinite distance is equal to MAX[abs(x1-x2), abs(y1-y2), abs(z1-z2)].
-    * @param tuple1 Tuple3d
-    * @param threshold double
-    */
-   public final boolean epsilonEquals(Tuple3DReadOnly tuple1, double threshold)
-   {
-      if (tuple1 == null)
-      {
-         return false;
-      }
-
-      return tuple.epsilonEquals(tuple1, threshold);
-   }
-
-   /**
-     * Returns true if the L-infinite distance between this frameTuple and frameTuple1 is less than or equal to the epsilon parameter, otherwise returns false.
-     * The L-infinite distance is equal to MAX[abs(x1-x2), abs(y1-y2), abs(z1-z2)].
-    * @param frameTuple1 FrameTuple<?, ?>
-    * @param threshold double
-    * @throws ReferenceFrameMismatchException
-    */
-   public final boolean epsilonEquals(FrameTuple3D<?, ?> frameTuple1, double threshold)
-   {
-      if (frameTuple1 == null)
-      {
-         return false;
-      }
-
       checkReferenceFrameMatch(frameTuple1);
-
-      return epsilonEquals(frameTuple1.tuple, threshold);
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.interpolate(frameTuple1, frameTuple2, alpha);
    }
 }

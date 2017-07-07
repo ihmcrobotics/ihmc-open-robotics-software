@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -17,10 +18,17 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FrameVectorTest extends FrameTupleTest<Vector3D>
+public class FrameVectorTest extends FrameTupleTest<FrameVector, Vector3D>
 {
+   @Override
+   public FrameVector createTuple(ReferenceFrame referenceFrame, double x, double y, double z)
+   {
+      return createFrameTuple(referenceFrame, x, y, z);
+   }
 
    @After
    public void tearDown()
@@ -37,6 +45,12 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
    public FrameVector createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       return new FrameVector(referenceFrame, x, y, z);
+   }
+
+   @Override
+   public double getEpsilon()
+   {
+      return 1.0e-15;
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -339,5 +353,12 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
    {
       expected.checkReferenceFrameMatch(actual);
       EuclidCoreTestTools.assertTuple3DEquals(expected.getVector(), actual.getVector(), delta);
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      assertSuperMethodsAreOverloaded(FrameTuple3DReadOnly.class, Tuple3DReadOnly.class, FrameVector.class, Vector3DBasics.class);
    }
 }
