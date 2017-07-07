@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -9,16 +8,26 @@ import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnlyTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
 {
+
+   @Override
+   public FramePoint2d createTuple(ReferenceFrame referenceFrame, double x, double y)
+   {
+      return createFrameTuple(referenceFrame, x, y);
+   }
 
    @Override
    public FramePoint2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y)
@@ -29,6 +38,12 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
    @After
    public void tearDown() throws Exception
    {
+   }
+
+   @Override
+   public double getEpsilon()
+   {
+      return 1.0e-15;
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -150,7 +165,6 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
    public void testFramePoint2d_ReferenceFrame_double_String()
    {
       double[] position = { 1.0, 2.0 };
-      String name = "testPointOne";
       FramePoint2d point = new FramePoint2d(worldFrame, position);
       assertEquals(1.0, point.getX(), 1e-7);
       assertEquals(2.0, point.getY(), 1e-7);
@@ -446,5 +460,12 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
       double ret = (framePoint2.getX() - framePoint1.getX()) * (framePoint2.getX() - framePoint1.getX()) + (framePoint2.getY() - framePoint1.getY())
             * (framePoint2.getY() - framePoint1.getY());
       return ret;
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      FrameTuple3DReadOnlyTest.assertSuperMethodsAreOverloaded(FrameTuple2DReadOnly.class, Tuple2DReadOnly.class, FramePoint2d.class, Point2DBasics.class);
    }
 }

@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -11,21 +9,37 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnlyTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 {
    @Override
+   public FrameVector2d createTuple(ReferenceFrame referenceFrame, double x, double y)
+   {
+      return createFrameTuple(referenceFrame, x, y);
+   }
+
+   @Override
    public FrameVector2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y)
    {
       return new FrameVector2d(referenceFrame, x, y);
+   }
+
+   @Override
+   public double getEpsilon()
+   {
+      return 1.0e-15;
    }
 
    @After
@@ -449,5 +463,12 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
       alpha.getX();
       beta.getY();
       beta.getZ();
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      FrameTuple3DReadOnlyTest.assertSuperMethodsAreOverloaded(FrameTuple2DReadOnly.class, Tuple2DReadOnly.class, FrameVector2d.class, Vector2DBasics.class);
    }
 }

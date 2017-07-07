@@ -119,10 +119,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     *
     * @throws ReferenceFrameMismatchException
     */
-   public final void set(FrameTuple2D<?, ?> frameTuple2d)
+   public final void set(FrameTuple2DReadOnly frameTuple2d)
    {
       checkReferenceFrameMatch(frameTuple2d);
-      set(frameTuple2d.tuple);
+      tuple.set(frameTuple2d);
    }
 
    /**
@@ -146,9 +146,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       setIncludingFrame(frameTuple.getReferenceFrame(), frameTuple.getX(), frameTuple.getY());
    }
 
-   public final void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
+   public final void setIncludingFrame(FrameTuple2DReadOnly frameTuple2d)
    {
-      setIncludingFrame(frameTuple2d.referenceFrame, frameTuple2d.tuple);
+      this.referenceFrame = frameTuple2d.getReferenceFrame();
+      tuple.set(frameTuple2d);
    }
 
    public final void setX(double x)
@@ -211,10 +212,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple1 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scale(double scaleFactor, FrameTuple2D<?, ?> frameTuple1)
+   public final void setAndScale(double scaleFactor, FrameTuple2DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      setAndScale(scaleFactor, frameTuple1.tuple);
+      tuple.setAndScale(scaleFactor, frameTuple1);
    }
 
    /**
@@ -227,11 +228,11 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple2 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple2D<?, ?> frameTuple1, FrameTuple2D<?, ?> frameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple2DReadOnly frameTuple1, FrameTuple2DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      scaleAdd(scaleFactor, frameTuple1.tuple, frameTuple2.tuple);
+      tuple.scaleAdd(scaleFactor, frameTuple1, frameTuple2);
    }
 
    /**
@@ -242,10 +243,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple1 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple2D<?, ?> frameTuple1)
+   public final void scaleAdd(double scaleFactor, FrameTuple2DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      scaleAdd(scaleFactor, frameTuple1.tuple);
+      tuple.scaleAdd(scaleFactor, frameTuple1);
    }
 
    /**
@@ -255,10 +256,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple1 the other Tuple2d
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple2D<?, ?> frameTuple1)
+   public final void add(FrameTuple2DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      add(frameTuple1.tuple);
+      tuple.add(frameTuple1);
    }
 
    /**
@@ -269,11 +270,11 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple2 the second FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple2D<?, ?> frameTuple1, FrameTuple2D<?, ?> frameTuple2)
+   public final void add(FrameTuple2DReadOnly frameTuple1, FrameTuple2DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      add(frameTuple1.tuple, frameTuple2.tuple);
+      tuple.add(frameTuple1, frameTuple2);
    }
 
    /**
@@ -283,10 +284,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple1 the first FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple2D<?, ?> frameTuple1)
+   public final void sub(FrameTuple2DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      sub(frameTuple1.tuple);
+      tuple.sub(frameTuple1);
    }
 
    /**
@@ -297,11 +298,11 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param frameTuple2 the second FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple2D<?, ?> frameTuple1, FrameTuple2D<?, ?> frameTuple2)
+   public final void sub(FrameTuple2DReadOnly frameTuple1, FrameTuple2DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      sub(frameTuple1.tuple, frameTuple2.tuple);
+      tuple.sub(frameTuple1, frameTuple2);
    }
 
    /**
@@ -313,27 +314,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param alpha the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple2D<?, ?> frameTuple1, FrameTuple2D<?, ?> frameTuple2, double alpha)
-   {
-      frameTuple1.checkReferenceFrameMatch(frameTuple2);
-
-      interpolate(frameTuple1.tuple, frameTuple2.tuple, alpha);
-      referenceFrame = frameTuple1.getReferenceFrame();
-   }
-
-   /**
-    * Returns true if the L-infinite distance between this frameTuple and frameTuple1 is less than
-    * or equal to the epsilon parameter, otherwise returns false. The L-infinite distance is equal
-    * to MAX[abs(x1-x2), abs(y1-y2)].
-    *
-    * @param frameTuple1 FrameTuple2d<?, ?>
-    * @param threshold double
-    * @throws ReferenceFrameMismatchException
-    */
-   public final boolean epsilonEquals(FrameTuple2D<?, ?> frameTuple1, double threshold)
+   public final void interpolate(FrameTuple2DReadOnly frameTuple1, FrameTuple2DReadOnly frameTuple2, double alpha)
    {
       checkReferenceFrameMatch(frameTuple1);
-
-      return epsilonEquals(frameTuple1.tuple, threshold);
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.interpolate(frameTuple1, frameTuple2, alpha);
    }
 }
