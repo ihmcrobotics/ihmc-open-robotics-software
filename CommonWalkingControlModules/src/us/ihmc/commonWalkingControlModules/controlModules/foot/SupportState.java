@@ -269,7 +269,7 @@ public class SupportState extends AbstractFootControlState
       footSwitch.computeAndPackCoP(cop2d);
       if (cop2d.containsNaN())
          cop2d.setToZero(contactableFoot.getSoleFrame());
-      framePosition.setXYIncludingFrame(cop2d);
+      framePosition.setIncludingFrame(cop2d, 0.0);
       frameOrientation.setToZero(contactableFoot.getSoleFrame());
       controlFrame.setPoseAndUpdate(framePosition, frameOrientation);
 
@@ -282,7 +282,7 @@ public class SupportState extends AbstractFootControlState
       // assemble feedback command
       bodyFixedControlledPose.setToZero(controlFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      desiredCopPosition.setXYIncludingFrame(cop2d);
+      desiredCopPosition.setIncludingFrame(cop2d, 0.0);
       desiredCopPosition.setIncludingFrame(desiredSoleFrame, desiredCopPosition.getPoint());
       desiredCopPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);

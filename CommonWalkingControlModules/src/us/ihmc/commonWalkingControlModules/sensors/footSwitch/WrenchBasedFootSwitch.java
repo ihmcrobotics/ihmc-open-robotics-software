@@ -299,7 +299,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          yoResolvedCoP.set(resolvedCoP);
          
          resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
-         resolvedCoP3d.setXY(resolvedCoP);
+         resolvedCoP3d.set(resolvedCoP);
          resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
       }
    }

@@ -128,7 +128,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       walking.set(true);
 
       FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
-      direction.setXY(direction2dInWorld);
+      direction.set(direction2dInWorld);
       RobotSide swingSide = findStepSide(direction);
 
       FramePoint location = computeSteppingLocation(direction, swingSide);
@@ -194,7 +194,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       Point2D location2d = reachableRegion.orthogonalProjectionCopy(desiredLocation);
 
       FramePoint location = new FramePoint(stanceSoleFrame);
-      location.setXY(location2d);
+      location.set(location2d);
       location.changeFrame(ReferenceFrame.getWorldFrame());
 
       return location;

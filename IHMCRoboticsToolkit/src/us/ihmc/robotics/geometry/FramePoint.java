@@ -80,7 +80,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
    public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
    {
       super(frameTuple2d.getReferenceFrame(), new Point3D());
-      setXY(frameTuple2d);
+      set(frameTuple2d);
    }
 
    /**

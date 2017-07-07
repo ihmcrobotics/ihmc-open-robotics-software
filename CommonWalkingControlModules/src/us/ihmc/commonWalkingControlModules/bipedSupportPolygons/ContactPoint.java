@@ -56,13 +56,13 @@ public class ContactPoint implements ContactPointInterface
    @Override
    public void getPosition2d(Point2D position2d)
    {
-      position.setXY(position2d);
+      position2d.set(position);
    }
 
    @Override
    public void setPosition2d(FramePoint2d position2d)
    {
-      position.setXY(position2d);
+      position.set(position2d, 0.0);
    }
 
    @Override

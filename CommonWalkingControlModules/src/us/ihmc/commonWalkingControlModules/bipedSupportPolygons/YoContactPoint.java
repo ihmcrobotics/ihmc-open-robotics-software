@@ -82,17 +82,17 @@ public class YoContactPoint implements ContactPointInterface
    @Override
    public void setPosition2d(FramePoint2d position2d)
    {
-      yoPosition.setXY(position2d);
+      yoPosition.set(position2d);
    }
 
    public void setPosition2d(Point2D contactPointLocation)
    {
-      yoPosition.setXY(contactPointLocation);
+      yoPosition.set(contactPointLocation);
    }
 
    public void setPosition(FramePoint2d contactPointLocation)
    {
-      yoPosition.setXY(contactPointLocation);
+      yoPosition.set(contactPointLocation);
    }
 
    @Override

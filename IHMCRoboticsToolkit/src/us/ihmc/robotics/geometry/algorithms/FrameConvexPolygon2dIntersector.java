@@ -219,11 +219,11 @@ public class FrameConvexPolygon2dIntersector
       }
       if (!lineIntersectionOnPolygonPlane.getFirst().containsNaN())
       {
-         intersectionWithPolygon.getFirst().setXYIncludingFrame(lineIntersectionOnPolygonPlane.getFirst());
+         intersectionWithPolygon.getFirst().setIncludingFrame(lineIntersectionOnPolygonPlane.getFirst(), 0.0);
       }
       if (!lineIntersectionOnPolygonPlane.getSecond().containsNaN())
       {
-         intersectionWithPolygon.getSecond().setXYIncludingFrame(lineIntersectionOnPolygonPlane.getSecond());
+         intersectionWithPolygon.getSecond().setIncludingFrame(lineIntersectionOnPolygonPlane.getSecond(), 0.0);
       }
    }
 

@@ -83,29 +83,16 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       this.tuple.set(tuple);
    }
 
-   /**
-    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and
-    * sets the z component to zero.
-    * 
-    * @param tuple2d
-    */
-   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple, double z)
    {
       this.referenceFrame = referenceFrame;
-      setXY(tuple);
+      set(tuple, z);
    }
 
-   /**
-    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y
-    * respectively, and sets the z component to zero. Changes the referenceFrame of this frameTuple
-    * to frameTuple2d.getReferenceFrame().
-    * 
-    * @param frameTuple2d
-    */
-   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d, double z)
    {
       referenceFrame = frameTuple2d.getReferenceFrame();
-      setXY(frameTuple2d);
+      set(frameTuple2d, z);
    }
 
    public final void setIncludingFrame(FrameTuple3DReadOnly other)
@@ -195,105 +182,6 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    {
       this.referenceFrame = referenceFrame;
       tuple.set(startRow, column, tupleDenseMatrix);
-   }
-
-   @Override
-   public final void setX(double x)
-   {
-      tuple.setX(x);
-   }
-
-   @Override
-   public final void setY(double y)
-   {
-      tuple.setY(y);
-   }
-
-   @Override
-   public final void setZ(double z)
-   {
-      tuple.setZ(z);
-   }
-
-   /**
-    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and
-    * sets the z component to zero.
-    * 
-    * @param tuple2d
-    */
-   public void setXY(Tuple2DReadOnly tuple2d)
-   {
-      this.tuple.setX(tuple2d.getX());
-      this.tuple.setY(tuple2d.getY());
-      this.tuple.setZ(0.0);
-   }
-
-   /**
-    * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y
-    * respectively, and sets the z component to zero.
-    * 
-    * @param frameTuple2d
-    * @throws ReferenceFrameMismatchException
-    */
-   public void setXY(FrameTuple2d<?, ?> frameTuple2d)
-   {
-      checkReferenceFrameMatch(frameTuple2d);
-      setXY(frameTuple2d.tuple);
-   }
-
-   @Override
-   public final double getX()
-   {
-      return tuple.getX();
-   }
-
-   @Override
-   public final double getY()
-   {
-      return tuple.getY();
-   }
-
-   @Override
-   public final double getZ()
-   {
-      return tuple.getZ();
-   }
-
-   /**
-    * Returns a Point3D copy of the tuple in this FrameTuple.
-    *
-    * @return Point3D
-    */
-   public final Point3D getPointCopy()
-   {
-      return new Point3D(tuple);
-   }
-
-   /**
-    * Returns a Vector3d copy of the tuple in this FrameTuple.
-    *
-    * @return Vector3d
-    */
-   public final Vector3D getVectorCopy()
-   {
-      return new Vector3D(tuple);
-   }
-
-   @Override
-   public final void get(Tuple3DBasics tuple3dToPack)
-   {
-      tuple3dToPack.set(tuple);
-   }
-
-   public final void checkForNaN()
-   {
-      if (containsNaN())
-         throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
-   }
-
-   public final boolean containsInfinity()
-   {
-      return Double.isInfinite(tuple.getX()) || Double.isInfinite(tuple.getY()) || Double.isInfinite(tuple.getZ());
    }
 
    public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly other)
@@ -409,4 +297,85 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       checkReferenceFrameMatch(frameTuple2);
       tuple.interpolate(frameTuple1, frameTuple2, alpha);
    }
+
+   @Override
+   public final void setX(double x)
+   {
+      tuple.setX(x);
+   }
+
+   @Override
+   public final void setY(double y)
+   {
+      tuple.setY(y);
+   }
+
+   @Override
+   public final void setZ(double z)
+   {
+      tuple.setZ(z);
+   }
+
+   public void set(FrameTuple2d<?, ?> frameTuple2d)
+   {
+      checkReferenceFrameMatch(frameTuple2d);
+      tuple.set(frameTuple2d.tuple);
+   }
+
+   public void set(FrameTuple2d<?, ?> frameTuple2d, double z)
+   {
+      checkReferenceFrameMatch(frameTuple2d);
+      tuple.set(frameTuple2d.tuple, z);
+   }
+
+   @Override
+   public final double getX()
+   {
+      return tuple.getX();
+   }
+
+   @Override
+   public final double getY()
+   {
+      return tuple.getY();
+   }
+
+   @Override
+   public final double getZ()
+   {
+      return tuple.getZ();
+   }
+
+   /**
+    * Returns a Point3D copy of the tuple in this FrameTuple.
+    *
+    * @return Point3D
+    */
+   public final Point3D getPointCopy()
+   {
+      return new Point3D(tuple);
+   }
+
+   /**
+    * Returns a Vector3d copy of the tuple in this FrameTuple.
+    *
+    * @return Vector3d
+    */
+   public final Vector3D getVectorCopy()
+   {
+      return new Vector3D(tuple);
+   }
+
+   @Override
+   public final void get(Tuple3DBasics tuple3dToPack)
+   {
+      tuple3dToPack.set(tuple);
+   }
+
+   public final void checkForNaN()
+   {
+      if (containsNaN())
+         throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
+   }
+
 }

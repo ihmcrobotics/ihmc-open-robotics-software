@@ -117,7 +117,7 @@ public class PlaneContactWrenchProcessor
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
-            tempCoP3d.setXYIncludingFrame(cop);
+            tempCoP3d.setIncludingFrame(cop, 0.0);
             centersOfPressureWorld.get(contactablePlaneBody).setAndMatchFrame(tempCoP3d);
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(tempForce.length());
             normalTorques.get(contactablePlaneBody).set(normalTorque);

@@ -246,7 +246,7 @@ public class SwingState extends AbstractUnconstrainedState
       FramePoint2d toeContactPoint2d = new FramePoint2d();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint toeContactPoint = new FramePoint();
-      toeContactPoint.setXYIncludingFrame(toeContactPoint2d);
+      toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
       toeContactPoint.changeFrame(footFrame);
 
       transformFromToeToAnkle.setTranslation(toeContactPoint.getVectorCopy());

@@ -168,7 +168,7 @@ public class PushRecoveryControlModule
          return;
       }
 
-      projectedCapturePoint.setXYIncludingFrame(this.capturePoint2d);
+      projectedCapturePoint.setIncludingFrame(this.capturePoint2d, 0.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {

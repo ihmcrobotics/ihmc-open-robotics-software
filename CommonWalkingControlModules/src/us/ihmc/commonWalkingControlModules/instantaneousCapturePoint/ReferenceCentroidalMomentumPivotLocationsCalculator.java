@@ -363,7 +363,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       if (firstEntryCMPForSingleSupport.containsNaN())
          computeEntryCMPForSupportFoot(cmp, supportSide, null, null);
       else
-         cmp.setXYIncludingFrame(firstEntryCMPForSingleSupport);
+         cmp.setIncludingFrame(firstEntryCMPForSingleSupport, 0.0);
 
       ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide);
       cmp.changeFrame(supportSoleFrame);
@@ -477,7 +477,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          int numberOfContactPoints = predictedContactPoints.size();
          for (int i = 0; i < numberOfContactPoints; i++)
          {
-            tempFramePoint.setXYIncludingFrame(footstep.getSoleReferenceFrame(), predictedContactPoints.get(i));
+            tempFramePoint.setIncludingFrame(footstep.getSoleReferenceFrame(), predictedContactPoints.get(i), 0.0);
             convexPolygonToExtend.addVertexByProjectionOntoXYPlane(tempFramePoint);
          }
       }
@@ -486,7 +486,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          ConvexPolygon2D defaultPolygon = defaultFootPolygons.get(footstep.getRobotSide());
          for (int i = 0; i < defaultPolygon.getNumberOfVertices(); i++)
          {
-            tempFramePoint.setXYIncludingFrame(footstep.getSoleReferenceFrame(), defaultPolygon.getVertex(i));
+            tempFramePoint.setIncludingFrame(footstep.getSoleReferenceFrame(), defaultPolygon.getVertex(i), 0.0);
             convexPolygonToExtend.addVertexByProjectionOntoXYPlane(tempFramePoint);
          }
       }
@@ -547,7 +547,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          cmp2d.add(offset.getX(), offset.getY());
       }
 
-      entryCMPToPack.setXYIncludingFrame(cmp2d);
+      entryCMPToPack.setIncludingFrame(cmp2d, 0.0);
       entryCMPToPack.changeFrame(worldFrame);
    }
 
@@ -646,7 +646,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
                minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
       }
 
-      exitCMPToPack.setXYIncludingFrame(cmp2d);
+      exitCMPToPack.setIncludingFrame(cmp2d, 0.0);
       exitCMPToPack.changeFrame(worldFrame);
    }
 
@@ -690,11 +690,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private void computeFinalCMPBetweenSupportFeet(int cmpIndex, FrameConvexPolygon2d footA, FrameConvexPolygon2d footB)
    {
       footA.getCentroid(tempCentroid);
-      firstCMP.setXYIncludingFrame(tempCentroid);
+      firstCMP.setIncludingFrame(tempCentroid, 0.0);
       firstCMP.changeFrame(worldFrame);
 
       footB.getCentroid(tempCentroid);
-      secondCMP.setXYIncludingFrame(tempCentroid);
+      secondCMP.setIncludingFrame(tempCentroid, 0.0);
       secondCMP.changeFrame(worldFrame);
 
       upcomingSupport.clear(worldFrame);
@@ -710,7 +710,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       exitCMPs.get(cmpIndex).switchCurrentReferenceFrame(worldFrame);
 
       upcomingSupport.getCentroid(tempCentroid);
-      tempCentroid3d.setXYIncludingFrame(tempCentroid);
+      tempCentroid3d.setIncludingFrame(tempCentroid, 0.0);
 
       double chicken = MathTools.clamp(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
       if (chicken <= 0.5)

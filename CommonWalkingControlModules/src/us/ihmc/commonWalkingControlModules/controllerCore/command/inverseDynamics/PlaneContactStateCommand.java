@@ -62,7 +62,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
    public void addPointInContact(FramePoint2d newPointInContact)
    {
-      contactPoints.add().setXYIncludingFrame(newPointInContact);
+      contactPoints.add().setIncludingFrame(newPointInContact, 0.0);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
    }
 
@@ -80,7 +80,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       clearContactPoints();
       for (int i = 0; i < newPointsInContact.size(); i++)
       {
-         contactPoints.add().setXYIncludingFrame(contactFrame, newPointsInContact.get(i));
+         contactPoints.add().setIncludingFrame(contactFrame, newPointsInContact.get(i), 0.0);
          maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
       }
    }

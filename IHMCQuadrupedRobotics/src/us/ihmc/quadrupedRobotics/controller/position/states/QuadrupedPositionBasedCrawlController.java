@@ -1591,7 +1591,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          case COM_INCIRCLE:
             lineSegment.set(diagonalFootstep2d, acrossBodyFootstep2d);
             lineSegment.getClosestPointOnLineSegment(comProjectionOnOutsideLegs2d, centerOfMassPoint2d);
-            comProjectionOnOutsideLegs.setXY(comProjectionOnOutsideLegs2d);
+            comProjectionOnOutsideLegs.set(comProjectionOnOutsideLegs2d, 0.0);
 
             safeToStepSupportPolygon.clear();
             safeToStepSupportPolygon.setFootstep(currentSwingLeg, centerOfMassFramePoint);
@@ -1872,7 +1872,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
 
          comTargetToPack.add(tempFrameVector.getVector());
-         circleCenter.setXY(comTargetToPack);
+         circleCenter.set(comTargetToPack, 0.0);
       }
 
       public void reinitializeCoMTrajectory()
@@ -1900,8 +1900,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          FrameVector desiredBodyVelocityCurrent = desiredCoMVelocity.getFrameTuple();
          initialCoMVelocity.set(desiredBodyVelocityCurrent);
 
-         desiredCoMTarget.setXY(target);
-         desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
+         desiredCoMTarget.set(target, desiredBodyCurrent.getZ());
 
          double distance = initialCoMPosition.distance(desiredCoMTarget);
          desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);

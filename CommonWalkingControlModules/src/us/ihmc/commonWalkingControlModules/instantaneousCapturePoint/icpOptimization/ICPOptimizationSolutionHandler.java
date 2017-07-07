@@ -213,9 +213,9 @@ public class ICPOptimizationSolutionHandler
    private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
-      solutionLocation.setXYIncludingFrame(solutionLocationToPack);
-      referenceLocation.setXYIncludingFrame(referenceLocation2d);
-      previousLocation.setXYIncludingFrame(currentSolutionLocation);
+      solutionLocation.setIncludingFrame(solutionLocationToPack, 0.0);
+      referenceLocation.setIncludingFrame(referenceLocation2d, 0.0);
+      previousLocation.setIncludingFrame(currentSolutionLocation, 0.0);
 
       solutionLocation.changeFrame(worldFrame);
       referenceLocation.changeFrame(worldFrame);

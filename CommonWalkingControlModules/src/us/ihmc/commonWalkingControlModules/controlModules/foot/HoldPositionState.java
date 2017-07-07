@@ -251,7 +251,7 @@ public class HoldPositionState extends AbstractFootControlState
       }
 
       // Update the control frame to be at the desired center of pressure
-      desiredCoP3d.setXYIncludingFrame(cop); // used to be desiredCoP
+      desiredCoP3d.setIncludingFrame(cop, 0.0); // used to be desiredCoP
       desiredCoP3d.changeFrame(bodyFixedControlledPose.getReferenceFrame());
       bodyFixedControlledPose.setPosition(desiredCoP3d);
 
@@ -293,7 +293,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       footPolygon.getClosestEdge(closestEdgeToCoP, cop);
       closestEdgeToCoP.getFrameVector(edgeVector2d);
-      edgeVector.setXYIncludingFrame(edgeVector2d);
+      edgeVector.setIncludingFrame(edgeVector2d, 0.0);
       edgeVector.normalize();
       desiredOrientationCopy.setIncludingFrame(desiredOrientation);
       desiredOrientationCopy.changeFrame(footPolygon.getReferenceFrame());

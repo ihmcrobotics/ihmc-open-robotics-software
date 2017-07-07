@@ -671,7 +671,7 @@ public class BalanceManager
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
       centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
       shrunkSupportPolygon.orthogonalProjection(centerOfMassPosition2d);
-      centerOfMassPosition.setXY(centerOfMassPosition2d);
+      centerOfMassPosition.set(centerOfMassPosition2d, 0.0);
 
       centerOfMassPosition.changeFrame(worldFrame);
       icpPlanner.holdCurrentICP(centerOfMassPosition);

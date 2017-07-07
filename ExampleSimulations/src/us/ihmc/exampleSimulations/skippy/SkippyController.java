@@ -660,7 +660,7 @@ public class SkippyController implements RobotController
       else
          tempCMP.set(0.0, 0.0);
       tempCMP.add(com.getFramePoint2dCopy());
-      this.cmpFromParameterizedReaction.setXY(tempCMP);
+      this.cmpFromParameterizedReaction.set(tempCMP, 0.0);
    }
 
    /*

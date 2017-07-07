@@ -610,7 +610,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          icpPlanner.compute(currentTime);
          icpPlanner.getDesiredCapturePointPosition(desiredICP);
          icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
-         desiredICP3d.setXY(desiredICP);
+         desiredICP3d.set(desiredICP, 0.0);
          bagOfBalls.setBall(desiredICP3d, i);
       }
 
