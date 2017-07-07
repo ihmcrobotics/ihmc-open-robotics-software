@@ -424,17 +424,6 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testCheckForNaN()
-   {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 6.0, 50.0, 2.0);
-
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), Math.sqrt(1.0), 2.0, 3.0);
-      alpha.checkForNaN();
-      beta.checkForNaN();
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testInterpolate()
    {
       FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), -1.0, 0.0, 17.0);

@@ -322,19 +322,6 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       ft1.set(framepoint2d);
    }
 
-   // NaN was found in beta, commented out for further testing
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testCheckForNaN()
-   {
-      FrameTuple3D<?, ?> alpha = createFrameTuple(ReferenceFrame.getWorldFrame(), 6.0, 50.0, 2.0);
-      FrameTuple3D<?, ?> beta = createFrameTuple(ReferenceFrame.getWorldFrame(), Math.sqrt(1.0), 2.0, 3.0);
-
-      alpha.checkForNaN();
-      beta.checkForNaN();
-   }
-
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGets()
@@ -1256,53 +1243,22 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
    public final void testCheckForNaNAndContainsNaN()
    {
       FrameTuple3D<?, ?> framePoint = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
-      framePoint.checkForNaN();
       assertFalse(framePoint.containsNaN());
 
       framePoint.setX(Double.NaN);
       assertTrue(framePoint.containsNaN());
 
-      try
-      {
-         framePoint.checkForNaN();
-         fail("Failed to throw exception");
-      }
-      catch (RuntimeException e)
-      {
-      }
-
       framePoint.setX(1.0);
-      framePoint.checkForNaN();
       assertFalse(framePoint.containsNaN());
       framePoint.setY(Double.NaN);
       assertTrue(framePoint.containsNaN());
 
-      try
-      {
-         framePoint.checkForNaN();
-         fail("Failed to throw exception");
-      }
-      catch (RuntimeException e)
-      {
-      }
-
       framePoint.setY(2.0);
-      framePoint.checkForNaN();
       assertFalse(framePoint.containsNaN());
       framePoint.setZ(Double.NaN);
       assertTrue(framePoint.containsNaN());
 
-      try
-      {
-         framePoint.checkForNaN();
-         fail("Failed to throw exception");
-      }
-      catch (RuntimeException e)
-      {
-      }
-
       framePoint.setZ(3.0);
-      framePoint.checkForNaN();
       assertFalse(framePoint.containsNaN());
    }
 
