@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public abstract class FrameTuple2dTest<T extends FrameTuple2D<?, ?>>
+public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
 {
    protected static final boolean VERBOSE = false;
 
