@@ -151,12 +151,12 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
       resultToPack.add(tempX, tempY, tempZ);
    }
 
-   public void pitchAboutPoint(FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
+   public static void pitchAboutPoint(FramePoint pointToTransform, FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
    {
-      checkReferenceFrameMatch(pointToPitchAbout);
-      double tempX = getX() - pointToPitchAbout.getX();
-      double tempY = getY() - pointToPitchAbout.getY();
-      double tempZ = getZ() - pointToPitchAbout.getZ();
+      pointToTransform.checkReferenceFrameMatch(pointToPitchAbout);
+      double tempX = pointToTransform.getX() - pointToPitchAbout.getX();
+      double tempY = pointToTransform.getY() - pointToPitchAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToPitchAbout.getZ();
 
       double cosAngle = Math.cos(pitch);
       double sinAngle = Math.sin(pitch);
