@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -163,7 +164,7 @@ public class FootStepPlanner
          bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
          bodyPoseProjectedInFuture.getPositionIncludingFrame(bodyPositionProjectedInFuture);
          centerOfTurn.changeFrame(bodyZUpFrame);
-         FramePoint.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
+         GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
          bodyPoseProjectedInFuture.setPosition(bodyPositionProjectedInFuture);
          bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
          

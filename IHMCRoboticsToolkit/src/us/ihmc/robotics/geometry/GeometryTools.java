@@ -900,4 +900,47 @@ public class GeometryTools
    
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }
+
+   public static void pitchAboutPoint(FramePoint pointToTransform, FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToPitchAbout);
+      double tempX = pointToTransform.getX() - pointToPitchAbout.getX();
+      double tempY = pointToTransform.getY() - pointToPitchAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToPitchAbout.getZ();
+   
+      double cosAngle = Math.cos(pitch);
+      double sinAngle = Math.sin(pitch);
+   
+      double x = cosAngle * tempX + sinAngle * tempZ;
+      tempZ = -sinAngle * tempX + cosAngle * tempZ;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToPitchAbout);
+      resultToPack.add(tempX, tempY, tempZ);
+   }
+
+   /**
+    * yawAboutPoint
+    *
+    * @param pointToYawAbout FramePoint
+    * @param yaw double
+    * @return CartesianPositionFootstep
+    */
+   public static void yawAboutPoint(FramePoint pointToTransform, FramePoint pointToYawAbout, double yaw, FramePoint resultToPack)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = pointToTransform.getX() - pointToYawAbout.getX();
+      double tempY = pointToTransform.getY() - pointToYawAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToYawAbout.getZ();
+   
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
+   
+      double x = cosAngle * tempX + -sinAngle * tempY;
+      tempY = sinAngle * tempX + cosAngle * tempY;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToYawAbout);
+      resultToPack.add(tempX, tempY, tempZ);
+   }
 }
