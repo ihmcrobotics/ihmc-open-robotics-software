@@ -10,9 +10,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * This class is a hack to provide all setter methods of {@link YoFramePointInMultipleFrames} for {@link YoFrameEuclideanTrajectoryPoint}
- * and then some more ;)
- *
+ * Adds some visualization methods to the YoFrameEuclideanTrajectoryPoint class 
  */
 public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 {  
@@ -27,55 +25,55 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       this.registry = registry;
    }
    
-   public FramePoint getFrameTuple()
-   {
-      getPositionIncludingFrame(localPosition);
-      return localPosition;
-   }
-   
-   public void getFrameTuple2dIncludingFrame(FramePoint2d pointToPack)
-   {
-      pointToPack.setIncludingFrame(getPosition().getReferenceFrame(), getPosition().getX(), getPosition().getY());
-   }
-   
-   public void set(FramePoint position)
-   {
-      getPosition().set(position);
-      putYoValuesIntoFrameWaypoint();
-   }
-   
-   public void set(YoFramePoint position)
-   {
-      getPosition().set(position);
-      putYoValuesIntoFrameWaypoint();
-   }
-   
-   public void set(CoPTrajectoryPoint position)
-   {
-      getPosition().set(position.getPosition());
-      putYoValuesIntoFrameWaypoint();
-   }
-   
-   public void setIncludingFrame(FramePoint position)
-   {      
-      switchCurrentReferenceFrame(position.getReferenceFrame());
-      getPosition().set(position);
-      putYoValuesIntoFrameWaypoint();
-   }
-   
-   public void setIncludingFrame(YoFramePoint position)
-   {
-      switchCurrentReferenceFrame(position.getReferenceFrame());
-      getPosition().set(position);
-      putYoValuesIntoFrameWaypoint();
-   }
-   
-   public void setIncludingFrame(CoPTrajectoryPoint position)
-   {
-      switchCurrentReferenceFrame(position.getReferenceFrame());
-      getPosition().set(position.getFrameTuple());
-      putYoValuesIntoFrameWaypoint();
-   }
+//   public FramePoint getFrameTuple()
+//   {
+//      getPositionIncludingFrame(localPosition);
+//      return localPosition;
+//   }
+//   
+//   public void getFrameTuple2dIncludingFrame(FramePoint2d pointToPack)
+//   {
+//      pointToPack.setIncludingFrame(getPosition().getReferenceFrame(), getPosition().getX(), getPosition().getY());
+//   }
+//   
+//   public void set(FramePoint position)
+//   {
+//      getPosition().set(position);
+//      putYoValuesIntoFrameWaypoint();
+//   }
+//   
+//   public void set(YoFramePoint position)
+//   {
+//      getPosition().set(position);
+//      putYoValuesIntoFrameWaypoint();
+//   }
+//   
+//   public void set(CoPTrajectoryPoint position)
+//   {
+//      getPosition().set(position.getPosition());
+//      putYoValuesIntoFrameWaypoint();
+//   }
+//   
+//   public void setIncludingFrame(FramePoint position)
+//   {      
+//      switchCurrentReferenceFrame(position.getReferenceFrame());
+//      getPosition().set(position);
+//      putYoValuesIntoFrameWaypoint();
+//   }
+//   
+//   public void setIncludingFrame(YoFramePoint position)
+//   {
+//      switchCurrentReferenceFrame(position.getReferenceFrame());
+//      getPosition().set(position);
+//      putYoValuesIntoFrameWaypoint();
+//   }
+//   
+//   public void setIncludingFrame(CoPTrajectoryPoint position)
+//   {
+//      switchCurrentReferenceFrame(position.getReferenceFrame());
+//      getPosition().set(position.getFrameTuple());
+//      putYoValuesIntoFrameWaypoint();
+//   }
       
    public boolean epsilonEquals(FramePoint2d point, double threshold)
    {
@@ -86,8 +84,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
    public String toString()
    {
       return "Time: " + getTime() + " Location: " + getPosition().toString();
-   }   
-   
+   }
    
    public YoFramePoint buildUpdatedYoFramePointForVisualizationOnly()
    {

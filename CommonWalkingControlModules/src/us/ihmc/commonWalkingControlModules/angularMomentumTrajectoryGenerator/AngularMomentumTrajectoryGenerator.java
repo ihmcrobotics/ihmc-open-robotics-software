@@ -3,20 +3,15 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -74,14 +69,14 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
       this.swingAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue());
       this.transferAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue());      
       this.upcomingCoPsInFootsteps = new RecyclingArrayList<CoPPointsInFoot>(numberOfFootstepsToConsider.getIntegerValue(), CoPPointsInFoot.class);
+      ReferenceFrame[] referenceFrames = {worldFrame};
       for(int i = 0; i < maxNumberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(namePrefix + "Footstep" + i + "SwingTrajectory", registry, worldFrame, maxNumberOfWaypointsPerFootstep.getIntegerValue());
          this.swingAngularMomentumTrajectories.add(swingTrajectory);
          TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(namePrefix + "Footstep" + i + "TransferTrajectory", registry, worldFrame, maxNumberOfWaypointsPerFootstep.getIntegerValue());
          this.transferAngularMomentumTrajectories.add(transferTrajectory);
-         ReferenceFrame[] referenceFrames = {worldFrame};
-         CoPPointsInFoot copLocations = new CoPPointsInFoot(i, maxNumberOfCoPPointsPerFoot.getIntegerValue(), referenceFrames, registry);
+         CoPPointsInFoot copLocations = new CoPPointsInFoot(i, referenceFrames, registry);
          upcomingCoPsInFootsteps.add(copLocations);
       }
       
@@ -246,12 +241,12 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    {
       TransferAngularMomentumTrajectory transferTrajectory = transferAngularMomentumTrajectories.get(footIndex);
       CoPPointsInFoot previousFootstepCoPPlan = upcomingCoPsInFootsteps.get(footIndex);
-      p1 = upcomingCoPsInFootsteps.get(footIndex).get(maxNumberOfWaypointsPerFootstep.getIntegerValue() -1).getFrameTuple();
-      p2 = upcomingCoPsInFootsteps.get(footIndex+1).get(0).getFrameTuple();
-      p3 = upcomingCoPsInFootsteps.get(footIndex+1).get(maxNumberOfWaypointsPerFootstep.getIntegerValue() -1).getFrameTuple();
-      p4 = upcomingCoPsInFootsteps.get(footIndex+2).get(0).getFrameTuple();
-      comTrajectory.setCubicBezier(p1, p2, p3, p4);
-      swingFootTrajectory.setConstant(z0);
+//      p1 = upcomingCoPsInFootsteps.get(footIndex).get(maxNumberOfWaypointsPerFootstep.getIntegerValue() -1).getFrameTuple();
+//      p2 = upcomingCoPsInFootsteps.get(footIndex+1).get(0).getFrameTuple();
+//      p3 = upcomingCoPsInFootsteps.get(footIndex+1).get(maxNumberOfWaypointsPerFootstep.getIntegerValue() -1).getFrameTuple();
+//      p4 = upcomingCoPsInFootsteps.get(footIndex+2).get(0).getFrameTuple();
+//      comTrajectory.setCubicBezier(p1, p2, p3, p4);
+//      swingFootTrajectory.setConstant(z0);
       swingFootTrajectory.subtractByTrimming(comTrajectory);
       swingFootTrajectory.getDerivative(swingFootVelocity);
       TrajectoryMathTools.crossProductByTrimming(angularMomentumTrajectory, swingFootTrajectory, swingFootVelocity);
@@ -278,7 +273,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
 
    private void computeForSingleSupportFromCoPWayPoints()
    {
-      int numberOfFootstepToPlan = Math.min(maxNumberOfFootstepsToConsider, upcomingEntryCoPList.size());
+      int numberOfFootstepToPlan = Math.min(maxNumberOfFootstepsToConsider.getIntegerValue(), upcomingCoPsInFootsteps.size());
       for (int index = 0; index < numberOfFootstepToPlan; index++)
          computeSwingAngularMomentumApproximationForFootstep(index);
    }
@@ -286,12 +281,12 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    private void computeSwingAngularMomentumApproximationForFootstep(int footIndex)
    {
       TransferAngularMomentumTrajectory transferTrajectory = transferAngularMomentumTrajectories.get(footIndex);
-      p1 = upcomingExitCoPList.get(footIndex);
-      p2 = upcomingEntryCoPList.get(footIndex + 1);
-      p3 = upcomingExitCoPList.get(footIndex + 1);
-      p4 = upcomingEntryCoPList.get(footIndex + 2);
-      comTrajectory.setCubicBezier(p1, p2, p3, p4);
-      swingFootTrajectory.setCubic(z0, zFinal);
+//      p1 = upcomingExitCoPList.get(footIndex);
+//      p2 = upcomingEntryCoPList.get(footIndex + 1);
+//      p3 = upcomingExitCoPList.get(footIndex + 1);
+//      p4 = upcomingEntryCoPList.get(footIndex + 2);
+//      comTrajectory.setCubicBezier(p1, p2, p3, p4);
+//      swingFootTrajectory.setCubic(z0, zFinal);
       swingFootTrajectory.subtractByTrimming(comTrajectory);
       swingFootTrajectory.getDerivative(swingFootVelocity);
       angularMomentumTrajectory.crossProduct(swingFootTrajectory,swingFootVelocity);
