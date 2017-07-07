@@ -295,14 +295,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }
 
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromHalfStride.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromHalfStride, -orientationDeltaWithBody);
+      FramePoint.yawAboutPoint(desiredSwingFootPositionFromHalfStride, footPositionOppositeSideSameEnd, -orientationDeltaWithBody, desiredSwingFootPositionFromHalfStride);
       
       desiredSwingFootPositionFromHalfStride.changeFrame(ReferenceFrame.getWorldFrame());
 
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, desiredSwingFootPositionFromHalfStride, deltaYaw);
+      FramePoint.yawAboutPoint(desiredSwingFootPositionFromHalfStride, centroid, deltaYaw, desiredSwingFootPositionFromHalfStride);
    }
 
    private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -342,14 +342,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
       
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromOppositeSideFoot, -orientationDeltaWithBody);
+      FramePoint.yawAboutPoint(desiredSwingFootPositionFromOppositeSideFoot, footPositionOppositeSideSameEnd, -orientationDeltaWithBody, desiredSwingFootPositionFromOppositeSideFoot);
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, desiredSwingFootPositionFromOppositeSideFoot, deltaYaw);
+      FramePoint.yawAboutPoint(desiredSwingFootPositionFromOppositeSideFoot, centroid, deltaYaw, desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)

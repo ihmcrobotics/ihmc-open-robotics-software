@@ -272,7 +272,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
       FramePoint endPoint = new FramePoint(temporaryCentroid);
       endPoint.add(0.4,0.0,0.0);
-      endPoint.yawAboutPoint(temporaryCentroid, endPoint, nominalYaw.getDoubleValue());
+      FramePoint.yawAboutPoint(endPoint, temporaryCentroid, nominalYaw.getDoubleValue(), endPoint);
       nominalYawEndpoint.set(endPoint);
 
       FramePoint2d endpointTwoD = new FramePoint2d();
