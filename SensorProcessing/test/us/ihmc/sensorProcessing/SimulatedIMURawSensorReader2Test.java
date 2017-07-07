@@ -60,8 +60,8 @@ public class SimulatedIMURawSensorReader2Test
       simulatedIMURawSensorReader.read();
       imuSensorProcessor.update();
 
-      Vector3D linearAccelerationFromRobot = robot.getBodyAcceleration().getVectorCopy();
-      Vector3D linearAccelerationFromIMU = processedSensors.getAcceleration(imuIndex).getVectorCopy();
+      Vector3D linearAccelerationFromRobot = new Vector3D(robot.getBodyAcceleration());
+      Vector3D linearAccelerationFromIMU = new Vector3D(processedSensors.getAcceleration(imuIndex));
 
 //      System.out.println("linear from robot: " + linearAccelerationFromRobot);
 //      System.out.println("linear from imu: " + linearAccelerationFromIMU);

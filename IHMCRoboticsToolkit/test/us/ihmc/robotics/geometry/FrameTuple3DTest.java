@@ -204,10 +204,6 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       assertEquals(y, tuple3dToTest.getY(), epsilon);
       assertEquals(z, tuple3dToTest.getZ(), epsilon);
 
-      assertEquals(x, frameTuple.getVectorCopy().getX(), epsilon);
-      assertEquals(y, frameTuple.getVectorCopy().getY(), epsilon);
-      assertEquals(z, frameTuple.getVectorCopy().getZ(), epsilon);
-
       assertEquals(x, frameTuple.tuple.getX(), epsilon);
       assertEquals(y, frameTuple.tuple.getY(), epsilon);
       assertEquals(z, frameTuple.tuple.getZ(), epsilon);
@@ -481,17 +477,6 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       framePoint = createFrameTuple(theFrame, 0, 0, 0);
       actualReturn = framePoint1.epsilonEquals(framePoint, threshold);
       assertEquals("return value", expectedReturn, actualReturn);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testGetVectorCopy()
-   {
-      FrameTuple3D<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
-      Vector3D tuple3d = new Vector3D(1.0, 2.0, 3.0);
-      Vector3D vector3dCopy = frameTuple.getVectorCopy();
-
-      assertTrue(tuple3d.epsilonEquals(vector3dCopy, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

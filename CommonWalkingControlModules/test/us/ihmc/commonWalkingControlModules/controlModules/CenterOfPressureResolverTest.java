@@ -145,7 +145,7 @@ public class CenterOfPressureResolverTest
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 
          // Forces should be the same, after rotated into the same frame:
-         EuclidCoreTestTools.assertTuple3DEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame.getVectorCopy(), 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame, 1e-7);
 
          // Torque should have no components in x and y resolved at the Center of Pressure:
          assertEquals(0.0, torqueResolvedInCenterOfPressureFrame.getX(), 1e-7);

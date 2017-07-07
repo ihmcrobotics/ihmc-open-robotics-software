@@ -175,7 +175,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       compass.set(compassX.getDoubleValue(), compassY.getDoubleValue(), compassZ.getDoubleValue());
 
       rawSensors.setOrientation(orientation, imuIndex);
-      rawSensors.setAcceleration(acceleration.getVectorCopy(), imuIndex);
+      rawSensors.setAcceleration(new Vector3D(acceleration), imuIndex);
       rawSensors.setAngularVelocity(angularVelocity, imuIndex);
       rawSensors.setCompass(compass, imuIndex);
    }

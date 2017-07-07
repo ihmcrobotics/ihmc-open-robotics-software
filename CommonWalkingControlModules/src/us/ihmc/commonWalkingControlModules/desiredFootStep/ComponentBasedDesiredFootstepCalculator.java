@@ -99,7 +99,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       RotationMatrix footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
       FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, footToWorldRotation, 0.0, stepDuration);
 
-      setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
+      setYoVariables(swingLegSide, footToWorldRotation, new Vector3D(footstepPosition));
    }
 
    @Override

@@ -275,11 +275,11 @@ public class FrameBox3dTest
       assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
       box.getCenter(CenterBack);
-      assertTrue(vector.epsilonEquals(new Vector3D(CenterBack.getVectorCopy()), 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(CenterBack), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenterCopy()), 0.0));
 
-      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenter().getVectorCopy()), 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenter()), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenterCopy()), 0.0));
    }
 
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)

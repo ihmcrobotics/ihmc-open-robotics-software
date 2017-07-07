@@ -85,7 +85,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       FramePoint offsetFromHipRollToHipPitch = new FramePoint(frameBeforeHipPitch);
       offsetFromHipRollToHipPitch.changeFrame(legAttachmentFrame);
 
-      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
+      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(new Vector3D(offsetFromHipRollToHipPitch), referenceFrames, robotQuadrant);
    }
 
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
@@ -100,7 +100,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       FramePoint offsetFromHipRollToHipPitch = new FramePoint(frameBeforeHipPitch);
       offsetFromHipRollToHipPitch.changeFrame(frameAfterHipRoll);
 
-      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
+      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(new Vector3D(offsetFromHipRollToHipPitch), referenceFrames, robotQuadrant);
    }
 
    public void setBendKneesIn(boolean bendKneesIn)

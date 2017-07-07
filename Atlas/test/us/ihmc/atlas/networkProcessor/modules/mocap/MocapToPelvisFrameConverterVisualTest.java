@@ -108,7 +108,7 @@ public class MocapToPelvisFrameConverterVisualTest
       mocapMarkers.add(new MocapMarker(3, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(4, new Vector3D(), 0.024f));
       markerPoint2.changeFrame(mocapFrame);
-      MocapRigidBody markerRigidBody = new MocapRigidBody(1, markerPoint2.getVectorCopy(), pelvisToMocapRotation, mocapMarkers, false);
+      MocapRigidBody markerRigidBody = new MocapRigidBody(1, new Vector3D(markerPoint2), pelvisToMocapRotation, mocapMarkers, false);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();
       frameConverter.initialize(pelvisFrame, markerRigidBody);

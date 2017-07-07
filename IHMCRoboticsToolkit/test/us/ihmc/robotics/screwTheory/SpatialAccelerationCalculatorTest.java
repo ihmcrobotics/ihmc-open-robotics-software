@@ -81,7 +81,7 @@ public class SpatialAccelerationCalculatorTest
             rootPosition.changeFrame(bodyFrame);
             rootAngularAcceleration.changeFrame(bodyFrame);
             Vector3D crossPart = new Vector3D();
-            crossPart.cross(rootPosition.getVectorCopy(), rootAngularAcceleration.getVector());
+            crossPart.cross(new Vector3D(rootPosition), rootAngularAcceleration.getVector());
             expectedAcceleration.linearPart.add(crossPart);
 
             expectedAcceleration.setAngularPart(rootAngularAcceleration);
@@ -707,7 +707,7 @@ public class SpatialAccelerationCalculatorTest
       FramePoint rootToBody = new FramePoint(rootAcceleration.getExpressedInFrame());
       rootToBody.changeFrame(expectedAcceleration.getExpressedInFrame());
       Vector3D crossPart = new Vector3D();
-      crossPart.cross(rootToBody.getVectorCopy(), rootAngularAcceleration.getVector());
+      crossPart.cross(rootToBody, rootAngularAcceleration.getVector());
       expectedAcceleration.linearPart.add(crossPart);
       expectedAcceleration.linearPart.add(rootLinearAcceleration.getVector());
 
