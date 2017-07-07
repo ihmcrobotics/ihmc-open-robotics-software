@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
+public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 {
    @Override
    public FrameVector2d createFrameTuple(ReferenceFrame referenceFrame, double x, double y)

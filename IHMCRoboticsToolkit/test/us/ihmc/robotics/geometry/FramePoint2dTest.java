@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
+public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
 {
 
    @Override
