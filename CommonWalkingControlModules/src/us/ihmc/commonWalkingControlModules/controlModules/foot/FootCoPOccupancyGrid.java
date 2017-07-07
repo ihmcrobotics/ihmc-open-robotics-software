@@ -219,7 +219,7 @@ public class FootCoPOccupancyGrid
             if (VISUALIZE)
             {
                getCellCenter(cellCenter, xIndex, yIndex);
-               cellPosition.setXYIncludingFrame(cellCenter);
+               cellPosition.setIncludingFrame(cellCenter, 0.0);
                cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
             }
 
@@ -510,7 +510,7 @@ public class FootCoPOccupancyGrid
                if (isCellOccupied(xIndex, yIndex))
                {
                   getCellCenter(cellCenter, xIndex, yIndex);
-                  cellPosition.setXYIncludingFrame(cellCenter);
+                  cellPosition.setIncludingFrame(cellCenter, 0.0);
                   cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
                }
                else

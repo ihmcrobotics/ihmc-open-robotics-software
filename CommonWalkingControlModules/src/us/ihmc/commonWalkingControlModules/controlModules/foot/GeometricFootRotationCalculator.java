@@ -140,7 +140,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
    {
       centerOfPressure.checkReferenceFrameMatch(soleFrame);
-      cop.setXYIncludingFrame(centerOfPressure);
+      cop.setIncludingFrame(centerOfPressure, 0.0);
       cop.changeFrame(worldFrame);
 
       // assuming flat ground:

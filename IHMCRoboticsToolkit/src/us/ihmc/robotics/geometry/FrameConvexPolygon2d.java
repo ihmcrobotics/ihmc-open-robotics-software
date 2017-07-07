@@ -690,7 +690,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       convexPolygon.checkNonEmpty();
       convexPolygon.checkIndexInBoundaries(vertexIndex);
 
-      vertexToPack.setXYIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
+      vertexToPack.setIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex), 0.0);
    }
 
    public void getNextFrameVertex(int vertexIndex, FramePoint2d vertexToPack)

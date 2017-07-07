@@ -371,21 +371,42 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       set(yoFrameTuple.getFrameTuple());
    }
 
-   public final void setXY(Tuple2DReadOnly tuple2d)
+   public final void set(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
-      this.frameTuple.setXY(tuple2d);
+      this.frameTuple.set(tuple2d);
       getYoValuesFromFrameTuple();
    }
 
-   public final void setXY(FrameTuple2d<?, ?> frameTuple2d)
+   public final void set(Tuple2DReadOnly tuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
-      this.frameTuple.setXY(frameTuple2d);
+      this.frameTuple.set(tuple2d, z);
       getYoValuesFromFrameTuple();
    }
 
-   public final void setXY(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   public final void set(FrameTuple2d<?, ?> frameTuple2d)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      this.frameTuple.set(frameTuple2d);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(FrameTuple2d<?, ?> frameTuple2d, double z)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      this.frameTuple.set(frameTuple2d, z);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);

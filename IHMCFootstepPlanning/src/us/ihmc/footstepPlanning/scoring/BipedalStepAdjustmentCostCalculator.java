@@ -139,7 +139,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private double dot3dVectorWith2dVector(YoFrameVector vector3d, YoFrameVector2d vector2d)
    {
-      tempFrameVectorForDot.setXYIncludingFrame(vector2d.getFrameTuple2d());
+      tempFrameVectorForDot.setIncludingFrame(vector2d.getFrameTuple2d(), 0.0);
       return vector3d.dot(tempFrameVectorForDot);
    }
 

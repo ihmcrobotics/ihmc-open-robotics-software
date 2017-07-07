@@ -230,8 +230,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       pointInWorld.checkReferenceFrameMatch(worldFrame);
 
       double z = getPlaneZGivenXY(planeFrame, pointInWorld.getX(), pointInWorld.getY());
-      pointProjectedOntoPlaneFrameToPack.setXYIncludingFrame(pointInWorld);
-      pointProjectedOntoPlaneFrameToPack.setZ(z);
+      pointProjectedOntoPlaneFrameToPack.setIncludingFrame(pointInWorld, z);
    }
 
    private double getPlaneZGivenXY(ReferenceFrame planeFrame, double xWorld, double yWorld)

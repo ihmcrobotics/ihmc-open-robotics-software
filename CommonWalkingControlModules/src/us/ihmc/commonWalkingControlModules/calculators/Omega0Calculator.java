@@ -54,7 +54,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
             FramePoint2d cop2d = cop2ds.get(robotSide);
             if (!cop2d.containsNaN())
             {
-               tempCoP3d.setXYIncludingFrame(cop2d);
+               tempCoP3d.setIncludingFrame(cop2d, 0.0);
                tempCoP3d.changeFrame(centerOfMassFrame);
                deltaZ = -tempCoP3d.getZ();
                break;
@@ -74,7 +74,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
          copToCoPFrame.update();
          pseudoCoP2d.setToZero(copToCoPFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrench, copToCoPFrame);
-         pseudoCoP.setXYIncludingFrame(pseudoCoP2d);
+         pseudoCoP.setIncludingFrame(pseudoCoP2d, 0.0);
          pseudoCoP.changeFrame(centerOfMassFrame);
          deltaZ = -pseudoCoP.getZ();
       }

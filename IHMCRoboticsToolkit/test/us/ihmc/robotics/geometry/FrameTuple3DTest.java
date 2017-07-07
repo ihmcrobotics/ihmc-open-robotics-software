@@ -320,14 +320,14 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       FramePoint2d framepoint2d = new FramePoint2d(theFrame);
       framepoint2d.set(-1.0, -2.0);
 
-      alpha.setXY(framepoint2d);
+      alpha.set(framepoint2d, 0.0);
       assertEquals("This should be equal", -1.0, alpha.getX(), epsilon);
       assertEquals("This should be equal", -2.0, alpha.getY(), epsilon);
       assertEquals("This should be equal", 0.0, alpha.getZ(), epsilon);
 
       //test non-matching reference frames
       FrameTuple3D<?, ?> ft1 = createFrameTuple(aFrame);
-      ft1.setXY(framepoint2d);
+      ft1.set(framepoint2d);
    }
 
    // NaN was found in beta, commented out for further testing

@@ -61,16 +61,16 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       set(yoFrameTuple);
    }
 
-   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d, double z)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
-      setXY(frameTuple2d);
+      set(frameTuple2d, z);
    }
 
-   public void setXYIncludingFrame(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   public void setIncludingFrame(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple2d.getReferenceFrame());
-      setXY(yoFrameTuple2d);
+      set(yoFrameTuple2d, z);
    }
 
    /**

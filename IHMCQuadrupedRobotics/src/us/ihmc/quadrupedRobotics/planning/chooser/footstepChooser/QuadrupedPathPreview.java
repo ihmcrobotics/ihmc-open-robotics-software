@@ -117,7 +117,7 @@ public class QuadrupedPathPreview
 
          tempCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
          YoFramePoint circleCenter = circleCenters[i];
-         circleCenter.setXY(circleCenter2d);
+         circleCenter.set(circleCenter2d, 0.0);
 
          updatedSupportPolygon.setFootstep(swingLeg, desiredPosition);
          swingLeg = swingLeg.getNextRegularGaitSwingQuadrant();

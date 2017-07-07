@@ -347,7 +347,7 @@ public class DynamicReachabilityCalculator
          throw new RuntimeException("Final CoM Contains NaN!");
 
       predictedCoMPosition.setToZero(worldFrame);
-      predictedCoMPosition.setXY(tempFinalCoM);
+      predictedCoMPosition.set(tempFinalCoM);
 
       stanceFootOrientation.setToZero(fullRobotModel.getFoot(stanceSide).getBodyFixedFrame());
       nextFootstep.getAnkleOrientation(footstepAnkleOrientation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
@@ -410,8 +410,8 @@ public class DynamicReachabilityCalculator
       tempFinalCoM.setByProjectionOntoXYPlaneIncludingFrame(tempPoint);
 
       tempFinalCoM.changeFrame(worldFrame);
-      hipMaximumLocations.get(supportSide).setXY(tempFinalCoM);
-      hipMinimumLocations.get(supportSide).setXY(tempFinalCoM);
+      hipMaximumLocations.get(supportSide).set(tempFinalCoM, 0.0);
+      hipMinimumLocations.get(supportSide).set(tempFinalCoM, 0.0);
 
       double planarDistance = tempFinalCoM.distance(tempPoint2d);
 
@@ -460,8 +460,8 @@ public class DynamicReachabilityCalculator
       tempFinalCoM.changeFrame(worldFrame);
       ankleLocation.changeFrame(worldFrame);
 
-      hipMaximumLocations.get(swingSide).setXY(tempFinalCoM);
-      hipMinimumLocations.get(swingSide).setXY(tempFinalCoM);
+      hipMaximumLocations.get(swingSide).set(tempFinalCoM, 0.0);
+      hipMinimumLocations.get(swingSide).set(tempFinalCoM, 0.0);
 
       double minimumHeight, maximumHeight;
       if (planarDistance >= minimumLegLength.getDoubleValue())
@@ -1205,7 +1205,7 @@ public class DynamicReachabilityCalculator
       tempPoint.set(originalPosition);
       tempPoint.setZ(0.0);
       gradientToPack.setToZero(worldFrame);
-      gradientToPack.setXY(adjustedPosition);
+      gradientToPack.set(adjustedPosition);
       gradientToPack.sub(tempPoint);
       gradientToPack.scale(1.0 / variation);
    }
@@ -1275,7 +1275,7 @@ public class DynamicReachabilityCalculator
    private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
-      gradientToPack.setXY(gradientToExtract);
+      gradientToPack.set(gradientToExtract);
       gradientToPack.changeFrame(stepDirectionFrames.get(stanceSide));
    }
 

@@ -481,7 +481,7 @@ public class HighLevelHumanoidControllerToolbox
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, omega0.getDoubleValue());
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
-      yoCapturePoint.setXY(capturePoint2d);
+      yoCapturePoint.set(capturePoint2d, 0.0);
    }
 
    private final FrameVector angularMomentum = new FrameVector();

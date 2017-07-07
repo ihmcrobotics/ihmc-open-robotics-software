@@ -3,10 +3,14 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.DenseMatrixBool;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
-import us.ihmc.convexOptimization.quadraticProgram.*;
+
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPEqualityConstraintInput;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -277,7 +281,7 @@ public class ICPQPOptimizationSolver
    public void addSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
+      tmpPoint.set(vertexLocation);
 
       if (tmpPoint.getX() > 0.0)
          tmpPoint.setX(tmpPoint.getX() + xBuffer);
@@ -324,7 +328,7 @@ public class ICPQPOptimizationSolver
    public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
    {
       tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
+      tmpPoint.set(vertexLocation);
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);

@@ -33,7 +33,7 @@ public class SphereWithConvexPolygonIntersector
       polygon.getConvexPolygon2d().orthogonalProjection(pointUnsafe);
       closestPointOnPolygon2d.set(pointUnsafe.getX(), pointUnsafe.getY());
       
-      closestPointOnPolygon.setXY(closestPointOnPolygon2d);
+      closestPointOnPolygon.set(closestPointOnPolygon2d, 0.0);
       
       boolean isInsideOrOnSurface = sphere.getSphere3d().isInsideOrOnSurface(closestPointOnPolygon.getPoint());
       

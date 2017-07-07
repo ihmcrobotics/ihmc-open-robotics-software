@@ -493,7 +493,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
             for (int i = 0; i < contactPoints.size(); i++)
             {
-               point3d.setXYIncludingFrame(ankleFrame, contactPoints.get(i));
+               point3d.setIncludingFrame(ankleFrame, contactPoints.get(i), 0.0);
                point3d.changeFrame(soleFrame);
                point3d.setZ(0.0);
                point3d.changeFrame(worldFrame);
