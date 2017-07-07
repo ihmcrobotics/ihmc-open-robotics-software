@@ -4,6 +4,8 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -65,9 +67,9 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple3D<?, ?> frameTuple)
+   public FramePoint(FrameTuple3DReadOnly frameTuple)
    {
-      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple.tuple));
+      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple));
    }
 
    /**
@@ -75,7 +77,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple2D<?, ?> frameTuple2d)
+   public FramePoint(FrameTuple2DReadOnly frameTuple2d)
    {
       super(frameTuple2d.getReferenceFrame(), new Point3D());
       set(frameTuple2d);
@@ -122,14 +124,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    public Point3D getPoint()
    {
       return this.tuple;
-   }
-
-   public static FramePoint getMidPoint(FramePoint point1, FramePoint point2)
-   {
-      point1.checkReferenceFrameMatch(point2);
-      FramePoint midPoint = new FramePoint(point1.referenceFrame);
-      midPoint.interpolate(point1, point2, 0.5);
-      return midPoint;
    }
 
    /**
