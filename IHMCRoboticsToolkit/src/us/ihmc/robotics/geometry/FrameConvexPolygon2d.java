@@ -673,7 +673,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       return frameVertexCopy;
    }
 
-   public void getFrameVertex(int vertexIndex, FrameTuple2d<?, ?> vertexToPack)
+   public void getFrameVertex(int vertexIndex, FrameTuple2D<?, ?> vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
 

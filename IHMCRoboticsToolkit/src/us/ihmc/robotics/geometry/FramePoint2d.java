@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  *
  * @author Learning Locomotion Team
  */
-public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements FramePoint2dReadOnly, Point2DBasics
+public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2dReadOnly, Point2DBasics
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -33,7 +33,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(FrameTuple2d<?, ?> frameTuple2d)
+   public FramePoint2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
    }

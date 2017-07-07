@@ -77,7 +77,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
+   public FramePoint(FrameTuple2D<?, ?> frameTuple2d)
    {
       super(frameTuple2d.getReferenceFrame(), new Point3D());
       set(frameTuple2d);
@@ -190,7 +190,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
     * 
     * @param tupleToPack
     */
-   public void getFrameTuple2d(FrameTuple2d<?, ?> tupleToPack)
+   public void getFrameTuple2d(FrameTuple2D<?, ?> tupleToPack)
    {
       tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
