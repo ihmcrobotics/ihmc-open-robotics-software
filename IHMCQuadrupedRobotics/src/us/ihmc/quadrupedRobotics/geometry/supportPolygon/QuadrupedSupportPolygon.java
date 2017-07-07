@@ -419,7 +419,7 @@ public class QuadrupedSupportPolygon implements Serializable
          if (containsFootstep(footstep))
          {
             FramePoint rotatedPoint = new FramePoint();
-            footstep.yawAboutPoint(temporaryFramePoint, rotatedPoint, yaw);
+            FramePoint.yawAboutPoint(footstep, temporaryFramePoint, yaw, rotatedPoint);
             footstep.set(rotatedPoint);
          }
       }

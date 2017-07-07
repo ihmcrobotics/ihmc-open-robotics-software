@@ -133,12 +133,12 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public void yawAboutPoint(FramePoint pointToYawAbout, FramePoint resultToPack, double yaw)
+   public static void yawAboutPoint(FramePoint pointToTransform, FramePoint pointToYawAbout, double yaw, FramePoint resultToPack)
    {
-      checkReferenceFrameMatch(pointToYawAbout);
-      double tempX = getX() - pointToYawAbout.getX();
-      double tempY = getY() - pointToYawAbout.getY();
-      double tempZ = getZ() - pointToYawAbout.getZ();
+      pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = pointToTransform.getX() - pointToYawAbout.getX();
+      double tempY = pointToTransform.getY() - pointToYawAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToYawAbout.getZ();
 
       double cosAngle = Math.cos(yaw);
       double sinAngle = Math.sin(yaw);
