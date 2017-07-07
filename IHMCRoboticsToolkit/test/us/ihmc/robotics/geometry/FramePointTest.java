@@ -31,7 +31,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FramePointTest extends FrameTupleTest<FramePoint, Point3D>
+public class FramePointTest extends FrameTuple3DTest<FramePoint, Point3D>
 {
    public static double epsilon = 1e-10;
 

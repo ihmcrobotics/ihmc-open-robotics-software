@@ -25,7 +25,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 
-public abstract class FrameTupleTest<F extends FrameTuple3D<F, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameTuple3DReadOnlyTest<F>
+public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameTuple3DReadOnlyTest<F>
 {
    private static final boolean VERBOSE = false;
 

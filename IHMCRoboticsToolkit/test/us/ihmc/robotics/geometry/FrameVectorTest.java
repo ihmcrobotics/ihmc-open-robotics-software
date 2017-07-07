@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FrameVectorTest extends FrameTupleTest<FrameVector, Vector3D>
+public class FrameVectorTest extends FrameTuple3DTest<FrameVector, Vector3D>
 {
    @Override
    public FrameVector createTuple(ReferenceFrame referenceFrame, double x, double y, double z)
