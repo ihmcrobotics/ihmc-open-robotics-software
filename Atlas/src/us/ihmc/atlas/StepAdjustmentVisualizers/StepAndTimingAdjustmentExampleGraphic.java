@@ -192,7 +192,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
       for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
-         contactPoints.add(point.getPointCopy());
+         contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
       YoGraphicShape nextFootstepViz = new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0);

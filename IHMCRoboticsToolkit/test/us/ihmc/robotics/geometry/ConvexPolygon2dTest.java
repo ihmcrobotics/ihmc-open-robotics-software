@@ -1422,14 +1422,14 @@ public class ConvexPolygon2dTest
 
             ConvexPolygon2D shrunkenPolygon = shrunkenPolygons[j];
 
-            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && shrunkenPolygon.isPointInside(testPoint.getPointCopy()));
+            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && shrunkenPolygon.isPointInside(testPoint));
             if (insideShrunkenPolygon)
                insideAnyShrunkenPolygon = true;
 
             // If point is inside, then polygonP when moved to this location should be fully inside Q.
             // Otherwise it shouldn't be fully inside Q.
 
-            Vector2D translation = new Vector2D(testPoint.getPointCopy());
+            Vector2D translation = new Vector2D(testPoint);
             translation.sub(referencePointForP);
             ConvexPolygon2D translatedPolygon = randomPPolygon.translateCopy(translation);
 
@@ -1568,7 +1568,7 @@ public class ConvexPolygon2dTest
                }
 
                boolean insideIntersection = ((intersectionPolygon != null)
-                     && (intersectionPolygon.isPointInside(testPoint.getPointCopy())));
+                     && (intersectionPolygon.isPointInside(testPoint)));
                if (insideIntersection)
                {
                   insideAnyIntersection = true;

@@ -16,6 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -254,7 +255,7 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
    public void testGetPoint()
    {
       FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0);
-      Point2D point2d = point1.getPoint();
+      Point2DReadOnly point2d = point1.getPoint();
       assertEquals("Should be equal", point1.getX(), point2d.getX(), epsilon);
       assertEquals("Should be equal", point1.getY(), point2d.getY(), epsilon);
    }

@@ -190,7 +190,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    public void addVertex(FramePoint2d vertex)
    {
       vertex.checkReferenceFrameMatch(referenceFrame);
-      addVertex(vertex.getPoint());
+      addVertex(vertex);
    }
 
    public void addVertex(Point2DReadOnly vertex)
@@ -220,7 +220,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    {
       tempPoint2d.setIncludingFrame(newVertex);
       tempPoint2d.changeFrame(referenceFrame);
-      convexPolygon.addVertex(tempPoint2d.getPoint());
+      convexPolygon.addVertex(tempPoint2d);
    }
 
    /**
@@ -232,7 +232,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    {
       tempPoint2d.setIncludingFrame(newVertex);
       tempPoint2d.changeFrameAndProjectToXYPlane(referenceFrame);
-      convexPolygon.addVertex(tempPoint2d.getPoint());
+      convexPolygon.addVertex(tempPoint2d);
    }
 
    /**
@@ -886,7 +886,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    {
       ray.checkReferenceFrameMatch(referenceFrame);
       closestVertexToPack.setToZero(referenceFrame);
-      boolean success = convexPolygon.getClosestPointWithRay(ray.getLine2d(), closestVertexToPack.getPoint());
+      boolean success = convexPolygon.getClosestPointWithRay(ray.getLine2d(), closestVertexToPack);
 
       return success;
    }
@@ -950,7 +950,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
-      convexPolygon.orthogonalProjection(point.getPoint());
+      convexPolygon.orthogonalProjection(point);
    }
 
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
@@ -997,8 +997,8 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    public void intersectionWith(FrameLine2d otherLine, Pair<FramePoint2d, FramePoint2d> intersection)
    {
       checkReferenceFrameMatch(otherLine);
-      int numberOfIntersections = convexPolygon.intersectionWith(otherLine.getLine2d(), intersection.getFirst().getPoint(),
-                                                                 intersection.getSecond().getPoint());
+      int numberOfIntersections = convexPolygon.intersectionWith(otherLine.getLine2d(), intersection.getFirst(),
+                                                                 intersection.getSecond());
       if (numberOfIntersections < 2)
       {
          intersection.getSecond().setToNaN();
@@ -1024,7 +1024,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       checkReferenceFrameMatch(ray);
       intersectionToPack1.setToZero(referenceFrame);
       intersectionToPack2.setToZero(referenceFrame);
-      return convexPolygon.intersectionWithRay(ray.getLine2d(), intersectionToPack1.getPoint(), intersectionToPack2.getPoint());
+      return convexPolygon.intersectionWithRay(ray.getLine2d(), intersectionToPack1, intersectionToPack2);
    }
 
    public FramePoint2d[] intersectionWithRayCopy(FrameLine2d ray)

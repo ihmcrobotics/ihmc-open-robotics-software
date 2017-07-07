@@ -51,13 +51,13 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public FrameLine2d(FramePoint2d framePoint2d, FrameVector2d frameVector2d)
    {
-      this(framePoint2d.getReferenceFrame(), new Line2D(framePoint2d.getPointCopy(), frameVector2d.getVectorCopy()));
+      this(framePoint2d.getReferenceFrame(), new Line2D(framePoint2d, frameVector2d));
       framePoint2d.checkReferenceFrameMatch(frameVector2d);
    }
 
    public FrameLine2d(FramePoint2d firstPointOnLine, FramePoint2d secondPointOnLine)
    {
-      this(firstPointOnLine.getReferenceFrame(), new Line2D(firstPointOnLine.getPointCopy(), secondPointOnLine.getPointCopy()));
+      this(firstPointOnLine.getReferenceFrame(), new Line2D(firstPointOnLine, secondPointOnLine));
       firstPointOnLine.checkReferenceFrameMatch(secondPointOnLine);
    }
 
@@ -117,7 +117,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       framePoint.checkReferenceFrameMatch(referenceFrame);
 
-      return line.isPointOnLine(framePoint.getPointCopy(), epsilon);
+      return line.isPointOnLine(framePoint, epsilon);
    }
 
    public void negateDirection()
@@ -148,7 +148,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(frameVector2d);
       
-      line.setDirection(frameVector2d.getVector());
+      line.setDirection(frameVector2d);
    }
 
    @Deprecated
@@ -180,7 +180,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(startPoint);
       checkReferenceFrameMatch(vector);
-      this.line.set(startPoint.getPoint(), vector.getVector());
+      this.line.set(startPoint, vector);
    }
 
    public void set(FramePoint2d[] endpoints)
@@ -202,7 +202,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       startPoint.checkReferenceFrameMatch(vector);
       this.referenceFrame = startPoint.getReferenceFrame();
-      this.line.set(startPoint.getPoint(), vector.getVector());
+      this.line.set(startPoint, vector);
    }
 
    public void set(ReferenceFrame referenceFrame, double pointX, double pointY, double vectorX, double vectorY)
@@ -242,7 +242,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       line.checkReferenceFrameMatch(point);
       ReferenceFrame referenceFrame = line.referenceFrame;
-      Line2D perpLine2d = line.line.perpendicularLineThroughPoint(point.getPointCopy());
+      Line2D perpLine2d = line.line.perpendicularLineThroughPoint(point);
 
       return new FrameLine2d(referenceFrame, perpLine2d);
    }
@@ -327,7 +327,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       checkReferenceFrameMatch(line);
       checkReferenceFrameMatch(intersectionToPack);
       
-      this.line.intersectionWith(line.getLine2d(), intersectionToPack.getPoint());
+      this.line.intersectionWith(line.getLine2d(), intersectionToPack);
    }
 
    public FramePoint2d intersectionWith(FrameLine2d secondLine)
@@ -407,7 +407,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       checkReferenceFrameMatch(frontDirection);
       checkReferenceFrameMatch(framePoint);
       
-      return line.isPointInFrontOfLine(frontDirection.getVector(), framePoint.getPoint());
+      return line.isPointInFrontOfLine(frontDirection, framePoint);
    }
 
    /**
@@ -422,14 +422,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(point);
 
-      return this.line.isPointInFrontOfLine(point.getPointCopy());
+      return this.line.isPointInFrontOfLine(point);
    }
 
    public boolean isPointBehindLine(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
 
-      return this.line.isPointBehindLine(point.getPointCopy());
+      return this.line.isPointBehindLine(point);
    }
 
    public void shiftToLeft(double distanceToShift)

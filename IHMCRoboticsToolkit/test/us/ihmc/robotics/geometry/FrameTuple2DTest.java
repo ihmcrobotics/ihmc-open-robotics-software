@@ -262,26 +262,6 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>> extends Fra
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testGetPointCopy()
-   {
-      FrameTuple2D<?, ?> frameTuple = createFrameTuple(theFrame, 10.0, 10.0);
-      Point2D point = frameTuple.getPointCopy();
-      assertEquals("These should be equal", point.getX(), frameTuple.getX(), epsilon);
-      assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetVectorCopy()
-   {
-      FrameTuple2D<?, ?> frameTuple = createFrameTuple(theFrame, 10.0, 10.0);
-      Vector2D point = frameTuple.getVectorCopy();
-      assertEquals("These should be equal", point.getX(), frameTuple.getX(), epsilon);
-      assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testGet_Tuple2d()
    {
       Point2D tuple2dToPack = new Point2D();

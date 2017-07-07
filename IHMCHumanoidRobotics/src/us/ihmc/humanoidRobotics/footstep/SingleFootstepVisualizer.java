@@ -95,7 +95,7 @@ public class SingleFootstepVisualizer
          for (int i=0; i<contactPointsFromContactablePlaneBody.size(); i++)
          {
             FramePoint2d point = contactPointsFromContactablePlaneBody.get(i);
-            predictedContactPoints.add(point.getPointCopy());
+            predictedContactPoints.add(new Point2D(point));
          }
       }
       

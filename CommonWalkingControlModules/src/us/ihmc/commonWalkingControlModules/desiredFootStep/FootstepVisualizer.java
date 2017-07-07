@@ -53,7 +53,7 @@ public class FootstepVisualizer
 
       List<FramePoint2d> contactPoints2d = contactableFoot.getContactPoints2d();
       for (int i = 0; i < contactPoints2d.size(); i++)
-         defaultContactPointsInSoleFrame.add(contactPoints2d.get(i).getPointCopy());
+         defaultContactPointsInSoleFrame.add(new Point2D(contactPoints2d.get(i)));
    }
 
    public void update(Footstep footstep)
