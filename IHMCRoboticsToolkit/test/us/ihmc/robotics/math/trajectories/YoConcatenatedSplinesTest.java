@@ -49,8 +49,8 @@ public class YoConcatenatedSplinesTest
             FrameVector actualVelocity = concatenatedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(expectedPosition.get(direction), actualPosition.get(direction), EPSILON);
-               assertEquals(expectedVelocity.get(direction), actualVelocity.get(direction), EPSILON);
+               assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
+               assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
             }
          }
       }
@@ -89,8 +89,8 @@ public class YoConcatenatedSplinesTest
          FrameVector actualVelocity = concatenatedSplines.getVelocity();
          for (Direction direction : Direction.values())
          {
-            assertEquals(expectedPosition.get(direction), actualPosition.get(direction), EPSILON);
-            assertEquals(expectedVelocity.get(direction), actualVelocity.get(direction), EPSILON);
+            assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
+            assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
          }
       }
    }
@@ -127,8 +127,8 @@ public class YoConcatenatedSplinesTest
             FrameVector respacedVelocity = respacedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(originalPosition.get(direction), respacedPosition.get(direction), EPSILON);
-               assertEquals(originalVelocity.get(direction), respacedVelocity.get(direction), EPSILON);
+               assertEquals(originalPosition.getElement(direction.getIndex()), respacedPosition.getElement(direction.getIndex()), EPSILON);
+               assertEquals(originalVelocity.getElement(direction.getIndex()), respacedVelocity.getElement(direction.getIndex()), EPSILON);
             }
          }
       }

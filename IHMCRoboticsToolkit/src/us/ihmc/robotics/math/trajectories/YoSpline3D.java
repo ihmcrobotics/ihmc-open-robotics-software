@@ -65,7 +65,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setLinear(t0, tf, p0.get(direction), pf.get(direction));
+         polynomials.get(direction).setLinear(t0, tf, p0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -77,7 +77,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setLinear(t0, p0.get(direction), pd0.get(direction));
+         polynomials.get(direction).setLinear(t0, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -89,7 +89,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setLinear(tf, pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setLinear(tf, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -102,8 +102,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuarticUsingIntermediateVelocity(t0, t1, tf, p0.get(direction), pd0.get(direction), pd1.get(direction),
-                         pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setQuarticUsingIntermediateVelocity(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pd1.getElement(direction.ordinal()),
+                         pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -116,8 +116,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuinticUsingIntermediateVelocityAndAcceleration(t0, t1, tf, p0.get(direction), pd0.get(direction), pd1.get(direction),
-                         pdd1.get(direction), pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setQuinticUsingIntermediateVelocityAndAcceleration(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pd1.getElement(direction.ordinal()),
+                         pdd1.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -130,8 +130,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setSexticUsingWaypoint(t0, t1, tf, p0.get(direction), pd0.get(direction), pdd0.get(direction), p1.get(direction),
-                         pf.get(direction), pdf.get(direction), pddf.get(direction));
+         polynomials.get(direction).setSexticUsingWaypoint(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), p1.getElement(direction.ordinal()),
+                         pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -144,8 +144,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(t0, t1, tf, p0.get(direction), pd0.get(direction), pdd0.get(direction),
-                         pd1.get(direction), pdd1.get(direction), pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()),
+                         pd1.getElement(direction.ordinal()), pdd1.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -158,8 +158,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(tf, t1, t0, pf.get(direction), pdf.get(direction), pddf.get(direction),
-                         pd1.get(direction), pdd1.get(direction), p0.get(direction), pd0.get(direction));
+         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(tf, t1, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()),
+                         pd1.getElement(direction.ordinal()), pdd1.getElement(direction.ordinal()), p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -171,7 +171,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuartic(t0, tf, p0.get(direction), pd0.get(direction), pdd0.get(direction), pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setQuartic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -183,7 +183,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuartic(tf, t0, pf.get(direction), pdf.get(direction), pddf.get(direction), p0.get(direction), pd0.get(direction));
+         polynomials.get(direction).setQuartic(tf, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()), p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -195,7 +195,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuadratic(t0, tf, p0.get(direction), pd0.get(direction), pf.get(direction));
+         polynomials.get(direction).setQuadratic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -207,7 +207,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuadratic(tf, t0, pf.get(direction), pdf.get(direction), p0.get(direction));
+         polynomials.get(direction).setQuadratic(tf, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), p0.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -219,7 +219,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuadraticUsingInitialAcceleration(t0, tf, p0.get(direction), pd0.get(direction), pdd0.get(direction));
+         polynomials.get(direction).setQuadraticUsingInitialAcceleration(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -231,7 +231,7 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setCubic(t0, tf, p0.get(direction), pd0.get(direction), pf.get(direction), pdf.get(direction));
+         polynomials.get(direction).setCubic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -243,8 +243,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tf, p0.get(direction), pd0.get(direction), pdf.get(direction),
-                         pddf.get(direction));
+         polynomials.get(direction).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()),
+                         pddf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -256,8 +256,8 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         polynomials.get(direction).setQuintic(t0, tf, p0.get(direction), pd0.get(direction), pdd0.get(direction), pf.get(direction), pdf.get(direction),
-                         pddf.get(direction));
+         polynomials.get(direction).setQuintic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()),
+                         pddf.getElement(direction.ordinal()));
       }
 
       setYoVariables(t0, tf);

@@ -269,18 +269,18 @@ public class EuclideanTrajectoryPointCalculator
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.get(direction);
-         double zd0 = tempFrameVector.get(direction);
+         double z0 = tempFramePoint.getElement(direction.ordinal());
+         double zd0 = tempFrameVector.getElement(direction.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.get(direction);
+         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.get(direction);
-         double zdf = tempFrameVector.get(direction);
+         double zf = tempFramePoint.getElement(direction.ordinal());
+         double zdf = tempFrameVector.getElement(direction.ordinal());
 
          YoPolynomial polynomial = polynomials.get(direction);
          polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
@@ -303,16 +303,16 @@ public class EuclideanTrajectoryPointCalculator
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.get(direction);
+         double z0 = tempFramePoint.getElement(direction.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.get(direction);
+         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.get(direction);
+         double zf = tempFramePoint.getElement(direction.ordinal());
 
          YoPolynomial polynomial = polynomials.get(direction);
          polynomial.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tf, z0, zIntermediate, zf);
