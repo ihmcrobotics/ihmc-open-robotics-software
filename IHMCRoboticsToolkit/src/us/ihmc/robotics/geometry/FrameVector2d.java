@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -103,6 +104,11 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       return randomVector;
    }
 
+   public void setAndNormalize(FrameVector2d other)
+   {
+      tuple.setAndNormalize(other);
+   }
+
    /**
     * Returns the vector inside this FrameVector.
     *
@@ -130,9 +136,13 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
 
    public double cross(FrameVector2d frameVector)
    {
-      checkReferenceFrameMatch(frameVector);
+      return cross((FrameTuple2DReadOnly) frameVector);
+   }
 
-      return this.tuple.getX() * frameVector.tuple.getY() - tuple.getY() * frameVector.tuple.getX();
+   public double cross(FrameTuple2DReadOnly frameVector)
+   {
+      checkReferenceFrameMatch(frameVector);
+      return tuple.cross(frameVector);
    }
 
    public double angle(FrameVector2d frameVector)
@@ -140,21 +150,6 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       checkReferenceFrameMatch(frameVector);
 
       return this.tuple.angle(frameVector.tuple);
-   }
-
-   public void normalize()
-   {
-      this.tuple.normalize();
-   }
-
-   public double length()
-   {
-      return tuple.length();
-   }
-
-   public double lengthSquared()
-   {
-      return tuple.lengthSquared();
    }
 
    public void clipMaxLength(double maxLength)
