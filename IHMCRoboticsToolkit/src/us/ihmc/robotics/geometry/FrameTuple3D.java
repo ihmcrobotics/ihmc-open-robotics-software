@@ -197,6 +197,18 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.scaleAdd(scaleFactor, tuple1, tuple2);
    }
 
+   public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1, FrameTuple3DReadOnly tuple2)
+   {
+      checkReferenceFrameMatch(tuple2);
+      tuple.scaleAdd(scaleFactor, tuple1, tuple2);
+   }
+
+   public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
+   {
+      checkReferenceFrameMatch(tuple1);
+      tuple.scaleAdd(scaleFactor, tuple1, tuple2);
+   }
+
    public final void scaleSub(double scaleFactor, FrameTuple3DReadOnly other)
    {
       checkReferenceFrameMatch(other);
@@ -217,6 +229,18 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
+      tuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
+   }
+
+   public final void scaleSub(double scaleFactor, Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
+   {
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
+   }
+
+   public final void scaleSub(double scaleFactor, FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly frameTuple2)
+   {
+      checkReferenceFrameMatch(frameTuple1);
       tuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
    }
 
@@ -244,6 +268,18 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    public final void add(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.add(frameTuple1, frameTuple2);
+   }
+
+   public final void add(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly tuple2)
+   {
+      checkReferenceFrameMatch(frameTuple1);
+      tuple.add(frameTuple1, tuple2);
+   }
+
+   public final void add(Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
+   {
       checkReferenceFrameMatch(frameTuple2);
       tuple.add(frameTuple1, frameTuple2);
    }
@@ -276,6 +312,18 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.sub(frameTuple1, frameTuple2);
    }
 
+   public final void sub(Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
+   {
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.sub(frameTuple1, frameTuple2);
+   }
+
+   public final void sub(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly frameTuple2)
+   {
+      checkReferenceFrameMatch(frameTuple1);
+      tuple.sub(frameTuple1, frameTuple2);
+   }
+
    public final void interpolate(FrameTuple3DReadOnly other, double alpha)
    {
       checkReferenceFrameMatch(other);
@@ -295,6 +343,18 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
+      tuple.interpolate(frameTuple1, frameTuple2, alpha);
+   }
+
+   public final void interpolate(Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2, double alpha)
+   {
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.interpolate(frameTuple1, frameTuple2, alpha);
+   }
+
+   public final void interpolate(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly frameTuple2, double alpha)
+   {
+      checkReferenceFrameMatch(frameTuple1);
       tuple.interpolate(frameTuple1, frameTuple2, alpha);
    }
 

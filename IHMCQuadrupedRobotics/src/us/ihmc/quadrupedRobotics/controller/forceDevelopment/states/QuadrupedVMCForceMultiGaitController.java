@@ -765,7 +765,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       targetSupportPolygon.getHindMidpoint(hindMidpoint);
       targetSupportPolygon.getLeftMidpoint(leftMidpoint);
 
-      frontDirection.setByProjectionOntoXYPlane(frontMidpoint);
+      frontDirection.set(frontMidpoint);
       frontDirection.sub(hindMidpoint.getX(), hindMidpoint.getY());
 
       sidewaysMidLine.setByProjectionOntoXYPlane(leftMidpoint, rightMidpoint);

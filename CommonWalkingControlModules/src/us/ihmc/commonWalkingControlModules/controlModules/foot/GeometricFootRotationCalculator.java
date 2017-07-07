@@ -170,8 +170,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       angleFootGround.set(alpha);
       footRotating.set(alpha > angleTreshold.getDoubleValue());
 
-      centerOfRotation2d.setByProjectionOntoXYPlane(cop);
-      lineOfRotation2d.setByProjectionOntoXYPlane(lineOfContact);
+      centerOfRotation2d.set(cop);
+      lineOfRotation2d.set(lineOfContact);
       lineOfRotationInWorldFrame.set(centerOfRotation2d, lineOfRotation2d);
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);

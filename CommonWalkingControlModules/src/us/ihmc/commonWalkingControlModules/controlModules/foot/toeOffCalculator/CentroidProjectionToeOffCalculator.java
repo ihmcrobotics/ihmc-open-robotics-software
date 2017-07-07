@@ -82,7 +82,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       this.exitCMP.setIncludingFrame(exitCMP);
       this.exitCMP.changeFrame(soleFrame);
       exitCMP2d.setToZero(soleFrame);
-      exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
+      exitCMP2d.setIncludingFrame(this.exitCMP);
    }
 
    @Override

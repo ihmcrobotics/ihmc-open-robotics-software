@@ -475,8 +475,8 @@ public class HighLevelHumanoidControllerToolbox
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
-      centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+      centerOfMassPosition2d.setIncludingFrame(centerOfMassPosition);
+      centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, omega0.getDoubleValue());
 

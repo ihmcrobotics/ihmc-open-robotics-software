@@ -247,7 +247,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       centerOfMass2d.setToZero(centerOfMassFrame);
       centerOfMass2d.changeFrame(worldFrame);
 
-      achievedCoMAcceleration2d.setByProjectionOntoXYPlaneIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
       achievedCoMAcceleration2d.scale(1.0 / totalMass);
       achievedCoMAcceleration2d.changeFrame(worldFrame);
 

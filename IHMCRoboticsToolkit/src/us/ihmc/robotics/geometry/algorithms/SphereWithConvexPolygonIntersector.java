@@ -27,7 +27,7 @@ public class SphereWithConvexPolygonIntersector
       sphere.changeFrame(polygon.getReferenceFrame());
       
       sphere.getCenter(closestPointOnPolygon);
-      closestPointOnPolygon2d.setByProjectionOntoXYPlaneIncludingFrame(closestPointOnPolygon);
+      closestPointOnPolygon2d.setIncludingFrame(closestPointOnPolygon);
       
       Point2D pointUnsafe = closestPointOnPolygon2d.getPoint();
       polygon.getConvexPolygon2d().orthogonalProjection(pointUnsafe);

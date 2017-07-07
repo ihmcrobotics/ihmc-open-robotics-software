@@ -193,7 +193,7 @@ public class CenterOfMassJacobian
    {
       getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(desiredOutputFrame);
-      centerOfMassVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tempFrameVector);
+      centerOfMassVelocityToPack.setIncludingFrame(tempFrameVector);
    }
 
    private void setColumn(Twist twist, FramePoint comPositionScaledByMass, double subTreeMass, int column)

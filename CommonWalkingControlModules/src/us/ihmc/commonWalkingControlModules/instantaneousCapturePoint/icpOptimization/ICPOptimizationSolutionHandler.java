@@ -255,7 +255,7 @@ public class ICPOptimizationSolutionHandler
          wasAdjusted = true;
 
       solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
-      solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);
+      solutionLocationToPack.set(solutionLocation);
 
       return wasAdjusted;
    }

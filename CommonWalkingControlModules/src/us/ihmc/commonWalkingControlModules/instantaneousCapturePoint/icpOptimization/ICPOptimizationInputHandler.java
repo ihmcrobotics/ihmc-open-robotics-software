@@ -210,7 +210,7 @@ public class ICPOptimizationInputHandler
 
    public void computeFinalICPRecursion(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d finalICPRecursionToPack)
    {
-      finalICPRecursionToPack.setByProjectionOntoXYPlane(finalICP.getFrameTuple());
+      finalICPRecursionToPack.set(finalICP.getFrameTuple());
 
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getFinalICPRecursionMultiplier());
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getStateEndCurrentMultiplier());
@@ -267,8 +267,8 @@ public class ICPOptimizationInputHandler
          FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
          FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(footstepIndex).getFrameTuple();
 
-         stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
-         stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
+         stanceEntryCMP2d.set(stanceEntryCMP);
+         stanceExitCMP2d.set(stanceExitCMP);
 
          this.stanceEntryCMP.set(stanceEntryCMP2d);
          this.stanceExitCMP.set(stanceExitCMP2d);
@@ -278,7 +278,7 @@ public class ICPOptimizationInputHandler
          FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
 
          stanceExitCMP2d.setToZero();
-         stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
+         stanceEntryCMP2d.set(stanceEntryCMP);
 
          this.stanceExitCMP.setToNaN();
          this.stanceEntryCMP.set(stanceEntryCMP2d);
@@ -320,8 +320,8 @@ public class ICPOptimizationInputHandler
          entryOffset.setToZero(worldFrame);
          exitOffset.setToZero(worldFrame);
 
-         entryOffset.setByProjectionOntoXYPlane(referenceCMPsCalculator.getEntryCMPs().get(i + 1).getFrameTuple());
-         exitOffset.setByProjectionOntoXYPlane(referenceCMPsCalculator.getExitCMPs().get(i + 1).getFrameTuple());
+         entryOffset.set(referenceCMPsCalculator.getEntryCMPs().get(i + 1).getFrameTuple());
+         exitOffset.set(referenceCMPsCalculator.getExitCMPs().get(i + 1).getFrameTuple());
 
          entryOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());
          exitOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());

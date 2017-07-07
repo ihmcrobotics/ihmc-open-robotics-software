@@ -339,7 +339,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       computeEntryCMPForSupportFoot(cmp, transferToSide, supportFootPolygonsInSoleZUpFrame.get(transferFromSide).getCentroid(), exitCMPs.get(cmpIndex - 1));
       cmp.changeFrame(transferToSoleFrame);
       entryCMPs.get(cmpIndex).setIncludingFrame(cmp);
-      firstEntryCMPForSingleSupport.setByProjectionOntoXYPlaneIncludingFrame(cmp);
+      firstEntryCMPForSingleSupport.setIncludingFrame(cmp);
       computeFootstepCentroid(centroidOfUpcomingFootstep, upcomingFootsteps.get(0));
       boolean isUpcomingFootstepLast = upcomingFootsteps.size() == 1;
       computeExitCMPForSupportFoot(cmp, transferToSide, centroidOfUpcomingFootstep, isUpcomingFootstepLast);

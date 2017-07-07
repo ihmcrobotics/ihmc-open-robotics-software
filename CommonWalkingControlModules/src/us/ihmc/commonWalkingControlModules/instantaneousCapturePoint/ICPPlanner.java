@@ -1515,7 +1515,7 @@ public class ICPPlanner
       if (isStanding.getBooleanValue())
       {
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
-         tempFinalCoM.setByProjectionOntoXYPlane(tempFinalICP);
+         tempFinalCoM.set(tempFinalICP);
       }
       else
       {

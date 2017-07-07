@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -140,7 +141,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     *
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple)
+   public final void set(FrameTuple3DReadOnly frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       set(frameTuple.getX(), frameTuple.getY());
@@ -151,7 +152,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     *
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlaneIncludingFrame(FrameTuple3D<?, ?> frameTuple)
+   public final void setIncludingFrame(FrameTuple3DReadOnly frameTuple)
    {
       setIncludingFrame(frameTuple.getReferenceFrame(), frameTuple.getX(), frameTuple.getY());
    }
@@ -282,7 +283,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     * @param scaleFactor double
     * @param frameTuple1 Tuple2d
     */
-   public final void scale(double scaleFactor, Tuple2DReadOnly tuple1)
+   public final void setAndScale(double scaleFactor, Tuple2DReadOnly tuple1)
    {
       tuple.setAndScale(scaleFactor, tuple1);
    }
@@ -298,21 +299,6 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    public final void scaleAdd(double scaleFactor, Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2)
    {
       tuple.scaleAdd(scaleFactor, tuple1, tuple2);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 and then adds the scalar
-    * multiplication of tuple2 (this = scaleFactor1 * tuple1 + scaleFactor2 * tuple2).
-    *
-    * @param scaleFactor1 double
-    * @param frameTuple1 Tuple2d
-    * @param scaleFactor2 double
-    * @param frameTuple2 Tuple2d
-    */
-   public final void scaleAdd(double scaleFactor1, Tuple2DReadOnly tuple1, double scaleFactor2, Tuple2DReadOnly tuple2)
-   {
-      tuple.setX(scaleFactor1 * tuple1.getX() + scaleFactor2 * tuple2.getX());
-      tuple.setY(scaleFactor1 * tuple1.getY() + scaleFactor2 * tuple2.getY());
    }
 
    /**
@@ -338,7 +324,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    public final void scale(double scaleFactor, FrameTuple2d<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      scale(scaleFactor, frameTuple1.tuple);
+      setAndScale(scaleFactor, frameTuple1.tuple);
    }
 
    /**
@@ -549,10 +535,5 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
       checkReferenceFrameMatch(frameTuple1);
 
       return epsilonEquals(frameTuple1.tuple, threshold);
-   }
-
-   public final double[] toArray()
-   {
-      return new double[] {tuple.getX(), tuple.getY()};
    }
 }
