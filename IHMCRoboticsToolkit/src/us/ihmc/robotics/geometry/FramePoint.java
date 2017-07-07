@@ -7,7 +7,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
 
@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.interfaces.PointInterface;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface
+public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface, Point3DBasics
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -147,11 +147,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
       return Math.sqrt(dx * dx + dy * dy);
    }
 
-   public double distance(Point3DReadOnly point)
-   {
-      return this.tuple.distance(point);
-   }
-
    public double distance(FramePoint framePoint)
    {
       checkReferenceFrameMatch(framePoint);
@@ -164,16 +159,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
       checkReferenceFrameMatch(framePoint);
 
       return this.tuple.distanceSquared(framePoint.tuple);
-   }
-
-   public double distanceFromOrigin()
-   {
-      return tuple.distanceFromOrigin();
-   }
-
-   public double distanceFromOriginSquared()
-   {
-      return tuple.distanceFromOriginSquared();
    }
 
    /**

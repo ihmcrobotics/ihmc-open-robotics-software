@@ -17,6 +17,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -25,12 +26,20 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FramePointTest extends FrameTupleTest<Point3D>
+public class FramePointTest extends FrameTupleTest<FramePoint, Point3D>
 {
    public static double epsilon = 1e-10;
+
+   @Override
+   public FramePoint createTuple(ReferenceFrame referenceFrame, double x, double y, double z)
+   {
+      return createFrameTuple(referenceFrame, x, y, z);
+   }
 
    @Override
    public FramePoint createEmptyFrameTuple()
@@ -42,6 +51,12 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public FramePoint createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       return new FramePoint(referenceFrame, x, y, z);
+   }
+
+   @Override
+   public double getEpsilon()
+   {
+      return 1.0e-15;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -652,6 +667,13 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    {
       expected.checkReferenceFrameMatch(actual);
       EuclidCoreTestTools.assertTuple3DEquals(expected.getPoint(), actual.getPoint(), delta);
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      assertSuperMethodsAreOverloaded(FrameTuple3DReadOnly.class, Tuple3DReadOnly.class, FramePoint.class, Point3DBasics.class);
    }
 
    public static void main(String[] args)
