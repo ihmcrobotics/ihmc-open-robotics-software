@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
@@ -782,7 +782,7 @@ public class MatrixTools
       tuple3d.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractFrameTupleFromEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
+   public static void extractFrameTupleFromEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
    {
       frameTuple.setToZero(desiredFrame);
       frameTuple.setX(ejmlVector.get(startIndex + 0, 0));
@@ -824,7 +824,7 @@ public class MatrixTools
       ejmlVector.set(indices[2], 0, tuple3d.getZ());
    }
 
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void insertFrameTupleIntoEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());

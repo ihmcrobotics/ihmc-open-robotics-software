@@ -149,7 +149,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
      * @param frameTupleToPack the frameTuple to be multiplied by this frameMatrix3D and then replaced
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple<?, ?> frameTupleToPack)
+   public void transform(FrameTuple3D<?, ?> frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleToPack);
       matrix.transform(frameTupleToPack.tuple);
@@ -162,7 +162,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
      * @param frameTupleToPack the FrameTuple into which the product is placed
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple<?, ?> frameTupleOriginal, FrameTuple<?, ?> frameTupleToPack)
+   public void transform(FrameTuple3D<?, ?> frameTupleOriginal, FrameTuple3D<?, ?> frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleOriginal);
       frameTupleToPack.setIncludingFrame(frameTupleOriginal);
