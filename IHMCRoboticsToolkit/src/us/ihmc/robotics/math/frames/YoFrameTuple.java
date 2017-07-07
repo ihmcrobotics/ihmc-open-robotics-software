@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -123,7 +123,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       frameTuple.set(getFrameTuple());
    }
 
-   public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       frameTuple2d.set(getFrameTuple());
    }
@@ -159,7 +159,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       frameTuple.setIncludingFrame(getReferenceFrame(), getX(), getY(), getZ());
    }
 
-   public final void getFrameTuple2dIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       putYoValuesIntoFrameTuple();
       frameTuple2d.setIncludingFrame(getReferenceFrame(), getX(), getY());
@@ -385,14 +385,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(FrameTuple2d<?, ?> frameTuple2d)
+   public final void set(FrameTuple2D<?, ?> frameTuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple2d);
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(FrameTuple2d<?, ?> frameTuple2d, double z)
+   public final void set(FrameTuple2D<?, ?> frameTuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple2d, z);

@@ -89,7 +89,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       set(tuple, z);
    }
 
-   public void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d, double z)
+   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d, double z)
    {
       referenceFrame = frameTuple2d.getReferenceFrame();
       set(frameTuple2d, z);
@@ -376,13 +376,13 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.setZ(z);
    }
 
-   public void set(FrameTuple2d<?, ?> frameTuple2d)
+   public void set(FrameTuple2D<?, ?> frameTuple2d)
    {
       checkReferenceFrameMatch(frameTuple2d);
       tuple.set(frameTuple2d.tuple);
    }
 
-   public void set(FrameTuple2d<?, ?> frameTuple2d, double z)
+   public void set(FrameTuple2D<?, ?> frameTuple2d, double z)
    {
       checkReferenceFrameMatch(frameTuple2d);
       tuple.set(frameTuple2d.tuple, z);

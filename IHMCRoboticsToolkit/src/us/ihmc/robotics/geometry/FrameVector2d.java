@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D> implements Vector2DBasics
+public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> implements Vector2DBasics
 {
    private static final long serialVersionUID = -610124454205790361L;
 
@@ -77,7 +77,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
+   public FrameVector2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
    }
