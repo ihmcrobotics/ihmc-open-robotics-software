@@ -885,17 +885,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testGetDirection()
-   {
-      FrameTuple3D<?, ?> framePoint = createFrameTuple(theFrame, 1.0, 2.0, 5.0);
-
-      assertEquals(1.0, framePoint.get(Direction.X), epsilon);
-      assertEquals(2.0, framePoint.get(Direction.Y), epsilon);
-      assertEquals(5.0, framePoint.get(Direction.Z), epsilon);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testScale()
    {
