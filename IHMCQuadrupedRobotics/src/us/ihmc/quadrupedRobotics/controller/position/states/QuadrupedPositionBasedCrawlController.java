@@ -1080,7 +1080,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       fourFootSupportPolygon.getCentroid(centroidFramePoint);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
 
-      centroidFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(centroidFramePoint);
+      centroidFramePoint2d.setIncludingFrame(centroidFramePoint);
       endPoint2d.set(centroidFramePoint2d);
       endPoint2d.add(0.4,0.0);
       endPoint2d.yawAboutPoint(centroidFramePoint2d, endPoint2d, nominalYaw.getDoubleValue());

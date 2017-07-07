@@ -175,7 +175,7 @@ public class PushRecoveryControlModule
          ReferenceFrame soleFrame = soleFrames.get(robotSide);
          projectedCapturePoint.changeFrame(soleFrame);
          footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
-         projectedCapturePoint2d.setByProjectionOntoXYPlaneIncludingFrame(projectedCapturePoint);
+         projectedCapturePoint2d.setIncludingFrame(projectedCapturePoint);
 
          distanceICPToFeet.get(robotSide).set(projectedCapturePoint2d.distance(footPolygon.getCentroid()));
          isRobotBackToSafeState.set(false);

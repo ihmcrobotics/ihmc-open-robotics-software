@@ -125,7 +125,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
 
    public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      frameTuple2d.setByProjectionOntoXYPlane(getFrameTuple());
+      frameTuple2d.set(getFrameTuple());
    }
 
    public final T getFrameTuple()

@@ -194,12 +194,12 @@ public class FourBarKinematicLoop
       vectorDAClosurePoint.sub(masterJointAPosition, jointDClosedLoopPosition);
       vectorCDClosurePoint.sub(jointDClosedLoopPosition, jointCPosition);
 
-      vectorBCProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorBC);
-      vectorCDProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCD);
-      vectorDAProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDA);
-      vectorABProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorAB);
-      vectorDAClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDAClosurePoint);
-      vectorCDClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCDClosurePoint);
+      vectorBCProjectedToPack.setIncludingFrame(vectorBC);
+      vectorCDProjectedToPack.setIncludingFrame(vectorCD);
+      vectorDAProjectedToPack.setIncludingFrame(vectorDA);
+      vectorABProjectedToPack.setIncludingFrame(vectorAB);
+      vectorDAClosurePointProjectedToPack.setIncludingFrame(vectorDAClosurePoint);
+      vectorCDClosurePointProjectedToPack.setIncludingFrame(vectorCDClosurePoint);
 
       if (DEBUG)
       {

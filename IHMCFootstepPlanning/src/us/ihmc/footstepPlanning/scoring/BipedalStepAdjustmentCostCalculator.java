@@ -167,7 +167,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       else
       {
          FrameVector2d frameTuple2d = vectorToPack.getFrameTuple2d();
-         frameTuple2d.setByProjectionOntoXYPlane(toPose.getFramePointCopy());
+         frameTuple2d.set(toPose.getFramePointCopy());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
          frameTuple2d.normalize();

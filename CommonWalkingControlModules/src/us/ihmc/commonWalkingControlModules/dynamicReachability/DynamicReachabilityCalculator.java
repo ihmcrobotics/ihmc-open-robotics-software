@@ -407,7 +407,7 @@ public class DynamicReachabilityCalculator
       // get the hip location in XY
       tempPoint.setToZero(predictedHipFrames.get(supportSide));
       tempPoint.changeFrame(worldFrame);
-      tempFinalCoM.setByProjectionOntoXYPlaneIncludingFrame(tempPoint);
+      tempFinalCoM.setIncludingFrame(tempPoint);
 
       tempFinalCoM.changeFrame(worldFrame);
       hipMaximumLocations.get(supportSide).set(tempFinalCoM, 0.0);
@@ -453,7 +453,7 @@ public class DynamicReachabilityCalculator
 
       tempPoint.setToZero(predictedHipFrames.get(swingSide));
       tempPoint.changeFrame(worldFrame);
-      tempFinalCoM.setByProjectionOntoXYPlaneIncludingFrame(tempPoint);
+      tempFinalCoM.setIncludingFrame(tempPoint);
 
       double planarDistance = tempFinalCoM.distance(tempPoint2d);
 
@@ -1032,7 +1032,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * currentEndTransferDuration;
@@ -1042,7 +1042,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, currentTransferDuration, currentTransferDurationAlpha);
@@ -1066,7 +1066,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * nextEndTransferDuration;
@@ -1076,7 +1076,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, nextTransferDuration, nextTransferDurationAlpha);
@@ -1094,7 +1094,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherTransferGradients.get(stepIndex - 2).setByProjectionOntoXYPlane(tempGradient);
+      higherTransferGradients.get(stepIndex - 2).set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepIndex, originalDuration, -1.0);
@@ -1118,7 +1118,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialSwingGradient.set(tempGradient);
 
       // compute end swing duration gradient
       variation = -swingTwiddleSizeDuration * currentEndSwingDuration;
@@ -1128,7 +1128,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndSwingGradient.set(tempGradient);
 
       // reset timing
       submitSwingTiming(stepNumber, currentSwingDuration, currentSwingDurationAlpha);
@@ -1143,7 +1143,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherSwingGradients.get(stepIndex - 1).setByProjectionOntoXYPlane(tempGradient);
+      higherSwingGradients.get(stepIndex - 1).set(tempGradient);
 
       //reset timing
       submitSwingTiming(stepIndex, duration, -1.0);
@@ -1300,7 +1300,7 @@ public class DynamicReachabilityCalculator
       public void setXAxis(FrameVector xAxis)
       {
          xAxis.changeFrame(parentFrame);
-         this.xAxis.setByProjectionOntoXYPlane(xAxis);
+         this.xAxis.set(xAxis);
          this.xAxis.normalize();
          update();
       }

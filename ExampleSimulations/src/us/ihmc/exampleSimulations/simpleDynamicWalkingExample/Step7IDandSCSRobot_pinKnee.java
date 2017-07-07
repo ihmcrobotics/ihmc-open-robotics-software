@@ -483,8 +483,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       centerOfMass.changeFrame(worldFrame);
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocity.changeFrame(worldFrame); //to make sure that we are actually in world frame
-      centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+      centerOfMass2d.setIncludingFrame(centerOfMass);
+      centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
       yoCoM.set(centerOfMass);
       yoCoMVelocity.set(centerOfMassVelocity);

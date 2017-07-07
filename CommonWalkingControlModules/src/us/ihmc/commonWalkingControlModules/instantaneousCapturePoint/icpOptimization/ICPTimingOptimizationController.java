@@ -451,10 +451,10 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
       footTwist.getLinearPart(tempVector);
 
       tempVector.changeFrame(worldFrame);
-      currentSwingFootVelocity.setByProjectionOntoXYPlane(tempVector);
+      currentSwingFootVelocity.set(tempVector);
 
       tempPoint.changeFrame(worldFrame);
-      currentSwingFootPosition.setByProjectionOntoXYPlane(tempPoint);
+      currentSwingFootPosition.set(tempPoint);
       requiredFootstepPosition.changeFrame(worldFrame);
 
       requiredSwingFootVelocity.set(requiredFootstepPosition);

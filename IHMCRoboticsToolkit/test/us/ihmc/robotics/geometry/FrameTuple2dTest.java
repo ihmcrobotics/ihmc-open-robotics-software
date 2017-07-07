@@ -431,7 +431,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, 0.0, 0.0);
       double scaleFactor = 7.0;
       Point2D tuple2d = new Point2D(values);
-      frameTuple.scale(scaleFactor, tuple2d);
+      frameTuple.setAndScale(scaleFactor, tuple2d);
 
       assertEquals("Should be equal doubles", scaleFactor * values[0], frameTuple.getX(), epsilon);
       assertEquals("Should be equal doubles", scaleFactor * values[1], frameTuple.getY(), epsilon);
@@ -451,22 +451,6 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       frameTuple.scaleAdd(scaleFactor, tuple1, tuple2);      
       assertEquals("Should be equal doubles", scaleFactor * values1[0] + values2[0], frameTuple.getX(), epsilon);
       assertEquals("Should be equal doubles", scaleFactor * values1[1] + values2[1], frameTuple.getY(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testScaleAdd_double_Tuple2d_double_Tuple2d()
-   {
-      double[] values1 = {8.0, -5.0};
-      double[] values2 = {19.6, -3.9};
-      FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, 1.5, 7.0);
-      double scaleFactor1 = -7.43, scaleFactor2 = 6.545;
-      Point2D tuple1 = new Point2D(values1);
-      Point2D tuple2 = new Point2D(values2);
-
-      frameTuple.scaleAdd(scaleFactor1, tuple1, scaleFactor2, tuple2);      
-      assertEquals("Should be equal doubles", scaleFactor1 * values1[0] + scaleFactor2 * values2[0], frameTuple.getX(), epsilon);
-      assertEquals("Should be equal doubles", scaleFactor1 * values1[1] + scaleFactor2 * values2[1], frameTuple.getY(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -877,16 +861,5 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       {
          //Good
       }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testToArray()
-   {
-      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 10.0, 10.0);
-      double[] array = frameTuple.toArray();
-      assertEquals("Should be equal", frameTuple.getX(), array[0], epsilon);
-      assertEquals("Should be equal", frameTuple.getY(), array[1], epsilon);
-
    }
 }

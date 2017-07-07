@@ -669,7 +669,7 @@ public class BalanceManager
       convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
-      centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
+      centerOfMassPosition2d.setIncludingFrame(centerOfMassPosition);
       shrunkSupportPolygon.orthogonalProjection(centerOfMassPosition2d);
       centerOfMassPosition.set(centerOfMassPosition2d, 0.0);
 
