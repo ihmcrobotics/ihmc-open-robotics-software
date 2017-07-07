@@ -70,7 +70,7 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>> extends Fra
       Random random = new Random(251654165L);
       T framePoint2d = createFrameTuple(worldFrame, 2.0, 4.0);
 
-      for (int i = 0; i < 100000; i++)
+      for (int i = 0; i < 10000; i++)
       {
          transformInPlane.setIdentity();
          transformInPlane.setRotationYawAndZeroTranslation(RandomNumbers.nextDouble(random, -Math.PI, Math.PI));
