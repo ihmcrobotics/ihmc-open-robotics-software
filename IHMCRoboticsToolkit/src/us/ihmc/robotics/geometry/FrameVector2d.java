@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on vectors occur
@@ -15,7 +16,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
+public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D> implements Vector2DBasics
 {
    private static final long serialVersionUID = -610124454205790361L;
 
