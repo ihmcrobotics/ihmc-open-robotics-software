@@ -509,7 +509,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          FramePoint2d goalPositionInMidFeetZUp = goalPosition.changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
-         reachedGoal.set(goalPositionInMidFeetZUp.distanceFromZero() < reachedGoalThreshold.getDoubleValue());
+         reachedGoal.set(goalPositionInMidFeetZUp.distanceFromOrigin() < reachedGoalThreshold.getDoubleValue());
       }
 
       @Override
