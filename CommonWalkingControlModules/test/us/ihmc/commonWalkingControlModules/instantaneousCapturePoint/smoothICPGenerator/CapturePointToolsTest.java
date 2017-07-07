@@ -385,7 +385,6 @@ public class CapturePointToolsTest
       }
    }
    
-   // TODO: implement similar to above
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeDesiredCornerPointsFromCMPPolynomials()
@@ -404,6 +403,9 @@ public class CapturePointToolsTest
       ArrayList<FramePoint> entryCornerPointsToPack = new ArrayList<FramePoint>();
       ArrayList<FramePoint> exitCornerPointsToPack = new ArrayList<FramePoint>();
       
+      ArrayList<FramePoint> entryCornerPointsToPackDecoupled = new ArrayList<FramePoint>();
+      ArrayList<FramePoint> exitCornerPointsToPackDecoupled = new ArrayList<FramePoint>();
+      
       ArrayList<FramePoint> entryCornerPointsByHandToPack = new ArrayList<FramePoint>();
       ArrayList<FramePoint> exitCornerPointsByHandToPack = new ArrayList<FramePoint>();
 
@@ -415,6 +417,9 @@ public class CapturePointToolsTest
       {
          entryCornerPointsToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
          exitCornerPointsToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
+         
+         entryCornerPointsToPackDecoupled.add(new FramePoint(ReferenceFrame.getWorldFrame()));
+         exitCornerPointsToPackDecoupled.add(new FramePoint(ReferenceFrame.getWorldFrame()));
          
          entryCornerPointsByHandToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
          exitCornerPointsByHandToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
@@ -436,6 +441,7 @@ public class CapturePointToolsTest
             cmpPolynomials3D.set(i, cmpPolynomial3D);
          }
          CapturePointTools.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
+         CapturePointTools.computeDesiredCornerPointsDecoupled(entryCornerPointsToPackDecoupled, exitCornerPointsToPackDecoupled, cmpPolynomials3D, omega0);
          
          exitCornerPointsByHandToPack.set(exitCornerPointsByHandToPack.size()-1, copsToPack.get(copsToPack.size()-1));
          for(int i = numberOfCoPWaypoints-2; i >= 0; i--)
@@ -460,6 +466,9 @@ public class CapturePointToolsTest
          {
             EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsByHandToPack.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
             EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsByHandToPack.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
+            
+            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsToPackDecoupled.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsToPackDecoupled.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
          }
       }
    }
