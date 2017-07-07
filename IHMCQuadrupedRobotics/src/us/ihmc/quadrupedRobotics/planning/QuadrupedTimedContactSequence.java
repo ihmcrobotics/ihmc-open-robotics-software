@@ -174,7 +174,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
          case TOUCH_DOWN:
             contactState.set(stepTransition[i].robotQuadrant, ContactState.IN_CONTACT);
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-            solePosition.get(stepTransition[i].robotQuadrant).setPoint(stepTransition[i].solePosition);
+            solePosition.get(stepTransition[i].robotQuadrant).set(stepTransition[i].solePosition);
             break;
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
