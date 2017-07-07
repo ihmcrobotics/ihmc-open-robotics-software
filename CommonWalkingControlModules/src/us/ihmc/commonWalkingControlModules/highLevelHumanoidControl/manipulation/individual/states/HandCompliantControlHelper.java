@@ -158,8 +158,8 @@ public class HandCompliantControlHelper
       errorTorque.setIncludingFrame(controlFrame, desiredTorque.getX(), desiredTorque.getY(), desiredTorque.getZ());
       errorTorque.sub(measuredTorque);
 
-      linearCorrection.scale(linearGain.getDoubleValue(), errorForce);
-      angularCorrection.scale(angularGain.getDoubleValue(), errorTorque);
+      linearCorrection.setAndScale(linearGain.getDoubleValue(), errorForce);
+      angularCorrection.setAndScale(angularGain.getDoubleValue(), errorTorque);
 
       clipToVectorMagnitude(compliantControlMaxLinearCorrectionPerTick.getDoubleValue(), linearCorrection);
       clipToVectorMagnitude(compliantControlMaxAngularCorrectionPerTick.getDoubleValue(), angularCorrection);

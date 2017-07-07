@@ -89,8 +89,8 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
       totalForce.setToZero(worldFrame);
 
-      springForce.scale(stiffness.getDoubleValue(), connectionPositionError);
-      damperForce.scale(damping.getDoubleValue(), connectionVelocityError);
+      springForce.setAndScale(stiffness.getDoubleValue(), connectionPositionError);
+      damperForce.setAndScale(damping.getDoubleValue(), connectionVelocityError);
 
       totalForce.add(springForce);
       totalForce.add(damperForce);
