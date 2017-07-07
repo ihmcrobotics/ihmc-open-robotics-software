@@ -376,9 +376,9 @@ public class PositionOptimizedTrajectoryGenerator
          Direction axis = Direction.values[dimension];
          YoPolynomial polynomial = trajectories.get(axis).get(activeSegment);
          polynomial.compute(time);
-         desiredPosition.set(axis, polynomial.getPosition());
-         desiredVelocity.set(axis, polynomial.getVelocity());
-         desiredAcceleration.set(axis, polynomial.getAcceleration());
+         desiredPosition.setElement(dimension, polynomial.getPosition());
+         desiredVelocity.setElement(dimension, polynomial.getVelocity());
+         desiredAcceleration.setElement(dimension, polynomial.getAcceleration());
       }
    }
 
@@ -406,7 +406,7 @@ public class PositionOptimizedTrajectoryGenerator
       optimizer.getWaypointVelocity(this.waypointVelocity, waypointIndex);
       waypointVelocityToPack.setToZero(trajectoryFrame);
       for (int d = 0; d < Direction.values.length; d++)
-         waypointVelocityToPack.set(Direction.values[d], this.waypointVelocity.get(d));
+         waypointVelocityToPack.setElement(d, this.waypointVelocity.get(d));
    }
 
    public boolean isDone()

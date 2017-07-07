@@ -285,7 +285,7 @@ public class EuclideanTrajectoryPointCalculator
          YoPolynomial polynomial = polynomials.get(direction);
          polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
          polynomial.compute(tIntermediate);
-         linearVelocityToPack.set(direction, polynomial.getVelocity());
+         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
       }
    }
 
@@ -330,7 +330,7 @@ public class EuclideanTrajectoryPointCalculator
             break;
          }
 
-         linearVelocityToPack.set(direction, polynomial.getVelocity());
+         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
       }
    }
 

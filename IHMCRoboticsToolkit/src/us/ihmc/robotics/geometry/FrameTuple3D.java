@@ -179,11 +179,6 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.setZ(z);
    }
 
-   public final void set(Direction direction, double value)
-   {
-      Direction.set(tuple, direction, value);
-   }
-
    /**
     * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
     * <p>

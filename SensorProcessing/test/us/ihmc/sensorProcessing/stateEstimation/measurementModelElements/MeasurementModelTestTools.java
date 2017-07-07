@@ -40,7 +40,7 @@ public class MeasurementModelTestTools
       for (Direction direction : Direction.values())
       {
          FrameVector perturbationVector = new FrameVector(nominalState.getReferenceFrame());
-         perturbationVector.set(direction, perturbationMagnitude);
+         perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
@@ -65,7 +65,7 @@ public class MeasurementModelTestTools
       for (Direction direction : Direction.values())
       {
          FrameVector perturbationVector = new FrameVector(nominalState.getReferenceFrame());
-         perturbationVector.set(direction, perturbationMagnitude);
+         perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
