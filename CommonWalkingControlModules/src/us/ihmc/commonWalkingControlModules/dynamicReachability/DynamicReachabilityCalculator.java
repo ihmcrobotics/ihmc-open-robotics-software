@@ -46,6 +46,9 @@ public class DynamicReachabilityCalculator
    private static final boolean VISUALIZE_REACHABILITY = false;
    private static final double epsilon = 0.005;
 
+
+   private static final double gradientThresholdForConsideration = 0.005;
+
    private final double transferTwiddleSizeDuration;
    private final double swingTwiddleSizeDuration;
 
@@ -343,8 +346,6 @@ public class DynamicReachabilityCalculator
       RobotSide stanceSide = swingSide.getOppositeSide();
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
-      if (tempFinalCoM.containsNaN())
-         throw new RuntimeException("Final CoM Contains NaN!");
 
       predictedCoMPosition.setToZero(worldFrame);
       predictedCoMPosition.set(tempFinalCoM);
@@ -1055,6 +1056,13 @@ public class DynamicReachabilityCalculator
       double nextTransferDuration = originalTransferDurations.get(stepNumber);
       double nextTransferDurationAlpha = originalTransferAlphas.get(stepNumber);
 
+      if (nextTransferDuration == 0.0)
+      {
+         nextEndTransferGradient.setToZero();
+         nextInitialTransferGradient.setToZero();
+         return;
+      }
+
       double nextInitialTransferDuration = nextTransferDurationAlpha * nextTransferDuration;
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
 
@@ -1080,9 +1088,6 @@ public class DynamicReachabilityCalculator
 
       // reset timing
       submitTransferTiming(stepNumber, nextTransferDuration, nextTransferDurationAlpha);
-
-      if (nextInitialTransferGradient.containsNaN() || nextEndTransferGradient.containsNaN())
-         throw new RuntimeException("Next Transfer Gradients Contains NaN.");
    }
 
    private void computeHigherTransferGradient(int stepIndex)
@@ -1208,6 +1213,11 @@ public class DynamicReachabilityCalculator
       gradientToPack.set(adjustedPosition);
       gradientToPack.sub(tempPoint);
       gradientToPack.scale(1.0 / variation);
+
+      if (MathTools.intervalContains(gradientToPack.getX(), gradientThresholdForConsideration))
+         gradientToPack.setX(0.0);
+      if (MathTools.intervalContains(gradientToPack.getY(), gradientThresholdForConsideration))
+         gradientToPack.setY(0.0);
    }
 
    private void submitGradientInformationToSolver(int numberOfHigherSteps)

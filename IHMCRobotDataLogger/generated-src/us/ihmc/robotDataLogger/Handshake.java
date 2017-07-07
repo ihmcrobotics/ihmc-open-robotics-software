@@ -34,7 +34,7 @@ public class Handshake
     public void set(Handshake other)
     {
         	dt_ = other.dt_;
-            registries_.set(other.registries_);	variables_.set(other.variables_);	joints_.set(other.joints_);	graphicObjects_.set(other.graphicObjects_);	artifacts_.set(other.artifacts_);	enumTypes_.set(other.enumTypes_);	us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(summary_, other.summary_);
+            registries_.set(other.registries_);	variables_.set(other.variables_);	joints_.set(other.joints_);	graphicObjects_.set(other.graphicObjects_);	artifacts_.set(other.artifacts_);	enumTypes_.set(other.enumTypes_);	us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(other.summary_, summary_);
     }
 
     public void setDt(double dt)

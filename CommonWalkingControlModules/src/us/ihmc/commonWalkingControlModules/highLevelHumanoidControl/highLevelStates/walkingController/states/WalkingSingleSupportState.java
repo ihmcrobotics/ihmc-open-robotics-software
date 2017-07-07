@@ -225,11 +225,14 @@ public class WalkingSingleSupportState extends SingleSupportState
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
          double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
-         double nextSwingDuration = nextFootstepTiming.getSwingTime();
 
          swingTime = currentSwingDuration;
          footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
-         nextFootstepTiming.setTimings(nextSwingDuration, nextTransferDuration);
+
+         if (nextFootstepTiming != null)
+            nextFootstepTiming.setTimings(nextFootstepTiming.getSwingTime(), nextTransferDuration);
+         else
+            balanceManager.setFinalTransferTime(nextTransferDuration);
       }
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())

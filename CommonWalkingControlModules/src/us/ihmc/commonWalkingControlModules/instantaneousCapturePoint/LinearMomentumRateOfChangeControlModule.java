@@ -384,4 +384,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public abstract ICPOptimizationController getICPOptimizationController();
 
    public abstract double getOptimizedTimeRemaining();
+
+   public abstract void setReferenceICPVelocity(FrameVector2d referenceICPVelocity);
 }

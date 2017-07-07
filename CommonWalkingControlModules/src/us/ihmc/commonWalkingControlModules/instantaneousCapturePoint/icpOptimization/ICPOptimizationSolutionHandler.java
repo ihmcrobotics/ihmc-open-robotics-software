@@ -310,6 +310,11 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
+   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   {
+      referenceICPVelocity.set(desiredICPVelocity);
+   }
+
    public void setReferenceValues(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, double omega0)
    {
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, tempPoint2d);

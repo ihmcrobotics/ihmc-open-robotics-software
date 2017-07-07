@@ -61,7 +61,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       this.device = device;
 
       this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()), null, LogSettings.BEHAVIOR, DT);
-      this.server.setMainRegistry(registry, fullRobotModel, new YoGraphicsListRegistry());
+      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), new YoGraphicsListRegistry());
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);

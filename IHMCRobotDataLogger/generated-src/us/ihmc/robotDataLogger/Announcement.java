@@ -40,7 +40,7 @@ public class Announcement
         	name_.append(other.name_);
         	hostName_.setLength(0);
         	hostName_.append(other.hostName_);
-            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(modelFileDescription_, other.modelFileDescription_);log_ = other.log_;
+            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(other.modelFileDescription_, modelFileDescription_);log_ = other.log_;
 
     }
 

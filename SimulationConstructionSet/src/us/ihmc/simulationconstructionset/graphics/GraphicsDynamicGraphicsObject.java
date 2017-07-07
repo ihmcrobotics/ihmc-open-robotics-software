@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.graphics;
 
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 

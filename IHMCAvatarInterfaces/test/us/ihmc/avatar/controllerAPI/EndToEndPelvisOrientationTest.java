@@ -19,7 +19,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -31,7 +30,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -185,33 +185,37 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(numberOfPoints);
       message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      Quaternion previousOrientation = initialOrientation.getQuaternionCopy();
-      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
       for (int point = 0; point < numberOfPoints; point++)
       {
          double time = timePerPoint * (point + 1);
          double factor = Math.sin(2.0 * Math.PI * time * frequency);
 
+         double yaw = yawMagnitude * factor;
+         double pitch = pitchMagnitude * factor;
+         double roll = rollMagnitude * factor;
+
          Quaternion orientation = new Quaternion();
-         orientation.appendYawRotation(yawMagnitude * factor);
-         orientation.appendPitchRotation(pitchMagnitude * factor);
-         orientation.appendRollRotation(rollMagnitude * factor);
+         orientation.appendYawRotation(yaw);
+         orientation.appendPitchRotation(pitch);
+         orientation.appendRollRotation(roll);
          FrameOrientation frameOrientation = new FrameOrientation(pelvisFrame, orientation);
          frameOrientation.changeFrame(worldFrame);
          frameOrientation.get(orientation);
 
-         Vector4D derivative = new Vector4D();
-         quaternionCalculus.computeQDotByFiniteDifferenceCentral(previousOrientation, orientation, timePerPoint, derivative);
+         double derivativeFactor = 2.0 * Math.PI * frequency * Math.cos(2.0 * Math.PI * time * frequency);
+         double yawRate = yawMagnitude * derivativeFactor;
+         double pitchRate = pitchMagnitude * derivativeFactor;
+         double rollRate = rollMagnitude * derivativeFactor;
          Vector3D angularVelocity = new Vector3D();
-         quaternionCalculus.computeAngularVelocityInWorldFrame(orientation, derivative, angularVelocity);
+         RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
+         FrameVector frameAngularVelcoity = new FrameVector(pelvisFrame, angularVelocity);
+         frameAngularVelcoity.changeFrame(worldFrame);
+         frameAngularVelcoity.get(angularVelocity);
 
          if (point == numberOfPoints - 1)
             angularVelocity.setToZero();
-
          message.setTrajectoryPoint(point, time, orientation, angularVelocity, worldFrame);
-
-         previousOrientation = orientation;
       }
 
       drcSimulationTestHelper.send(message);
