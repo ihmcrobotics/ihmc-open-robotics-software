@@ -15,7 +15,6 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
@@ -94,6 +93,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
             try
             {
                handlePackets();
+               lastPacketReceived = System.nanoTime();
             }
             catch (InterruptedException e)
             {
