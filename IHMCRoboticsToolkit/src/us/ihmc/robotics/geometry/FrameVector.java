@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -92,8 +91,8 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                        double zMax)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomNumbers.nextDouble(random, xMin, xMax),
-                                                 RandomNumbers.nextDouble(random, yMin, yMax), RandomNumbers.nextDouble(random, zMin, zMax));
+      FrameVector randomVector = new FrameVector(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
+                                                 RandomNumbers.nextDouble(random, zMin, zMax));
       return randomVector;
    }
 
@@ -121,21 +120,11 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return new FrameVector2d(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
-   public double dot(Vector3DReadOnly vector)
-   {
-      return this.tuple.dot(vector);
-   }
-
    public double dot(FrameVector frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 
       return this.tuple.dot(frameVector.tuple);
-   }
-
-   public double angle(Vector3DReadOnly vector)
-   {
-      return this.tuple.angle(vector);
    }
 
    public double angle(FrameVector frameVector)
@@ -163,58 +152,37 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    public void cross(FrameVector frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      cross(this.tuple, this.tuple, frameTuple1.tuple);
+      tuple.cross(tuple, frameTuple1);
    }
 
-   public void cross(FrameTuple3D<?, ?> frameTuple1)
+   public void cross(FrameTuple3DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      cross(this.tuple, this.tuple, frameTuple1.tuple);
-   }
-
-   public void cross(Vector3DReadOnly vector)
-   {
-      cross(this.tuple, this.tuple, vector);
+      tuple.cross(tuple, frameTuple1);
    }
 
    public void cross(FrameVector frameTuple1, FrameVector frameTuple2)
    {
-      checkReferenceFrameMatch(frameTuple1);
-      checkReferenceFrameMatch(frameTuple2);
-      cross(this.tuple, frameTuple1.tuple, frameTuple2.tuple);
+      cross((FrameTuple3DReadOnly) frameTuple1, (FrameTuple3DReadOnly) frameTuple2);
    }
 
-   public void cross(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public void cross(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
-      cross(this.tuple, frameTuple1.tuple, frameTuple2.tuple);
+      tuple.cross(frameTuple1, frameTuple2);
    }
 
-   protected static final void cross(Vector3DBasics resultToPack, Tuple3DReadOnly t1, Tuple3DReadOnly t2)
+   public void cross(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly frameTuple2)
    {
-      double x, y;
-
-      x = t1.getY() * t2.getZ() - t1.getZ() * t2.getY();
-      y = t2.getX() * t1.getZ() - t2.getZ() * t1.getX();
-      resultToPack.setZ(t1.getX() * t2.getY() - t1.getY() * t2.getX());
-      resultToPack.setX(x);
-      resultToPack.setY(y);
+      checkReferenceFrameMatch(frameTuple1);
+      tuple.cross(frameTuple1, frameTuple2);
    }
 
-   public void normalize()
+   public void cross(Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
-      this.tuple.normalize();
-   }
-
-   public double length()
-   {
-      return tuple.length();
-   }
-
-   public double lengthSquared()
-   {
-      return tuple.lengthSquared();
+      checkReferenceFrameMatch(frameTuple2);
+      tuple.cross(frameTuple1, frameTuple2);
    }
 
    /**

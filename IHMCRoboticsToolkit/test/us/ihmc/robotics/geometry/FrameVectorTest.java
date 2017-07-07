@@ -269,7 +269,7 @@ public class FrameVectorTest extends FrameTuple3DTest<FrameVector, Vector3D>
          fv3.cross(fv1, fv2);
          assertTrue(fv3.getVector().epsilonEquals(v3, epsilon));
 
-         FrameVector.cross(staticResult, v1, v2); //compare to static version of cross()
+         staticResult.cross(v1, v2); //compare to Vector3D.cross()
          assertTrue(fv3.getVector().epsilonEquals(staticResult, epsilon));
       }
    }

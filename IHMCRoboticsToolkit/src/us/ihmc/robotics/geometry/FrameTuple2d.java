@@ -19,23 +19,11 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 {
    private static final long serialVersionUID = 6275308250031489785L;
 
-   private static final boolean DEBUG = false;
-
    protected final T tuple;
 
    public FrameTuple2d(ReferenceFrame referenceFrame, T tuple)
    {
       super(referenceFrame, tuple);
-
-      if (DEBUG)
-      {
-         if (referenceFrame == null)
-         {
-            String errorMsg = "FrameTuple2d: created a " + getClass().getSimpleName() + " with a null reference frame.";
-            System.err.println(errorMsg);
-         }
-      }
-
       this.tuple = getGeometryObject();
    }
 
@@ -81,9 +69,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    }
 
    /**
-    * Sets this tuple's components {@code x}, {@code y} in order from the given column
-    * vector starting to read from its first row index and sets this tuple frame to
-    * {@code referenceFrame}.
+    * Sets this tuple's components {@code x}, {@code y} in order from the given column vector
+    * starting to read from its first row index and sets this tuple frame to {@code referenceFrame}.
     *
     * @param referenceFrame the new reference frame for this tuple.
     * @param matrix the column vector containing the new values for this tuple's components. Not
@@ -96,9 +83,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    }
 
    /**
-    * Sets this tuple's components {@code x}, {@code y} in order from the given column
-    * vector starting to read from {@code startRow} and sets this tuple frame to
-    * {@code referenceFrame}.
+    * Sets this tuple's components {@code x}, {@code y} in order from the given column vector
+    * starting to read from {@code startRow} and sets this tuple frame to {@code referenceFrame}.
     *
     * @param referenceFrame the new reference frame for this tuple.
     * @param startRow the first row index to start reading in the dense-matrix.
@@ -112,9 +98,9 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    }
 
    /**
-    * Sets this tuple's components {@code x}, {@code y} in order from the given matrix
-    * starting to read from {@code startRow} at the column index {@code column} and sets this tuple
-    * frame to {@code referenceFrame}.
+    * Sets this tuple's components {@code x}, {@code y} in order from the given matrix starting to
+    * read from {@code startRow} at the column index {@code column} and sets this tuple frame to
+    * {@code referenceFrame}.
     *
     * @param referenceFrame the new reference frame for this tuple.
     * @param startRow the first row index to start reading in the dense-matrix.
@@ -248,8 +234,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    }
 
    /**
-    * Packs the components {@code x}, {@code y} in order in a column vector starting from
-    * its first row index.
+    * Packs the components {@code x}, {@code y} in order in a column vector starting from its first
+    * row index.
     *
     * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
     */
