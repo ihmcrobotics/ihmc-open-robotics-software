@@ -42,7 +42,7 @@ public class YoFramePoint2dInPolygonCoordinate
    {
       FramePoint2d temp = new FramePoint2d(pointInAnyFrame);
       temp.changeFrame(polygon.getReferenceFrame());
-      updatePointAndPolygon(polygon, temp.getPoint());
+      updatePointAndPolygon(polygon, temp);
    }
 
    /**

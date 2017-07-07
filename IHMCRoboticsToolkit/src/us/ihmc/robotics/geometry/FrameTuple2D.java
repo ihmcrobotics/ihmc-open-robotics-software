@@ -10,8 +10,6 @@ import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
@@ -206,26 +204,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
    public final double getY()
    {
       return tuple.getY();
-   }
-
-   /**
-    * Returns a Point2d copy of the tuple in this FrameTuple.
-    *
-    * @return Point2d
-    */
-   public final Point2D getPointCopy()
-   {
-      return new Point2D(tuple);
-   }
-
-   /**
-    * Returns a Vector2d copy of the tuple in this FrameTuple.
-    *
-    * @return Vector2d
-    */
-   public final Vector2D getVectorCopy()
-   {
-      return new Vector2D(this.tuple);
    }
 
    @Override

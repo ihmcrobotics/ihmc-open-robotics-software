@@ -42,7 +42,7 @@ public class BestFitPlaneCalculatorTest
       );
       DataGridTools.fillMapWithMatrixCentered(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
-      Plane3D plane = calculator.calculatePlane(map, footCenterPoint.getPoint(), 2.0, 2.0);
+      Plane3D plane = calculator.calculatePlane(map, footCenterPoint, 2.0, 2.0);
       System.out.println("BestFitPlaneCalculatorTest: calculator.getPointList() = " + calculator.getPointList());
       Point3D point = plane.getPointCopy();
       Vector3D normal = plane.getNormalCopy();

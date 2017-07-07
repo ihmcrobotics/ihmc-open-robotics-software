@@ -36,7 +36,7 @@ public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingC
       fallingDirection.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       if (this.fallingDirection == null)
          this.fallingDirection = new Vector2D32();
-      this.fallingDirection.set(fallingDirection.getVector());
+      this.fallingDirection.set(fallingDirection);
    }
 
    public Vector2D32 getFallingDirection()

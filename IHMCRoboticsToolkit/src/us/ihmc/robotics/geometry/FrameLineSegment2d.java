@@ -54,14 +54,14 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
 
    public FrameLineSegment2d(FramePoint2d[] endpoints)
    {
-      this(endpoints[0].getReferenceFrame(), new LineSegment2D(endpoints[0].getPointCopy(), endpoints[1].getPointCopy()));
+      this(endpoints[0].getReferenceFrame(), new LineSegment2D(endpoints[0], endpoints[1]));
       
       endpoints[0].checkReferenceFrameMatch(endpoints[1]);
    }
 
    public FrameLineSegment2d(FramePoint2d firstEndpoint, FramePoint2d secondEndpoint)
    {
-      this(firstEndpoint.getReferenceFrame(), new LineSegment2D(firstEndpoint.getPointCopy(), secondEndpoint.getPointCopy()));
+      this(firstEndpoint.getReferenceFrame(), new LineSegment2D(firstEndpoint, secondEndpoint));
       firstEndpoint.checkReferenceFrameMatch(secondEndpoint);
    }
 
@@ -89,7 +89,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(vectorToSecondEndpoint);
-      this.lineSegment.set(firstEndpoint.getPoint(), vectorToSecondEndpoint.getVector());
+      this.lineSegment.set(firstEndpoint, vectorToSecondEndpoint);
    }
 
    public void setIncludingFrame(FramePoint2d firstEndpoint, FramePoint2d secondEndpoint)
@@ -315,14 +315,14 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
-      lineSegment.orthogonalProjection(point.getPoint());
+      lineSegment.orthogonalProjection(point);
    }
 
    public void orthogonalProjection(FramePoint2d point, FramePoint2d projectedPointToPack)
    {
       checkReferenceFrameMatch(point);
       projectedPointToPack.setToZero(referenceFrame);
-      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack.getPoint());
+      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack);
    }
 
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
@@ -406,7 +406,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
 
-      return this.lineSegment.isPointOnRightSideOfLineSegment(point.getPointCopy());
+      return this.lineSegment.isPointOnRightSideOfLineSegment(point);
    }
 
    public FrameLineSegment2d shiftToLeftCopy(double distanceToShift)
@@ -443,7 +443,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
       
-      lineSegment.orthogonalProjection(tempPoint2d, point.getPoint());
+      lineSegment.orthogonalProjection(tempPoint2d, point);
       framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
    }
    

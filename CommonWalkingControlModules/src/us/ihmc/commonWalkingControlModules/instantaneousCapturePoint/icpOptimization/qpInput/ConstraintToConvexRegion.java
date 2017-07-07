@@ -73,7 +73,7 @@ public class ConstraintToConvexRegion
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      convexPolygon.addVertex(vertex.getPoint());
+      convexPolygon.addVertex(vertex);
    }
 
    public void addPolygon(FrameConvexPolygon2d polygon)

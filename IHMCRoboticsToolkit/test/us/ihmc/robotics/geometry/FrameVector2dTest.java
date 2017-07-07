@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -155,7 +156,7 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
    {
       double x = 5.6, y = 45.67;
       FrameVector2d frame = new FrameVector2d(aFrame, x, y);
-      Vector2D vector2d = frame.getVector();
+      Vector2DReadOnly vector2d = frame.getVector();
       assertEquals("Should be equal", frame.getX(), vector2d.getX(), epsilon);
       assertEquals("Should be equal", frame.getY(), vector2d.getY(), epsilon);
    }

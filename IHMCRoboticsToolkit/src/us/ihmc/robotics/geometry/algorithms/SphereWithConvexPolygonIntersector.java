@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry.algorithms;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -29,7 +29,7 @@ public class SphereWithConvexPolygonIntersector
       sphere.getCenter(closestPointOnPolygon);
       closestPointOnPolygon2d.setIncludingFrame(closestPointOnPolygon);
       
-      Point2D pointUnsafe = closestPointOnPolygon2d.getPoint();
+      Point2DBasics pointUnsafe = closestPointOnPolygon2d;
       polygon.getConvexPolygon2d().orthogonalProjection(pointUnsafe);
       closestPointOnPolygon2d.set(pointUnsafe.getX(), pointUnsafe.getY());
       

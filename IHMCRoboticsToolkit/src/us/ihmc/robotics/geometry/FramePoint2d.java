@@ -8,6 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 /**
@@ -115,7 +116,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     *
     * @return Point2d
     */
-   public Point2D getPoint()
+   public Point2DReadOnly getPoint()
    {
       return tuple;
    }

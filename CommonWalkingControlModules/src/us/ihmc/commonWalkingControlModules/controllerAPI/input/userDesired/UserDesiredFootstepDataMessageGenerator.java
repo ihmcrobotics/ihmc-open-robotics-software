@@ -221,7 +221,7 @@ public class UserDesiredFootstepDataMessageGenerator
       contactPoints.clear();
       for (FramePoint2d contactFramePoint : contactFramePoints)
       {
-         contactPoint = contactFramePoint.getPointCopy();
+         contactPoint = new Point2D(contactFramePoint);
 
          if (contactFramePoint.getX() > 0.0)
             contactPoint.setX(contactPoint.getX() * stepToePercentage.getDoubleValue());
