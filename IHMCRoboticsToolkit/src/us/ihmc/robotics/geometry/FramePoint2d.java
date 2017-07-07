@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 /**
@@ -20,7 +21,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  *
  * @author Learning Locomotion Team
  */
-public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements FramePoint2dReadOnly
+public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements FramePoint2dReadOnly, Point2DBasics
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
