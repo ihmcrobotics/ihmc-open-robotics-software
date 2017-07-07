@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -104,7 +104,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> implements
       frameTuple2dToPack.setIncludingFrame(getFrameTuple2d());
    }
 
-   public final void getFrameTupleIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
+   public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTupleToPack)
    {
       frameTupleToPack.setXYIncludingFrame(getFrameTuple2d());
    }
@@ -194,12 +194,12 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> implements
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void setByProjectionOntoXYPlane(FrameTuple<?, ?> frameTuple)
+   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple)
    {
       setByProjectionOntoXYPlane(frameTuple, true);
    }
 
-   public final void setByProjectionOntoXYPlane(FrameTuple<?, ?> frameTuple, boolean notifyListeners)
+   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
    {
       this.frameTuple2d.setByProjectionOntoXYPlane(frameTuple);
       getYoValuesFromFrameTuple2d(notifyListeners);

@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -51,7 +51,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParentToTranslationOnly(FrameTuple<?, ?> translationToParent)
+   public void setOffsetToParentToTranslationOnly(FrameTuple3D<?, ?> translationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.setToZero();
@@ -68,7 +68,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParent(FrameTuple<?, ?> translationToParent, FrameOrientation rotationToParent)
+   public void setOffsetToParent(FrameTuple3D<?, ?> translationToParent, FrameOrientation rotationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.set(rotationToParent);

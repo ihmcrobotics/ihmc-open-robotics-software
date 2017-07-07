@@ -154,7 +154,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     *
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlane(FrameTuple<?, ?> frameTuple)
+   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       set(frameTuple.getX(), frameTuple.getY());
@@ -165,7 +165,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     *
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlaneIncludingFrame(FrameTuple<?, ?> frameTuple)
+   public final void setByProjectionOntoXYPlaneIncludingFrame(FrameTuple3D<?, ?> frameTuple)
    {
       setIncludingFrame(frameTuple.getReferenceFrame(), frameTuple.getX(), frameTuple.getY());
    }

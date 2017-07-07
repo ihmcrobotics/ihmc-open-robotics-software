@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
@@ -102,7 +102,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
       zDot.update(tuple.getZ());
    }
 
-   public void update(FrameTuple<?, ?> frameTuple)
+   public void update(FrameTuple3D<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       xDot.update(frameTuple.getX());

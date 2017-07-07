@@ -21,13 +21,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T> implements Serializable
+public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
    protected final T tuple;
 
-   public FrameTuple(ReferenceFrame referenceFrame, T tuple)
+   public FrameTuple3D(ReferenceFrame referenceFrame, T tuple)
    {
       super(referenceFrame, tuple);
       this.tuple = getGeometryObject();
@@ -126,7 +126,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       this.tuple.set(tuple);
    }
 
-   public final void set(FrameTuple<?, ?> frameTuple)
+   public final void set(FrameTuple3D<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       set(frameTuple.tuple);
@@ -159,7 +159,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       setXY(frameTuple2d);
    }
 
-   public final void setIncludingFrame(FrameTuple<?, ?> frameTuple)
+   public final void setIncludingFrame(FrameTuple3D<?, ?> frameTuple)
    {
       setIncludingFrame(frameTuple.referenceFrame, frameTuple.tuple);
    }
@@ -348,7 +348,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple1 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scale(double scaleFactor, FrameTuple<?, ?> frameTuple1)
+   public final void scale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       setAndScale(scaleFactor, frameTuple1.tuple);
@@ -362,7 +362,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple1 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple<?, ?> frameTuple1)
+   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       scaleAdd(scaleFactor, frameTuple1.tuple);
@@ -377,7 +377,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -393,7 +393,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleSub(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void scaleSub(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -435,7 +435,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple1 the other Tuple3d
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple<?, ?> frameTuple1)
+   public final void add(FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       add(frameTuple1.tuple);
@@ -447,7 +447,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple2 the second FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void add(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -487,7 +487,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple1 the first FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple<?, ?> frameTuple1)
+   public final void sub(FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       sub(frameTuple1.tuple);
@@ -499,7 +499,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple2 the second FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void sub(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -527,7 +527,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param frameTuple2 the second FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void subAndScale(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void subAndScale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -552,7 +552,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
      *  @param alpha  the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2, double alpha)
+   public final void interpolate(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2, double alpha)
    {
       frameTuple1.checkReferenceFrameMatch(frameTuple2);
 
@@ -634,7 +634,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
     * @param threshold double
     * @throws ReferenceFrameMismatchException
     */
-   public final boolean epsilonEquals(FrameTuple<?, ?> frameTuple1, double threshold)
+   public final boolean epsilonEquals(FrameTuple3D<?, ?> frameTuple1, double threshold)
    {
       if (frameTuple1 == null)
       {
