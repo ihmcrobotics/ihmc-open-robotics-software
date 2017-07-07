@@ -150,7 +150,7 @@ public class GroundContactPointsSlipper implements RobotController
          if (touchedDown)
          {
             groundContactPointToSlip.getTouchdownLocation(touchdownLocation);
-            touchdownLocation.add(slipDelta.getVectorCopy());
+            touchdownLocation.add(slipDelta);
             groundContactPointToSlip.setTouchdownLocation(touchdownLocation);
          }
       }

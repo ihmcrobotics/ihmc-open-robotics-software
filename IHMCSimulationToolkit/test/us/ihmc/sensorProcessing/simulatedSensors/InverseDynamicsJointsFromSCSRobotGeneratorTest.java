@@ -406,7 +406,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   FramePoint comOffsetCheck = new FramePoint();
                   revoluteJoint.getSuccessor().getCoMOffset(comOffsetCheck);
                   comOffsetCheck.changeFrame(revoluteJoint.getFrameAfterJoint());
-                  EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
+                  EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck, 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
                   revoluteJoint.getSuccessor().getBodyFixedFrame().getTwistOfFrame(revoluteJointTwist);

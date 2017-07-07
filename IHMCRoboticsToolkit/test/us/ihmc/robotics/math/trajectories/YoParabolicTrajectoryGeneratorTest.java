@@ -37,13 +37,13 @@ public class YoParabolicTrajectoryGeneratorTest
       FramePoint positionToPack = new FramePoint(referenceFrame);
 
       trajectoryGenerator.getPosition(positionToPack, 0.0);
-      EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialPosition, positionToPack, delta);
 
       trajectoryGenerator.getPosition(positionToPack, intermediateParameter);
-      EuclidCoreTestTools.assertTuple3DEquals(intermediatePosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(intermediatePosition, positionToPack, delta);
 
       trajectoryGenerator.getPosition(positionToPack, 1.0);
-      EuclidCoreTestTools.assertTuple3DEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(finalPosition, positionToPack, delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -168,7 +168,7 @@ public class YoParabolicTrajectoryGeneratorTest
          trajectoryGenerator.getVelocity(velocityFromTrajectoryGenerator, parameter);
 
          double delta = 1e-4;
-         EuclidCoreTestTools.assertTuple3DEquals(numericalVelocity.getVectorCopy(), velocityFromTrajectoryGenerator.getVectorCopy(), delta);
+         EuclidCoreTestTools.assertTuple3DEquals(numericalVelocity, velocityFromTrajectoryGenerator, delta);
       }
    }
 

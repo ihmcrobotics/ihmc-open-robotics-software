@@ -55,7 +55,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
       Vector3D expected = jointAcceleration.getLinearPartCopy();
       rotationMatrix.transform(expected);
-      EuclidCoreTestTools.assertTuple3DEquals(expected, comAcceleration.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, comAcceleration, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -94,7 +94,7 @@ public class CenterOfMassAccelerationCalculatorTest
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

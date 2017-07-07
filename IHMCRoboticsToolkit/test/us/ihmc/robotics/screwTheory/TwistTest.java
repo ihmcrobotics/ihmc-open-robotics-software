@@ -426,7 +426,7 @@ public class TwistTest extends SpatialMotionVectorTest
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, actual.getVectorCopy(), 1e-6);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, actual, 1e-6);
    }
 
    /**

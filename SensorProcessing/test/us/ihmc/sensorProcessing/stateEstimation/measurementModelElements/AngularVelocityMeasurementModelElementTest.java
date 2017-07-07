@@ -68,7 +68,7 @@ public class AngularVelocityMeasurementModelElementTest
       FrameVector measuredAngularVelocity = getAngularVelocity(twistCalculator, measurementLink, measurementFrame);
       FrameVector bias = new FrameVector(measurementFrame, RandomGeometry.nextVector3D(random));
       measuredAngularVelocity.add(bias);
-      angularVelocityMeasurementInputPort.setData(measuredAngularVelocity.getVectorCopy());
+      angularVelocityMeasurementInputPort.setData(new Vector3D(measuredAngularVelocity));
 
       biasStatePort.setData(bias);
       FrameVector angularVelocityOfEstimationLink = getAngularVelocity(twistCalculator, estimationLink, estimationFrame);

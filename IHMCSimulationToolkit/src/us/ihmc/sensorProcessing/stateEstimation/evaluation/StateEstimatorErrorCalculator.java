@@ -95,7 +95,7 @@ public class StateEstimatorErrorCalculator
    {
       orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocityFrameVector);
       
-      Vector3D estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedAngularVelocity = new Vector3D(estimatedAngularVelocityFrameVector);
       Vector3D actualAngularVelocity = new Vector3D();
       estimationJoint.physics.getAngularVelocityInBody(actualAngularVelocity);
 
@@ -140,7 +140,7 @@ public class StateEstimatorErrorCalculator
       perfectCoMVelocity.set(linearVelocity);
       
       orientationEstimator.getEstimatedCoMVelocity(estimatedCoMVelocityFrameVector);
-      Vector3D estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedCoMVelocity = new Vector3D(estimatedCoMVelocityFrameVector);
 
       estimatedCoMVelocity.sub(linearVelocity);
       comVelocityError.set(estimatedCoMVelocity.length());

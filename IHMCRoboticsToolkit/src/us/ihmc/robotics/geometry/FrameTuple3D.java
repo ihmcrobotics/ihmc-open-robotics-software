@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
@@ -406,16 +405,6 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       return tuple.getZ();
    }
 
-   /**
-    * Returns a Vector3d copy of the tuple in this FrameTuple.
-    *
-    * @return Vector3d
-    */
-   public final Vector3D getVectorCopy()
-   {
-      return new Vector3D(tuple);
-   }
-
    @Override
    public final void get(Tuple3DBasics tuple3dToPack)
    {
@@ -427,5 +416,4 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       if (containsNaN())
          throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
    }
-
 }

@@ -89,7 +89,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
-      Vector3D expected = new Vector3D(pointFixedInFrameB.getVectorCopy());
+      Vector3D expected = new Vector3D(pointFixedInFrameB);
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 

@@ -527,7 +527,7 @@ public class ScrewTools
    {
       String jointNameOriginal = original.getName();
       RigidBodyTransform jointTransform = original.getOffsetTransform3D();
-      Vector3D jointAxisCopy = original.getJointAxis().getVectorCopy();
+      Vector3D jointAxisCopy = new Vector3D(original.getJointAxis());
       OneDoFJoint clone;
 
       if (original instanceof RevoluteJoint)
@@ -550,7 +550,7 @@ public class ScrewTools
       String nameOriginal = original.getName();
       Matrix3D massMomentOfInertiaPartCopy = original.getInertia().getMassMomentOfInertiaPartCopy();
       double mass = original.getInertia().getMass();
-      Vector3D comOffsetCopy = comOffset.getVectorCopy();
+      Vector3D comOffsetCopy = new Vector3D(comOffset);
       RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
       return clone;
    }

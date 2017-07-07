@@ -112,6 +112,6 @@ public class MocapToPelvisFrameConverterTest
       mocapMarkers.add(new MocapMarker(2, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(3, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(4, new Vector3D(), 0.024f));
-      return new MocapRigidBody(1, markerPoint2.getVectorCopy(), pelvisToMocapRotation, mocapMarkers, false);
+      return new MocapRigidBody(1, new Vector3D(markerPoint2), pelvisToMocapRotation, mocapMarkers, false);
    }
 }

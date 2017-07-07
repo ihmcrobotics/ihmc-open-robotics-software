@@ -63,7 +63,7 @@ public class SimulatedIMURawSensorReaderTest
    public void setUp() throws Exception
    {
       transformIMUToJoint.setRotation(jointToIMURotation);
-      transformIMUToJoint.setTranslation(jointToIMUOffset.getVectorCopy());
+      transformIMUToJoint.setTranslation(jointToIMUOffset);
       transformJointToIMU.setAndInvert(transformIMUToJoint);
 
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
@@ -151,7 +151,7 @@ public class SimulatedIMURawSensorReaderTest
 
    private void generateExpectedAngularVelocity()
    {
-      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity.getVectorCopy()); // in joint/body frame
+      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity); // in joint/body frame
       transformJointToIMU.transform(expectedAngularVelocityInIMUFrame);
    }
 
@@ -173,11 +173,11 @@ public class SimulatedIMURawSensorReaderTest
       FrameVector angularAccelerationPart = new FrameVector(bodyFrame);
       angularAccelerationPart.cross(randomAngularAcceleration, jointToIMUOffset);
 
-      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart.getVectorCopy());
+      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart);
 
       transformJointToIMU.transform(expectedLinearAccelerationOfIMUInIMUFrame);
    }
