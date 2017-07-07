@@ -144,7 +144,7 @@ public class FootStepPlanner
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
       
       desiredVelocityScaled.setToNaN(desiredLinearVelocity.getReferenceFrame());
-      desiredVelocityScaled.scale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
+      desiredVelocityScaled.setAndScale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
       desiredVelocityScaled.changeFrame(centerOfMassFrameWithOrientation);
       
 //      if(desiredAngularVelocity.length() > 0.003)

@@ -343,7 +343,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
     * @param frameTuple1 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
+   public final void setAndScale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       setAndScale(scaleFactor, frameTuple1.tuple);
