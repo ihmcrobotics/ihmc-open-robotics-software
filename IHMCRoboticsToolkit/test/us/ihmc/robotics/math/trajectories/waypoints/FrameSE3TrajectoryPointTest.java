@@ -623,7 +623,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
-      frameSE3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, position.getPointCopy(), orientation.getQuaternionCopy(), linearVelocity.getVectorCopy(),
+      frameSE3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, new Point3D(position), orientation.getQuaternionCopy(), linearVelocity.getVectorCopy(),
             angularVelocity.getVectorCopy());
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
    

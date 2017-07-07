@@ -167,7 +167,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FramePoint rootJointPosition = new FramePoint(bodyFixedFrame);
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      rootJointExternalForcePoint.setOffsetWorld(rootJointPosition.getPointCopy());
+      rootJointExternalForcePoint.setOffsetWorld(rootJointPosition);
       Vector3D offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -715,7 +715,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          pointOfWrenchApplication.changeFrame(ReferenceFrame.getWorldFrame());
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
-         footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication.getPointCopy());
+         footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication);
 
          FrameVector wrenchForce = wrench.getLinearPartAsFrameVectorCopy();
          wrenchForce.changeFrame(ReferenceFrame.getWorldFrame());

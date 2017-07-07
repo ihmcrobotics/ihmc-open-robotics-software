@@ -814,8 +814,8 @@ public class FootstepSnapperSimulationTest
 
          soleZ.set(solePosition.getZ());
 
-         Point3D planePosition = solePosition.getPointCopy();
-         Vector3D planeNormal = soleNormal.getVectorCopy();
+         Point3D planePosition = new Point3D(solePosition);
+         Vector3D planeNormal = new Vector3D(soleNormal);
 
          planePose.setPosition(planePosition);
 

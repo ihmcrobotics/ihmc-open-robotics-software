@@ -134,7 +134,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);
@@ -188,7 +188,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);
@@ -244,7 +244,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);

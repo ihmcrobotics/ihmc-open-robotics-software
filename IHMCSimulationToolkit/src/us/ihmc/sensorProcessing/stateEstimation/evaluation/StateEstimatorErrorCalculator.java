@@ -118,7 +118,7 @@ public class StateEstimatorErrorCalculator
       
       Vector3D comError = new Vector3D();
       orientationEstimator.getEstimatedCoMPosition(estimatedCoMPosition);
-      comError.set(estimatedCoMPosition.getPointCopy());
+      comError.set(estimatedCoMPosition);
       comError.sub(comPoint);
 
       comZPositionError.set(comError.getZ());

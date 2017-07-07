@@ -121,7 +121,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
@@ -194,7 +194,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
