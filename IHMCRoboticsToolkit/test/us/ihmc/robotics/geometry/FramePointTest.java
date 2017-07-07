@@ -246,33 +246,6 @@ public class FramePointTest extends FrameTuple3DTest<FramePoint, Point3D>
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testMidPoint()
-   {
-      FramePoint expectedMidPoint = new FramePoint(theFrame, 9.0, 3.6, -1.16);
-      FrameVector difference = new FrameVector(theFrame, 1.5, -3.1, 12.9);
-
-      FramePoint framePoint1 = new FramePoint(expectedMidPoint);
-      FramePoint framePoint2 = new FramePoint(expectedMidPoint);
-      framePoint1.add(difference);
-      framePoint2.sub(difference);
-
-      FramePoint actualMidPoint = FramePoint.getMidPoint(framePoint1, framePoint2);
-
-      assertTrue(expectedMidPoint.epsilonEquals(actualMidPoint, epsilon));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
-   public void testMidPointException()
-   {
-      FramePoint framePoint1 = new FramePoint(theFrame, 1.0, 2.0, 3.0);
-      FramePoint framePoint2 = new FramePoint(aFrame, 0.0, -1.0, 8.2);
-
-      FramePoint.getMidPoint(framePoint1, framePoint2);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public void testGetXYplaneDistance()
    {
