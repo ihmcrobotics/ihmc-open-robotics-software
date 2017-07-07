@@ -251,8 +251,10 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, xyPolynomial.getPosition());
-      currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
-      currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
+      currentVelocity.sub(finalPosition, initialPosition);
+      currentVelocity.scale(alphaDot);
+      currentAcceleration.sub(finalPosition, initialPosition);
+      currentAcceleration.scale(alphaDDot);
 
       time = MathTools.clamp(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       zPolynomial.compute(time);

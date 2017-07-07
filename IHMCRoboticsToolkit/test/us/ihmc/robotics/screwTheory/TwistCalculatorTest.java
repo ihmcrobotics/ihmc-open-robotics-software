@@ -549,7 +549,8 @@ public class TwistCalculatorTest
       bodyPositionInFuture.changeFrame(worldFrame);
 
       FrameVector bodyLinearVelocity = new FrameVector(worldFrame);
-      bodyLinearVelocity.subAndScale(1.0 / dt, bodyPositionInFuture, bodyPosition);
+      bodyLinearVelocity.sub(bodyPositionInFuture, bodyPosition);
+      bodyLinearVelocity.scale(1.0 / dt);
       bodyLinearVelocity.changeFrame(bodyFrame);
       return bodyLinearVelocity;
    }

@@ -567,36 +567,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
    }
 
    /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 minus yoFrameTuple2 (this = scaleFactor * ( yoFrameTuple1 - yoFrameTuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 the first YoFrameTuple<?, ?>
-    * @param frameTuple2 the second YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void subAndScale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.subAndScale(scaleFactor, frameTuple1, frameTuple2);
-      getYoValuesFromFrameTuple();
-   }
-
-   /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 minus yoFrameTuple2 (this = scaleFactor * ( yoFrameTuple1 - yoFrameTuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param yoFrameTuple1 the first YoFrameTuple<?, ?>
-    * @param yoFrameTuple2 the second YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void subAndScale(double scaleFactor, YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.subAndScale(scaleFactor, yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
-      getYoValuesFromFrameTuple();
-   }
-
-   /**
     * Negates the value of this YoFrameTuple in place.
     */
    public final void negate()
