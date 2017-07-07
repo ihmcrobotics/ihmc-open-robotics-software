@@ -202,7 +202,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       loadStandPrepSetPoints();
       selectedJoint.notifyVariableChangedListeners();
       
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, null);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
       yoVariableServer.start();
    }
 

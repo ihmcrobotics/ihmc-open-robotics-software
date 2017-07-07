@@ -26,8 +26,8 @@ import us.ihmc.humanoidRobotics.communication.subscribers.StateEstimatorModeSubs
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -207,7 +207,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       if (robotVisualizer != null)
       {
-         robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel, yoGraphicsListRegistry);
+         robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel.getElevator(), yoGraphicsListRegistry);
       }
    }
 

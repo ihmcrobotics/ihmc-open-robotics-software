@@ -2,6 +2,9 @@ package us.ihmc.tools.inputDevices.keyboard;
 
 import java.util.EnumMap;
 
+import us.ihmc.tools.inputDevices.keyboard.Key;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
+
 public class ModifierKeyHolder implements ModifierKeyInterface
 {
    private final EnumMap<Key, Boolean> pressedModifierKeys = new EnumMap<Key, Boolean>(Key.class);

@@ -139,6 +139,11 @@ public class WalkingMessageHandler
                footstepDataListRecievedTime.set(yoTime.getDoubleValue());
             break;
          case QUEUE:
+            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
+            {
+               PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+               return;
+            }
             currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
             break;
          default:

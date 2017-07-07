@@ -27,7 +27,7 @@ public class GraphicObjectMessage
         	type_ = other.type_;
         	name_.setLength(0);
         	name_.append(other.name_);
-            yoVariableIndex_.set(other.yoVariableIndex_);	constants_.set(other.constants_);	us.ihmc.robotDataLogger.AppearanceDefinitionMessagePubSubType.staticCopy(appearance_, other.appearance_);listName_.setLength(0);
+            yoVariableIndex_.set(other.yoVariableIndex_);	constants_.set(other.constants_);	us.ihmc.robotDataLogger.AppearanceDefinitionMessagePubSubType.staticCopy(other.appearance_, appearance_);listName_.setLength(0);
         	listName_.append(other.listName_);
 
     }

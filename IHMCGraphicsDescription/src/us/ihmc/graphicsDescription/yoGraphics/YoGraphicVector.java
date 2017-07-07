@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {

@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
@@ -16,7 +17,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {

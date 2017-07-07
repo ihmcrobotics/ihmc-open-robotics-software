@@ -554,6 +554,8 @@ public class BalanceManager
       }
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
+
+      linearMomentumRateOfChangeControlModule.setReferenceICPVelocity(yoDesiredICPVelocity.getFrameTuple2d());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
@@ -677,7 +679,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   private void setFinalTransferTime(double finalTransferTime)
+   public void setFinalTransferTime(double finalTransferTime)
    {
       icpPlanner.setFinalTransferDuration(finalTransferTime);
       linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);
