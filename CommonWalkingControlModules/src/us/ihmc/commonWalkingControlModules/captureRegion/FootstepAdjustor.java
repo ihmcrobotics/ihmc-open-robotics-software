@@ -148,7 +148,7 @@ public class FootstepAdjustor
    private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
       footstep.getPosition(centroid3d);
-      centroid3d.getFramePoint2d(centroid2d);
+      centroid2d.setIncludingFrame(centroid3d);
       centroid2d.changeFrame(desiredFrame);
 
       polygonToPack.setIncludingFrameAndUpdate(footstep.getSoleReferenceFrame(), defaultSupportPolygons.get(footstep.getRobotSide()));

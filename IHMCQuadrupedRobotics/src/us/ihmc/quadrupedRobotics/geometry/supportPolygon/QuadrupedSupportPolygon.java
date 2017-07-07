@@ -1041,7 +1041,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public double getDistanceInsideInCircle2d(FramePoint point)
    {
       double inCircleRadius = getInCircle2d(tempInCircleCenter);
-      double distanceToInCircleCenter = point.getXYPlaneDistance(tempInCircleCenter);
+      double distanceToInCircleCenter = point.distanceXY(tempInCircleCenter);
       return (inCircleRadius - distanceToInCircleCenter);
    }
    
@@ -1729,9 +1729,9 @@ public class QuadrupedSupportPolygon implements Serializable
             Point2D tempA = tempPointsForCornerCircle[1];
             Point2D tempB = tempPointsForCornerCircle[2];
             
-            cornerPoint.getPoint2d(tempCorner);
-            pointA.getPoint2d(tempA);
-            pointB.getPoint2d(tempB);
+            tempCorner.set(cornerPoint);
+            tempA.set(pointA);
+            tempB.set(pointB);
    
             double bisectTheta = 0.5 * theta;
    

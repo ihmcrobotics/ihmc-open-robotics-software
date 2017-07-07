@@ -44,22 +44,17 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
 
    public double getXYPlaneDistance(FramePoint framePoint)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint);
+      return getFrameTuple().distanceXY(framePoint);
    }
 
    public double getXYPlaneDistance(FramePoint2d framePoint2d)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint2d);
+      return getFrameTuple().distanceXY(framePoint2d);
    }
 
    public double getXYPlaneDistance(YoFramePoint yoFramePoint)
    {
       return getXYPlaneDistance(yoFramePoint.getFrameTuple());
-   }
-
-   public double getXYPlaneDistance(YoFramePoint2d yoFramePoint2d)
-   {
-      return getXYPlaneDistance(yoFramePoint2d.getFrameTuple2d());
    }
 
    @Override

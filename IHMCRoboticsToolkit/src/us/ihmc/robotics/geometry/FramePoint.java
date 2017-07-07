@@ -1,11 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import java.util.List;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -18,7 +17,7 @@ import us.ihmc.robotics.geometry.interfaces.PointInterface;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface, Point3DBasics
+public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface, FramePoint3DReadOnly, Point3DBasics
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -93,23 +92,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
       super(referenceFrame, new Point3D(x, y, z));
    }
 
-   public static FramePoint average(List<? extends FramePoint> framePoints)
-   {
-      ReferenceFrame frame = framePoints.get(0).getReferenceFrame();
-      FramePoint nextPoint = new FramePoint(frame);
-
-      FramePoint average = new FramePoint(framePoints.get(0));
-      for (int i = 1; i < framePoints.size(); i++)
-      {
-         nextPoint.set(framePoints.get(i));
-         nextPoint.changeFrame(frame);
-         average.add(nextPoint);
-      }
-
-      average.scale(1.0 / ((double) framePoints.size()));
-      return average;
-   }
-
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
       FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX),
@@ -125,74 +107,12 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
       return randomPoint;
    }
 
-   public double getXYPlaneDistance(FramePoint framePoint)
-   {
-      checkReferenceFrameMatch(framePoint);
-
-      double dx, dy;
-
-      dx = this.getX() - framePoint.getX();
-      dy = this.getY() - framePoint.getY();
-      return Math.sqrt(dx * dx + dy * dy);
-   }
-
-   public double getXYPlaneDistance(FramePoint2d framePoint2d)
-   {
-      checkReferenceFrameMatch(framePoint2d);
-
-      double dx, dy;
-
-      dx = this.getX() - framePoint2d.getX();
-      dy = this.getY() - framePoint2d.getY();
-      return Math.sqrt(dx * dx + dy * dy);
-   }
-
-   public double distance(FramePoint framePoint)
-   {
-      checkReferenceFrameMatch(framePoint);
-
-      return this.tuple.distance(framePoint.tuple);
-   }
-
-   public double distanceSquared(FramePoint framePoint)
-   {
-      checkReferenceFrameMatch(framePoint);
-
-      return this.tuple.distanceSquared(framePoint.tuple);
-   }
-
    /**
     * Creates a new FramePoint2d based on the x and y components of this FramePoint
     */
    public FramePoint2d toFramePoint2d()
    {
       return new FramePoint2d(this.getReferenceFrame(), this.getX(), this.getY());
-   }
-
-   /**
-    * Makes the pointToPack a FramePoint2d version of this FramePoint
-    * 
-    * @param pointToPack
-    */
-   public void getFramePoint2d(FramePoint2d pointToPack)
-   {
-      pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
-   }
-
-   public void getPoint2d(Point2DBasics pointToPack)
-   {
-      pointToPack.setX(this.getX());
-      pointToPack.setY(this.getY());
-   }
-
-   /**
-    * Makes the tupleToPack a FrameTuple2d version of this FramePoint
-    * 
-    * @param tupleToPack
-    */
-   public void getFrameTuple2d(FrameTuple2D<?, ?> tupleToPack)
-   {
-      tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
    /**

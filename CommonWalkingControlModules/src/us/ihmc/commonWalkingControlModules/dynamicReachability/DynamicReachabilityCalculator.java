@@ -19,10 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -35,6 +31,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DynamicReachabilityCalculator
 {
@@ -403,7 +403,7 @@ public class DynamicReachabilityCalculator
    {
       FramePoint ankleLocation = ankleLocations.get(supportSide);
       ankleLocation.changeFrame(worldFrame);
-      ankleLocation.getFrameTuple2d(tempPoint2d);
+      tempPoint2d.setIncludingFrame(ankleLocation);
 
       // get the hip location in XY
       tempPoint.setToZero(predictedHipFrames.get(supportSide));
@@ -450,7 +450,7 @@ public class DynamicReachabilityCalculator
 
       FramePoint ankleLocation = ankleLocations.get(swingSide);
       ankleLocation.changeFrame(worldFrame);
-      ankleLocation.getFrameTuple2d(tempPoint2d);
+      tempPoint2d.setIncludingFrame(ankleLocation);
 
       tempPoint.setToZero(predictedHipFrames.get(swingSide));
       tempPoint.changeFrame(worldFrame);

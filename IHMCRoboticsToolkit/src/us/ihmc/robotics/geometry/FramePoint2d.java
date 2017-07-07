@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -22,7 +23,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  *
  * @author Learning Locomotion Team
  */
-public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2dReadOnly, Point2DBasics
+public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2DReadOnly, Point2DBasics
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -35,6 +36,16 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * A normal point2d associated with a specific reference frame.
     */
    public FramePoint2d(FrameTuple2D<?, ?> frameTuple2d)
+   {
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
+   }
+
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FramePoint2d(FrameTuple3D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
    }
