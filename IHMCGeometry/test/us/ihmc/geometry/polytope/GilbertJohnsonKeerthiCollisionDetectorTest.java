@@ -161,7 +161,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomNumbers.nextDouble(random, 1000.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 0.0, 1000.0);
          double radius = RandomNumbers.nextDouble(random, 1.0, 20.0);
          int maxNumberOfPoints = 40;
 
@@ -330,7 +330,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomNumbers.nextDouble(random, 500.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 0.0, 500.0);
          double radius = RandomNumbers.nextDouble(random, 1.0, 10.0);
          int maxNumberOfPoints = 40;
 
@@ -426,7 +426,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomNumbers.nextDouble(random, 20.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 0.0, 20.0);
          double radius = RandomNumbers.nextDouble(random, 1.0, 5.0);
          double height = RandomNumbers.nextDouble(random, 1.0, 5.0);
          int maxNumberOfPoints = 20;
