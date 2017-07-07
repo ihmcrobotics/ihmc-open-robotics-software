@@ -32,6 +32,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final String namePrefix = "icpPlanner";
 
    protected final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
+   protected final YoBoolean useDecoupled = new YoBoolean(namePrefix + "useDecoupled", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
    protected final YoBoolean isDoubleSupport = new YoBoolean(namePrefix + "IsDoubleSupport", registry);
 
@@ -131,6 +132,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, CapturePointPlannerParameters icpPlannerParameters)
    {
       isStanding.set(true);
+      useDecoupled.set(false);
 
       finalTransferDuration.setToNaN();
 
