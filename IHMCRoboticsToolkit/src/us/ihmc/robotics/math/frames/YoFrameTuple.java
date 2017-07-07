@@ -637,12 +637,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       return this.frameTuple.epsilonEquals(frameTuple, threshold);
    }
 
-   public final void checkForNaN()
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.checkForNaN();
-   }
-
    @Override
    public final boolean containsNaN()
    {
