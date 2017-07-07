@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -89,7 +90,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       set(tuple, z);
    }
 
-   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d, double z)
+   public void setIncludingFrame(FrameTuple2DReadOnly frameTuple2d, double z)
    {
       referenceFrame = frameTuple2d.getReferenceFrame();
       set(frameTuple2d, z);
@@ -376,16 +377,16 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
       tuple.setZ(z);
    }
 
-   public void set(FrameTuple2D<?, ?> frameTuple2d)
+   public void set(FrameTuple2DReadOnly frameTuple2d)
    {
       checkReferenceFrameMatch(frameTuple2d);
-      tuple.set(frameTuple2d.tuple);
+      tuple.set(frameTuple2d);
    }
 
-   public void set(FrameTuple2D<?, ?> frameTuple2d, double z)
+   public void set(FrameTuple2DReadOnly frameTuple2d, double z)
    {
       checkReferenceFrameMatch(frameTuple2d);
-      tuple.set(frameTuple2d.tuple, z);
+      tuple.set(frameTuple2d, z);
    }
 
    @Override
