@@ -90,7 +90,7 @@ public class MocapToPelvisFrameConverterVisualTest
       mocapAndPelvisGraphics.addModelFile(modelDirectory + "pelvis.obj");
       mocapAndPelvisGraphics.identity();
 
-      mocapAndPelvisGraphics.translate(markerPoint2.getPointCopy());
+      mocapAndPelvisGraphics.translate(markerPoint2);
       mocapAndPelvisGraphics.addSphere(0.005, YoAppearance.White());
       mocapAndPelvisGraphics.identity();
 

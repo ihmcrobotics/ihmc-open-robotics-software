@@ -64,8 +64,8 @@ public class CapturePointToolsTest
       CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3D pointBetweenFeet = new Point3D();
-      pointBetweenFeet.set(footstepList.get(0).getPointCopy());
-      pointBetweenFeet.add(footstepList.get(1).getPointCopy());
+      pointBetweenFeet.set(new Point3D(footstepList.get(0)));
+      pointBetweenFeet.add(new Point3D(footstepList.get(1)));
       pointBetweenFeet.scale(0.5);
 
       for (int i = 0; i < footstepList.size(); i++)
@@ -109,11 +109,11 @@ public class CapturePointToolsTest
       CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3D pointBetweenFeet = new Point3D();
-      pointBetweenFeet.set(footstepList.get(0).getPointCopy());
-      pointBetweenFeet.add(footstepList.get(1).getPointCopy());
+      pointBetweenFeet.set(new Point3D(footstepList.get(0)));
+      pointBetweenFeet.add(new Point3D(footstepList.get(1)));
       pointBetweenFeet.scale(0.5);
 
-      EuclidCoreTestTools.assertTuple3DEquals("", footstepList.get(0).getPointCopy(), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(footstepList.get(0)), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 
       for (int i = 1; i < footstepList.size(); i++)
       {
@@ -157,7 +157,7 @@ public class CapturePointToolsTest
 
          for (int i = 0; i < arrayToPack.size(); i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -200,13 +200,13 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(0).getPointCopy());
-         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(0)));
+         copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
          for (int i = 1; i < arrayToPack.size() - 1; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -249,13 +249,13 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
+         copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
          for (int i = 0; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -298,19 +298,19 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
+         copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
 
-         copPos1.set(footstepList.get(0).getPointCopy());
-         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(0)));
+         copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 
          for (int i = 1; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }

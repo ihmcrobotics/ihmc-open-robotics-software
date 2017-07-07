@@ -199,7 +199,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.3, 0.0, 0.0);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld.getPointCopy());
+      footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(stepSide);
       message.add(footstepData);

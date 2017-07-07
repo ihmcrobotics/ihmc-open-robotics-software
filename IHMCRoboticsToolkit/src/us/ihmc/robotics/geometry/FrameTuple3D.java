@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -405,16 +404,6 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    public final double getZ()
    {
       return tuple.getZ();
-   }
-
-   /**
-    * Returns a Point3D copy of the tuple in this FrameTuple.
-    *
-    * @return Point3D
-    */
-   public final Point3D getPointCopy()
-   {
-      return new Point3D(tuple);
    }
 
    /**

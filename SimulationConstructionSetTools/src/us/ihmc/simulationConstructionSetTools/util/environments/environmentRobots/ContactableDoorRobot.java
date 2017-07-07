@@ -276,7 +276,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       normalToPack.set(frameNormalToPack.getVectorCopy());
       
       frameIntersectionToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      intersectionToPack.set(frameIntersectionToPack.getPointCopy());
+      intersectionToPack.set(frameIntersectionToPack);
    }
    
    @Override

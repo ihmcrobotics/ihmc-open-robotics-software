@@ -181,7 +181,7 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
 
    private final void assertTuplesEqual(FrameTuple3D<?, ?> frameTupleToTest, FrameTuple3D<?, ?> frameTuple2)
    {
-      testGetters(frameTupleToTest, frameTuple2.getPointCopy());
+      testGetters(frameTupleToTest, new Point3D(frameTuple2));
       assertEquals(frameTuple2.getReferenceFrame(), frameTupleToTest.getReferenceFrame());
       assertTrue(frameTupleToTest.epsilonEquals(frameTuple2, epsilon));
    }
@@ -203,10 +203,6 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       assertEquals(x, tuple3dToTest.getX(), epsilon);
       assertEquals(y, tuple3dToTest.getY(), epsilon);
       assertEquals(z, tuple3dToTest.getZ(), epsilon);
-
-      assertEquals(x, frameTuple.getPointCopy().getX(), epsilon);
-      assertEquals(y, frameTuple.getPointCopy().getY(), epsilon);
-      assertEquals(z, frameTuple.getPointCopy().getZ(), epsilon);
 
       assertEquals(x, frameTuple.getVectorCopy().getX(), epsilon);
       assertEquals(y, frameTuple.getVectorCopy().getY(), epsilon);
@@ -485,23 +481,6 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       framePoint = createFrameTuple(theFrame, 0, 0, 0);
       actualReturn = framePoint1.epsilonEquals(framePoint, threshold);
       assertEquals("return value", expectedReturn, actualReturn);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public final void testGetPointCopy()
-   {
-      FrameTuple3D<?, ?> framePoint = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
-
-      Point3D actualReturn = framePoint.getPointCopy();
-      assertEquals(1.0, actualReturn.getX(), epsilon);
-      assertEquals(2.0, actualReturn.getY(), epsilon);
-      assertEquals(3.0, actualReturn.getZ(), epsilon);
-
-      framePoint.add(createFrameTuple(theFrame, 1.0, 1.0, 1.0));
-      assertEquals(1.0, actualReturn.getX(), epsilon);
-      assertEquals(2.0, actualReturn.getY(), epsilon);
-      assertEquals(3.0, actualReturn.getZ(), epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
