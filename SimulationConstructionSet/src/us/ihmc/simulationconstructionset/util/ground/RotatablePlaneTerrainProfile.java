@@ -131,7 +131,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          normalVector.getVector(normalToPack);
          
          xyPoint.setToNaN(planeFrame);
-         testPoint.getFramePoint2d(xyPoint);
+         xyPoint.setIncludingFrame(testPoint);
          double zHeight = plane.getZOnPlane(xyPoint);
          
          testPoint.changeFrame(WORLD_FRAME);
@@ -162,7 +162,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, x, y, z);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       v1.changeFrame(planeFrame);
@@ -186,7 +186,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, position);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       return currentZ - prevZ != 0;

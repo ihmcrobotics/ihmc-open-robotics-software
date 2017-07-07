@@ -233,7 +233,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       comXYAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-      comPosition.getFramePoint2d(comPositionAsFramePoint2d);
+      comPositionAsFramePoint2d.setIncludingFrame(comPosition);
       comXYTimeDerivatives.setCoMXYPosition(comPositionAsFramePoint2d);
       comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);

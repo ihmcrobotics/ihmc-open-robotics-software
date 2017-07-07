@@ -273,31 +273,17 @@ public class FramePointTest extends FrameTuple3DTest<FramePoint, Point3D>
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAverage()
-   {
-      List<FramePoint> framePoints = new ArrayList<FramePoint>();
-      framePoints.add(new FramePoint(theFrame, 1.0, 3.0, 9.0));
-      framePoints.add(new FramePoint(theFrame, 5.0, 3.0, 3.0));
-      framePoints.add(new FramePoint(theFrame, 6.0, 0.0, 18.0));
-      FramePoint average = FramePoint.average(framePoints);
-      assertEquals(4.0, average.getX(), epsilon);
-      assertEquals(2.0, average.getY(), epsilon);
-      assertEquals(10.0, average.getZ(), epsilon);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public void testGetXYplaneDistance()
    {
       FramePoint firstPoint = new FramePoint(theFrame, 1.0, 2.0, 5.0);
       FramePoint secondPoint = new FramePoint(theFrame, 4.0, -2.0, -3.0);
 
-      assertEquals(5.0, firstPoint.getXYPlaneDistance(secondPoint), epsilon);
+      assertEquals(5.0, firstPoint.distanceXY(secondPoint), epsilon);
 
       //Test for reference frame mismatch
       FramePoint thirdPoint = new FramePoint(aFrame, 4.0, -2.0, -3.0);
-      firstPoint.getXYPlaneDistance(thirdPoint);
+      firstPoint.distanceXY(thirdPoint);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -339,20 +325,6 @@ public class FramePointTest extends FrameTuple3DTest<FramePoint, Point3D>
       FramePoint framePoint = new FramePoint(theFrame, 1.0, 2.0, 5.0);
       FramePoint2d framePoint2d = framePoint.toFramePoint2d();
 
-      assertSame(theFrame, framePoint2d.getReferenceFrame());
-      assertEquals(1.0, framePoint2d.getX(), epsilon);
-      assertEquals(2.0, framePoint2d.getY(), epsilon);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetFramePoint2d() //Brett
-   {
-      FramePoint framePoint = new FramePoint(theFrame, 1.0, 2.0, 5.0);
-      FramePoint2d framePoint2d = new FramePoint2d();
-      framePoint.getFramePoint2d(framePoint2d);
-      //      System.out.println(framePoint);
-      //      System.out.println(framePoint2d);
       assertSame(theFrame, framePoint2d.getReferenceFrame());
       assertEquals(1.0, framePoint2d.getX(), epsilon);
       assertEquals(2.0, framePoint2d.getY(), epsilon);

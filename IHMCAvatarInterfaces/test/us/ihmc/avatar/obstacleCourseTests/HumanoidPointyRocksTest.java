@@ -1302,7 +1302,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
                point3d.changeFrame(soleFrame);
                point3d.setZ(0.0);
                point3d.changeFrame(worldFrame);
-               point3d.getFramePoint2d(point);
+               point.setIncludingFrame(point3d);
                footSupport.addVertex(point.getPoint());
             }
 

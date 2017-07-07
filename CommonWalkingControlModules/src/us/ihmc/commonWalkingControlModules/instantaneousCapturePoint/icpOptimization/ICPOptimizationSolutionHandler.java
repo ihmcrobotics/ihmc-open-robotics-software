@@ -268,7 +268,7 @@ public class ICPOptimizationSolutionHandler
       ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
       FramePoint2d stanceEntryCMP = inputHandler.getStanceEntryCMP();
       FramePoint2d stanceExitCMP = inputHandler.getStanceExitCMP();
-      inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
+      tempPoint2d.setIncludingFrame(inputHandler.getFinalICP());
 
       stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, tempPoint2d, footstepSolutions, entryOffsets, exitOffsets,
             numberOfFootstepsToConsider);
@@ -293,7 +293,7 @@ public class ICPOptimizationSolutionHandler
          ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
          FramePoint2d stanceEntryCMP = inputHandler.getStanceEntryCMP();
          FramePoint2d stanceExitCMP = inputHandler.getStanceExitCMP();
-         inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
+         tempPoint2d.setIncludingFrame(inputHandler.getFinalICP());
 
          stateMultiplierCalculator
                .yoReconstructICPCornerPoint(tmpEndPoint, tempPoint2d, upcomingFootstepLocations, entryOffsets, exitOffsets,

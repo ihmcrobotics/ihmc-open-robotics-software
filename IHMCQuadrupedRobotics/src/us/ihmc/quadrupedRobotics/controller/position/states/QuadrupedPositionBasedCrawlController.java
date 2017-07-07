@@ -1556,14 +1556,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          FramePoint acrossBodyFootstep = fourFootSupportPolygon.getFootstep(acrossBodyQuadrant);
 
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
+         centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
 
-         FramePoint2d sameSideFootstep2d = new FramePoint2d();
-         FramePoint2d diagonalFootstep2d = new FramePoint2d();
-         FramePoint2d acrossBodyFootstep2d = new FramePoint2d();
-         sameSideFootstep.getFramePoint2d(sameSideFootstep2d);
-         diagonalFootstep.getFramePoint2d(diagonalFootstep2d);
-         acrossBodyFootstep.getFramePoint2d(acrossBodyFootstep2d);
+         FramePoint2d sameSideFootstep2d = new FramePoint2d(sameSideFootstep);
+         FramePoint2d diagonalFootstep2d = new FramePoint2d(diagonalFootstep);
+         FramePoint2d acrossBodyFootstep2d = new FramePoint2d(acrossBodyFootstep);
          FrameLineSegment2d lineSegment = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
          FramePoint2d comProjectionOnOutsideLegs2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
          FramePoint comProjectionOnOutsideLegs = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -1965,7 +1962,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             return false;
          }
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
+         centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
 
          return estimatedCommonTriangle.get(swingLeg).isInside(centerOfMassFramePoint);
       }
@@ -1976,7 +1973,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public boolean isCoMInsideTriangleForSwingLeg(RobotQuadrant swingLeg)
       {
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
+         centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
          fourFootSupportPolygon.getAndRemoveFootstep(temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg, swingLeg);
 //         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.isInside(centerOfMassFramePoint);
          return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.getDistanceInside2d(centerOfMassFramePoint) > distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
@@ -2101,7 +2098,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             timeToSlowTo = timeToTest;
             comTrajectoryGenerator.compute(timeToTest);
             comTrajectoryGenerator.getPosition(tempEndPoint);
-            double distanceTraveled = tempStartPoint.getXYPlaneDistance(tempEndPoint);
+            double distanceTraveled = tempStartPoint.distanceXY(tempEndPoint);
             if (distanceTraveled <= distanceToTravel)
                break;
          }
@@ -2125,7 +2122,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator + timeElapsed);
          comTrajectoryGenerator.getPosition(tempEndPoint);
 
-         double distanceTraveled = tempStartPoint.getXYPlaneDistance(tempEndPoint);
+         double distanceTraveled = tempStartPoint.distanceXY(tempEndPoint);
 
          //set it back to what it was before
          comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator);
