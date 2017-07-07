@@ -1,13 +1,39 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class SmoothCMPPlannerParameters extends ICPPlannerParameters
 {
    private final double modelScale;
+   private final List<Vector2D> copOffsetsFootFrame = new ArrayList<>();
+   private final EnumMap<CoPPointName, Double> maxXCoPOffsets = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, Double> minXCoPOffsets = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, Double> maxYCoPOffsets = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, Double> minYCoPOffsets = new EnumMap<>(CoPPointName.class);
+
+   /**
+    * List of CoP points to plan in the order of planning
+    */
+   private final List<CoPPointName> copPointsToPlan = Arrays.asList(CoPPointName.HEEL_COP, CoPPointName.BALL_COP);
+   /**
+    * CoP offsets in foot frame
+    */
+   private final Vector2D[] copOffsets = {new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025)};
+   private final BoundingBox2D[] copOffsetLimits = {new BoundingBox2D(-0.04, -1, 0.03, 1), new BoundingBox2D(0.0, -1, 0.08, -1)};
+   /**
+    * Final CoP name (chicken support will be used only for this point)
+    */
+   private final CoPPointName endCoP = CoPPointName.MIDFEET_COP;
+   /**
+    * Percentage chicken support
+    */
+   private final double chickenSuppportPercentage = 0.5;
 
    public SmoothCMPPlannerParameters()
    {
@@ -36,9 +62,8 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
-      return 2;
+      return copPointsToPlan.size();
    }
-
 
    @Override
    /**
@@ -142,17 +167,24 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
     */
    public List<Vector2D> getCoPOffsets()
    {
-      Vector2D heelOffset = new Vector2D(0.0, -0.005);
-      Vector2D ballOffset = new Vector2D(0.0, 0.025);
-
-      heelOffset.scale(modelScale);
-      ballOffset.scale(modelScale);
-
-      List<Vector2D> copOffsets = new ArrayList<>();
-      copOffsets.add(heelOffset);
-      copOffsets.add(ballOffset);
-
-      return copOffsets;
+      Vector2D tempVec;
+      for (int i = 0; i < copPointsToPlan.size(); i++)
+      {
+         tempVec = copOffsets[i];
+         tempVec.scale(modelScale);
+         copOffsetsFootFrame.add(tempVec);
+      }
+      return copOffsetsFootFrame;
+   }
+   
+   public CoPPointName getEntryCoPName()
+   {
+      return copPointsToPlan.get(0);
+   }
+   
+   public CoPPointName getExitCoPName()
+   {
+      return copPointsToPlan.get(copPointsToPlan.size() -1);
    }
 
    @Override
@@ -160,6 +192,11 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public double getCoPSafeDistanceAwayFromSupportEdges()
    {
       return modelScale * 0.01;
+   }
+
+   public List<CoPPointName> getCoPPointsToPlan()
+   {
+      return copPointsToPlan;
    }
 
    @Override
