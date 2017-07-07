@@ -13,8 +13,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -233,7 +235,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return location;
    }
 
-   public void getLocation(Point3D locationToPack)
+   public void getLocation(Point3DBasics locationToPack)
    {
       locationToPack.set(location);
    }
@@ -243,7 +245,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return orientation;
    }
 
-   public void getOrientation(Quaternion orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(this.orientation);
    }
@@ -278,28 +280,28 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.robotSide = robotSide;
    }
 
-   public void setLocation(Point3D location)
+   public void setLocation(Point3DReadOnly location)
    {
       if (this.location == null)
          this.location = new Point3D();
       this.location.set(location);
    }
 
-   public void setOrientation(Quaternion orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       if (this.orientation == null)
          this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
-   public void setExpectedInitialLocation(Point3D location)
+   public void setExpectedInitialLocation(Point3DReadOnly location)
    {
       if (this.expectedInitialLocation == null)
          this.expectedInitialLocation = new Point3D();
       this.expectedInitialLocation.set(location);
    }
 
-   public void setExpectedInitialOrientation(Quaternion orientation)
+   public void setExpectedInitialOrientation(QuaternionReadOnly orientation)
    {
       if (this.expectedInitialOrientation == null)
          this.expectedInitialOrientation = new Quaternion();
