@@ -111,18 +111,18 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
       for (Direction direction : Direction.values())
       {
-         double viconCovariance = covariance.get(direction);
+         double viconCovariance = covariance.getElement(direction.ordinal());
          DenseMatrix64F P = new DenseMatrix64F(nStates, nStates);
          DenseMatrix64F x = new DenseMatrix64F(nStates, 1);
 
          if (!Double.isInfinite(viconCovariance))
          {
             P.set(positionIndex, positionIndex, viconCovariance);
-            x.set(positionIndex, bodyPosition.get(direction));
+            x.set(positionIndex, bodyPosition.getElement(direction.ordinal()));
          }
          else
          {
-            x.set(positionIndex, initialPositionIfNotUsingVicon.get(direction));
+            x.set(positionIndex, initialPositionIfNotUsingVicon.getElement(direction.ordinal()));
          }
 
          kalmanFilters.get(direction).setState(x, P);
@@ -174,7 +174,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
       for (Direction direction : Direction.values())
       {
-         inputs.get(direction).set(0, bodyAcceleration.get(direction));
+         inputs.get(direction).set(0, bodyAcceleration.getElement(direction.ordinal()));
       }
    }
 
@@ -188,7 +188,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          int index = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
          for (Direction direction : Direction.values())
          {
-            double estimatedPosition = tempEstimatedPosition.get(direction);
+            double estimatedPosition = tempEstimatedPosition.getElement(direction.ordinal());
             if (Double.isNaN(estimatedPosition))
                estimatedPosition = 0.0;    // otherwise the Kalman filter math won't work; happens e.g. when vicon is not turned on
             measurements.get(direction).set(index, estimatedPosition);
@@ -203,7 +203,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          int index = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
          for (Direction direction : Direction.values())
          {
-            double estimatedVelocity = tempEstimatedVelocity.get(direction);
+            double estimatedVelocity = tempEstimatedVelocity.getElement(direction.ordinal());
             if (Double.isNaN(estimatedVelocity))
                estimatedVelocity = 0.0;    // otherwise the Kalman filter math won't work; happens e.g. when vicon is not turned on
             measurements.get(direction).set(index, estimatedVelocity);

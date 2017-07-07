@@ -229,10 +229,10 @@ public class PositionOptimizedTrajectoryGenerator
 
       for (Direction axis : Direction.values)
       {
-         initialPositionArray.set(axis.getIndex(), this.initialPosition.get(axis));
-         initialVelocityArray.set(axis.getIndex(), this.initialVelocity.get(axis));
-         finalPositionArray.set(axis.getIndex(), this.finalPosition.get(axis));
-         finalVelocityArray.set(axis.getIndex(), this.finalVelocity.get(axis));
+         initialPositionArray.set(axis.getIndex(), this.initialPosition.getElement(axis.getIndex()));
+         initialVelocityArray.set(axis.getIndex(), this.initialVelocity.getElement(axis.getIndex()));
+         finalPositionArray.set(axis.getIndex(), this.finalPosition.getElement(axis.getIndex()));
+         finalVelocityArray.set(axis.getIndex(), this.finalVelocity.getElement(axis.getIndex()));
       }
 
       optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
@@ -258,7 +258,7 @@ public class PositionOptimizedTrajectoryGenerator
          waypointPosition.changeFrame(trajectoryFrame);
          TDoubleArrayList waypoint = this.waypointPositions.add();
          for (Direction axis : Direction.values)
-            waypoint.set(axis.getIndex(), this.waypointPosition.get(axis));
+            waypoint.set(axis.getIndex(), this.waypointPosition.getElement(axis.getIndex()));
          coefficients.add();
       }
 
