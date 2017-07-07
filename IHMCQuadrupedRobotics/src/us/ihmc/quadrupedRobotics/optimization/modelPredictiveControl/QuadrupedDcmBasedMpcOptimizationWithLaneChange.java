@@ -171,7 +171,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
       for (Direction direction : Direction.values2D())
       {
-         stepAdjustmentVector.set(direction, u.get(rowOffset++, 0));
+         stepAdjustmentVector.setElement(direction.ordinal(), u.get(rowOffset++, 0));
       }
 
       // Update logging variables

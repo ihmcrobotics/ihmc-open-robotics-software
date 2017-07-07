@@ -198,7 +198,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            positions[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
+            positions[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 
@@ -214,7 +214,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            velocities[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
+            velocities[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 

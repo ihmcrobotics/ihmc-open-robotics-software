@@ -685,13 +685,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(Direction direction, double value)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.set(direction, value);
-      getYoValuesFromFrameTuple();
-   }
-
    /**
     * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
     * <p>

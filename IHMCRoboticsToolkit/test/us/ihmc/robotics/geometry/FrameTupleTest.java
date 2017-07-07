@@ -309,9 +309,6 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
 
       alpha.set(beta);
       assertTrue("This should be true", alpha.epsilonEquals(beta, 1e-10));
-
-      alpha.set(Direction.X, 50.0);
-      assertEquals("This should be equal", 50.0, alpha.getX(), 1e-10);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

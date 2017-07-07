@@ -279,17 +279,17 @@ public class YoSpline3D
 
       for (Direction direction : Direction.values)
       {
-         position.set(direction, polynomials.get(direction).getPosition());
+         position.setElement(direction.ordinal(), polynomials.get(direction).getPosition());
       }
 
       for (Direction direction : Direction.values)
       {
-         velocity.set(direction, polynomials.get(direction).getVelocity());
+         velocity.setElement(direction.ordinal(), polynomials.get(direction).getVelocity());
       }
 
       for (Direction direction : Direction.values)
       {
-         acceleration.set(direction, polynomials.get(direction).getAcceleration());
+         acceleration.setElement(direction.ordinal(), polynomials.get(direction).getAcceleration());
       }
    }
 
