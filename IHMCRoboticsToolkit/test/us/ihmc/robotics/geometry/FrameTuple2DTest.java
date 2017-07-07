@@ -9,15 +9,20 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnlyTest;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnlyTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
+public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>> extends FrameTuple2DReadOnlyTest<T>
 {
    protected static final boolean VERBOSE = false;
 
@@ -459,13 +464,13 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
       FrameTuple2D<?, ?> different = createFrameTuple(aFrame, 5.0, 6.0);
       double scaleFactor = 7.0;
 
-      original.scale(scaleFactor, same);
+      original.setAndScale(scaleFactor, same);
       assertEquals("These shoud be equal", original.getX(), scaleFactor * same.getX(), epsilon);
       assertEquals("These shoud be equal", original.getY(), scaleFactor * same.getY(), epsilon);
 
       try
       {
-         original.scale(scaleFactor, different);
+         original.setAndScale(scaleFactor, different);
          fail();
       }
       catch(ReferenceFrameMismatchException rfme)
@@ -725,7 +730,7 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
       double[] sameValues = {0.4, 2.6};
       double[] differentValues = {2.7, 4.0};
       double alpha = 2.7;
-      FrameTuple2D<?, ?> holder = createFrameTuple(aFrame, originalValues[0], originalValues[1]);
+      FrameTuple2D<?, ?> holder = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
       FrameTuple2D<?, ?> original = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
       FrameTuple2D<?, ?> same = createFrameTuple(theFrame, sameValues[0], sameValues[1]);
       FrameTuple2D<?, ?> different = createFrameTuple(aFrame, differentValues[0], differentValues[1]);
@@ -748,7 +753,7 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
 
       try
       {
-         holder.interpolate(original, different, alpha);
+         holder.interpolate(different, different, alpha);
          fail("Should have thrown ReferenceFrameMismatchException");
       }
       catch(ReferenceFrameMismatchException rfme)
@@ -843,5 +848,12 @@ public abstract class FrameTuple2DTest<T extends FrameTuple2D<?, ?>>
       {
          //Good
       }
+   }
+
+   @Override
+   public void testOverloading() throws Exception
+   {
+      super.testOverloading();
+      FrameTuple3DReadOnlyTest.assertSuperMethodsAreOverloaded(FrameTuple2DReadOnly.class, Tuple2DReadOnly.class, FrameTuple2D.class, Tuple2DBasics.class);
    }
 }
