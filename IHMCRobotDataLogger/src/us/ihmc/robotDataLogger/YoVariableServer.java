@@ -76,7 +76,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
       try
       {
-         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this);
+         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this, config.getPublicBroadcast());
          dataProducerParticipant.setLog(logSettings.isLog());
          addCameras(config, logSettings);
 

@@ -100,13 +100,19 @@ public class DataProducerParticipant
 
    }
 
-   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener) throws IOException
+   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast) throws IOException
    {
       announcement.setName(name);
       this.dataProducerListener = variableChangedListener;
 
       domain.setLogLevel(LogLevel.ERROR);
       ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
+      
+      if(!publicBroadcast)
+      {
+         att.bindToLocalhost();
+      }
+      
       participant = domain.createParticipant(att);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());

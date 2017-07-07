@@ -13,7 +13,7 @@ public class LoggerConfigurationLoader
 
    public static final String location = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCLoggerConfiguration.ini";
    
-   private final InetAddress myNetworkAddress;
+   private final boolean publicBroadcast;
    private final TByteArrayList cameras = new TByteArrayList();
    
    public LoggerConfigurationLoader() throws IOException
@@ -21,45 +21,38 @@ public class LoggerConfigurationLoader
 
       PropertiesSerializer<LoggerConfiguration> ser = new PropertiesSerializer<>(new LoggerConfigurationPubSubType());
 
-      String network = null;
+      boolean publicBroadcast = false;
       String cameraString = null;
       
       File in = new File(location);
       if(in.exists())
       {
          LoggerConfiguration config = ser.deserialize(in);
-         network = config.getLoggerNetworkAsString();
+         publicBroadcast = config.getPublicBroadcast();
          cameraString = config.getCamerasToCaptureAsString();
          
       }
       
       
-      String networkFromCmd = System.getProperty("ihmc.loggerNetwork");
+      String publicFromCmd = System.getProperty("ihmc.publicBroadcast");
       String cameraFromCmd = System.getProperty("ihmc.camerasToCapture");
       
       
-      if(networkFromCmd != null)
+      if(publicFromCmd != null)
       {
-         network = networkFromCmd;
+         publicBroadcast = Boolean.parseBoolean(publicFromCmd);
       }
       if(cameraFromCmd != null)
       {
          cameraString = cameraFromCmd;
       }
       
-      if(network == null)
+      if(!publicBroadcast)
       {
-         throw new IOException("No network to bind to set for the logger. Please edit " + location + " or pass in a correct network with -Dihmc.loggerNetwork=[IP or hostname]");
+         System.err.println("Public broadcasting of logger data is OFF. The logger will only connect to your local computer. Please add \"publicBroadcast=true\" to " + location + " or pass in -Dihmc.publicBroadcast=true");
       }
       
-      try
-      {
-         myNetworkAddress = LogUtils.getMyIP(network);
-      }
-      catch (IOException e)
-      {
-         throw new IOException(network + " is not a valid hostname or IP. Please edit " + location + " or pass in a correct network with -Dihmc.loggerNetwork=[IP or hostname]", e);
-      }
+      this.publicBroadcast = publicBroadcast;
       
       
       
@@ -92,9 +85,9 @@ public class LoggerConfigurationLoader
    
    
 
-   public InetAddress getMyNetworkAddress()
+   public boolean getPublicBroadcast()
    {
-      return myNetworkAddress;
+      return publicBroadcast;
    }
 
 
