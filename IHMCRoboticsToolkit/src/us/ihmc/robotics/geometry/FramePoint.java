@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.interfaces.PointInterface;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on points occur
@@ -17,7 +16,7 @@ import us.ihmc.robotics.geometry.interfaces.PointInterface;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface, FramePoint3DReadOnly, Point3DBasics
+public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements FramePoint3DReadOnly, Point3DBasics
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -174,23 +173,5 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Poi
 
       resultToPack.setIncludingFrame(pointToPitchAbout);
       resultToPack.add(tempX, tempY, tempZ);
-   }
-
-   @Override
-   public void getPoint(Point3D pointToPack)
-   {
-      this.get(pointToPack);
-   }
-
-   @Override
-   public void setPoint(PointInterface pointInterface)
-   {
-      pointInterface.getPoint(this.getPoint());
-   }
-
-   @Override
-   public void setPoint(Point3D point)
-   {
-      this.set(point);
    }
 }
