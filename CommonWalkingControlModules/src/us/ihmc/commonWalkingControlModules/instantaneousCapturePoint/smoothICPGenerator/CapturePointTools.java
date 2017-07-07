@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -639,10 +641,10 @@ public class CapturePointTools
       }
    }
    
-   //TODO: implement validity checks
    /**
     * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
     */
+   //TODO: implement validity checks
    public static void computeDesiredCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                  List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
@@ -661,6 +663,30 @@ public class CapturePointTools
          exitCornerPoint.set(nextEntryCornerPoint);
          
          computeDesiredCapturePointPosition(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
+
+         nextEntryCornerPoint = entryCornerPoint;
+      }
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCornerPointsDecoupled(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
+                                                          List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
+   {
+      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(cmpPolynomials3D.size() - 1);
+      
+      cmpPolynomial3D.compute(cmpPolynomial3D.getFinalTime());
+      FramePoint nextEntryCornerPoint = cmpPolynomial3D.getFramePosition();
+            
+      for (int i = cmpPolynomials3D.size() - 1; i >= 0; i--)
+      {
+         cmpPolynomial3D = cmpPolynomials3D.get(i);
+         
+         FramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         FramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
+         
+         exitCornerPoint.set(nextEntryCornerPoint);
+         
+         computeDesiredCapturePointPositionDecoupled(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
 
          nextEntryCornerPoint = entryCornerPoint;
       }
@@ -762,6 +788,19 @@ public class CapturePointTools
       CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, 
                                                                                    desiredCapturePointToPack);
    }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointPositionDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                                  FramePoint desiredCapturePointToPack)
+   {  
+      for(Direction dir : Direction.values())
+      {
+         YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
+         double icpPositionDesired = CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.get(dir));
+         
+         desiredCapturePointToPack.set(dir, icpPositionDesired);
+      }
+   }
 
    /**
     * Compute the desired capture point velocity at a given time. ICPv_d = w * e^{w*t} * ICP0 - p0 *
@@ -834,6 +873,19 @@ public class CapturePointTools
    {
       CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, 
                                                                                    desiredCapturePointVelocityToPack);
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointVelocityDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
+                                                                  FrameVector desiredCapturePointVelocityToPack)
+   {
+      for(Direction dir : Direction.values())
+      {
+         YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
+         double icpVelocityDesired = CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.get(dir));
+         
+         desiredCapturePointVelocityToPack.set(dir, icpVelocityDesired);
+      }
    }
 
    /**
@@ -921,6 +973,19 @@ public class CapturePointTools
    {
       CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, 
                                                                                    desiredCapturePointAccelerationToPack);
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCapturePointAccelerationDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
+                                                                      FrameVector desiredCapturePointAccelerationToPack)
+   {
+      for(Direction dir : Direction.values())
+      {
+         YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
+         double icpAccelerationDesired = CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.get(dir));
+         
+         desiredCapturePointAccelerationToPack.set(dir, icpAccelerationDesired);
+      }
    }
 
    /**
