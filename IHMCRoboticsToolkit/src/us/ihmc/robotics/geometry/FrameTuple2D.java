@@ -29,12 +29,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       this.tuple = getGeometryObject();
    }
 
-   public final void set(double x, double y)
-   {
-      tuple.setX(x);
-      tuple.setY(y);
-   }
-
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y)
    {
       this.referenceFrame = referenceFrame;
@@ -116,11 +110,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       tuple.set(startRow, column, tupleDenseMatrix);
    }
 
-   public final void set(Tuple2DReadOnly tuple)
-   {
-      this.tuple.set(tuple);
-   }
-
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
    {
       this.referenceFrame = referenceFrame;
@@ -173,17 +162,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       tuple.setY(y);
    }
 
-   public final void scale(double scaleFactor)
-   {
-      tuple.scale(scaleFactor);
-   }
-
-   public final void scale(double scaleXFactor, double scaleYFactor)
-   {
-      tuple.setX(tuple.getX() * scaleXFactor);
-      tuple.setY(tuple.getY() * scaleYFactor);
-   }
-
    public final double getX()
    {
       return tuple.getX();
@@ -192,11 +170,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
    public final double getY()
    {
       return tuple.getY();
-   }
-
-   public double distanceFromZero()
-   {
-      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY());
    }
 
    /**
@@ -235,83 +208,10 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       tuple3dToPack.set(tuple.getX(), tuple.getY(), 0.0);
    }
 
-   /**
-    * Packs the components {@code x}, {@code y} in order in a column vector starting from its first
-    * row index.
-    *
-    * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
-    */
-   public final void get(DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y} in order in a column vector starting from
-    * {@code startRow}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param tupleMatrixToPack the column vector in which this frame tuple is stored. Modified.
-    */
-   public final void get(int startRow, DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(startRow, tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y} in order in a column vector starting from
-    * {@code startRow} at the column index {@code column}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param column the column index to write in the dense-matrix.
-    * @param tupleMatrixToPack the matrix in which this frame tuple is stored. Modified.
-    */
-   public final void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
-   {
-      tuple.get(startRow, column, tupleMatrixToPack);
-   }
-
    public final void checkForNaN()
    {
       if (containsNaN())
          throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 (this = scaleFactor *
-    * tuple1).
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 Tuple2d
-    */
-   public final void setAndScale(double scaleFactor, Tuple2DReadOnly tuple1)
-   {
-      tuple.setAndScale(scaleFactor, tuple1);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 and then adds tuple2 (this
-    * = scaleFactor * tuple1 + tuple2).
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 Tuple2d
-    * @param frameTuple2 Tuple2d
-    */
-   public final void scaleAdd(double scaleFactor, Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2)
-   {
-      tuple.scaleAdd(scaleFactor, tuple1, tuple2);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of itself and then adds tuple1 (this
-    * = scaleFactor * this + tuple1). Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 Tuple2d
-    */
-   public final void scaleAdd(double scaleFactor, Tuple2DReadOnly tuple1)
-   {
-      tuple.scaleAdd(scaleFactor, tuple1);
    }
 
    /**
@@ -359,33 +259,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       scaleAdd(scaleFactor, frameTuple1.tuple);
    }
 
-   public final void add(double dx, double dy)
-   {
-      tuple.setX(tuple.getX() + dx);
-      tuple.setY(tuple.getY() + dy);
-   }
-
-   /**
-    * Sets the value of this tuple to the sum of itself and tuple1.
-    *
-    * @param tuple1 the other Tuple2d
-    */
-   public final void add(Tuple2DReadOnly tuple1)
-   {
-      tuple.add(tuple1);
-   }
-
-   /**
-    * Sets the value of this tuple to the sum of tuple1 and tuple2 (this = tuple1 + tuple2).
-    *
-    * @param tuple1 the first Tuple2d
-    * @param tuple2 the second Tuple2d
-    */
-   public final void add(Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2)
-   {
-      tuple.add(tuple1, tuple2);
-   }
-
    /**
     * Sets the value of this frameTuple to the sum of itself and frameTuple1 (this += frameTuple1).
     * Checks if reference frames match.
@@ -412,33 +285,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
       add(frameTuple1.tuple, frameTuple2.tuple);
-   }
-
-   /**
-    * Sets the value of this tuple to the difference of itself and tuple1 (this -= tuple1).
-    *
-    * @param tuple1 the other Tuple2d
-    */
-   public final void sub(Tuple2DReadOnly tuple1)
-   {
-      tuple.sub(tuple1);
-   }
-
-   public final void sub(double dx, double dy)
-   {
-      tuple.setX(tuple.getX() - dx);
-      tuple.setY(tuple.getY() - dy);
-   }
-
-   /**
-    * Sets the value of this tuple to the difference of tuple1 and tuple2 (this = tuple1 - tuple2).
-    *
-    * @param tuple1 the first Tuple2d
-    * @param tuple2 the second Tuple2d
-    */
-   public final void sub(Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2)
-   {
-      tuple.sub(tuple1, tuple2);
    }
 
    /**
@@ -476,19 +322,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
     * @param t1 the first tuple
     * @param t2 the second tuple
     * @param alpha the alpha interpolation parameter
-    */
-   public final void interpolate(Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2, double alpha)
-   {
-      tuple.interpolate(tuple1, tuple2, alpha);
-   }
-
-   /**
-    * Linearly interpolates between tuples tuple1 and tuple2 and places the result into this tuple:
-    * this = (1-alpha) * tuple1 + alpha * tuple2.
-    *
-    * @param t1 the first tuple
-    * @param t2 the second tuple
-    * @param alpha the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
    public final void interpolate(FrameTuple2D<?, ?> frameTuple1, FrameTuple2D<?, ?> frameTuple2, double alpha)
@@ -497,29 +330,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
 
       interpolate(frameTuple1.tuple, frameTuple2.tuple, alpha);
       referenceFrame = frameTuple1.getReferenceFrame();
-   }
-
-   public final void clipToMinMax(double minValue, double maxValue)
-   {
-      this.tuple.clipToMinMax(minValue, maxValue);
-   }
-
-   public final void negate()
-   {
-      tuple.negate();
-   }
-
-   /**
-    * Returns true if the L-infinite distance between this tuple and tuple1 is less than or equal to
-    * the epsilon parameter, otherwise returns false. The L-infinite distance is equal to
-    * MAX[abs(x1-x2), abs(y1-y2)].
-    *
-    * @param tuple1 Tuple2d
-    * @param threshold double
-    */
-   public final boolean epsilonEquals(Tuple2DReadOnly tuple1, double threshold)
-   {
-      return tuple.epsilonEquals(tuple1, threshold);
    }
 
    /**
