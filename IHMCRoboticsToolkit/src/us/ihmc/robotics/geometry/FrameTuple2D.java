@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple2DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T>
       implements FrameTuple2DReadOnly, Tuple2DBasics, Serializable
@@ -196,16 +195,6 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
    public final void get(Tuple2DBasics tuple2dToPack)
    {
       tuple2dToPack.set(tuple);
-   }
-
-   /**
-    * Pack this tuple2d in tuple3dToPack and tuple3dToPack.z = 0.0.
-    *
-    * @param tuple3dToPack {@code Tuple3DBasics}
-    */
-   public final void get(Tuple3DBasics tuple3dToPack)
-   {
-      tuple3dToPack.set(tuple.getX(), tuple.getY(), 0.0);
    }
 
    public final void checkForNaN()

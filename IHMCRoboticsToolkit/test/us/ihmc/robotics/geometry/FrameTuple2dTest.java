@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -19,7 +15,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public abstract class FrameTuple2dTest<T extends FrameTuple2D<?, ?>>
@@ -290,19 +285,6 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2D<?, ?>>
       frameTuple.get(tuple2dToPack);
       assertEquals("These should be equal", values[0], tuple2dToPack.getX(), epsilon);
       assertEquals("These should be equal", values[1], tuple2dToPack.getY(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGet_Tuple3d()
-   {
-      Point3D tuple3dToPack = new Point3D();
-      double[] values = {456465.067, 456.898};
-      FrameTuple2D<?, ?> frameTuple = createFrameTuple(aFrame, values[0], values[1]);
-      frameTuple.get(tuple3dToPack);
-      assertEquals("These should be equal", values[0], tuple3dToPack.getX(), epsilon);
-      assertEquals("These should be equal", values[1], tuple3dToPack.getY(), epsilon);
-      assertEquals("These should be equal", 0.0, tuple3dToPack.getZ(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
