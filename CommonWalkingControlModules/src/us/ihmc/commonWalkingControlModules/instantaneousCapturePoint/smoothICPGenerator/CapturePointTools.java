@@ -742,7 +742,10 @@ public class CapturePointTools
                                                          YoFrameVector desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointVelocityToPack.scale(omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointVelocityToPack.setToZero();
    }
@@ -765,7 +768,10 @@ public class CapturePointTools
       desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointVelocityToPack.scale(omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointVelocityToPack.setToZero();
    }
@@ -786,7 +792,10 @@ public class CapturePointTools
                                                          YoFrameVector desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointVelocityToPack.scale(omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointVelocityToPack.setToZero();
    }
@@ -823,7 +832,10 @@ public class CapturePointTools
                                                              YoFrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointAccelerationToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointAccelerationToPack.scale(omega0 * omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointAccelerationToPack.setToZero();
    }
@@ -844,7 +856,10 @@ public class CapturePointTools
                                                              FrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointAccelerationToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointAccelerationToPack.scale(omega0 * omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointAccelerationToPack.setToZero();
    }
@@ -865,7 +880,10 @@ public class CapturePointTools
                                                              YoFrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      {
+         desiredCapturePointAccelerationToPack.sub(initialCapturePoint, initialCMP);
+         desiredCapturePointAccelerationToPack.scale(omega0 * omega0 * Math.exp(omega0 * time));
+      }
       else
          desiredCapturePointAccelerationToPack.setToZero();
    }

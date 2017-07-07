@@ -298,8 +298,10 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, xyPolynomial.getPosition());
-      currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
-      currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
+      currentVelocity.sub(finalPosition, initialPosition);
+      currentVelocity.scale(alphaDot);
+      currentAcceleration.sub(finalPosition, initialPosition);
+      currentAcceleration.scale(alphaDDot);
 
       zPolynomial.compute(MathTools.clamp(time, 0.0, tf));
 

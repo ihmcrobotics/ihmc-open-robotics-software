@@ -502,34 +502,6 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
    }
 
    /**
-    * Sets the value of this tuple to the scalar multiplication of tuple1 minus tuple2 (this = scaleFactor * ( tuple1 - tuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param tuple1 Tuple3d
-    * @param tuple2 Tuple3d
-    */
-   public final void subAndScale(double scaleFactor, Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
-   {
-      sub(tuple1, tuple2);
-      scale(scaleFactor);
-   }
-
-   /**
-    * Sets the value of this tuple to the scalar multiplication of frameTuple1 minus frameTuple2 (this = scaleFactor * ( frameTuple1 - frameTuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 the first FrameTuple<?, ?>
-    * @param frameTuple2 the second FrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void subAndScale(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      checkReferenceFrameMatch(frameTuple2);
-      subAndScale(scaleFactor, frameTuple1.tuple, frameTuple2.tuple);
-   }
-
-   /**
      *  Linearly interpolates between tuples tuple1 and tuple2 and places the result into this tuple:  this = (1-alpha) * tuple1 + alpha * tuple2.
      *  @param t1  the first tuple
      *  @param t2  the second tuple  
