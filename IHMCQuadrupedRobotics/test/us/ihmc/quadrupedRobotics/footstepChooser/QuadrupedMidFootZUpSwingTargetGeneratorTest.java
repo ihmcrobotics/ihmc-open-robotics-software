@@ -32,6 +32,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -583,7 +584,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
       FramePoint endPoint = new FramePoint(temporaryCentroid);
       endPoint.add(0.4,0.0,0.0);
-      FramePoint.yawAboutPoint(endPoint, temporaryCentroid, nominalYaw.getDoubleValue(), endPoint);
+      GeometryTools.yawAboutPoint(endPoint, temporaryCentroid, nominalYaw.getDoubleValue(), endPoint);
       nominalYawEndpoint.set(endPoint);
 
       FramePoint2d endpointTwoD = new FramePoint2d();
