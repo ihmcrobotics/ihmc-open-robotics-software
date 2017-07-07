@@ -2,6 +2,7 @@ package us.ihmc.acsell;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -74,7 +75,9 @@ public class CostOfTransportCalculator implements RobotVisualizer
    {
       return (int) (index % samples);
    }
-   
+
+   private final RigidBodyTransform inverse = new RigidBodyTransform();
+
    @Override
    public void update(long timestamp)
    {
@@ -83,8 +86,9 @@ public class CostOfTransportCalculator implements RobotVisualizer
       
       this.robotTime[currentSample] = Conversions.nanosecondsToSeconds(timestamp);
       this.totalWork[currentSample] = totalWorkVariable.getDoubleValue();
-      
-      rootBody.getChildrenJoints().get(0).getFrameAfterJoint().getInverseTransformToRoot().getTranslation(position);
+
+      inverse.setAndInvert(rootBody.getChildrenJoints().get(0).getFrameAfterJoint().getTransformToRoot());
+      inverse.getTranslation(position);
       this.xPosition[currentSample] = position.getX();
       this.yPosition[currentSample] = position.getY();
       this.zPosition[currentSample] = position.getZ();
