@@ -916,7 +916,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       assertEquals("return value", 3.0, framePoint.getZ(), Double.MIN_VALUE);
 
       //test non-matching reference frames
-      framePoint.scale(scaleFactor, tuple1);
+      framePoint.setAndScale(scaleFactor, tuple1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -927,7 +927,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple3D<?, ?> frameVector = createFrameTuple(theFrame, 1.0, 3.0, -2.0);
       double scale = 2.3;
 
-      framePoint.scale(scale, frameVector);
+      framePoint.setAndScale(scale, frameVector);
 
       assertEquals(2.3, framePoint.getX(), epsilon);
       assertEquals(6.9, framePoint.getY(), epsilon);
@@ -942,7 +942,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple3D<?, ?> frameVector = createFrameTuple(aFrame, 1.0, 3.0, -2.0);
       double scale = 2.3;
 
-      framePoint.scale(scale, frameVector);
+      framePoint.setAndScale(scale, frameVector);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -953,7 +953,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple3D<?, ?> framePoint2 = createFrameTuple(theFrame, 1.0, 3.0, -2.0);
       double scale = 2.3;
 
-      framePoint.scale(scale, framePoint2);
+      framePoint.setAndScale(scale, framePoint2);
 
       assertEquals(2.3, framePoint.getX(), epsilon);
       assertEquals(6.9, framePoint.getY(), epsilon);
@@ -968,7 +968,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple3D<?, ?> framePoint2 = createFrameTuple(aFrame, 1.0, 3.0, -2.0);
       double scale = 2.3;
 
-      framePoint.scale(scale, framePoint2);
+      framePoint.setAndScale(scale, framePoint2);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
