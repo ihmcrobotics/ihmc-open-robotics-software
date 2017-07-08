@@ -117,14 +117,6 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       return this.tuple;
    }
 
-   public void rotate90()
-   {
-      double x = -tuple.getY();
-      double y = tuple.getX();
-
-      tuple.set(x, y);
-   }
-
    public double dot(FrameVector2d frameVector)
    {
       checkReferenceFrameMatch(frameVector);

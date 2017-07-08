@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,12 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -25,6 +20,12 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class FootCoPOccupancyGrid
 {
@@ -326,7 +327,7 @@ public class FootCoPOccupancyGrid
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
-      shiftingVector.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(shiftingVector, shiftingVector);
       if (sideToLookAt == RobotSide.RIGHT)
       {
          shiftingVector.negate();
@@ -377,7 +378,7 @@ public class FootCoPOccupancyGrid
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
-      shiftingVector.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(shiftingVector, shiftingVector);
       if (sideToLookAt == RobotSide.RIGHT)
       {
          shiftingVector.negate();
