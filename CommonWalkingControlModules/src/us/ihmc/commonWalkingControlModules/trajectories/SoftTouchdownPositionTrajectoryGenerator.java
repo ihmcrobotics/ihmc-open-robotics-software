@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -34,7 +34,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoDouble startTime;
    private final YoDouble timeIntoTouchdown;
    
-   private final FramePoint p0;
+   private final FramePoint3D p0;
    private final FrameVector3D pd0;
    private final FrameVector3D pdd0;
    
@@ -55,7 +55,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
       
-      p0 = new FramePoint();
+      p0 = new FramePoint3D();
       pd0 = new FrameVector3D();
       pdd0 = new FrameVector3D();
       t0 = 0.0;
@@ -121,7 +121,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -139,7 +139,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

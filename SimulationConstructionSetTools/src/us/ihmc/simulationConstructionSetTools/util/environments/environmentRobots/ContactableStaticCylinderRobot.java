@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
@@ -62,7 +62,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       cylinderTransform.getTranslation(offset);
       cylinderTransform.getRotation(rotation);
       
-      FramePoint cylinderCenter = new FramePoint(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
+      FramePoint3D cylinderCenter = new FramePoint3D(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
       cylinderCenterTransformToWorld.set(rotation, new Vector3D(cylinderCenter));
       

@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,7 +18,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    private final YoFramePoint position;
    private final YoFrameOrientation orientation;
 
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
 
    public YoFramePose(YoFramePoint position, YoFrameOrientation orientation)
@@ -113,7 +113,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       orientation.setFromReferenceFrame(referenceFrame);
    }
 
-   public void setPosition(FramePoint framePoint)
+   public void setPosition(FramePoint3D framePoint)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -135,7 +135,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       orientation.set(quaternion);
    }
 
-   public void set(FramePoint framePoint, FrameOrientation frameOrientation)
+   public void set(FramePoint3D framePoint, FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -147,7 +147,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
    }
 
-   public void setAndMatchFrame(FramePoint framePoint, FrameOrientation frameOrientation)
+   public void setAndMatchFrame(FramePoint3D framePoint, FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       position.setAndMatchFrame(framePoint, notifyListeners);

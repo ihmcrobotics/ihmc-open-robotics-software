@@ -6,7 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
@@ -14,22 +14,22 @@ import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 public class CenterOfMassPositionDiscreteProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
 
    // temp stuff
-   private final FramePoint centerOfMassPosition;
+   private final FramePoint3D centerOfMassPosition;
    private final FrameVector3D centerOfMassPositionDelta;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public CenterOfMassPositionDiscreteProcessModelElement(double deltaT, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
+   public CenterOfMassPositionDiscreteProcessModelElement(double deltaT, ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort,
          ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort, String name, YoVariableRegistry registry)
    {
       super(centerOfMassPositionPort, TimeDomain.DISCRETE, false, SIZE, name, registry);
 
       this.centerOfMassPositionPort = centerOfMassPositionPort;
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
-      this.centerOfMassPosition = new FramePoint(worldFrame);
+      this.centerOfMassPosition = new FramePoint3D(worldFrame);
       this.centerOfMassPositionDelta = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
       stateMatrixBlocks.put(centerOfMassPositionPort, new DenseMatrix64F(SIZE, SIZE));

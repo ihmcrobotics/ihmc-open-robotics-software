@@ -40,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -586,7 +586,7 @@ public class StepAdjustmentExampleGraphic
       footSpoof.setSoleFrame(nextSupportPose);
    }
 
-   private final FramePoint desiredICP3d = new FramePoint();
+   private final FramePoint3D desiredICP3d = new FramePoint3D();
    public void updateTrajectoyViz()
    {
       icpPlanner.clearPlan();

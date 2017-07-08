@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.frames;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
@@ -27,7 +27,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
    private final MovingReferenceFrame pelvisFrame;
    private final MovingMidFootZUpGroundFrame midFootZUpGroundFrame;
 
-   private final FramePoint pelvisPosition = new FramePoint();
+   private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final FramePose pose = new FramePose();
 
    public MovingWalkingReferenceFrame(String name, MovingReferenceFrame pelvisFrame, MovingMidFootZUpGroundFrame midFootZUpGroundFrame)

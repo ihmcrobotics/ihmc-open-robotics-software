@@ -590,7 +590,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       footSpoof.setSoleFrame(nextSupportPose);
    }
 
-   private final FramePoint desiredICP3d = new FramePoint();
+   private final FramePoint3D desiredICP3d = new FramePoint3D();
    public void updateTrajectoyViz()
    {
       icpPlanner.clearPlan();

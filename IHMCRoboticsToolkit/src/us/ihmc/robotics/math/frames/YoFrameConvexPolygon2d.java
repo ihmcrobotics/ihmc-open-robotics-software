@@ -8,7 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -107,7 +107,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       }
    }
 
-   public void setConvexPolygon2d(List<FramePoint> framePoints)
+   public void setConvexPolygon2d(List<FramePoint3D> framePoints)
    {
       if (framePoints == null)
       {
@@ -149,7 +149,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       }
    }
    
-   public void setConvexPolygon2d(FramePoint[] framePoints)
+   public void setConvexPolygon2d(FramePoint3D[] framePoints)
    {
       if (framePoints == null)
       {

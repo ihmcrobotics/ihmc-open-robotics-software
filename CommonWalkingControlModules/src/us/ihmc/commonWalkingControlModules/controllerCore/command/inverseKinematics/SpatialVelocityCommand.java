@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -755,7 +755,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint positionToPack, FrameOrientation orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameOrientation orientationToPack)
    {
       controlFramePose.getPositionIncludingFrame(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);

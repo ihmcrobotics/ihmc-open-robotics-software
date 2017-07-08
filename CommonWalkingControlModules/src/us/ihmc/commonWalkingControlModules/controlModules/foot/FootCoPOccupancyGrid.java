@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -192,7 +192,7 @@ public class FootCoPOccupancyGrid
       resetGridListener.variableChanged(null);
    }
 
-   private final FramePoint cellPosition = new FramePoint();
+   private final FramePoint3D cellPosition = new FramePoint3D();
 
    public void registerCenterOfPressureLocation(FramePoint2d copToRegister)
    {

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -102,7 +102,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       trajectoryTime.set(duration);
    }
 
-   public void setInitialConditions(FramePoint initialPosition, FrameVector3D initialVelocity)
+   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.setAndMatchFrame(initialPosition);
       this.initialVelocity.setAndMatchFrame(initialVelocity);
@@ -120,7 +120,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.initialVelocity.setAndMatchFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.setAndMatchFrame(finalPosition);
       this.finalVelocity.setAndMatchFrame(finalVelocity);
@@ -138,7 +138,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.setAndMatchFrame(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, FramePoint initialPosition, FrameVector3D initialVelocity, FramePoint finalPosition, FrameVector3D finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, FrameVector3D initialVelocity, FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -160,7 +160,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.set(finalVelocity);
    }
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempLinearVelocity = new FrameVector3D();
    
    public void setTrajectoryParameters(FrameEuclideanTrajectoryPoint initialFrameEuclideanWaypoint, FrameEuclideanTrajectoryPoint finalFrameEuclideanWaypoint)
@@ -263,7 +263,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -316,7 +316,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
@@ -330,7 +330,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       accelerationToPack.set(currentAcceleration);
    }
 
-   public void getFinalPosition(FramePoint finalPosition)
+   public void getFinalPosition(FramePoint3D finalPosition)
    {
       this.finalPosition.getFrameTuple(finalPosition);
    }

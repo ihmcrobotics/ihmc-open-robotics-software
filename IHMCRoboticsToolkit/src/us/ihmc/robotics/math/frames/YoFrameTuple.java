@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
@@ -139,9 +139,9 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       return new FrameVector3D(getFrameTuple());
    }
 
-   public final FramePoint getFramePointCopy()
+   public final FramePoint3D getFramePointCopy()
    {
-      return new FramePoint(getFrameTuple());
+      return new FramePoint3D(getFrameTuple());
    }
 
    public final FrameVector2d getFrameVector2dCopy()

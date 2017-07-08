@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -22,7 +22,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 {
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionOutputPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort;
 
    private final CenterOfMassCalculator centerOfMassCalculator;
@@ -31,7 +31,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public PositionStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-           ControlFlowOutputPort<FramePoint> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort)
+           ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.centerOfMassPositionOutputPort = centerOfMassPositionOutputPort;
@@ -75,7 +75,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 
    }
 
-   private final FramePoint tempComBody = new FramePoint();
+   private final FramePoint3D tempComBody = new FramePoint3D();
    private final FrameVector3D tempComVelocityBody = new FrameVector3D();
    private final FrameVector3D tempCenterOfMassVelocityOffset = new FrameVector3D();
    private final FrameVector3D tempCrossPart = new FrameVector3D();
@@ -125,13 +125,13 @@ public class PositionStateRobotModelUpdater implements Runnable
                                rootJointLinearVelocity.getVector(), tempRootJointTwistExistingAngularPart.getVector());
    }
 
-   private final FramePoint tempCenterOfMassPositionState = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempCenterOfMassPositionState = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final RotationMatrix tempOrientationStateReconstructMatrix = new RotationMatrix();
    private final FrameOrientation tempOrientationStateReconstruct = new FrameOrientation(ReferenceFrame.getWorldFrame());
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
-   private void updateRootJointPosition(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame estimationFrame, FramePoint centerOfMassPosition)
+   private void updateRootJointPosition(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame estimationFrame, FramePoint3D centerOfMassPosition)
    {
       tempCenterOfMassPositionState.setIncludingFrame(centerOfMassPosition);
       estimationFrame.getTransformToDesiredFrame(worldFrame).getRotation(tempOrientationStateReconstructMatrix);
@@ -142,12 +142,12 @@ public class PositionStateRobotModelUpdater implements Runnable
       rootJoint.setPositionAndRotation(tempRootJointToWorld);
    }
 
-   private final FramePoint tempCenterOfMassBody = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempCenterOfMassBody = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final Vector3D tempCenterOfMassBodyVector3d = new Vector3D();
    private final Point3D tempEstimationLinkPosition = new Point3D();
    private final Vector3D tempEstimationLinkPositionVector3d = new Vector3D();
 
-   private void computeEstimationLinkToWorldTransform(ReferenceFrame estimationFrame, RigidBodyTransform estimationLinkToWorldToPack, FramePoint centerOfMassWorld,
+   private void computeEstimationLinkToWorldTransform(ReferenceFrame estimationFrame, RigidBodyTransform estimationLinkToWorldToPack, FramePoint3D centerOfMassWorld,
            FrameOrientation estimationLinkOrientation)
    {
       // r^{estimation}

@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -52,46 +52,46 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private ReferenceFrame initialFrame;
    private ReferenceFrame finalFrame;
 
-   private final FramePoint initialCornerPointInitialFrame = new FramePoint();
-   private final FramePoint finalCornerPointInitialFrame = new FramePoint();
-   private final FramePoint initialCMPInitialFrame = new FramePoint();
-   private final FramePoint finalCMPInitialFrame = new FramePoint();
-   private final FramePoint initialICPInitialFrame = new FramePoint();
-   private final FramePoint finalICPInitialFrame = new FramePoint();
+   private final FramePoint3D initialCornerPointInitialFrame = new FramePoint3D();
+   private final FramePoint3D finalCornerPointInitialFrame = new FramePoint3D();
+   private final FramePoint3D initialCMPInitialFrame = new FramePoint3D();
+   private final FramePoint3D finalCMPInitialFrame = new FramePoint3D();
+   private final FramePoint3D initialICPInitialFrame = new FramePoint3D();
+   private final FramePoint3D finalICPInitialFrame = new FramePoint3D();
 
-   private final FramePoint startOfSplineICPInitialFrame = new FramePoint();
+   private final FramePoint3D startOfSplineICPInitialFrame = new FramePoint3D();
    private final FrameVector3D startOfSplineICPVelocityInitialFrame = new FrameVector3D();
-   private final FramePoint endOfSplineICPInitialFrame = new FramePoint();
+   private final FramePoint3D endOfSplineICPInitialFrame = new FramePoint3D();
    private final FrameVector3D endOfSplineICPVelocityInitialFrame = new FrameVector3D();
 
    private final FramePoint2d startOfSingleSupportCoM = new FramePoint2d();
    private final FramePoint2d startOfSplineCoM = new FramePoint2d();
    private final FramePoint2d endOfSplineCoM = new FramePoint2d();
 
-   private final FramePoint initialCornerPointFinalFrame = new FramePoint();
-   private final FramePoint finalCornerPointFinalFrame = new FramePoint();
-   private final FramePoint initialCMPFinalFrame = new FramePoint();
-   private final FramePoint finalCMPFinalFrame = new FramePoint();
-   private final FramePoint initialICPFinalFrame = new FramePoint();
-   private final FramePoint finalICPFinalFrame = new FramePoint();
+   private final FramePoint3D initialCornerPointFinalFrame = new FramePoint3D();
+   private final FramePoint3D finalCornerPointFinalFrame = new FramePoint3D();
+   private final FramePoint3D initialCMPFinalFrame = new FramePoint3D();
+   private final FramePoint3D finalCMPFinalFrame = new FramePoint3D();
+   private final FramePoint3D initialICPFinalFrame = new FramePoint3D();
+   private final FramePoint3D finalICPFinalFrame = new FramePoint3D();
 
-   private final FramePoint startOfSplineICPFinalFrame = new FramePoint();
+   private final FramePoint3D startOfSplineICPFinalFrame = new FramePoint3D();
    private final FrameVector3D startOfSplineICPVelocityFinalFrame = new FrameVector3D();
-   private final FramePoint endOfSplineICPFinalFrame = new FramePoint();
+   private final FramePoint3D endOfSplineICPFinalFrame = new FramePoint3D();
    private final FrameVector3D endOfSplineICPVelocityFinalFrame = new FrameVector3D();
 
-   private final FramePoint startOfSplineICP = new FramePoint();
+   private final FramePoint3D startOfSplineICP = new FramePoint3D();
    private final FrameVector3D startOfSplineICPVelocity = new FrameVector3D();
-   private final FramePoint endOfSplineICP = new FramePoint();
+   private final FramePoint3D endOfSplineICP = new FramePoint3D();
    private final FrameVector3D endOfSplineICPVelocity = new FrameVector3D();
 
-   private final FramePoint desiredICPInitialFrame = new FramePoint();
+   private final FramePoint3D desiredICPInitialFrame = new FramePoint3D();
    private final FrameVector3D desiredICPVelocityInitialFrame = new FrameVector3D();
 
-   private final FramePoint desiredICPFinalFrame = new FramePoint();
+   private final FramePoint3D desiredICPFinalFrame = new FramePoint3D();
    private final FrameVector3D desiredICPVelocityFinalFrame = new FrameVector3D();
 
-   private final FramePoint desiredICPOutput = new FramePoint();
+   private final FramePoint3D desiredICPOutput = new FramePoint3D();
    private final FrameVector3D desiredICPVelocityOutput = new FrameVector3D();
 
    private final FramePoint2d desiredCoMPosition = new FramePoint2d();
@@ -411,10 +411,10 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       yoEndOfSplineICP.set(endOfSplineICP);
    }
 
-   private final FramePoint pointA = new FramePoint();
-   private final FramePoint pointB = new FramePoint();
+   private final FramePoint3D pointA = new FramePoint3D();
+   private final FramePoint3D pointB = new FramePoint3D();
 
-   private void interpolatePointFromInitialToFinalFrame(FramePoint pointTrajectoryFrameToPack, FramePoint pointInitialFrame, FramePoint pointFinalFrame,
+   private void interpolatePointFromInitialToFinalFrame(FramePoint3D pointTrajectoryFrameToPack, FramePoint3D pointInitialFrame, FramePoint3D pointFinalFrame,
                                                         double percentOfFinal)
    {
       pointA.setIncludingFrame(pointInitialFrame);
@@ -446,7 +446,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(desiredICPOutput);
    }
@@ -489,7 +489,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

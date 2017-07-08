@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 public interface StateEstimator
@@ -16,15 +16,15 @@ public interface StateEstimator
 
    public abstract void setEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocity);
    
-   public abstract void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack);
+   public abstract void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack);
 
-   public abstract void setEstimatedCoMPosition(FramePoint estimatedCoMPosition);
+   public abstract void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition);
 
    public abstract void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack);
 
    public abstract void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity);
 
-   public abstract void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack);
+   public abstract void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack);
 
    public abstract void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack);
 

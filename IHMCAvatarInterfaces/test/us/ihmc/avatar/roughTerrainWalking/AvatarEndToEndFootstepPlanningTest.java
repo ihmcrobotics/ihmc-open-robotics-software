@@ -43,7 +43,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -292,7 +292,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    {
       referenceFrames.updateFrames();
       ReferenceFrame bodyFrame = referenceFrames.getABodyAttachedZUpFrame();
-      FramePoint goalPoint = new FramePoint(ReferenceFrame.getWorldFrame(), point.getX(), point.getY(), 0.0);
+      FramePoint3D goalPoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), point.getX(), point.getY(), 0.0);
       goalPoint.changeFrame(bodyFrame);
 
       double distanceFrameBody = Math.sqrt(goalPoint.getX() * goalPoint.getX() + goalPoint.getY() * goalPoint.getY());

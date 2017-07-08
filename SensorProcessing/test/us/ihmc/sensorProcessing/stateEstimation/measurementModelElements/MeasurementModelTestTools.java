@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MeasurementModelTestTools
@@ -33,8 +33,8 @@ public class MeasurementModelTestTools
    }
 
 
-   public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FramePoint> statePort, MeasurementModelElement modelElement,
-                                                                 FramePoint nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
+   public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FramePoint3D> statePort, MeasurementModelElement modelElement,
+                                                                 FramePoint3D nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
    {
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
       for (Direction direction : Direction.values())
@@ -45,7 +45,7 @@ public class MeasurementModelTestTools
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
 
-         FramePoint perturbedState = new FramePoint(nominalState);
+         FramePoint3D perturbedState = new FramePoint3D(nominalState);
          perturbedState.add(perturbationVector);
          statePort.setData(perturbedState);
 

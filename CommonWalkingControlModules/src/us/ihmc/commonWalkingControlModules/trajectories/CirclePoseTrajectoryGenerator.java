@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -63,9 +63,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoDouble desiredRotationAngle;
    private final YoDouble finalAngle;
 
-   private final FramePoint initialPosition = new FramePoint();
-   private final FramePoint currentPosition = new FramePoint();
-   private final FramePoint finalPosition = new FramePoint();
+   private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FramePoint3D currentPosition = new FramePoint3D();
+   private final FramePoint3D finalPosition = new FramePoint3D();
 
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameOrientation finalOrientation = new FrameOrientation();
@@ -100,7 +100,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private boolean visualize = true;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    private final YoFramePoint circleOrigin;
@@ -250,7 +250,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       circleFrame.update();
    }
 
-   public void updateCircleFrame(FramePoint circleCenter, FrameVector3D circleNormal)
+   public void updateCircleFrame(FramePoint3D circleCenter, FrameVector3D circleNormal)
    {
       circleOrigin.setAndMatchFrame(circleCenter);
       rotationAxis.setAndMatchFrame(circleNormal);
@@ -448,7 +448,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoTangentialCircleFramePose.setAndMatchFrame(tangentialCircleFramePose);
    }
 
-   private final FramePoint currentControlledFramePosition = new FramePoint();
+   private final FramePoint3D currentControlledFramePosition = new FramePoint3D();
 
    private double adjustCurrentDesiredRelativeAngle(double currentDesiredRelativeAngle)
    {
@@ -540,7 +540,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return circleFrame;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -578,7 +578,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       framePoseToPack.setPoseIncludingFrame(currentPosition, currentOrientation);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

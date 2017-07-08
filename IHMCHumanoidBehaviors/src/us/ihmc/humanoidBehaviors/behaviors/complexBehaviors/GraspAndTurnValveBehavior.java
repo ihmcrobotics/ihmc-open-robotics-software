@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -237,7 +237,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private FramePose offsetPointFromValveInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
    {
-      FramePoint point1 = new FramePoint(valvePose, x, y, z);
+      FramePoint3D point1 = new FramePoint3D(valvePose, x, y, z);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
       FrameOrientation orient = new FrameOrientation(valvePose, yaw, pitch, roll);
       orient.changeFrame(ReferenceFrame.getWorldFrame());

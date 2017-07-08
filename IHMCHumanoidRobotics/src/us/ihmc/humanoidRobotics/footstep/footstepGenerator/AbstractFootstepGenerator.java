@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunc
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -109,7 +109,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
          }
          else
          {
-            FramePoint soleFrameInWorldPoint = new FramePoint(soleFrame);
+            FramePoint3D soleFrameInWorldPoint = new FramePoint3D(soleFrame);
             soleFrameInWorldPoint.changeFrame(WORLD_FRAME);
             footstep = footstepSnapper.generateFootstepWithoutHeightMap(solePose, foot, soleFrame, currentFootstepSide, soleFrameInWorldPoint.getZ(), new Vector3D(0.0, 0.0, 1.0));
             if (VERBOSE_ERROR_PRINTS)
@@ -227,7 +227,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    {
       FramePose2d endPose = getPath().getPoseAtS(1);
       Point3D endPoint = new Point3D(endPose.getX(), endPose.getY(), 0.0);
-      RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint(ReferenceFrame.getWorldFrame(), endPoint));
+      RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint3D(ReferenceFrame.getWorldFrame(), endPoint));
 
       return closestSideToEnd;
    }

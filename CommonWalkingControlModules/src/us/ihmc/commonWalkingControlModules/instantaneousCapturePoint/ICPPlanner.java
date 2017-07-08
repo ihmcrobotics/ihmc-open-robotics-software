@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -93,17 +93,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * controller time.
  * <li>The output of the planner can be accessed using the various following getters:
  * <ul>
- * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint)},
+ * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
  * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
  * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
- * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint)},
+ * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
  * {@link #getDesiredCenterOfMassPosition(YoFramePoint2d)}.
  * <li>To get the CMP position, use either
- * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint)}, or
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
  * <li>To get the CMP velocity, use either
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
@@ -241,8 +241,8 @@ public class ICPPlanner
    private final ReferenceFrame midFeetZUpFrame;
    protected final SideDependentList<ReferenceFrame> soleZUpFrames;
 
-   private final FramePoint tempConstantCMP = new FramePoint();
-   private final FramePoint tempICP = new FramePoint();
+   private final FramePoint3D tempConstantCMP = new FramePoint3D();
+   private final FramePoint3D tempICP = new FramePoint3D();
    private final FramePoint2d tempCoM = new FramePoint2d();
 
    /**
@@ -504,7 +504,7 @@ public class ICPPlanner
     * @param icpPositionToHold the position at which the ICP will be held during the next double
     *           support phase. Not modified.
     */
-   public void holdCurrentICP(FramePoint icpPositionToHold)
+   public void holdCurrentICP(FramePoint3D icpPositionToHold)
    {
       this.icpPositionToHold.set(icpPositionToHold);
       requestedHoldPosition.set(true);
@@ -1126,7 +1126,7 @@ public class ICPPlanner
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   public void getDesiredCapturePointPosition(FramePoint desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack)
    {
       desiredICPPosition.getFrameTupleIncludingFrame(desiredCapturePointPositionToPack);
    }
@@ -1168,7 +1168,7 @@ public class ICPPlanner
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   public void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(FramePoint3D desiredCenterOfMassPositionToPack)
    {
       desiredCoMPosition.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
    }
@@ -1251,7 +1251,7 @@ public class ICPPlanner
     * 
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
@@ -1461,14 +1461,14 @@ public class ICPPlanner
       return isInitialTransfer.getBooleanValue();
    }
 
-   private final FramePoint tempFinalICP = new FramePoint();
+   private final FramePoint3D tempFinalICP = new FramePoint3D();
 
    /**
     * Retrieves the desired ICP position at the end of the current state.
     * 
     * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
     */
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
@@ -1535,7 +1535,7 @@ public class ICPPlanner
     * 
     * @param entryCMPToPack the next exit CMP position. Modified.
     */
-   public void getNextExitCMP(FramePoint entryCMPToPack)
+   public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
    }

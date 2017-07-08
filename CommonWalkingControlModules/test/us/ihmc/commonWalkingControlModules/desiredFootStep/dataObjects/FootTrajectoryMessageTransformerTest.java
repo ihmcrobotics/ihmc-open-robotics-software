@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,8 +49,8 @@ public class FootTrajectoryMessageTransformerTest
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending");
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D);
 
-      FramePoint start = new FramePoint(starting, startingPoint);
-      FramePoint end = new FramePoint(ending, endPoint);
+      FramePoint3D start = new FramePoint3D(starting, startingPoint);
+      FramePoint3D end = new FramePoint3D(ending, endPoint);
 
       end.changeFrame(starting);
 

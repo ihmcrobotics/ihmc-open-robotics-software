@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
@@ -136,7 +136,7 @@ public class HandCompliantControlHelper
       torqueDeadzoneSize.set(0.5);
    }
 
-   public void doCompliantControl(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   public void doCompliantControl(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       updateWristMeasuredWrench(measuredForce, measuredTorque);
 
@@ -257,7 +257,7 @@ public class HandCompliantControlHelper
       yoCompliantControlAngularDisplacement.setToZero();
    }
 
-   public void progressivelyCancelOutCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   public void progressivelyCancelOutCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       yoCompliantControlLinearDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
       yoCompliantControlAngularDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
@@ -271,7 +271,7 @@ public class HandCompliantControlHelper
       applyCorrection(desiredPosition, desiredOrientation);
    }
 
-   private void applyCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   private void applyCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       ReferenceFrame originalFrame = desiredPosition.getReferenceFrame();
       desiredPosition.changeFrame(controlFrame);

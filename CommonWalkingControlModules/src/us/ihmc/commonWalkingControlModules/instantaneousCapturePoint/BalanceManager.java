@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -85,11 +85,11 @@ public class BalanceManager
 
    private final ReferenceFrame centerOfMassFrame;
 
-   private final FramePoint centerOfMassPosition = new FramePoint();
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint tempCapturePoint = new FramePoint();
+   private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
@@ -337,7 +337,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   private final FramePoint copEstimate = new FramePoint();
+   private final FramePoint3D copEstimate = new FramePoint3D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
@@ -472,7 +472,7 @@ public class BalanceManager
       return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
-   public void getNextExitCMP(FramePoint entryCMPToPack)
+   public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
       icpPlanner.getNextExitCMP(entryCMPToPack);
    }

@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -34,16 +34,16 @@ public class HexapodMomentumController
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final HexapodReferenceFrames referenceFrames;
-   private final FramePoint desiredComPosition = new FramePoint();
+   private final FramePoint3D desiredComPosition = new FramePoint3D();
    private final StraightLineCartesianTrajectoryGenerator trajectoryGenerator;
    private final YoDouble yoTime;
    private final CenterOfMassJacobian comJacobian;
    private final YoFramePoint yoCurrentCenterOfMassPosition;
    private final YoFramePoint yoCurrentCenterOfFeetPosition;
-   private final FramePoint currentCenterOfMassPosition = new FramePoint();
+   private final FramePoint3D currentCenterOfMassPosition = new FramePoint3D();
    private final FrameVector3D currentCenterOfMassVelocity = new FrameVector3D();
    private final FrameVector3D initialAcceleration = new FrameVector3D();
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    
    private double dt;

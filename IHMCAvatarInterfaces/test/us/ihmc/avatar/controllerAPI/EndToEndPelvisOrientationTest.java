@@ -29,7 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -316,7 +316,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       messageToPack.setDefaultTransferDuration(transferDuration);
       for (int step = 0; step < steps; step++)
       {
-         FramePoint location = new FramePoint(midFootZUpGroundFrame);
+         FramePoint3D location = new FramePoint3D(midFootZUpGroundFrame);
          if (squareUp && step == steps - 1)
             location.setX(stepLength * step);
          else

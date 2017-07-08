@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
@@ -40,7 +40,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
 
    public boolean isIncluded(Point3D testInput)
    {
-      FramePoint test = new FramePoint(ReferenceFrame.getWorldFrame(),testInput);
+      FramePoint3D test = new FramePoint3D(ReferenceFrame.getWorldFrame(),testInput);
       if (DEBUG)
          System.out.printf("SimpleFootstepMask: testing point input is <%.2f,%.2f> in frame %s", test.getX(), test.getY(), test.getReferenceFrame());
       test.changeFrame(yawFrame2d);

@@ -18,7 +18,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -110,7 +110,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       exitCMP.setX(0.05);
 
@@ -125,7 +125,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       FramePoint2d desiredCMP = new FramePoint2d();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -145,7 +145,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       FramePoint2d desiredCMP = new FramePoint2d();
       FramePoint2d toeOffPoint = new FramePoint2d();
 

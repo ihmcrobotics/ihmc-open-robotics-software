@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -43,7 +43,7 @@ public class YoFrameSE3TrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
+      FramePoint3D poseFramePosition = new FramePoint3D(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
       FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
@@ -97,7 +97,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = 0.0;
-      FramePoint expectedPosition = new FramePoint(expectedFrame);
+      FramePoint3D expectedPosition = new FramePoint3D(expectedFrame);
       FrameOrientation expectedOrientation = new FrameOrientation(expectedFrame);
       FrameVector3D expectedLinearVelocity = new FrameVector3D(expectedFrame);
       FrameVector3D expectedAngularVelocity = new FrameVector3D(expectedFrame);
@@ -121,7 +121,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = 0.0;
-      FramePoint expectedPosition = new FramePoint(expectedFrame);
+      FramePoint3D expectedPosition = new FramePoint3D(expectedFrame);
       FrameOrientation expectedOrientation = new FrameOrientation(expectedFrame);
       FrameVector3D expectedLinearVelocity = new FrameVector3D(expectedFrame);
       FrameVector3D expectedAngularVelocity = new FrameVector3D(expectedFrame);
@@ -136,7 +136,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       expectedFrame = worldFrame;
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -148,7 +148,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       expectedFrame = worldFrame;
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -161,7 +161,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       expectedFrame = worldFrame;
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -189,7 +189,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      FramePoint expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      FramePoint3D expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       FrameOrientation expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       FrameVector3D expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       FrameVector3D expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -232,7 +232,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      FramePoint expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      FramePoint3D expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       FrameOrientation expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       FrameVector3D expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       FrameVector3D expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -256,7 +256,7 @@ public class YoFrameSE3TrajectoryPointTest
       testedYoFrameSE3TrajectoryPoint.registerReferenceFrame(expectedFrame);
 
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      expectedPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      expectedPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
       expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
       expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
@@ -284,7 +284,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      FramePoint expectedPosition = FramePoint.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
+      FramePoint3D expectedPosition = FramePoint3D.generateRandomFramePoint(random, expectedFrame, 10.0, 10.0, 10.0);
       FrameOrientation expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFrame);
       FrameVector3D expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
       FrameVector3D expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, expectedFrame);
@@ -304,7 +304,7 @@ public class YoFrameSE3TrajectoryPointTest
       expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop", random, worldFrame);
       testedYoFrameSE3TrajectoryPoint.registerReferenceFrame(expectedFrame);
       expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-      expectedPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      expectedPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       expectedOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
       expectedLinearVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
       expectedAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
@@ -323,7 +323,7 @@ public class YoFrameSE3TrajectoryPointTest
    }
 
    private void assertWaypointContainsExpectedData(String expectedNamePrefix, String expectedNameSuffix, ReferenceFrame expectedFrame, double expectedTime,
-         FramePoint expectedPosition, FrameOrientation expectedOrientation, FrameVector3D expectedLinearVelocity, FrameVector3D expectedAngularVelocity,
+         FramePoint3D expectedPosition, FrameOrientation expectedOrientation, FrameVector3D expectedLinearVelocity, FrameVector3D expectedAngularVelocity,
          YoFrameSE3TrajectoryPoint testedYoFrameSE3TrajectoryPoint, double epsilon)
    {
       assertTrue(expectedFrame == testedYoFrameSE3TrajectoryPoint.getReferenceFrame());
@@ -361,7 +361,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
 
-      FramePoint actualFramePosition = new FramePoint(expectedFrame);
+      FramePoint3D actualFramePosition = new FramePoint3D(expectedFrame);
       FrameOrientation actualFrameOrientation = new FrameOrientation(expectedFrame);
       FrameVector3D actualFrameLinearVelocity = new FrameVector3D(expectedFrame);
       FrameVector3D actualFrameAngularVelocity = new FrameVector3D(expectedFrame);
@@ -376,7 +376,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
 
-      actualFramePosition = new FramePoint();
+      actualFramePosition = new FramePoint3D();
       actualFrameOrientation = new FrameOrientation();
       actualFrameLinearVelocity = new FrameVector3D();
       actualFrameAngularVelocity = new FrameVector3D();
@@ -541,7 +541,7 @@ public class YoFrameSE3TrajectoryPointTest
       yoFrameSE3TrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       double time = 3.4;
-      FramePoint position = new FramePoint(worldFrame, 1.0, 2.1, 3.7);
+      FramePoint3D position = new FramePoint3D(worldFrame, 1.0, 2.1, 3.7);
       FrameOrientation orientation = new FrameOrientation(worldFrame, new Quaternion(0.1, 0.22, 0.34, 0.56));
 
       FrameVector3D linearVelocity = new FrameVector3D(worldFrame, -0.4, 1.2, 3.3);
@@ -556,7 +556,7 @@ public class YoFrameSE3TrajectoryPointTest
       
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
+      FramePoint3D poseFramePosition = new FramePoint3D(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
       FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));

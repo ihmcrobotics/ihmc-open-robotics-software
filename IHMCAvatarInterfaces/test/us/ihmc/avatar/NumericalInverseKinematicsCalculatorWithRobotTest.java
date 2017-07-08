@@ -23,7 +23,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
@@ -203,7 +203,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(random, 0.5);
 
-      FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
+      FramePoint3D handEndEffectorPositionFK = getHandEndEffectorPosition();
       FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
@@ -233,7 +233,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          generateRandomArmPoseWithForwardKinematics(random);
          fullRobotModel.updateFrames();
 
-         FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
+         FramePoint3D handEndEffectorPositionFK = getHandEndEffectorPosition();
          FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
 
          if (VISUALIZE)
@@ -273,7 +273,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(percentPassed > 0.96);
    }
 
-   public boolean testAPose(Random random, FramePoint handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
+   public boolean testAPose(Random random, FramePoint3D handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
                             double errorThreshold, boolean updateListenersEachStep)
    {
       testPositionForwardKinematics.set(handEndEffectorPositionFK);
@@ -281,7 +281,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       solveForArmPoseWithInverseKinematics(random, handEndEffectorOrientationFK, handEndEffectorPositionFK, initialGuessForTests, updateListenersEachStep);
 
-      FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
+      FramePoint3D handEndEffectorPositionIK = getHandEndEffectorPosition();
       FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
 
       testPositionInverseKinematics.set(handEndEffectorPositionIK);
@@ -322,7 +322,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
 
-   private void solveForArmPoseWithInverseKinematics(Random random, FrameOrientation desiredOrientation, FramePoint desiredPosition,
+   private void solveForArmPoseWithInverseKinematics(Random random, FrameOrientation desiredOrientation, FramePoint3D desiredPosition,
            InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
    {
       FramePose handPose = new FramePose(worldFrame);
@@ -399,10 +399,10 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return handEndEffectorOrientation;
    }
 
-   private FramePoint getHandEndEffectorPosition()
+   private FramePoint3D getHandEndEffectorPosition()
    {
       ReferenceFrame handEndEffectorFrame = fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame();
-      FramePoint handEndEffectorPosition = new FramePoint(handEndEffectorFrame);
+      FramePoint3D handEndEffectorPosition = new FramePoint3D(handEndEffectorFrame);
 
       handEndEffectorPosition.changeFrame(worldFrame);
 

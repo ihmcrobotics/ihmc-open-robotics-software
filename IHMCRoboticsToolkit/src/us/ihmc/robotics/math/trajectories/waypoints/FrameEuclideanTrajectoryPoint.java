@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
@@ -31,7 +31,7 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       setToZero(referenceFrame);
    }
 
-   public FrameEuclideanTrajectoryPoint(double time, FramePoint position, FrameVector3D linearVelocity)
+   public FrameEuclideanTrajectoryPoint(double time, FramePoint3D position, FrameVector3D linearVelocity)
    {
       this();
       setIncludingFrame(time, position, linearVelocity);
@@ -55,7 +55,7 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.setPosition(position);
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       checkReferenceFrameMatch(position);
       geometryObject.setPosition(position.getPoint());
@@ -84,14 +84,14 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.set(time, position, linearVelocity);
    }
 
-   public void set(double time, FramePoint position, FrameVector3D linearVelocity)
+   public void set(double time, FramePoint3D position, FrameVector3D linearVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(linearVelocity);
       geometryObject.set(time, position.getPoint(), linearVelocity.getVector());
    }
 
-   public void setIncludingFrame(double time, FramePoint position, FrameVector3D linearVelocity)
+   public void setIncludingFrame(double time, FramePoint3D position, FrameVector3D linearVelocity)
    {
       position.checkReferenceFrameMatch(linearVelocity);
       setToZero(position.getReferenceFrame());
@@ -191,20 +191,20 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
       geometryObject.getPosition(positionToPack.getPoint());
    }
 
-   public FramePoint getPositionCopy()
+   public FramePoint3D getPositionCopy()
    {
-      FramePoint positionCopy = new FramePoint(getReferenceFrame());
+      FramePoint3D positionCopy = new FramePoint3D(getReferenceFrame());
       getPosition(positionCopy);
       return positionCopy;
    }
 
-   public void getPositionIncludingFrame(FramePoint positionToPack)
+   public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
       geometryObject.getPosition(positionToPack.getPoint());
@@ -236,14 +236,14 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       return getTime();
    }
 
-   public double get(FramePoint positionToPack, FrameVector3D linearVelocityToPack)
+   public double get(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack)
    {
       getPosition(positionToPack);
       getLinearVelocity(linearVelocityToPack);
       return getTime();
    }
 
-   public double getIncludingFrame(FramePoint positionToPack, FrameVector3D linearVelocityToPack)
+   public double getIncludingFrame(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack)
    {
       getPositionIncludingFrame(positionToPack);
       getLinearVelocityIncludingFrame(linearVelocityToPack);

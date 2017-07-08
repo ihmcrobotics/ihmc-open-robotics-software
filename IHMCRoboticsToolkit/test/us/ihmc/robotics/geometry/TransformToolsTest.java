@@ -80,7 +80,7 @@ public class TransformToolsTest
 
       // System.out.println("a2Origin after transform" + a2Origin);
 
-      FramePoint a2OriginFramePoint = new FramePoint(a2);
+      FramePoint3D a2OriginFramePoint = new FramePoint3D(a2);
 
       a2OriginFramePoint.changeFrame(a1);
 
@@ -113,7 +113,7 @@ public class TransformToolsTest
 
       // System.out.println("a2Origin after transform" + a2Origin);
 
-      FramePoint a2OriginFramePoint = new FramePoint(a2);
+      FramePoint3D a2OriginFramePoint = new FramePoint3D(a2);
 
       a2OriginFramePoint.changeFrame(a1);
 

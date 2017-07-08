@@ -21,7 +21,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -101,8 +101,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoFrameVector unachievedSwingVelocity;
    private final YoFrameVector unachievedSwingAcceleration;
 
-   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
-   private final FramePoint anklePosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
+   private final FramePoint3D anklePosition = new FramePoint3D(worldFrame);
    private final FrameVector3D equivalentDesiredHipPitchHeightTranslation = new FrameVector3D();
    private final FrameVector3D equivalentDesiredHipVelocity = new FrameVector3D();
    private final FrameVector3D equivalentDesiredHipPitchAcceleration = new FrameVector3D();
@@ -111,7 +111,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final Twist pelvisTwist = new Twist();
    private final FrameVector3D pelvisLinearVelocity = new FrameVector3D();
-   private final FramePoint desiredFootPosition = new FramePoint();
+   private final FramePoint3D desiredFootPosition = new FramePoint3D();
    private final FrameVector3D desiredFootLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredFootLinearAcceleration = new FrameVector3D();
 
@@ -273,9 +273,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private static final long serialVersionUID = 8992154939350877111L;
          private final AxisAngle hipPitchRotationToParentFrame = new AxisAngle();
          private final Vector3D hipPitchToParentFrame = new Vector3D();
-         private final FramePoint tempPoint = new FramePoint();
+         private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
-         private final FramePoint hipPitchPosition = new FramePoint();
+         private final FramePoint3D hipPitchPosition = new FramePoint3D();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -299,9 +299,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private static final long serialVersionUID = 2338083143740929570L;
          private final AxisAngle anklePitchRotationToParentFrame = new AxisAngle();
          private final Vector3D anklePitchToParentFrame = new Vector3D();
-         private final FramePoint tempPoint = new FramePoint();
+         private final FramePoint3D tempPoint = new FramePoint3D();
          private final FrameVector3D footToHipAxis = new FrameVector3D();
-         private final FramePoint anklePitchPosition = new FramePoint();
+         private final FramePoint3D anklePitchPosition = new FramePoint3D();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -424,7 +424,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       checkVelocityForSwingSingularityAvoidance.set(value);
    }
 
-   public void correctSwingFootTrajectory(FramePoint desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
+   public void correctSwingFootTrajectory(FramePoint3D desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
          FrameVector3D desiredFootLinearAccelerationToCorrect)
    {
       isSwingSingularityAvoidanceUsed.set(false);
@@ -464,7 +464,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
                desiredFootLinearAccelerationToCorrect);
    }
 
-   private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
+   private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint3D desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
          FrameVector3D desiredFootLinearAccelerationToCorrect)
    {
       if (desiredPercentOfLegLength.getDoubleValue() > percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
@@ -570,7 +570,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   private void correctSwingFootTrajectoryForSingularityAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
+   private void correctSwingFootTrajectoryForSingularityAvoidance(FramePoint3D desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
          FrameVector3D desiredFootLinearAccelerationToCorrect)
    {
       if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())

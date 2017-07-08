@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -76,8 +76,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       YoDouble leftFootHeight = new YoDouble("leftFootHeight", registry);
       YoDouble rightFootHeight = new YoDouble("rightFootHeight", registry);
       YoDouble randomNum = new YoDouble("randomNumberInTestController", registry);
-      FramePoint leftFootOrigin;
-      FramePoint rightFootOrigin;
+      FramePoint3D leftFootOrigin;
+      FramePoint3D rightFootOrigin;
 
       public TestController(FullHumanoidRobotModel estimatorModel)
       {
@@ -88,11 +88,11 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       public void doControl()
       {
          ReferenceFrame leftFootFrame = estimatorModel.getFoot(RobotSide.LEFT).getBodyFixedFrame();
-         leftFootOrigin = new FramePoint(leftFootFrame);
+         leftFootOrigin = new FramePoint3D(leftFootFrame);
          leftFootOrigin.changeFrame(ReferenceFrame.getWorldFrame());
 
          ReferenceFrame rightFootFrame = estimatorModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame();
-         rightFootOrigin = new FramePoint(rightFootFrame);
+         rightFootOrigin = new FramePoint3D(rightFootFrame);
          rightFootOrigin.changeFrame(ReferenceFrame.getWorldFrame());
 
          randomNum.set(random.nextDouble());

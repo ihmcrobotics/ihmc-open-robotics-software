@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -73,7 +73,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
       angularMomentumRateLateralGain.set(capturePointPlannerParameters.getAngularMomentumRateLateralGain());
    }
 
-   public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)
+   public void modifyDesiredICPForAngularMomentum(FramePoint3D copEstimate, RobotSide supportSide)
    {
       if (!modifyICPPlanByAngularMomentum.getBooleanValue() || copEstimate.containsNaN())
       {
@@ -127,7 +127,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
       }
    }
 
-   private void estimateCurrentTimeWithModifiedCMP(FramePoint desiredCoPFromAngularMomentum)
+   private void estimateCurrentTimeWithModifiedCMP(FramePoint3D desiredCoPFromAngularMomentum)
    {
       double copCMPDistance = desiredCMPPosition.getXYPlaneDistance(desiredCoPFromAngularMomentum);
       double distanceFromCMP = desiredICPPosition.getXYPlaneDistance(modifiedCMPPosition);
@@ -160,7 +160,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       modifiedCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }

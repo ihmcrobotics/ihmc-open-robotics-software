@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -30,7 +30,7 @@ public class ContactPointWrenchMatrixCalculator
 
    // intermediate result storage:
    private final ArrayList<FrameVector3D> normalizedSupportVectors = new ArrayList<FrameVector3D>(4);
-   private final FramePoint tempContactPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempContactPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final DenseMatrix64F qBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F rhoBlock = new DenseMatrix64F(1, 1);

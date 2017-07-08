@@ -64,7 +64,7 @@ import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -446,7 +446,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          upperArmsFrames.put(robotSide, upperArmBody.getBodyFixedFrame());
          lowerArmsFrames.put(robotSide, lowerArmBody.getBodyFixedFrame());
 
-         FramePoint tempPoint = new FramePoint(hand.getParentJoint().getFrameAfterJoint());
+         FramePoint3D tempPoint = new FramePoint3D(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
          FrameVector3D tempVector = new FrameVector3D(tempPoint);
          EuclidCoreMissingTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
@@ -597,7 +597,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       ///////////   combinations of doom   ////////////
       //shiftWeight + pelvisOrientation
-      FramePoint currentPelvisHeight = new FramePoint(pelvisZUpFrame);
+      FramePoint3D currentPelvisHeight = new FramePoint3D(pelvisZUpFrame);
       currentPelvisHeight.changeFrame(worldFrame);
       FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
       FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
@@ -1139,26 +1139,26 @@ public class DiagnosticBehavior extends AbstractBehavior
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
       //foot remains flat
       boolean parallelize = false;
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
 
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
 
       //footOrientation changes
       //      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
@@ -1171,8 +1171,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       //
 
       //put the foot back on the ground
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, -0.1));
    }
 
    private void sequenceFootPoseLong()
@@ -1207,53 +1207,53 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       ///////////////////     good     ////////////////////////////
       boolean parallelize = false;
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, midFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, 0.0, midFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
 
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, midFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, 0.0, midFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
 
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
 
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));
       submitFootPosition(parallelize, robotSide,
-            new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+            new FramePoint3D(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       ////////////////////////////////////////////////////////
 
       //footOrientation changes
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
       submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
       submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
       submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
 
       //put the foot back on the ground
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, -0.1));
 
    }
 
@@ -1270,7 +1270,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       boolean mirrorOrientationsForRightSide = true;
 
       // First Lift up the foot
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
 
       // Go to running man pose:
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
@@ -1317,7 +1317,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitDesiredPelvisOrientation(true, 0.0, 0.0, 0.0);
 
       // Put the foot back on the ground
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
    private final double shoulderExtensionAngle = Math.toRadians(20.0);
@@ -1735,7 +1735,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
       // First Lift up the foot
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
       submitSymmetricHumanoidArmPose(HumanoidArmPose.KARATE_KID_KRANE_KICK);
       pipeLine.requestNewStage();
 
@@ -1751,14 +1751,14 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitChestHomeCommand(true);
 
       // Put the foot back on the ground
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
    private void karateKid(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
       // First Lift up the foot
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
 
       // Put the arm down
       double halfPi = Math.PI / 2.0;
@@ -1901,7 +1901,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitPelvisHomeCommand(true);
 
       // Put the foot back on the ground
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
 
       //
       submitArmGoHomeCommand(true);
@@ -1983,7 +1983,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
       ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
-      FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
+      FramePoint3D desiredPelvisPosition = new FramePoint3D(frameAfterRootJoint);
       desiredPelvisPosition.setZ(offsetHeight);
       desiredPelvisPosition.changeFrame(worldFrame);
       PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue());
@@ -2311,7 +2311,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          pipeLine.submitSingleTaskStage(footstepTask);
    }
 
-   private void submitFootPosition(boolean parallelize, RobotSide robotSide, FramePoint desiredFootPosition)
+   private void submitFootPosition(boolean parallelize, RobotSide robotSide, FramePoint3D desiredFootPosition)
    {
       FrameOrientation desiredFootOrientation = new FrameOrientation(desiredFootPosition.getReferenceFrame());
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
@@ -2343,7 +2343,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitFootPose(boolean parallelize, RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch,
          double roll)
    {
-      FramePoint framePosition = new FramePoint(referenceFrame, x, y, z);
+      FramePoint3D framePosition = new FramePoint3D(referenceFrame, x, y, z);
       FrameOrientation frameOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
       FramePose desiredFootPose = new FramePose(framePosition, frameOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
@@ -2600,15 +2600,15 @@ public class DiagnosticBehavior extends AbstractBehavior
          for (RobotSide side : RobotSide.values())
          {
             ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(side);
-            submitFootPosition(false, side, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
-            submitFootPosition(false, side, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+            submitFootPosition(false, side, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+            submitFootPosition(false, side, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, -0.1));
          }
       }
       else
       {
          ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
-         submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
-         submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+         submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+         submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, -0.1));
       }
    }
 
@@ -2617,7 +2617,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       if (footSideToPickUp != null)
       {
          ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(footSideToPickUp);
-         submitFootPosition(false, footSideToPickUp, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+         submitFootPosition(false, footSideToPickUp, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
       }
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
@@ -2632,7 +2632,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       if (footSideToPickUp != null)
       {
          ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(footSideToPickUp);
-         submitFootPosition(false, footSideToPickUp, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+         submitFootPosition(false, footSideToPickUp, new FramePoint3D(ankleZUpFrame, 0.0, 0.0, -0.1));
       }
    }
 

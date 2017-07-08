@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -45,11 +45,11 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
-   private final FramePoint desiredCoP3d = new FramePoint();
-   private final FramePoint desiredCoP3dInDesiredSoleFrame = new FramePoint();
+   private final FramePoint3D desiredCoP3d = new FramePoint3D();
+   private final FramePoint3D desiredCoP3dInDesiredSoleFrame = new FramePoint3D();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   private final FramePoint desiredSolePosition = new FramePoint();
+   private final FramePoint3D desiredSolePosition = new FramePoint3D();
 
    private final FootSwitchInterface footSwitch;
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();

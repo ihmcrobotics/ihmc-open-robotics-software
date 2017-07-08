@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements FramePoint3DReadOnly, Point3DBasics
+public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements FramePoint3DReadOnly, Point3DBasics
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -26,7 +26,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * Creates a new frame point and initializes it components to zero and its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
-   public FramePoint()
+   public FramePoint3D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -37,7 +37,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * 
     * @param referenceFrame the initial frame for this frame point.
     */
-   public FramePoint(ReferenceFrame referenceFrame)
+   public FramePoint3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Point3D());
    }
@@ -51,7 +51,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * @param y the y-component.
     * @param z the z-component.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
+   public FramePoint3D(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       super(referenceFrame, new Point3D(x, y, z));
    }
@@ -63,7 +63,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * @param referenceFrame the initial frame for this frame point.
     * @param pointArray the array containing this point's coordinates. Not modified.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double[] pointArray)
+   public FramePoint3D(ReferenceFrame referenceFrame, double[] pointArray)
    {
       super(referenceFrame, new Point3D(pointArray));
    }
@@ -75,7 +75,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * @param referenceFrame the initial frame for this frame point.
     * @param tuple3DReadOnly the tuple to copy the components from. Not modified.
     */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
+   public FramePoint3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
       super(referenceFrame, new Point3D(tuple3DReadOnly));
    }
@@ -87,7 +87,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * @param frameTuple2DReadOnly the tuple to copy the components and reference frame from. Not
     *           modified.
     */
-   public FramePoint(FrameTuple2DReadOnly frameTuple2DReadOnly)
+   public FramePoint3D(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
       super(frameTuple2DReadOnly.getReferenceFrame(), new Point3D(frameTuple2DReadOnly));
    }
@@ -97,22 +97,22 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     *
     * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FramePoint(FrameTuple3DReadOnly other)
+   public FramePoint3D(FrameTuple3DReadOnly other)
    {
       super(other.getReferenceFrame(), new Point3D(other));
    }
 
-   public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
+   public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX), RandomNumbers.nextDouble(random, yMaxAbsoluteY),
+      FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX), RandomNumbers.nextDouble(random, yMaxAbsoluteY),
                                               RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
-   public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
+   public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                      double zMax)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
+      FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
                                               RandomNumbers.nextDouble(random, zMin, zMax));
       return randomPoint;
    }

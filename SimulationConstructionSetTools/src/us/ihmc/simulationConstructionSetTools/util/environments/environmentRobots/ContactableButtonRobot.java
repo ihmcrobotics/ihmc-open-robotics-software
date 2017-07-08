@@ -12,7 +12,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -219,7 +219,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
 
       if (cylinderFrame.isInsideOrOnSurface(pointToCheck))
       {

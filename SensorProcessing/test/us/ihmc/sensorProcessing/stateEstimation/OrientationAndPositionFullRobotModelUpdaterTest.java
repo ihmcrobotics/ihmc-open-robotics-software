@@ -15,7 +15,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVectorTest;
@@ -55,7 +55,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
+      ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint3D>("centerOfMassPositionPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassAccelerationPort", controlFlowElement);
 
@@ -82,7 +82,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+         centerOfMassPositionPort.setData(new FramePoint3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          centerOfMassVelocityPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          centerOfMassAccelerationPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          RotationMatrix orientation = new RotationMatrix();
@@ -125,11 +125,11 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       }
    }
 
-   private void compareCenterOfMass(RigidBody elevator, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, double epsilon)
+   private void compareCenterOfMass(RigidBody elevator, ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, double epsilon)
    {
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
       centerOfMassCalculator.compute();
-      FramePoint centerOfMassBack = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D centerOfMassBack = new FramePoint3D(ReferenceFrame.getWorldFrame());
       centerOfMassCalculator.getCenterOfMass(centerOfMassBack);
       FramePointTest.assertFramePointEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
    }

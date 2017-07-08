@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 
 public class CurrentPositionProviderTest
 {
@@ -40,7 +40,7 @@ public class CurrentPositionProviderTest
    public void testGet()
    {
       provider = new CurrentPositionProvider(referenceFrame);
-      FramePoint framePointToPack = new FramePoint(referenceFrame);
+      FramePoint3D framePointToPack = new FramePoint3D(referenceFrame);
 
       provider.getPosition(framePointToPack);
 

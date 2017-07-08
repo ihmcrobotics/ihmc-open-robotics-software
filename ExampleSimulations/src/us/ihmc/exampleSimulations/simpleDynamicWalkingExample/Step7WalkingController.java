@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -400,17 +400,17 @@ public class Step7WalkingController implements RobotController
       private final RobotSide robotSide;
 
       // swing trajectory variables 
-      private final FramePoint initialPosition = new FramePoint();
+      private final FramePoint3D initialPosition = new FramePoint3D();
       private final YoGraphicPosition debugIniPosViz;
       private final YoFramePoint iniPosDebug;
       private final FrameVector3D initialVelocity = new FrameVector3D();
       private final FrameVector3D initialAcceleration = new FrameVector3D();
-      private final FramePoint finalDesiredPositionToPack = new FramePoint();
+      private final FramePoint3D finalDesiredPositionToPack = new FramePoint3D();
       private final FrameVector3D finalDesiredVelocity = new FrameVector3D();
       private int nTicksSinceTrajectoryIsDone = 0;
 
-      private final FramePoint desiredPosition = new FramePoint();
-      private final FramePoint desiredPositionTrajectoryViz = new FramePoint();
+      private final FramePoint3D desiredPosition = new FramePoint3D();
+      private final FramePoint3D desiredPositionTrajectoryViz = new FramePoint3D();
       private final FrameVector3D pControl = new FrameVector3D();
 
       private final FrameVector3D currentVelocity = new FrameVector3D();

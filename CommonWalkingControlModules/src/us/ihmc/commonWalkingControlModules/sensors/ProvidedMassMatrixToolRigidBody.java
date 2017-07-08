@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -53,7 +53,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final SixDoFJoint toolJoint;
    private final ReferenceFrame elevatorFrame;
 
-   private final FramePoint temporaryPoint = new FramePoint();
+   private final FramePoint3D temporaryPoint = new FramePoint3D();
    private final FrameVector3D temporaryVector = new FrameVector3D();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
 
@@ -108,7 +108,7 @@ public class ProvidedMassMatrixToolRigidBody
       inverseDynamicsCalculator = new InverseDynamicsCalculator(new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, spatialAccelerationCalculator);
    }
 
-   private final FramePoint toolFramePoint = new FramePoint();
+   private final FramePoint3D toolFramePoint = new FramePoint3D();
 
    public void update()
    {

@@ -22,7 +22,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -182,15 +182,15 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
-   private final FramePoint comPosition = new FramePoint();
+   private final FramePoint3D comPosition = new FramePoint3D();
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2d comXYVelocity = new FrameVector2d();
    private final FrameVector2d comXYAcceleration = new FrameVector2d();
    private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
-   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
-   private final FramePoint pelvisPosition = new FramePoint();
+   private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
+   private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
    private final Twist currentPelvisTwist = new Twist();
    
@@ -296,7 +296,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    }
 
    @Override
-   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack)
+   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       positionToPack.set(desiredCenterOfMassHeightPoint);
    }

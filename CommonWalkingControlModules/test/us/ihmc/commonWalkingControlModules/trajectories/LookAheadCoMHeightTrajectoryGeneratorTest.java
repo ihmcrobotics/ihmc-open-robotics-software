@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -164,14 +164,14 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          Footstep upcomingFootstep = footsteps.get(0);
 
          FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
-         FramePoint transferFromFootFramePoint = new FramePoint();
+         FramePoint3D transferFromFootFramePoint = new FramePoint3D();
          transferFromFootstep.getPosition(transferFromFootFramePoint);
          FrameOrientation transferFromFootOrientation = new FrameOrientation();
          transferFromFootstep.getOrientation(transferFromFootOrientation);
          transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
 
          FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
-         FramePoint transferToFootFramePoint = new FramePoint();
+         FramePoint3D transferToFootFramePoint = new FramePoint3D();
          transferToFootstep.getPosition(transferToFootFramePoint);
          FrameOrientation transferToFootOrientation = new FrameOrientation();
          transferToFootstep.getOrientation(transferToFootOrientation);
@@ -249,7 +249,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             boolean isInDoubleSupport = supportLeg == null;
             lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
 
-            FramePoint comPosition = new FramePoint();
+            FramePoint3D comPosition = new FramePoint3D();
             pelvisFrame.setZ(comPosition.getZ());
             pelvisFrame.update();
 

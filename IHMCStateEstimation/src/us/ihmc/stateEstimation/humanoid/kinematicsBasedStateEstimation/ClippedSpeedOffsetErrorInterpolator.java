@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
@@ -130,7 +130,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    //used to check if the orientation error is too big
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
    private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
-   private final FramePoint iterativeClosestPointTranslation = new FramePoint();
+   private final FramePoint3D iterativeClosestPointTranslation = new FramePoint3D();
    private final AxisAngle axisAngleForError = new AxisAngle();
    private final YoDouble maximumErrorAngleInDegrees;
    private final YoDouble maximumErrorTranslation;
@@ -150,8 +150,8 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Translation = new PoseReferenceFrame("startOffsetErrorReferenceFrame_Translation", startOffsetErrorPose_Translation);
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Rotation= new PoseReferenceFrame("startOffsetErrorReferenceFrame_Rotation", startOffsetErrorPose_Rotation);
 
-   private final FramePoint goalOffsetFramePoint_Translation = new FramePoint(worldFrame);
-   private final FramePoint interpolatedOffsetFramePoint_Translation = new FramePoint(worldFrame);
+   private final FramePoint3D goalOffsetFramePoint_Translation = new FramePoint3D(worldFrame);
+   private final FramePoint3D interpolatedOffsetFramePoint_Translation = new FramePoint3D(worldFrame);
    private final FrameOrientation goalOffsetFrameOrientation_Rotation = new FrameOrientation(worldFrame);
    private final FrameOrientation interpolatedOffsetFrameOrientation_Rotation = new FrameOrientation(worldFrame);
 

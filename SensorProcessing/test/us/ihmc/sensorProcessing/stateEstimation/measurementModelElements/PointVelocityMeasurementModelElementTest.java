@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
@@ -69,7 +69,7 @@ public class PointVelocityMeasurementModelElementTest
 
       ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort = new ControlFlowInputPort<PointVelocityDataObject>("pointVelocityMeasurementInputPort", controlFlowElement);
 
-      ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
+      ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint3D>("centerOfMassPositionPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassAccelerationPort", controlFlowElement);
 
@@ -78,7 +78,7 @@ public class PointVelocityMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector3D> angularAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("angularAccelerationPort", controlFlowElement);
 
       RigidBody stationaryPointLink = measurementLink;
-      FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
+      FramePoint3D stationaryPoint = new FramePoint3D(measurementFrame, RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
       AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(elevator);
       RigidBodyToIndexMap rigidBodyToIndexMap = new RigidBodyToIndexMap(elevator);
       PointVelocityMeasurementModelElement modelElement = new PointVelocityMeasurementModelElement(name, pointVelocityMeasurementInputPort,
@@ -93,7 +93,7 @@ public class PointVelocityMeasurementModelElementTest
       Runnable updater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
                             centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
-      centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+      centerOfMassPositionPort.setData(new FramePoint3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       centerOfMassVelocityPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       centerOfMassAccelerationPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       RotationMatrix orientation = new RotationMatrix();
@@ -127,13 +127,13 @@ public class PointVelocityMeasurementModelElementTest
               perturbation, tol, updater);
    }
 
-   private void setMeasuredPointVelocityToActual(FullInverseDynamicsStructure inverseDynamicsStructure, TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint measurementPointInBodyFrame,
+   private void setMeasuredPointVelocityToActual(FullInverseDynamicsStructure inverseDynamicsStructure, TwistCalculator twistCalculator, RigidBody stationaryPointLink, FramePoint3D measurementPointInBodyFrame,
            ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
       twistCalculator.getTwistOfBody(stationaryPointLink, twist);
       twist.changeFrame(twist.getBaseFrame());
-      FramePoint pointInTwistBaseFrame = new FramePoint(measurementPointInBodyFrame);
+      FramePoint3D pointInTwistBaseFrame = new FramePoint3D(measurementPointInBodyFrame);
       pointInTwistBaseFrame.changeFrame(twist.getBaseFrame());
       FrameVector3D velocityOfMeasurementPointInWorldFrame = new FrameVector3D(twist.getBaseFrame());
       twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfMeasurementPointInWorldFrame, pointInTwistBaseFrame);

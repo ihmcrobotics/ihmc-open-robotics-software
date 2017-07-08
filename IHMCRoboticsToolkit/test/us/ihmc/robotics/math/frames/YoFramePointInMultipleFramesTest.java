@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class YoFramePointInMultipleFramesTest
@@ -112,7 +112,7 @@ public class YoFramePointInMultipleFramesTest
       YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames("blop", registry, allFrames);
       yoFramePointInMultipleFrames.switchCurrentReferenceFrame(worldFrame);
       
-      FramePoint framePoint = new FramePoint(worldFrame);
+      FramePoint3D framePoint = new FramePoint3D(worldFrame);
       framePoint.setToZero(worldFrame);
 
       assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
@@ -126,7 +126,7 @@ public class YoFramePointInMultipleFramesTest
       YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames("blop", registry, new ReferenceFrame[]{worldFrame, frameA});
       yoFramePointInMultipleFrames.switchCurrentReferenceFrame(worldFrame);
       
-      FramePoint framePoint = new FramePoint(worldFrame);
+      FramePoint3D framePoint = new FramePoint3D(worldFrame);
 
       Point3D point = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
       
@@ -157,14 +157,14 @@ public class YoFramePointInMultipleFramesTest
       YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames("blop", registry, new ReferenceFrame[]{worldFrame, frameA});
       yoFramePointInMultipleFrames.switchCurrentReferenceFrame(worldFrame);
       
-      FramePoint framePoint = FramePoint.generateRandomFramePoint(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+      FramePoint3D framePoint = FramePoint3D.generateRandomFramePoint(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
       
       yoFramePointInMultipleFrames.setIncludingFrame(framePoint);
       assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
       
       try
       {
-         yoFramePointInMultipleFrames.setIncludingFrame(new FramePoint(frameC));
+         yoFramePointInMultipleFrames.setIncludingFrame(new FramePoint3D(frameC));
          fail("Should have thrown an exception");
       }
       catch (Exception e)

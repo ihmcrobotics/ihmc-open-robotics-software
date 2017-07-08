@@ -2,7 +2,7 @@ package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class CurrentConfigurationProvider implements SE3ConfigurationProvider
@@ -15,7 +15,7 @@ public class CurrentConfigurationProvider implements SE3ConfigurationProvider
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(endEffectorFrame);
    }

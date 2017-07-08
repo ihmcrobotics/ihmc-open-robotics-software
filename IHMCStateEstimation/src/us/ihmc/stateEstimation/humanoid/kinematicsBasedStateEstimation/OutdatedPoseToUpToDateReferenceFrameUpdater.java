@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -33,7 +33,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final TimeStampedTransform3D stateEstimatorTimeStampedTransformInPast;
    private final FramePose stateEstimatorPoseInThePast;
    private final PoseReferenceFrame stateEstimatorReferenceFrameInThePast;
-   private final FramePoint stateEstimatorPositionInThePastInWorldFrame;
+   private final FramePoint3D stateEstimatorPositionInThePastInWorldFrame;
 
    // outdated in present
    private final ReferenceFrame localizationReferenceFrameInPresent_Translation;
@@ -44,7 +44,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final PoseReferenceFrame localizationReferenceFrameInThePast;
    private final RigidBodyTransform localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Translation = new RigidBodyTransform();
    private final RigidBodyTransform localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation = new RigidBodyTransform();
-   private final FramePoint localizationPositionInThePastInWorldFrame;
+   private final FramePoint3D localizationPositionInThePastInWorldFrame;
 
    private final FrameVector3D translationOffsetFrameVector = new FrameVector3D(worldFrame);
    private final Vector3D translationOffsetVector = new Vector3D();
@@ -66,9 +66,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       localizationPoseInThePast = new FramePose(worldFrame);
 
       stateEstimatorReferenceFrameInThePast = new PoseReferenceFrame("upToDateReferenceFrameInThePast", stateEstimatorPoseInThePast);
-      stateEstimatorPositionInThePastInWorldFrame = new FramePoint(stateEstimatorReferenceFrameInThePast);
+      stateEstimatorPositionInThePastInWorldFrame = new FramePoint3D(stateEstimatorReferenceFrameInThePast);
       localizationReferenceFrameInThePast = new PoseReferenceFrame("upToDateReferenceFrameInThePast", localizationPoseInThePast);
-      localizationPositionInThePastInWorldFrame = new FramePoint(localizationReferenceFrameInThePast);
+      localizationPositionInThePastInWorldFrame = new FramePoint3D(localizationReferenceFrameInThePast);
 
       ////////////////////////// In present ///////////
       stateEstimatorReferenceFrameInPresent_Translation = new ReferenceFrame("stateEstimatorReferenceFrameInPresent_Translation", worldFrame)

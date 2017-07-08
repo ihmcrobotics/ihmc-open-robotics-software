@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -20,7 +20,7 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
    private final ReferenceFrame bodyFrame;
    
    private final Vector3D pointVelocity = new Vector3D();
-   private final FramePoint measurementPointInBodyFrame = new FramePoint();
+   private final FramePoint3D measurementPointInBodyFrame = new FramePoint3D();
    private final FrameVector3D velocityOfMeasurementPointInWorldFrame = new FrameVector3D();
    
    private final PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();

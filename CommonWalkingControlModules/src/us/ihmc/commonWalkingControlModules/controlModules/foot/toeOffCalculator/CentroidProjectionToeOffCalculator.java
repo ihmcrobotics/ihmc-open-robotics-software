@@ -24,7 +24,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
-   private final FramePoint exitCMP = new FramePoint();
+   private final FramePoint3D exitCMP = new FramePoint3D();
    private final FramePoint2d exitCMP2d = new FramePoint2d();
    private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
 
@@ -76,7 +76,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
       this.exitCMP.setIncludingFrame(exitCMP);

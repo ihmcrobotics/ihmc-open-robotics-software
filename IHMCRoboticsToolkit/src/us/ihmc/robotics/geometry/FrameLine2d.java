@@ -157,7 +157,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       setPoint(framePoint2d);
    }
 
-   public void setByProjectionOntoXYPlane(FramePoint startPoint, FramePoint endPoint)
+   public void setByProjectionOntoXYPlane(FramePoint3D startPoint, FramePoint3D endPoint)
    {
       checkReferenceFrameMatch(startPoint);
       checkReferenceFrameMatch(endPoint);

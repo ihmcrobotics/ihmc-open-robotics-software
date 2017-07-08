@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -69,8 +69,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame elevatorFrame;
-   private FramePoint bodyPosition = new FramePoint();
-   private FramePoint footPosition = new FramePoint();
+   private FramePoint3D bodyPosition = new FramePoint3D();
+   private FramePoint3D footPosition = new FramePoint3D();
 
    private final Vector3D jointAxesPinJoints = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
    private final RigidBody elevator;
@@ -141,7 +141,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    private final FrameVector3D bodyJointLinearVelocity = new FrameVector3D();
    private final FrameVector3D bodyJointAngularVelocity = new FrameVector3D();
 
-   private final FramePoint centerOfMass = new FramePoint();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMass2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
@@ -775,7 +775,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       yoCoM.getFrameTuple2dIncludingFrame(comToPack);
    }
 
-   public void getCoM(FramePoint centerOfMassToPack)
+   public void getCoM(FramePoint3D centerOfMassToPack)
    {
       yoCoM.getFrameTupleIncludingFrame(centerOfMassToPack);
    }

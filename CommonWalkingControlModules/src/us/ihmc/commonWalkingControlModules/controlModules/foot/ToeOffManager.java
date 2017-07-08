@@ -86,7 +86,7 @@ public class ToeOffManager
    private final YoDouble extraCoMMaxHeightWithToes = new YoDouble("extraCoMMaxHeightWithToes", registry);
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
-   private final List<FramePoint> contactStatePoints = new ArrayList<>();
+   private final List<FramePoint3D> contactStatePoints = new ArrayList<>();
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final SideDependentList<FrameConvexPolygon2d> footDefaultPolygons;
@@ -95,8 +95,8 @@ public class ToeOffManager
 
    private final FramePoint2d tempLeadingFootPosition = new FramePoint2d();
    private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
-   private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
-   private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
+   private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
+   private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
    private final FrameVector2d toLeadingFoot = new FrameVector2d();
 
    private final HashMap<ToeContact, AbstractToeContact> toeContacts = new HashMap<>();
@@ -232,7 +232,7 @@ public class ToeOffManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusSingleSupport(FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusSingleSupport(FramePoint3D exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
       {
@@ -311,7 +311,7 @@ public class ToeOffManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP,
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP,
          FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       nextFootstep = null;
@@ -624,7 +624,7 @@ public class ToeOffManager
       protected final FramePoint2d toeOffPoint = new FramePoint2d();
       protected final FramePoint2d tmpPoint2d = new FramePoint2d();
 
-      public abstract void updateToeSupportPolygon(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon);
+      public abstract void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon);
 
       public abstract void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame);
 
@@ -664,7 +664,7 @@ public class ToeOffManager
 
    private class ToeLineContact extends AbstractToeContact
    {
-      public void updateToeSupportPolygon(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
+      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
       {
          if (exitCMP == null)
             computeToeContacts(trailingSide);
@@ -697,7 +697,7 @@ public class ToeOffManager
          doLineToeOff.set(true);
       }
 
-      private void computeToeContacts(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide supportSide)
+      private void computeToeContacts(FramePoint3D exitCMP, FramePoint2d desiredECMP, RobotSide supportSide)
       {
          toeOffCalculator.setExitCMP(exitCMP, supportSide);
          toeOffCalculator.computeToeOffContactLine(desiredECMP, supportSide);
@@ -736,7 +736,7 @@ public class ToeOffManager
 
    private class ToePointContact extends AbstractToeContact
    {
-      public void updateToeSupportPolygon(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
+      public void updateToeSupportPolygon(FramePoint3D exitCMP, FramePoint2d desiredECMP, RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
       {
          if (exitCMP == null)
             computeToeContacts(trailingSide);
@@ -763,7 +763,7 @@ public class ToeOffManager
          doPointToeOff.set(true);
       }
 
-      private void computeToeContacts(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide supportSide)
+      private void computeToeContacts(FramePoint3D exitCMP, FramePoint2d desiredECMP, RobotSide supportSide)
       {
          toeOffCalculator.setExitCMP(exitCMP, supportSide);
          toeOffCalculator.computeToeOffContactPoint(desiredECMP, supportSide);

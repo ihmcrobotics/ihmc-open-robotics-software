@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
@@ -66,7 +66,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector yoDesiredRotationVector;
    private final YoFrameVector yoCurrentRotationVector;
 
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FramePose currentPose = new FramePose();
    private final FramePose desiredPose = new FramePose();

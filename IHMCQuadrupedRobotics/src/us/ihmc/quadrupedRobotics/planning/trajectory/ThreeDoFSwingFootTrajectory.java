@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
@@ -16,9 +16,9 @@ public class ThreeDoFSwingFootTrajectory
    final private YoPolynomial xTrajectoryAdjustment;
    final private YoPolynomial yTrajectoryAdjustment;
    final private YoPolynomial zTrajectoryAdjustment;
-   final private FramePoint initialPosition;
-   final private FramePoint finalPosition;
-   final private FramePoint position;
+   final private FramePoint3D initialPosition;
+   final private FramePoint3D finalPosition;
+   final private FramePoint3D position;
    final private FrameVector3D velocity;
    final private FrameVector3D acceleration;
    private ReferenceFrame referenceFrame;
@@ -34,9 +34,9 @@ public class ThreeDoFSwingFootTrajectory
       xTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentX", 6, registry);
       yTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentY", 6, registry);
       zTrajectoryAdjustment = new YoPolynomial(prefix + "SwingTrajectoryAdjustmentZ", 6, registry);
-      finalPosition = new FramePoint();
-      initialPosition = new FramePoint();
-      position = new FramePoint();
+      finalPosition = new FramePoint3D();
+      initialPosition = new FramePoint3D();
+      position = new FramePoint3D();
       velocity = new FrameVector3D();
       acceleration = new FrameVector3D();
       referenceFrame = ReferenceFrame.getWorldFrame();
@@ -55,7 +55,7 @@ public class ThreeDoFSwingFootTrajectory
       return timeInterval.getEndTime();
    }
 
-   public void getPosition(FramePoint position)
+   public void getPosition(FramePoint3D position)
    {
       position.setIncludingFrame(this.position);
    }
@@ -75,17 +75,17 @@ public class ThreeDoFSwingFootTrajectory
       return referenceFrame;
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, TimeInterval timeInterval)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, TimeInterval timeInterval)
    {
       initializeTrajectory(initialPosition, finalPosition, groundClearance, timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double duration)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, double duration)
    {
       initializeTrajectory(initialPosition, finalPosition, groundClearance, 0, duration);
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double startTime, double endTime)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double groundClearance, double startTime, double endTime)
    {
       finalPosition.checkReferenceFrameMatch(initialPosition);
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -112,7 +112,7 @@ public class ThreeDoFSwingFootTrajectory
       computeTrajectory(0);
    }
 
-   public void adjustTrajectory(FramePoint finalPosition, double currentTime)
+   public void adjustTrajectory(FramePoint3D finalPosition, double currentTime)
    {
       if (!initialized)
       {

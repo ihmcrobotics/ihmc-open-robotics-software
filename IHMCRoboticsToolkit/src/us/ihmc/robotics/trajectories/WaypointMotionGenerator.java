@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class WaypointMotionGenerator
@@ -51,7 +51,7 @@ public class WaypointMotionGenerator
    }
 
 
-   public FramePoint getCurrentDesiredPoint(double timeInMove)
+   public FramePoint3D getCurrentDesiredPoint(double timeInMove)
    {
       minimumJerkTrajectory.computeTrajectory(timeInMove);
 
@@ -63,10 +63,10 @@ public class WaypointMotionGenerator
    // TODO: Find more elegant way to handle edge cases.
    public FrameVector3D getCurrentDesiredVelocity(double timeInMove)
    {
-      FramePoint Xfh = getCurrentDesiredPoint(timeInMove + stepSizeforNumericalCalculation);
-      FramePoint Xf2h = getCurrentDesiredPoint(timeInMove + 2.0 * stepSizeforNumericalCalculation);
-      FramePoint Xrh = getCurrentDesiredPoint(timeInMove - stepSizeforNumericalCalculation);
-      FramePoint Xr2h = getCurrentDesiredPoint(timeInMove - 2.0 * stepSizeforNumericalCalculation);
+      FramePoint3D Xfh = getCurrentDesiredPoint(timeInMove + stepSizeforNumericalCalculation);
+      FramePoint3D Xf2h = getCurrentDesiredPoint(timeInMove + 2.0 * stepSizeforNumericalCalculation);
+      FramePoint3D Xrh = getCurrentDesiredPoint(timeInMove - stepSizeforNumericalCalculation);
+      FramePoint3D Xr2h = getCurrentDesiredPoint(timeInMove - 2.0 * stepSizeforNumericalCalculation);
 
       FrameVector3D ret = new FrameVector3D(Xfh.getReferenceFrame());
       ret.setX((-Xf2h.getX() + 8.0 * Xfh.getX() - 8.0 * Xrh.getX() + Xr2h.getX()) / (12.0 * stepSizeforNumericalCalculation));
@@ -87,9 +87,9 @@ public class WaypointMotionGenerator
    // TODO: This does not return the exact acceleration at the start and end of the move
    public FrameVector3D getCurrentDesiredAcceleration(double timeInMove)
    {
-      FramePoint Xfh = getCurrentDesiredPoint(timeInMove + stepSizeforNumericalCalculation);
-      FramePoint X = getCurrentDesiredPoint(timeInMove);
-      FramePoint Xrh = getCurrentDesiredPoint(timeInMove - stepSizeforNumericalCalculation);
+      FramePoint3D Xfh = getCurrentDesiredPoint(timeInMove + stepSizeforNumericalCalculation);
+      FramePoint3D X = getCurrentDesiredPoint(timeInMove);
+      FramePoint3D Xrh = getCurrentDesiredPoint(timeInMove - stepSizeforNumericalCalculation);
 
       FrameVector3D ret = new FrameVector3D(X.getReferenceFrame());
       ret.setX((Xfh.getX() - 2.0 * X.getX() + Xrh.getX()) / (MathTools.square(stepSizeforNumericalCalculation)));

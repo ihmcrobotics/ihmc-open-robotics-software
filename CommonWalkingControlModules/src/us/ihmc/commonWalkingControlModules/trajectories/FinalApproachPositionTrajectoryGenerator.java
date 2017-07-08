@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -58,7 +58,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -166,7 +166,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       initialPosition.set(x, y, z);
    }
 
-   public void setInitialPosition(FramePoint initialPosition)
+   public void setInitialPosition(FramePoint3D initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }
@@ -176,7 +176,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       finalPosition.set(x, y, z);
    }
 
-   public void setFinalPosition(FramePoint finalPosition)
+   public void setFinalPosition(FramePoint3D finalPosition)
    {
       this.finalPosition.set(finalPosition);
    }
@@ -300,7 +300,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -318,7 +318,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
