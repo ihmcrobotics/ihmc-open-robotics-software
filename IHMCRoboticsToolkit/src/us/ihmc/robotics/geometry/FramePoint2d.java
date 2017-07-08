@@ -30,7 +30,6 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    private static final long serialVersionUID = -1287148635726098768L;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   private FrameVector2d temporaryPointForYawing;
 
    /**
     * FramePoint2d
@@ -161,30 +160,5 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    public void applyTransform(Transform transform, boolean requireTransformInXYPlane)
    {
       this.getGeometryObject().applyTransform(transform, requireTransformInXYPlane);
-   }
-
-   /**
-    * yawAboutPoint
-    *
-    * @param pointToYawAbout FramePoint2d
-    * @param yaw double
-    * @return CartesianPositionFootstep
-    */
-   public void yawAboutPoint(FramePoint2d pointToYawAbout, FramePoint2d pointToPack, double yaw)
-   {
-      if (temporaryPointForYawing == null)
-         temporaryPointForYawing = new FrameVector2d(this);
-      else
-         temporaryPointForYawing.setIncludingFrame(this);
-
-      temporaryPointForYawing.sub(pointToYawAbout);
-
-      temporaryTransformToDesiredFrame.setIdentity();
-      temporaryTransformToDesiredFrame.setRotationYawAndZeroTranslation(yaw);
-
-      temporaryPointForYawing.applyTransform(temporaryTransformToDesiredFrame);
-
-      pointToPack.setIncludingFrame(pointToYawAbout);
-      pointToPack.add(temporaryPointForYawing);
    }
 }

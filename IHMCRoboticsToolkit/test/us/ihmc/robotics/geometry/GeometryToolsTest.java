@@ -598,6 +598,34 @@ public class GeometryToolsTest
       return (random.nextDouble() - 0.5) * 2.0 * Math.PI;
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testYawAboutPoint_FramePoint2d_double()
+   {
+      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
+      double epsilon = 1e-10;
+
+      FramePoint2d original = new FramePoint2d(theFrame, 5.0, 7.0);
+      FramePoint2d pointToYawAbout = new FramePoint2d(theFrame);
+      double yaw = Math.PI;
+
+      FramePoint2d result = new FramePoint2d(theFrame);
+      GeometryTools.yawAboutPoint(original, pointToYawAbout, yaw, result);
+      assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
+      assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
+      try
+      {
+         FramePoint2d pointToYawAbout2 = new FramePoint2d(aFrame);
+         GeometryTools.yawAboutPoint(original, pointToYawAbout2, yaw, result);
+         fail("Should have thrown ReferenceFrameMismatchException");
+      }
+      catch (ReferenceFrameMismatchException rfme)
+      {
+         //Good
+      }
+   }
+
    public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(GeometryTools.class, GeometryToolsTest.class);

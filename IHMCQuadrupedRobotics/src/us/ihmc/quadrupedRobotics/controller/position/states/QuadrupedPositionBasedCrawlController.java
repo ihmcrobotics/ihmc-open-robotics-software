@@ -50,6 +50,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -1083,7 +1084,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       centroidFramePoint2d.setIncludingFrame(centroidFramePoint);
       endPoint2d.set(centroidFramePoint2d);
       endPoint2d.add(0.4,0.0);
-      endPoint2d.yawAboutPoint(centroidFramePoint2d, endPoint2d, nominalYaw.getDoubleValue());
+      GeometryTools.yawAboutPoint(endPoint2d, centroidFramePoint2d, nominalYaw.getDoubleValue(), endPoint2d);
 
       nominalYawLineSegment.set(centroidFramePoint2d, endPoint2d);
       YoDouble desiredYaw = desiredCoMOrientation.getYaw();
