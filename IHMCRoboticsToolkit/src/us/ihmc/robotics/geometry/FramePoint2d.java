@@ -44,7 +44,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, 0.0, 0.0);
+      super(referenceFrame, new Point2D());
    }
 
    /**
@@ -62,9 +62,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double[] position)
+   public FramePoint2d(ReferenceFrame referenceFrame, double[] pointArray)
    {
-      this(referenceFrame, position[0], position[1]);
+      super(referenceFrame, new Point2D(pointArray));
    }
 
    /**
@@ -72,9 +72,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position)
+   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
-      this(referenceFrame, position.getX(), position.getY());
+      super(referenceFrame, new Point2D(tuple2DReadOnly));
    }
 
    /**
@@ -84,7 +84,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      this(frameTuple2DReadOnly.getReferenceFrame(), frameTuple2DReadOnly.getX(), frameTuple2DReadOnly.getY());
+      super(frameTuple2DReadOnly.getReferenceFrame(), new Point2D(frameTuple2DReadOnly));
    }
 
    /**
@@ -94,7 +94,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     */
    public FramePoint2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      this(frameTuple3DReadOnly.getReferenceFrame(), frameTuple3DReadOnly.getX(), frameTuple3DReadOnly.getY());
+      this(frameTuple3DReadOnly.getReferenceFrame(), new Point2D(frameTuple3DReadOnly));
    }
 
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)

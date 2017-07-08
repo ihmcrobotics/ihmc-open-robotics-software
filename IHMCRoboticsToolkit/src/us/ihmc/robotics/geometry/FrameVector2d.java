@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -80,6 +81,16 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
    public FrameVector2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
       this(frameTuple2DReadOnly.getReferenceFrame(), frameTuple2DReadOnly.getX(), frameTuple2DReadOnly.getY());
+   }
+
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FrameVector2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
+   {
+      this(frameTuple3DReadOnly.getReferenceFrame(), frameTuple3DReadOnly.getX(), frameTuple3DReadOnly.getY());
    }
 
    public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
