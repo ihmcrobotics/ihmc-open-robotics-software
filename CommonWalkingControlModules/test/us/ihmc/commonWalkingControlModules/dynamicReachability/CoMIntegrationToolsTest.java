@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -57,7 +57,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint2d finalCoM = new FramePoint2d();
+      FramePoint2D finalCoM = new FramePoint2D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint3D dummyPoint = new FramePoint3D();
@@ -142,7 +142,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint2d finalCoM = new FramePoint2d();
+      FramePoint2D finalCoM = new FramePoint2D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint3D dummyPoint = new FramePoint3D();
@@ -229,7 +229,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint2d finalCoM = new FramePoint2d();
+      FramePoint2D finalCoM = new FramePoint2D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint3D dummyPoint = new FramePoint3D();

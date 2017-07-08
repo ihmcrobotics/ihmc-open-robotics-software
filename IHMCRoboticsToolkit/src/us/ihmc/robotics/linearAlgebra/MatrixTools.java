@@ -27,7 +27,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -692,13 +692,13 @@ public class MatrixTools
       to.setTranslation(new Vector3D(T.x, T.y, T.z));
    }
 
-   public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       matrix.set(0, 0, framePoint.getX());
       matrix.set(1, 0, framePoint.getY());
    }
 
-   public static void transformColumnVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformColumnVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       framePoint.setX(matrix.get(0, 0));
       framePoint.setY(matrix.get(1, 0));
@@ -716,13 +716,13 @@ public class MatrixTools
       frameVector.setY(matrix.get(1, 0));
    }
 
-   public static void transformFramePoint2dIntoRowVector(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformFramePoint2dIntoRowVector(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       matrix.set(0, 0, framePoint.getX());
       matrix.set(0, 1, framePoint.getY());
    }
 
-   public static void transformRowVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformRowVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       framePoint.setX(matrix.get(0, 0));
       framePoint.setX(matrix.get(0, 1));

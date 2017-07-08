@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -25,13 +25,13 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
    }
 
-   public void setDesiredCenterOfPressure(FramePoint2d cop, RigidBody rigidBody)
+   public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBody rigidBody)
    {
       centerOfPressureDataHolder.setCenterOfPressure(cop, rigidBody);
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint2d copToPack, RigidBody rigidBody)
+   public void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBody rigidBody)
    {
       centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
    }

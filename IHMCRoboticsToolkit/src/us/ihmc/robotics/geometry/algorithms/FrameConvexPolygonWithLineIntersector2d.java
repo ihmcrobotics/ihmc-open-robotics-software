@@ -3,12 +3,12 @@ package us.ihmc.robotics.geometry.algorithms;
 import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 
 public class FrameConvexPolygonWithLineIntersector2d
 {
-   private final FramePoint2d intersectionPointOne;
-   private final FramePoint2d intersectionPointTwo;
+   private final FramePoint2D intersectionPointOne;
+   private final FramePoint2D intersectionPointTwo;
 
    private IntersectionResult intersectionResult;
 
@@ -19,8 +19,8 @@ public class FrameConvexPolygonWithLineIntersector2d
 
    public FrameConvexPolygonWithLineIntersector2d()
    {
-      intersectionPointOne = new FramePoint2d();
-      intersectionPointTwo = new FramePoint2d();
+      intersectionPointOne = new FramePoint2D();
+      intersectionPointTwo = new FramePoint2D();
 
       intersectionResult = IntersectionResult.NO_INTERSECTION;
    }
@@ -71,12 +71,12 @@ public class FrameConvexPolygonWithLineIntersector2d
       intersectionPointTwo.setToZero(frameObject1.getReferenceFrame());
    }
 
-   public FramePoint2d getIntersectionPointOne()
+   public FramePoint2D getIntersectionPointOne()
    {
       return intersectionPointOne;
    }
 
-   public FramePoint2d getIntersectionPointTwo()
+   public FramePoint2D getIntersectionPointTwo()
    {
       return intersectionPointTwo;
    }

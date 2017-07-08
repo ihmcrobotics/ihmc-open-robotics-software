@@ -191,7 +191,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
          contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
@@ -265,7 +265,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -448,11 +448,11 @@ public class StepAndTimingAdjustmentExampleGraphic
    private boolean thirdTick = true;
 
    private final FramePose footstepPose = new FramePose();
-   private final FramePoint2d footstepPositionSolution = new FramePoint2d();
-   private final FramePoint2d desiredCMP = new FramePoint2d();
-   private final FramePoint2d desiredICP = new FramePoint2d();
+   private final FramePoint2D footstepPositionSolution = new FramePoint2D();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D desiredICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-   private final FramePoint2d currentICP = new FramePoint2d();
+   private final FramePoint2D currentICP = new FramePoint2D();
 
    public void updateGraphic()
    {

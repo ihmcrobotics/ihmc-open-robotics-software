@@ -16,7 +16,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.DataGridTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 
@@ -30,7 +30,7 @@ public class BestFitPlaneCalculatorTest
    {
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
-      FramePoint2d footCenterPoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      FramePoint2D footCenterPoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
       DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 8, 8, 0, 0, 0,

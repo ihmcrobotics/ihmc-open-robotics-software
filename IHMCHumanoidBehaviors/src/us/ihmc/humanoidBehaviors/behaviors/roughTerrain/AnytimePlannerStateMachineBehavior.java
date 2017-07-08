@@ -46,7 +46,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -300,7 +300,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner.requestStop();
    }
 
-   private final FramePoint2d goalPosition = new FramePoint2d();
+   private final FramePoint2D goalPosition = new FramePoint2D();
 
    public void setGoalPose(FramePose goalPose)
    {
@@ -508,7 +508,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
 
          ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-         FramePoint2d goalPositionInMidFeetZUp = new FramePoint2d(goalPosition);
+         FramePoint2D goalPositionInMidFeetZUp = new FramePoint2D(goalPosition);
          goalPositionInMidFeetZUp.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
          reachedGoal.set(goalPositionInMidFeetZUp.distanceFromOrigin() < reachedGoalThreshold.getDoubleValue());
       }

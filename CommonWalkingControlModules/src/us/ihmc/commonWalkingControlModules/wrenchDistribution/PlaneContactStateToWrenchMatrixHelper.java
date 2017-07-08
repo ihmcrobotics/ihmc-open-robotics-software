@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -84,7 +84,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
          int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
    {
-      List<FramePoint2d> contactPoints2d = contactablePlaneBody.getContactPoints2d();
+      List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
 
       if (contactPoints2d.size() > maxNumberOfContactPoints)
          throw new RuntimeException("Unexpected number of contact points: " + contactPoints2d.size());

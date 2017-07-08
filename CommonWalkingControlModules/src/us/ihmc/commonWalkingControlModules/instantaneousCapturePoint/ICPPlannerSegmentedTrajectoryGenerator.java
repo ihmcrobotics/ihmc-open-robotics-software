@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -64,9 +64,9 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint3D endOfSplineICPInitialFrame = new FramePoint3D();
    private final FrameVector3D endOfSplineICPVelocityInitialFrame = new FrameVector3D();
 
-   private final FramePoint2d startOfSingleSupportCoM = new FramePoint2d();
-   private final FramePoint2d startOfSplineCoM = new FramePoint2d();
-   private final FramePoint2d endOfSplineCoM = new FramePoint2d();
+   private final FramePoint2D startOfSingleSupportCoM = new FramePoint2D();
+   private final FramePoint2D startOfSplineCoM = new FramePoint2D();
+   private final FramePoint2D endOfSplineCoM = new FramePoint2D();
 
    private final FramePoint3D initialCornerPointFinalFrame = new FramePoint3D();
    private final FramePoint3D finalCornerPointFinalFrame = new FramePoint3D();
@@ -94,7 +94,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint3D desiredICPOutput = new FramePoint3D();
    private final FrameVector3D desiredICPVelocityOutput = new FrameVector3D();
 
-   private final FramePoint2d desiredCoMPosition = new FramePoint2d();
+   private final FramePoint2D desiredCoMPosition = new FramePoint2D();
 
    private final VelocityConstrainedPositionTrajectoryGenerator spline;
 
@@ -201,7 +201,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       finalICP.getFrameTupleIncludingFrame(finalICPFinalFrame);
    }
 
-   public void setInitialCoMPosition(FramePoint2d startOfSingleSupportCoM, ReferenceFrame attachedFrame)
+   public void setInitialCoMPosition(FramePoint2D startOfSingleSupportCoM, ReferenceFrame attachedFrame)
    {
       this.startOfSingleSupportCoM.setIncludingFrame(startOfSingleSupportCoM);
       this.startOfSingleSupportCoM.changeFrame(attachedFrame);
@@ -285,7 +285,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
          endOfSplineCoM.set(startOfSplineCoM);
    }
 
-   public void computeFinalCoMPosition(FramePoint2d finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint2D finalCoMToPack)
    {
       computeCenterOfMassFirstSegment(startOfSplineTime.getDoubleValue(), startOfSplineCoM);
       yoStartOfSplineCoM.set(startOfSplineCoM);
@@ -343,7 +343,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
                                                progressionInPercent.getDoubleValue());
    }
 
-   public void computeCenterOfMassFirstSegment(double timeInFirstSegment, FramePoint2d comToPack)
+   public void computeCenterOfMassFirstSegment(double timeInFirstSegment, FramePoint2D comToPack)
    {
       integrateCoMPositionUsingConstantCMP(timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
             startOfSingleSupportCoM, comToPack);
@@ -358,7 +358,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       spline.getVelocity(desiredICPVelocityOutput);
    }
 
-   public void computeCenterOfMassSecondSegment(double timeInSecondSegment, FramePoint2d comToPack)
+   public void computeCenterOfMassSecondSegment(double timeInSecondSegment, FramePoint2D comToPack)
    {
       double segmentDuration = spline.getTrajectoryTime();
 
@@ -388,7 +388,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
                                                progressionInPercent.getDoubleValue());
    }
    
-   public void computeCenterOfMassThirdSegment(double timeInThirdSegment, FramePoint2d comToPack)
+   public void computeCenterOfMassThirdSegment(double timeInThirdSegment, FramePoint2D comToPack)
    {
       yoEndOfSplineCoM.getFrameTuple2d(endOfSplineCoM);
       integrateCoMPositionUsingConstantCMP(timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame, endOfSplineCoM,

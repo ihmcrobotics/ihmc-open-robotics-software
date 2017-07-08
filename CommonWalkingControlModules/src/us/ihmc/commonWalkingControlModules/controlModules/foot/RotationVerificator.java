@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 
@@ -71,8 +71,8 @@ public class RotationVerificator
 
    private final FrameVector2D copError2d = new FrameVector2D();
 
-   public boolean isRotating(FramePoint2d cop,
-         FramePoint2d desiredCop,
+   public boolean isRotating(FramePoint2D cop,
+         FramePoint2D desiredCop,
          FrameLine2d lineOfRotation)
    {
       cop.checkReferenceFrameMatch(soleFrame);

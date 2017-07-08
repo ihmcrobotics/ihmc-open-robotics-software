@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoContactPoint implements ContactPointInterface
@@ -17,7 +17,7 @@ public class YoContactPoint implements ContactPointInterface
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
-   public YoContactPoint(String namePrefix, int index, FramePoint2d contactPointPosition2d, PlaneContactState parentContactState,
+   public YoContactPoint(String namePrefix, int index, FramePoint2D contactPointPosition2d, PlaneContactState parentContactState,
          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
@@ -55,7 +55,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(FramePoint2d framePoint2dToPack)
+   public void getPosition2d(FramePoint2D framePoint2dToPack)
    {
       yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
    }
@@ -80,7 +80,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition2d(FramePoint2d position2d)
+   public void setPosition2d(FramePoint2D position2d)
    {
       yoPosition.set(position2d);
    }
@@ -90,7 +90,7 @@ public class YoContactPoint implements ContactPointInterface
       yoPosition.set(contactPointLocation);
    }
 
-   public void setPosition(FramePoint2d contactPointLocation)
+   public void setPosition(FramePoint2D contactPointLocation)
    {
       yoPosition.set(contactPointLocation);
    }
@@ -101,7 +101,7 @@ public class YoContactPoint implements ContactPointInterface
       return parentContactState;
    }
 
-   public boolean epsilonEquals(FramePoint2d contactPointPosition2d, double threshold)
+   public boolean epsilonEquals(FramePoint2D contactPointPosition2d, double threshold)
    {
       yoPosition.checkReferenceFrameMatch(contactPointPosition2d);
       if (!MathTools.epsilonEquals(yoPosition.getX(), contactPointPosition2d.getX(), threshold))

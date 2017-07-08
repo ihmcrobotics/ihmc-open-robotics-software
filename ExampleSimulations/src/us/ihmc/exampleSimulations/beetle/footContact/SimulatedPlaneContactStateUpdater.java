@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -143,7 +143,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
+   public List<FramePoint2D> getContactFramePoints2dInContactCopy()
    {
       return null;
    }
@@ -211,7 +211,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition2d(FramePoint2d framePoint2dToPack)
+      public void getPosition2d(FramePoint2D framePoint2dToPack)
       {
 
       }
@@ -229,7 +229,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void setPosition2d(FramePoint2d position2d)
+      public void setPosition2d(FramePoint2D position2d)
       {
 
       }

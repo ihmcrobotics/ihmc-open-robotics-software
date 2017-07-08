@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -128,7 +128,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       }
    }
 
-   public void setConvexPolygon2d(FramePoint2d[] framePoints)
+   public void setConvexPolygon2d(FramePoint2D[] framePoints)
    {
       if (framePoints == null)
       {
@@ -194,7 +194,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       return numVertices;
    }
    
-   public FramePoint2d getFrameVertex(int vertexIndex)
+   public FramePoint2D getFrameVertex(int vertexIndex)
    {
       checkIndexInBoundaries(vertexIndex);
       return yoFramePoints.get(vertexIndex).getFrameTuple2d();

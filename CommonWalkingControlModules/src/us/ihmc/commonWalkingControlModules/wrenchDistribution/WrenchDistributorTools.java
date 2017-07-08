@@ -9,13 +9,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WrenchDistributorTools
 {
-   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector3D force, FramePoint2d cop, double normalTorque)
+   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector3D force, FramePoint2D cop, double normalTorque)
    {
       ReferenceFrame referenceFrame = cop.getReferenceFrame();
       force.changeFrame(referenceFrame);
@@ -29,7 +29,7 @@ public class WrenchDistributorTools
       groundReactionWrenchToPack.set(referenceFrame, force.getVector(), torque);
    }
 
-   public static FramePoint3D computePseudoCMP3d(FramePoint3D centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
+   public static FramePoint3D computePseudoCMP3d(FramePoint3D centerOfMass, FramePoint2D cmp, double fZ, double totalMass, double omega0)
    {
       FramePoint3D pseudoCMP3d = new FramePoint3D();
 
@@ -38,7 +38,7 @@ public class WrenchDistributorTools
       return pseudoCMP3d;
    }
 
-   public static void computePseudoCMP3d(FramePoint3D pseudoCMP3dToPack, FramePoint3D centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
+   public static void computePseudoCMP3d(FramePoint3D pseudoCMP3dToPack, FramePoint3D centerOfMass, FramePoint2D cmp, double fZ, double totalMass, double omega0)
    {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
       pseudoCMP3dToPack.setIncludingFrame(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);

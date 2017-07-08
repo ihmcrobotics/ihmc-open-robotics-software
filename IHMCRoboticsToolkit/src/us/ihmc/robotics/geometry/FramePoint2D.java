@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  *
  * @author Learning Locomotion Team
  */
-public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2DReadOnly, Point2DBasics
+public class FramePoint2D extends FrameTuple2D<FramePoint2D, Point2D> implements FramePoint2DReadOnly, Point2DBasics
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -30,7 +30,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * Creates a new frame point and initializes it coordinates to zero and its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
-   public FramePoint2d()
+   public FramePoint2D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -41,7 +41,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * 
     * @param referenceFrame the initial frame for this frame point.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame)
+   public FramePoint2D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Point2D());
    }
@@ -54,7 +54,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param x the x-coordinate.
     * @param y the y-coordinate.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double x, double y)
+   public FramePoint2D(ReferenceFrame referenceFrame, double x, double y)
    {
       super(referenceFrame, new Point2D(x, y));
    }
@@ -66,7 +66,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param referenceFrame the initial frame for this frame point.
     * @param pointArray the array containing this point's coordinates. Not modified.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double[] pointArray)
+   public FramePoint2D(ReferenceFrame referenceFrame, double[] pointArray)
    {
       super(referenceFrame, new Point2D(pointArray));
    }
@@ -78,7 +78,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param referenceFrame the initial frame for this frame point.
     * @param tuple2DReadOnly the tuple to copy the coordinates from. Not modified.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
+   public FramePoint2D(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
       super(referenceFrame, new Point2D(tuple2DReadOnly));
    }
@@ -88,7 +88,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     *
     * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FramePoint2d(FrameTuple2DReadOnly other)
+   public FramePoint2D(FrameTuple2DReadOnly other)
    {
       super(other.getReferenceFrame(), new Point2D(other));
    }
@@ -100,14 +100,14 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param frameTuple3DReadOnly the tuple to copy the coordinates and reference frame from. Not
     *           modified.
     */
-   public FramePoint2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
+   public FramePoint2D(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
       this(frameTuple3DReadOnly.getReferenceFrame(), new Point2D(frameTuple3DReadOnly));
    }
 
-   public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
+   public static FramePoint2D generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax));
+      FramePoint2D randomPoint = new FramePoint2D(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax));
 
       return randomPoint;
    }

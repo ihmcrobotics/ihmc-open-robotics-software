@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -116,7 +116,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       getYoValuesFromFrameLineSegment();
    }
 
-   public void set(FramePoint2d firstEndpoint, FramePoint2d secondEndpoint)
+   public void set(FramePoint2D firstEndpoint, FramePoint2D secondEndpoint)
    {
       referenceFrame.checkReferenceFrameMatch(firstEndpoint.getReferenceFrame());
       referenceFrame.checkReferenceFrameMatch(secondEndpoint.getReferenceFrame());
@@ -124,7 +124,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       getYoValuesFromFrameLineSegment();
    }
 
-   public void set(FramePoint2d firstEndpoint, FrameVector2D vectorToSecondEndpoint)
+   public void set(FramePoint2D firstEndpoint, FrameVector2D vectorToSecondEndpoint)
    {
       referenceFrame.checkReferenceFrameMatch(firstEndpoint.getReferenceFrame());
       referenceFrame.checkReferenceFrameMatch(vectorToSecondEndpoint.getReferenceFrame());
@@ -144,21 +144,21 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       lineSegmentToPack.setIncludingFrame(frameLineSegment);
    }
 
-   public FramePoint2d midpoint()
+   public FramePoint2D midpoint()
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.midpoint();
    }
 
-   public void getFirstEndPoint(FramePoint2d firstEndpointToPack)
+   public void getFirstEndPoint(FramePoint2D firstEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
 
       frameLineSegment.getFirstEndpoint(firstEndpointToPack);
    }
 
-   public void getSecondEndPoint(FramePoint2d secondEndpointToPack)
+   public void getSecondEndPoint(FramePoint2D secondEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
 
@@ -186,7 +186,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       return frameLineSegment.length();
    }
 
-   public boolean isBetweenEndpoints(FramePoint2d point, double epsilon)
+   public boolean isBetweenEndpoints(FramePoint2D point, double epsilon)
    {
       putYoValuesIntoFrameLineSegment();
 
@@ -199,48 +199,48 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       return referenceFrame;
    }
 
-   public void orthogonalProjection(FramePoint2d point)
+   public void orthogonalProjection(FramePoint2D point)
    {
       putYoValuesIntoFrameLineSegment();
       frameLineSegment.orthogonalProjection(point);
    }
 
-   public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
+   public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.orthogonalProjectionCopy(point);
    }
 
-   public FramePoint2d intersectionWith(FrameLine2d line)
+   public FramePoint2D intersectionWith(FrameLine2d line)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.intersectionWith(line);
    }
 
-   public FramePoint2d intersectionWith(FrameLineSegment2d secondLineSegment)
+   public FramePoint2D intersectionWith(FrameLineSegment2d secondLineSegment)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.intersectionWith(secondLineSegment);
    }
 
-   public FramePoint2d[] intersectionWith(FrameConvexPolygon2d convexPolygon)
+   public FramePoint2D[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.intersectionWith(convexPolygon);
    }
 
-   public double distance(FramePoint2d point)
+   public double distance(FramePoint2D point)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.distance(point);
    }
 
-   public FramePoint2d pointBetweenEndPointsGivenParameter(double parameter)
+   public FramePoint2D pointBetweenEndPointsGivenParameter(double parameter)
    {
       putYoValuesIntoFrameLineSegment();
 

@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -69,7 +69,7 @@ public class ConstraintToConvexRegion
     *
     * @param vertex vertex to add.
     */
-   public void addVertex(FramePoint2d vertex)
+   public void addVertex(FramePoint2D vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
@@ -96,7 +96,7 @@ public class ConstraintToConvexRegion
    /**
     * Sets the polygon for the convex constraint to use. Should be called after
     * all the vertices have been added using {@link #addVertex(FramePoint3D)} or
-    * {@link #addVertex(FramePoint2d)}.
+    * {@link #addVertex(FramePoint2D)}.
     */
    public void setPolygon()
    {

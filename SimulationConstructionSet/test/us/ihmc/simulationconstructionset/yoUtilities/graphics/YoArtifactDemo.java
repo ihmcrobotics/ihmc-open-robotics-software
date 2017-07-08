@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -58,14 +58,14 @@ public class YoArtifactDemo
       YoFramePoint2d point1 = new YoFramePoint2d("point1", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint2d polyPoint1 = point1;
       polyPoint1.set(1.5, 2.0);
-      polygon2.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d()});
+      polygon2.setConvexPolygon2d(new FramePoint2D[] {polyPoint1.getFrameTuple2d()});
       
       YoFrameConvexPolygon2d polygon3 = new YoFrameConvexPolygon2d("polygon2", ReferenceFrame.getWorldFrame(), 5, registry);
       YoFramePoint2d polyPoint2 = new YoFramePoint2d("point2", ReferenceFrame.getWorldFrame(), registry);
       polyPoint2.set(2.0, 2.5);
       YoFramePoint2d polyPoint3 = new YoFramePoint2d("point3", ReferenceFrame.getWorldFrame(), registry);
       polyPoint3.set(1.0, 3.0);
-      polygon3.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d(), polyPoint2.getFrameTuple2d(), polyPoint3.getFrameTuple2d()});
+      polygon3.setConvexPolygon2d(new FramePoint2D[] {polyPoint1.getFrameTuple2d(), polyPoint2.getFrameTuple2d(), polyPoint3.getFrameTuple2d()});
       
       YoFramePoint2d pointZ = new YoFramePoint2d("pointZ", ReferenceFrame.getWorldFrame(), registry);
       pointZ.set(-2.2, 3.0);

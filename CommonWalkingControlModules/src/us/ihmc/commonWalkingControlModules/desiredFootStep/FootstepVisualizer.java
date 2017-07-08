@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -51,7 +51,7 @@ public class FootstepVisualizer
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, poseViz);
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, footholdViz);
 
-      List<FramePoint2d> contactPoints2d = contactableFoot.getContactPoints2d();
+      List<FramePoint2D> contactPoints2d = contactableFoot.getContactPoints2d();
       for (int i = 0; i < contactPoints2d.size(); i++)
          defaultContactPointsInSoleFrame.add(new Point2D(contactPoints2d.get(i)));
    }

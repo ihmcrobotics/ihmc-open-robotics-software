@@ -65,7 +65,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -526,7 +526,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void sequenceMediumWarmup()
    {
-      FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
+      FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
       FrameVector2D shiftScaleVector = new FrameVector2D(midFeetZUpFrame, 0.1, 0.7);
 
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
@@ -554,9 +554,9 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitPelvisHomeCommand(false);
    }
 
-   private final FramePoint2d frameVertexBefore = new FramePoint2d();
-   private final FramePoint2d frameVertexCurrentlyChecked = new FramePoint2d();
-   private final FramePoint2d frameVertexAfter = new FramePoint2d();
+   private final FramePoint2D frameVertexBefore = new FramePoint2D();
+   private final FramePoint2D frameVertexCurrentlyChecked = new FramePoint2D();
+   private final FramePoint2D frameVertexAfter = new FramePoint2D();
 
    private void sequenceHardWarmup()
    {
@@ -570,7 +570,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
       int numberOfVertices = supportPolygon.getNumberOfVertices();
-      ArrayList<FramePoint2d> supportCornerPoints = new ArrayList<>();
+      ArrayList<FramePoint2D> supportCornerPoints = new ArrayList<>();
 
       for (int i = 0; i < numberOfVertices; i++)
       {
@@ -600,7 +600,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePoint3D currentPelvisHeight = new FramePoint3D(pelvisZUpFrame);
       currentPelvisHeight.changeFrame(worldFrame);
       FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
-      FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
+      FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
 
       double yawPercentage = 0.3;
       double pitchPercentage = 0.3;
@@ -994,7 +994,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void sequenceShiftWeight()
    {
-      FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
+      FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
 
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);

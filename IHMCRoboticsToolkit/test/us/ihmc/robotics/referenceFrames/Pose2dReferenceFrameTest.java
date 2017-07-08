@@ -12,7 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -67,18 +67,18 @@ public class Pose2dReferenceFrameTest
       for (int i=0; i<numberOfFramesInChain; i++)
       {
          Pose2dReferenceFrame poseFrame = new Pose2dReferenceFrame("poseFrame" + i, previousFrame);
-         poseFrame.setPositionAndUpdate(new FramePoint2d(previousFrame, 1.0, 0.0));
+         poseFrame.setPositionAndUpdate(new FramePoint2D(previousFrame, 1.0, 0.0));
          previousFrame = poseFrame;
       }
       
-      FramePoint2d finalPosition = new FramePoint2d(previousFrame);
+      FramePoint2D finalPosition = new FramePoint2D(previousFrame);
       finalPosition.changeFrame(worldFrame);
       
       long startTime = System.currentTimeMillis();
       int numberOfChangeFrames = 1000000;
       for (int i=0; i<numberOfChangeFrames; i++)
       {
-         FramePoint2d finalPosition2 = new FramePoint2d(previousFrame);
+         FramePoint2D finalPosition2 = new FramePoint2D(previousFrame);
          finalPosition2.changeFrame(worldFrame);
       }
       long endTime = System.currentTimeMillis();
@@ -87,7 +87,7 @@ public class Pose2dReferenceFrameTest
       System.out.println("millisPerChangeFrame = " + millisPerChangeFrame);
       
       assertTrue(millisPerChangeFrame < 0.01); //That would still be pretty slow, but allows for hiccups.
-      FramePoint2d finalPosition3 = new FramePoint2d(previousFrame);
+      FramePoint2D finalPosition3 = new FramePoint2D(previousFrame);
       finalPosition3.changeFrame(worldFrame);
    }
 
@@ -110,13 +110,13 @@ public class Pose2dReferenceFrameTest
       Pose2dReferenceFrame[] referenceFrames = new Pose2dReferenceFrame[]{poseFrame0, poseFrame00, poseFrame01, poseFrame010, poseFrame000, poseFrame001, poseFrame1, poseFrame10, poseFrame100, poseFrame101};
       
       Point2D position = new Point2D(1.0, 2.2);
-      FramePoint2d framePoint = new FramePoint2d(poseFrame010, position);
+      FramePoint2D framePoint = new FramePoint2D(poseFrame010, position);
       
       updateAllFrames(referenceFrames);
 
       Random random = new Random(1776L);
 
-      FramePoint2d newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);
+      FramePoint2D newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);
       newPoint.changeFrame(framePoint.getReferenceFrame());
       
       assertTrue(newPoint.epsilonEquals(framePoint, 1e-7)); 
@@ -125,10 +125,10 @@ public class Pose2dReferenceFrameTest
       doRandomPoseChangeAndUpdate(poseFrame01, random);
       newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);      
 
-      FramePoint2d newPointInWorldOne = new FramePoint2d(newPoint);
+      FramePoint2D newPointInWorldOne = new FramePoint2D(newPoint);
       newPointInWorldOne.changeFrame(worldFrame);
       updateAllFrames(referenceFrames);
-      FramePoint2d newPointInWorldTwo = new FramePoint2d(newPoint);
+      FramePoint2D newPointInWorldTwo = new FramePoint2D(newPoint);
       newPointInWorldTwo.changeFrame(worldFrame);
 
       assertTrue(newPointInWorldOne.epsilonEquals(newPointInWorldTwo, 1e-7));
@@ -151,7 +151,7 @@ public class Pose2dReferenceFrameTest
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }
    
-   private FramePoint2d doRandomChangeFrames(ReferenceFrame[] referenceFrames, FramePoint2d framePoint, Random random)
+   private FramePoint2D doRandomChangeFrames(ReferenceFrame[] referenceFrames, FramePoint2D framePoint, Random random)
    {
       for (int i=0; i<10; i++)
       {

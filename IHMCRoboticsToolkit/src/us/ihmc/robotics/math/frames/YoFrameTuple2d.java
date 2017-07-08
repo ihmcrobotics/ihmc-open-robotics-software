@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
@@ -94,9 +94,9 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       return new FrameVector2D(getFrameTuple2d());
    }
 
-   public final FramePoint2d getFramePoint2dCopy()
+   public final FramePoint2D getFramePoint2dCopy()
    {
-      return new FramePoint2d(getFrameTuple2d());
+      return new FramePoint2D(getFrameTuple2d());
    }
    
    public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2dToPack)

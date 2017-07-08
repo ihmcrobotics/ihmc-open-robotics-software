@@ -44,9 +44,9 @@ public class SpeedUpExampleGraphic
    private final YoFramePoint2d currentICP;
    private final YoFramePoint2d projectedICP;
 
-   private final FramePoint2d desiredICP2d = new FramePoint2d();
-   private final FramePoint2d finalICP2d = new FramePoint2d();
-   private final FramePoint2d referenceCMP = new FramePoint2d();
+   private final FramePoint2D desiredICP2d = new FramePoint2D();
+   private final FramePoint2D finalICP2d = new FramePoint2D();
+   private final FramePoint2D referenceCMP = new FramePoint2D();
 
    private static final double forwardCMPOffset = 0.075;
    private static final double backwardCMPOffset = 0.02;
@@ -77,17 +77,17 @@ public class SpeedUpExampleGraphic
       YoFrameConvexPolygon2d stepFootPolygonViz = new YoFrameConvexPolygon2d("stepFootPolygon", "", worldFrame, 4, registry);
 
       FrameConvexPolygon2d stanceFootPolygon = new FrameConvexPolygon2d();
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, 0.0425));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, -0.0425));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, -0.055));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, 0.055));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11, 0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11, -0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11, -0.055));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11, 0.055));
       stanceFootPolygon.update();
 
       FrameConvexPolygon2d stepFootPolygon = new FrameConvexPolygon2d();
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, 0.0425 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, -0.0425 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, -0.055 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, 0.055 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11 + stepLength, 0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11 + stepLength, -0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11 + stepLength, -0.055 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11 + stepLength, 0.055 + stepWidth));
       stepFootPolygon.update();
 
       stanceFootPolygonViz.setFrameConvexPolygon2d(stanceFootPolygon);
@@ -102,7 +102,7 @@ public class SpeedUpExampleGraphic
 
 
 
-      FramePoint2d heelStrikeCMP = new FramePoint2d(worldFrame, stepLength - backwardCMPOffset, stepWidth);
+      FramePoint2D heelStrikeCMP = new FramePoint2D(worldFrame, stepLength - backwardCMPOffset, stepWidth);
       stanceCMP.set(forwardCMPOffset, 0);
       stanceCMP.getFrameTuple2d(referenceCMP);
 
@@ -165,7 +165,7 @@ public class SpeedUpExampleGraphic
 
       timeInSegment.set(currentTime.getDoubleValue() - initialTime);
 
-      FramePoint2d firstKnot = new FramePoint2d();
+      FramePoint2D firstKnot = new FramePoint2D();
 
       FrameVector2D xAxis = new FrameVector2D(worldFrame);
       endICP.getFrameTuple2d(finalICP2d);
@@ -175,9 +175,9 @@ public class SpeedUpExampleGraphic
       actionFrame.setXAxis(xAxis);
       actionFrame.update();
 
-      FramePoint2d secondKnot = new FramePoint2d(actionFrame);
-      FramePoint2d thirdKnot = new FramePoint2d(actionFrame);
-      FramePoint2d fourthKnot = new FramePoint2d(actionFrame);
+      FramePoint2D secondKnot = new FramePoint2D(actionFrame);
+      FramePoint2D thirdKnot = new FramePoint2D(actionFrame);
+      FramePoint2D fourthKnot = new FramePoint2D(actionFrame);
       secondKnot.set(0.2, 0.1);
       thirdKnot.set(0.2, -0.05);
       fourthKnot.set(0.0, -0.15);
@@ -221,9 +221,9 @@ public class SpeedUpExampleGraphic
 
    private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
-   private final FramePoint2d actualICP2d = new FramePoint2d();
+   private final FramePoint2D actualICP2d = new FramePoint2D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2d actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
    {
       stanceCMP.getFrameTuple2dIncludingFrame(referenceCMP);
       desiredICP.getFrameTuple2dIncludingFrame(desiredICP2d);

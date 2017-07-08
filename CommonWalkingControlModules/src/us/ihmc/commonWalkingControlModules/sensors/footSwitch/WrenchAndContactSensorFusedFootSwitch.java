@@ -5,7 +5,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -53,7 +53,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       wrenchBasedFootSwitch.computeAndPackCoP(copToPack);
    }

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -25,8 +25,8 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    private final FramePoint3D finalPositionInSpecificFrame = new FramePoint3D();
    private final FrameVector3D finalVelocityInSpecificFrame = new FrameVector3D();
 
-   private final FramePoint2d initialCoMPositionInSpecificFrame = new FramePoint2d();
-   private final FramePoint2d desiredCoMPosition = new FramePoint2d();
+   private final FramePoint2D initialCoMPositionInSpecificFrame = new FramePoint2D();
+   private final FramePoint2D desiredCoMPosition = new FramePoint2D();
 
    private final YoDouble omega0;
 
@@ -63,7 +63,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void computeFinalCoMPosition(FramePoint2d finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint2D finalCoMToPack)
    {
       computeCoMPosition(doubleSupportCapturePointTrajectory.getTrajectoryTime(), finalCoMToPack);
    }
@@ -87,7 +87,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       computeCoMPosition(time, desiredCoMPosition);
    }
 
-   public void computeCoMPosition(double time, FramePoint2d comPositionToPack)
+   public void computeCoMPosition(double time, FramePoint2D comPositionToPack)
    {
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();

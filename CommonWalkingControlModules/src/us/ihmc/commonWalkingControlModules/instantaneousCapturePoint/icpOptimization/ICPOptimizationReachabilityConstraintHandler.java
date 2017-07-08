@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -108,14 +108,14 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.addReachabilityPolygon(contractedReachabilityPolygon.getFrameConvexPolygon2d());
    }
 
-   private final FramePoint2d adjustedLocation = new FramePoint2d();
-   private final FramePoint2d referenceLocation = new FramePoint2d();
+   private final FramePoint2D adjustedLocation = new FramePoint2D();
+   private final FramePoint2D referenceLocation = new FramePoint2D();
    private final FrameVector2D adjustmentDirection = new FrameVector2D();
    private final FrameLine2d motionLine = new FrameLine2d();
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2d> footstepSolutions,
+   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2D> footstepSolutions,
                                                    boolean wasAdjusted)
    {
       if (!wasAdjusted)

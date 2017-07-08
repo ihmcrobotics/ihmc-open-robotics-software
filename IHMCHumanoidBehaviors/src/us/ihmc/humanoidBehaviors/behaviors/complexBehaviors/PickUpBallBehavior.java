@@ -45,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -616,9 +616,9 @@ public class PickUpBallBehavior extends AbstractBehavior
    private FramePose2d getoffsetPoint()
    {
 
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+      FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
             initialSphereDetectionBehavior.getBallLocation().getY());
-      FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+      FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2D walkingDirection = new FrameVector2D(worldFrame);
       walkingDirection.set(ballPosition2d);

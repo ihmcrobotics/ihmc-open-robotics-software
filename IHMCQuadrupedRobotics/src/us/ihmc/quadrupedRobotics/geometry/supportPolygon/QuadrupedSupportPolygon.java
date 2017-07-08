@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
@@ -49,8 +49,8 @@ public class QuadrupedSupportPolygon implements Serializable
    private final Vector2D tempVectorForCornerCircle = new Vector2D();
    
    private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
-   private final FramePoint2d tempFramePoint2dOne = new FramePoint2d();
-   private final FramePoint2d tempFramePoint2dTwo = new FramePoint2d();
+   private final FramePoint2D tempFramePoint2dOne = new FramePoint2D();
+   private final FramePoint2D tempFramePoint2dTwo = new FramePoint2D();
    private final FrameLine2d tempFrameLine2d = new FrameLine2d();
 
    public QuadrupedSupportPolygon()
@@ -524,17 +524,17 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
    {
-      FramePoint2d snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
+      FramePoint2D snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
       pointToSnap.set(snapped.getX(), snapped.getY());
    }
    
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
    {
-      FramePoint2d snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
+      FramePoint2D snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
       pointToSnap.set(snapped.getX(), snapped.getY(), 0.0);
    }
    
-   private FramePoint2d snapPointToClosestEdgeOfPolygonIfOutside2d(double x, double y)
+   private FramePoint2D snapPointToClosestEdgeOfPolygonIfOutside2d(double x, double y)
    {
       if (size() > 0 && !isInside(x, y))
       {
@@ -560,7 +560,7 @@ public class QuadrupedSupportPolygon implements Serializable
          updateTempFrameConvexPolygon();
 
          tempLineSegment2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
-         FramePoint2d[] intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempLineSegment2d);
+         FramePoint2D[] intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempLineSegment2d);
          if (intersectionWith == null || intersectionWith.length < 1)
          {
             tempFrameLine2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
@@ -721,7 +721,7 @@ public class QuadrupedSupportPolygon implements Serializable
       framePose.setPosition(tempFramePointForCentroids);
    }
 
-   public void getCentroid2d(FramePoint2d centroidToPack2d)
+   public void getCentroid2d(FramePoint2D centroidToPack2d)
    {
       centroidToPack2d.setToZero();
       
@@ -796,7 +796,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public boolean isInside(FramePoint2d point)
+   public boolean isInside(FramePoint2D point)
    {
       return isInside(point.getX(), point.getY());
    }
@@ -811,7 +811,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
    }
    
-   public double getDistanceInside2d(FramePoint2d point)
+   public double getDistanceInside2d(FramePoint2D point)
    {
       return getDistanceInside2d(point.getX(), point.getY());
    }
@@ -873,13 +873,13 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public double getDistanceOutside2d(FramePoint2d point)
+   public double getDistanceOutside2d(FramePoint2D point)
    {
       return getDistanceOutside2d(point.getX(), point.getY());
    }
 
    /**
-    * @see #getDistanceInside2d(FramePoint2d)
+    * @see #getDistanceInside2d(FramePoint2D)
     */
    public double getDistanceOutside2d(FramePoint3D point)
    {
@@ -887,7 +887,7 @@ public class QuadrupedSupportPolygon implements Serializable
    }
 
    /**
-    * @see #getDistanceInside2d(FramePoint2d)
+    * @see #getDistanceInside2d(FramePoint2D)
     */
    private double getDistanceOutside2d(double x, double y)
    {
@@ -1678,7 +1678,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param centerToPack
     * @return false if the center passed the centroid
     */
-   public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2D centerToPack)
    {
       if (size() == 3)
       {
@@ -1708,7 +1708,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param radius
     * @param centerToPack
     */
-   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2D centerToPack)
    {
       if (containsFootstep(cornerToPutCircle))
       {

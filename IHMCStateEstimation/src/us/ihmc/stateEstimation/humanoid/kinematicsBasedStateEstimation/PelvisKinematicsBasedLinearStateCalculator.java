@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -92,7 +92,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FramePoint2d tempCoP2d = new FramePoint2d();
+   private final FramePoint2D tempCoP2d = new FramePoint2D();
    private final FramePoint3D tempCoP = new FramePoint3D();
    private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
@@ -136,7 +136,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(feetContactablePlaneBodies.get(foot).getContactPoints2d());
          footPolygons.put(foot, footPolygon);
 
-         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2d(soleFrame), new FramePoint2d(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
+         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
          footCenterCoPLineSegments.put(foot, tempLineSegment);
 
          YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
@@ -334,7 +334,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
                   FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
                   footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
                   // TODO Garbage
-                  FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
+                  FramePoint2D[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
 
                   if (intersectionPoints == null || intersectionPoints.length == 0)
                   {

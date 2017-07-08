@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -236,7 +236,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       circleCenter.setY(centerOfInscribedCircle.getY());
       inscribedCircleRadius.set(radius);
       
-      FramePoint2d centerOfMiniCircle = new FramePoint2d();
+      FramePoint2D centerOfMiniCircle = new FramePoint2D();
       if (supportPolygon.size() >= 3)
       {
          supportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);

@@ -20,7 +20,7 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -188,7 +188,7 @@ public class KickBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint2d ballToKickLocation = new FramePoint2d();
+            FramePoint2D ballToKickLocation = new FramePoint2D();
             getoffsetPoint().getPositionIncludingFrame(ballToKickLocation);
             kickBehavior.setObjectToKickPoint(ballToKickLocation);
          }
@@ -203,9 +203,9 @@ public class KickBallBehavior extends AbstractBehavior
 
    private FramePose2d getoffsetPoint()
    {
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
+      FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
             sphereDetectionBehavior.getBallLocation().getY());
-      FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+      FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2D walkingDirection = new FrameVector2D(worldFrame);
       walkingDirection.set(ballPosition2d);

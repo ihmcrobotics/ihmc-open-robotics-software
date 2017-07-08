@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -69,11 +69,11 @@ public class ICPProportionalController
       icpErrorIntegrated.set(0.0, 0.0);
    }
 
-   private final FramePoint2d desiredCMP = new FramePoint2d();
-   private final FramePoint2d previousPerfectCMP = new FramePoint2d();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D previousPerfectCMP = new FramePoint2D();
 
-   public FramePoint2d doProportionalControl(FramePoint2d desiredCMPPreviousValue, FramePoint2d capturePoint, FramePoint2d desiredCapturePoint,
-         FramePoint2d finalDesiredCapturePoint, FrameVector2D desiredCapturePointVelocity, FramePoint2d perfectCMP, double omega0)
+   public FramePoint2D doProportionalControl(FramePoint2D desiredCMPPreviousValue, FramePoint2D capturePoint, FramePoint2D desiredCapturePoint,
+         FramePoint2D finalDesiredCapturePoint, FrameVector2D desiredCapturePointVelocity, FramePoint2D perfectCMP, double omega0)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -150,7 +150,7 @@ public class ICPProportionalController
    private final FrameVector2D cmpErrorPreviousValue = new FrameVector2D();
    private final FrameVector2D cmpErrorDifference = new FrameVector2D();
 
-   private void rateLimitCMP(FramePoint2d cmp, FramePoint2d cmpPreviousValue, FramePoint2d perfectCMP, FramePoint2d previousPerfectCMP)
+   private void rateLimitCMP(FramePoint2D cmp, FramePoint2D cmpPreviousValue, FramePoint2D perfectCMP, FramePoint2D previousPerfectCMP)
    {
       if (feedbackPartMaxRate.getDoubleValue() < 1.0e-3)
          return;

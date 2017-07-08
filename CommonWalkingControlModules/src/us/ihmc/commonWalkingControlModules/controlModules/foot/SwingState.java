@@ -243,7 +243,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
-      FramePoint2d toeContactPoint2d = new FramePoint2d();
+      FramePoint2D toeContactPoint2d = new FramePoint2D();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint3D toeContactPoint = new FramePoint3D();
       toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);

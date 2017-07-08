@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
@@ -134,7 +134,7 @@ public class FootStepPlanner
    FrameVector3D offsetFromBodyToFoot = new FrameVector3D();
 
    private final Point2D startPoint = new Point2D();
-   private final FramePoint2d frameEndPoint = new FramePoint2d();
+   private final FramePoint2D frameEndPoint = new FramePoint2D();
    private final FramePoint3D bodyPositionProjectedInFuture = new FramePoint3D();
    private final FrameOrientation rotationAtEnd = new FrameOrientation();
    

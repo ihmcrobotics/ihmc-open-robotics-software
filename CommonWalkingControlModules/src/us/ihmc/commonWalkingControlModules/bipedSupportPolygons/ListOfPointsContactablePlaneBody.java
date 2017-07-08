@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -78,13 +78,13 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2d()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
+      List<FramePoint2D> ret = new ArrayList<FramePoint2D>(contactPoints.size());
       for (int i = 0; i < contactPoints.size(); i++)
       {
          Tuple2DBasics point = contactPoints.get(i);
-         ret.add(new FramePoint2d(soleFrame, point));
+         ret.add(new FramePoint2D(soleFrame, point));
       }
 
       return ret;

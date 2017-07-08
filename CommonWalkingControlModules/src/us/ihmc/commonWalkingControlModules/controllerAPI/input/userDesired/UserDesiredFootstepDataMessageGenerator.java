@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -56,7 +56,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private final YoBoolean sendSteps = new YoBoolean(namePrefix + "Send", registry);
 
-   private List<FramePoint2d> contactFramePoints;
+   private List<FramePoint2D> contactFramePoints;
    private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);
    private Point2D contactPoint;
 
@@ -219,7 +219,7 @@ public class UserDesiredFootstepDataMessageGenerator
       // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();
       contactPoints.clear();
-      for (FramePoint2d contactFramePoint : contactFramePoints)
+      for (FramePoint2D contactFramePoint : contactFramePoints)
       {
          contactPoint = new Point2D(contactFramePoint);
 

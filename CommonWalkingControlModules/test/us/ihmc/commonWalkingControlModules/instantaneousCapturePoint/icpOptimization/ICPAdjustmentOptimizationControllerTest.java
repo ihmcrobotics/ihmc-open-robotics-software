@@ -29,7 +29,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -101,16 +101,16 @@ public class ICPAdjustmentOptimizationControllerTest
 
       icpPlanner.updateCurrentPlan();
       double currentTime = 0.5;
-      FramePoint2d desiredICP = new FramePoint2d();
+      FramePoint2D desiredICP = new FramePoint2D();
       FrameVector2D desiredICPVelocity = new FrameVector2D();
-      FramePoint2d perfectCMP = new FramePoint2d();
+      FramePoint2D perfectCMP = new FramePoint2D();
       icpPlanner.compute(currentTime);
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       icpOptimizationController.getDesiredCMP(desiredCMP);
       PrintTools.debug("Desired CMP = " + desiredCMP);
       PrintTools.debug("Perfect CMP = " + perfectCMP);
@@ -155,7 +155,7 @@ public class ICPAdjustmentOptimizationControllerTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();

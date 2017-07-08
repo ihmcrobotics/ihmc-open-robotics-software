@@ -34,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -137,7 +137,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
+   private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
@@ -148,7 +148,7 @@ public class HighLevelHumanoidControllerToolbox
    private final AlphaFilteredYoFrameVector filteredYoAngularMomentum;
    private final YoDouble totalMass = new YoDouble("TotalMass", registry);
 
-   private final FramePoint2d centerOfPressure = new FramePoint2d();
+   private final FramePoint2D centerOfPressure = new FramePoint2D();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
@@ -423,7 +423,7 @@ public class HighLevelHumanoidControllerToolbox
          footSwitches.get(robotSide).updateCoP();
    }
 
-   private final FramePoint2d tempFootCop2d = new FramePoint2d();
+   private final FramePoint2D tempFootCop2d = new FramePoint2D();
    private final FramePoint3D tempFootCop = new FramePoint3D();
    private final Wrench tempFootWrench = new Wrench();
 
@@ -453,10 +453,10 @@ public class HighLevelHumanoidControllerToolbox
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
-   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
+   private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
    private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
 
    private void computeCapturePoint()
@@ -496,10 +496,10 @@ public class HighLevelHumanoidControllerToolbox
       filteredYoAngularMomentum.update();
    }
 
-   private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
+   private final FramePoint2D localDesiredCapturePoint = new FramePoint2D();
    private final YoDouble momentumGain = new YoDouble("MomentumGain", registry);
 
-   public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
+   public void getAdjustedDesiredCapturePoint(FramePoint2D desiredCapturePoint, FramePoint2D adjustedDesiredCapturePoint)
    {
       filteredYoAngularMomentum.getFrameTuple(angularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
@@ -514,7 +514,7 @@ public class HighLevelHumanoidControllerToolbox
       adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
-   public void getCapturePoint(FramePoint2d capturePointToPack)
+   public void getCapturePoint(FramePoint2D capturePointToPack)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
    }
@@ -524,8 +524,8 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.getFrameTuple(capturePointToPack);
    }
 
-   private final FramePoint2d copDesired = new FramePoint2d();
-   private final FramePoint2d copActual = new FramePoint2d();
+   private final FramePoint2D copDesired = new FramePoint2D();
+   private final FramePoint2D copActual = new FramePoint2D();
    private final FrameVector2D copError = new FrameVector2D();
    private final Wrench footWrench = new Wrench();
    private final FrameVector3D footForceVector = new FrameVector3D();
@@ -536,7 +536,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoDouble highCoPDampingStartTime = new YoDouble("highCoPDampingStartTime", registry);
    private final YoDouble highCoPDampingDuration = new YoDouble("highCoPDampingDuration", registry);
 
-   public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2d> desiredCoPs)
+   public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2D> desiredCoPs)
    {
       if (!enableHighCoPDampingForShakies.getBooleanValue())
          return false;
@@ -672,7 +672,7 @@ public class HighLevelHumanoidControllerToolbox
       return getName();
    }
 
-   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoP)
+   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoP)
    {
       YoFramePoint2d cop = footDesiredCenterOfPressures.get(contactablePlaneBody);
       if (cop != null)
@@ -686,12 +686,12 @@ public class HighLevelHumanoidControllerToolbox
       }
    }
 
-   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
       footDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
    }
 
-   public void getFilteredDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
+   public void getFilteredDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
       filteredFootDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
    }
@@ -716,7 +716,7 @@ public class HighLevelHumanoidControllerToolbox
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      List<FramePoint2d> defaultContactPoints = foot.getContactPoints2d();
+      List<FramePoint2D> defaultContactPoints = foot.getContactPoints2d();
       previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(defaultContactPoints);
       footContactState.setContactFramePoints(defaultContactPoints);
    }
@@ -974,7 +974,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
    }
 
-   public void getCoP(FramePoint2d copToPack)
+   public void getCoP(FramePoint2D copToPack)
    {
       yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
