@@ -56,6 +56,7 @@ public class TaskNode3D extends TaskNode
       /*
        * set whole body tasks.
        */            
+      System.out.println(endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
       nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
       nodeTester.setHandSelectionMatrixFree(endEffectorTrajectory.getAnotherRobotSide());
       

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.behaviorTests.SolarPanel;
+package us.ihmc.avatar.behaviorTests.rrtPlannerTests;
 
 import static org.junit.Assert.assertTrue;
 

@@ -27,8 +27,8 @@ public class TaskNodeTree
     */   
    private double matricRatioTimeToTask = 0.5;
    
-   private double maximumDisplacementOfStep = 0.1;
-   private double maximumTimeGapOfStep = 0.05;
+   private double maximumDisplacementOfStep = 0.15;
+   private double maximumTimeGapOfStep = 0.03;
    
    private int dimensionOfTask;
 
@@ -335,7 +335,7 @@ public class TaskNodeTree
       {
          nearNode.addChildNode(this.newNode);
          wholeNodes.add(newNode);
-         PrintTools.info("this new Configuration is added on tree");      
+//         PrintTools.info("this new Configuration is added on tree");      
          for (int i = 0; i < this.newNode.getDimensionOfNodeData(); i++)
          {
 //            PrintTools.info("randomNode "+newNode.getNodeData(i) + " ");
@@ -380,6 +380,9 @@ public class TaskNodeTree
       try {
          String savingContent = "";
          
+         /*
+          * whole nodes
+          */
          for(int i=0;i<getWholeNodes().size();i++)
          {
             String convertedNodeData = "";            
@@ -409,6 +412,9 @@ public class TaskNodeTree
             savingContent = savingContent + convertedNodeData;
          }
          
+         /*
+          * fail nodes
+          */
          for(int i=0;i<getFailNodes().size();i++)
          {
             String convertedNodeData = "";            
@@ -423,6 +429,22 @@ public class TaskNodeTree
             savingContent = savingContent + convertedNodeData;
          }
          
+         /*
+          * path nodes
+          */
+         for(int i=0;i<getFailNodes().size();i++)
+         {
+            String convertedNodeData = "";            
+            
+            convertedNodeData = convertedNodeData + "3\t";
+            for(int j=0;j<getPath().get(i).getDimensionOfNodeData();j++)
+            {
+               convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));               
+            }
+            convertedNodeData = convertedNodeData + "\n";
+            
+            savingContent = savingContent + convertedNodeData;
+         }
          
          fw = new FileWriter(fileName);
          bw = new BufferedWriter(fw);

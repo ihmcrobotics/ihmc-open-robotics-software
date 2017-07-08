@@ -626,15 +626,30 @@ public class WheneverWholeBodyKinematicsSolver
        * The Z coordinate is upward like as robot coordinate and matched when human thumb up ahead.
        * The X coordinate is forward like as robot coordinate and matched when human punch out ahead. 
        */
+      Quaternion preMultipliedOrientation = new Quaternion();      
+      if(robotSide == RobotSide.RIGHT)
+      {
+         preMultipliedOrientation.appendRollRotation(-Math.PI*0.5);
+         preMultipliedOrientation.appendYawRotation(Math.PI*0.5);
+      }
+      else
+      {
+         preMultipliedOrientation.appendRollRotation(Math.PI*0.5);
+         preMultipliedOrientation.appendYawRotation(-Math.PI*0.5);
+      }
+      
       FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
       
-      desiredOrientationToWorld.appendPitchRotation(Math.PI*0.5);
-      desiredOrientationToWorld.appendRollRotation(-Math.PI*0.5);
+      desiredOrientationToWorld.multiply(preMultipliedOrientation);
+//      desiredOrientationToWorld.appendPitchRotation(Math.PI*0.5);
+//      desiredOrientationToWorld.appendRollRotation(-Math.PI*0.5);
       
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
+      
       desiredPoseToWorld.changeFrame(worldFrame);
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
+      
    }
    
    public void setDesiredPelvisHeight(double desiredHeightToMidZUp)

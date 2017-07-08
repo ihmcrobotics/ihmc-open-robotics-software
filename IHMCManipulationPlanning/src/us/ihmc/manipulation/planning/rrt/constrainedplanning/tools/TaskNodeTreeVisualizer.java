@@ -24,7 +24,7 @@ public class TaskNodeTreeVisualizer
    private final SimulationConstructionSet scs;
    private TaskNodeTree taskNodeTree;
    
-   private static boolean showNormalized = false;
+   private static boolean showNormalized = true;
    
    public TaskNodeTreeVisualizer(SimulationConstructionSet scs, TaskNodeTree taskNodeTree)
    {
@@ -59,6 +59,7 @@ public class TaskNodeTreeVisualizer
          if(node.getParentNode() == null)
          {
             PrintTools.info("this is root node");
+            yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, true));
          }
          else
          {  

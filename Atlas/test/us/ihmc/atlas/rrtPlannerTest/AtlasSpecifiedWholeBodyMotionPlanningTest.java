@@ -2,7 +2,7 @@ package us.ihmc.atlas.rrtPlannerTest;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.behaviorTests.SolarPanel.SpecifiedWholeBodyMotionPlanningTest;
+import us.ihmc.avatar.behaviorTests.rrtPlannerTests.SpecifiedWholeBodyMotionPlanningTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 
