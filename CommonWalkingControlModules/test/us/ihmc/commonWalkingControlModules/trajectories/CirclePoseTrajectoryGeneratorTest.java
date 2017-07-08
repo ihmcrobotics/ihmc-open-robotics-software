@@ -16,7 +16,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVectorTest;
+import us.ihmc.euclid.referenceFrame.FrameVector3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -363,6 +363,6 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameVector3D vCheck = new FrameVector3D(frame);
       vCheck.cross(omega, r);
 
-      FrameVectorTest.assertFrameVectorEquals(vCheck, v, 1e-8);
+      FrameVector3DTest.assertFrameVectorEquals(vCheck, v, 1e-8);
    }
 }
