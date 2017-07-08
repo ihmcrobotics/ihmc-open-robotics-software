@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
@@ -14,7 +14,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
 
    private final YoDouble integralStiffness;
    private final YoFrameVector yoConnectionPositionIntegratedError;
-   private final FrameVector integralForce;
+   private final FrameVector3D integralForce;
 
    private final Vector3D tempForce = new Vector3D();
 
@@ -26,7 +26,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
       integralStiffness = new YoDouble(name + "_IntegralStiffness", registry);
       yoConnectionPositionIntegratedError = new YoFrameVector(name + "_ConnectionPositionIntegratedError", worldFrame, registry);
 
-      integralForce = new FrameVector(worldFrame);
+      integralForce = new FrameVector3D(worldFrame);
    }
 
    public void setIntegralStiffness(double integralStiffness)

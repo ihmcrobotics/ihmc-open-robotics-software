@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -136,7 +136,7 @@ public class QuaternionCalculusTest
       double dtForFD = 1.0e-6;
 
       FrameOrientation orientation = new FrameOrientation();
-      FrameVector expectedAngularVelocity = new FrameVector();
+      FrameVector3D expectedAngularVelocity = new FrameVector3D();
       Quaternion q = new Quaternion();
       Vector4D qDot = new Vector4D();
       Quaternion qPrevious = new Quaternion();
@@ -231,7 +231,7 @@ public class QuaternionCalculusTest
       double dtForFD = 1.0e-4;
 
       FrameOrientation orientation = new FrameOrientation();
-      FrameVector expectedAngularAcceleration = new FrameVector();
+      FrameVector3D expectedAngularAcceleration = new FrameVector3D();
       Quaternion q = new Quaternion();
       Vector4D qDot = new Vector4D();
       Vector4D qDDot = new Vector4D();

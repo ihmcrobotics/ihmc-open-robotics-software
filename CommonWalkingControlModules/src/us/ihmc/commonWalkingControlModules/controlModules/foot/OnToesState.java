@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -203,7 +203,7 @@ public class OnToesState extends AbstractFootControlState
          toeSlippingDetector.update();
    }
 
-   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
+   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(desiredOrientation);
       desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
@@ -219,7 +219,7 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
-   private final FrameVector direction = new FrameVector();
+   private final FrameVector3D direction = new FrameVector3D();
    private final FramePoint2d tmpPoint2d = new FramePoint2d();
    private void setupContactLine()
    {

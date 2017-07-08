@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -215,7 +215,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
+   public void set(FramePoint desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
@@ -335,7 +335,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
    }
 
-   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
+   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);

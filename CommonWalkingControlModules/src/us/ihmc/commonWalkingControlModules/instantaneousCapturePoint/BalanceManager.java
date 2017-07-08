@@ -40,7 +40,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -697,7 +697,7 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
-   public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
+   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate)
    {
       linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
       yoAchievedCMP.setAndMatchFrame(achievedCMP);

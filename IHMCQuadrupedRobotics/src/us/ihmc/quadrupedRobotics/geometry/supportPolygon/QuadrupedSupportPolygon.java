@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -36,15 +36,15 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
    private final FramePoint temporaryFramePoint = new FramePoint();
-   private final FrameVector tempPlaneNormalInWorld = new FrameVector();
+   private final FrameVector3D tempPlaneNormalInWorld = new FrameVector3D();
    
-   private final FrameVector[] tempVectorsForInCirclePoint = new FrameVector[] {new FrameVector(), new FrameVector(), new FrameVector(), new FrameVector()};
+   private final FrameVector3D[] tempVectorsForInCirclePoint = new FrameVector3D[] {new FrameVector3D(), new FrameVector3D(), new FrameVector3D(), new FrameVector3D()};
    private final FramePoint[] tempPointListForInCirclePoint = new FramePoint[4];
    private final FramePoint tempInCircleCenter = new FramePoint();
    
    private final FramePoint tempIntersection = new FramePoint();
    
-   private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
+   private final FrameVector3D[] tempVectorsForCommonSupportPolygon = new FrameVector3D[] {new FrameVector3D(), new FrameVector3D()};
    private final Point2D[] tempPointsForCornerCircle = new Point2D[] {new Point2D(), new Point2D(), new Point2D(), new Point2D()};
    private final Vector2D tempVectorForCornerCircle = new Vector2D();
    
@@ -367,7 +367,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       FramePoint frontMidPoint = tempInCircleCenter;
       FramePoint hindMidPoint = tempIntersection;
-      FrameVector forwardVector = tempVectorsForCommonSupportPolygon[0];
+      FrameVector3D forwardVector = tempVectorsForCommonSupportPolygon[0];
       
       getFrontMidpoint(frontMidPoint);
       getHindMidpoint(hindMidPoint);
@@ -389,7 +389,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       FramePoint rightMidpoint = tempInCircleCenter;
       FramePoint leftMidpoint = tempIntersection;
-      FrameVector rightwaysVector = tempVectorsForCommonSupportPolygon[0];
+      FrameVector3D rightwaysVector = tempVectorsForCommonSupportPolygon[0];
       
       getRightMidpoint(rightMidpoint);
       getLeftMidpoint(leftMidpoint);
@@ -1013,7 +1013,7 @@ public class QuadrupedSupportPolygon implements Serializable
       tempVectorsForInCirclePoint[1].normalize();
 
       // normalize and subtract to get vector that bisects the first angle
-      FrameVector v2p = tempVectorsForInCirclePoint[0];
+      FrameVector3D v2p = tempVectorsForInCirclePoint[0];
       v2p.add(tempVectorsForInCirclePoint[1]);
       v2p.normalize();
 
@@ -1024,7 +1024,7 @@ public class QuadrupedSupportPolygon implements Serializable
       tempVectorsForInCirclePoint[3].normalize();
 
       // normalize and subtract to get vector that bisects the second angle
-      FrameVector v3p = tempVectorsForInCirclePoint[2];
+      FrameVector3D v3p = tempVectorsForInCirclePoint[2];
       v3p.add(tempVectorsForInCirclePoint[3]);
       v3p.normalize();
 
@@ -1323,10 +1323,10 @@ public class QuadrupedSupportPolygon implements Serializable
       if (quadrantToAssignToIntersection != thisSwingLeg && quadrantToAssignToIntersection != compareSwingLeg)
          throw new UndefinedOperationException("The specified intersection quadrant must be one of the swinging (same side) leg names");
       
-      FrameVector direction1 = tempVectorsForCommonSupportPolygon[0];
+      FrameVector3D direction1 = tempVectorsForCommonSupportPolygon[0];
       direction1.sub(getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()), getFootstep(compareSwingLeg));
       
-      FrameVector direction2 = tempVectorsForCommonSupportPolygon[1];
+      FrameVector3D direction2 = tempVectorsForCommonSupportPolygon[1];
       direction2.sub(polygonToCompare.getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()), polygonToCompare.getFootstep(thisSwingLeg));
       
       commonPolygonToPack.clear();
@@ -1449,7 +1449,7 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint shrunkenShrinkEdgeFoot = shrunkenPolygonToPack.getFootstep(sideToShrink);
          FramePoint shrunkenNextEdgeFoot = shrunkenPolygonToPack.getFootstep(nextEdgeQuadrant);
          
-         FrameVector shrinkDirection = tempPlaneNormalInWorld;
+         FrameVector3D shrinkDirection = tempPlaneNormalInWorld;
          shrinkDirection.sub(originalShrinkEdgeFoot, originalNextEdgeFoot);
          GeometryTools.getPerpendicularVector2d(shrinkDirection, shrinkDirection);
          shrinkDirection.normalize();
@@ -1469,7 +1469,7 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint shrinkFootstep = getFootstep(shrinkQuadrant);
          FramePoint shrinkTowardsFootstep = getFootstep(nextEdgeQuadrant);
          
-         FrameVector shrinkVector = tempVectorsForInCirclePoint[0];
+         FrameVector3D shrinkVector = tempVectorsForInCirclePoint[0];
          shrinkVector.sub(shrinkTowardsFootstep, shrinkFootstep);
          shrinkVector.normalize();
          shrinkVector.scale(distance);

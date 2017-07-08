@@ -61,7 +61,7 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
       line3D = getGeometryObject();
    }
 
-   public FrameLine3D(FramePoint pointOnLine, FrameVector lineDirection)
+   public FrameLine3D(FramePoint pointOnLine, FrameVector3D lineDirection)
    {
       this(pointOnLine.getReferenceFrame(), pointOnLine.getGeometryObject(), lineDirection.getGeometryObject());
       pointOnLine.checkReferenceFrameMatch(lineDirection);
@@ -84,9 +84,9 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
       line3D = getGeometryObject();
    }
 
-   public FrameVector getFrameNormalizedVectorCopy()
+   public FrameVector3D getFrameNormalizedVectorCopy()
    {
-      return new FrameVector(referenceFrame, line3D.getDirection());
+      return new FrameVector3D(referenceFrame, line3D.getDirection());
    }
 
    public Point3DReadOnly getPoint()
@@ -135,7 +135,7 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
       line3D.setDirection(lineDirection);
    }
 
-   public void setDirection(FrameVector lineDirection)
+   public void setDirection(FrameVector3D lineDirection)
    {
       checkReferenceFrameMatch(lineDirection);
       line3D.setDirection(lineDirection.getVector());

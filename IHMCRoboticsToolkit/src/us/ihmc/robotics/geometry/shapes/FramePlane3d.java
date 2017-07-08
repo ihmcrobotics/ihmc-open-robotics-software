@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FrameLine3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class FramePlane3d implements ReferenceFrameHolder
 {
@@ -49,7 +49,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       this.plane3d = new Plane3D(framePlane3d.plane3d);
    }
 
-   public FramePlane3d(FrameVector normal, FramePoint point)
+   public FramePlane3d(FrameVector3D normal, FramePoint point)
    {
       normal.checkReferenceFrameMatch(point);
       this.referenceFrame = normal.getReferenceFrame();
@@ -68,16 +68,16 @@ public class FramePlane3d implements ReferenceFrameHolder
       return referenceFrame;
    }
 
-   public void getNormal(FrameVector normalToPack)
+   public void getNormal(FrameVector3D normalToPack)
    {
       checkReferenceFrameMatch(normalToPack.getReferenceFrame());
       this.plane3d.getNormal(temporaryVector);
       normalToPack.set(temporaryVector);
    }
 
-   public FrameVector getNormalCopy()
+   public FrameVector3D getNormalCopy()
    {
-      FrameVector returnVector = new FrameVector(this.referenceFrame);
+      FrameVector3D returnVector = new FrameVector3D(this.referenceFrame);
       getNormal(returnVector);
       return returnVector;
    }

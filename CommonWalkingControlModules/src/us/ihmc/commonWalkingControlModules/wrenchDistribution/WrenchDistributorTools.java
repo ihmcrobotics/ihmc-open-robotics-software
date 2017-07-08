@@ -10,12 +10,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WrenchDistributorTools
 {
-   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector force, FramePoint2d cop, double normalTorque)
+   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector3D force, FramePoint2d cop, double normalTorque)
    {
       ReferenceFrame referenceFrame = cop.getReferenceFrame();
       force.changeFrame(referenceFrame);
@@ -46,16 +46,16 @@ public class WrenchDistributorTools
       pseudoCMP3dToPack.setZ(zCMP);
    }
 
-   public static FrameVector computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
+   public static FrameVector3D computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
-      FrameVector force = new FrameVector(centerOfMass);
+      FrameVector3D force = new FrameVector3D(centerOfMass);
 
       computeForce(force, centerOfMass, cmp, fZ);
 
       return force;
    }
 
-   public static void computeForce(FrameVector forceToPack, FramePoint centerOfMass, FramePoint cmp, double fZ)
+   public static void computeForce(FrameVector3D forceToPack, FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
       cmp.changeFrame(centerOfMass.getReferenceFrame());
       forceToPack.setIncludingFrame(centerOfMass);
@@ -63,7 +63,7 @@ public class WrenchDistributorTools
       forceToPack.scale(fZ / forceToPack.getZ());
    }
 
-   public static void getSupportVectors(List<FrameVector> normalizedSupportVectorsToPack, double mu, ReferenceFrame contactPlaneFrame)
+   public static void getSupportVectors(List<FrameVector3D> normalizedSupportVectorsToPack, double mu, ReferenceFrame contactPlaneFrame)
    {
       int numberOfSupportVectors = normalizedSupportVectorsToPack.size();
       double angleIncrement = 2.0 * Math.PI / ((double) numberOfSupportVectors);
@@ -75,7 +75,7 @@ public class WrenchDistributorTools
       }
    }
 
-   public static void getSupportVector(FrameVector normalizedSupportVectorToPack, double angle, double mu, ReferenceFrame contactPlaneFrame)
+   public static void getSupportVector(FrameVector3D normalizedSupportVectorToPack, double angle, double mu, ReferenceFrame contactPlaneFrame)
    {
       double x = mu * Math.cos(angle);
       double y = mu * Math.sin(angle);
@@ -85,12 +85,12 @@ public class WrenchDistributorTools
       normalizedSupportVectorToPack.normalize();
    }
 
-   public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector> normalizedSupportVectors,
+   public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector3D> normalizedSupportVectors,
          ReferenceFrame referenceFrame)
    {
       for (int i = 0; i < normalizedSupportVectors.size(); i++)
       {
-         FrameVector normalizedSupportVector = normalizedSupportVectors.get(i);
+         FrameVector3D normalizedSupportVector = normalizedSupportVectors.get(i);
          normalizedSupportVector.changeFrame(referenceFrame);
          normalizedSupportVector.getVector().get(0, i, supportVectorMatrixBlock);
       }

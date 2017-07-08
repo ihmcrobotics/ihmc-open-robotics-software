@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -27,11 +27,11 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final ContactableFoot contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
-   protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   protected final FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
+   protected final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
+   protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
    protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   protected final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   protected final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;

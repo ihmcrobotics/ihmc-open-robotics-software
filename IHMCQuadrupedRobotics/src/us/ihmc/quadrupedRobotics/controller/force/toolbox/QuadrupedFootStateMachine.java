@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -26,7 +26,7 @@ public class QuadrupedFootStateMachine
    private final YoDouble timestamp;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
-   private final FrameVector soleForceCommand;
+   private final FrameVector3D soleForceCommand;
    private final YoQuadrupedTimedStep stepCommand;
    private final YoBoolean stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -54,7 +54,7 @@ public class QuadrupedFootStateMachine
       this.timestamp = timestamp;
       this.solePositionController = solePositionController;
       this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
-      this.soleForceCommand = new FrameVector();
+      this.soleForceCommand = new FrameVector3D();
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -110,7 +110,7 @@ public class QuadrupedFootStateMachine
          return ContactState.NO_CONTACT;
    }
 
-   public void compute(FrameVector soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
+   public void compute(FrameVector3D soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
    {
       // Update estimates.
       this.taskSpaceEstimates.set(taskSpaceEstimates);
@@ -225,7 +225,7 @@ public class QuadrupedFootStateMachine
          swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition());
 
          // Detect early touch-down.
-         FrameVector soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
+         FrameVector3D soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
          soleForceEstimate.changeFrame(ReferenceFrame.getWorldFrame());
          double pressureEstimate = -soleForceEstimate.getZ();
          double relativeTimeInSwing = currentTime - stepCommand.getTimeInterval().getStartTime();

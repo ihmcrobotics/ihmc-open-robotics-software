@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MidFrameZUpFrame extends ReferenceFrame
 {
@@ -14,7 +14,7 @@ public class MidFrameZUpFrame extends ReferenceFrame
 
    private final FramePoint originOneInParent;
    private final FramePoint originTwoInParent;
-   private final FrameVector vectorBetweenFrames;
+   private final FrameVector3D vectorBetweenFrames;
    private final Vector2D vectorBetweenFrames2d = new Vector2D();
    private final Vector3D parentToMidpointVector3d = new Vector3D();
    private final RigidBodyTransform transform3D = new RigidBodyTransform();
@@ -34,7 +34,7 @@ public class MidFrameZUpFrame extends ReferenceFrame
 
       originOneInParent = new FramePoint(frameOne);
       originTwoInParent = new FramePoint(frameTwo);
-      vectorBetweenFrames = new FrameVector(parentZUpFrame);
+      vectorBetweenFrames = new FrameVector3D(parentZUpFrame);
    }
 
    @Override

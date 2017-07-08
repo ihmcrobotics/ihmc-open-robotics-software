@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -60,7 +60,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint desiredSwingFootPositionFromHalfStride = new FramePoint();
    private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
 
-   private final FrameVector footDesiredVector= new FrameVector();
+   private final FrameVector3D footDesiredVector= new FrameVector3D();
    private final Vector2D footDesiredVector2d= new Vector2D();
    
    private final QuadrupedLinkLengths linkLengths;
@@ -94,7 +94,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    }
 
    @Override
-   public void getSwingTarget(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
+   public void getSwingTarget(RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, FramePoint swingTargetToPack, double desiredYawRate)
    {
       updateFeetPositions();
       RobotSide oppositeSide = swingLeg.getOppositeSide();
@@ -109,10 +109,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    
    private final FramePose projectedLegPitchPose = new FramePose();
    private final FramePoint projectedLegPitchPosition = new FramePoint();
-   private final FrameVector scaledVelocityVector = new FrameVector();
+   private final FrameVector3D scaledVelocityVector = new FrameVector3D();
    
    @Override
-   public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
+   public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector3D desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
       getSwingTargetTimer.startMeasurement();
@@ -158,7 +158,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       getSwingTargetTimer.stopMeasurement();
    }
    
-   private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector desiredBodyVelocity, double swingDuration)
+   private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector3D desiredBodyVelocity, double swingDuration)
    {
       double legLength = linkLengths.getThighLength(swingLeg) + linkLengths.getShinLength(swingLeg);
       double zHeight = swingTarget.getZ();
@@ -179,7 +179,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    }
    
    @Override
-   public void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, FramePoint swingTargetToPack,
+   public void getSwingTarget(QuadrupedSupportPolygon footPostions, RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
       FramePoint across = footPostions.getFootstep(swingLeg.getAcrossBodyQuadrant());
@@ -200,7 +200,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       calculateSwingTarget(footPostions, midFeetZUpFrame, swingLeg, desiredBodyVelocity, desiredYawRate, swingTargetToPack);
    }
 
-   private void calculateSwingTarget(QuadrupedSupportPolygon supportPolygon, ReferenceFrame oppositeSideZUpFrame, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double desiredYawRate,
+   private void calculateSwingTarget(QuadrupedSupportPolygon supportPolygon, ReferenceFrame oppositeSideZUpFrame, RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double desiredYawRate,
          FramePoint swingTargetToPack)
    {
       //calculate hipPitchHeight
@@ -253,7 +253,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //      swingTargetToPack.set(desiredSwingFootPositionFromOppositeSideFoot);
    }
 
-   private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+   private void determineFootPositionFromHalfStride(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double maxStepDistance, double deltaYaw,
           FramePoint footPositionSameSideOppositeEnd, FramePoint footPositionOppositeSideSameEnd, ReferenceFrame oppositeSideZUpFrame)
    {
       RobotSide swingSide = swingLeg.getSide();
@@ -306,7 +306,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       GeometryTools.yawAboutPoint(desiredSwingFootPositionFromHalfStride, centroid, deltaYaw, desiredSwingFootPositionFromHalfStride);
    }
 
-   private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double maxStepDistance, double deltaYaw,
+   private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double maxStepDistance, double deltaYaw,
          FramePoint footPositionSameSideOppositeEnd, FramePoint footPositionOppositeSideSameEnd, ReferenceFrame oppositeSideZUpFrame)
    {
       RobotSide swingSide = swingLeg.getSide();

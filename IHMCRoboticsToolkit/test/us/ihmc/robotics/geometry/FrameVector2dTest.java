@@ -349,8 +349,8 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testSets()
    {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), 8.0, -2.0, 0.0);
+      FrameVector3D alpha = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
+      FrameVector3D beta = new FrameVector3D(ReferenceFrame.getWorldFrame(), 8.0, -2.0, 0.0);
       alpha.set(0.0, 0.0, 0.0);
       alpha.setX(-7.0);
       alpha.setY(10.3);
@@ -364,8 +364,8 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testadd()
    {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), 7.0, 0.0, 6.0);
+      FrameVector3D alpha = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
+      FrameVector3D beta = new FrameVector3D(ReferenceFrame.getWorldFrame(), 7.0, 0.0, 6.0);
       alpha.add(beta);
 
    }
@@ -374,9 +374,9 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testInterpolate()
    {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), -1.0, 0.0, 17.0);
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), 3.3, 30.0, 9.0);
-      FrameVector gamma = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.8, 3.0);
+      FrameVector3D alpha = new FrameVector3D(ReferenceFrame.getWorldFrame(), -1.0, 0.0, 17.0);
+      FrameVector3D beta = new FrameVector3D(ReferenceFrame.getWorldFrame(), 3.3, 30.0, 9.0);
+      FrameVector3D gamma = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 2.8, 3.0);
 
       gamma.interpolate(alpha, beta, 3.0);
       gamma.interpolate(beta, alpha, 1);
@@ -386,8 +386,8 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testGetReferenceFrame()
    {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 20.0, 5.0);
+      FrameVector3D alpha = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
+      FrameVector3D beta = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 20.0, 5.0);
       alpha.getReferenceFrame();
       beta.getReferenceFrame();
    }
@@ -396,8 +396,8 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testGets()
    {
-      FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), 7.0, 0.0, -6.0);
+      FrameVector3D alpha = new FrameVector3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
+      FrameVector3D beta = new FrameVector3D(ReferenceFrame.getWorldFrame(), 7.0, 0.0, -6.0);
       alpha.getX();
       beta.getY();
       beta.getZ();

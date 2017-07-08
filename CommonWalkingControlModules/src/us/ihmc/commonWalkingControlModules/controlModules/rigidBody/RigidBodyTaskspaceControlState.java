@@ -24,7 +24,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -84,11 +84,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
    private final FramePoint desiredPosition = new FramePoint(worldFrame);
-   private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame);
 
    private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();

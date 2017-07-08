@@ -2,7 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 
 public class FourBarKinematicLoopTools
@@ -10,7 +10,7 @@ public class FourBarKinematicLoopTools
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
-   public static void checkJointAxesAreParallel(FrameVector masterAxis, FrameVector jointBAxis, FrameVector jointCAxis, FrameVector jointDAxis)
+   public static void checkJointAxesAreParallel(FrameVector3D masterAxis, FrameVector3D jointBAxis, FrameVector3D jointCAxis, FrameVector3D jointDAxis)
    {
       masterAxis.changeFrame(worldFrame);
       jointBAxis.changeFrame(worldFrame);

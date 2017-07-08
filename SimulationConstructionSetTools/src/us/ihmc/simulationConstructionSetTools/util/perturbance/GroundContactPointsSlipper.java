@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
@@ -135,7 +135,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyTranslationalSlip(double percentOfDelta) 
    {
-      FrameVector slipDelta = slipAmount.getFrameVectorCopy();
+      FrameVector3D slipDelta = slipAmount.getFrameVectorCopy();
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 

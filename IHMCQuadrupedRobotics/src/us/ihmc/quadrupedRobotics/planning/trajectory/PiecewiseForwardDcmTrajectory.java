@@ -4,7 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class PiecewiseForwardDcmTrajectory
    private final FramePoint[] dcmPositionAtSoS;
    private final FramePoint[] vrpPositionAtSoS;
    private final FramePoint dcmPosition;
-   private final FrameVector dcmVelocity;
+   private final FrameVector3D dcmVelocity;
    private final List<MutableDouble> temporaryDouble;
    private final List<FramePoint> temporaryFramePoint;
 
@@ -43,7 +43,7 @@ public class PiecewiseForwardDcmTrajectory
          this.vrpPositionAtSoS[i] = new FramePoint(ReferenceFrame.getWorldFrame());
       }
       this.dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      this.dcmVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
       this.temporaryDouble = new ArrayList<>();
       this.temporaryDouble.add(new MutableDouble(0));
       this.temporaryFramePoint = new ArrayList<>();
@@ -138,7 +138,7 @@ public class PiecewiseForwardDcmTrajectory
       dcmPosition.setIncludingFrame(this.dcmPosition);
    }
 
-   public void getVelocity(FrameVector dcmVelocity)
+   public void getVelocity(FrameVector3D dcmVelocity)
    {
       dcmVelocity.setIncludingFrame(this.dcmVelocity);
    }

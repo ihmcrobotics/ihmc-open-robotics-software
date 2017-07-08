@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -239,7 +239,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       return momentumRateCommand;
    }
 
-   public void computeAchievedCMP(FrameVector achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
+   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
    {
       if (achievedLinearMomentumRate.containsNaN())
          return;
@@ -257,9 +257,9 @@ public abstract class LinearMomentumRateOfChangeControlModule
    }
 
    private final FramePoint cmp3d = new FramePoint();
-   private final FrameVector groundReactionForce = new FrameVector();
+   private final FrameVector3D groundReactionForce = new FrameVector3D();
 
-   protected FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
+   protected FrameVector3D computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);
@@ -297,7 +297,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       supportLegPreviousTick.set(supportSide);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
-      FrameVector linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
+      FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
       linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
 

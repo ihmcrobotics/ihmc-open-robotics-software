@@ -14,7 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
@@ -116,7 +116,7 @@ public class PositionTrajectorySmootherTest
    public void testPackVelocity()
    {
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
@@ -133,7 +133,7 @@ public class PositionTrajectorySmootherTest
    public void testPackAcceleration()
    {
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
@@ -161,8 +161,8 @@ public class PositionTrajectorySmootherTest
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(velocityToPack.getReferenceFrame()));

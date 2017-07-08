@@ -12,7 +12,7 @@ import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -82,7 +82,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    /**
     * Do the interesting part.
     */
-   private RobotQuadrant doTheCalculations(FrameVector desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
+   private RobotQuadrant doTheCalculations(FrameVector3D desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
    {
       if (desiredVelocity.getX() < ZERO_THRESHOLD && desiredVelocity.getY() < ZERO_THRESHOLD && desiredYawRate < ZERO_THRESHOLD)
       {
@@ -140,7 +140,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       updateState();
       return doTheCalculations(desiredVelocity, desiredYawRate, lastStepFoot, supportPolygon);

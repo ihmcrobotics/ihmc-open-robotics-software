@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 
 public class CaptureRegionMathTools
@@ -66,7 +66,7 @@ public class CaptureRegionMathTools
 
    private final Vector3D negZRotationAxis = new Vector3D(0.0, 0.0, -1.0);
    private final RigidBodyTransform rotation = new RigidBodyTransform();
-   private final FrameVector rotatedFromA = new FrameVector();
+   private final FrameVector3D rotatedFromA = new FrameVector3D();
    private final AxisAngle axisAngle = new AxisAngle();
 
    /**

@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.sensorProcessing.sensors.ProcessedBodyPositionSensorsWriteOnlyInterface;
 import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
@@ -47,7 +47,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    private final YoDouble velocityCovariance = new YoDouble("velocityCovariance", registry);
 
    private final FramePoint bodyPosition = new FramePoint(world);
-   private final FrameVector bodyVelocity = new FrameVector(world);
+   private final FrameVector3D bodyVelocity = new FrameVector3D(world);
    private final FramePoint initialPositionIfNotUsingVicon;
 
    private final int positionIndex = 0;
@@ -98,7 +98,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
    public void initialize()
    {
-      FrameVector covariance = new FrameVector(world, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      FrameVector3D covariance = new FrameVector3D(world, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       if (bodyPositionEstimatorVicon != null)
       {
          bodyPositionEstimatorVicon.estimateBodyPosition();
@@ -164,12 +164,12 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    }
 
    private final FramePoint tempEstimatedPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempEstimatedVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempEstimatedVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    private void updateInputs()
    {
       // TODO: IMU is not always at body root joint, make this more general for arbitrary IMU position
-      FrameVector bodyAcceleration = processedIMUSensors.getAcceleration(bodyIMUIndex);
+      FrameVector3D bodyAcceleration = processedIMUSensors.getAcceleration(bodyIMUIndex);
       bodyAcceleration.checkReferenceFrameMatch(world);
 
       for (Direction direction : Direction.values())

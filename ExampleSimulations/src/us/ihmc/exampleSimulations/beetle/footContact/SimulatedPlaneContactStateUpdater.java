@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -23,7 +23,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private final RigidBody rigidBody;
    private final ArrayList<ContactPointWrapper> contactPoints = new ArrayList<>();
    private final GroundContactPoint contactPoint;
-   private FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+   private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    private final double coefficientOfFriction = 0.8;
    private final int numberOfPointsInContact = 1;
    private final double contactForceThreshold = 0.3;
@@ -118,13 +118,13 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public FrameVector getContactNormalFrameVectorCopy()
+   public FrameVector3D getContactNormalFrameVectorCopy()
    {
       return null;
    }
 
    @Override
-   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
       YoFrameVector yoSurfaceNormal = contactPoint.getYoSurfaceNormal();
       yoSurfaceNormal.getFrameTuple(frameVectorToPack);

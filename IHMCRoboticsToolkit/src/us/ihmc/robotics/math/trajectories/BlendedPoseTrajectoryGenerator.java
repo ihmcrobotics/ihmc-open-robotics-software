@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
@@ -15,9 +15,9 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
 
    private final FramePoint tempPosition = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
-   private final FrameVector tempAngularVelocity = new FrameVector();
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry)
    {
@@ -94,13 +94,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       blendedPositionTrajectory.getVelocity(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       blendedPositionTrajectory.getAcceleration(accelerationToPack);
    }
@@ -112,13 +112,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    }
 
    @Override
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       blendedOrientationTrajectory.getAngularVelocity(angularVelocityToPack);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       blendedOrientationTrajectory.getAngularAcceleration(angularAccelerationToPack);
    }

@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class CylindricalCoordinatesPositionController implements PositionController
 {
@@ -65,8 +65,8 @@ public class CylindricalCoordinatesPositionController implements PositionControl
       parentRegistry.addChild(registry);
    }
 
-   public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity,
-                       FrameVector feedForward)
+   public void compute(FrameVector3D output, FramePoint desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity,
+                       FrameVector3D feedForward)
    {
       desiredPosition.changeFrame(cylinderFrame);
       desiredVelocity.changeFrame(cylinderFrame);

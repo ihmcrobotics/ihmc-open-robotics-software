@@ -20,7 +20,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -132,14 +132,14 @@ public class WeightMatrix3DTest
              DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
              DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
 
-             FrameVector randomVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
+             FrameVector3D randomVector = FrameVector3D.generateRandomFrameVector(random, destinationFrame);
              DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
              randomVector.get(originalVector);
              weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, expectedWeightMatrix);
              CommonOps.mult(expectedWeightMatrix, originalVector, actualSubspaceVector);
 
              
-             FrameVector weights = new FrameVector();
+             FrameVector3D weights = new FrameVector3D();
              weights.set(xWeight, yWeight, zWeight);
              
              if (selectionFrame != null)

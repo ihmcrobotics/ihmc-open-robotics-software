@@ -27,7 +27,7 @@ import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -56,7 +56,7 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
    private final QuadrantDependentList<FramePoint> solePositionEstimate;
-   private final QuadrantDependentList<FrameVector> soleForceCommand;
+   private final QuadrantDependentList<FrameVector3D> soleForceCommand;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrupedContactForceLimits contactForceLimits;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -99,7 +99,7 @@ public class QuadrupedTimedStepController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionEstimate.set(robotQuadrant, new FramePoint());
-         soleForceCommand.set(robotQuadrant, new FrameVector());
+         soleForceCommand.set(robotQuadrant, new FrameVector3D());
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
       contactForceLimits = new QuadrupedContactForceLimits();
@@ -227,7 +227,7 @@ public class QuadrupedTimedStepController
    }
 
    public void compute(QuadrantDependentList<ContactState> contactState, QuadrupedContactForceLimits contactForceLimits,
-         QuadrantDependentList<FrameVector> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEsimates)
+         QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEsimates)
    {
       // copy inputs
       this.taskSpaceEstimates.set(taskSpaceEsimates);
@@ -382,7 +382,7 @@ public class QuadrupedTimedStepController
          swingTrajectory.getPosition(solePositionControllerSetpoints.get(robotQuadrant).getSolePosition());
 
          // detect early touch-down
-         FrameVector soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
+         FrameVector3D soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
          soleForceEstimate.changeFrame(ReferenceFrame.getWorldFrame());
          double pressureEstimate = -soleForceEstimate.getZ();
          double relativeTimeInSwing = currentTime - timedStep.getTimeInterval().getStartTime();

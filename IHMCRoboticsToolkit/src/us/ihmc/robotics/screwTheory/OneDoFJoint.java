@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {
@@ -450,9 +450,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qddDesired);
    }
 
-   public abstract FrameVector getJointAxis();
+   public abstract FrameVector3D getJointAxis();
 
-   public abstract void getJointAxis(FrameVector axisToPack);
+   public abstract void getJointAxis(FrameVector3D axisToPack);
 
    // DRC Hack
 

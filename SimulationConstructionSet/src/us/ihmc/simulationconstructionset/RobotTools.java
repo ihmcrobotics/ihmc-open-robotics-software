@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -37,8 +37,8 @@ public class RobotTools
 
       // Temporary variables
       private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      private final FrameVector linearVelocity = new FrameVector();
-      private final FrameVector angularVelocity = new FrameVector();
+      private final FrameVector3D linearVelocity = new FrameVector3D();
+      private final FrameVector3D angularVelocity = new FrameVector3D();
       private final Twist rootJointTwist = new Twist();
 
       public SCSRobotFromInverseDynamicsRobotModel(String name, InverseDynamicsJoint rootJoint)

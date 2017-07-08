@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -112,7 +112,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final FramePoint supportCentroid;
-   private final FrameVector stepAdjustmentVector;
+   private final FrameVector3D stepAdjustmentVector;
    private final FramePoint stepGoalPosition;
 
    // inputs
@@ -178,7 +178,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          xGaitCurrentSteps.set(robotEnd, new QuadrupedTimedStep());
       }
-      stepAdjustmentVector = new FrameVector();
+      stepAdjustmentVector = new FrameVector3D();
       stepGoalPosition = new FramePoint();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());

@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -155,8 +155,8 @@ public class GroundPlaneEstimatorTest
       computedPitch = groundPlaneEstimator.getPitch();
       assertTrue(MathTools.epsilonEquals(actualPitch, computedPitch, epsilon));
       
-      FrameVector normal = new FrameVector();
-      FrameVector normal2 = new FrameVector();
+      FrameVector3D normal = new FrameVector3D();
+      FrameVector3D normal2 = new FrameVector3D();
       groundPlaneEstimator.getPlaneNormal(normal);
       
       //change frame back before updating the feet frame

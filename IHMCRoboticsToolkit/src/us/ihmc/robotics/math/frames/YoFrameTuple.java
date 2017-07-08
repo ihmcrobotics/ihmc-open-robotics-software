@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -134,9 +134,9 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       return frameTuple;
    }
 
-   public final FrameVector getFrameVectorCopy()
+   public final FrameVector3D getFrameVectorCopy()
    {
-      return new FrameVector(getFrameTuple());
+      return new FrameVector3D(getFrameTuple());
    }
 
    public final FramePoint getFramePointCopy()

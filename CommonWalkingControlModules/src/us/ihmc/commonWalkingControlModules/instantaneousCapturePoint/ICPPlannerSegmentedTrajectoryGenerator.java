@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -60,9 +60,9 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint finalICPInitialFrame = new FramePoint();
 
    private final FramePoint startOfSplineICPInitialFrame = new FramePoint();
-   private final FrameVector startOfSplineICPVelocityInitialFrame = new FrameVector();
+   private final FrameVector3D startOfSplineICPVelocityInitialFrame = new FrameVector3D();
    private final FramePoint endOfSplineICPInitialFrame = new FramePoint();
-   private final FrameVector endOfSplineICPVelocityInitialFrame = new FrameVector();
+   private final FrameVector3D endOfSplineICPVelocityInitialFrame = new FrameVector3D();
 
    private final FramePoint2d startOfSingleSupportCoM = new FramePoint2d();
    private final FramePoint2d startOfSplineCoM = new FramePoint2d();
@@ -76,23 +76,23 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint finalICPFinalFrame = new FramePoint();
 
    private final FramePoint startOfSplineICPFinalFrame = new FramePoint();
-   private final FrameVector startOfSplineICPVelocityFinalFrame = new FrameVector();
+   private final FrameVector3D startOfSplineICPVelocityFinalFrame = new FrameVector3D();
    private final FramePoint endOfSplineICPFinalFrame = new FramePoint();
-   private final FrameVector endOfSplineICPVelocityFinalFrame = new FrameVector();
+   private final FrameVector3D endOfSplineICPVelocityFinalFrame = new FrameVector3D();
 
    private final FramePoint startOfSplineICP = new FramePoint();
-   private final FrameVector startOfSplineICPVelocity = new FrameVector();
+   private final FrameVector3D startOfSplineICPVelocity = new FrameVector3D();
    private final FramePoint endOfSplineICP = new FramePoint();
-   private final FrameVector endOfSplineICPVelocity = new FrameVector();
+   private final FrameVector3D endOfSplineICPVelocity = new FrameVector3D();
 
    private final FramePoint desiredICPInitialFrame = new FramePoint();
-   private final FrameVector desiredICPVelocityInitialFrame = new FrameVector();
+   private final FrameVector3D desiredICPVelocityInitialFrame = new FrameVector3D();
 
    private final FramePoint desiredICPFinalFrame = new FramePoint();
-   private final FrameVector desiredICPVelocityFinalFrame = new FrameVector();
+   private final FrameVector3D desiredICPVelocityFinalFrame = new FrameVector3D();
 
    private final FramePoint desiredICPOutput = new FramePoint();
-   private final FrameVector desiredICPVelocityOutput = new FrameVector();
+   private final FrameVector3D desiredICPVelocityOutput = new FrameVector3D();
 
    private final FramePoint2d desiredCoMPosition = new FramePoint2d();
 
@@ -425,10 +425,10 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       pointTrajectoryFrameToPack.interpolate(pointA, pointB, percentOfFinal);
    }
 
-   private final FrameVector vectorA = new FrameVector();
-   private final FrameVector vectorB = new FrameVector();
+   private final FrameVector3D vectorA = new FrameVector3D();
+   private final FrameVector3D vectorB = new FrameVector3D();
 
-   private void interpolateVectorFromInitialToFinalFrame(FrameVector vectorTrajectoryFrameToPack, FrameVector vectorInitialFrame, FrameVector vectorFinalFrame,
+   private void interpolateVectorFromInitialToFinalFrame(FrameVector3D vectorTrajectoryFrameToPack, FrameVector3D vectorInitialFrame, FrameVector3D vectorFinalFrame,
                                                          double percentOfFinal)
    {
       vectorA.setIncludingFrame(vectorInitialFrame);
@@ -462,7 +462,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setIncludingFrame(desiredICPVelocityOutput);
    }
@@ -473,7 +473,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero(trajectoryFrame);
    }
@@ -489,7 +489,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

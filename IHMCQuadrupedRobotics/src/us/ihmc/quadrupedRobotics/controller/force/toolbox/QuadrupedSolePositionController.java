@@ -5,7 +5,7 @@ import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -16,15 +16,15 @@ public class QuadrupedSolePositionController
    {
       private RobotQuadrant robotQuadrant;
       private final FramePoint solePosition;
-      private final FrameVector soleLinearVelocity;
-      private final FrameVector soleForceFeedforward;
+      private final FrameVector3D soleLinearVelocity;
+      private final FrameVector3D soleForceFeedforward;
 
       public Setpoints(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
          this.solePosition = new FramePoint();
-         this.soleLinearVelocity = new FrameVector();
-         this.soleForceFeedforward = new FrameVector();
+         this.soleLinearVelocity = new FrameVector3D();
+         this.soleForceFeedforward = new FrameVector3D();
       }
 
       public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
@@ -45,12 +45,12 @@ public class QuadrupedSolePositionController
          return solePosition;
       }
 
-      public FrameVector getSoleLinearVelocity()
+      public FrameVector3D getSoleLinearVelocity()
       {
          return soleLinearVelocity;
       }
 
-      public FrameVector getSoleForceFeedforward()
+      public FrameVector3D getSoleForceFeedforward()
       {
          return soleForceFeedforward;
       }
@@ -94,12 +94,12 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(FrameVector3D soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       FramePoint solePositionSetpoint = setpoints.getSolePosition();
-      FrameVector soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
-      FrameVector soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
-      FrameVector soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
+      FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
+      FrameVector3D soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
+      FrameVector3D soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
 
       ReferenceFrame solePositionSetpointFrame = solePositionSetpoint.getReferenceFrame();
       ReferenceFrame soleLinearVelocitySetpointFrame = soleLinearVelocitySetpoint.getReferenceFrame();

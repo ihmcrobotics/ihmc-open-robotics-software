@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
 public class RateLimitedYoFrameOrientation extends YoFrameOrientation
@@ -18,7 +18,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    private final YoBoolean hasBeenCalled;
    private final double dt;
 
-   private final FrameVector differenceVector = new FrameVector();
+   private final FrameVector3D differenceVector = new FrameVector3D();
 
    public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    YoFrameOrientation rawOrientation)

@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -25,7 +25,7 @@ public class MomentumVisualizer implements Updatable
    private final YoFrameVector linearMomentum;
 
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
-   private final FrameVector frameVector = new FrameVector();
+   private final FrameVector3D frameVector = new FrameVector3D();
 
    public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)

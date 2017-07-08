@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -209,7 +209,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          double rollRate = rollMagnitude * derivativeFactor;
          Vector3D angularVelocity = new Vector3D();
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
-         FrameVector frameAngularVelcoity = new FrameVector(pelvisFrame, angularVelocity);
+         FrameVector3D frameAngularVelcoity = new FrameVector3D(pelvisFrame, angularVelocity);
          frameAngularVelcoity.changeFrame(worldFrame);
          frameAngularVelcoity.get(angularVelocity);
 

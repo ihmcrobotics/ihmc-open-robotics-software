@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -185,7 +185,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final Vector3D tempVector = new Vector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public void setInitialLeadOut(FramePoint initialPosition, FrameVector initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePoint initialPosition, FrameVector3D initialDirection, double leaveDistance)
    {
       this.initialPosition.set(initialPosition);
       this.initialDirection.set(initialDirection);
@@ -200,7 +200,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.leaveDistance.set(leaveDistance);
    }
 
-   public void setFinalLeadIn(FramePoint finalPosition, FrameVector finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePoint finalPosition, FrameVector3D finalDirection, double approachDistance)
    {
       this.finalPosition.set(finalPosition);
       this.finalDirection.set(finalDirection);
@@ -349,19 +349,19 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

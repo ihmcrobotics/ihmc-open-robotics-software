@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 
@@ -32,15 +32,15 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       double endIntegrationTime = 2.0;
 
       FrameOrientation currentOrientation = new FrameOrientation();
-      FrameVector currentAngularVelocity = new FrameVector();
-      FrameVector currentAngularAcceleration = new FrameVector();
+      FrameVector3D currentAngularVelocity = new FrameVector3D();
+      FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
       FrameOrientation orientationFromIntegration = new FrameOrientation();
       Vector3D angularVelocityVector = new Vector3D();
       Quaternion quaternionFromIntegration = new Quaternion();
       Quaternion integratedAngularVelocity = new Quaternion();
 
-      FrameVector angularVelocityFromIntegration = new FrameVector();
+      FrameVector3D angularVelocityFromIntegration = new FrameVector3D();
       Vector3D integratedAngularAcceleration = new Vector3D();
 
       VelocityConstrainedOrientationTrajectoryGenerator traj = new VelocityConstrainedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
@@ -49,9 +49,9 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 5; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
@@ -96,19 +96,19 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 10000; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
-         FrameVector zeroAngularAcceleration = new FrameVector();
+         FrameVector3D zeroAngularAcceleration = new FrameVector3D();
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          double dt = 1.0e-8;
          traj.compute(0.0 + dt);
@@ -120,7 +120,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          boolean goodInitialVelocity = initialAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon);
          if (DEBUG && !goodInitialVelocity)
          {
-            FrameVector error = new FrameVector();
+            FrameVector3D error = new FrameVector3D();
             error.sub(initialAngularVelocity, currentAngularVelocity);
             System.out.println("Bad initial velocity, error: " + error);
             printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
@@ -163,25 +163,25 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 100; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
+         FrameVector3D initialAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
+         FrameVector3D finalAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          Quaternion currentQuaternion = new Quaternion();
          Quaternion previousQuaternion = new Quaternion();
          Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
-         FrameVector previousAngularVelocity = new FrameVector();
-         FrameVector previousAngularAcceleration = new FrameVector();
+         FrameVector3D previousAngularVelocity = new FrameVector3D();
+         FrameVector3D previousAngularAcceleration = new FrameVector3D();
 
          
          double maxVelocity = 4.0;
@@ -265,25 +265,25 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 1000; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          Quaternion currentQuaternion = new Quaternion();
          Quaternion previousQuaternion = new Quaternion();
          Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
-         FrameVector previousAngularVelocity = new FrameVector();
-         FrameVector previousAngularAcceleration = new FrameVector();
+         FrameVector3D previousAngularVelocity = new FrameVector3D();
+         FrameVector3D previousAngularAcceleration = new FrameVector3D();
 
          
          double maxVelocity = 40.0;
@@ -349,7 +349,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   private void printLimitConditions(FrameOrientation initialOrientation, FrameVector initialAngularVelocity, FrameOrientation finalOrientation, FrameVector finalAngularVelocity)
+   private void printLimitConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity, FrameOrientation finalOrientation, FrameVector3D finalAngularVelocity)
    {
       System.out.println("FrameOrientation initialOrientation" + toStringFrameOrientationForVizualizer(initialOrientation));
       System.out.println("FrameVector initialAngularVelocity" + toStringFrameVectorForVizualizer(initialAngularVelocity));
@@ -366,7 +366,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       return " = new FrameOrientation(worldFrame, " + qx + ", " + qy + ", " + qz + ", " + qs + ");";
    }
 
-   private String toStringFrameVectorForVizualizer(FrameVector frameVector)
+   private String toStringFrameVectorForVizualizer(FrameVector3D frameVector)
    {
       double x = frameVector.getX();
       double y = frameVector.getY();

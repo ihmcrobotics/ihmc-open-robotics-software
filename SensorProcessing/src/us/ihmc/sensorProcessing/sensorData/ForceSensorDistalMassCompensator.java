@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -95,33 +95,33 @@ public class ForceSensorDistalMassCompensator
       return sensorFrame;
    }
 
-   public FrameVector getSensorForceRaw(ReferenceFrame desiredFrame)
+   public FrameVector3D getSensorForceRaw(ReferenceFrame desiredFrame)
    {
-      FrameVector force = yoSensorForce.getFrameTuple();
+      FrameVector3D force = yoSensorForce.getFrameTuple();
       force.changeFrame(desiredFrame);
       
       return force;
    }
 
-   public FrameVector getSensorTorqueRaw(ReferenceFrame desiredFrame)
+   public FrameVector3D getSensorTorqueRaw(ReferenceFrame desiredFrame)
    {
-      FrameVector torque = yoSensorTorque.getFrameTuple();
+      FrameVector3D torque = yoSensorTorque.getFrameTuple();
       torque.changeFrame(desiredFrame);
       
       return torque;
    }
 
-   public FrameVector getSensorForceMassCompensated(ReferenceFrame desiredFrame)
+   public FrameVector3D getSensorForceMassCompensated(ReferenceFrame desiredFrame)
    {
-      FrameVector force = yoSensorForceMassCompensated.getFrameTuple();
+      FrameVector3D force = yoSensorForceMassCompensated.getFrameTuple();
       force.changeFrame(desiredFrame);
       
       return force;
    }
 
-   public FrameVector getSensorTorqueMassCompensated(ReferenceFrame desiredFrame)
+   public FrameVector3D getSensorTorqueMassCompensated(ReferenceFrame desiredFrame)
    {
-      FrameVector torque = yoSensorTorqueMassCompensated.getFrameTuple();
+      FrameVector3D torque = yoSensorTorqueMassCompensated.getFrameTuple();
       torque.changeFrame(desiredFrame);
       
       return torque;

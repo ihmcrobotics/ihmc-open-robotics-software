@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -32,7 +32,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    private final YoFramePoint modifiedCMPPosition;
    private final YoFrameVector modifiedCMPVelocity;
 
-   private final FrameVector cmpOffsetFromCoP = new FrameVector();
+   private final FrameVector3D cmpOffsetFromCoP = new FrameVector3D();
    private final YoFrameVector cmpOffset;
    private final AlphaFilteredYoFrameVector filteredCMPOffset;
 
@@ -139,7 +139,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       modifiedICPVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -174,7 +174,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       modifiedCMPVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }

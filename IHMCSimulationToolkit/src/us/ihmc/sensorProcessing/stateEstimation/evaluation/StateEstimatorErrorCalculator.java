@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -89,7 +89,7 @@ public class StateEstimatorErrorCalculator
       orientationError.set(Math.abs(errorAngle));
    }
 
-   private final FrameVector estimatedAngularVelocityFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D estimatedAngularVelocityFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
    
    private void computeAngularVelocityError()
    {
@@ -127,7 +127,7 @@ public class StateEstimatorErrorCalculator
       comXYPositionError.set(comError.length());
    }
 
-   private final FrameVector estimatedCoMVelocityFrameVector = new FrameVector();
+   private final FrameVector3D estimatedCoMVelocityFrameVector = new FrameVector3D();
 
    private void computeCoMVelocityError()
    {
@@ -185,7 +185,7 @@ public class StateEstimatorErrorCalculator
       pelvisXYPositionError.set(positionError.length());
    }
 
-   private final FrameVector estimatedPelvisVelocityFrameVector = new FrameVector();
+   private final FrameVector3D estimatedPelvisVelocityFrameVector = new FrameVector3D();
 
    private void computePelvisVelocityError()
    {

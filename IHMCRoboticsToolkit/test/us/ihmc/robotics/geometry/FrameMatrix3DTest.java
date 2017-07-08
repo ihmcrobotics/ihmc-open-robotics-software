@@ -366,9 +366,9 @@ public class FrameMatrix3DTest
    {
       PoseReferenceFrame randomFrameA = new PoseReferenceFrame("randomFrameA", worldFrame);
       PoseReferenceFrame randomFrameB = new PoseReferenceFrame("randomFrameB", worldFrame);
-      FrameVector originalVector = new FrameVector();
-      FrameVector vectorTransformedInFrameA = new FrameVector();
-      FrameVector vectorTransformedInFrameB = new FrameVector();
+      FrameVector3D originalVector = new FrameVector3D();
+      FrameVector3D vectorTransformedInFrameA = new FrameVector3D();
+      FrameVector3D vectorTransformedInFrameB = new FrameVector3D();
 
       FrameMatrix3D transformationMatrixToBeTested = new FrameMatrix3D();
 

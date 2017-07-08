@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -288,7 +288,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector angularVelocityBiasToPack)
+   public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -308,7 +308,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector angularVelocityBiasToPack)
+   public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -328,7 +328,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector linearAccelerationBiasToPack)
+   public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -348,7 +348,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector linearAccelerationBiasToPack)
+   public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)

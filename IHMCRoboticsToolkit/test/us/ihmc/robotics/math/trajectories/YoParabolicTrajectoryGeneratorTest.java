@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class YoParabolicTrajectoryGeneratorTest
@@ -160,11 +160,11 @@ public class YoParabolicTrajectoryGeneratorTest
          trajectoryGenerator.getPosition(position1, parameter);
          trajectoryGenerator.getPosition(position2, parameter + dt);
 
-         FrameVector numericalVelocity = new FrameVector(position2);
+         FrameVector3D numericalVelocity = new FrameVector3D(position2);
          numericalVelocity.sub(position1);
          numericalVelocity.scale(1.0 / dt);
 
-         FrameVector velocityFromTrajectoryGenerator = new FrameVector(referenceFrame);
+         FrameVector3D velocityFromTrajectoryGenerator = new FrameVector3D(referenceFrame);
          trajectoryGenerator.getVelocity(velocityFromTrajectoryGenerator, parameter);
 
          double delta = 1e-4;
@@ -182,14 +182,14 @@ public class YoParabolicTrajectoryGeneratorTest
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
 
       FramePoint initialPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
-      FrameVector initialVelocity = new FrameVector(referenceFrame, RandomGeometry.nextVector3D(random));
+      FrameVector3D initialVelocity = new FrameVector3D(referenceFrame, RandomGeometry.nextVector3D(random));
       FramePoint finalPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
       trajectoryGenerator.initialize(initialPosition, initialVelocity, finalPosition);
 
       FramePoint initialPositionBack = new FramePoint(referenceFrame);
       trajectoryGenerator.getPosition(initialPositionBack, 0.0);
 
-      FrameVector initialVelocityBack = new FrameVector(referenceFrame);
+      FrameVector3D initialVelocityBack = new FrameVector3D(referenceFrame);
       trajectoryGenerator.getVelocity(initialVelocityBack, 0.0);
 
       FramePoint finalPositionBack = new FramePoint(referenceFrame);

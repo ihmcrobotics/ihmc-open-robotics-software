@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -763,7 +763,7 @@ public class CapturePointTools
     * @param desiredCapturePointVelocityToPack
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
-                                                         FrameVector desiredCapturePointVelocityToPack)
+                                                         FrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
@@ -853,7 +853,7 @@ public class CapturePointTools
     * @param desiredCapturePointAccelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
-                                                             FrameVector desiredCapturePointAccelerationToPack)
+                                                             FrameVector3D desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
       {
@@ -945,7 +945,7 @@ public class CapturePointTools
     *           biped.
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0,
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector3D desiredCapturePointVelocity, double omega0,
                                                             YoFramePoint desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
@@ -977,7 +977,7 @@ public class CapturePointTools
     * @return
     */
    public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
-                                                                    FrameVector desiredCapturePointVelocity)
+                                                                    FrameVector3D desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
@@ -1102,7 +1102,7 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FrameVector comAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FrameVector3D comAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
    {
       comAcceleration.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       computeAngularMomentum(mass, gravity, comAcceleration.getZ(), eCMP, zmp, angularMomentumToPack);

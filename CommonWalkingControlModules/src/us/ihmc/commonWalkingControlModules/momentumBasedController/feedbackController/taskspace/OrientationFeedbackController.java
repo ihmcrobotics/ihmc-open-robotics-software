@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -63,13 +63,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FrameOrientation currentOrientation = new FrameOrientation();
    private final FrameOrientation errorOrientationCumulated = new FrameOrientation();
 
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector currentAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularVelocity = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
 
-   private final FrameVector desiredAngularAcceleration = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
-   private final FrameVector achievedAngularAcceleration = new FrameVector();
+   private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
+   private final FrameVector3D achievedAngularAcceleration = new FrameVector3D();
 
    private final Twist currentTwist = new Twist();
    private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
@@ -209,9 +209,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rateLimitedFeedbackAngularVelocity.reset();
    }
 
-   private final FrameVector proportionalFeedback = new FrameVector();
-   private final FrameVector derivativeFeedback = new FrameVector();
-   private final FrameVector integralFeedback = new FrameVector();
+   private final FrameVector3D proportionalFeedback = new FrameVector3D();
+   private final FrameVector3D derivativeFeedback = new FrameVector3D();
+   private final FrameVector3D integralFeedback = new FrameVector3D();
 
    @Override
    public void computeInverseDynamics()
@@ -299,7 +299,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * 
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   private void computeProportionalTerm(FrameVector feedbackTermToPack)
+   private void computeProportionalTerm(FrameVector3D feedbackTermToPack)
    {
       currentOrientation.setToZero(endEffectorFrame);
       currentOrientation.changeFrame(worldFrame);
@@ -339,7 +339,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * 
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   public void computeDerivativeTerm(FrameVector feedbackTermToPack)
+   public void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
       endEffectorFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentTwist.getAngularPart(currentAngularVelocity);
@@ -377,7 +377,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * 
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
-   public void computeIntegralTerm(FrameVector feedbackTermToPack)
+   public void computeIntegralTerm(FrameVector3D feedbackTermToPack)
    {
       double maximumIntegralError = gains.getMaximumIntegralError();
 

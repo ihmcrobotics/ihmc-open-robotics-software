@@ -90,7 +90,7 @@ public class FrameLineTest
       Vector3D direction = new Vector3D(1.0, 2.0, 3.0);
 
       FrameLine3D line = new FrameLine3D(world, origin, direction);
-      FrameVector vector = new FrameVector(world, direction);
+      FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
       assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
@@ -101,7 +101,7 @@ public class FrameLineTest
       assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      FrameVector frameVector = line.getFrameNormalizedVectorCopy();
+      FrameVector3D frameVector = line.getFrameNormalizedVectorCopy();
       frameVector.changeFrame(target2);
       assertTrue(frameVector.epsilonEquals(vector, 1e-12));
    }
@@ -120,7 +120,7 @@ public class FrameLineTest
       Vector3D direction = new Vector3D(2.0, 1.0, 4.0);
 
       FrameLine3D line = new FrameLine3D(world, origin, direction);
-      FrameVector vector = new FrameVector(world, direction);
+      FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
       assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
@@ -131,7 +131,7 @@ public class FrameLineTest
       assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      FrameVector frameNormalizedVectorCopy = line.getFrameNormalizedVectorCopy();
+      FrameVector3D frameNormalizedVectorCopy = line.getFrameNormalizedVectorCopy();
       frameNormalizedVectorCopy.changeFrame(target2);
       assertTrue(frameNormalizedVectorCopy.epsilonEquals(vector, 1e-12));
    }
@@ -141,7 +141,7 @@ public class FrameLineTest
    public void testConstructorC()
    {
       FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-      FrameVector direction = new FrameVector(createRandomFrame(ReferenceFrame.getWorldFrame(), new Random(1231L)), 4.0, 5.0, 6.0);
+      FrameVector3D direction = new FrameVector3D(createRandomFrame(ReferenceFrame.getWorldFrame(), new Random(1231L)), 4.0, 5.0, 6.0);
 
       new FrameLine3D(origin, direction);
    }

@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MeasurementModelTestTools
 {
@@ -39,7 +39,7 @@ public class MeasurementModelTestTools
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
       for (Direction direction : Direction.values())
       {
-         FrameVector perturbationVector = new FrameVector(nominalState.getReferenceFrame());
+         FrameVector3D perturbationVector = new FrameVector3D(nominalState.getReferenceFrame());
          perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
@@ -58,19 +58,19 @@ public class MeasurementModelTestTools
       statePort.setData(nominalState);
    }
 
-   public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FrameVector> statePort, MeasurementModelElement modelElement,
-           FrameVector nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
+   public static void assertOutputMatrixCorrectUsingPerturbation(ControlFlowOutputPort<FrameVector3D> statePort, MeasurementModelElement modelElement,
+           FrameVector3D nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
    {
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
       for (Direction direction : Direction.values())
       {
-         FrameVector perturbationVector = new FrameVector(nominalState.getReferenceFrame());
+         FrameVector3D perturbationVector = new FrameVector3D(nominalState.getReferenceFrame());
          perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
 
-         FrameVector perturbedState = new FrameVector(nominalState);
+         FrameVector3D perturbedState = new FrameVector3D(nominalState);
          perturbedState.add(perturbationVector);
          statePort.setData(perturbedState);
 

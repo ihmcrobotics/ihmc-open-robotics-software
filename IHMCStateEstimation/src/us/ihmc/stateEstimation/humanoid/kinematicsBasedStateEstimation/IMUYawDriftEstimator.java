@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -68,10 +68,10 @@ public class IMUYawDriftEstimator implements YawDriftProvider
 
    private final FramePoint footPosition = new FramePoint();
    private final FramePoint averagePosition = new FramePoint();
-   private final FrameVector referenceAverageToFootPosition = new FrameVector();
-   private final FrameVector currentAverageToFootPosition = new FrameVector();
+   private final FrameVector3D referenceAverageToFootPosition = new FrameVector3D();
+   private final FrameVector3D currentAverageToFootPosition = new FrameVector3D();
    private final Twist footTwist = new Twist();
-   private final FrameVector footLinearVelocity = new FrameVector();
+   private final FrameVector3D footLinearVelocity = new FrameVector3D();
 
    private final double estimatorDT;
 

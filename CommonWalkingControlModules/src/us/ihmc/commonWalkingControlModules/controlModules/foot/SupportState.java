@@ -170,7 +170,7 @@ public class SupportState extends AbstractFootControlState
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
+      FrameVector3D fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       controllerToolbox.setFootContactStateNormalContactVector(robotSide, fullyConstrainedNormalContactVector);
 
       for (int i = 0; i < dofs; i++)

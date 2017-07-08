@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class ListOfPointsTrajectory
 {
@@ -252,7 +252,7 @@ public class ListOfPointsTrajectory
       FramePoint beforePoint = new FramePoint(listOfPoints.get(indexBefore));
       FramePoint afterPoint = new FramePoint(listOfPoints.get(indexAfter));
 
-      FrameVector vectorBetweenPoints = new FrameVector(beforePoint.getReferenceFrame());
+      FrameVector3D vectorBetweenPoints = new FrameVector3D(beforePoint.getReferenceFrame());
       vectorBetweenPoints.sub(afterPoint, beforePoint);
 
       if (fractionBetweenPoints == 0.0)

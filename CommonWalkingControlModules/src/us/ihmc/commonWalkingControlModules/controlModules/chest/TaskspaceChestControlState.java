@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -41,8 +41,8 @@ public class TaskspaceChestControlState extends ChestControlState
    private final YoOrientationPIDGainsInterface gains;
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final FrameSO3TrajectoryPoint initialTrajectoryPoint = new FrameSO3TrajectoryPoint();

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration of each
@@ -27,9 +27,9 @@ import us.ihmc.robotics.geometry.FrameVector;
  * acceleration of any rigid-body with respect to the {@code inertialFrame}.
  * <li>{@link #getRelativeAcceleration(RigidBody, RigidBody, SpatialAccelerationVector)} provides
  * the spatial acceleration of any rigid-body with respect to another rigid-body of the same system.
- * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector)} provides
+ * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector3D)} provides
  * the linear acceleration of a point of a rigid-body with respect to the {@code inertialFrame}.
- * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)}
+ * <li>{@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)}
  * provides the linear acceleration of a point of a rigid-body with respect to another rigid-body of
  * the same system.
  * </ul>
@@ -299,20 +299,20 @@ public class SpatialAccelerationCalculator
    /**
     * Temporary acceleration used for intermediate garbage free operations. To use only in the
     * method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector3D)}.
     */
    private final SpatialAccelerationVector accelerationForGetLinearAccelerationOfBodyFixedPoint = new SpatialAccelerationVector();
    /**
     * Temporary point used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector3D)}.
     */
    private final FramePoint pointForGetLinearAccelerationOfBodyFixedPoint = new FramePoint();
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)} and
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, FramePoint, FrameVector3D)}.
     */
    private final Twist twistForGetLinearAccelerationOfBodyFixedPoint = new Twist();
 
@@ -333,7 +333,7 @@ public class SpatialAccelerationCalculator
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @param linearAccelerationToPack the linear acceleration of the body fixed point. Modified.
     */
-   public void getLinearAccelerationOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint bodyFixedPoint, FrameVector linearAccelerationToPack)
+   public void getLinearAccelerationOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint bodyFixedPoint, FrameVector3D linearAccelerationToPack)
    {
       FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
@@ -371,7 +371,7 @@ public class SpatialAccelerationCalculator
     * <p>
     * Note that the root acceleration is considered in this calculation. To get the linear
     * acceleration without considering the root acceleration use
-    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)}
+    * {@link #getLinearAccelerationOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)}
     * providing {@link #getRootBody()} as the {@code base}.
     * </p>
     * <p>
@@ -383,7 +383,7 @@ public class SpatialAccelerationCalculator
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @param linearAccelerationToPack the linear acceleration of the body fixed point. Modified.
     */
-   public void getLinearAccelerationOfBodyFixedPoint(RigidBody body, FramePoint bodyFixedPoint, FrameVector linearAccelerationToPack)
+   public void getLinearAccelerationOfBodyFixedPoint(RigidBody body, FramePoint bodyFixedPoint, FrameVector3D linearAccelerationToPack)
    {
       FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;

@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class LinearInvertedPendulumModel
 {
@@ -97,7 +97,7 @@ public class LinearInvertedPendulumModel
     * @param comForceToPack computed contact force acting on the center of mass
     * @param cmpPosition known position of the enhanced centroidal moment pivot
     */
-   public void computeComForce(FrameVector comForceToPack, FramePoint cmpPosition)
+   public void computeComForce(FrameVector3D comForceToPack, FramePoint cmpPosition)
    {
       ReferenceFrame cmpPositionFrame = cmpPosition.getReferenceFrame();
       ReferenceFrame comForceFrame = comForceToPack.getReferenceFrame();
@@ -116,7 +116,7 @@ public class LinearInvertedPendulumModel
     * @param cmpPositionToPack computed position of the enhanced centroidal moment pivot
     * @param comForce known contact force acting on the center of mass
     */
-   public void computeCmpPosition(FramePoint cmpPositionToPack, FrameVector comForce)
+   public void computeCmpPosition(FramePoint cmpPositionToPack, FrameVector3D comForce)
    {
       ReferenceFrame cmpPositionFrame = cmpPositionToPack.getReferenceFrame();
       ReferenceFrame comForceFrame = comForce.getReferenceFrame();

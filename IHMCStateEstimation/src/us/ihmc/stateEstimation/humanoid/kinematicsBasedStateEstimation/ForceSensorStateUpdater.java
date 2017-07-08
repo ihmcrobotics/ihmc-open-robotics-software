@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,8 +67,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 
    private final Wrench wristWrenchDueToGravity = new Wrench();
    private final Wrench tempWrench = new Wrench();
-   private final FrameVector tempForce = new FrameVector();
-   private final FrameVector tempTorque = new FrameVector();
+   private final FrameVector3D tempForce = new FrameVector3D();
+   private final FrameVector3D tempTorque = new FrameVector3D();
 
    private final double gravity;
 

@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -199,7 +199,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void setRotationVector(FrameVector rotationVector)
+   public void setRotationVector(FrameVector3D rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.setRotationVector(rotationVector);
@@ -289,7 +289,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void getRotationVector(FrameVector frameRotationVectorToPack)
+   public void getRotationVector(FrameVector3D frameRotationVectorToPack)
    {
       getFrameOrientation().getRotationVector(frameRotationVectorToPack);
    }
@@ -306,7 +306,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame it is expressed in are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       getFrameOrientation().getRotationVectorIncludingFrame(frameRotationVectorToPack);
    }

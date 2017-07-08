@@ -8,7 +8,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
  * This class is a tool that can be used to compute the twist of each {@code RigidBody} composing a
@@ -23,9 +23,9 @@ import us.ihmc.robotics.geometry.FrameVector;
  * to the {@code inertialFrame}.
  * <li>{@link #getRelativeTwist(RigidBody, RigidBody, Twist)} provides the twist of any rigid-body
  * with respect to another rigid-body of the same system.
- * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, FramePoint, FrameVector)} provides the
+ * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, FramePoint, FrameVector3D)} provides the
  * linear velocity of a point of a rigid-body with respect to the {@code inertialFrame}.
- * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)}
+ * <li>{@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)}
  * provides the linear velocity of a point of a rigid-body with respect to another rigid-body of the
  * same system.
  * </ul>
@@ -181,7 +181,7 @@ public class TwistCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getAngularVelocityOfBody(RigidBody, FrameVector)}.
+    * {@link #getAngularVelocityOfBody(RigidBody, FrameVector3D)}.
     */
    private final Twist twistForGetAngularVelocityOfBody = new Twist();
 
@@ -196,7 +196,7 @@ public class TwistCalculator
     * @param body the rigid-body to compute the angular velocity of.
     * @param angularVelocityToPack the angular velocity of the given {@code body}. Modified.
     */
-   public void getAngularVelocityOfBody(RigidBody body, FrameVector angularVelocityToPack)
+   public void getAngularVelocityOfBody(RigidBody body, FrameVector3D angularVelocityToPack)
    {
       getTwistOfBody(body, twistForGetAngularVelocityOfBody);
       twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
@@ -215,7 +215,7 @@ public class TwistCalculator
     * @param angularVelocityToPack the angular velocity of {@code body} relative to the
     *           {@code base}. Modified.
     */
-   public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector angularVelocityToPack)
+   public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector3D angularVelocityToPack)
    {
       getRelativeTwist(base, body, twistForGetAngularVelocityOfBody);
       twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
@@ -223,12 +223,12 @@ public class TwistCalculator
 
    /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)}.
     */
    private final Twist twistForGetLinearVelocityOfBodyFixedPoint = new Twist();
    /**
     * Temporary point used for intermediate garbage free operations. To use only in the method
-    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector)}.
+    * {@link #getLinearVelocityOfBodyFixedPoint(RigidBody, RigidBody, FramePoint, FrameVector3D)}.
     */
    private final FramePoint pointForGetLinearVelocityOfBodyFixedPoint = new FramePoint();
 
@@ -246,7 +246,7 @@ public class TwistCalculator
     * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
     *           inertial frame. Modified.
     */
-   public void getLinearVelocityOfBodyFixedPoint(RigidBody body, FramePoint bodyFixedPoint, FrameVector linearVelocityToPack)
+   public void getLinearVelocityOfBodyFixedPoint(RigidBody body, FramePoint bodyFixedPoint, FrameVector3D linearVelocityToPack)
    {
       FramePoint localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;
@@ -276,7 +276,7 @@ public class TwistCalculator
     * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
     *           inertial frame. Modified.
     */
-   public void getLinearVelocityOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint bodyFixedPoint, FrameVector linearVelocityToPack)
+   public void getLinearVelocityOfBodyFixedPoint(RigidBody base, RigidBody body, FramePoint bodyFixedPoint, FrameVector3D linearVelocityToPack)
    {
       FramePoint localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;

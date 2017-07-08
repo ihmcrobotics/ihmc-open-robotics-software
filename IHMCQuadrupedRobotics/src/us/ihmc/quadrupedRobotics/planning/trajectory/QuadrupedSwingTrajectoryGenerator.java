@@ -10,7 +10,7 @@ import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.Finishable;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
@@ -35,8 +35,8 @@ public class QuadrupedSwingTrajectoryGenerator
    
    private final FramePoint desiredEndEffectorPosition = new FramePoint();
    private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector zeroVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+   private final FrameVector3D finalDesiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D zeroVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
 
    private final YoDouble timeInStep, alphaTimeInStep, alphaIn, alphaOut;
    private final YoDouble alphaSlopeAtStart;
@@ -83,7 +83,7 @@ public class QuadrupedSwingTrajectoryGenerator
       bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, double swingHeight, FramePoint swingTarget, FrameVector desiredFinalVelocity)
+   public void initializeSwing(double swingTime, FramePoint swingInitial, double swingHeight, FramePoint swingTarget, FrameVector3D desiredFinalVelocity)
    {
       bagOfBalls.reset();
       

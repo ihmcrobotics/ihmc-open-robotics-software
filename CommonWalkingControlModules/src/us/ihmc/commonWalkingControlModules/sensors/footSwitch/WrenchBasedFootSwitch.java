@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -65,8 +65,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final double footLength;
    private final double footMinX;
    private final double footMaxX;
-   private final FrameVector footForce = new FrameVector();
-   private final FrameVector footTorque = new FrameVector();
+   private final FrameVector3D footForce = new FrameVector3D();
+   private final FrameVector3D footTorque = new FrameVector3D();
    private final YoFrameVector yoFootForce;
    private final YoFrameVector yoFootTorque;
    private final YoFrameVector yoFootForceInFoot;
@@ -369,10 +369,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private static double computeLength(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector forward = new FrameVector(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      FrameVector3D forward = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
       List<FramePoint> maxForward = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), forward, 1);
 
-      FrameVector back = new FrameVector(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
       List<FramePoint> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxForward.get(0).getX() - maxBack.get(0).getX();
@@ -380,7 +380,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private static double computeMinX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector back = new FrameVector(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
       List<FramePoint> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxBack.get(0).getX();
@@ -388,7 +388,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private static double computeMaxX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector front = new FrameVector(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      FrameVector3D front = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
       List<FramePoint> maxFront = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), front, 1);
 
       return maxFront.get(0).getX();

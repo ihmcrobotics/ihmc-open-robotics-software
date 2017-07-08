@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
@@ -332,9 +332,9 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       return new FramePoint(spinnerHandleCenter);
    }
 
-   public FrameVector getSteeringWheelAxis()
+   public FrameVector3D getSteeringWheelAxis()
    {
-      return new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
+      return new FrameVector3D(steeringWheelFrame, 0.0, 0.0, 1.0);
    }
 
    public FramePoint getSteeringWheelCenter()
