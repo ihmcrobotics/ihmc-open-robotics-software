@@ -177,13 +177,13 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
       for(RobotSide robotSide : RobotSide.values())
       {
-         doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleDoorSeparation+0.5*depthY), handleHingeRadius, YoAppearance.Grey());
+         doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleDoorSeparation+0.5*depthY), handleHingeRadius, YoAppearance.Gray());
          // graphics - handle
          double translation = robotSide.negateIfLeftSide(handleDoorSeparation + 0.5*depthY);
          doorHandleGraphics.translate(new Vector3D(0.0, 0.0, translation));
          
          doorHandleGraphics.rotate(new AxisAngle(0.0, 1.0, 0.0, robotSide.negateIfRightSide(0.5 * Math.PI)));
-         doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleLength), handleRadius, YoAppearance.Grey());
+         doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleLength), handleRadius, YoAppearance.DarkGray());
          doorHandleGraphics.rotate(new AxisAngle(0.0, 1.0, 0.0, -robotSide.negateIfRightSide(0.5 * Math.PI)));
          
          doorHandleGraphics.translate(new Vector3D(0.0, 0.0, -translation)); 
