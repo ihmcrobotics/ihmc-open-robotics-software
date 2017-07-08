@@ -718,23 +718,6 @@ public class GeometryTools
    }
 
    /**
-    * Calculates the distance on the xy-plane bewteen two 3D points.
-    * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * 
-    * @param firstPoint the first point. Not modified.
-    * @param secondPoint the second point. Not modified.
-    * @return the distance between the two points.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
-    */
-   public static double getXYDistance(FramePoint3D firstPoint, FramePoint3D secondPoint)
-   {
-      firstPoint.checkReferenceFrameMatch(secondPoint);
-      return EuclidGeometryTools.xyDistanceBetweenPoint3Ds(firstPoint.getPoint(), secondPoint.getPoint());
-   }
-
-   /**
     * Attempts to normalize the given 3D vector.
     * If the vector's length falls below {@value Epsilons#ONE_TRILLIONTH}, the vector is set to (0, 0, 1).
     *  
