@@ -7,6 +7,7 @@ import us.ihmc.manipulation.planning.trajectory.EndEffectorPose;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PushDoorPose implements EndEffectorPose
 {
@@ -15,10 +16,12 @@ public class PushDoorPose implements EndEffectorPose
    private PushDoor pushDoor;
    private double doorRotationAngle;
    private double pitchAngle;
+   private RobotSide robotSide;
    
-   public PushDoorPose(PushDoor pushDoor, double doorRotationAngle, double pitchAngle)
+   public PushDoorPose(PushDoor pushDoor, RobotSide robotSide, double doorRotationAngle, double pitchAngle)
    {
       this.pushDoor = pushDoor;
+      this.robotSide = robotSide;
       this.doorRotationAngle = doorRotationAngle;
       this.pitchAngle = pitchAngle;
    }
@@ -43,8 +46,18 @@ public class PushDoorPose implements EndEffectorPose
       
       endEffectorRigidBody.appendTranslation(0.0, pushDoor.getRadius(), pushDoor.getKnobHeight());
       
-      endEffectorRigidBody.appendRollRotation(-Math.PI*1.0);
-      endEffectorRigidBody.appendPitchRotation(pitchAngle);
+      if(robotSide == RobotSide.RIGHT)
+      {
+         endEffectorRigidBody.appendRollRotation(-Math.PI*0.5);
+         endEffectorRigidBody.appendYawRotation(pitchAngle);
+      }  
+      else
+      {
+         endEffectorRigidBody.appendRollRotation(Math.PI*0.5);
+         endEffectorRigidBody.appendYawRotation(-pitchAngle);
+      }
+         
+
       
       return new Pose(endEffectorRigidBody);
    }

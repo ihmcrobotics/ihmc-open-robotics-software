@@ -125,12 +125,12 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       switch (SIDE_WITH_HANDLE)
       {
       case LEFT:
-         STARTING_LOCATION.set(3.5, 0.85, 0.0);
+         STARTING_LOCATION.set(3.4, 0.65, 0.0);
          startYaw = 1.5 * Math.PI;
          break;
 
       case RIGHT:
-         STARTING_LOCATION.set(3.5, -0.85, 0.0);
+         STARTING_LOCATION.set(3.4, -0.65, 0.0);
          startYaw = 0.5 * Math.PI;
          break;
 
@@ -193,7 +193,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       return ret;
    }
    
-   @Test
+//   @Test
    public void testForKnobGraspingPose() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -218,7 +218,72 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
         
-      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -30*Math.PI/180);
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20*Math.PI/180);
+      pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
+                  
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
+      
+      /*
+       * Door kinematics Debug.
+       */      
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());      
+      HandTrajectoryMessage handTrajectoryMessageOpening = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFootZUpGroundFrame());
+      
+      System.out.println(handTrajectoryMessageOpening.getNumberOfTrajectoryPoints());
+      for(int i=0;i<handTrajectoryMessageOpening.getNumberOfTrajectoryPoints();i++)
+      {
+         Point3D point = new Point3D();
+         handTrajectoryMessageOpening.getTrajectoryPoints()[i].getPosition(point);
+         
+         Quaternion orientation = new Quaternion();
+         handTrajectoryMessageOpening.getTrajectoryPoints()[i].getOrientation(orientation);
+         
+         Pose pose = new Pose(point, orientation);
+         scs.addStaticLinkGraphics(getXYZAxis(pose));
+      }
+      
+      /*
+       * Reaching Motion
+       */
+      Pose reachingPose = pushDoorTrajectory.getEndEffectorPose(0.0);
+      Point3D reachingPoint = new Point3D(reachingPose.getPoint());
+      Quaternion reachingOrientation = new Quaternion(reachingPose.getOrientation());
+      reachingPoint.add(new Point3D(-0.1, 0.15, 0.0));
+      reachingOrientation.appendRollRotation(Math.PI*0.5);
+      HandTrajectoryMessage handTrajectoryMessageReaching = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, reachingPoint, reachingOrientation, referenceFrames.getWorldFrame()); 
+      
+      drcBehaviorTestHelper.send(handTrajectoryMessageReaching);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(handTrajectoryMessageReaching.getTrajectoryTime());
+      
+      PrintTools.info("END");   
+   }
+   
+   @Test
+   public void testForRRTPlanner() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      setupCamera(scs);
+      
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();
+            
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      
+      /*
+       * Door define
+       */
+      Quaternion pushDoorOrientation = new Quaternion();
+      pushDoorOrientation.appendYawRotation(startYaw);
+      
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
+      PushDoor pushDoor = new PushDoor(pushDoorFramePose, ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
+        
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -15*Math.PI/180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
                   
       TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
@@ -250,6 +315,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
                   
       TaskNode3D.nodeTester = wbikTester;
+      TaskNode3D.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       /*
        * Tree expanding.
@@ -269,7 +335,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       
       System.out.println(taskNodeTree.getTrajectoryTime());
             
-      taskNodeTree.expandTree(300);
+      taskNodeTree.expandTree(200);
             
       TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
       taskNodeTreeVisualizer.visualize();
