@@ -23,9 +23,8 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    private static final long serialVersionUID = -4831948077397801540L;
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes it components to zero and its reference frame to
+    * {@link ReferenceFrame#getWorldFrame()}.
     */
    public FramePoint()
    {
@@ -33,9 +32,10 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes it components to zero and its reference frame to the
+    * {@code referenceFrame}.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
     */
    public FramePoint(ReferenceFrame referenceFrame)
    {
@@ -43,9 +43,13 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes it with the given components and the given reference
+    * frame.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
+    * @param x the x-component.
+    * @param y the y-component.
+    * @param z the z-component.
     */
    public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
    {
@@ -53,9 +57,11 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes its component {@code x}, {@code y}, {@code z} in
+    * order from the given array and initializes its reference frame.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
+    * @param pointArray the array containing this point's coordinates. Not modified.
     */
    public FramePoint(ReferenceFrame referenceFrame, double[] pointArray)
    {
@@ -63,9 +69,11 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes it to {@code tuple3DReadOnly} and to the given
+    * reference frame.
+    *
+    * @param referenceFrame the initial frame for this frame point.
+    * @param tuple3DReadOnly the tuple to copy the components from. Not modified.
     */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
@@ -73,23 +81,25 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes its reference frame x and y coordinates from
+    * {@code frameTuple2DReadOnly}.
+    *
+    * @param frameTuple2DReadOnly the tuple to copy the components and reference frame from. Not
+    *           modified.
     */
-   public FramePoint(FrameTuple3DReadOnly frameTuple)
+   public FramePoint(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      super(frameTuple.getReferenceFrame(), new Point3D(frameTuple));
+      super(frameTuple2DReadOnly.getReferenceFrame(), new Point3D(frameTuple2DReadOnly));
    }
 
    /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
+    * Creates a new frame point and initializes it to {@code other}.
+    *
+    * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FramePoint(FrameTuple2DReadOnly frameTuple2d)
+   public FramePoint(FrameTuple3DReadOnly other)
    {
-      super(frameTuple2d.getReferenceFrame(), new Point3D(frameTuple2d));
+      super(other.getReferenceFrame(), new Point3D(other));
    }
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
@@ -108,9 +118,9 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
    }
 
    /**
-    * Returns the Point3D used in this FramePoint
+    * Gets the read-only reference to the point used in {@code this}.
     *
-    * @return Point3D
+    * @return the point of {@code this}.
     */
    public Point3D getPoint()
    {
