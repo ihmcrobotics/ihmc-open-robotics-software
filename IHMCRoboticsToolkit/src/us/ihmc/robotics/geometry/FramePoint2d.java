@@ -113,18 +113,4 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    {
       return tuple;
    }
-
-   /**
-    * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane, and
-    * returns a copy.
-    *
-    * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
-    * @return Copied FramePoint2d in the new reference frame.
-    */
-   public FramePoint2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
-   {
-      FramePoint2d ret = new FramePoint2d(this);
-      ret.changeFrameAndProjectToXYPlane(desiredFrame);
-      return ret;
-   }
 }
