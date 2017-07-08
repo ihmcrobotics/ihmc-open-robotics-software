@@ -26,9 +26,9 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
+   public FrameVector2d()
    {
-      super(referenceFrame, new Vector2D(x, y));
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -36,9 +36,19 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d()
+   public FrameVector2d(ReferenceFrame referenceFrame)
    {
-      this(ReferenceFrame.getWorldFrame());
+      this(referenceFrame, 0.0, 0.0);
+   }
+
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
+   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
+   {
+      super(referenceFrame, new Vector2D(x, y));
    }
 
    /**
@@ -66,19 +76,9 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame)
+   public FrameVector2d(FrameTuple2DReadOnly frameTuple2d)
    {
-      this(referenceFrame, 0.0, 0.0);
-   }
-
-   /**
-    * FrameVector2d
-    * <p/>
-    * A normal vector2d associated with a specific reference frame.
-    */
-   public FrameVector2d(FrameTuple2D<?, ?> frameTuple2d)
-   {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
    }
 
    /**
