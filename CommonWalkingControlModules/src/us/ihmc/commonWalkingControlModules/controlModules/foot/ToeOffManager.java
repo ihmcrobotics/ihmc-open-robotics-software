@@ -97,7 +97,7 @@ public class ToeOffManager
    private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
    private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
    private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
-   private final FrameVector2d toLeadingFoot = new FrameVector2d();
+   private final FrameVector2D toLeadingFoot = new FrameVector2D();
 
    private final HashMap<ToeContact, AbstractToeContact> toeContacts = new HashMap<>();
 

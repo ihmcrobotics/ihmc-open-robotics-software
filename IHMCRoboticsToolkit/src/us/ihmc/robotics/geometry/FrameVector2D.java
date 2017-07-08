@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> implements FrameVector2DReadOnly, Vector2DBasics
+public class FrameVector2D extends FrameTuple2D<FrameVector2D, Vector2D> implements FrameVector2DReadOnly, Vector2DBasics
 {
    private static final long serialVersionUID = -610124454205790361L;
 
@@ -27,7 +27,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * Creates a new frame vector and initializes it components to zero and its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
-   public FrameVector2d()
+   public FrameVector2D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -38,7 +38,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * 
     * @param referenceFrame the initial frame for this frame vector.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame)
+   public FrameVector2D(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, new Vector2D());
    }
@@ -51,7 +51,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * @param x the x-component.
     * @param y the y-component.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
+   public FrameVector2D(ReferenceFrame referenceFrame, double x, double y)
    {
       super(referenceFrame, new Vector2D(x, y));
    }
@@ -63,7 +63,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * @param referenceFrame the initial frame for this frame vector.
     * @param vectorArray the array containing this vector's components. Not modified.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double[] vectorArray)
+   public FrameVector2D(ReferenceFrame referenceFrame, double[] vectorArray)
    {
       this(referenceFrame, new Vector2D(vectorArray));
    }
@@ -75,7 +75,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * @param referenceFrame the initial frame for this frame vector.
     * @param tuple2DReadOnly the tuple to copy the components from. Not modified.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
+   public FrameVector2D(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
       super(referenceFrame, new Vector2D(tuple2DReadOnly));
    }
@@ -85,7 +85,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     *
     * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FrameVector2d(FrameTuple2DReadOnly other)
+   public FrameVector2D(FrameTuple2DReadOnly other)
    {
       this(other.getReferenceFrame(), new Vector2D(other));
    }
@@ -96,16 +96,16 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     *
     * @param frameTuple3DReadOnly the tuple to copy the components and reference frame from. Not modified.
     */
-   public FrameVector2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
+   public FrameVector2D(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
       this(frameTuple3DReadOnly.getReferenceFrame(), new Vector2D(frameTuple3DReadOnly));
    }
 
-   public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
+   public static FrameVector2D generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
    {
       double randomAngle = RandomNumbers.nextDouble(random, -Math.PI, Math.PI);
 
-      FrameVector2d randomVector = new FrameVector2d(zUpFrame, Math.cos(randomAngle), Math.sin(randomAngle));
+      FrameVector2D randomVector = new FrameVector2D(zUpFrame, Math.cos(randomAngle), Math.sin(randomAngle));
 
       return randomVector;
    }

@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.Vector2D32;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 
 public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingControllerFailureStatusMessage>
 {
@@ -31,7 +31,7 @@ public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingC
       this.fallingDirection.set(fallingDirection);
    }
    
-   public void setFallingDirection(FrameVector2d fallingDirection)
+   public void setFallingDirection(FrameVector2D fallingDirection)
    {
       fallingDirection.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       if (this.fallingDirection == null)

@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -61,7 +61,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    protected final FramePoint2d capturePoint = new FramePoint2d();
    protected final FramePoint2d desiredCapturePoint = new FramePoint2d();
-   protected final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
+   protected final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
    protected final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
    protected final FramePoint2d perfectCMP = new FramePoint2d();
@@ -81,7 +81,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final YoFrameConvexPolygon2d yoSafeAreaPolygon;
    protected final YoFrameConvexPolygon2d yoProjectionPolygon;
 
-   protected final FrameVector2d achievedCoMAcceleration2d = new FrameVector2d();
+   protected final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    protected double desiredCoMHeightAcceleration = 0.0;
 
    protected RobotSide supportSide = null;
@@ -212,7 +212,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
    }
 
-   public void setDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocity)
+   public void setDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocity)
    {
       this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
    }
@@ -385,5 +385,5 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    public abstract double getOptimizedTimeRemaining();
 
-   public abstract void setReferenceICPVelocity(FrameVector2d referenceICPVelocity);
+   public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
 }

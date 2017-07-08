@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
@@ -44,10 +44,10 @@ public class SmartCMPProjector extends CMPProjector
    private final FramePoint2d intersection1 = new FramePoint2d();
    private final FramePoint2d intersection2 = new FramePoint2d();
    private final FramePoint2d vertex = new FramePoint2d();
-   private final FrameVector2d icpToCMPVector = new FrameVector2d();
-   private final FrameVector2d icpToCandidateVector = new FrameVector2d();
+   private final FrameVector2D icpToCMPVector = new FrameVector2D();
+   private final FrameVector2D icpToCandidateVector = new FrameVector2D();
    private final FrameLine2d finalICPToICPLine = new FrameLine2d();
-   private final FrameVector2d finalICPToICPVector = new FrameVector2d();
+   private final FrameVector2D finalICPToICPVector = new FrameVector2D();
    private final FramePoint2d centroid = new FramePoint2d();
 
    // for debugging and to check what method was used

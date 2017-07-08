@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -300,9 +300,9 @@ public class FootCoPOccupancyGrid
    }
 
    private final FrameLine2d shiftedLine = new FrameLine2d();
-   private final FrameVector2d shiftedLineVector = new FrameVector2d();
+   private final FrameVector2D shiftedLineVector = new FrameVector2D();
    private final FramePoint2d shiftedLinePoint = new FramePoint2d();
-   private final FrameVector2d shiftingVector = new FrameVector2d();
+   private final FrameVector2D shiftingVector = new FrameVector2D();
    private final FramePoint2d cellCenter = new FramePoint2d();
 
    /**
@@ -402,7 +402,7 @@ public class FootCoPOccupancyGrid
       if (intersections == null || intersections.length == 1)
          return returnFailure;
 
-      FrameVector2d intersectionsVector = new FrameVector2d(soleFrame);
+      FrameVector2D intersectionsVector = new FrameVector2D(soleFrame);
       intersectionsVector.sub(intersections[1], intersections[0]);
 
       FramePoint2d temp = new FramePoint2d(soleFrame);
@@ -549,7 +549,7 @@ public class FootCoPOccupancyGrid
    private final Point3D tempPoint3d = new Point3D();
    private final FramePoint2d lineOrigin = new FramePoint2d();
    private final Vector3D tempVector3d = new Vector3D();
-   private final FrameVector2d lineDirection = new FrameVector2d();
+   private final FrameVector2D lineDirection = new FrameVector2D();
 
    private final FramePoint2d pointA = new FramePoint2d();
    private final FramePoint2d pointB = new FramePoint2d();

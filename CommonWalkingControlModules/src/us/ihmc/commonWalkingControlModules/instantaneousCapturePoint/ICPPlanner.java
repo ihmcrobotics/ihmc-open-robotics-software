@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -97,7 +97,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
- * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
+ * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
@@ -107,7 +107,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
  * <li>To get the CMP velocity, use either
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2D)}.
  * </ul>
  * </ul>
  * </p>
@@ -1223,7 +1223,7 @@ public class ICPPlanner
     * 
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       desiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -1293,7 +1293,7 @@ public class ICPPlanner
     * 
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }

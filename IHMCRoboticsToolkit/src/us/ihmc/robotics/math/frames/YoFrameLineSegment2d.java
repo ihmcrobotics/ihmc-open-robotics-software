@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -124,7 +124,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       getYoValuesFromFrameLineSegment();
    }
 
-   public void set(FramePoint2d firstEndpoint, FrameVector2d vectorToSecondEndpoint)
+   public void set(FramePoint2d firstEndpoint, FrameVector2D vectorToSecondEndpoint)
    {
       referenceFrame.checkReferenceFrameMatch(firstEndpoint.getReferenceFrame());
       referenceFrame.checkReferenceFrameMatch(vectorToSecondEndpoint.getReferenceFrame());

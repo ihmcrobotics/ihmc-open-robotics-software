@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -961,7 +961,7 @@ public class CapturePointTools
     *           biped.
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0,
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2D desiredCapturePointVelocity, double omega0,
                                                             FramePoint2d desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
@@ -1011,7 +1011,7 @@ public class CapturePointTools
     * @return
     */
    public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
-                                                                    FrameVector2d desiredCapturePointVelocity)
+                                                                    FrameVector2D desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);

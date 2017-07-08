@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
@@ -134,7 +134,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final Vector3D footNormalVector = new Vector3D();
 
    private final FramePoint2d centerOfRotation2d = new FramePoint2d();
-   private final FrameVector2d lineOfRotation2d = new FrameVector2d();
+   private final FrameVector2D lineOfRotation2d = new FrameVector2D();
 
    @Override
    public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)

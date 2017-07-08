@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -657,7 +657,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
          ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, constraintType);
@@ -666,7 +666,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, footLoadPercentage, constraintType);
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
          double zCurrent, ReferenceFrame pelvisZUpFrame, ConstraintType constraintType)
    {
       if (!USE_SINGULARITY_AVOIDANCE_SUPPORT)
@@ -803,7 +803,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
          ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       if (!USE_COLLAPSE_AVOIDANCE)

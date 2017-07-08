@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -61,9 +61,9 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();
 
    private final FramePoint2d currentSwingFootPosition = new FramePoint2d();
-   private final FrameVector2d currentSwingFootVelocity = new FrameVector2d();
-   private final FrameVector2d requiredSwingFootVelocity = new FrameVector2d();
-   private final FrameVector2d requiredFootstepPosition = new FrameVector2d();
+   private final FrameVector2D currentSwingFootVelocity = new FrameVector2D();
+   private final FrameVector2D requiredSwingFootVelocity = new FrameVector2D();
+   private final FrameVector2D requiredFootstepPosition = new FrameVector2D();
 
    private double previousSwingDurationSolution;
 
@@ -156,7 +156,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2D desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 

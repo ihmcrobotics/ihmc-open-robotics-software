@@ -1657,7 +1657,7 @@ public class ConvexPolygon2dTest
       for (double[] pointToTestDoubles : pointsAndLinesToTest)
       {
          FramePoint2d framePoint2d = new FramePoint2d(zUpFrame, pointToTestDoubles[0], pointToTestDoubles[1]);
-         FrameVector2d frameVector2d = new FrameVector2d(zUpFrame, pointToTestDoubles[2], pointToTestDoubles[3]);
+         FrameVector2D frameVector2d = new FrameVector2D(zUpFrame, pointToTestDoubles[2], pointToTestDoubles[3]);
 
          FrameLine2d frameLine2d = new FrameLine2d(framePoint2d, frameVector2d);
 

@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 
 public class CapturePointCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static void computeCapturePoint(FramePoint2d capturePointToPack, FramePoint2d centerOfMassInWorld, FrameVector2d centerOfMassVelocityInWorld,
+   public static void computeCapturePoint(FramePoint2d capturePointToPack, FramePoint2d centerOfMassInWorld, FrameVector2D centerOfMassVelocityInWorld,
          double omega0)
    {
       centerOfMassInWorld.checkReferenceFrameMatch(worldFrame);
@@ -20,8 +20,8 @@ public class CapturePointCalculator
       capturePointToPack.add(centerOfMassInWorld);
    }
 
-   public static void computeCapturePointVelocity(FrameVector2d capturePointVelocityToPack, FrameVector2d centerOfMassVelocityInWorld,
-         FrameVector2d centerOfMassAccelerationInWorld, double omega0)
+   public static void computeCapturePointVelocity(FrameVector2D capturePointVelocityToPack, FrameVector2D centerOfMassVelocityInWorld,
+         FrameVector2D centerOfMassAccelerationInWorld, double omega0)
    {
       centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
       centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);

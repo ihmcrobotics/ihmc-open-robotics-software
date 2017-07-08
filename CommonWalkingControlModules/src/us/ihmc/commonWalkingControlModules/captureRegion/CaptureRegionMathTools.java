@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 
 public class CaptureRegionMathTools
 {
@@ -30,7 +30,7 @@ public class CaptureRegionMathTools
    /**
     * Takes a line and a circle and computes the intersection. If there is no intersection sets NaN.
     */
-   public static void solveIntersectionOfRayAndCircle(FramePoint2d pointA, FramePoint2d pointB, FrameVector2d vector, double R, FramePoint2d pointToPack)
+   public static void solveIntersectionOfRayAndCircle(FramePoint2d pointA, FramePoint2d pointB, FrameVector2D vector, double R, FramePoint2d pointToPack)
    {
       // Look at JPratt Notes February 18, 2009 for details on the following:
 
@@ -74,7 +74,7 @@ public class CaptureRegionMathTools
    * a position specified by the alpha value. E.g. an alpha value of 0.5 will result in the point being in the
    * middle of the given directions.
    */
-   public void getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA, FrameVector2d directionB, double alpha, double radius,
+   public void getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2D directionA, FrameVector2D directionB, double alpha, double radius,
          FramePoint2d midpoint, FramePoint2d pointToPack)
    {
       directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
