@@ -13,11 +13,20 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
- * One of the main goals of this class is to check, at runtime, that operations on vectors occur
- * within the same Frame. This method checks for one Vector argument.
- *
- * @author Learning Locomotion Team
- * @version 2.0
+ * {@code FrameVector3D} is a 3D vector expressed in a given reference frame.
+ * <p>
+ * In addition to representing a {@link Vector3DBasics}, a {@link ReferenceFrame} is associated to a
+ * {@code FrameVector3D}. This allows, for instance, to enforce, at runtime, that operations on
+ * vectors occur in the same coordinate system. Also, via the method
+ * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of vector in different
+ * reference frame.
+ * </p>
+ * <p>
+ * Because a {@code FrameVector3D} extends {@code FrameVector3DReadOnly}, it is compatible with
+ * methods only requiring {@code FrameVector3DReadOnly}. However, these methods do NOT assert that
+ * the operation occur in the proper coordinate system. Use this feature carefully and always prefer
+ * using methods requiring {@code FrameVector3D}.
+ * </p>
  */
 public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> implements FrameVector3DReadOnly, Vector3DBasics
 {
@@ -98,10 +107,10 @@ public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> impleme
    }
 
    public static FrameVector3D generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
-                                                       double zMax)
+                                                         double zMax)
    {
       FrameVector3D randomVector = new FrameVector3D(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
-                                                 RandomNumbers.nextDouble(random, zMin, zMax));
+                                                     RandomNumbers.nextDouble(random, zMin, zMax));
       return randomVector;
    }
 

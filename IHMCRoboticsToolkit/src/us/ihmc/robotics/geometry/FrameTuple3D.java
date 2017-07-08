@@ -21,6 +21,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
  * {@code FrameTuple3D}. This allows, for instance, to enforce, at runtime, that operations on
  * tuples occur in the same coordinate system.
  * </p>
+ * <p>
+ * Because a {@code FrameTuple3D} extends {@code Tuple3DBasics}, it is compatible with methods only
+ * requiring {@code Tuple3DBasics}. However, these methods do NOT assert that the operation occur in
+ * the proper coordinate system. Use this feature carefully and always prefer using methods
+ * requiring {@code FrameTuple3D}.
+ * </p>
  */
 public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends FrameGeometryObject<S, T>
       implements FrameTuple3DReadOnly, Tuple3DBasics, Serializable
