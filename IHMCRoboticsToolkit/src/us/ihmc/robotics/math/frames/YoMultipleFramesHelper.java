@@ -4,7 +4,7 @@ import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
