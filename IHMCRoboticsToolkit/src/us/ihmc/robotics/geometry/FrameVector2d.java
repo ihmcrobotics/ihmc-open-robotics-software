@@ -40,7 +40,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     */
    public FrameVector2d(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, 0.0, 0.0);
+      this(referenceFrame, new Vector2D());
    }
 
    /**
@@ -60,7 +60,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     */
    public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
-      this(referenceFrame, tuple2DReadOnly.getX(), tuple2DReadOnly.getY());
+      super(referenceFrame, new Vector2D(tuple2DReadOnly));
    }
 
    /**
@@ -68,9 +68,9 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double[] vector)
+   public FrameVector2d(ReferenceFrame referenceFrame, double[] vectorArray)
    {
-      this(referenceFrame, vector[0], vector[1]);
+      this(referenceFrame, new Vector2D(vectorArray));
    }
 
    /**
@@ -80,7 +80,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     */
    public FrameVector2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      this(frameTuple2DReadOnly.getReferenceFrame(), frameTuple2DReadOnly.getX(), frameTuple2DReadOnly.getY());
+      this(frameTuple2DReadOnly.getReferenceFrame(), new Vector2D(frameTuple2DReadOnly));
    }
 
    /**
@@ -90,7 +90,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     */
    public FrameVector2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      this(frameTuple3DReadOnly.getReferenceFrame(), frameTuple3DReadOnly.getX(), frameTuple3DReadOnly.getY());
+      this(frameTuple3DReadOnly.getReferenceFrame(), new Vector2D(frameTuple3DReadOnly));
    }
 
    public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
@@ -107,6 +107,11 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       tuple.setAndNormalize(other);
    }
 
+   public double cross(FrameVector2d frameVector2D)
+   {
+      return FrameVector2DReadOnly.super.cross(frameVector2D);
+   }
+
    /**
     * Returns the vector inside this FrameVector.
     *
@@ -115,10 +120,5 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
    public Vector2DReadOnly getVector()
    {
       return this.tuple;
-   }
-
-   public double cross(FrameVector2d frameVector2D)
-   {
-      return FrameVector2DReadOnly.super.cross(frameVector2D);
    }
 }
