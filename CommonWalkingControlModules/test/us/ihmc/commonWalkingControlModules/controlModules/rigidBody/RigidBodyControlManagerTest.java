@@ -41,7 +41,7 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -173,7 +173,7 @@ public class RigidBodyControlManagerTest
 
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
@@ -181,7 +181,7 @@ public class RigidBodyControlManagerTest
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
-      FramePoint initialPosition = new FramePoint(bodyFrame);
+      FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
       FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
@@ -331,7 +331,7 @@ public class RigidBodyControlManagerTest
          assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
          ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
-         FramePoint initialPosition = new FramePoint(bodyFrame);
+         FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
          FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
          initialPosition.changeFrame(worldFrame);
          initialOrientation.changeFrame(worldFrame);
@@ -409,19 +409,19 @@ public class RigidBodyControlManagerTest
 
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
       FrameVector3D desiredAngularVelocity = new FrameVector3D();
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
       FrameOrientation actualControlFrameOrientation = new FrameOrientation();
-      FramePoint actualControlFramePosition = new FramePoint();
+      FramePoint3D actualControlFramePosition = new FramePoint3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("TestControlFrame", bodyFrame);
       controlFrame.setPoseAndUpdate(controlFramePosition, controlFrameOrientation);
-      FramePoint initialPosition = new FramePoint(controlFrame);
+      FramePoint3D initialPosition = new FramePoint3D(controlFrame);
       FrameOrientation initialOrientation = new FrameOrientation(controlFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);

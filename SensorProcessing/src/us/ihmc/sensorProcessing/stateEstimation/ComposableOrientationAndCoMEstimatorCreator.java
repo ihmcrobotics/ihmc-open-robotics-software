@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -155,7 +155,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
       private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
       private final ControlFlowOutputPort<FrameVector3D> angularVelocityOutputPort;
 
-      private final ControlFlowOutputPort<FramePoint> centerOfMassPositionOutputPort;
+      private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort;
       private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort;
       private final ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationOutputPort;
       private final ControlFlowOutputPort<FrameVector3D> angularAccelerationOutputPort;
@@ -457,7 +457,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityOutputPort.getData());
       }
 
-      public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
+      public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
       {
          estimatedCoMPositionToPack.setIncludingFrame(centerOfMassPositionOutputPort.getData());
       }
@@ -495,7 +495,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          setUpdatedInverseDynamicsStructureOutputPort(inverseDynamicsStructure);
       }
 
-      public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+      public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
       {
          centerOfMassPositionOutputPort.setData(estimatedCoMPosition);
 
@@ -614,7 +614,7 @@ public class ComposableOrientationAndCoMEstimatorCreator
          return inverseDynamicsStructureInputPort;
       }
 
-      public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+      public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
       {
          throw new RuntimeException("No pelvis position estimated with this state estimator (" + getClass().getSimpleName() + ").");
       }

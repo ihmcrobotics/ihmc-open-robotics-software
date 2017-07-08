@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -269,7 +269,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
-         FramePoint location = new FramePoint(pelvisFrame, footstepX, footstepY, 0.0);
+         FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);

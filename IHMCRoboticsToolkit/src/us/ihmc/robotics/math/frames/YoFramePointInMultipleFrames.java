@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
 
@@ -16,7 +16,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
-   private final FramePoint framePoint = new FramePoint();
+   private final FramePoint3D framePoint = new FramePoint3D();
    private final Point3D point = new Point3D();
 
    private final String namePrefix;
@@ -122,7 +122,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
 
          attachVariableChangedListener(new VariableChangedListener()
          {
-            private final FramePoint localFramePoint = new FramePoint();
+            private final FramePoint3D localFramePoint = new FramePoint3D();
             private final YoFramePoint point = yoFramePointInWorld;
 
             @Override

@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -25,7 +25,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
    
    public abstract double getKneeAngle(RobotSide robotSide);
 
-   public abstract FramePoint getCenterOfMassPositionInFrame(ReferenceFrame referenceFrame);
+   public abstract FramePoint3D getCenterOfMassPositionInFrame(ReferenceFrame referenceFrame);
 
    public abstract FrameVector3D getGravityInWorldFrame();
 
@@ -34,7 +34,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
 
    public abstract FrameOrientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
 
-   public abstract FramePoint getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
+   public abstract FramePoint3D getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
 
    public abstract double getLegJointPosition(RobotSide robotSide, LegJointName legJointName);
    public abstract double getLegJointVelocity(RobotSide robotSide, LegJointName legJointName);
@@ -62,7 +62,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
    public abstract FrameVector3D getBodyVelocity();
    public abstract FrameVector3D getCenterOfMassVelocityInFrame(ReferenceFrame referenceFrame);
    
-   public abstract FramePoint getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
+   public abstract FramePoint3D getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
    public abstract FrameVector3D getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
    
    public abstract HashMap<FramePoint2d, Boolean> getContactMap(RobotSide robotSide);

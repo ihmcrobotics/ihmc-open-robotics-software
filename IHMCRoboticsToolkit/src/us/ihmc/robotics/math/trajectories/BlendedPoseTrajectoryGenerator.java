@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -14,7 +14,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final BlendedPositionTrajectoryGenerator blendedPositionTrajectory;
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
@@ -88,7 +88,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       blendedPositionTrajectory.getPosition(positionToPack);
    }

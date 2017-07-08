@@ -17,7 +17,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -182,7 +182,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       isPerformingTouchdown.set(true);
    }
 
-   private final FramePoint desiredAnklePosition = new FramePoint();
+   private final FramePoint3D desiredAnklePosition = new FramePoint3D();
    private final FramePose desiredPose = new FramePose();
 
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)

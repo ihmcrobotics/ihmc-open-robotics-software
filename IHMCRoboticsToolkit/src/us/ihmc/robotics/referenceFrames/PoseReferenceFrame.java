@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -64,7 +64,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePoint position, FrameOrientation orientation)
+   public void setPoseAndUpdate(FramePoint3D position, FrameOrientation orientation)
    {
       originPose.setPose(position, orientation);
       this.update();
@@ -94,7 +94,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPositionAndUpdate(FramePoint framePoint)
+   public void setPositionAndUpdate(FramePoint3D framePoint)
    {
       framePoint.checkReferenceFrameMatch(parentFrame);
       originPose.setPosition(framePoint);
@@ -183,7 +183,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       getTransformToParent(transformToPack);
    }
 
-   public void getPoseIncludingFrame(FramePoint framePointToPack, FrameOrientation frameOrientationToPack)
+   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameOrientation frameOrientationToPack)
    {
       originPose.getPoseIncludingFrame(framePointToPack, frameOrientationToPack);
    }
@@ -203,7 +203,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.getPosition(pointToPack);
    }
 
-   public void getPositionIncludingFrame(FramePoint framePointToPack)
+   public void getPositionIncludingFrame(FramePoint3D framePointToPack)
    {
       originPose.getPositionIncludingFrame(framePointToPack);
    }

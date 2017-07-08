@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
@@ -254,7 +254,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Packs the linear acceleration of a point that is fixed in bodyFrame, with respect to
     * baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector3D linearAccelerationToPack)
+   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint3D pointFixedInBodyFrame, FrameVector3D linearAccelerationToPack)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
 

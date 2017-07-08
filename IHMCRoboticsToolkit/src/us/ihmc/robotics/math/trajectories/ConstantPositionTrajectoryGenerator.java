@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -35,7 +35,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
    public void initialize()
    {
       time.set(0.0);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
       positionProvider.getPosition(positionToPack);
       positionToPack.changeFrame(position.getReferenceFrame());
       position.set(positionToPack);
@@ -51,7 +51,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -66,7 +66,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
       accelerationToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

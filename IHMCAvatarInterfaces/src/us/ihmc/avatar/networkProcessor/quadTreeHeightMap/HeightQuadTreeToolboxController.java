@@ -25,7 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
@@ -60,7 +60,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final CommandInputManager commandInputManager;
    private final AtomicReference<RobotConfigurationData> robotConfigurationDataToProcess = new AtomicReference<>(null);
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatusToProcess = new AtomicReference<>(null);
-   private final FrameTupleArrayList<FramePoint> contactPoints = FrameTupleArrayList.createFramePointArrayList();
+   private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList();
    private final int expectedRobotConfigurationDataHash;
    private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingInverseDynamicsJoint rootJoint;
@@ -97,7 +97,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       return true;
    }
 
-   private final FramePoint scanPoint = new FramePoint();
+   private final FramePoint3D scanPoint = new FramePoint3D();
    private final MutableBoolean quadTreeUpdateRequested = new MutableBoolean(false);
 
    @Override
@@ -131,7 +131,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       {
          for (int contactPointIndex = 0; contactPointIndex < contactPoints.size(); contactPointIndex++)
          {
-            FramePoint contactPoint = contactPoints.get(contactPointIndex);
+            FramePoint3D contactPoint = contactPoints.get(contactPointIndex);
             quadTree.addPoint(contactPoint.getX(), contactPoint.getY(), contactPoint.getZ());
          }
       }
@@ -225,7 +225,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       }
    }
 
-   private void findProjectionOntoPlaneFrame(ReferenceFrame planeFrame, FramePoint2d pointInWorld, FramePoint pointProjectedOntoPlaneFrameToPack)
+   private void findProjectionOntoPlaneFrame(ReferenceFrame planeFrame, FramePoint2d pointInWorld, FramePoint3D pointProjectedOntoPlaneFrameToPack)
    {
       pointInWorld.checkReferenceFrameMatch(worldFrame);
 

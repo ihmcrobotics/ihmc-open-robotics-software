@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -343,7 +343,7 @@ public class TwistCalculatorTest
             assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
             Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
-            FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
+            FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
             FrameVector3D actualLinearVelocity = new FrameVector3D();
             twistCalculator.getLinearVelocityOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearVelocity);
             FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
@@ -433,7 +433,7 @@ public class TwistCalculatorTest
                assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
 
                Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
-               FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
+               FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
                FrameVector3D actualLinearVelocity = new FrameVector3D();
                twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);
                FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame,
@@ -487,8 +487,8 @@ public class TwistCalculatorTest
    public static FrameVector3D computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
                                                                              ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture, Point3D bodyFixedPoint)
    {
-      FramePoint point = new FramePoint(bodyFrame, bodyFixedPoint);
-      FramePoint pointInFuture = new FramePoint(bodyFrameInFuture, bodyFixedPoint);
+      FramePoint3D point = new FramePoint3D(bodyFrame, bodyFixedPoint);
+      FramePoint3D pointInFuture = new FramePoint3D(bodyFrameInFuture, bodyFixedPoint);
       point.changeFrame(baseFrame);
       pointInFuture.changeFrame(baseFrameInFuture);
 
@@ -543,9 +543,9 @@ public class TwistCalculatorTest
 
    public static FrameVector3D computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
-      FramePoint bodyPosition = new FramePoint(bodyFrame);
+      FramePoint3D bodyPosition = new FramePoint3D(bodyFrame);
       bodyPosition.changeFrame(worldFrame);
-      FramePoint bodyPositionInFuture = new FramePoint(bodyFrameInFuture);
+      FramePoint3D bodyPositionInFuture = new FramePoint3D(bodyFrameInFuture);
       bodyPositionInFuture.changeFrame(worldFrame);
 
       FrameVector3D bodyLinearVelocity = new FrameVector3D(worldFrame);

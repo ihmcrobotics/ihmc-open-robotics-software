@@ -6,7 +6,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
@@ -20,7 +20,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
    private final int initialSize = 8;
-   private final FrameTupleArrayList<FramePoint> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
+   private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
    private boolean useHighCoPDamping = false;
@@ -54,7 +54,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.clear();
    }
 
-   public void addPointInContact(FramePoint newPointInContact)
+   public void addPointInContact(FramePoint3D newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
@@ -66,7 +66,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
    }
 
-   public void setPointsInContact(List<FramePoint> newPointsInContact)
+   public void setPointsInContact(List<FramePoint3D> newPointsInContact)
    {
       contactPoints.copyFromListAndTrimSize(newPointsInContact);
 
@@ -131,7 +131,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       return rigidBodyName;
    }
 
-   public void getContactPoint(int index, FramePoint contactPointToPack)
+   public void getContactPoint(int index, FramePoint3D contactPointToPack)
    {
       contactPointToPack.setIncludingFrame(contactPoints.get(index));
    }

@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStep implements TimeIntervalProvider
@@ -23,7 +23,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       this.groundClearance = 0.0;
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -84,7 +84,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       goalPosition.set(this.goalPosition);
    }
 
-   public void getGoalPosition(FramePoint goalPosition)
+   public void getGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -97,7 +97,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       this.goalPosition.set(goalPosition);
    }
 
-   public void setGoalPosition(FramePoint goalPosition)
+   public void setGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());

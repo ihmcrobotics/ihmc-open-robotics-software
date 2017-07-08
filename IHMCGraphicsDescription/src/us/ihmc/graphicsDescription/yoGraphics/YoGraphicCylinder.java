@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -65,7 +65,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       point3d.setZ(this.baseZ.getDoubleValue());
    }
 
-   public void getBasePosition(FramePoint framePoint)
+   public void getBasePosition(FramePoint3D framePoint)
    {
       framePoint.setX(this.baseX.getDoubleValue());
       framePoint.setY(this.baseY.getDoubleValue());

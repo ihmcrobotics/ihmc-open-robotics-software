@@ -557,7 +557,7 @@ public class PlanarRegionTest
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
          assertFalse(planarRegion.isPointInside(point2d.getPoint()));
 
-         FramePoint point3d = new FramePoint();
+         FramePoint3D point3d = new FramePoint3D();
          double maximumOrthogonalDistance = 1.0e-3;
          // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);

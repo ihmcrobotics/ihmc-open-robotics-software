@@ -4,7 +4,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -16,7 +16,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3D>
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FramePoint imuFramePoint = new FramePoint(worldFrame);
+   private final FramePoint3D imuFramePoint = new FramePoint3D(worldFrame);
 
    private final FrameVector3D linearAccelerationFrameVector = new FrameVector3D(worldFrame);
    private final Vector3D linearAcceleration = new Vector3D();

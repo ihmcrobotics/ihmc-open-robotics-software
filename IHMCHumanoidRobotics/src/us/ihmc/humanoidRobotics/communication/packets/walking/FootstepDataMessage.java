@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -176,7 +176,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       robotSide = footstep.getRobotSide();
 
-      FramePoint location = new FramePoint();
+      FramePoint3D location = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -218,7 +218,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
          for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
          {
-            FramePoint framePoint = footstep.getCustomPositionWaypoints().get(i);
+            FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
             framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             positionWaypoints[i] = new Point3D(framePoint.getPoint());
          }

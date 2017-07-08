@@ -9,7 +9,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.Finishable;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
@@ -33,8 +33,8 @@ public class QuadrupedSwingTrajectoryGenerator
    private final YoVariableRegistry registry;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
-   private final FramePoint desiredEndEffectorPosition = new FramePoint();
-   private final FramePoint initialPosition = new FramePoint();
+   private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
+   private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D finalDesiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D zeroVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
 
@@ -83,7 +83,7 @@ public class QuadrupedSwingTrajectoryGenerator
       bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, double swingHeight, FramePoint swingTarget, FrameVector3D desiredFinalVelocity)
+   public void initializeSwing(double swingTime, FramePoint3D swingInitial, double swingHeight, FramePoint3D swingTarget, FrameVector3D desiredFinalVelocity)
    {
       bagOfBalls.reset();
       
@@ -101,7 +101,7 @@ public class QuadrupedSwingTrajectoryGenerator
       parabolicCartesianTrajectoryGenerator.initialize(initialPosition, zeroVector, zeroVector, swingTarget, finalDesiredVelocity);
    }
    
-   public void computeSwing(FramePoint framePointToPack)
+   public void computeSwing(FramePoint3D framePointToPack)
    {
       if (USE_NEW_SWING_GENERATOR)
       {
@@ -134,7 +134,7 @@ public class QuadrupedSwingTrajectoryGenerator
       }
    }
 
-   private void updateBagOfBalls(FramePoint desiredEndEffectorPosition)
+   private void updateBagOfBalls(FramePoint3D desiredEndEffectorPosition)
    {
       if(ballCounter % 10000 == 0)
       {

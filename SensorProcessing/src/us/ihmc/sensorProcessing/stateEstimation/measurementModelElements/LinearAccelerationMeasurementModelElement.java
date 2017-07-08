@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -26,7 +26,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 {
    private static final int SIZE = 3;
 
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
@@ -54,7 +54,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix3D tempMatrix = new Matrix3D();
    private final Vector3D tempVector = new Vector3D();
-   private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final Twist twistOfEstimationLink = new Twist();
    private final Twist twistOfMeasurementFrameWithRespectToEstimation = new Twist();
    private final FrameVector3D tempFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -80,7 +80,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final SpatialAccelerationVector spatialAccelerationOfMeasurementLink = new SpatialAccelerationVector();
 
 
-   public LinearAccelerationMeasurementModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FramePoint> centerOfMassPositionPort,
+   public LinearAccelerationMeasurementModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort,
            ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort, ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort,
            ControlFlowOutputPort<FrameVector3D> angularAccelerationPort, ControlFlowOutputPort<FrameVector3D> biasPort, ControlFlowInputPort<Vector3D> linearAccelerationMeasurementInputPort,
@@ -119,7 +119,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    }
 
    private final FrameVector3D rdTemp = new FrameVector3D();
-   private final FramePoint rPTemp = new FramePoint();
+   private final FramePoint3D rPTemp = new FramePoint3D();
    private final FrameVector3D rPdTemp = new FrameVector3D();
    public void computeMatrixBlocks()
    {
@@ -154,7 +154,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       computeAngularAccelerationBlock(rotationFromEstimationToMeasurement);
    }
 
-   private void computeRpd(FrameVector3D rPdToPack, FramePoint rP, FrameVector3D rd)
+   private void computeRpd(FrameVector3D rPdToPack, FramePoint3D rP, FrameVector3D rd)
    {
       // T_{p}^{p,w}
       estimationLink.getBodyFixedFrame().getTwistOfFrame(twistOfEstimationLink);
@@ -173,7 +173,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final FrameVector3D s = new FrameVector3D();
 
    private void computeOrientationBlock(SpatialAccelerationCalculator spatialAccelerationCalculator,
-         RotationMatrix rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint rP, FrameVector3D rPd)
+         RotationMatrix rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint3D rP, FrameVector3D rPd)
    {
       // TODO: code and computation repeated in LinearAccelerationMeasurementModelJacobianAssembler
       RigidBody elevator = spatialAccelerationCalculator.getRootBody();
@@ -186,7 +186,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       twistOfMeasurementWithRespectToEstimation.getAngularPart(omegaEstimationToMeasurement);
       twistOfMeasurementWithRespectToEstimation.getLinearPart(vEstimationToMeasurement);
 
-      FramePoint r = centerOfMassPositionPort.getData();
+      FramePoint3D r = centerOfMassPositionPort.getData();
       FrameVector3D rd = centerOfMassVelocityPort.getData();
       FrameVector3D rdd = centerOfMassAccelerationPort.getData();
 
@@ -287,7 +287,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       tempMatrix.get(getOutputMatrixBlock(orientationPort));
    }
 
-   private void computeAngularVelocityBlock(RotationMatrix rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint rP,
+   private void computeAngularVelocityBlock(RotationMatrix rotationFromEstimationToWorld, Twist twistOfMeasurementWithRespectToEstimation, FramePoint3D rP,
            FrameVector3D rd, FrameVector3D rPd)
    {
       twistOfMeasurementWithRespectToEstimation.changeFrame(estimationFrame);

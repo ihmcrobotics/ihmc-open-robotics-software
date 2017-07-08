@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PlanarWalkerTimedStep implements TimeIntervalProvider
@@ -23,7 +23,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
       this.groundClearance = 0.0;
    }
 
-   public PlanarWalkerTimedStep(RobotSide robotSide, FramePoint goalPosition, double groundClearance, TimeInterval timeInterval)
+   public PlanarWalkerTimedStep(RobotSide robotSide, FramePoint3D goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       this();
       setRobotSide(robotSide);
@@ -84,7 +84,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
       goalPosition.set(this.goalPosition);
    }
 
-   public void getGoalPosition(FramePoint goalPosition)
+   public void getGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -97,7 +97,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
       this.goalPosition.set(goalPosition);
    }
 
-   public void setGoalPosition(FramePoint goalPosition)
+   public void setGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());

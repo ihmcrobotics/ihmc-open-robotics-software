@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class CylindricalCoordinatesCalculator
 {
 
-   private FramePoint position = new FramePoint();
+   private FramePoint3D position = new FramePoint3D();
    private final RotationMatrix preRotation = new RotationMatrix();
    private final RotationMatrix rotation = new RotationMatrix();
    private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
@@ -35,7 +35,7 @@ public class CylindricalCoordinatesCalculator
       return new FramePose(position, orientation);
    }
 
-   public static void getPosition(FramePoint pointToPack, ReferenceFrame frame, double angle, double radius, double z)
+   public static void getPosition(FramePoint3D pointToPack, ReferenceFrame frame, double angle, double radius, double z)
    {
       double x = radius * Math.cos(angle);
       double y = radius * Math.sin(angle);
@@ -73,7 +73,7 @@ public class CylindricalCoordinatesCalculator
       accelerationToPack.setZ(zDDot);
    }
 
-   public static double getRadius(FramePoint position)
+   public static double getRadius(FramePoint3D position)
    {
       double x = position.getX();
       double y = position.getY();
@@ -82,7 +82,7 @@ public class CylindricalCoordinatesCalculator
       return radius;
    }
 
-   public static double getAngle(FramePoint position)
+   public static double getAngle(FramePoint3D position)
    {
       double x = position.getX();
       double y = position.getY();
@@ -91,7 +91,7 @@ public class CylindricalCoordinatesCalculator
       return angle;
    }
 
-   public static double getRadialVelocity(FramePoint position, FrameVector3D velocity)
+   public static double getRadialVelocity(FramePoint3D position, FrameVector3D velocity)
    {
       position.checkReferenceFrameMatch(velocity);
 
@@ -105,7 +105,7 @@ public class CylindricalCoordinatesCalculator
       return (x * xd + y * yd) / radius;
    }
 
-   public static double getAngularVelocity(FramePoint position, FrameVector3D velocity)
+   public static double getAngularVelocity(FramePoint3D position, FrameVector3D velocity)
    {
       position.checkReferenceFrameMatch(velocity);
 

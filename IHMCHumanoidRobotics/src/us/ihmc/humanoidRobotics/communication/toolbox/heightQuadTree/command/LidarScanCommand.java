@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -69,7 +69,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       pointToPack.set(scan.get(index));
    }
 
-   public void getFramePoint(int index, FramePoint framePointToPack)
+   public void getFramePoint(int index, FramePoint3D framePointToPack)
    {
       framePointToPack.setIncludingFrame(pointCloudFrame, scan.get(index));
    }

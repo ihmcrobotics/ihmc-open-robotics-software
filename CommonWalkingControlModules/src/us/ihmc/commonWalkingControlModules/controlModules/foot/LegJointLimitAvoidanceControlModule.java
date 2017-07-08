@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -62,7 +62,7 @@ public class LegJointLimitAvoidanceControlModule
    private YoDouble[] upperLimits;
    private YoFramePose originalDesiredYoPose;
    private FramePose originalDesiredPose;
-   private FramePoint adjustedDesiredPosition;
+   private FramePoint3D adjustedDesiredPosition;
    private FrameOrientation adjustedDesiredOrientation;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
@@ -120,7 +120,7 @@ public class LegJointLimitAvoidanceControlModule
          originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
          adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
-         adjustedDesiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         adjustedDesiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          adjustedDesiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       }
 
@@ -169,7 +169,7 @@ public class LegJointLimitAvoidanceControlModule
       }
    }
 
-   public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
+   public void correctSwingFootTrajectory(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
          FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearAccelerationOfOrigin, FrameVector3D desiredAngularAcceleration)
 
    {

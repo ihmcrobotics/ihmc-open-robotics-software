@@ -44,7 +44,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -401,7 +401,7 @@ public class PickUpBallBehavior extends AbstractBehavior
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
@@ -409,7 +409,7 @@ public class PickUpBallBehavior extends AbstractBehavior
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.6, -0.25, 0);
+            FramePoint3D rhPoint = new FramePoint3D(referenceFrames.getChestFrame(), 0.6, -0.25, 0);
             FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), 0, 0);
 
             //            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
@@ -423,7 +423,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius());
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);

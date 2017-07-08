@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
@@ -122,7 +122,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
       z.update(pointUnfiltered.getZ());
    }
 
-   public void update(FramePoint pointUnfiltered)
+   public void update(FramePoint3D pointUnfiltered)
    {
       checkReferenceFrameMatch(pointUnfiltered);
       x.update(pointUnfiltered.getX());

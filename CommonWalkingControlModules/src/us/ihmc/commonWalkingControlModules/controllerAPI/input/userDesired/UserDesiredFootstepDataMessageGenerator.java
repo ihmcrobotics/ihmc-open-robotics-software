@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -72,7 +72,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private PoseReferenceFrame previousPoseFrame;
 
    private FrameVector3D desiredOffset;
-   private FramePoint desiredPosition;
+   private FramePoint3D desiredPosition;
    private FrameOrientation desiredOrientation;
 
    private final FootstepDataCommand desiredFootstepCommand = new FootstepDataCommand();
@@ -88,7 +88,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
       ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
       desiredOffset = new FrameVector3D(stanceFootFrame);
-      desiredPosition = new FramePoint(stanceFootFrame);
+      desiredPosition = new FramePoint3D(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
 
       firstStepSide.set(supportSide);

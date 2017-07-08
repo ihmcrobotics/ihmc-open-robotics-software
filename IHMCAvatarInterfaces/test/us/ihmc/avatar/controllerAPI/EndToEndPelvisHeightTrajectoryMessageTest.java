@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -55,7 +55,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint desiredRandomPelvisPosition = new FramePoint(pelvis.getBodyFixedFrame());
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
       Point3D desiredPosition = new Point3D();
@@ -112,7 +112,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
       
-      FramePoint desiredRandomPelvisPosition = new FramePoint(pelvis.getBodyFixedFrame());
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.05);
       Point3D desiredPosition = new Point3D();

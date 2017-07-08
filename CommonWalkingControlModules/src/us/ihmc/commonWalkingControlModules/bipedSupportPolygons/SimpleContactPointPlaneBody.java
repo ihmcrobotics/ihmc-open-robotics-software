@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -62,10 +62,10 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public List<FramePoint> getContactPointsCopy()
+   public List<FramePoint3D> getContactPointsCopy()
    {
-      List<FramePoint> contactPoints = new ArrayList<>();
-      contactPoints.add(new FramePoint(contactFrame));
+      List<FramePoint3D> contactPoints = new ArrayList<>();
+      contactPoints.add(new FramePoint3D(contactFrame));
       return contactPoints;
    }
 

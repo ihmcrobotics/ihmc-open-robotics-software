@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -526,7 +526,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
          YoFramePose yoFramePose = feetIKs.get(robotSide);
 
-         FramePoint footPosition = new FramePoint(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
+         FramePoint3D footPosition = new FramePoint3D(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          double xyRange = 1.0;
@@ -577,7 +577,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
          YoFramePose yoFramePose = handIKs.get(robotSide);
 
-         FramePoint handPosition = new FramePoint(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
+         FramePoint3D handPosition = new FramePoint3D(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
          handPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          double xyRange = 1.0;
@@ -602,7 +602,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       double angle_min = -Math.PI;
       double angle_max = +Math.PI;
 
-      FramePoint pelvisPosition = new FramePoint(fullRobotModel.getPelvis().getBodyFixedFrame());
+      FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getPelvis().getBodyFixedFrame());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       double xyRange = 2.0;
@@ -903,7 +903,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             for (RobotSide robotSide : RobotSide.values())
             {
                YoFramePose footIK = feetIKs.get(robotSide);
-               FramePoint position = footIK.getPosition().getFramePointCopy();
+               FramePoint3D position = footIK.getPosition().getFramePointCopy();
                FrameOrientation orientation = footIK.getOrientation().getFrameOrientationCopy();
                FramePose framePose = new FramePose(position, orientation);
                framePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());

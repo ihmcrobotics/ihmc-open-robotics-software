@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -27,7 +27,7 @@ public class PositionTrajectorySmootherTest
    private PositionTrajectoryGenerator positionTrajectoryInput;
    private PositionTrajectorySmoother smoother;
    private PositionProvider positionProvider;
-   private FramePoint position;
+   private FramePoint3D position;
    private YoVariableRegistry parentRegistry;
 
    private double xValue = Math.random();
@@ -42,7 +42,7 @@ public class PositionTrajectorySmootherTest
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      position = new FramePoint(referenceFrame, xValue, yValue, zValue);
+      position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionProvider = new ConstantPositionProvider(position);
       positionTrajectoryInput = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);
    }
@@ -104,7 +104,7 @@ public class PositionTrajectorySmootherTest
    public void testGet()
    {
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
 
       smoother.getPosition(positionToPack);
 
@@ -149,7 +149,7 @@ public class PositionTrajectorySmootherTest
 	@Test(timeout = 30000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(referenceFrame);
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);

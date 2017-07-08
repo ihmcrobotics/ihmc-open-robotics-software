@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParamet
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -130,7 +130,7 @@ public class FootstepVisualizer
 
       nullRobot.setTime(nullRobot.getTime() + scs.getDT());
 
-      FramePoint solePositon = new FramePoint(footstep.getSoleReferenceFrame());
+      FramePoint3D solePositon = new FramePoint3D(footstep.getSoleReferenceFrame());
       solePositon.changeFrame(worldFrame);
 
       updateFocus(solePositon);
@@ -158,7 +158,7 @@ public class FootstepVisualizer
    }
    
 
-   private void updateFocus(FramePoint point)
+   private void updateFocus(FramePoint3D point)
    {
       double x = point.getX();
       double y = point.getY();

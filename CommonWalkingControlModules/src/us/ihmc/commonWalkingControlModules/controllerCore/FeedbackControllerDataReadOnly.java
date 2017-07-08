@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -68,13 +68,13 @@ public interface FeedbackControllerDataReadOnly
     * the method returns {@code false}.
     * </p>
     * 
-    * @param positionDataToPack the {@link FramePoint} in which the position data is stored. Data is
+    * @param positionDataToPack the {@link FramePoint3D} in which the position data is stored. Data is
     *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type whether the current or desired position is requested, the other values in
     *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
-   boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type);
+   boolean getCenterOfMassPositionData(FramePoint3D positionDataToPack, Type type);
 
    /**
     * Retrieves if possible the vector data about the center of mass.
@@ -100,13 +100,13 @@ public interface FeedbackControllerDataReadOnly
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param positionDataToPack the {@link FramePoint} in which the position data is stored. Data is
+    * @param positionDataToPack the {@link FramePoint3D} in which the position data is stored. Data is
     *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type whether the current or desired position is requested, the other values in
     *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
-   boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type);
+   boolean getPositionData(RigidBody endEffector, FramePoint3D positionDataToPack, Type type);
 
    /**
     * Retrieves if possible the orientation data about a specific end-effector.

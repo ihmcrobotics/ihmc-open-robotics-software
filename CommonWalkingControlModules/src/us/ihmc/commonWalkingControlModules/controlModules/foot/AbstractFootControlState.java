@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -26,7 +26,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final RigidBody pelvis;
    protected final ContactableFoot contactableFoot;
 
-   protected final FramePoint desiredPosition = new FramePoint(worldFrame);
+   protected final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    protected final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
    protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);

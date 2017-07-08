@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
@@ -59,7 +59,7 @@ public class CenterOfPressureResolver
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint centerOfPressureToPack, SpatialForceVector spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack, SpatialForceVector spatialForceVector,
          ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:

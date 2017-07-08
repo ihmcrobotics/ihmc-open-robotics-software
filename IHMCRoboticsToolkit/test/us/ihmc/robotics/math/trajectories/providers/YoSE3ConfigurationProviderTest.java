@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class YoSE3ConfigurationProviderTest
@@ -55,7 +55,7 @@ public class YoSE3ConfigurationProviderTest
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      FramePoint framePointToPack = new FramePoint();
+      FramePoint3D framePointToPack = new FramePoint3D();
       provider.getPosition(framePointToPack);
 
       assertEquals(referenceFrame, framePointToPack.getReferenceFrame());

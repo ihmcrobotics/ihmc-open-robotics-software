@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -99,7 +99,7 @@ public class MocapToPelvisFrameConverterTest
       Vector3D pelvisToMarker2Translation = new Vector3D();
       pelvisToMarker2Transform.getTranslation(pelvisToMarker2Translation);
       pelvisToMarker2Translation.negate();
-      FramePoint markerPoint2 = new FramePoint(pelvisFrame, pelvisToMarker2Translation);
+      FramePoint3D markerPoint2 = new FramePoint3D(pelvisFrame, pelvisToMarker2Translation);
       markerPoint2.changeFrame(mocapFrame);
 
       RigidBodyTransform pelvisToMocapTransform = new RigidBodyTransform();

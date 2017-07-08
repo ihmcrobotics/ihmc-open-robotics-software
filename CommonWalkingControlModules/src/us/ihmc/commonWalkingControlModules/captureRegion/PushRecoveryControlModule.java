@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,7 +65,7 @@ public class PushRecoveryControlModule
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
 
-   private final FramePoint projectedCapturePoint = new FramePoint();
+   private final FramePoint3D projectedCapturePoint = new FramePoint3D();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,

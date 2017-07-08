@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.robotController.RobotController;
@@ -33,7 +33,7 @@ public class JointAxisVisualizer implements RobotController
          if(joint instanceof OneDoFJoint)
          {
             FrameVector3D jAxis=((OneDoFJoint)joint).getJointAxis();
-            ReferenceFrame referenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis.getVector()));
+            ReferenceFrame referenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint3D(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis.getVector()));
             YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, length, YoAppearance.Gold());
             yoGraphicsList.add(yoGraphicReferenceFrame);
             yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);

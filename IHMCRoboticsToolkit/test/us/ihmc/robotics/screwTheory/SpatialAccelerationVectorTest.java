@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -85,7 +85,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 
       SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());    // zero relative acceleration
       Twist twist = new Twist(frameB, frameA, frameA, new Vector3D(), getRandomVector(random));    // pure rotational velocity
-      FramePoint pointFixedInFrameB = new FramePoint(frameA, getRandomVector(random));
+      FramePoint3D pointFixedInFrameB = new FramePoint3D(frameA, getRandomVector(random));
       FrameVector3D accelerationOfPointFixedInFrameB = new FrameVector3D(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
@@ -118,7 +118,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
          Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
          
-         FramePoint pointFixedInBodyFrame = new FramePoint(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
          FrameVector3D bodyFixedPointLinearAccelerationInBody = new FrameVector3D();
          FrameVector3D bodyFixedPointLinearAccelerationInBase = new FrameVector3D();
          
@@ -149,7 +149,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, RandomGeometry.nextVector3D(random),
                                            RandomGeometry.nextVector3D(random));
       Twist twist = new Twist(frameB, frameA, frameA, RandomGeometry.nextVector3D(random), getRandomVector(random));
-      FramePoint pointFixedInFrameB = new FramePoint(frameA);    // , getRandomVector(random));
+      FramePoint3D pointFixedInFrameB = new FramePoint3D(frameA);    // , getRandomVector(random));
       FrameVector3D accelerationOfPointFixedInFrameB = new FrameVector3D(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
@@ -370,7 +370,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck.getVector(), originAcceleration.getVector(), 1e-12);
       
       FrameVector3D originAccelerationBack = new FrameVector3D(twistOfBodyWithRespectToBase.getExpressedInFrame());
-      FramePoint origin = new FramePoint(acceleration.getBodyFrame());
+      FramePoint3D origin = new FramePoint3D(acceleration.getBodyFrame());
       origin.changeFrame(acceleration.getBaseFrame());
       acceleration.changeFrame(acceleration.getBaseFrame(), twistOfBodyWithRespectToBase, twistOfBodyWithRespectToBase);
       twistOfBodyWithRespectToBase.changeFrame(acceleration.getBaseFrame());

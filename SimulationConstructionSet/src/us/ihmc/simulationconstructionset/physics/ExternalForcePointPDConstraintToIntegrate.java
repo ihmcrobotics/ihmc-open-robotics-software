@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.physics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -33,8 +33,8 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
    private final YoDouble yoConnectionVelocityErrorMagnitude;
 
    // Temporary variables:
-   private final FramePoint connectionAPosition = new FramePoint(worldFrame);
-   private final FramePoint connectionBPosition = new FramePoint(worldFrame);
+   private final FramePoint3D connectionAPosition = new FramePoint3D(worldFrame);
+   private final FramePoint3D connectionBPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D connectionPositionError;
    private final FrameVector3D connectionAVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D connectionBVelocity = new FrameVector3D(worldFrame);

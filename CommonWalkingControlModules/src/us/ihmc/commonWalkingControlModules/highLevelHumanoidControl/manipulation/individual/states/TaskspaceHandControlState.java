@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -56,7 +56,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    // temp stuff:
    private final FramePose desiredPose = new FramePose();
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
 
@@ -329,7 +329,7 @@ public class TaskspaceHandControlState extends HandControlState
       return maximumNumberOfWaypoints;
    }
 
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
 
    private void updateControlFrameAndDesireds(ReferenceFrame newControlFrame, boolean initializeToCurrent, FrameSE3TrajectoryPoint trajectoryPointToPack)

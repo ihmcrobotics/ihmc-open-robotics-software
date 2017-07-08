@@ -40,7 +40,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -798,7 +798,7 @@ public class FootstepSnapperSimulationTest
                footstepBody.getRigidBody(), footstepBody.getSoleFrame(), robotSide, heightMap);
 
          ReferenceFrame soleFrame = generatedSnappedFootstep.getSoleReferenceFrame();
-         FramePoint solePosition = new FramePoint(soleFrame);
+         FramePoint3D solePosition = new FramePoint3D(soleFrame);
          FrameOrientation soleOrientation = new FrameOrientation(soleFrame);
          FrameVector3D soleNormal = new FrameVector3D(soleFrame, 0.0, 0.0, 1.0);
          solePosition.changeFrame(worldFrame);
@@ -844,7 +844,7 @@ public class FootstepSnapperSimulationTest
             for (Point3D point : pointList)
             {
                double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
-               pointListBalls.setBall(new FramePoint(worldFrame, point.getX(), point.getY(), point.getZ()));
+               pointListBalls.setBall(new FramePoint3D(worldFrame, point.getX(), point.getY(), point.getZ()));
 
 //             pointListBalls.setBall(new FramePoint(worldFrame, point.getX(), point.getY(), heightMapZ));
             }

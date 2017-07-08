@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -27,7 +27,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private final double coefficientOfFriction = 0.8;
    private final int numberOfPointsInContact = 1;
    private final double contactForceThreshold = 0.3;
-   private final FramePoint touchdownPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final ReferenceFrame soleFrame;
 
    public SimulatedPlaneContactStateUpdater(GroundContactPoint contactPoint, RigidBody footRigiBody, ReferenceFrame soleFrame)
@@ -131,13 +131,13 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public List<FramePoint> getContactFramePointsInContactCopy()
+   public List<FramePoint3D> getContactFramePointsInContactCopy()
    {
       return null;
    }
 
    @Override
-   public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
+   public void getContactFramePointsInContact(List<FramePoint3D> contactPointListToPack)
    {
 
    }
@@ -205,7 +205,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition(FramePoint framePointToPack)
+      public void getPosition(FramePoint3D framePointToPack)
       {
          framePointToPack.set(groundContactPoint.getPositionPoint());
       }
@@ -223,7 +223,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void setPosition(FramePoint position)
+      public void setPosition(FramePoint3D position)
       {
 
       }

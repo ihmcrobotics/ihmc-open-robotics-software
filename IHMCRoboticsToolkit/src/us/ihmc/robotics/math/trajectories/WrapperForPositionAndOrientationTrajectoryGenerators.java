@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
@@ -34,7 +34,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTrajectoryGenerator.getPosition(positionToPack);
    }
@@ -49,7 +49,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       positionTrajectoryGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       positionTrajectoryGenerator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
@@ -74,7 +74,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       orientationTrajectoryGenerator.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
    }
    
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    
    public void getPose(FramePose framePoseToPack)

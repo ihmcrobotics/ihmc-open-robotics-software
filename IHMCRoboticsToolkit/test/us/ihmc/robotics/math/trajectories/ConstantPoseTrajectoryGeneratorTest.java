@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -173,7 +173,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testGet()
    {
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
       generator.getPosition(positionToPack);
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
@@ -250,7 +250,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(referenceFrame);
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator.getPosition(positionToPack);

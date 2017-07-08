@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -81,11 +81,11 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 
       YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("floorGraphicPolygon", "", planeFrame, 4, registry);
       
-      FramePoint p0 = new FramePoint(WORLD_FRAME, 1.0, 1.0, 0.0);
-      FramePoint p1 = new FramePoint(WORLD_FRAME, -1.0, 1.0, 0.0);
-      FramePoint p2 = new FramePoint(WORLD_FRAME, -1.0, -1.0, 0.0);
-      FramePoint p3 = new FramePoint(WORLD_FRAME, 1.0, -1.0, 0.0);
-      FramePoint[] framePoints = new FramePoint[]{p0, p1, p2, p3};
+      FramePoint3D p0 = new FramePoint3D(WORLD_FRAME, 1.0, 1.0, 0.0);
+      FramePoint3D p1 = new FramePoint3D(WORLD_FRAME, -1.0, 1.0, 0.0);
+      FramePoint3D p2 = new FramePoint3D(WORLD_FRAME, -1.0, -1.0, 0.0);
+      FramePoint3D p3 = new FramePoint3D(WORLD_FRAME, 1.0, -1.0, 0.0);
+      FramePoint3D[] framePoints = new FramePoint3D[]{p0, p1, p2, p3};
       
       yoFrameConvexPolygon2d.setConvexPolygon2d(framePoints);
       
@@ -102,7 +102,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return null;
    }
 
-   FramePoint testPoint = new FramePoint(WORLD_FRAME);
+   FramePoint3D testPoint = new FramePoint3D(WORLD_FRAME);
    @Override
    public boolean isClose(double x, double y, double z)
    {
@@ -151,8 +151,8 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    FrameVector3D v1 = new FrameVector3D(planeFrame);
    FrameVector3D v2 = new FrameVector3D(WORLD_FRAME);
    Vector3D v3 = new Vector3D();
-   FramePoint p1 = new FramePoint(WORLD_FRAME);
-   FramePoint p2 = new FramePoint(WORLD_FRAME);
+   FramePoint3D p1 = new FramePoint3D(WORLD_FRAME);
+   FramePoint3D p2 = new FramePoint3D(WORLD_FRAME);
    
    public void velocityAt(double x, double y, double z, Vector3D normal)
    {
@@ -216,7 +216,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return null;
    }
 
-   private final FramePoint pointOnPlane = new FramePoint(WORLD_FRAME);
+   private final FramePoint3D pointOnPlane = new FramePoint3D(WORLD_FRAME);
    private final Vector3D gcForce = new Vector3D();
    private final Vector3D gcVelocity = new Vector3D();
    @Override

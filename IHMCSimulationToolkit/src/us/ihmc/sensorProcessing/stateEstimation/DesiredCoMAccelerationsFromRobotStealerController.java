@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -91,7 +91,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    private void updateGroundTruth()
    {
-      FramePoint com = new FramePoint();
+      FramePoint3D com = new FramePoint3D();
       perfectCenterOfMassCalculator.compute();
       perfectCenterOfMassCalculator.getCenterOfMass(com);
       perfectCoM.set(com);

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 public interface CartesianTrajectoryGenerator extends Finishable
@@ -14,7 +14,7 @@ public interface CartesianTrajectoryGenerator extends Finishable
     * @param finalDesiredPosition final desired position of the trajectory (can be updated using updateFinalDesiredPosition later)
     * @param finalDesiredVelocity final desired velocity of the trajectory
     */
-   public abstract void initialize(FramePoint initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint finalDesiredPosition,
+   public abstract void initialize(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint3D finalDesiredPosition,
                                    FrameVector3D finalDesiredVelocity);
 
    /**
@@ -24,13 +24,13 @@ public interface CartesianTrajectoryGenerator extends Finishable
     * @param accelerationToPack new desired acceleration to pack
     * @param deltaT time step
     */
-   public abstract void computeNextTick(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT);
+   public abstract void computeNextTick(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT);
 
    /**
     * Changes the final desired position for the trajectory
     * @param finalDesiredPosition the new final desired position
     */
-   public abstract void updateFinalDesiredPosition(FramePoint finalDesiredPosition);
+   public abstract void updateFinalDesiredPosition(FramePoint3D finalDesiredPosition);
 
    public abstract ReferenceFrame getReferenceFrame();
 

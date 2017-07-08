@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -164,7 +164,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointExternalForcePoint.setForce(new Vector3D(rootJointForce));
       rootJointExternalForcePoint.setMoment(new Vector3D(rootJointTorque));
 
-      FramePoint rootJointPosition = new FramePoint(bodyFixedFrame);
+      FramePoint3D rootJointPosition = new FramePoint3D(bodyFixedFrame);
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       rootJointExternalForcePoint.setOffsetWorld(rootJointPosition);
@@ -528,7 +528,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          Point3D position = new Point3D();
          footExternalForcePoint.getPosition(position);
-         FramePoint pointOfApplication = new FramePoint(ReferenceFrame.getWorldFrame(), position);
+         FramePoint3D pointOfApplication = new FramePoint3D(ReferenceFrame.getWorldFrame(), position);
          pointOfApplication.changeFrame(footFrame);
 
          Vector3D torqueFromLeverArm = new Vector3D();
@@ -711,7 +711,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          inverseDynamicsCalculator.getExternalWrench(foot, wrench);
 
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
-         FramePoint pointOfWrenchApplication = new FramePoint(bodyFixedFrame);
+         FramePoint3D pointOfWrenchApplication = new FramePoint3D(bodyFixedFrame);
          pointOfWrenchApplication.changeFrame(ReferenceFrame.getWorldFrame());
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);

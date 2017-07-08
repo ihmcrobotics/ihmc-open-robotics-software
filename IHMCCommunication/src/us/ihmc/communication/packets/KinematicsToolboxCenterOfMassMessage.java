@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
@@ -86,7 +86,7 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
     * @param desiredPosition the position the center of mass should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
     */
-   public void setDesiredPosition(FramePoint desiredPosition)
+   public void setDesiredPosition(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setDesiredPosition(desiredPosition.getPoint());
@@ -150,7 +150,7 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
          this.selectionMatrix.set(selectionMatrix);
    }
 
-   public void getDesiredPosition(FramePoint desiredPositionToPack)
+   public void getDesiredPosition(FramePoint3D desiredPositionToPack)
    {
       desiredPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredPositionInWorld);
    }

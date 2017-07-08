@@ -4,7 +4,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -28,7 +28,7 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector3D derivativeTerm;
    private final FrameVector3D integralTerm;
    
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
    private final FrameVector3D actionFromPositionController = new FrameVector3D();
@@ -89,7 +89,7 @@ public class EuclideanPositionController implements PositionController
    }
 
    @Override
-   public void compute(FrameVector3D output, FramePoint desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity, FrameVector3D feedForward)
+   public void compute(FrameVector3D output, FramePoint3D desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity, FrameVector3D feedForward)
    {
       computeProportionalTerm(desiredPosition);
       if (currentVelocity != null)
@@ -151,7 +151,7 @@ public class EuclideanPositionController implements PositionController
       currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void computeProportionalTerm(FramePoint desiredPosition)
+   private void computeProportionalTerm(FramePoint3D desiredPosition)
    {
       desiredPosition.changeFrame(bodyFrame);
       positionError.set(desiredPosition);

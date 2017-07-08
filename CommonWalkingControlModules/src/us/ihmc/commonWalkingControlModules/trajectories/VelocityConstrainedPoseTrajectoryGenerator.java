@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -74,7 +74,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private double deltaAngle, omegaFD;
    private FrameVector3D omegaVectorDF;
 
-   private final FramePoint tempPosition;
+   private final FramePoint3D tempPosition;
    private final FrameOrientation tempOrientation;
    private final FrameOrientation copyOfInitialOrientation;
    private final FrameOrientation copyOfFinalOrientation;
@@ -99,7 +99,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -162,7 +162,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       tempAxisAngle = new AxisAngle();
       tempVector = new Vector3D();
 
-      tempPosition = new FramePoint();
+      tempPosition = new FramePoint3D();
       tempOrientation = new FrameOrientation(trajectoryFrame);
       copyOfInitialOrientation = new FrameOrientation(trajectoryFrame);
       copyOfFinalOrientation = new FrameOrientation(trajectoryFrame);
@@ -359,7 +359,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.initialAngularVelocity.setToZero();
    }
 
-   public void setInitialPoseWithInitialVelocity(FramePoint initialPosition, FrameVector3D initialVelocity, FrameOrientation initialOrientation,
+   public void setInitialPoseWithInitialVelocity(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameOrientation initialOrientation,
          FrameVector3D initialAngularVelocity)
    {
       this.initialPosition.set(initialPosition);
@@ -368,7 +368,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.initialAngularVelocity.set(initialAngularVelocity);
    }
 
-   public void setInitialPoseWithoutInitialVelocity(FramePoint initialPosition, FrameOrientation initialOrientation)
+   public void setInitialPoseWithoutInitialVelocity(FramePoint3D initialPosition, FrameOrientation initialOrientation)
    {
       this.initialPosition.set(initialPosition);
       this.initialVelocity.setToZero();
@@ -401,7 +401,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       setFinalPoseWithoutFinalVelocity(tempPosition, tempOrientation);
    }
 
-   public void setFinalPoseWithoutFinalVelocity(FramePoint finalPosition, FrameOrientation finalOrientation)
+   public void setFinalPoseWithoutFinalVelocity(FramePoint3D finalPosition, FrameOrientation finalOrientation)
    {
       this.finalPosition.set(finalPosition);
       this.finalOrientation.set(finalOrientation);
@@ -636,7 +636,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       showViz.set(false);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -666,7 +666,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

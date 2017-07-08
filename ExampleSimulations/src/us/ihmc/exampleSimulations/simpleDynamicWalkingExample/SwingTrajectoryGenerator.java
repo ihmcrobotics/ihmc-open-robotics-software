@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
@@ -23,9 +23,9 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
    private final YoDouble swingHeightParabolaVertix;
    
    private final ReferenceFrame footFrame;
-   private final FramePoint currentFootPosition = new FramePoint();
-   private final FramePoint desiredEndEffectorPosition = new FramePoint();
-   private final FramePoint initialPosition = new FramePoint();
+   private final FramePoint3D currentFootPosition = new FramePoint3D();
+   private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
+   private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D initialVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D finalDesiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -42,7 +42,7 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
       parentRegistry.addChild(registry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, FramePoint swingTarget)
+   public void initializeSwing(double swingTime, FramePoint3D swingInitial, FramePoint3D swingTarget)
    {     
       swingTimeDoubleProvider.set(swingTime);
       currentFootPosition.setToZero(footFrame);
@@ -53,7 +53,7 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
       cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, swingTarget, finalDesiredVelocity);
    }
 
-   public void computeSwing(FramePoint framePointToPack)
+   public void computeSwing(FramePoint3D framePointToPack)
    {
       cartesianTrajectoryGenerator.computeNextTick(desiredEndEffectorPosition, dt);
       framePointToPack.setIncludingFrame(desiredEndEffectorPosition);

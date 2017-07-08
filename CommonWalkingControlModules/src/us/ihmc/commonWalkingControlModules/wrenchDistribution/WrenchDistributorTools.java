@@ -8,7 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -29,16 +29,16 @@ public class WrenchDistributorTools
       groundReactionWrenchToPack.set(referenceFrame, force.getVector(), torque);
    }
 
-   public static FramePoint computePseudoCMP3d(FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
+   public static FramePoint3D computePseudoCMP3d(FramePoint3D centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
-      FramePoint pseudoCMP3d = new FramePoint();
+      FramePoint3D pseudoCMP3d = new FramePoint3D();
 
       computePseudoCMP3d(pseudoCMP3d, centerOfMass, cmp, fZ, totalMass, omega0);
 
       return pseudoCMP3d;
    }
 
-   public static void computePseudoCMP3d(FramePoint pseudoCMP3dToPack, FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
+   public static void computePseudoCMP3d(FramePoint3D pseudoCMP3dToPack, FramePoint3D centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
       pseudoCMP3dToPack.setIncludingFrame(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
@@ -46,7 +46,7 @@ public class WrenchDistributorTools
       pseudoCMP3dToPack.setZ(zCMP);
    }
 
-   public static FrameVector3D computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
+   public static FrameVector3D computeForce(FramePoint3D centerOfMass, FramePoint3D cmp, double fZ)
    {
       FrameVector3D force = new FrameVector3D(centerOfMass);
 
@@ -55,7 +55,7 @@ public class WrenchDistributorTools
       return force;
    }
 
-   public static void computeForce(FrameVector3D forceToPack, FramePoint centerOfMass, FramePoint cmp, double fZ)
+   public static void computeForce(FrameVector3D forceToPack, FramePoint3D centerOfMass, FramePoint3D cmp, double fZ)
    {
       cmp.changeFrame(centerOfMass.getReferenceFrame());
       forceToPack.setIncludingFrame(centerOfMass);

@@ -33,7 +33,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    private class PoseTrajectoryState
    {
       public final double time;
-      public final FramePoint position;
+      public final FramePoint3D position;
       public final FrameOrientation orientation;
       public final FrameVector3D linearVelocity;
       public final FrameVector3D angularVelocity;
@@ -46,7 +46,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(PoseTrajectoryGenerator trajectory, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
             ReferenceFrame expressedInFrame)
       {
-         this.position = new FramePoint(expressedInFrame);
+         this.position = new FramePoint3D(expressedInFrame);
          this.orientation = new FrameOrientation(expressedInFrame);
          this.linearVelocity = new FrameVector3D(expressedInFrame);
          this.angularVelocity = new FrameVector3D(expressedInFrame);
@@ -64,7 +64,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(Random random, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
       {
          this.time = time;
-         this.position = FramePoint.generateRandomFramePoint(random, expressedInFrame, 1.0, 1.0, 1.0);
+         this.position = FramePoint3D.generateRandomFramePoint(random, expressedInFrame, 1.0, 1.0, 1.0);
          this.orientation = FrameOrientation.generateRandomFrameOrientation(random, expressedInFrame);
          this.linearVelocity = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          this.angularVelocity = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.Alph
 
 public class FramePointTrapezoidalVelocityTrajectory extends FrameNDoFTrapezoidalVelocityTrajectory
 {
-   public FramePointTrapezoidalVelocityTrajectory(double t0, FramePoint x0, FramePoint xF, FrameVector3D v0, FrameVector3D vF, FrameVector3D vMax, FrameVector3D aMax,
+   public FramePointTrapezoidalVelocityTrajectory(double t0, FramePoint3D x0, FramePoint3D xF, FrameVector3D v0, FrameVector3D vF, FrameVector3D vMax, FrameVector3D aMax,
            AlphaToAlphaType alphaToAlphaType)
    {
       super(x0.getReferenceFrame(), t0, toArray(x0), toArray(xF), toArray(v0), toArray(vF), toArray(vMax), toArray(aMax), alphaToAlphaType);
@@ -20,9 +20,9 @@ public class FramePointTrapezoidalVelocityTrajectory extends FrameNDoFTrapezoida
       return new double[]{tuple.getX(), tuple.getY(), tuple.getZ()};
    }
 
-   public FramePoint getPosition(double t)
+   public FramePoint3D getPosition(double t)
    {
-      return new FramePoint(getReferenceFrame(), getPositionArray(t));
+      return new FramePoint3D(getReferenceFrame(), getPositionArray(t));
    }
 
    public FrameVector3D getVelocity(double t)
@@ -45,9 +45,9 @@ public class FramePointTrapezoidalVelocityTrajectory extends FrameNDoFTrapezoida
       return new FrameVector3D(getReferenceFrame(), getMaximumAccelerationArray());
    }
 
-   public FramePoint getInitialPosition()
+   public FramePoint3D getInitialPosition()
    {
-      return new FramePoint(getReferenceFrame(), getX0Array());
+      return new FramePoint3D(getReferenceFrame(), getX0Array());
    }
 
    public FrameVector3D getInitialVelocity()

@@ -13,7 +13,7 @@ import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -141,7 +141,7 @@ public class ExampleLidarController implements RobotController
 
          for (int i = 0; i < scan.size(); i++)
          {
-            bagOfBalls.setBallLoop(new FramePoint(ReferenceFrame.getWorldFrame(), scan.getPoint(i)), YoAppearance.randomColor(random));
+            bagOfBalls.setBallLoop(new FramePoint3D(ReferenceFrame.getWorldFrame(), scan.getPoint(i)), YoAppearance.randomColor(random));
          }
       }
    }

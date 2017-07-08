@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -103,7 +103,7 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -121,7 +121,7 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

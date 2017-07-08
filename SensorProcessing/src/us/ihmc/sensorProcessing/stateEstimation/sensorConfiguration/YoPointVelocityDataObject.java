@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -34,7 +34,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    }
 
    @Override
-   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector3D velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
+   public void set(RigidBody rigidBody, FramePoint3D measurementPointInBodyFrame, FrameVector3D velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
    {
       if (!this.rigidBodyName.isEmpty() && !this.rigidBodyName.equals(rigidBody.getName()))
       {

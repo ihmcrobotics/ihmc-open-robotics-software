@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -63,9 +63,9 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint2d tmpEndPoint = new FramePoint2d();
    private final FramePoint2d tmpReferencePoint = new FramePoint2d();
 
-   private final FramePoint solutionLocation = new FramePoint();
-   private final FramePoint referenceLocation = new FramePoint();
-   private final FramePoint previousLocation = new FramePoint();
+   private final FramePoint3D solutionLocation = new FramePoint3D();
+   private final FramePoint3D referenceLocation = new FramePoint3D();
+   private final FramePoint3D previousLocation = new FramePoint3D();
    private final FrameVector3D solutionAdjustment = new FrameVector3D();
 
    private final FrameVector3D tempVector = new FrameVector3D();

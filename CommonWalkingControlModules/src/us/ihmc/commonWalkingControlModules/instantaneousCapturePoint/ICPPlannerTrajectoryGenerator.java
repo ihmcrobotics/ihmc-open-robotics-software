@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -20,9 +20,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
 {
    private final VelocityConstrainedPositionTrajectoryGenerator doubleSupportCapturePointTrajectory;
 
-   private final FramePoint initialPositionInSpecificFrame = new FramePoint();
+   private final FramePoint3D initialPositionInSpecificFrame = new FramePoint3D();
    private final FrameVector3D initialVelocityInSpecificFrame = new FrameVector3D();
-   private final FramePoint finalPositionInSpecificFrame = new FramePoint();
+   private final FramePoint3D finalPositionInSpecificFrame = new FramePoint3D();
    private final FrameVector3D finalVelocityInSpecificFrame = new FrameVector3D();
 
    private final FramePoint2d initialCoMPositionInSpecificFrame = new FramePoint2d();
@@ -110,7 +110,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       doubleSupportCapturePointTrajectory.getPosition(positionToPack);
    }
@@ -144,7 +144,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }

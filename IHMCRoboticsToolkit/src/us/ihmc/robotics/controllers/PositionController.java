@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FrameVector3D;
  */
 public interface PositionController
 {
-   public abstract void compute(FrameVector3D output, FramePoint desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity,
+   public abstract void compute(FrameVector3D output, FramePoint3D desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity,
                 FrameVector3D feedForward);
 
    public abstract ReferenceFrame getBodyFrame();

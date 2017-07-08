@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
@@ -87,7 +87,7 @@ public class FourBarKinematicLoop
       FrameVector3D masterJointAxis = masterJointA.getJointAxis();
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
       frameBeforeFourBarWithZAlongJointAxis = GeometryTools
-            .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint(masterJointA.getFrameBeforeJoint()), Axis.Z,
+            .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis.Z,
                   masterJointAxis);
 
       FrameVector3D masterAxis = masterJointA.getJointAxis();
@@ -168,11 +168,11 @@ public class FourBarKinematicLoop
          FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack, FrameVector2d vectorDAClosurePointProjectedToPack,
          FrameVector2d vectorCDClosurePointProjectedToPack)
    {
-      FramePoint masterJointAPosition = new FramePoint(masterJointA.getFrameAfterJoint());
-      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameAfterJoint());
-      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameAfterJoint());
-      FramePoint jointDZeroAnglePosition = new FramePoint(passiveJointD.getFrameAfterJoint());
-      FramePoint jointDClosedLoopPosition = new FramePoint(masterJointA.getFrameBeforeJoint(), jointDInJointABeforeFrame);
+      FramePoint3D masterJointAPosition = new FramePoint3D(masterJointA.getFrameAfterJoint());
+      FramePoint3D jointBPosition = new FramePoint3D(passiveJointB.getFrameAfterJoint());
+      FramePoint3D jointCPosition = new FramePoint3D(passiveJointC.getFrameAfterJoint());
+      FramePoint3D jointDZeroAnglePosition = new FramePoint3D(passiveJointD.getFrameAfterJoint());
+      FramePoint3D jointDClosedLoopPosition = new FramePoint3D(masterJointA.getFrameBeforeJoint(), jointDInJointABeforeFrame);
 
       jointBPosition.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointCPosition.changeFrame(frameBeforeFourBarWithZAlongJointAxis);

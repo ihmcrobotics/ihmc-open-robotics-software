@@ -5,7 +5,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -30,8 +30,8 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    private final PositionProvider initialPositionProvider;
    private final PositionProvider finalPositionProvider;
 
-   private final FramePoint tempInitialPosition;
-   private final FramePoint tempFinalPosition;
+   private final FramePoint3D tempInitialPosition;
+   private final FramePoint3D tempFinalPosition;
 
    private final YoBoolean continuouslyUpdateFinalPosition;
    private final DoubleProvider trajectoryTimeProvider;
@@ -57,8 +57,8 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;
 
-      tempInitialPosition = new FramePoint(referenceFrame);
-      tempFinalPosition = new FramePoint(referenceFrame);
+      tempInitialPosition = new FramePoint3D(referenceFrame);
+      tempFinalPosition = new FramePoint3D(referenceFrame);
 
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
@@ -120,7 +120,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -143,7 +143,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

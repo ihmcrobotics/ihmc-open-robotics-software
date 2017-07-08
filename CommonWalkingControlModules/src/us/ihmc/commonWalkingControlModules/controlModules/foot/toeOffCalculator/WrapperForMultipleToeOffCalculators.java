@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -38,7 +38,7 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.setExitCMP(exitCMP, trailingLeg);

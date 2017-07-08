@@ -3,18 +3,18 @@ package us.ihmc.robotics.geometry.algorithms;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 
 public class SphereWithConvexPolygonIntersector
 {
-   private final FramePoint closestPointOnPolygon;
+   private final FramePoint3D closestPointOnPolygon;
    private final FramePoint2d closestPointOnPolygon2d;
 
    public SphereWithConvexPolygonIntersector()
    {
-      closestPointOnPolygon = new FramePoint();
+      closestPointOnPolygon = new FramePoint3D();
       closestPointOnPolygon2d = new FramePoint2d();
    }
 
@@ -43,7 +43,7 @@ public class SphereWithConvexPolygonIntersector
       return isInsideOrOnSurface;
    }
 
-   public FramePoint getClosestPointOnPolygon()
+   public FramePoint3D getClosestPointOnPolygon()
    {
       return closestPointOnPolygon;
    }

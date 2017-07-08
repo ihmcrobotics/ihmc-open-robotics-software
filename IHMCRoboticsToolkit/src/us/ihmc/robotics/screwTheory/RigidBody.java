@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 
 /**
  * {@code RigidBody} describes a link which used with {@code InverseDynamicsJoint}s describe a robot
@@ -284,7 +284,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @param comOffsetToPack the {@code FramePoint} in which the center of mass position is stored.
     *           Modified.
     */
-   public void getCoMOffset(FramePoint comOffsetToPack)
+   public void getCoMOffset(FramePoint3D comOffsetToPack)
    {
       inertia.getCenterOfMassOffset(comOffsetToPack);
    }
@@ -303,7 +303,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @throws ReferenceFrameMismatchException if the argument is not expressed in the
     *            {@code bodyFixedFrame}.
     */
-   public void setCoMOffset(FramePoint comOffset)
+   public void setCoMOffset(FramePoint3D comOffset)
    {
       inertia.setCenterOfMassOffset(comOffset);
    }

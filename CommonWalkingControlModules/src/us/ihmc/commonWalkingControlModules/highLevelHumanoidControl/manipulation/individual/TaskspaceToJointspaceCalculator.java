@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
@@ -108,7 +108,7 @@ public class TaskspaceToJointspaceCalculator
    private final YoDouble kpTaskspaceAngularError;
    private final YoDouble kpTaskspaceLinearError;
 
-   private final FramePoint baseParentJointFramePosition = new FramePoint();
+   private final FramePoint3D baseParentJointFramePosition = new FramePoint3D();
    private final FrameOrientation baseParentJointFrameOrientation = new FrameOrientation();
 
    private final AxisAngle errorAxisAngle = new AxisAngle();
@@ -402,7 +402,7 @@ public class TaskspaceToJointspaceCalculator
       kpTaskspaceLinearError.set(kPLinearError);
    }
 
-   public void compute(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
+   public void compute(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       desiredControlFramePose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredLinearVelocity, desiredAngularVelocity);
@@ -703,12 +703,12 @@ public class TaskspaceToJointspaceCalculator
       return NormOps.normP2(subspaceSpatialError);
    }
 
-   private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempPositionError = new FrameVector3D();
    private final DenseMatrix64F tempSpatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempSubspaceError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
-   public double getNormPositionError(FramePoint desiredPosition)
+   public double getNormPositionError(FramePoint3D desiredPosition)
    {
       tempPoint.setIncludingFrame(desiredPosition);
       tempPoint.changeFrame(localControlFrame);

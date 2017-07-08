@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -40,14 +40,14 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       this.groundClearance.set(groundClearance);
    }
 
-   public void computeNextTick(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
+   public void computeNextTick(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
       getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
-   public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
+   public void updateFinalDesiredPosition(FramePoint3D finalDesiredPosition)
    {
       // empty
    }
@@ -77,7 +77,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       return this.groundClearance.getDoubleValue();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
 
@@ -119,10 +119,10 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, stepTime.getDoubleValue());
       double middleOfTrajectoryParameter = 0.5;
 
-      FramePoint initialPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D initialPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
       initialPositionProvider.getPosition(initialPosition);
 
-      FramePoint finalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D finalPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
       finalPositionProvider.getPosition(finalPosition);
 
       initialPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
@@ -139,7 +139,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       minimumJerkTrajectory.computeTrajectory(time);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

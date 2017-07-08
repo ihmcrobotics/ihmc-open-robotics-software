@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FrameLine3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
@@ -49,7 +49,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       this.plane3d = new Plane3D(framePlane3d.plane3d);
    }
 
-   public FramePlane3d(FrameVector3D normal, FramePoint point)
+   public FramePlane3d(FrameVector3D normal, FramePoint3D point)
    {
       normal.checkReferenceFrameMatch(point);
       this.referenceFrame = normal.getReferenceFrame();
@@ -97,16 +97,16 @@ public class FramePlane3d implements ReferenceFrameHolder
       plane3d.setNormal(normal);
    }
 
-   public void getPoint(FramePoint pointToPack)
+   public void getPoint(FramePoint3D pointToPack)
    {
       checkReferenceFrameMatch(pointToPack.getReferenceFrame());
       this.plane3d.getPoint(temporaryPoint);
       pointToPack.set(temporaryPoint);
    }
 
-   public FramePoint getPointCopy()
+   public FramePoint3D getPointCopy()
    {
-      FramePoint pointToReturn = new FramePoint(this.getReferenceFrame());
+      FramePoint3D pointToReturn = new FramePoint3D(this.getReferenceFrame());
       this.getPoint(pointToReturn);
       return pointToReturn;
    }
@@ -126,7 +126,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       plane3d.setPoint(point);
    }
 
-   public void setPoints(FramePoint pointA, FramePoint pointB, FramePoint pointC)
+   public void setPoints(FramePoint3D pointA, FramePoint3D pointB, FramePoint3D pointC)
    {
       pointA.checkReferenceFrameMatch(referenceFrame);
       pointB.checkReferenceFrameMatch(referenceFrame);
@@ -151,14 +151,14 @@ public class FramePlane3d implements ReferenceFrameHolder
       // otherwise: in the right frame already, so do nothing
    }
 
-   public boolean isOnOrAbove(FramePoint pointToTest)
+   public boolean isOnOrAbove(FramePoint3D pointToTest)
    {
       checkReferenceFrameMatch(pointToTest);
 
       return plane3d.isOnOrAbove(pointToTest.getPoint());
    }
 
-   public boolean isOnOrBelow(FramePoint pointToTest)
+   public boolean isOnOrBelow(FramePoint3D pointToTest)
    {
       checkReferenceFrameMatch(pointToTest);
 
@@ -210,16 +210,16 @@ public class FramePlane3d implements ReferenceFrameHolder
       return plane3d.isCoincident(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
    }
 
-   public FramePoint orthogonalProjectionCopy(FramePoint point)
+   public FramePoint3D orthogonalProjectionCopy(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
-      FramePoint returnPoint = new FramePoint(point);
+      FramePoint3D returnPoint = new FramePoint3D(point);
       orthogonalProjection(returnPoint);
 
       return returnPoint;
    }
 
-   public void orthogonalProjection(FramePoint point)
+   public void orthogonalProjection(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
       plane3d.orthogonalProjection(point.getPoint());
@@ -231,7 +231,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       return plane3d.getZOnPlane(xyPoint.getX(), xyPoint.getY());
    }
    
-   public double distance(FramePoint point)
+   public double distance(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
       return plane3d.distance(point.getPoint());
@@ -264,7 +264,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       plane3d.setNormal(normalX, normalY, normalZ);
    }
    
-   public void getIntersectionWithLine(FramePoint pointToPack, FrameLine3D line)
+   public void getIntersectionWithLine(FramePoint3D pointToPack, FrameLine3D line)
    {
 	   checkReferenceFrameMatch(line.getReferenceFrame());
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());

@@ -36,7 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
@@ -233,7 +233,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          ReferenceFrame rightSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.RIGHT);
 
 
-	      FramePoint leftSole = new FramePoint(leftSoleFrame);
+	      FramePoint3D leftSole = new FramePoint3D(leftSoleFrame);
 	      leftSole.changeFrame(ReferenceFrame.getWorldFrame());
 	      System.out.println("leftSole = " + leftSole);
 

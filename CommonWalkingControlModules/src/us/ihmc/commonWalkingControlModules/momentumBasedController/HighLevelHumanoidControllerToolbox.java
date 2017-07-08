@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -424,7 +424,7 @@ public class HighLevelHumanoidControllerToolbox
    }
 
    private final FramePoint2d tempFootCop2d = new FramePoint2d();
-   private final FramePoint tempFootCop = new FramePoint();
+   private final FramePoint3D tempFootCop = new FramePoint3D();
    private final Wrench tempFootWrench = new Wrench();
 
    private void computeCop()
@@ -454,7 +454,7 @@ public class HighLevelHumanoidControllerToolbox
    }
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint centerOfMassPosition = new FramePoint();
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
@@ -519,7 +519,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
    }
 
-   public void getCapturePoint(FramePoint capturePointToPack)
+   public void getCapturePoint(FramePoint3D capturePointToPack)
    {
       yoCapturePoint.getFrameTuple(capturePointToPack);
    }
@@ -948,7 +948,7 @@ public class HighLevelHumanoidControllerToolbox
       return defaultFootPolygons;
    }
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
 
    public void resetFootSupportPolygon(RobotSide robotSide)
    {
@@ -969,7 +969,7 @@ public class HighLevelHumanoidControllerToolbox
       return omega0.getDoubleValue();
    }
 
-   public void getCoP(FramePoint copToPack)
+   public void getCoP(FramePoint3D copToPack)
    {
       yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
    }

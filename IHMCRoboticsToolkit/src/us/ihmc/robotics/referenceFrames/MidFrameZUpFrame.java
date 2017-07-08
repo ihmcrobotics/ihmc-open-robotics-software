@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MidFrameZUpFrame extends ReferenceFrame
@@ -12,8 +12,8 @@ public class MidFrameZUpFrame extends ReferenceFrame
    private static final long serialVersionUID = -2229169827166093475L;
    private final ReferenceFrame parentZUpFrame, frameOne, frameTwo;
 
-   private final FramePoint originOneInParent;
-   private final FramePoint originTwoInParent;
+   private final FramePoint3D originOneInParent;
+   private final FramePoint3D originTwoInParent;
    private final FrameVector3D vectorBetweenFrames;
    private final Vector2D vectorBetweenFrames2d = new Vector2D();
    private final Vector3D parentToMidpointVector3d = new Vector3D();
@@ -32,8 +32,8 @@ public class MidFrameZUpFrame extends ReferenceFrame
       this.frameOne = frameOne;
       this.frameTwo = frameTwo;
 
-      originOneInParent = new FramePoint(frameOne);
-      originTwoInParent = new FramePoint(frameTwo);
+      originOneInParent = new FramePoint3D(frameOne);
+      originTwoInParent = new FramePoint3D(frameTwo);
       vectorBetweenFrames = new FrameVector3D(parentZUpFrame);
    }
 

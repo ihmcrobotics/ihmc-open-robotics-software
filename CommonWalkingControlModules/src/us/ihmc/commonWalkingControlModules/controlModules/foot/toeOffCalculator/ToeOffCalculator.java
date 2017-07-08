@@ -9,7 +9,7 @@ public interface ToeOffCalculator
 
    public ToeOffEnum getEnum();
 
-   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg);
+   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg);
 
    public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg);
 

@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -109,7 +109,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       double swingTime = 0.8;
       double transferTime = 0.15;
 
-      ArrayList<FramePoint> stepLocations = world.getStepLocations();
+      ArrayList<FramePoint3D> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
          if (i == stepLocations.size()-2)
@@ -182,7 +182,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       double swingTime = 0.8;
       double transferTime = 0.15;
 
-      ArrayList<FramePoint> stepLocations = world.getStepLocations();
+      ArrayList<FramePoint3D> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
          if (i == stepLocations.size()-2)

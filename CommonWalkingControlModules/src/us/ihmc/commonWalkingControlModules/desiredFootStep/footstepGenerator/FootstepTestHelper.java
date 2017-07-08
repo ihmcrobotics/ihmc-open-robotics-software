@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,7 +33,7 @@ public class FootstepTestHelper
 
       RobotSide currentSide = RobotSide.LEFT;
 
-      FramePoint lastFootstepPosition = new FramePoint(contactableFeet.get(currentSide).getSoleFrame());
+      FramePoint3D lastFootstepPosition = new FramePoint3D(contactableFeet.get(currentSide).getSoleFrame());
       lastFootstepPosition.changeFrame(worldFrame);
 
       for (int i = 0; i < numberOfSteps; i++)

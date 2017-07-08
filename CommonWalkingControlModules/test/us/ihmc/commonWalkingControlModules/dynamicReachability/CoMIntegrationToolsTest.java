@@ -9,7 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -60,7 +60,7 @@ public class CoMIntegrationToolsTest
       FramePoint2d finalCoM = new FramePoint2d();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < duration)
@@ -145,7 +145,7 @@ public class CoMIntegrationToolsTest
       FramePoint2d finalCoM = new FramePoint2d();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < swingDuration)
@@ -232,7 +232,7 @@ public class CoMIntegrationToolsTest
       FramePoint2d finalCoM = new FramePoint2d();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < swingDuration)

@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -149,7 +149,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoTwist desiredBodyTwist;
 
    // Jacobian
-   private final FramePoint jointPosition = new FramePoint();
+   private final FramePoint3D jointPosition = new FramePoint3D();
    private final FrameVector3D jointToFootVector = new FrameVector3D();
    private final FrameVector3D vmcRequestedTorqueFromJoint = new FrameVector3D();
    private final FrameVector3D jointAxis = new FrameVector3D();
@@ -192,10 +192,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final QuadrantDependentList<BagOfBalls> swingTrajectoryBagsOfBalls = new QuadrantDependentList<>();
 
    // Experimental Trot Stuff
-   private final FramePoint rightMidpoint = new FramePoint();
-   private final FramePoint leftMidpoint = new FramePoint();
-   private final FramePoint frontMidpoint = new FramePoint();
-   private final FramePoint hindMidpoint = new FramePoint();
+   private final FramePoint3D rightMidpoint = new FramePoint3D();
+   private final FramePoint3D leftMidpoint = new FramePoint3D();
+   private final FramePoint3D frontMidpoint = new FramePoint3D();
+   private final FramePoint3D hindMidpoint = new FramePoint3D();
    private final FrameVector2d frontDirection = new FrameVector2d();
    private final FrameLine2d sidewaysMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d lengthwiseMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
