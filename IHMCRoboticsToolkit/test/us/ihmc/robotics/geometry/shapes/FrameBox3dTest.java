@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class FrameBox3dTest
 {
@@ -170,10 +170,10 @@ public class FrameBox3dTest
       pointOnXFace.set(0.4, 0.3, -0.1);
       FramePoint expectedPoint = new FramePoint(worldFrame);
       expectedPoint.set(0.5, 0.3, -0.1);
-      FrameVector expectedNormal = new FrameVector(worldFrame);
+      FrameVector3D expectedNormal = new FrameVector3D(worldFrame);
       expectedNormal.set(1.0, 0.0, 0.0);
       FramePoint returnedPoint = new FramePoint(worldFrame);
-      FrameVector returnedNormal = new FrameVector(worldFrame);
+      FrameVector3D returnedNormal = new FrameVector3D(worldFrame);
       box.getClosestPointAndNormalAt(returnedPoint, returnedNormal, pointOnXFace);
       assertTrue(expectedPoint.epsilonEquals(returnedPoint, 1e-14));
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));

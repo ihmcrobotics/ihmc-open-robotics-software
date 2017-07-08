@@ -8,7 +8,7 @@ import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -35,7 +35,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       
@@ -56,7 +56,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       return nextSwingLeg;
    }
   
-   public RobotQuadrant chooseNextSwingLegUsingDistanceFromCentroid(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLegUsingDistanceFromCentroid(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       

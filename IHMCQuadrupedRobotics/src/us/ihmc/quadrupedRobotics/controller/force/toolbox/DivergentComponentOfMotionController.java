@@ -11,7 +11,7 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -21,7 +21,7 @@ public class DivergentComponentOfMotionController
    public static class Setpoints
    {
       private final FramePoint dcmPosition = new FramePoint();
-      private final FrameVector dcmVelocity = new FrameVector();
+      private final FrameVector3D dcmVelocity = new FrameVector3D();
 
       public void initialize(FramePoint dcmPositionEstimate)
       {
@@ -34,7 +34,7 @@ public class DivergentComponentOfMotionController
          return dcmPosition;
       }
 
-      public FrameVector getDcmVelocity()
+      public FrameVector3D getDcmVelocity()
       {
          return dcmVelocity;
       }
@@ -127,10 +127,10 @@ public class DivergentComponentOfMotionController
       yoVrpPositionRateLimit.set(vrpPositionRateLimit);
    }
 
-   public void compute(FrameVector comForceCommand, Setpoints setpoints, FramePoint dcmPositionEstimate)
+   public void compute(FrameVector3D comForceCommand, Setpoints setpoints, FramePoint dcmPositionEstimate)
    {
       FramePoint dcmPositionSetpoint = setpoints.getDcmPosition();
-      FrameVector dcmVelocitySetpoint = setpoints.getDcmVelocity();
+      FrameVector3D dcmVelocitySetpoint = setpoints.getDcmVelocity();
       ReferenceFrame comForceCommandFrame = comForceCommand.getReferenceFrame();
       ReferenceFrame dcmPositionSetpointFrame = dcmPositionSetpoint.getReferenceFrame();
       ReferenceFrame dcmPositionVelocityFrame = dcmVelocitySetpoint.getReferenceFrame();

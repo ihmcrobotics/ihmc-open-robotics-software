@@ -4,11 +4,11 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 
-public class YoFrameVectorControlFlowOutputPort extends ControlFlowOutputPort<FrameVector>
+public class YoFrameVectorControlFlowOutputPort extends ControlFlowOutputPort<FrameVector3D>
 {
    private final YoFrameVector yoFrameVector;
 
@@ -16,11 +16,11 @@ public class YoFrameVectorControlFlowOutputPort extends ControlFlowOutputPort<Fr
    {
       super(namePrefix, controlFlowElement);
       yoFrameVector = new YoFrameVector(namePrefix, frame, registry);
-      super.setData(new FrameVector(frame));
+      super.setData(new FrameVector3D(frame));
    }
 
    @Override
-   public FrameVector getData()
+   public FrameVector3D getData()
    {
       yoFrameVector.getFrameTuple(super.getData());
 
@@ -28,7 +28,7 @@ public class YoFrameVectorControlFlowOutputPort extends ControlFlowOutputPort<Fr
    }
 
    @Override
-   public void setData(FrameVector data)
+   public void setData(FrameVector3D data)
    {
       yoFrameVector.set(data);
    }

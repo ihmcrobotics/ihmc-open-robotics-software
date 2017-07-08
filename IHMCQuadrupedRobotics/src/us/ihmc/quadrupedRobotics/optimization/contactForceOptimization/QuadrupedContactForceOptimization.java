@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -25,12 +25,12 @@ public class QuadrupedContactForceOptimization
    private final ReferenceFrame worldFrame;
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
-   private final FrameVector comTorqueCommand;
-   private final FrameVector comTorqueSolution;
-   private final FrameVector comForceCommand;
-   private final FrameVector comForceSolution;
-   private final QuadrantDependentList<FrameVector> contactForceCommand = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector> contactForceSolution = new QuadrantDependentList<>();
+   private final FrameVector3D comTorqueCommand;
+   private final FrameVector3D comTorqueSolution;
+   private final FrameVector3D comForceCommand;
+   private final FrameVector3D comForceSolution;
+   private final QuadrantDependentList<FrameVector3D> contactForceCommand = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FrameVector3D> contactForceSolution = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint> contactPosition = new QuadrantDependentList<>();
    private final QuadrantDependentList<ContactState> contactState = new QuadrantDependentList<>();
 
@@ -67,14 +67,14 @@ public class QuadrupedContactForceOptimization
       soleFrame = referenceFrames.getFootReferenceFrames();
       worldFrame = ReferenceFrame.getWorldFrame();
 
-      comTorqueCommand = new FrameVector(comFrame);
-      comTorqueSolution = new FrameVector(comFrame);
-      comForceCommand = new FrameVector(comFrame);
-      comForceSolution = new FrameVector(comFrame);
+      comTorqueCommand = new FrameVector3D(comFrame);
+      comTorqueSolution = new FrameVector3D(comFrame);
+      comForceCommand = new FrameVector3D(comFrame);
+      comForceSolution = new FrameVector3D(comFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
-         contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
+         contactForceCommand.set(robotQuadrant, new FrameVector3D(comFrame));
+         contactForceSolution.set(robotQuadrant, new FrameVector3D(comFrame));
          contactPosition.set(robotQuadrant, new FramePoint(comFrame));
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
@@ -123,17 +123,17 @@ public class QuadrupedContactForceOptimization
       }
    }
 
-   public void setComTorqueCommand(FrameVector comTorque)
+   public void setComTorqueCommand(FrameVector3D comTorque)
    {
       comTorqueCommand.setIncludingFrame(comTorque);
    }
 
-   public void setComForceCommand(FrameVector comForce)
+   public void setComForceCommand(FrameVector3D comForce)
    {
       comForceCommand.setIncludingFrame(comForce);
    }
 
-   public void setContactForceCommand(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   public void setContactForceCommand(RobotQuadrant robotQuadrant, FrameVector3D contactForce)
    {
       contactForceCommand.get(robotQuadrant).setIncludingFrame(contactForce);
    }
@@ -212,17 +212,17 @@ public class QuadrupedContactForceOptimization
       }
    }
 
-   public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector3D contactForce)
    {
       contactForce.setIncludingFrame(contactForceSolution.get(robotQuadrant));
    }
 
-   public void getComTorqueSolution(FrameVector comTorque)
+   public void getComTorqueSolution(FrameVector3D comTorque)
    {
       comTorque.setIncludingFrame(comTorqueSolution);
    }
 
-   public void getComForceSolution(FrameVector comForce)
+   public void getComForceSolution(FrameVector3D comForce)
    {
       comForce.setIncludingFrame(comForceSolution);
    }

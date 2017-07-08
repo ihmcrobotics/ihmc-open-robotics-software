@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
@@ -32,7 +32,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    private final ReferenceFrame bodyFrame;
 
    private final RotationMatrix orientation = new RotationMatrix();
-   private final FrameVector acceleration = new FrameVector(worldFrame);
+   private final FrameVector3D acceleration = new FrameVector3D(worldFrame);
    private final Vector3D angularVelocity = new Vector3D();
    private final Vector3D compass = new Vector3D();
 

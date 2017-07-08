@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -109,7 +109,7 @@ public class ToeSlippingDetector
 
    private final Wrench footWrench = new Wrench();
    private final Twist footTwist = new Twist();
-   private final FrameVector toeLinearVelocity = new FrameVector();
+   private final FrameVector3D toeLinearVelocity = new FrameVector3D();
    private final FramePoint currentToePosition = new FramePoint();
 
    public void update()

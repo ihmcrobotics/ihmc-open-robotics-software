@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -169,8 +169,8 @@ public class LegJointLimitAvoidanceControlModule
       }
    }
 
-   public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
-         FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
+   public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
+         FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearAccelerationOfOrigin, FrameVector3D desiredAngularAcceleration)
 
    {
       // update joint positions in the ikJoints to the current positions
@@ -178,7 +178,7 @@ public class LegJointLimitAvoidanceControlModule
 
       Twist rootJointTist = new Twist();
       robotModel.getRootJoint().getJointTwist(rootJointTist);
-      FrameVector linearRootJointVelocity = new FrameVector();
+      FrameVector3D linearRootJointVelocity = new FrameVector3D();
       rootJointTist.getLinearPart(linearRootJointVelocity);
 
       linearRootJointVelocity.scale(0.004);

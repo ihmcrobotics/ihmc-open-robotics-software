@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -336,7 +336,7 @@ public class ComposableStateEstimatorEvaluator
          estimatedOrientation.set(rotationMatrix);
          orientationEstimator.setEstimatedOrientation(estimatedOrientation);
 
-         FrameVector estimatedAngularVelocity = new FrameVector();
+         FrameVector3D estimatedAngularVelocity = new FrameVector3D();
          orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocity);
          estimatedAngularVelocity.set(angularVelocityInBody);
          orientationEstimator.setEstimatedAngularVelocity(estimatedAngularVelocity);

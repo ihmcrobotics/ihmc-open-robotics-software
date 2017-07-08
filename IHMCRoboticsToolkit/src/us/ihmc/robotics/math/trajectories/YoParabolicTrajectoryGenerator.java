@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 
@@ -15,9 +15,9 @@ public class YoParabolicTrajectoryGenerator
    private final ReferenceFrame referenceFrame;
    private final YoFrameVector c0, c1, c2;
 
-   private final FrameVector tempInitialize;
+   private final FrameVector3D tempInitialize;
    private final FramePoint tempPackPosition, tempPackPosition2;
-   private final FrameVector tempPackVelocity;
+   private final FrameVector3D tempPackVelocity;
 
    public YoParabolicTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -28,10 +28,10 @@ public class YoParabolicTrajectoryGenerator
       c1 = new YoFrameVector("c1", "", referenceFrame, registry);
       c2 = new YoFrameVector("c2", "", referenceFrame, registry);
 
-      tempInitialize = new FrameVector(referenceFrame);
+      tempInitialize = new FrameVector3D(referenceFrame);
       tempPackPosition = new FramePoint(referenceFrame);
       tempPackPosition2 = new FramePoint(referenceFrame);
-      tempPackVelocity = new FrameVector(referenceFrame);
+      tempPackVelocity = new FrameVector3D(referenceFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -75,7 +75,7 @@ public class YoParabolicTrajectoryGenerator
       c1.sub(c2);
    }
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition)
+   public void initialize(FramePoint initialPosition, FrameVector3D initialVelocity, FramePoint finalPosition)
    {
       initialPosition.changeFrame(referenceFrame);
       initialVelocity.changeFrame(referenceFrame);
@@ -108,7 +108,7 @@ public class YoParabolicTrajectoryGenerator
       positionToPack.add(tempPackPosition2);
    }
 
-   public void getVelocity(FrameVector velocityToPack, double parameter)
+   public void getVelocity(FrameVector3D velocityToPack, double parameter)
    {      
       double q = parameter;
       MathTools.checkIntervalContains(q, 0.0, 1.0);
@@ -123,7 +123,7 @@ public class YoParabolicTrajectoryGenerator
       velocityToPack.add(tempPackVelocity);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero(referenceFrame);
       

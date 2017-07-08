@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -127,7 +127,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       referenceFrames.updateFrames();
       walking.set(true);
 
-      FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D direction = new FrameVector3D(ReferenceFrame.getWorldFrame());
       direction.set(direction2dInWorld);
       RobotSide swingSide = findStepSide(direction);
 
@@ -143,7 +143,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       sendPacketToController(footsteps);
    }
 
-   private RobotSide findStepSide(FrameVector direction)
+   private RobotSide findStepSide(FrameVector3D direction)
    {
       double score = 0.0;
       RobotSide ret = null;
@@ -176,7 +176,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       return ret;
    }
 
-   private FramePoint computeSteppingLocation(FrameVector direction, RobotSide stepSide)
+   private FramePoint computeSteppingLocation(FrameVector3D direction, RobotSide stepSide)
    {
       // reachable region in stance frame
       ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
@@ -187,7 +187,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       reachableRegion.update();
 
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
-      FrameVector localDirection = new FrameVector(direction);
+      FrameVector3D localDirection = new FrameVector3D(direction);
       localDirection.changeFrame(stanceSoleFrame);
 
       Point2D desiredLocation = new Point2D(localDirection.getX(), localDirection.getY());

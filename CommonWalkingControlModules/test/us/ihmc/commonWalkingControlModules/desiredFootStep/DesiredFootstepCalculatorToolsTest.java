@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.MemoryTools;
 
@@ -49,7 +49,7 @@ public class DesiredFootstepCalculatorToolsTest
             input.add(new FramePoint(worldFrame, RandomGeometry.nextVector3D(random, maxLength)));
          }
 
-         FrameVector minusYDirection = new FrameVector(worldFrame, 0.0, -1.0, 0.0);
+         FrameVector3D minusYDirection = new FrameVector3D(worldFrame, 0.0, -1.0, 0.0);
          int nPointsOut = random.nextInt(nPointsIn);
          List<FramePoint> outputX = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(input, minusYDirection, nPointsOut);
 

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -39,7 +39,7 @@ public interface ControllerCoreOutputReadOnly
     * 
     * @param linearMomentumRateToPack the linear momentum rate after optimization.
     */
-   public abstract void getLinearMomentumRate(FrameVector linearMomentumRateToPack);
+   public abstract void getLinearMomentumRate(FrameVector3D linearMomentumRateToPack);
 
    /**
     * Retrieves the desired state for the root joint.

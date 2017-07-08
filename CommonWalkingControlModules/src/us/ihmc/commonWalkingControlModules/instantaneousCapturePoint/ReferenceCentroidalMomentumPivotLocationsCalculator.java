@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -84,7 +84,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final FramePoint secondCMP = new FramePoint();
 
    private final FramePoint soleFrameOrigin = new FramePoint();
-   private final FrameVector soleToSoleFrameVector = new FrameVector();
+   private final FrameVector3D soleToSoleFrameVector = new FrameVector3D();
 
    private final FramePoint2d cmp2d = new FramePoint2d();
    private final FramePoint2d previousExitCMP2d = new FramePoint2d();

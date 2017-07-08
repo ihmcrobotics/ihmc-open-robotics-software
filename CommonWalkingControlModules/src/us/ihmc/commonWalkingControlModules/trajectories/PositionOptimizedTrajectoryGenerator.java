@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -54,9 +54,9 @@ public class PositionOptimizedTrajectoryGenerator
    private final double[] tempCoeffs = new double[order.getCoefficients()];
 
    private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector initialVelocity = new FrameVector();
+   private final FrameVector3D initialVelocity = new FrameVector3D();
    private final FramePoint finalPosition = new FramePoint();
-   private final FrameVector finalVelocity = new FrameVector();
+   private final FrameVector3D finalVelocity = new FrameVector3D();
    private final FramePoint waypointPosition = new FramePoint();
    private final RecyclingArrayList<TDoubleArrayList> waypointPositions;
 
@@ -82,7 +82,7 @@ public class PositionOptimizedTrajectoryGenerator
 
    private final YoDouble maxSpeed;
    private final YoDouble maxSpeedTime;
-   private final FrameVector tempVelocity = new FrameVector();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
 
    public PositionOptimizedTrajectoryGenerator()
    {
@@ -215,7 +215,7 @@ public class PositionOptimizedTrajectoryGenerator
     * @param finalPosition
     * @param finalVelocity
     */
-   public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
+   public void setEndpointConditions(FramePoint initialPosition, FrameVector3D initialVelocity, FramePoint finalPosition, FrameVector3D finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
@@ -401,7 +401,7 @@ public class PositionOptimizedTrajectoryGenerator
     * @param waypointIndex
     * @param waypointVelocityToPack
     */
-   public void getWaypointVelocity(int waypointIndex, FrameVector waypointVelocityToPack)
+   public void getWaypointVelocity(int waypointIndex, FrameVector3D waypointVelocityToPack)
    {
       optimizer.getWaypointVelocity(this.waypointVelocity, waypointIndex);
       waypointVelocityToPack.setToZero(trajectoryFrame);
@@ -419,17 +419,17 @@ public class PositionOptimizedTrajectoryGenerator
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

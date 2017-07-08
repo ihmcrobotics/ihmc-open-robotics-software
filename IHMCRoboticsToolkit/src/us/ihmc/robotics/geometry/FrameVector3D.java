@@ -19,7 +19,7 @@ import us.ihmc.robotics.random.RandomGeometry;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements FrameVector3DReadOnly, Vector3DBasics
+public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> implements FrameVector3DReadOnly, Vector3DBasics
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -27,7 +27,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * Creates a new frame vector and initializes it components to zero and its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
-   public FrameVector()
+   public FrameVector3D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -38,7 +38,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * 
     * @param referenceFrame the initial frame for this frame vector.
     */
-   public FrameVector(ReferenceFrame referenceFrame)
+   public FrameVector3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Vector3D());
    }
@@ -52,7 +52,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * @param y the y-component.
     * @param z the z-component.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
+   public FrameVector3D(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       super(referenceFrame, new Vector3D(x, y, z));
    }
@@ -64,7 +64,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * @param referenceFrame the initial frame for this frame vector.
     * @param vectorArray the array containing this vector's components. Not modified.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vectorArray)
+   public FrameVector3D(ReferenceFrame referenceFrame, double[] vectorArray)
    {
       super(referenceFrame, new Vector3D(vectorArray));
    }
@@ -76,7 +76,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * @param referenceFrame the initial frame for this frame vector.
     * @param tuple3DReadOnly the tuple to copy the components from. Not modified.
     */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
+   public FrameVector3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
       super(referenceFrame, new Vector3D(tuple3DReadOnly));
    }
@@ -86,21 +86,21 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     *
     * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FrameVector(FrameTuple3DReadOnly other)
+   public FrameVector3D(FrameTuple3DReadOnly other)
    {
       super(other.getReferenceFrame(), new Vector3D(other));
    }
 
-   public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)
+   public static FrameVector3D generateRandomFrameVector(Random random, ReferenceFrame frame)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomGeometry.nextVector3D(random));
+      FrameVector3D randomVector = new FrameVector3D(frame, RandomGeometry.nextVector3D(random));
       return randomVector;
    }
 
-   public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
+   public static FrameVector3D generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                        double zMax)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
+      FrameVector3D randomVector = new FrameVector3D(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
                                                  RandomNumbers.nextDouble(random, zMin, zMax));
       return randomVector;
    }

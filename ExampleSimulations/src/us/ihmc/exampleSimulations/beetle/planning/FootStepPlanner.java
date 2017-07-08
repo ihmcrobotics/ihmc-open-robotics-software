@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -39,8 +39,8 @@ public class FootStepPlanner
 
    private SegmentDependentList<RobotSextant, YoFrameVector> nominalOffsetsFromBodyToFeet = new SegmentDependentList<>(RobotSextant.class);
    private final CenterOfMassJacobian centerOfMassJacobian;
-   private FrameVector centerOfMassVelocity = new FrameVector();
-   private FrameVector desiredVelocityScaled = new FrameVector();
+   private FrameVector3D centerOfMassVelocity = new FrameVector3D();
+   private FrameVector3D desiredVelocityScaled = new FrameVector3D();
    private ReferenceFrame centerOfMassFrameWithOrientation;
    private ReferenceFrame bodyZUpFrame;
    private YoDouble swingTimeScalar = new YoDouble("swingTimeScalar", registry);
@@ -51,7 +51,7 @@ public class FootStepPlanner
 
    private final RigidBody pelvis;
    private final Twist twistToPack = new Twist();
-   private FrameVector angularVelocity = new FrameVector();
+   private FrameVector3D angularVelocity = new FrameVector3D();
    private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();
    private FramePoint centerOfTurn = new FramePoint();
 
@@ -131,14 +131,14 @@ public class FootStepPlanner
       parentRegistry.addChild(registry);
    }
 
-   FrameVector offsetFromBodyToFoot = new FrameVector();
+   FrameVector3D offsetFromBodyToFoot = new FrameVector3D();
 
    private final Point2D startPoint = new Point2D();
    private final FramePoint2d frameEndPoint = new FramePoint2d();
    private final FramePoint bodyPositionProjectedInFuture = new FramePoint();
    private final FrameOrientation rotationAtEnd = new FrameOrientation();
    
-   public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector desiredLinearVelocity, FrameVector desiredAngularVelocity, double swingTime, FramePoint framePointToPack)
+   public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint framePointToPack)
    {
       YoFrameVector offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
       offsetFromBodyToFootDesired.getFrameTupleIncludingFrame(offsetFromBodyToFoot);

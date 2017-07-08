@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -96,7 +96,7 @@ public class PlaneContactWrenchProcessor
    }
 
    private final FramePoint tempCoP3d = new FramePoint();
-   private final FrameVector tempForce = new FrameVector();
+   private final FrameVector3D tempForce = new FrameVector3D();
 
    public void compute(Map<RigidBody, Wrench> externalWrenches)
    {

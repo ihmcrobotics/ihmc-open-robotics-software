@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
 public class ThreeDoFMinimumJerkTrajectory
@@ -12,8 +12,8 @@ public class ThreeDoFMinimumJerkTrajectory
    final private MinimumJerkTrajectory yTrajectory;
    final private MinimumJerkTrajectory zTrajectory;
    final private FramePoint position;
-   final private FrameVector velocity;
-   final private FrameVector acceleration;
+   final private FrameVector3D velocity;
+   final private FrameVector3D acceleration;
    private ReferenceFrame referenceFrame;
    private TimeInterval timeInterval;
    private boolean initialized;
@@ -24,8 +24,8 @@ public class ThreeDoFMinimumJerkTrajectory
       yTrajectory = new MinimumJerkTrajectory();
       zTrajectory = new MinimumJerkTrajectory();
       position = new FramePoint();
-      velocity = new FrameVector();
-      acceleration = new FrameVector();
+      velocity = new FrameVector3D();
+      acceleration = new FrameVector3D();
       referenceFrame = ReferenceFrame.getWorldFrame();
       timeInterval = new TimeInterval();
       initialized = false;
@@ -46,12 +46,12 @@ public class ThreeDoFMinimumJerkTrajectory
       position.setIncludingFrame(this.position);
    }
 
-   public void getVelocity(FrameVector velocity)
+   public void getVelocity(FrameVector3D velocity)
    {
       velocity.setIncludingFrame(this.velocity);
    }
 
-   public void getAcceleration(FrameVector acceleration)
+   public void getAcceleration(FrameVector3D acceleration)
    {
       acceleration.setIncludingFrame(this.acceleration);
    }

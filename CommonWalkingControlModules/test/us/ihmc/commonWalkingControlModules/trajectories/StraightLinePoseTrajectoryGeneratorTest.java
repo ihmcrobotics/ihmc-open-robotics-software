@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
@@ -116,18 +116,18 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
       double dt = 1.0e-3;
       FramePoint position1 = new FramePoint();
-      FrameVector velocity1 = new FrameVector();
-      FrameVector acceleration1 = new FrameVector();
+      FrameVector3D velocity1 = new FrameVector3D();
+      FrameVector3D acceleration1 = new FrameVector3D();
       FrameOrientation orientation1 = new FrameOrientation();
-      FrameVector angularVelocity1 = new FrameVector();
-      FrameVector angularAcceleration1 = new FrameVector();
+      FrameVector3D angularVelocity1 = new FrameVector3D();
+      FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FramePoint position2 = new FramePoint();
-      FrameVector velocity2 = new FrameVector();
-      FrameVector acceleration2 = new FrameVector();
+      FrameVector3D velocity2 = new FrameVector3D();
+      FrameVector3D acceleration2 = new FrameVector3D();
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
       {
@@ -172,18 +172,18 @@ public class StraightLinePoseTrajectoryGeneratorTest
       trajToTest.compute(-5.0);
 
       FramePoint position1 = new FramePoint(initialPosition);
-      FrameVector velocity1 = new FrameVector(worldFrame);
-      FrameVector acceleration1 = new FrameVector(worldFrame);
+      FrameVector3D velocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D acceleration1 = new FrameVector3D(worldFrame);
       FrameOrientation orientation1 = new FrameOrientation(initialOrientation);
-      FrameVector angularVelocity1 = new FrameVector(worldFrame);
-      FrameVector angularAcceleration1 = new FrameVector(worldFrame);
+      FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FramePoint position2 = new FramePoint();
-      FrameVector velocity2 = new FrameVector();
-      FrameVector acceleration2 = new FrameVector();
+      FrameVector3D velocity2 = new FrameVector3D();
+      FrameVector3D acceleration2 = new FrameVector3D();
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       trajToTest.getLinearData(position2, velocity2, acceleration2);
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
@@ -218,18 +218,18 @@ public class StraightLinePoseTrajectoryGeneratorTest
       trajToTest.compute(15.0);
 
       FramePoint position1 = new FramePoint(finalPosition);
-      FrameVector velocity1 = new FrameVector(worldFrame);
-      FrameVector acceleration1 = new FrameVector(worldFrame);
+      FrameVector3D velocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D acceleration1 = new FrameVector3D(worldFrame);
       FrameOrientation orientation1 = new FrameOrientation(finalOrientation);
-      FrameVector angularVelocity1 = new FrameVector(worldFrame);
-      FrameVector angularAcceleration1 = new FrameVector(worldFrame);
+      FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FramePoint position2 = new FramePoint();
-      FrameVector velocity2 = new FrameVector();
-      FrameVector acceleration2 = new FrameVector();
+      FrameVector3D velocity2 = new FrameVector3D();
+      FrameVector3D acceleration2 = new FrameVector3D();
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       trajToTest.getLinearData(position2, velocity2, acceleration2);
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
@@ -275,18 +275,18 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
       double dt = 1.0e-3;
       FramePoint position1 = new FramePoint();
-      FrameVector velocity1 = new FrameVector();
-      FrameVector acceleration1 = new FrameVector();
+      FrameVector3D velocity1 = new FrameVector3D();
+      FrameVector3D acceleration1 = new FrameVector3D();
       FrameOrientation orientation1 = new FrameOrientation();
-      FrameVector angularVelocity1 = new FrameVector();
-      FrameVector angularAcceleration1 = new FrameVector();
+      FrameVector3D angularVelocity1 = new FrameVector3D();
+      FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FramePoint position2 = new FramePoint();
-      FrameVector velocity2 = new FrameVector();
-      FrameVector acceleration2 = new FrameVector();
+      FrameVector3D velocity2 = new FrameVector3D();
+      FrameVector3D acceleration2 = new FrameVector3D();
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
       {

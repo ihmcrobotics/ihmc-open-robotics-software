@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -19,7 +19,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
 
    private final FramePoint pointToMeasureVelocityOf;
    private final FramePoint tempPointToMeasureVelocityOf = new FramePoint();
-   private final FrameVector pointVelocityFrameVector = new FrameVector();
+   private final FrameVector3D pointVelocityFrameVector = new FrameVector3D();
 
    private final Twist twist = new Twist();
 
@@ -62,7 +62,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
       pointVelocityOutputPort.setData(pointVelocity);
    }
    
-   public void packPointVelocity(FrameVector velocity)
+   public void packPointVelocity(FrameVector3D velocity)
    {
       yoFrameVectorPerfect.getFrameTupleIncludingFrame(velocity);
    }

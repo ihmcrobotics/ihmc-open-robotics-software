@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 
 public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
@@ -33,7 +33,7 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
       parentRegistry.addChild(registry);
    }
 
-   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
+   public void computeNextTick(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
    {
       double time = this.time.getDoubleValue();
 
@@ -47,22 +47,22 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
       return referenceFrame;
    }
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition, FrameVector finalDesiredVelocity)
+   public void initialize(FramePoint initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint finalDesiredPosition, FrameVector3D finalDesiredVelocity)
    {
       initialPosition = new FramePoint(initialPosition);
       initialPosition.changeFrame(referenceFrame);
-      initialVelocity = new FrameVector(initialVelocity);
+      initialVelocity = new FrameVector3D(initialVelocity);
       initialVelocity.changeFrame(referenceFrame);
       finalDesiredPosition = new FramePoint(finalDesiredPosition);
       finalDesiredPosition.changeFrame(referenceFrame);
 
-      FrameVector finalVelocity = new FrameVector(referenceFrame);
+      FrameVector3D finalVelocity = new FrameVector3D(referenceFrame);
 
       double maxVelDouble = maxVel.getDoubleValue();
       double maxAccelDouble = maxAccel.getDoubleValue();
 
-      FrameVector vMax = new FrameVector(referenceFrame, maxVelDouble, maxVelDouble, maxVelDouble);
-      FrameVector aMax = new FrameVector(referenceFrame, maxAccelDouble, maxAccelDouble, maxAccelDouble);
+      FrameVector3D vMax = new FrameVector3D(referenceFrame, maxVelDouble, maxVelDouble, maxVelDouble);
+      FrameVector3D aMax = new FrameVector3D(referenceFrame, maxAccelDouble, maxAccelDouble, maxAccelDouble);
 
       trajectory = new FramePointTrapezoidalVelocityTrajectory(time.getDoubleValue(), initialPosition, finalDesiredPosition, initialVelocity, finalVelocity,
               vMax, aMax, AlphaToAlphaType.LINEAR);

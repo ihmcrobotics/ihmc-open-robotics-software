@@ -13,7 +13,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class CenterOfMassAccelerationCalculatorTest
 {
@@ -50,7 +50,7 @@ public class CenterOfMassAccelerationCalculatorTest
       sixDoFJoint.getRotation(rotationMatrix);
 
       spatialAccelerationCalculator.compute();
-      FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       Vector3D expected = jointAcceleration.getLinearPartCopy();
@@ -91,7 +91,7 @@ public class CenterOfMassAccelerationCalculatorTest
       elevator.updateFramesRecursively();
 
       spatialAccelerationCalculator.compute();
-      FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration, 1e-5);
@@ -125,7 +125,7 @@ public class CenterOfMassAccelerationCalculatorTest
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       spatialAccelerationCalculator.compute();
-      FrameVector comAcceleration = new FrameVector(worldFrame);
+      FrameVector3D comAcceleration = new FrameVector3D(worldFrame);
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       assertEquals(length * qd * qd, comAcceleration.length(), 1e-5);
@@ -153,7 +153,7 @@ public class CenterOfMassAccelerationCalculatorTest
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       spatialAccelerationCalculator.compute();
-      FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
    }
 

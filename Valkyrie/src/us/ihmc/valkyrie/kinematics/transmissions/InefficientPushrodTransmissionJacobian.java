@@ -12,7 +12,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
@@ -66,14 +66,14 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    private final FramePoint t5InBottomFrame = new FramePoint();
    private final FramePoint t6InBottomFrame = new FramePoint();
 
-   private final FrameVector f5VectorInTopFrame = new FrameVector(topFrame);
-   private final FrameVector f6VectorInTopFrame = new FrameVector(topFrame);
+   private final FrameVector3D f5VectorInTopFrame = new FrameVector3D(topFrame);
+   private final FrameVector3D f6VectorInTopFrame = new FrameVector3D(topFrame);
 
-   private final FrameVector f5VectorInBottomFrame = new FrameVector(bottomFrame);
-   private final FrameVector f6VectorInBottomFrame = new FrameVector(bottomFrame);
+   private final FrameVector3D f5VectorInBottomFrame = new FrameVector3D(bottomFrame);
+   private final FrameVector3D f6VectorInBottomFrame = new FrameVector3D(bottomFrame);
 
-   private final FrameVector tempRVector = new FrameVector();
-   private final FrameVector tempCrossVector = new FrameVector();
+   private final FrameVector3D tempRVector = new FrameVector3D();
+   private final FrameVector3D tempCrossVector = new FrameVector3D();
 
    private boolean visualize = true;
 
@@ -110,7 +110,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       }
       }
       
-      topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
+      topFrame.updateTranslation(new FrameVector3D(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
@@ -123,7 +123,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
       actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);
       
-      beforeBottomJointFrame.updateTranslation(new FrameVector(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
+      beforeBottomJointFrame.updateTranslation(new FrameVector3D(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
 
       if (yoGraphicsListRegistry == null)
       {
@@ -403,7 +403,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    }
    
-   private void setJacobianElement(YoDouble jacobianElement, FrameVector rCrossFVector, Axis jointAxis)
+   private void setJacobianElement(YoDouble jacobianElement, FrameVector3D rCrossFVector, Axis jointAxis)
    {
       if (jointAxis == Axis.X)
       {

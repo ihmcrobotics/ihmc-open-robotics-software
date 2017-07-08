@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
- * {@code FrameTuple3D} is the base implementation for {@link FramePoint} and {@link FrameVector}.
+ * {@code FrameTuple3D} is the base implementation for {@link FramePoint} and {@link FrameVector3D}.
  * <p>
  * In addition to representing a {@link Tuple3DBasics}, a {@link ReferenceFrame} is associated to a
  * {@code FrameTuple3D}. This allows, for instance, to enforce, at runtime, that operations on

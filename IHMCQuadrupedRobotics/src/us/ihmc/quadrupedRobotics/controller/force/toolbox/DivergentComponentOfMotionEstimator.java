@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class DivergentComponentOfMotionEstimator
@@ -42,7 +42,7 @@ public class DivergentComponentOfMotionEstimator
       return lipModel;
    }
 
-   public void compute(FramePoint dcmPositionEstimate, FrameVector comVelocityEstimate)
+   public void compute(FramePoint dcmPositionEstimate, FrameVector3D comVelocityEstimate)
    {
       ReferenceFrame dcmPositionEstimateFrame = dcmPositionEstimate.getReferenceFrame();
       ReferenceFrame comVelocityEstimateFrame = comVelocityEstimate.getReferenceFrame();

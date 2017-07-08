@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -23,8 +23,8 @@ public class QuadrupedSoleForceEstimator
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
-   private final QuadrantDependentList<FrameVector> soleVirtualForce;
-   private final QuadrantDependentList<FrameVector> soleContactForce;
+   private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
+   private final QuadrantDependentList<FrameVector3D> soleContactForce;
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
@@ -57,8 +57,8 @@ public class QuadrupedSoleForceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint(worldFrame));
-         soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
-         soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
+         soleVirtualForce.set(robotQuadrant, new FrameVector3D(worldFrame));
+         soleContactForce.set(robotQuadrant, new FrameVector3D(worldFrame));
       }
 
       // initialize yo variables
@@ -148,22 +148,22 @@ public class QuadrupedSoleForceEstimator
       }
    }
 
-   public QuadrantDependentList<FrameVector> getSoleVirtualForce()
+   public QuadrantDependentList<FrameVector3D> getSoleVirtualForce()
    {
       return soleVirtualForce;
    }
 
-   public FrameVector getSoleVirtualForce(RobotQuadrant robotQuadrant)
+   public FrameVector3D getSoleVirtualForce(RobotQuadrant robotQuadrant)
    {
       return soleVirtualForce.get(robotQuadrant);
    }
 
-   public QuadrantDependentList<FrameVector> getSoleContactForce()
+   public QuadrantDependentList<FrameVector3D> getSoleContactForce()
    {
       return soleContactForce;
    }
 
-   public FrameVector getSoleContactForce(RobotQuadrant robotQuadrant)
+   public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
    {
       return soleContactForce.get(robotQuadrant);
    }

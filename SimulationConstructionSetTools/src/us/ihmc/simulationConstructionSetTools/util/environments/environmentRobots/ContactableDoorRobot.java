@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -245,7 +245,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       boolean packedByHandles = false;
       
       FramePoint frameIntersectionToPack = new FramePoint();
-      FrameVector frameNormalToPack = new FrameVector();
+      FrameVector3D frameNormalToPack = new FrameVector3D();
       
       // check if close enough to handles
       for (RobotSide robotSide : RobotSide.values())

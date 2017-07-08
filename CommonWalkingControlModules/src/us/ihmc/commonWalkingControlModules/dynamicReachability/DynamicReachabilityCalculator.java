@@ -22,7 +22,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -111,7 +111,7 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<FramePoint> ankleLocations = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
    private final SideDependentList<FramePoint> adjustedAnkleLocations = new SideDependentList<>();
-   private final SideDependentList<FrameVector> hipOffsets = new SideDependentList<>();
+   private final SideDependentList<FrameVector3D> hipOffsets = new SideDependentList<>();
 
    private final SideDependentList<YoFramePoint> yoAnkleLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> yoHipLocations = new SideDependentList<>();
@@ -134,8 +134,8 @@ public class DynamicReachabilityCalculator
    private final FrameOrientation stanceFootOrientation = new FrameOrientation();
    private final FrameOrientation footstepAnkleOrientation = new FrameOrientation();
 
-   private final FrameVector tempGradient = new FrameVector();
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempGradient = new FrameVector3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
@@ -184,7 +184,7 @@ public class DynamicReachabilityCalculator
       {
          ankleLocations.put(robotSide, new FramePoint());
          adjustedAnkleLocations.put(robotSide, new FramePoint());
-         hipOffsets.put(robotSide, new FrameVector());
+         hipOffsets.put(robotSide, new FrameVector3D());
 
          String prefix = robotSide.getShortLowerCaseName();
          if (VISUALIZE_REACHABILITY)
@@ -246,7 +246,7 @@ public class DynamicReachabilityCalculator
       FramePoint pelvis = new FramePoint(pelvisFrame);
       FramePoint com = new FramePoint(centerOfMassFrame);
       pelvis.changeFrame(centerOfMassFrame);
-      FrameVector translationToCoM = new FrameVector(centerOfMassFrame);
+      FrameVector3D translationToCoM = new FrameVector3D(centerOfMassFrame);
       translationToCoM.set(com);
       translationToCoM.sub(pelvis);
       translationToCoM.changeFrame(pelvisFrame);
@@ -268,7 +268,7 @@ public class DynamicReachabilityCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameVector translationToPelvis = new FrameVector(pelvisFrame);
+         FrameVector3D translationToPelvis = new FrameVector3D(pelvisFrame);
          FramePoint pelvisCenter = new FramePoint(pelvisFrame);
          FramePoint hipJoint = new FramePoint(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameAfterJoint());
          hipJoint.changeFrame(pelvisFrame);
@@ -751,8 +751,8 @@ public class DynamicReachabilityCalculator
       FramePoint adjustedUpcomingAnklePoint = adjustedAnkleLocations.get(stepSide);
       FramePoint adjustedStanceAnklePoint = adjustedAnkleLocations.get(stanceSide);
 
-      FrameVector stepHipVector = hipOffsets.get(stepSide);
-      FrameVector stanceHipVector = hipOffsets.get(stanceSide);
+      FrameVector3D stepHipVector = hipOffsets.get(stepSide);
+      FrameVector3D stanceHipVector = hipOffsets.get(stanceSide);
 
       tempPoint.setToZero(stepHipFrame);
       tempPoint.changeFrame(predictedCoMFrame);
@@ -1203,7 +1203,7 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private void computeGradient(FramePoint originalPosition, FramePoint2d adjustedPosition, double variation, FrameVector gradientToPack)
+   private void computeGradient(FramePoint originalPosition, FramePoint2d adjustedPosition, double variation, FrameVector3D gradientToPack)
    {
       originalPosition.changeFrame(worldFrame);
       tempPoint.setToZero(worldFrame);
@@ -1282,7 +1282,7 @@ public class DynamicReachabilityCalculator
       }
    }
 
-   private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
+   private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector3D gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
       gradientToPack.set(gradientToExtract);
@@ -1307,7 +1307,7 @@ public class DynamicReachabilityCalculator
          xAxis = new FrameVector2d(parentFrame);
       }
 
-      public void setXAxis(FrameVector xAxis)
+      public void setXAxis(FrameVector3D xAxis)
       {
          xAxis.changeFrame(parentFrame);
          this.xAxis.set(xAxis);

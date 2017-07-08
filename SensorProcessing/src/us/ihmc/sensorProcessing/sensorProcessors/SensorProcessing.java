@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -216,8 +216,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final Vector3D tempAngularVelocity = new Vector3D();
    private final Vector3D tempLinearAcceleration = new Vector3D();
 
-   private final FrameVector tempForce = new FrameVector();
-   private final FrameVector tempTorque = new FrameVector();
+   private final FrameVector3D tempForce = new FrameVector3D();
+   private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
 
    private AuxiliaryRobotData auxiliaryRobotData;

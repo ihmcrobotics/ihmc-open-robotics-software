@@ -26,7 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -148,7 +148,7 @@ public class PlanningTestTools
       yoGoal.set(goalPose.getFramePointCopy());
       graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("GoalViz", yoGoal, 0.05, YoAppearance.White()));
       PoseReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
-      FrameVector goalOrientation = new FrameVector(goalFrame, 0.5, 0.0, 0.0);
+      FrameVector3D goalOrientation = new FrameVector3D(goalFrame, 0.5, 0.0, 0.0);
       goalOrientation.changeFrame(worldFrame);
       YoFrameVector yoGoalOrientation = new YoFrameVector("GoalVector", worldFrame, registry);
       yoGoalOrientation.set(goalOrientation);

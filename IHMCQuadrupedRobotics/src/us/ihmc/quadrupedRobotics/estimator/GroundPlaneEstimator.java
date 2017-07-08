@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -117,7 +117,7 @@ public class GroundPlaneEstimator
    /**
     * @param normal : ground plane normal in World Frame
     */
-   public void getPlaneNormal(FrameVector normal)
+   public void getPlaneNormal(FrameVector3D normal)
    {
       normal.changeFrame(ReferenceFrame.getWorldFrame());
       groundPlane.getNormal(normal.getVector());

@@ -10,14 +10,14 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PassiveRevoluteJointTest
 {
    // Variables
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   private FrameVector frameVec = new FrameVector();
+   private FrameVector3D frameVec = new FrameVector3D();
    private RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
    private PassiveRevoluteJoint joint = null; // new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
    private DenseMatrix64F matrix = new DenseMatrix64F();

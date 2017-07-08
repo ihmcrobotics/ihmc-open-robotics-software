@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -40,8 +40,8 @@ public class HoldPositionState extends AbstractFootControlState
    private static final boolean VISUALIZE = false;
    private static final double EPSILON = 0.010;
 
-   private final FrameVector holdPositionNormalContactVector = new FrameVector();
-   private final FrameVector fullyConstrainedNormalContactVector;
+   private final FrameVector3D holdPositionNormalContactVector = new FrameVector3D();
+   private final FrameVector3D fullyConstrainedNormalContactVector;
 
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
@@ -55,7 +55,7 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
    private final FrameLineSegment2d closestEdgeToCoP = new FrameLineSegment2d();
    private final FrameVector2d edgeVector2d = new FrameVector2d();
-   private final FrameVector edgeVector = new FrameVector();
+   private final FrameVector3D edgeVector = new FrameVector3D();
    private final FrameOrientation desiredOrientationCopy = new FrameOrientation();
    private final AxisAngle desiredAxisAngle = new AxisAngle();
    private final Vector3D desiredRotationVector = new Vector3D();

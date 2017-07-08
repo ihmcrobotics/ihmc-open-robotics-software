@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
@@ -73,8 +73,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final Vector3D tempPlaneNormal = new Vector3D();
 
    // Boilerplate variables
-   private final FrameVector initialVelocity;
-   private final FrameVector touchdownVelocity;
+   private final FrameVector3D initialVelocity;
+   private final FrameVector3D touchdownVelocity;
    private final FramePoint swingStartPosition;
    private final FramePoint swingEndPosition;
    private final FramePoint stanceFootPosition;
@@ -140,8 +140,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       axisAngle = new AxisAngle();
       rigidBodyTransform = new RigidBodyTransform();
 
-      initialVelocity = new FrameVector(WORLD, 0.0, 0.0, 0.0);
-      touchdownVelocity = new FrameVector(WORLD, 0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
+      initialVelocity = new FrameVector3D(WORLD, 0.0, 0.0, 0.0);
+      touchdownVelocity = new FrameVector3D(WORLD, 0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
       swingStartPosition = new FramePoint();
       swingEndPosition = new FramePoint();
       stanceFootPosition = new FramePoint();

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -46,7 +46,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final RigidBodyTransform localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation = new RigidBodyTransform();
    private final FramePoint localizationPositionInThePastInWorldFrame;
 
-   private final FrameVector translationOffsetFrameVector = new FrameVector(worldFrame);
+   private final FrameVector3D translationOffsetFrameVector = new FrameVector3D(worldFrame);
    private final Vector3D translationOffsetVector = new Vector3D();
 
    private final RigidBodyTransform totalErrorTransform = new RigidBodyTransform();

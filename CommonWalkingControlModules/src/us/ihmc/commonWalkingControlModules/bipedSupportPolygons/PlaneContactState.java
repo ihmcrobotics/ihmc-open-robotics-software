@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface PlaneContactState
@@ -19,9 +19,9 @@ public interface PlaneContactState
 
    public abstract boolean inContact();
 
-   public abstract FrameVector getContactNormalFrameVectorCopy();
+   public abstract FrameVector3D getContactNormalFrameVectorCopy();
 
-   public abstract void getContactNormalFrameVector(FrameVector frameVectorToPack);
+   public abstract void getContactNormalFrameVector(FrameVector3D frameVectorToPack);
 
    public abstract List<FramePoint> getContactFramePointsInContactCopy();
 

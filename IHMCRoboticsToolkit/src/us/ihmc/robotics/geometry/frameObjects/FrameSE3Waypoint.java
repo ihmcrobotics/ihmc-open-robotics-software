@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
@@ -64,7 +64,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.setLinearVelocity(linearVelocity);
    }
 
-   public void setLinearVelocity(FrameVector linearVelocity)
+   public void setLinearVelocity(FrameVector3D linearVelocity)
    {
       checkReferenceFrameMatch(linearVelocity);
       geometryObject.setLinearVelocity(linearVelocity.getVector());
@@ -76,7 +76,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.setAngularVelocity(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.setAngularVelocity(angularVelocity.getVector());
@@ -93,7 +93,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.set(position, orientation, linearVelocity, angularVelocity);
    }
 
-   public void set(FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void set(FramePoint position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(orientation);
@@ -102,7 +102,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.set(position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
    }
 
-   public void setIncludingFrame(FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void setIncludingFrame(FramePoint position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       position.checkReferenceFrameMatch(orientation);
       position.checkReferenceFrameMatch(linearVelocity);
@@ -244,13 +244,13 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
-   public void getLinearVelocity(FrameVector linearVelocityToPack)
+   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
       geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
-   public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
+   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.setToZero(getReferenceFrame());
       geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
@@ -262,13 +262,13 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       setToZero(getReferenceFrame());
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());

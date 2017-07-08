@@ -12,7 +12,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
@@ -26,8 +26,8 @@ public class HexapodMomentumController
    private final YoFrameVector yoLinearMomentumRateOfChange;
    private final YoFrameVector yoAngularMomentumRateOfChange;
    
-   private final FrameVector linearMomentumRateOfChange = new FrameVector();
-   private final FrameVector angularMomentumRateOfChange = new FrameVector();
+   private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
+   private final FrameVector3D angularMomentumRateOfChange = new FrameVector3D();
    private final Vector3D linearMomentumWeight = new Vector3D(0.8, 0.8, 0.8);
    private final Vector3D angularMomentumWeight = new Vector3D(0.01, 0.01, 0.01);
    
@@ -41,10 +41,10 @@ public class HexapodMomentumController
    private final YoFramePoint yoCurrentCenterOfMassPosition;
    private final YoFramePoint yoCurrentCenterOfFeetPosition;
    private final FramePoint currentCenterOfMassPosition = new FramePoint();
-   private final FrameVector currentCenterOfMassVelocity = new FrameVector();
-   private final FrameVector initialAcceleration = new FrameVector();
+   private final FrameVector3D currentCenterOfMassVelocity = new FrameVector3D();
+   private final FrameVector3D initialAcceleration = new FrameVector3D();
    private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredVelocity = new FrameVector();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
    
    private double dt;
 

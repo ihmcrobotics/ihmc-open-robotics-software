@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -360,7 +360,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
       transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
 
-      FrameVector fromContactFrameDrift = null;
+      FrameVector3D fromContactFrameDrift = null;
 
       if (correctForCoMHeightDrift.getBooleanValue() && transferToFootstep.getTrustHeight() && (transferFromDesiredFootstep != null))
       {
@@ -378,7 +378,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
             transferFromDesiredFootstep.getAnklePosition(transferFromDesiredContactFramePosition, transformsFromAnkleToSole.get(transferFromDesiredFootstep.getRobotSide()));
             transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
 
-            fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
+            fromContactFrameDrift = new FrameVector3D(transferFromContactFramePosition.getReferenceFrame());
             fromContactFrameDrift.sub(transferFromContactFramePosition, transferFromDesiredContactFramePosition);
             fromContactFrameDrift.changeFrame(transferToContactFramePosition.getReferenceFrame());
             transferToContactFramePosition.setZ(transferToContactFramePosition.getZ() + fromContactFrameDrift.getZ());

@@ -13,7 +13,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -34,8 +34,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final FrameOrientation desiredPelvisOrientation = new FrameOrientation();
-   private final FrameVector desiredPelvisAngularVelocity = new FrameVector();
-   private final FrameVector desiredPelvisAngularAcceleration = new FrameVector();
+   private final FrameVector3D desiredPelvisAngularVelocity = new FrameVector3D();
+   private final FrameVector3D desiredPelvisAngularAcceleration = new FrameVector3D();
    private final FrameOrientation desiredPelvisOrientationWithOffset = new FrameOrientation();
 
    private final FrameOrientation initialPelvisOrientation = new FrameOrientation();
@@ -54,8 +54,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
-   private final FrameVector tempAngularVelocity = new FrameVector();
-   private final FrameVector tempAngularAcceleration = new FrameVector();
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
+   private final FrameVector3D tempAngularAcceleration = new FrameVector3D();
 
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
    private final ReferenceFrame midFeetZUpGroundFrame;

@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -21,9 +21,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    private final VelocityConstrainedPositionTrajectoryGenerator doubleSupportCapturePointTrajectory;
 
    private final FramePoint initialPositionInSpecificFrame = new FramePoint();
-   private final FrameVector initialVelocityInSpecificFrame = new FrameVector();
+   private final FrameVector3D initialVelocityInSpecificFrame = new FrameVector3D();
    private final FramePoint finalPositionInSpecificFrame = new FramePoint();
-   private final FrameVector finalVelocityInSpecificFrame = new FrameVector();
+   private final FrameVector3D finalVelocityInSpecificFrame = new FrameVector3D();
 
    private final FramePoint2d initialCoMPositionInSpecificFrame = new FramePoint2d();
    private final FramePoint2d desiredCoMPosition = new FramePoint2d();
@@ -122,7 +122,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
 
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
@@ -133,7 +133,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
@@ -144,7 +144,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 
 public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -58,7 +58,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       orientationTrajectory.appendWaypoint(waypoint);
    }
 
-   public void appendPositionWaypoint(double timeAtWaypoint, FramePoint position, FrameVector linearVelocity)
+   public void appendPositionWaypoint(double timeAtWaypoint, FramePoint position, FrameVector3D linearVelocity)
    {
       position.changeFrame(activeFrame);
       linearVelocity.changeFrame(activeFrame);
@@ -71,7 +71,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       positionTrajectory.appendWaypoint(positionWaypoint);
    }
    
-   public void appendOrientationWaypoint(double timeAtWaypoint, FrameOrientation orientation, FrameVector angularVelocity)
+   public void appendOrientationWaypoint(double timeAtWaypoint, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       orientation.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
@@ -117,13 +117,13 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       positionTrajectory.getVelocity(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       positionTrajectory.getAcceleration(accelerationToPack);
    }
@@ -135,13 +135,13 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       orientationTrajectory.getAngularVelocity(angularVelocityToPack);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       orientationTrajectory.getAngularAcceleration(angularAccelerationToPack);
    }

@@ -15,7 +15,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class YoConcatenatedSplinesTest
 {
@@ -34,7 +34,7 @@ public class YoConcatenatedSplinesTest
          YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint[] positions = getRandomPositions(4);
-         FrameVector[] velocities = getRandomVelocities(4);
+         FrameVector3D[] velocities = getRandomVelocities(4);
          
          YoConcatenatedSplines concatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, worldFrame, 100, registry, "original");
 
@@ -45,8 +45,8 @@ public class YoConcatenatedSplinesTest
             concatenatedSplines.compute(times[i]);
             FramePoint expectedPosition = positions[i];
             FramePoint actualPosition = concatenatedSplines.getPosition();
-            FrameVector expectedVelocity = velocities[i];
-            FrameVector actualVelocity = concatenatedSplines.getVelocity();
+            FrameVector3D expectedVelocity = velocities[i];
+            FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
                assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
@@ -67,14 +67,14 @@ public class YoConcatenatedSplinesTest
       FramePoint p2 = new FramePoint(worldFrame, 4.804858430375251, 1.0594552970638658, 1.5041612749446536);
       FramePoint p3 = new FramePoint(worldFrame, -3.956325341635919, 1.9215355811412582, -0.6302175630608513);
       
-      FrameVector v0 = new FrameVector(worldFrame, -4.8568993877181565, 0.1075944215258593, -1.6784029597793193);
-      FrameVector v1 = new FrameVector(worldFrame, 0.7643232534897653, 2.343350060177201, -4.41734069825054);
-      FrameVector v2 = new FrameVector(worldFrame, -0.6049982080383529, 0.15877078502014896, 4.057649141458521);
-      FrameVector v3 = new FrameVector(worldFrame, -4.96359745963404, 1.6376702749164398, 3.5095804627690903);
+      FrameVector3D v0 = new FrameVector3D(worldFrame, -4.8568993877181565, 0.1075944215258593, -1.6784029597793193);
+      FrameVector3D v1 = new FrameVector3D(worldFrame, 0.7643232534897653, 2.343350060177201, -4.41734069825054);
+      FrameVector3D v2 = new FrameVector3D(worldFrame, -0.6049982080383529, 0.15877078502014896, 4.057649141458521);
+      FrameVector3D v3 = new FrameVector3D(worldFrame, -4.96359745963404, 1.6376702749164398, 3.5095804627690903);
       
       double[] times = new double[]{0.6999570397272431, 2.5250057526516496, 2.5267781471484474, 3.681342287856614};
       FramePoint[] positions = new FramePoint[]{p0, p1, p2, p3};
-      FrameVector[] velocities = new FrameVector[]{v0, v1, v2, v3};
+      FrameVector3D[] velocities = new FrameVector3D[]{v0, v1, v2, v3};
       
       YoConcatenatedSplines concatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, worldFrame, 100, registry, "original");
 
@@ -85,8 +85,8 @@ public class YoConcatenatedSplinesTest
          concatenatedSplines.compute(times[i]);
          FramePoint expectedPosition = positions[i];
          FramePoint actualPosition = concatenatedSplines.getPosition();
-         FrameVector expectedVelocity = velocities[i];
-         FrameVector actualVelocity = concatenatedSplines.getVelocity();
+         FrameVector3D expectedVelocity = velocities[i];
+         FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
          for (Direction direction : Direction.values())
          {
             assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
@@ -106,7 +106,7 @@ public class YoConcatenatedSplinesTest
          YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint[] positions = getRandomPositions(4);
-         FrameVector[] velocities = getRandomVelocities(4);
+         FrameVector3D[] velocities = getRandomVelocities(4);
 
          YoConcatenatedSplines originalSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, worldFrame, 100, registry, "original");
          YoConcatenatedSplines respacedSplines = new YoConcatenatedSplines(new int[] {6, 6, 6, 6}, worldFrame, 100, registry, "respaced");
@@ -123,8 +123,8 @@ public class YoConcatenatedSplinesTest
             respacedSplines.compute(newTimes[i]);
             FramePoint originalPosition = originalSplines.getPosition();
             FramePoint respacedPosition = respacedSplines.getPosition();
-            FrameVector originalVelocity = originalSplines.getVelocity();
-            FrameVector respacedVelocity = respacedSplines.getVelocity();
+            FrameVector3D originalVelocity = originalSplines.getVelocity();
+            FrameVector3D respacedVelocity = respacedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
                assertEquals(originalPosition.getElement(direction.getIndex()), respacedPosition.getElement(direction.getIndex()), EPSILON);
@@ -145,7 +145,7 @@ public class YoConcatenatedSplinesTest
          YoVariableRegistry registry = new YoVariableRegistry("ConcatenatedSplinesTest");
          double[] times = getRandomTimes(4);
          FramePoint[] positions = getRandomPositions(4);
-         FrameVector[] velocities = getRandomVelocities(4);
+         FrameVector3D[] velocities = getRandomVelocities(4);
 
          YoConcatenatedSplines concatenatedSplines = new YoConcatenatedSplines(new int[] {4, 6, 4}, worldFrame, 100, registry, "original");
 
@@ -205,12 +205,12 @@ public class YoConcatenatedSplinesTest
       return positions;
    }
 
-   private FrameVector[] getRandomVelocities(int number)
+   private FrameVector3D[] getRandomVelocities(int number)
    {
-      FrameVector[] velocities = new FrameVector[number];
+      FrameVector3D[] velocities = new FrameVector3D[number];
       for (int i = 0; i < number; i++)
       {
-         velocities[i] = new FrameVector(worldFrame);
+         velocities[i] = new FrameVector3D(worldFrame);
 
          for (Direction direction : Direction.values())
          {

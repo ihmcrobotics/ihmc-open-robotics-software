@@ -5,7 +5,7 @@ import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class ThreeDoFSwingFootTrajectory
@@ -19,8 +19,8 @@ public class ThreeDoFSwingFootTrajectory
    final private FramePoint initialPosition;
    final private FramePoint finalPosition;
    final private FramePoint position;
-   final private FrameVector velocity;
-   final private FrameVector acceleration;
+   final private FrameVector3D velocity;
+   final private FrameVector3D acceleration;
    private ReferenceFrame referenceFrame;
    private TimeInterval timeInterval;
    private TimeInterval timeIntervalAdjustment;
@@ -37,8 +37,8 @@ public class ThreeDoFSwingFootTrajectory
       finalPosition = new FramePoint();
       initialPosition = new FramePoint();
       position = new FramePoint();
-      velocity = new FrameVector();
-      acceleration = new FrameVector();
+      velocity = new FrameVector3D();
+      acceleration = new FrameVector3D();
       referenceFrame = ReferenceFrame.getWorldFrame();
       timeInterval = new TimeInterval();
       timeIntervalAdjustment = new TimeInterval();
@@ -60,12 +60,12 @@ public class ThreeDoFSwingFootTrajectory
       position.setIncludingFrame(this.position);
    }
 
-   public void getVelocity(FrameVector velocity)
+   public void getVelocity(FrameVector3D velocity)
    {
       velocity.setIncludingFrame(this.velocity);
    }
 
-   public void getAcceleration(FrameVector acceleration)
+   public void getAcceleration(FrameVector3D acceleration)
    {
       acceleration.setIncludingFrame(this.acceleration);
    }

@@ -965,7 +965,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
 
-   public void getNormal3dVector(FrameVector normalToPack)
+   public void getNormal3dVector(FrameVector3D normalToPack)
    {
       normalToPack.setIncludingFrame(getReferenceFrame(), 0.0, 0.0, 1.0);
    }

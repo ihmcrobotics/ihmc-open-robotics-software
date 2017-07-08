@@ -63,16 +63,16 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final FramePose initialPose = new FramePose();
    private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector initialLinearVelocity = new FrameVector();
+   private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameOrientation initialOrientation = new FrameOrientation();
-   private final FrameVector initialAngularVelocity = new FrameVector();
+   private final FrameVector3D initialAngularVelocity = new FrameVector3D();
    private final FramePose expectedInitialPose = new FramePose();
    private final FramePoint expectedInitialPosition = new FramePoint();
    private final FrameOrientation expectedInitialOrientation = new FrameOrientation();
    private final FramePoint finalPosition = new FramePoint();
-   private final FrameVector finalLinearVelocity = new FrameVector();
+   private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameOrientation finalOrientation = new FrameOrientation();
-   private final FrameVector finalAngularVelocity = new FrameVector();
+   private final FrameVector3D finalAngularVelocity = new FrameVector3D();
    private final FramePoint stanceFootPosition = new FramePoint();
 
    private final RecyclingArrayList<FramePoint> positionWaypointsForSole;
@@ -321,7 +321,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      FrameVector touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
+      FrameVector3D touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 

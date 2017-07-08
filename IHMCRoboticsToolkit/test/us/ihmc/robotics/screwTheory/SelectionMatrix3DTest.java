@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SelectionMatrix3DTest
@@ -134,7 +134,7 @@ public class SelectionMatrix3DTest
                DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
                DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
 
-               FrameVector randomVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
+               FrameVector3D randomVector = FrameVector3D.generateRandomFrameVector(random, destinationFrame);
                DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
                randomVector.get(originalVector);
                selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);

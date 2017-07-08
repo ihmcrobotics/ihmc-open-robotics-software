@@ -14,7 +14,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 
 public class CenterOfMassJacobian
@@ -27,7 +27,7 @@ public class CenterOfMassJacobian
    private final Twist tempUnitTwist = new Twist();
    private final Vector3D tempJacobianColumn = new Vector3D();
    private final Vector3D tempVector = new Vector3D();
-   private final FrameVector tempFrameVector = new FrameVector();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 
@@ -177,7 +177,7 @@ public class CenterOfMassJacobian
       return jacobianMatrix;
    }
 
-   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)
    {
       ScrewTools.getJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
       CommonOps.mult(jacobianMatrix, tempJointVelocitiesMatrix, centerOfMassVelocityMatrix);

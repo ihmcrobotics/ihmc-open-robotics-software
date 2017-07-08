@@ -49,49 +49,49 @@ public class GeometryToolsTest
    public void testGetDistanceBetweenPointAndPlane1()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      FrameVector3D planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
       double actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       double expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 3, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 6.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 1, 0, 0);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 0, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 1, 1, 1);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 2.0;
@@ -103,31 +103,31 @@ public class GeometryToolsTest
    public void testIsLineSegmentIntersectingPlane1()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      FrameVector3D planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -1);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
       assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 1, 0, 0);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), -6, 3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
       assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
       assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, 3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
       assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
+      planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, -1);
       assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
@@ -141,10 +141,10 @@ public class GeometryToolsTest
       FramePoint lineStart0 = new FramePoint(ReferenceFrame.getWorldFrame(), -10, 10, 0);
       FramePoint lineEnd0 = new FramePoint(ReferenceFrame.getWorldFrame(), 10, 10, 0);
       FramePoint intersectionPoint0 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 10, 0);
-      FrameVector x0 = new FrameVector(point0.getReferenceFrame());
+      FrameVector3D x0 = new FrameVector3D(point0.getReferenceFrame());
       x0.sub(point0, intersectionPoint0);
-      FrameVector expectedReturn0 = x0;
-      FrameVector actualReturn0 = GeometryTools.getPerpendicularVectorFromLineToPoint(point0, lineStart0, lineEnd0, intersectionPoint0);
+      FrameVector3D expectedReturn0 = x0;
+      FrameVector3D actualReturn0 = GeometryTools.getPerpendicularVectorFromLineToPoint(point0, lineStart0, lineEnd0, intersectionPoint0);
 
       assertTrue("Test Failed", expectedReturn0.epsilonEquals(actualReturn0, EPSILON));
 
@@ -152,10 +152,10 @@ public class GeometryToolsTest
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 10, 10, 0);
       FramePoint intersectionPoint = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 3, 0);
-      FrameVector x = new FrameVector(point.getReferenceFrame());
+      FrameVector3D x = new FrameVector3D(point.getReferenceFrame());
       x.sub(point, intersectionPoint);
-      FrameVector expectedReturn = x;
-      FrameVector actualReturn = GeometryTools.getPerpendicularVectorFromLineToPoint(point, lineStart, lineEnd, intersectionPoint);
+      FrameVector3D expectedReturn = x;
+      FrameVector3D actualReturn = GeometryTools.getPerpendicularVectorFromLineToPoint(point, lineStart, lineEnd, intersectionPoint);
       assertTrue("Test Failed", expectedReturn.epsilonEquals(actualReturn, EPSILON));
 
       FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), -2.5, 1.5, 0);
@@ -164,10 +164,10 @@ public class GeometryToolsTest
       FramePoint intersectionPoint1 = new FramePoint(ReferenceFrame.getWorldFrame(), -2, 2, 0);
 
       EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(new Point2D(-2.5, 1.5), new Point2D(0, 0), new Point2D(-4, 4));
-      FrameVector x1 = new FrameVector(point1.getReferenceFrame());
+      FrameVector3D x1 = new FrameVector3D(point1.getReferenceFrame());
       x1.sub(point1, intersectionPoint1);
-      FrameVector expectedReturn1 = x1;
-      FrameVector actualReturn1 = GeometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
+      FrameVector3D expectedReturn1 = x1;
+      FrameVector3D actualReturn1 = GeometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
 
       assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
    }
@@ -179,29 +179,29 @@ public class GeometryToolsTest
       FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 0);
       FramePoint point2 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 0);
       FramePoint point3 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 0);
-      FrameVector expectedReturn = null;
-      FrameVector actualReturn = GeometryTools.getPlaneNormalGivenThreePoints(point1, point2, point3);
+      FrameVector3D expectedReturn = null;
+      FrameVector3D actualReturn = GeometryTools.getPlaneNormalGivenThreePoints(point1, point2, point3);
       assertEquals("test failed", expectedReturn, actualReturn);
 
       FramePoint point91 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       FramePoint point92 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 0);
       FramePoint point93 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 1, 0);
-      FrameVector expectedReturn9 = null;
-      FrameVector actualReturn9 = GeometryTools.getPlaneNormalGivenThreePoints(point91, point92, point93);
+      FrameVector3D expectedReturn9 = null;
+      FrameVector3D actualReturn9 = GeometryTools.getPlaneNormalGivenThreePoints(point91, point92, point93);
       assertEquals("test failed", expectedReturn9, actualReturn9);
 
       FramePoint point81 = new FramePoint(ReferenceFrame.getWorldFrame(), 9, 0, 0);
       FramePoint point82 = new FramePoint(ReferenceFrame.getWorldFrame(), 7, 0, 0);
       FramePoint point83 = new FramePoint(ReferenceFrame.getWorldFrame(), 4, 0, 0);
-      FrameVector expectedReturn8 = null;
-      FrameVector actualReturn8 = GeometryTools.getPlaneNormalGivenThreePoints(point81, point82, point83);
+      FrameVector3D expectedReturn8 = null;
+      FrameVector3D actualReturn8 = GeometryTools.getPlaneNormalGivenThreePoints(point81, point82, point83);
       assertEquals("test failed", expectedReturn8, actualReturn8);
 
       FramePoint point71 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 4);
       FramePoint point72 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 6);
       FramePoint point73 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 7);
-      FrameVector expectedReturn7 = null;
-      FrameVector actualReturn7 = GeometryTools.getPlaneNormalGivenThreePoints(point71, point72, point73);
+      FrameVector3D expectedReturn7 = null;
+      FrameVector3D actualReturn7 = GeometryTools.getPlaneNormalGivenThreePoints(point71, point72, point73);
       assertEquals("test failed", expectedReturn7, actualReturn7);
 
       FramePoint point11 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 46);
@@ -209,9 +209,9 @@ public class GeometryToolsTest
       FramePoint point13 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 18, 8);
       FramePoint p1 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 5, 5);
       FramePoint v1 = new FramePoint(ReferenceFrame.getWorldFrame(), 1, 5, 5);
-      FrameVector expectedReturn1 = new FrameVector(p1.getReferenceFrame());
+      FrameVector3D expectedReturn1 = new FrameVector3D(p1.getReferenceFrame());
       expectedReturn1.sub(p1, v1);
-      FrameVector actualReturn1 = GeometryTools.getPlaneNormalGivenThreePoints(point11, point12, point13);
+      FrameVector3D actualReturn1 = GeometryTools.getPlaneNormalGivenThreePoints(point11, point12, point13);
       assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
 
       FramePoint point21 = new FramePoint(ReferenceFrame.getWorldFrame(), 65, 0, 46);
@@ -219,9 +219,9 @@ public class GeometryToolsTest
       FramePoint point23 = new FramePoint(ReferenceFrame.getWorldFrame(), 13, 0, 8);
       FramePoint p2 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 1, 5);
       FramePoint v2 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 5);
-      FrameVector expectedReturn2 = new FrameVector(p2.getReferenceFrame());
+      FrameVector3D expectedReturn2 = new FrameVector3D(p2.getReferenceFrame());
       expectedReturn2.sub(p2, v2);
-      FrameVector actualReturn2 = GeometryTools.getPlaneNormalGivenThreePoints(point21, point22, point23);
+      FrameVector3D actualReturn2 = GeometryTools.getPlaneNormalGivenThreePoints(point21, point22, point23);
       assertTrue("Test Failed", expectedReturn2.epsilonEquals(actualReturn2, EPSILON));
 
       FramePoint point31 = new FramePoint(ReferenceFrame.getWorldFrame(), 65, 56, 0);
@@ -229,9 +229,9 @@ public class GeometryToolsTest
       FramePoint point33 = new FramePoint(ReferenceFrame.getWorldFrame(), 13, 87, 0);
       FramePoint p3 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 55, 0);
       FramePoint v3 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 55, 1);
-      FrameVector expectedReturn3 = new FrameVector(p3.getReferenceFrame());
+      FrameVector3D expectedReturn3 = new FrameVector3D(p3.getReferenceFrame());
       expectedReturn3.sub(p3, v3);
-      FrameVector actualReturn3 = GeometryTools.getPlaneNormalGivenThreePoints(point31, point32, point33);
+      FrameVector3D actualReturn3 = GeometryTools.getPlaneNormalGivenThreePoints(point31, point32, point33);
       assertTrue("Test Failed", expectedReturn3.epsilonEquals(actualReturn3, EPSILON));
    }
 
@@ -399,14 +399,14 @@ public class GeometryToolsTest
 
       FramePoint randomPoint = new FramePoint(worldFrame);
 
-      FrameVector randomVector = new FrameVector(worldFrame);
+      FrameVector3D randomVector = new FrameVector3D(worldFrame);
 
       int numberOfTests = 100000;
 
       for (int i = 0; i < numberOfTests; i++)
       {
          randomPoint.setIncludingFrame(FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0));
-         randomVector.setIncludingFrame(FrameVector.generateRandomFrameVector(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+         randomVector.setIncludingFrame(FrameVector3D.generateRandomFrameVector(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
 
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
          ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);

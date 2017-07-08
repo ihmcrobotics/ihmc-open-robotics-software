@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class OrientationInterpolationCalculatorTest
 {
@@ -70,7 +70,7 @@ public class OrientationInterpolationCalculatorTest
 
          // compute angular velocity using OrientationInterpolationAngularVelocityCalculator
          OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
-         FrameVector angularVelocityFromCalculator = new FrameVector();
+         FrameVector3D angularVelocityFromCalculator = new FrameVector3D();
          orientationInterpolationCalculator.computeAngularVelocity(angularVelocityFromCalculator, startOrientation, endOrientation, alphaDot);
 
          double epsilon = 1e-5;

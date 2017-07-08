@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -90,7 +90,7 @@ public class QuadrupedPathPreview
       parentRegistry.addChild(registry);
    }
 
-   public void update(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double yawRate)
+   public void update(RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double yawRate)
    {
       updateFeetLocations();
       updatedSupportPolygon.set(fourFootSupportPolygon);
