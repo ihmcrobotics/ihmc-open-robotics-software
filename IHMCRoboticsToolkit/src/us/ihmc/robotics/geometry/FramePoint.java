@@ -27,26 +27,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
-   {
-      super(referenceFrame, new Point3D(tuple3DReadOnly));
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, double[] pointArray)
-   {
-      super(referenceFrame, new Point3D(pointArray));
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
    public FramePoint()
    {
       this(ReferenceFrame.getWorldFrame());
@@ -67,6 +47,36 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
+   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
+   {
+      super(referenceFrame, new Point3D(x, y, z));
+   }
+
+   /**
+    * FramePoint
+    * <p/>
+    * A normal point associated with a specific reference frame.
+    */
+   public FramePoint(ReferenceFrame referenceFrame, double[] pointArray)
+   {
+      super(referenceFrame, new Point3D(pointArray));
+   }
+
+   /**
+    * FramePoint
+    * <p/>
+    * A normal point associated with a specific reference frame.
+    */
+   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
+   {
+      super(referenceFrame, new Point3D(tuple3DReadOnly));
+   }
+
+   /**
+    * FramePoint
+    * <p/>
+    * A normal point associated with a specific reference frame.
+    */
    public FramePoint(FrameTuple3DReadOnly frameTuple)
    {
       super(frameTuple.getReferenceFrame(), new Point3D(frameTuple));
@@ -79,18 +89,7 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     */
    public FramePoint(FrameTuple2DReadOnly frameTuple2d)
    {
-      super(frameTuple2d.getReferenceFrame(), new Point3D());
-      set(frameTuple2d);
-   }
-
-   /**
-    * FramePoint
-    * <p/>
-    * A normal point associated with a specific reference frame.
-    */
-   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
-   {
-      super(referenceFrame, new Point3D(x, y, z));
+      super(frameTuple2d.getReferenceFrame(), new Point3D(frameTuple2d));
    }
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
