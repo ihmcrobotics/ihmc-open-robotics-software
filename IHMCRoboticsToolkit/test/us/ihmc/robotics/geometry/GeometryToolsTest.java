@@ -408,8 +408,8 @@ public class GeometryToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         randomPoint.setIncludingFrame(FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0));
-         randomVector.setIncludingFrame(FrameVector3D.generateRandomFrameVector(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+         randomPoint.setIncludingFrame(EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0));
+         randomVector.setIncludingFrame(EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
 
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
          ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);

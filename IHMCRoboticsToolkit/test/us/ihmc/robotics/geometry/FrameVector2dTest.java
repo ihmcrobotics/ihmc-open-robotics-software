@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -220,7 +221,7 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2D>
       {
          double firstVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
          double secondVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         FrameVector2D firstVector = FrameVector2D.generateRandomFrameVector2d(random, worldFrame);
+         FrameVector2D firstVector = EuclidFrameRandomTools.generateRandomFrameVector2d(random, worldFrame);
          firstVector.scale(firstVectorLength / firstVector.length());
          FrameVector2D secondVector = new FrameVector2D();
 

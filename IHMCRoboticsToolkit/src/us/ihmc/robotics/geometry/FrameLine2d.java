@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -447,8 +448,8 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public static FrameLine2d generateRandomFrameLine2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2D randomPoint = FramePoint2D.generateRandomFramePoint2d(random, zUpFrame, xMin, xMax, yMin, yMax);
-      FrameVector2D randomVector = FrameVector2D.generateRandomFrameVector2d(random, zUpFrame);
+      FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FrameVector2D randomVector = EuclidFrameRandomTools.generateRandomFrameVector2d(random, zUpFrame);
 
       return new FrameLine2d(randomPoint, randomVector);
    }

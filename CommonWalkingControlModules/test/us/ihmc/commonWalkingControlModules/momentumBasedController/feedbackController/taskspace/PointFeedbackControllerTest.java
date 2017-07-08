@@ -28,6 +28,7 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
@@ -62,7 +63,7 @@ public final class PointFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -150,7 +151,7 @@ public final class PointFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -317,7 +318,7 @@ public final class PointFeedbackControllerTest
          pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setGains(positionGains);
 
-         FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+         FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
          FramePoint3D desiredPosition = new FramePoint3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
          FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
          FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
