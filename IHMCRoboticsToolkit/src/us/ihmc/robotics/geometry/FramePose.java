@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -90,7 +91,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin,
                                                    double[] yawPitchRollMax)
    {
-      FramePose randomFramePose = new FramePose(FramePoint3D.generateRandomFramePoint(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
+      FramePose randomFramePose = new FramePose(EuclidFrameRandomTools.generateRandomFramePoint3D(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
                                                                                     xyzMin[2], xyzMax[2]),
                                                 FrameOrientation.generateRandomFrameOrientation(random, referenceFrame, yawPitchRollMin[0], yawPitchRollMax[0],
                                                                                                 yawPitchRollMin[1], yawPitchRollMax[1], yawPitchRollMin[2],

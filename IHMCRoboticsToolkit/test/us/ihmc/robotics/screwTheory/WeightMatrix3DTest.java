@@ -132,7 +132,7 @@ public class WeightMatrix3DTest
              DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
              DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
 
-             FrameVector3D randomVector = FrameVector3D.generateRandomFrameVector(random, destinationFrame);
+             FrameVector3D randomVector = EuclidFrameRandomTools.generateRandomFrameVector3D(random, destinationFrame);
              DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
              randomVector.get(originalVector);
              weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, expectedWeightMatrix);
