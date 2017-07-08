@@ -129,29 +129,6 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testFrameVector2d_FramePoint2d_FramePoint2d()
-   {
-      double x = 5.7, y = 56.3;
-      FramePoint2d startFramePoint = new FramePoint2d(theFrame, x, y);
-      FramePoint2d endFramePoint = new FramePoint2d(theFrame, y, x);
-      FrameVector2d frame = new FrameVector2d(startFramePoint, endFramePoint);
-      assertEquals("Should be equal", frame.getX(), endFramePoint.getX() - startFramePoint.getX(), epsilon);
-      assertEquals("Should be equal", frame.getY(), endFramePoint.getY() - startFramePoint.getY(), epsilon);
-      assertEquals("Should be equal", frame.getReferenceFrame(), startFramePoint.getReferenceFrame());
-      try
-      {
-         FramePoint2d startFramePoint2 = new FramePoint2d(aFrame, x, y);
-         new FrameVector2d(startFramePoint2, endFramePoint);
-         fail();
-      }
-      catch(ReferenceFrameMismatchException rfme)
-      {
-         //Good
-      }
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testGetVector()
    {
       double x = 5.6, y = 45.67;

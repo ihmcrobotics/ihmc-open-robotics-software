@@ -551,8 +551,10 @@ public class SmartCMPProjectorTest
 
    private boolean checkDirectionPreserved(FramePoint2d capturePoint, FramePoint2d desiredCMP, FramePoint2d projectedCMP)
    {
-      FrameVector2d desiredCMPToICP = new FrameVector2d(desiredCMP, capturePoint);
-      FrameVector2d projectedCMPToICP = new FrameVector2d(projectedCMP, capturePoint);
+      FrameVector2d desiredCMPToICP = new FrameVector2d(desiredCMP.getReferenceFrame());
+      desiredCMPToICP.sub(desiredCMP, capturePoint);
+      FrameVector2d projectedCMPToICP = new FrameVector2d(projectedCMP.getReferenceFrame());
+      projectedCMPToICP.sub(projectedCMP, capturePoint);
       double angleDifference = desiredCMPToICP.angle(projectedCMPToICP);
       return Math.abs(angleDifference) < 1.0e-7;
    }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -17,7 +18,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> implements Vector2DBasics
+public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> implements FrameVector2DReadOnly, Vector2DBasics
 {
    private static final long serialVersionUID = -610124454205790361L;
 
@@ -56,9 +57,9 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
+   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
-      this(referenceFrame, tuple.getX(), tuple.getY());
+      this(referenceFrame, tuple2DReadOnly.getX(), tuple2DReadOnly.getY());
    }
 
    /**
@@ -76,21 +77,9 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FrameTuple2DReadOnly frameTuple2d)
+   public FrameVector2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
-   }
-
-   /**
-    * FrameVector2d
-    * <p/>
-    * A normal vector2d associated with a specific reference frame.
-    */
-   public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
-   {
-      this(endFramePoint.getReferenceFrame(), endFramePoint.tuple.getX(), endFramePoint.tuple.getY());
-      startFramePoint.checkReferenceFrameMatch(endFramePoint);
-      sub(startFramePoint);
+      this(frameTuple2DReadOnly.getReferenceFrame(), frameTuple2DReadOnly.getX(), frameTuple2DReadOnly.getY());
    }
 
    public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
@@ -102,7 +91,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       return randomVector;
    }
 
-   public void setAndNormalize(FrameVector2d other)
+   public void setAndNormalize(FrameVector2DReadOnly other)
    {
       tuple.setAndNormalize(other);
    }
@@ -117,28 +106,8 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
       return this.tuple;
    }
 
-   public double dot(FrameVector2d frameVector)
+   public double cross(FrameVector2d frameVector2D)
    {
-      checkReferenceFrameMatch(frameVector);
-
-      return this.tuple.dot(frameVector.tuple);
-   }
-
-   public double cross(FrameVector2d frameVector)
-   {
-      return cross((FrameTuple2DReadOnly) frameVector);
-   }
-
-   public double cross(FrameTuple2DReadOnly frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-      return tuple.cross(frameVector);
-   }
-
-   public double angle(FrameVector2d frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-
-      return this.tuple.angle(frameVector.tuple);
+      return FrameVector2DReadOnly.super.cross(frameVector2D);
    }
 }
