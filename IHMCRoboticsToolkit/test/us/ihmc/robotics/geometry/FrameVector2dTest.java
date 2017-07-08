@@ -304,23 +304,6 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testClipMaxLength_double()
-   {
-      double x1 = 0.5, y1 = -0.5;
-      double maxLength = 1.0;
-      FrameVector2d frame1 = new FrameVector2d(theFrame, x1, y1);
-      frame1.clipMaxLength(maxLength);
-      assertTrue(frame1.getX() <= maxLength);
-      assertTrue(frame1.getY() <= maxLength);
-
-      double maxLength2 = 1e-8;
-      frame1.clipMaxLength(maxLength2);
-      assertEquals("Should be 0.0", frame1.getX(), 0.0, epsilon);
-      assertEquals("Should be 0.0", frame1.getY(), 0.0, epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testChangeFrame_ReferenceFrame()
    {
       FrameVector2d frameVector = new FrameVector2d(theFrame);
