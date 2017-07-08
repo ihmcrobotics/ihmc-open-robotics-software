@@ -451,7 +451,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FramePoint2d desiredICP = new FramePoint2d();
-   private final FrameVector2d desiredICPVelocity = new FrameVector2d();
+   private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FramePoint2d currentICP = new FramePoint2d();
 
    public void updateGraphic()

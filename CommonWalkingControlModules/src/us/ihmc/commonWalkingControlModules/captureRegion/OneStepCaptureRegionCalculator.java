@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -97,9 +97,9 @@ public class OneStepCaptureRegionCalculator
    private final FramePoint2d capturePoint = new FramePoint2d(worldFrame);
    private final FramePoint2d kinematicExtreme = new FramePoint2d(worldFrame);
    private final FramePoint2d additionalKinematicPoint = new FramePoint2d(worldFrame);
-   private final FrameVector2d projectedLine = new FrameVector2d(worldFrame);
-   private final FrameVector2d firstKinematicExtremeDirection = new FrameVector2d(worldFrame);
-   private final FrameVector2d lastKinematicExtremeDirection = new FrameVector2d(worldFrame);
+   private final FrameVector2D projectedLine = new FrameVector2D(worldFrame);
+   private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
+   private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameConvexPolygon2d rawCaptureRegion = new FrameConvexPolygon2d(worldFrame);
 
    public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2d icp, double omega0, FrameConvexPolygon2d footPolygon)

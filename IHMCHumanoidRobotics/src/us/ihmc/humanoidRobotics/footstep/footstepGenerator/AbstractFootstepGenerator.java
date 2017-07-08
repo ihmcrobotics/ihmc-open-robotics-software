@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -235,7 +235,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected FramePoint2d offsetFootstepFromPath(RobotSide currentFootstepSide, FramePoint2d footstepPosition2d, double footHeading, double offsetAmount)
    {
       double sideWaysHeading = footHeading + Math.PI / 2.0;
-      FrameVector2d offsetVector = new FrameVector2d(WORLD_FRAME, Math.cos(sideWaysHeading), Math.sin(sideWaysHeading));
+      FrameVector2D offsetVector = new FrameVector2D(WORLD_FRAME, Math.cos(sideWaysHeading), Math.sin(sideWaysHeading));
       offsetVector.scale(currentFootstepSide.negateIfRightSide(offsetAmount));
       FramePoint2d footstepPosition = new FramePoint2d(footstepPosition2d);
       footstepPosition.changeFrame(WORLD_FRAME);

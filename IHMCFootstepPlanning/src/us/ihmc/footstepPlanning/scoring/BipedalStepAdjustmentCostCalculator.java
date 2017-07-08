@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -166,7 +166,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       }
       else
       {
-         FrameVector2d frameTuple2d = vectorToPack.getFrameTuple2d();
+         FrameVector2D frameTuple2d = vectorToPack.getFrameTuple2d();
          frameTuple2d.set(toPose.getFramePointCopy());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());

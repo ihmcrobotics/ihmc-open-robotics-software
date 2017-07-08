@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
@@ -183,7 +183,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
     *            frame.
     */
-   public void setLinearMomentumXY(FrameVector2d linearMomentum)
+   public void setLinearMomentumXY(FrameVector2D linearMomentum)
    {
       linearMomentum.checkReferenceFrameMatch(worldFrame);
 

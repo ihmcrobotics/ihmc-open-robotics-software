@@ -25,7 +25,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -1237,10 +1237,10 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon createSimplePolygon = createSimplePolygon();
       
-      FrameVector2d[] normalsToPack = new FrameVector2d[createSimplePolygon.size()];
+      FrameVector2D[] normalsToPack = new FrameVector2D[createSimplePolygon.size()];
       for (int j = 0; j < normalsToPack.length; j++)
       {
-         normalsToPack[j] = new FrameVector2d();
+         normalsToPack[j] = new FrameVector2D();
       }
    }
    

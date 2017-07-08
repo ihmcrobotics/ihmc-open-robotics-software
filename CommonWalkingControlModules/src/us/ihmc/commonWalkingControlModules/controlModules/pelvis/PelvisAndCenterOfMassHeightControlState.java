@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
 public abstract class PelvisAndCenterOfMassHeightControlState extends FinishableState<PelvisHeightControlMode>
@@ -47,6 +47,6 @@ public abstract class PelvisAndCenterOfMassHeightControlState extends Finishable
 
    public abstract void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager);
 }

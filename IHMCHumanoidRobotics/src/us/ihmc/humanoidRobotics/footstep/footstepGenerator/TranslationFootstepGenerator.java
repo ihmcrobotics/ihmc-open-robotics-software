@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -251,7 +251,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    {
       double xOffset = offsetForward * Math.cos(forwardHeading) - offsetLeft * Math.sin(forwardHeading);
       double yOffset = offsetForward * Math.sin(forwardHeading) + offsetLeft * Math.cos(forwardHeading);
-      FrameVector2d offsetVector = new FrameVector2d(WORLD_FRAME, xOffset, yOffset);
+      FrameVector2D offsetVector = new FrameVector2D(WORLD_FRAME, xOffset, yOffset);
       footstepPosition2d.changeFrame(WORLD_FRAME);
       footstepPosition2d.add(offsetVector);
 

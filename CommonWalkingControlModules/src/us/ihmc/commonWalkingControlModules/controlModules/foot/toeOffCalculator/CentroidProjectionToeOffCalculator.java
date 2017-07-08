@@ -26,7 +26,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
    private final FramePoint3D exitCMP = new FramePoint3D();
    private final FramePoint2d exitCMP2d = new FramePoint2d();
-   private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
+   private final FrameVector2D exitCMPRayDirection2d = new FrameVector2D();
 
    private final FramePoint2d tmpPoint2d = new FramePoint2d();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();

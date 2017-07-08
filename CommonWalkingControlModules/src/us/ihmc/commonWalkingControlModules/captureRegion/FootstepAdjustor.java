@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -102,7 +102,7 @@ public class FootstepAdjustor
 
    private final FramePoint2d nextStep2d = new FramePoint2d();
    private final FramePoint2d projection = new FramePoint2d();
-   private final FrameVector2d direction = new FrameVector2d();
+   private final FrameVector2D direction = new FrameVector2D();
 
    /** 
     * This function projects the footstep midpoint in the capture region.

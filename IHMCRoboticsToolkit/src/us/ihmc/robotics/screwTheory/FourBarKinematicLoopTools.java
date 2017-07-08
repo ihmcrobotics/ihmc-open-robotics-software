@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 
 public class FourBarKinematicLoopTools
 {   
@@ -71,7 +71,7 @@ public class FourBarKinematicLoopTools
       }     
    }
    
-   public static boolean checkFourBarConvexityAndOrientation(FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected, FrameVector2d vectorDAProjected)
+   public static boolean checkFourBarConvexityAndOrientation(FrameVector2D vectorABProjected, FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected)
    {
       boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0 && vectorCDProjected.cross(vectorDAProjected) > 0.0;
       boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0 && vectorCDProjected.cross(vectorDAProjected) < 0.0;

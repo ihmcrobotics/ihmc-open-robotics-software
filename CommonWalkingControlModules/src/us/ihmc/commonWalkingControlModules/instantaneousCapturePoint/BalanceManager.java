@@ -41,7 +41,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -91,7 +91,7 @@ public class BalanceManager
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
+   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
    /** CMP position according to the ICP planner */
    private final FramePoint2d perfectCMP = new FramePoint2d();
@@ -102,7 +102,7 @@ public class BalanceManager
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FramePoint2d achievedCMP = new FramePoint2d();
 
-   private final FrameVector2d icpError2d = new FrameVector2d();
+   private final FrameVector2D icpError2d = new FrameVector2D();
 
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
@@ -462,7 +462,7 @@ public class BalanceManager
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredICPToPack);
    }
 
-   public void getDesiredICPVelocity(FrameVector2d desiredICPVelocityToPack)
+   public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
    {
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPVelocityToPack);
    }
@@ -595,7 +595,7 @@ public class BalanceManager
       return capturePoint2d.distance(yoDesiredCapturePoint.getFrameTuple2d());
    }
 
-   public void getICPError(FrameVector2d icpErrorToPack)
+   public void getICPError(FrameVector2D icpErrorToPack)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);

@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -47,8 +47,8 @@ public class ICPOptimizationInputHandler
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
 
-   private final ArrayList<FrameVector2d> entryOffsets = new ArrayList<>();
-   private final ArrayList<FrameVector2d> exitOffsets = new ArrayList<>();
+   private final ArrayList<FrameVector2D> entryOffsets = new ArrayList<>();
+   private final ArrayList<FrameVector2D> exitOffsets = new ArrayList<>();
    private final ArrayList<YoFrameVector2d> yoEntryOffsets = new ArrayList<>();
    private final ArrayList<YoFrameVector2d> yoExitOffsets = new ArrayList<>();
 
@@ -89,8 +89,8 @@ public class ICPOptimizationInputHandler
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         entryOffsets.add(new FrameVector2d(worldFrame));
-         exitOffsets.add(new FrameVector2d(worldFrame));
+         entryOffsets.add(new FrameVector2D(worldFrame));
+         exitOffsets.add(new FrameVector2D(worldFrame));
          YoFrameVector2d entryOffset = new YoFrameVector2d("entryOffset" + i, worldFrame, registry);
          YoFrameVector2d exitOffset = new YoFrameVector2d("exitOffset" + i, worldFrame, registry);
          yoEntryOffsets.add(entryOffset);
@@ -226,11 +226,11 @@ public class ICPOptimizationInputHandler
 
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();
    private final FramePoint2d beginningOfStateICPProjection = new FramePoint2d();
-   private final FrameVector2d beginningOfStateICPVelocityProjection = new FrameVector2d();
+   private final FrameVector2D beginningOfStateICPVelocityProjection = new FrameVector2D();
    private final FramePoint2d cmpOffsetRecursionProjection = new FramePoint2d();
 
    public void computeCMPConstantEffects(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d cmpConstantEffectsToPack,
-         FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity, boolean useTwoCMPs, boolean isInTransfer)
+         FramePoint2d beginningOfStateICP, FrameVector2D beginningOfStateICPVelocity, boolean useTwoCMPs, boolean isInTransfer)
    {
       computeStanceCMPProjection(stateMultiplierCalculator, stanceCMPProjection, useTwoCMPs, isInTransfer);
       computeBeginningOfStateICPProjection(stateMultiplierCalculator, beginningOfStateICPProjection, beginningOfStateICP);
@@ -304,7 +304,7 @@ public class ICPOptimizationInputHandler
    }
 
    private void computeBeginningOfStateICPVelocityProjection(StateMultiplierCalculator stateMultiplierCalculator,
-         FrameVector2d beginningOfStateICPVelocityProjectionToPack, FrameVector2d beginningOfStateICPVelocity)
+         FrameVector2D beginningOfStateICPVelocityProjectionToPack, FrameVector2D beginningOfStateICPVelocity)
    {
       beginningOfStateICPVelocityProjectionToPack.set(beginningOfStateICPVelocity);
       beginningOfStateICPVelocityProjectionToPack.scale(stateMultiplierCalculator.getInitialICPVelocityCurrentMultiplier());
@@ -314,8 +314,8 @@ public class ICPOptimizationInputHandler
    {
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
-         FrameVector2d entryOffset = entryOffsets.get(i);
-         FrameVector2d exitOffset = exitOffsets.get(i);
+         FrameVector2D entryOffset = entryOffsets.get(i);
+         FrameVector2D exitOffset = exitOffsets.get(i);
 
          entryOffset.setToZero(worldFrame);
          exitOffset.setToZero(worldFrame);
@@ -331,12 +331,12 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public ArrayList<FrameVector2d> getEntryOffsets()
+   public ArrayList<FrameVector2D> getEntryOffsets()
    {
       return entryOffsets;
    }
 
-   public ArrayList<FrameVector2d> getExitOffsets()
+   public ArrayList<FrameVector2D> getExitOffsets()
    {
       return exitOffsets;
    }

@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 
 public class CenterOfMassJacobian
 {
@@ -184,12 +184,12 @@ public class CenterOfMassJacobian
       centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix);
    }
 
-   public void getCenterOfMassVelocity(FrameVector2d centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(FrameVector2D centerOfMassVelocityToPack)
    {
       getCenterOfMassVelocity(rootFrame, centerOfMassVelocityToPack);
    }
 
-   public void getCenterOfMassVelocity(ReferenceFrame desiredOutputFrame, FrameVector2d centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(ReferenceFrame desiredOutputFrame, FrameVector2D centerOfMassVelocityToPack)
    {
       getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(desiredOutputFrame);

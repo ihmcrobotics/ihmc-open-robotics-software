@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -146,7 +146,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       modifiedICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -181,7 +181,7 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       modifiedCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }

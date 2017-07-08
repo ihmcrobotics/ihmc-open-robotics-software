@@ -36,7 +36,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -457,7 +457,7 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
-   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+   private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
 
    private void computeCapturePoint()
    {
@@ -526,7 +526,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final FramePoint2d copDesired = new FramePoint2d();
    private final FramePoint2d copActual = new FramePoint2d();
-   private final FrameVector2d copError = new FrameVector2d();
+   private final FrameVector2D copError = new FrameVector2D();
    private final Wrench footWrench = new Wrench();
    private final FrameVector3D footForceVector = new FrameVector3D();
 
@@ -870,7 +870,7 @@ public class HighLevelHumanoidControllerToolbox
       this.controllerFailureListeners.add(listener);
    }
 
-   public void reportControllerFailureToListeners(FrameVector2d fallingDirection)
+   public void reportControllerFailureToListeners(FrameVector2D fallingDirection)
    {
       for (int i = 0; i < controllerFailureListeners.size(); i++)
       {

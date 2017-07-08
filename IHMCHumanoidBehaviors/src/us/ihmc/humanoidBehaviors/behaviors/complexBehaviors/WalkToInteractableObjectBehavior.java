@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
@@ -113,7 +113,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             FramePoint2d walkPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
             FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
             robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector2d walkingDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+            FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
             walkingDirection.set(walkPosition2d);
             walkingDirection.sub(robotPosition);
             walkingDirection.normalize();

@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
 
@@ -106,12 +106,12 @@ public class FourBarKinematicLoop
       passiveJointD.setQ(0.0);
 
       // Link lengths
-      FrameVector2d vectorBCProjected = new FrameVector2d();
-      FrameVector2d vectorCDProjected = new FrameVector2d();
-      FrameVector2d vectorDAProjected = new FrameVector2d();
-      FrameVector2d vectorABProjected = new FrameVector2d();
-      FrameVector2d vectorDAClosurePointProjected = new FrameVector2d();
-      FrameVector2d vectorCDClosurePointProjected = new FrameVector2d();
+      FrameVector2D vectorBCProjected = new FrameVector2D();
+      FrameVector2D vectorCDProjected = new FrameVector2D();
+      FrameVector2D vectorDAProjected = new FrameVector2D();
+      FrameVector2D vectorABProjected = new FrameVector2D();
+      FrameVector2D vectorDAClosurePointProjected = new FrameVector2D();
+      FrameVector2D vectorCDClosurePointProjected = new FrameVector2D();
       computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected,
             vectorDAClosurePointProjected, vectorCDClosurePointProjected);
 
@@ -164,9 +164,9 @@ public class FourBarKinematicLoop
       }
    }
 
-   private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2d vectorBCProjectedToPack, FrameVector2d vectorCDProjectedToPack,
-         FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack, FrameVector2d vectorDAClosurePointProjectedToPack,
-         FrameVector2d vectorCDClosurePointProjectedToPack)
+   private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2D vectorBCProjectedToPack, FrameVector2D vectorCDProjectedToPack,
+         FrameVector2D vectorDAProjectedToPack, FrameVector2D vectorABProjectedToPack, FrameVector2D vectorDAClosurePointProjectedToPack,
+         FrameVector2D vectorCDClosurePointProjectedToPack)
    {
       FramePoint3D masterJointAPosition = new FramePoint3D(masterJointA.getFrameAfterJoint());
       FramePoint3D jointBPosition = new FramePoint3D(passiveJointB.getFrameAfterJoint());
@@ -213,8 +213,8 @@ public class FourBarKinematicLoop
       }
    }
 
-   private ConstantSideFourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected,
-         FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected)
+   private ConstantSideFourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected,
+         FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
       double BC = vectorBCProjected.length();
@@ -232,8 +232,8 @@ public class FourBarKinematicLoop
       return fourBarCalculator;
    }
 
-   private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected,
-         FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected)
+   private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected,
+         FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected)
    {
       FrameVector3D jointBAxis = passiveJointB.getJointAxis();
       FrameVector3D jointCAxis = passiveJointC.getJointAxis();

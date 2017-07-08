@@ -37,7 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
@@ -224,7 +224,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
+      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
       desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());

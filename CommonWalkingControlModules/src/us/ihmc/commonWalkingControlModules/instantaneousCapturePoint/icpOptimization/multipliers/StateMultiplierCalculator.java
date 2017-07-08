@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 import java.util.ArrayList;
@@ -341,7 +341,7 @@ public class StateMultiplierCalculator
    private final FramePoint2d tmpExit = new FramePoint2d();
 
    public void reconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<FramePoint2d> footstepLocations,
-         ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, int numberOfFootstepsToConsider)
+         ArrayList<FrameVector2D> entryOffsets, ArrayList<FrameVector2D> exitOffsets, int numberOfFootstepsToConsider)
    {
       predictedICPCornerPointToPack.set(finalICP);
       predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
@@ -367,7 +367,7 @@ public class StateMultiplierCalculator
    }
 
    public void yoReconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<YoFramePoint2d> footstepLocations,
-         ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, int numberOfFootstepsToConsider)
+         ArrayList<FrameVector2D> entryOffsets, ArrayList<FrameVector2D> exitOffsets, int numberOfFootstepsToConsider)
    {
       predictedICPCornerPointToPack.set(finalICP);
       predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
@@ -389,8 +389,8 @@ public class StateMultiplierCalculator
       }
    }
 
-   public void reconstructReferenceICP(FramePoint2d referenceICPToPack, FrameVector2d referenceICPVelocityToPack, FramePoint2d predictedICPCornerPoint,
-         FramePoint2d entryCMP, FramePoint2d exitCMP, FramePoint2d initialICP, FrameVector2d initialICPVelocity)
+   public void reconstructReferenceICP(FramePoint2d referenceICPToPack, FrameVector2D referenceICPVelocityToPack, FramePoint2d predictedICPCornerPoint,
+         FramePoint2d entryCMP, FramePoint2d exitCMP, FramePoint2d initialICP, FrameVector2D initialICPVelocity)
    {
       referenceICPToPack.set(predictedICPCornerPoint);
       referenceICPToPack.scale(getStateEndCurrentMultiplier());

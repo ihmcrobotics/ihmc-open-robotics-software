@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -102,7 +102,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.updateCurrentPlan();
       double currentTime = 0.5;
       FramePoint2d desiredICP = new FramePoint2d();
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
       FramePoint2d perfectCMP = new FramePoint2d();
       icpPlanner.compute(currentTime);
       icpPlanner.getDesiredCapturePointPosition(desiredICP);

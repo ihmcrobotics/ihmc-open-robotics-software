@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -152,7 +152,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.walkPathVector.sub(this.targetLocation, robotYoPose.getPosition());
       fullRobotModel.updateFrames();
 
-      FrameVector2d frameHeadingVector = new FrameVector2d(referenceFrame, 1.0, 0.0);
+      FrameVector2D frameHeadingVector = new FrameVector2D(referenceFrame, 1.0, 0.0);
       frameHeadingVector.changeFrame(worldFrame);
       double ret = -Math.abs(frameHeadingVector.angle(walkPathVector.getFrameVector2dCopy()));
 

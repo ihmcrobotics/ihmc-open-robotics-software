@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ICPPlannerWithTimeFreezer extends ICPPlanner
@@ -29,7 +29,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final YoDouble maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
 
    private final FramePoint2d tmpCapturePointPosition;
-   private final FrameVector2d tmpCapturePointVelocity;
+   private final FrameVector2D tmpCapturePointVelocity;
 
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                     CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry,
@@ -47,7 +47,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.doTimeFreezing = new YoBoolean(namePrefix + "DoTimeFreezing", registry);
       this.isTimeBeingFrozen = new YoBoolean(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
-      this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
+      this.tmpCapturePointVelocity = new FrameVector2D(worldFrame);
 
       this.isTimeBeingFrozen.set(false);
       this.timeDelay.set(0.0);
@@ -133,7 +133,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    private void computeCapturePointDistantToFreezeLine(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
-                                                       FrameVector2d desiredCapturePointVelocity)
+                                                       FrameVector2D desiredCapturePointVelocity)
    {
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
                                                                                              desiredCapturePointVelocity));

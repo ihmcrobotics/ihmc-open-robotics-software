@@ -43,7 +43,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -453,7 +453,7 @@ public class StepAdjustmentExampleGraphic
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FramePoint2d desiredICP = new FramePoint2d();
-   private final FrameVector2d desiredICPVelocity = new FrameVector2d();
+   private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FramePoint2d currentICP = new FramePoint2d();
 
    public void updateGraphic()

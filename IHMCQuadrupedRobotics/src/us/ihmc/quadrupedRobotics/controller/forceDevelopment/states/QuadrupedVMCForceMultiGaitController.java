@@ -36,7 +36,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -196,7 +196,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FramePoint3D leftMidpoint = new FramePoint3D();
    private final FramePoint3D frontMidpoint = new FramePoint3D();
    private final FramePoint3D hindMidpoint = new FramePoint3D();
-   private final FrameVector2d frontDirection = new FrameVector2d();
+   private final FrameVector2D frontDirection = new FrameVector2D();
    private final FrameLine2d sidewaysMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d lengthwiseMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d lineForFindingClosestLineSegment = new FrameLine2d(ReferenceFrame.getWorldFrame());
@@ -209,7 +209,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint2d midPointOfIntersections = new YoFramePoint2d("midPointOfIntersections", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint2d trotCrossPoint = new FramePoint2d();
    private final YoFramePoint2d innerCenterOfPressure = new YoFramePoint2d("innerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
+   private final FrameVector2D awayFromCentroidToClosestIntersection = new FrameVector2D();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private double ratioFromMidToClosest;
    private final YoBoolean isInFrontOfLeftTrotLine = new YoBoolean("isInFrontOfLeftTrotLine", registry);

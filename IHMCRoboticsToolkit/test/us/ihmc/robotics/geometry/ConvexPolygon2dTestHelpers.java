@@ -27,10 +27,10 @@ public class ConvexPolygon2dTestHelpers
          FramePoint2d point2 = polygon.getFrameVertexCopy((i + 1) % numPoints);
          FramePoint2d point3 = polygon.getFrameVertexCopy((i + 2) % numPoints);
 
-         FrameVector2d vector1 = new FrameVector2d(point2);
+         FrameVector2D vector1 = new FrameVector2D(point2);
          vector1.sub(point1);
 
-         FrameVector2d vector2 = new FrameVector2d(point3);
+         FrameVector2D vector2 = new FrameVector2D(point3);
          vector2.sub(point2);
 
          double cross = vector1.cross(vector2);
@@ -52,10 +52,10 @@ public class ConvexPolygon2dTestHelpers
          FramePoint2d point2 = clockwisePoints.get((i + 1) % numPoints);
          FramePoint2d point3 = clockwisePoints.get((i + 2) % numPoints);
 
-         FrameVector2d vector1 = new FrameVector2d(point2);
+         FrameVector2D vector1 = new FrameVector2D(point2);
          vector1.sub(point1);
 
-         FrameVector2d vector2 = new FrameVector2d(point3);
+         FrameVector2D vector2 = new FrameVector2D(point3);
          vector2.sub(point2);
 
          double cross = vector1.cross(vector2);
@@ -190,12 +190,12 @@ public class ConvexPolygon2dTestHelpers
 
       double epsilon = 1.0e-5;
 
-      FrameVector2d observingToLeftPoint = new FrameVector2d(leftPointAroundEdge);
+      FrameVector2D observingToLeftPoint = new FrameVector2D(leftPointAroundEdge);
       observingToLeftPoint.sub(observingPoint);
       observingToLeftPoint.normalize();
       observingToLeftPoint.scale(epsilon);
 
-      FrameVector2d observingToRightPoint = new FrameVector2d(rightPointAroundEdge);
+      FrameVector2D observingToRightPoint = new FrameVector2D(rightPointAroundEdge);
       observingToRightPoint.sub(observingPoint);
       observingToRightPoint.normalize();
       observingToRightPoint.scale(epsilon);
@@ -224,12 +224,12 @@ public class ConvexPolygon2dTestHelpers
       // Point a little before and a little after the lineOfSightVertices should be outside the polygon:
       double epsilon = 1.0e-5;
 
-      FrameVector2d observingToLineOfSight1 = new FrameVector2d(lineOfSightVertices[0]);
+      FrameVector2D observingToLineOfSight1 = new FrameVector2D(lineOfSightVertices[0]);
       observingToLineOfSight1.sub(observingPoint);
       observingToLineOfSight1.normalize();
       observingToLineOfSight1.scale(epsilon);
 
-      FrameVector2d observingToLineOfSight2 = new FrameVector2d(lineOfSightVertices[1]);
+      FrameVector2D observingToLineOfSight2 = new FrameVector2D(lineOfSightVertices[1]);
       observingToLineOfSight2.sub(observingPoint);
       observingToLineOfSight2.normalize();
       observingToLineOfSight2.scale(epsilon);
@@ -336,7 +336,7 @@ public class ConvexPolygon2dTestHelpers
    {
       FramePoint2d lineStart = new FramePoint2d();
       frameLine2d.getFramePoint2d(lineStart);
-      FrameVector2d lineDirection = new FrameVector2d();
+      FrameVector2D lineDirection = new FrameVector2D();
       frameLine2d.getNormalizedFrameVector(lineDirection);
 
       double startToLeftVertexX = leftVertex.getX() - lineStart.getX();

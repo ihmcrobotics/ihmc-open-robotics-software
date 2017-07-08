@@ -42,7 +42,7 @@ import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
@@ -551,9 +551,9 @@ public class SmartCMPProjectorTest
 
    private boolean checkDirectionPreserved(FramePoint2d capturePoint, FramePoint2d desiredCMP, FramePoint2d projectedCMP)
    {
-      FrameVector2d desiredCMPToICP = new FrameVector2d(desiredCMP.getReferenceFrame());
+      FrameVector2D desiredCMPToICP = new FrameVector2D(desiredCMP.getReferenceFrame());
       desiredCMPToICP.sub(desiredCMP, capturePoint);
-      FrameVector2d projectedCMPToICP = new FrameVector2d(projectedCMP.getReferenceFrame());
+      FrameVector2D projectedCMPToICP = new FrameVector2D(projectedCMP.getReferenceFrame());
       projectedCMPToICP.sub(projectedCMP, capturePoint);
       double angleDifference = desiredCMPToICP.angle(projectedCMPToICP);
       return Math.abs(angleDifference) < 1.0e-7;

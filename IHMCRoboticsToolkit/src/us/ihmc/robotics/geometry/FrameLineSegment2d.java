@@ -85,7 +85,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       this.lineSegment.set(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
    }
 
-   public void set(FramePoint2d firstEndpoint, FrameVector2d vectorToSecondEndpoint)
+   public void set(FramePoint2d firstEndpoint, FrameVector2D vectorToSecondEndpoint)
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(vectorToSecondEndpoint);
@@ -185,7 +185,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       return lineSegment.getSecondEndpoint();
    }
 
-   public void getFrameVector(FrameVector2d vectorToPack)
+   public void getFrameVector(FrameVector2D vectorToPack)
    {
       vectorToPack.setToZero(referenceFrame);
       vectorToPack.sub(lineSegment.getSecondEndpoint(), lineSegment.getFirstEndpoint());
@@ -447,7 +447,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
    }
    
-   public void getPerpendicular(boolean normalize, FrameVector2d perpendicularBisectorToPack)
+   public void getPerpendicular(boolean normalize, FrameVector2D perpendicularBisectorToPack)
    {
       lineSegment.perpendicular(normalize, tempVector2d);
       perpendicularBisectorToPack.setIncludingFrame(referenceFrame, tempVector2d);

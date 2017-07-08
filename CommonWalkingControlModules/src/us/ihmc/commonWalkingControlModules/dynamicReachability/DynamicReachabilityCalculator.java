@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -96,17 +96,17 @@ public class DynamicReachabilityCalculator
 
    private final ExecutionTimer reachabilityTimer = new ExecutionTimer("reachabilityTimer", registry);
 
-   private final FrameVector2d currentInitialTransferGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d currentEndTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D currentInitialTransferGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D currentEndTransferGradient = new FrameVector2D(worldFrame);
 
-   private final FrameVector2d currentInitialSwingGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d currentEndSwingGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D currentInitialSwingGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D currentEndSwingGradient = new FrameVector2D(worldFrame);
 
-   private final FrameVector2d nextInitialTransferGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d nextEndTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D nextInitialTransferGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D nextEndTransferGradient = new FrameVector2D(worldFrame);
 
-   private final ArrayList<FrameVector2d> higherSwingGradients = new ArrayList<>();
-   private final ArrayList<FrameVector2d> higherTransferGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2D> higherSwingGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2D> higherTransferGradients = new ArrayList<>();
 
    private final SideDependentList<FramePoint3D> ankleLocations = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
@@ -208,8 +208,8 @@ public class DynamicReachabilityCalculator
       int numberOfFootstepsToConsider = icpPlanner.getNumberOfFootstepsToConsider();
       for (int i = 0; i < numberOfFootstepsToConsider - 3; i++)
       {
-         FrameVector2d higherSwingGradient = new FrameVector2d(worldFrame);
-         FrameVector2d higherTransferGradient = new FrameVector2d(worldFrame);
+         FrameVector2D higherSwingGradient = new FrameVector2D(worldFrame);
+         FrameVector2D higherTransferGradient = new FrameVector2D(worldFrame);
          higherSwingGradients.add(higherSwingGradient);
          higherTransferGradients.add(higherTransferGradient);
 
@@ -1282,7 +1282,7 @@ public class DynamicReachabilityCalculator
       }
    }
 
-   private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector3D gradientToPack)
+   private void extractGradient(FrameVector2D gradientToExtract, RobotSide stanceSide, FrameVector3D gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
       gradientToPack.set(gradientToExtract);
@@ -1295,7 +1295,7 @@ public class DynamicReachabilityCalculator
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -1304,7 +1304,7 @@ public class DynamicReachabilityCalculator
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
       public void setXAxis(FrameVector3D xAxis)
