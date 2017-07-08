@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -79,7 +79,7 @@ public class MomentumRecoveryControlModule
    private final FrameConvexPolygon2d safeCMPArea = new FrameConvexPolygon2d();
 
    private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons;
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    private final FrameConvexPolygon2d tempPolygon1 = new FrameConvexPolygon2d();
@@ -299,7 +299,7 @@ public class MomentumRecoveryControlModule
       icpErrorUpToDate = true;
    }
 
-   public void setCapturePoint(FramePoint2d capturePoint2d)
+   public void setCapturePoint(FramePoint2D capturePoint2d)
    {
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       capturePointUpToDate = true;

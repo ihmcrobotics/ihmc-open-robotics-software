@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -65,5 +65,5 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
    public abstract FramePoint3D getCentroidalMomentPivotInFrame(ReferenceFrame referenceFrame);
    public abstract FrameVector3D getAngularMomentumInFrame(ReferenceFrame midFeetZUp);
    
-   public abstract HashMap<FramePoint2d, Boolean> getContactMap(RobotSide robotSide);
+   public abstract HashMap<FramePoint2D, Boolean> getContactMap(RobotSide robotSide);
 }

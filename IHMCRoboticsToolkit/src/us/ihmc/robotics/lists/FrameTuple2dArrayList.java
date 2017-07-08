@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 
@@ -78,9 +78,9 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       }
    }
 
-   public static FrameTuple2dArrayList<FramePoint2d> createFramePoint2dArrayList()
+   public static FrameTuple2dArrayList<FramePoint2D> createFramePoint2dArrayList()
    {
-      return new FrameTuple2dArrayList<>(FramePoint2d.class);
+      return new FrameTuple2dArrayList<>(FramePoint2D.class);
    }
 
    public static FrameTuple2dArrayList<FrameVector2D> createFrameVector2dArrayList()
@@ -88,9 +88,9 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       return new FrameTuple2dArrayList<>(FrameVector2D.class);
    }
 
-   public static FrameTuple2dArrayList<FramePoint2d> createFramePoint2dArrayList(int initialSize)
+   public static FrameTuple2dArrayList<FramePoint2D> createFramePoint2dArrayList(int initialSize)
    {
-      return new FrameTuple2dArrayList<>(initialSize, FramePoint2d.class);
+      return new FrameTuple2dArrayList<>(initialSize, FramePoint2D.class);
    }
 
    public static FrameTuple2dArrayList<FrameVector2D> createFrameVector2dArrayList(int initialSize)

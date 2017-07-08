@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -57,15 +57,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    protected final ReferenceFrame centerOfMassFrame;
    protected final FramePoint3D centerOfMass;
-   protected final FramePoint2d centerOfMass2d = new FramePoint2d();
+   protected final FramePoint2D centerOfMass2d = new FramePoint2D();
 
-   protected final FramePoint2d capturePoint = new FramePoint2d();
-   protected final FramePoint2d desiredCapturePoint = new FramePoint2d();
+   protected final FramePoint2D capturePoint = new FramePoint2D();
+   protected final FramePoint2D desiredCapturePoint = new FramePoint2D();
    protected final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
-   protected final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
+   protected final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
-   protected final FramePoint2d perfectCMP = new FramePoint2d();
-   protected final FramePoint2d desiredCMP = new FramePoint2d();
+   protected final FramePoint2D perfectCMP = new FramePoint2D();
+   protected final FramePoint2D desiredCMP = new FramePoint2D();
 
    protected final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
@@ -202,12 +202,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.omega0 = omega0;
    }
 
-   public void setCapturePoint(FramePoint2d capturePoint)
+   public void setCapturePoint(FramePoint2D capturePoint)
    {
       this.capturePoint.setIncludingFrame(capturePoint);
    }
 
-   public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint)
+   public void setDesiredCapturePoint(FramePoint2D desiredCapturePoint)
    {
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
    }
@@ -239,7 +239,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       return momentumRateCommand;
    }
 
-   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
+   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate, FramePoint2D achievedCMPToPack)
    {
       if (achievedLinearMomentumRate.containsNaN())
          return;
@@ -259,7 +259,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector3D groundReactionForce = new FrameVector3D();
 
-   protected FrameVector3D computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
+   protected FrameVector3D computeGroundReactionForce(FramePoint2D cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);
@@ -273,7 +273,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    private boolean desiredCMPcontainedNaN = false;
 
-   public void compute(FramePoint2d desiredCMPPreviousValue, FramePoint2d desiredCMPToPack)
+   public void compute(FramePoint2D desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
       computeCMPInternal(desiredCMPPreviousValue);
 
@@ -338,19 +338,19 @@ public abstract class LinearMomentumRateOfChangeControlModule
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 
-   public abstract void computeCMPInternal(FramePoint2d desiredCMPPreviousValue);
+   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
       minimizeAngularMomentumRateZ.set(enable);
    }
 
-   public void setFinalDesiredCapturePoint(FramePoint2d finalDesiredCapturePoint)
+   public void setFinalDesiredCapturePoint(FramePoint2D finalDesiredCapturePoint)
    {
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
-   public void setPerfectCMP(FramePoint2d perfectCMP)
+   public void setPerfectCMP(FramePoint2D perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
    }

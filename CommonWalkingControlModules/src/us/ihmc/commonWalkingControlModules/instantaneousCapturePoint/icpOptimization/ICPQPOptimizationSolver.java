@@ -14,7 +14,7 @@ import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -278,7 +278,7 @@ public class ICPQPOptimizationSolver
     * @param xBuffer offset of the vertex in the x direction in the {@param frame} reference frame.
     * @param yBuffer offset of the vetex in the y direction in the {@param frame} reference frame.
     */
-   public void addSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
+   public void addSupportPolygonVertex(FramePoint2D vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
       tmpPoint.set(vertexLocation);
@@ -325,7 +325,7 @@ public class ICPQPOptimizationSolver
     * @param vertexLocation location of the vertex.
     * @param frame reference frame of the support polygon.
     */
-   public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
+   public void addReachabilityVertex(FramePoint2D vertexLocation, ReferenceFrame frame)
    {
       tmpPoint.setToZero(frame);
       tmpPoint.set(vertexLocation);
@@ -416,7 +416,7 @@ public class ICPQPOptimizationSolver
     * Resets the controller conditions on the feedback minimization task, the feedback gains, and the dynamic relaxation minimization task.
     * Also sets that the controller is not to attempt to regularize the feedback minimization task.
     *
-    * Should be called before calling {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)} and before calling
+    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
     * {@link #setFeedbackConditions(double, double, double, double, double)} every control tick.
     */
    public void resetFeedbackConditions()
@@ -432,7 +432,7 @@ public class ICPQPOptimizationSolver
     * Resets the controller conditions for the minimization of angular momentum task, and also sets it so that the controller will not attempt to utilize
     * angular momentum to stabilize the ICP dynamics.
     *
-    * Should be called before calling {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)} and before calling
+    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
     * {@link #setAngularMomentumConditions(double, boolean)} every control tick.
     */
    public void resetAngularMomentumConditions()
@@ -445,8 +445,8 @@ public class ICPQPOptimizationSolver
     * Resets the footstep plan tracking conditions for the controller. This includes resetting all the reference footstep locations and the
     * footstep recursion multipliers. Also sets that the controller is not to attempt to regularize the footstep locations.
     *
-    * Should be called before calling {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)} and before calling
-    * {@link #setFootstepAdjustmentConditions(int, double, double, double, FramePoint2d)} every control tick.
+    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
+    * {@link #setFootstepAdjustmentConditions(int, double, double, double, FramePoint2D)} every control tick.
     */
    public void resetFootstepConditions()
    {
@@ -469,14 +469,14 @@ public class ICPQPOptimizationSolver
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
     * Should be called after calling {@link #resetFootstepConditions()} and before calling
-    * {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}.
+    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param footstepIndex index of the current footstep.
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param weight weight on tracking the reference footstep location in the solver.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double weight, FramePoint2d referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double weight, FramePoint2D referenceFootstepLocation)
    {
       this.setFootstepAdjustmentConditions(footstepIndex, recursionMultiplier, weight, weight, referenceFootstepLocation);
    }
@@ -486,7 +486,7 @@ public class ICPQPOptimizationSolver
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
     * Should be called after calling {@link #resetFootstepConditions()} and before calling
-    * {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}.
+    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param footstepIndex index of the current footstep.
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
@@ -494,7 +494,7 @@ public class ICPQPOptimizationSolver
     * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double xWeight, double yWeight, FramePoint2d referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double xWeight, double yWeight, FramePoint2D referenceFootstepLocation)
    {
       CommonOps.setIdentity(identity);
       MatrixTools.setMatrixBlock(footstepRecursionMultipliers.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, recursionMultiplier);
@@ -519,7 +519,7 @@ public class ICPQPOptimizationSolver
     * the ICP dynamics, as well as the weight on its minimization.
     *
     * Should be called after calling {@link #resetAngularMomentumConditions()} and before calling
-    * {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}.
+    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param angularMomentumMinimizationWeight weight on minimizing angular momentum.
     * @param useAngularMomentum whether or not to use angular momentum in the problem.
@@ -552,7 +552,7 @@ public class ICPQPOptimizationSolver
     * @param footstepIndex index of footstep to reset
     * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
     */
-   public void resetFootstepRegularization(int footstepIndex, FramePoint2d previousFootstepLocation)
+   public void resetFootstepRegularization(int footstepIndex, FramePoint2D previousFootstepLocation)
    {
       previousFootstepLocation.changeFrame(worldFrame);
       previousFootstepLocations.get(footstepIndex).set(0, 0, previousFootstepLocation.getX());
@@ -568,7 +568,7 @@ public class ICPQPOptimizationSolver
     * small magnitude, which is critical to not overconstraining the problem.
     *
     * Should be called before calling after {@link #resetFeedbackConditions()} and before calling
-    * {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}.
+    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param feedbackWeight weight on the minimization of the feedback action for the solver.
     * @param feedbackGain ICP controller proportional gain.
@@ -585,7 +585,7 @@ public class ICPQPOptimizationSolver
     * small magnitude, which is critical to not overconstraining the problem.
     *
     * Should be called before calling after {@link #resetFeedbackConditions()} and before calling
-    * {@link #compute(FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}.
+    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param feedbackXWeight weight on the minimization of the feedback action for the solver in the Cartesian x coordinate direction.
     * @param feedbackYWeight weight on the minimization of the feedback action for the solver in the Cartesian y coordinate direction.
@@ -657,7 +657,7 @@ public class ICPQPOptimizationSolver
     * @param perfectCMP current desired value of the CMP based on the nominal ICP location.
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
-   public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpConstantEffect, FramePoint2d currentICP, FramePoint2d perfectCMP) throws NoConvergenceException
+   public void compute(FramePoint2D finalICPRecursion, FramePoint2D cmpConstantEffect, FramePoint2D currentICP, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
@@ -1035,7 +1035,7 @@ public class ICPQPOptimizationSolver
     * @param footstepIndex index of footstep to get.
     * @param footstepLocationToPack location of the footstep in the world frame.
     */
-   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2d footstepLocationToPack)
+   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2D footstepLocationToPack)
    {
       footstepLocationToPack.setToZero(worldFrame);
       footstepLocationToPack.setX(footstepLocationSolution.get(2 * footstepIndex, 0));
@@ -1059,7 +1059,7 @@ public class ICPQPOptimizationSolver
     *
     * @param dynamicRelaxationToPack magnitude of the slack variable. Modified.
     */
-   public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
+   public void getDynamicRelaxation(FramePoint2D dynamicRelaxationToPack)
    {
       dynamicRelaxationToPack.setToZero(worldFrame);
       dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
@@ -1072,7 +1072,7 @@ public class ICPQPOptimizationSolver
     *
     * @param differenceToPack difference between the two points. Modified.
     */
-   public void getCMPDifferenceFromCoP(FramePoint2d differenceToPack)
+   public void getCMPDifferenceFromCoP(FramePoint2D differenceToPack)
    {
       differenceToPack.setToZero(worldFrame);
       differenceToPack.setX(angularMomentumSolution.get(0, 0));

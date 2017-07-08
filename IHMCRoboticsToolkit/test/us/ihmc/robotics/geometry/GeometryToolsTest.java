@@ -606,17 +606,17 @@ public class GeometryToolsTest
       ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
       double epsilon = 1e-10;
 
-      FramePoint2d original = new FramePoint2d(theFrame, 5.0, 7.0);
-      FramePoint2d pointToYawAbout = new FramePoint2d(theFrame);
+      FramePoint2D original = new FramePoint2D(theFrame, 5.0, 7.0);
+      FramePoint2D pointToYawAbout = new FramePoint2D(theFrame);
       double yaw = Math.PI;
 
-      FramePoint2d result = new FramePoint2d(theFrame);
+      FramePoint2D result = new FramePoint2D(theFrame);
       GeometryTools.yawAboutPoint(original, pointToYawAbout, yaw, result);
       assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
       assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
       try
       {
-         FramePoint2d pointToYawAbout2 = new FramePoint2d(aFrame);
+         FramePoint2D pointToYawAbout2 = new FramePoint2D(aFrame);
          GeometryTools.yawAboutPoint(original, pointToYawAbout2, yaw, result);
          fail("Should have thrown ReferenceFrameMismatchException");
       }

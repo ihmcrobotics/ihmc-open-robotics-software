@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
@@ -110,8 +110,8 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             sendPacket(p1);
 
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePoint2d walkPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
-            FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+            FramePoint2D walkPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
+            FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
             robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
             FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
             walkingDirection.set(walkPosition2d);

@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -183,7 +183,7 @@ public class Footstep
       }
    }
 
-   public void setPredictedContactPointsFromFramePoint2ds(List<FramePoint2d> contactPointList)
+   public void setPredictedContactPointsFromFramePoint2ds(List<FramePoint2D> contactPointList)
    {
       efficientlyResizeContactPointList(contactPointList);
 
@@ -203,7 +203,7 @@ public class Footstep
 
       for (int i = 0; i < contactPointList.size(); i++)
       {
-         FramePoint2d point = contactPointList.get(i);
+         FramePoint2D point = contactPointList.get(i);
          this.predictedContactPoints.get(i).set(point.getX(), point.getY());
       }
 
@@ -307,7 +307,7 @@ public class Footstep
       footstepPose.setPoseIncludingFrame(position, orientation);
    }
 
-   public void setPositionChangeOnlyXY(FramePoint2d position2d)
+   public void setPositionChangeOnlyXY(FramePoint2D position2d)
    {
       position2d.checkReferenceFrameMatch(footstepPose);
       setX(position2d.getX());
@@ -464,7 +464,7 @@ public class Footstep
       positionToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getTranslationVector());
    }
 
-   public void getAnklePosition2d(FramePoint2d position2dToPack, RigidBodyTransform transformFromAnkleToSole)
+   public void getAnklePosition2d(FramePoint2D position2dToPack, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(footstepPose.getOrientation());
       tempTransform.setTranslation(footstepPose.getPosition());

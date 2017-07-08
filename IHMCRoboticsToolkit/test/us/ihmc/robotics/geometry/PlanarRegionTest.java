@@ -545,7 +545,7 @@ public class PlanarRegionTest
          planarRegion.getTransformToWorld(actualTransform);
          assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
 
-         FramePoint2d point2d = new FramePoint2d();
+         FramePoint2D point2d = new FramePoint2D();
 
          // Do a bunch of trivial queries with isPointInside(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);

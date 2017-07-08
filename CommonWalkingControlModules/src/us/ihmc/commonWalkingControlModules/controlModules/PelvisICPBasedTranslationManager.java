@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -79,7 +79,7 @@ public class PelvisICPBasedTranslationManager
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
-   private final FramePoint2d tempPosition2d = new FramePoint2d();
+   private final FramePoint2D tempPosition2d = new FramePoint2D();
    private final FrameVector2D tempError2d = new FrameVector2D();
    private final FrameVector2D tempICPOffset = new FrameVector2D();
    private final FrameVector2D icpOffsetForFreezing = new FrameVector2D();
@@ -132,7 +132,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2d actualICP)
+   public void compute(RobotSide supportLeg, FramePoint2D actualICP)
    {
       if (isFrozen.getBooleanValue())
       {
@@ -383,9 +383,9 @@ public class PelvisICPBasedTranslationManager
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
 
-   private final FramePoint2d originalICPToModify = new FramePoint2d();
+   private final FramePoint2D originalICPToModify = new FramePoint2D();
 
-   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2D desiredICPVelocityToModify)
+   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());

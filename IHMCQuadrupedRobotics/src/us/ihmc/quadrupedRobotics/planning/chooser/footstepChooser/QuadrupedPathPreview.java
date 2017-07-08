@@ -12,7 +12,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedRefere
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -23,7 +23,7 @@ public class QuadrupedPathPreview
    private int iterations = 30;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final FramePoint2d circleCenter2d = new FramePoint2d();
+   private final FramePoint2D circleCenter2d = new FramePoint2D();
 
    private final CommonQuadrupedReferenceFrames referenceFrames;
 

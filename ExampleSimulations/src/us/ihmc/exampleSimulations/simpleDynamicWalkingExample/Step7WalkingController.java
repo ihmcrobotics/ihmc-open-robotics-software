@@ -18,7 +18,7 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -70,7 +70,7 @@ public class Step7WalkingController implements RobotController
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
 
    // new stuff
-   private FramePoint2d capturePoint, desiredICP;
+   private FramePoint2D capturePoint, desiredICP;
    private final YoFramePoint2d yoDesiredCoP = new YoFramePoint2d("desiredCenterOfPressure", worldFrame, registry);
    private final YoFramePoint2d yoDesiredICP = new YoFramePoint2d("yoDesiredCapturePoint", worldFrame, registry);
    private final YoFramePoint yodesiredPositionSwingFoot = new YoFramePoint("yoDesiredPositionSwingFoot", worldFrame, registry);

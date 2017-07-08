@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
@@ -43,8 +43,8 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameVector3D holdPositionNormalContactVector = new FrameVector3D();
    private final FrameVector3D fullyConstrainedNormalContactVector;
 
-   private final FramePoint2d cop = new FramePoint2d();
-   private final FramePoint2d desiredCoP = new FramePoint2d();
+   private final FramePoint2D cop = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D desiredCoP3d = new FramePoint3D();
    private final FramePoint3D desiredCoP3dInDesiredSoleFrame = new FramePoint3D();
    private final PartialFootholdControlModule partialFootholdControlModule;

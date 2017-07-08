@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -86,9 +86,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final FramePoint3D soleFrameOrigin = new FramePoint3D();
    private final FrameVector3D soleToSoleFrameVector = new FrameVector3D();
 
-   private final FramePoint2d cmp2d = new FramePoint2d();
-   private final FramePoint2d previousExitCMP2d = new FramePoint2d();
-   private final FramePoint2d firstEntryCMPForSingleSupport = new FramePoint2d();
+   private final FramePoint2D cmp2d = new FramePoint2D();
+   private final FramePoint2D previousExitCMP2d = new FramePoint2D();
+   private final FramePoint2D firstEntryCMPForSingleSupport = new FramePoint2D();
    private final SideDependentList<ConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
    private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempSupportPolygonForShrinking = new FrameConvexPolygon2d();
@@ -97,9 +97,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final YoDouble safeDistanceFromCMPToSupportEdges;
    private final YoDouble safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
 
-   private final FramePoint2d centroidOfUpcomingFootstep = new FramePoint2d();
-   private final FramePoint2d centroidOfCurrentFootstep = new FramePoint2d();
-   private final FramePoint2d centroidOfFootstepToConsider = new FramePoint2d();
+   private final FramePoint2D centroidOfUpcomingFootstep = new FramePoint2D();
+   private final FramePoint2D centroidOfCurrentFootstep = new FramePoint2D();
+   private final FramePoint2D centroidOfFootstepToConsider = new FramePoint2D();
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
 
@@ -391,14 +391,14 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private void computeReferenceCMPsWithUpcomingFootsteps(RobotSide firstSupportSide, int numberOfUpcomingFootsteps, int cmpIndex)
    {
-      FramePoint2d centroidInSoleFrameOfPreviousSupportFoot = supportFootPolygonsInSoleZUpFrame.get(firstSupportSide).getCentroid();
+      FramePoint2D centroidInSoleFrameOfPreviousSupportFoot = supportFootPolygonsInSoleZUpFrame.get(firstSupportSide).getCentroid();
 
       for (int i = 0; i < numberOfUpcomingFootsteps; i++)
       {
          Footstep currentFootstep = upcomingFootsteps.get(i);
          computeFootstepCentroid(centroidOfCurrentFootstep, currentFootstep);
 
-         FramePoint2d centroidOfNextFootstep = null;
+         FramePoint2D centroidOfNextFootstep = null;
          int indexOfUpcomingFootstep = i + 1;
          if (i < upcomingFootsteps.size() - 1)
          {
@@ -451,7 +451,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          exitCMPs.get(i).changeFrame(desiredFrame);
    }
 
-   private void computeFootstepCentroid(FramePoint2d centroidToPack, Footstep footstep)
+   private void computeFootstepCentroid(FramePoint2D centroidToPack, Footstep footstep)
    {
       predictedSupportPolygon.clear(footstep.getSoleReferenceFrame());
       addPredictedContactPointsToPolygon(footstep, predictedSupportPolygon);
@@ -459,7 +459,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       predictedSupportPolygon.getCentroid(centroidToPack);
    }
 
-   private void computePredictedSupportCentroid(FramePoint2d centroidToPack, Footstep footstep, Footstep nextFootstep)
+   private void computePredictedSupportCentroid(FramePoint2D centroidToPack, Footstep footstep, Footstep nextFootstep)
    {
       predictedSupportPolygon.clear(worldFrame);
       addPredictedContactPointsToPolygon(footstep, predictedSupportPolygon);
@@ -492,7 +492,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
    }
 
-   private void computeEntryCMPForSupportFoot(FramePoint3D entryCMPToPack, RobotSide robotSide, FramePoint2d centroidInSoleFrameOfPreviousSupportFoot,
+   private void computeEntryCMPForSupportFoot(FramePoint3D entryCMPToPack, RobotSide robotSide, FramePoint2D centroidInSoleFrameOfPreviousSupportFoot,
          YoFramePoint previousLateCMP)
    {
       ReferenceFrame soleFrame = soleZUpFrames.get(robotSide);
@@ -502,7 +502,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       computeEntryCMP(entryCMPToPack, robotSide, soleFrame, tempSupportPolygon, centroidInSoleFrameOfPreviousSupportFoot, previousLateCMP);
    }
 
-   private void computeEntryCMPForFootstep(FramePoint3D entryCMPToPack, Footstep footstep, FramePoint2d centroidInSoleFrameOfPreviousSupportFoot,
+   private void computeEntryCMPForFootstep(FramePoint3D entryCMPToPack, Footstep footstep, FramePoint2D centroidInSoleFrameOfPreviousSupportFoot,
          YoFramePoint previousExitCMP)
    {
       ReferenceFrame soleFrame = footstep.getSoleReferenceFrame();
@@ -517,7 +517,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       computeEntryCMP(entryCMPToPack, robotSide, soleFrame, tempSupportPolygon, centroidInSoleFrameOfPreviousSupportFoot, previousExitCMP);
    }
 
-   private void computeEntryCMP(FramePoint3D entryCMPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FrameConvexPolygon2d footSupportPolygon, FramePoint2d centroidInSoleFrameOfPreviousSupportFoot,
+   private void computeEntryCMP(FramePoint3D entryCMPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FrameConvexPolygon2d footSupportPolygon, FramePoint2D centroidInSoleFrameOfPreviousSupportFoot,
          YoFramePoint previousExitCMP)
    {
       if (useTwoCMPsPerSupport)
@@ -551,7 +551,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       entryCMPToPack.changeFrame(worldFrame);
    }
 
-   private void computeExitCMPForSupportFoot(FramePoint3D exitCMPToPack, RobotSide robotSide, FramePoint2d centroidInSoleFrameOfUpcomingSupportFoot,
+   private void computeExitCMPForSupportFoot(FramePoint3D exitCMPToPack, RobotSide robotSide, FramePoint2D centroidInSoleFrameOfUpcomingSupportFoot,
          boolean isUpcomingFootstepLast)
    {
       if (useTwoCMPsPerSupport)
@@ -568,7 +568,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
    }
 
-   private void computeExitCMPForFootstep(FramePoint3D exitCMPToPack, Footstep footstep, FramePoint2d centroidInSoleFrameOfUpcomingSupportFoot,
+   private void computeExitCMPForFootstep(FramePoint3D exitCMPToPack, Footstep footstep, FramePoint2D centroidInSoleFrameOfUpcomingSupportFoot,
          boolean isUpcomingFootstepLast)
    {
       if (useTwoCMPsPerSupport)
@@ -590,7 +590,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
    }
 
-   private void computeExitCMP(FramePoint3D exitCMPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FrameConvexPolygon2d footSupportPolygon, FramePoint2d centroidInSoleFrameOfUpcomingSupportFoot,
+   private void computeExitCMP(FramePoint3D exitCMPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FrameConvexPolygon2d footSupportPolygon, FramePoint2D centroidInSoleFrameOfUpcomingSupportFoot,
          boolean isUpcomingFootstepLast)
    {
       if (centroidInSoleFrameOfUpcomingSupportFoot != null)
@@ -650,7 +650,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       exitCMPToPack.changeFrame(worldFrame);
    }
 
-   private void putExitCMPOnToes(FramePoint2d exitCMPToPack, FrameConvexPolygon2d footSupportPolygon, double exitCMPInsideOffset)
+   private void putExitCMPOnToes(FramePoint2D exitCMPToPack, FrameConvexPolygon2d footSupportPolygon, double exitCMPInsideOffset)
    {
       // Set x to have the CMP slightly inside the support polygon
       exitCMPToPack.setToZero(footSupportPolygon.getReferenceFrame());
@@ -665,11 +665,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       footSupportPolygon.orthogonalProjection(exitCMPToPack);
    }
 
-   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2d cmpToPack, FrameConvexPolygon2d footSupportPolygon,
-         FramePoint2d centroidOfFootstepToConsider, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2D cmpToPack, FrameConvexPolygon2d footSupportPolygon,
+         FramePoint2D centroidOfFootstepToConsider, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
-      FramePoint2d footSupportCentroid = footSupportPolygon.getCentroid();
+      FramePoint2D footSupportCentroid = footSupportPolygon.getCentroid();
       double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * (centroidOfFootstepToConsider.getX() - footSupportCentroid.getX()) + cmpOffset.getX();
       cmpXOffsetFromCentroid = MathTools.clamp(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
 
@@ -683,7 +683,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       footSupportPolygon.orthogonalProjection(cmpToPack);
    }
 
-   private final FramePoint2d tempCentroid = new FramePoint2d();
+   private final FramePoint2D tempCentroid = new FramePoint2D();
    private final FramePoint3D tempCentroid3d = new FramePoint3D();
    private final FrameConvexPolygon2d tempFootPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d upcomingSupport = new FrameConvexPolygon2d();

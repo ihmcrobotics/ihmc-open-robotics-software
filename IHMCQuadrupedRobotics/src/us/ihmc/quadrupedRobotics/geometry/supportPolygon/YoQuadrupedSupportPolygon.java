@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -76,7 +76,7 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getCommonTriangle2d(polygonToCompare, commonPolygonToPack, quadrantToAssignToIntersection);
    }
    
-   public double getDistanceInside2d(FramePoint2d point)
+   public double getDistanceInside2d(FramePoint2D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getDistanceInside2d(point);
@@ -277,7 +277,7 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.isInside(point);
    }
    
-   public boolean isInside(FramePoint2d point)
+   public boolean isInside(FramePoint2D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.isInside(point);
@@ -302,14 +302,14 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2D centerToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(cornerToPutCircle, cornerCircleRadius, centerToPack);
    }
    
    public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius,
-         FramePoint2d centerToPack)
+         FramePoint2D centerToPack)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(cornerToPutCircle, cornerCircleRadius, centerToPack);
@@ -402,7 +402,7 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void getCentroid2d(FramePoint2d centroidToPack2d)
+   public void getCentroid2d(FramePoint2D centroidToPack2d)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid2d(centroidToPack2d);
@@ -411,7 +411,7 @@ public class YoQuadrupedSupportPolygon
    public void getCentroid2d(YoFramePoint2d centroidToPack)
    {
       putYoValuesIntoSupportPolygon();
-      FramePoint2d innerTuple = centroidToPack.getFrameTuple2d();
+      FramePoint2D innerTuple = centroidToPack.getFrameTuple2d();
       quadrupedSupportPolygon.getCentroid2d(innerTuple);
       centroidToPack.setWithoutChecks(innerTuple);
    }

@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -39,8 +39,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
-   private final FramePoint2d cop = new FramePoint2d();
-   private final FramePoint2d desiredCoP = new FramePoint2d();
+   private final FramePoint2D cop = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
@@ -164,9 +164,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    }
 
    private final Vector2D tempVector2d = new Vector2D();
-   private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
-   private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
-   private final FramePoint2d currentCorner = new FramePoint2d();
+   private final FramePoint2D shrunkPolygonCentroid = new FramePoint2D();
+   private final FramePoint2D desiredCenterOfPressure = new FramePoint2D();
+   private final FramePoint2D currentCorner = new FramePoint2D();
    private int currentCornerIdx = 0;
    private int lastCornerCropped = 0;
 
@@ -253,7 +253,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             yoCurrentCorner.set(currentCornerIdx);
 
             supportPolygon.getFrameVertex(currentCornerIdx, currentCorner);
-            FramePoint2d centroid = supportPolygon.getCentroid();
+            FramePoint2D centroid = supportPolygon.getCentroid();
 
             ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
             currentCorner.changeFrame(soleFrame);

@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -52,7 +52,7 @@ public class FootCoPOccupancyGrid
 
    private final ReferenceFrame soleFrame;
    private final Point2D tempPoint = new Point2D();
-   private final FramePoint2d gridOrigin = new FramePoint2d();
+   private final FramePoint2D gridOrigin = new FramePoint2D();
    private final FrameConvexPolygon2d gridBoundaries = new FrameConvexPolygon2d();
 
    private final double footLength;
@@ -74,10 +74,10 @@ public class FootCoPOccupancyGrid
       gridOrigin.scale(0.5);
 
       gridBoundaries.clear(soleFrame);
-      gridBoundaries.addVertex(new FramePoint2d(soleFrame, -footLength / 2.0, -footWidth / 2.0));
-      gridBoundaries.addVertex(new FramePoint2d(soleFrame, -footLength / 2.0, footWidth / 2.0));
-      gridBoundaries.addVertex(new FramePoint2d(soleFrame, footLength / 2.0, -footWidth / 2.0));
-      gridBoundaries.addVertex(new FramePoint2d(soleFrame, footLength / 2.0, footWidth / 2.0));
+      gridBoundaries.addVertex(new FramePoint2D(soleFrame, -footLength / 2.0, -footWidth / 2.0));
+      gridBoundaries.addVertex(new FramePoint2D(soleFrame, -footLength / 2.0, footWidth / 2.0));
+      gridBoundaries.addVertex(new FramePoint2D(soleFrame, footLength / 2.0, -footWidth / 2.0));
+      gridBoundaries.addVertex(new FramePoint2D(soleFrame, footLength / 2.0, footWidth / 2.0));
       gridBoundaries.update();
 
       registry = new YoVariableRegistry(namePrefix + name);
@@ -194,7 +194,7 @@ public class FootCoPOccupancyGrid
 
    private final FramePoint3D cellPosition = new FramePoint3D();
 
-   public void registerCenterOfPressureLocation(FramePoint2d copToRegister)
+   public void registerCenterOfPressureLocation(FramePoint2D copToRegister)
    {
       copToRegister.checkReferenceFrameMatch(soleFrame);
       copToRegister.get(tempPoint);
@@ -254,7 +254,7 @@ public class FootCoPOccupancyGrid
       return occupancyGrid.get(xIndex, yIndex) > 0.9;
    }
 
-   public boolean isCellAtLocationOccupied(FramePoint2d location)
+   public boolean isCellAtLocationOccupied(FramePoint2D location)
    {
       location.checkReferenceFrameMatch(soleFrame);
       location.get(tempPoint);
@@ -269,7 +269,7 @@ public class FootCoPOccupancyGrid
          return false;
    }
 
-   public void getCellCenter(FramePoint2d cellCenter, int xIndex, int yIndex)
+   public void getCellCenter(FramePoint2D cellCenter, int xIndex, int yIndex)
    {
       double x = getXCoordinateInSoleFrame(xIndex);
       double y = getYCoordinateInSoleFrame(yIndex);
@@ -287,7 +287,7 @@ public class FootCoPOccupancyGrid
       return ((double) yIndex + 0.5) * cellSize.getY() + gridOrigin.getY();
    }
 
-   public boolean findCenterOfClosestCell(FramePoint2d centerOfClosestCellToPack, FramePoint2d closestToPoint)
+   public boolean findCenterOfClosestCell(FramePoint2D centerOfClosestCellToPack, FramePoint2D closestToPoint)
    {
       int xIndex = findXIndex(closestToPoint.getX());
       int yIndex = findYIndex(closestToPoint.getY());
@@ -301,9 +301,9 @@ public class FootCoPOccupancyGrid
 
    private final FrameLine2d shiftedLine = new FrameLine2d();
    private final FrameVector2D shiftedLineVector = new FrameVector2D();
-   private final FramePoint2d shiftedLinePoint = new FramePoint2d();
+   private final FramePoint2D shiftedLinePoint = new FramePoint2D();
    private final FrameVector2D shiftingVector = new FrameVector2D();
-   private final FramePoint2d cellCenter = new FramePoint2d();
+   private final FramePoint2D cellCenter = new FramePoint2D();
 
    /**
     * This algorithm is stupid because it checks for every cell if the cell is on the right side and if it is activated.
@@ -397,7 +397,7 @@ public class FootCoPOccupancyGrid
       // I tried to make it clever such that this algorithm doesn't check every of the cells
 
       // Get the intersections
-      FramePoint2d[] intersections = gridBoundaries.intersectionWith(shiftedLine);
+      FramePoint2D[] intersections = gridBoundaries.intersectionWith(shiftedLine);
 
       if (intersections == null || intersections.length == 1)
          return returnFailure;
@@ -405,8 +405,8 @@ public class FootCoPOccupancyGrid
       FrameVector2D intersectionsVector = new FrameVector2D(soleFrame);
       intersectionsVector.sub(intersections[1], intersections[0]);
 
-      FramePoint2d temp = new FramePoint2d(soleFrame);
-      FramePoint2d cellCenter = new FramePoint2d();
+      FramePoint2D temp = new FramePoint2D(soleFrame);
+      FramePoint2D cellCenter = new FramePoint2D();
       int xIndex = -1;
       int yIndex = -1;
 
@@ -523,7 +523,7 @@ public class FootCoPOccupancyGrid
       }
    }
 
-   private final FramePoint2d tempCellCenter = new FramePoint2d();
+   private final FramePoint2D tempCellCenter = new FramePoint2D();
    public void computeConvexHull(FrameConvexPolygon2d convexHullToPack)
    {
       convexHullToPack.clear(soleFrame);
@@ -547,12 +547,12 @@ public class FootCoPOccupancyGrid
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
    private final DenseMatrix64F pointCloud = new DenseMatrix64F(0, 0);
    private final Point3D tempPoint3d = new Point3D();
-   private final FramePoint2d lineOrigin = new FramePoint2d();
+   private final FramePoint2D lineOrigin = new FramePoint2D();
    private final Vector3D tempVector3d = new Vector3D();
    private final FrameVector2D lineDirection = new FrameVector2D();
 
-   private final FramePoint2d pointA = new FramePoint2d();
-   private final FramePoint2d pointB = new FramePoint2d();
+   private final FramePoint2D pointA = new FramePoint2D();
+   private final FramePoint2D pointB = new FramePoint2D();
 
    public boolean fitLineToData(FrameLine2d lineToPack)
    {

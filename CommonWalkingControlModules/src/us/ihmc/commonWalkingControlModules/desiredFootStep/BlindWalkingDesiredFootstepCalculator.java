@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -67,7 +67,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       this.blindWalkingDirection.set(blindWalkingDirection);
    }
 
-   public void setDesiredDestination(FramePoint2d desiredDestinationInWorld)
+   public void setDesiredDestination(FramePoint2D desiredDestinationInWorld)
    {
       numberBlindStepsInPlace.set(0);
       this.desiredDestination.set(desiredDestinationInWorld);
@@ -125,12 +125,12 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return footstepPosition;
    }
 
-   private void computeDistanceAndAngleToDestination(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, FramePoint2d desiredDestination)
+   private void computeDistanceAndAngleToDestination(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, FramePoint2D desiredDestination)
    {
-      FramePoint2d destinationInAnkleFrame = new FramePoint2d(desiredDestination);
+      FramePoint2D destinationInAnkleFrame = new FramePoint2D(desiredDestination);
       destinationInAnkleFrame.changeFrame(supportAnkleZUpFrame);
 
-      FramePoint2d squaredUpMidpointInAnkleFrame = new FramePoint2d(supportAnkleZUpFrame, 0.0,
+      FramePoint2D squaredUpMidpointInAnkleFrame = new FramePoint2D(supportAnkleZUpFrame, 0.0,
             swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue() / 2.0));
 
       FrameVector2D midpointToDestination = new FrameVector2D(destinationInAnkleFrame);

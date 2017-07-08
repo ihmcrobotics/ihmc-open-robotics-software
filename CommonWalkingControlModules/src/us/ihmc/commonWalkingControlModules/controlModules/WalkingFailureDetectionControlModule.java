@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -94,7 +94,7 @@ public class WalkingFailureDetectionControlModule
 
    private final FrameVector2D tempFallingDirection = new FrameVector2D();
 
-   public void checkIfRobotIsFalling(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d)
+   public void checkIfRobotIsFalling(FramePoint2D capturePoint2d, FramePoint2D desiredCapturePoint2d)
    {
       updateCombinedPolygon();
 
@@ -111,7 +111,7 @@ public class WalkingFailureDetectionControlModule
       if (isRobotFalling.getBooleanValue())
       {
          tempFallingDirection.set(capturePoint2d);
-         FramePoint2d footCenter = combinedFootPolygon.getCentroid();
+         FramePoint2D footCenter = combinedFootPolygon.getCentroid();
          tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
          footCenter.changeFrame(ReferenceFrame.getWorldFrame());
          tempFallingDirection.sub(footCenter);

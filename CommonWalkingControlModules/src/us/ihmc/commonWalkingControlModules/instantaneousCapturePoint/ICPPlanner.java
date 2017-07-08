@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.*;
@@ -94,17 +94,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * <li>The output of the planner can be accessed using the various following getters:
  * <ul>
  * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
- * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
+ * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
  * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
- * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
+ * {@link #getDesiredCenterOfMassPosition(FramePoint2D)}, or
  * {@link #getDesiredCenterOfMassPosition(YoFramePoint2d)}.
  * <li>To get the CMP position, use either
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
- * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
  * <li>To get the CMP velocity, use either
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2D)}.
@@ -215,8 +215,8 @@ public class ICPPlanner
 
    private final YoFramePoint2d yoSingleSupportInitialCoM;
    private final YoFramePoint2d yoSingleSupportFinalCoM;
-   private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
-   private final FramePoint2d singleSupportFinalCoM = new FramePoint2d();
+   private final FramePoint2D singleSupportInitialCoM = new FramePoint2D();
+   private final FramePoint2D singleSupportFinalCoM = new FramePoint2D();
 
    private final YoBoolean requestedHoldPosition = new YoBoolean(namePrefix + "RequestedHoldPosition", registry);
    private final YoBoolean isHoldingPosition = new YoBoolean(namePrefix + "IsHoldingPosition", registry);
@@ -243,7 +243,7 @@ public class ICPPlanner
 
    private final FramePoint3D tempConstantCMP = new FramePoint3D();
    private final FramePoint3D tempICP = new FramePoint3D();
-   private final FramePoint2d tempCoM = new FramePoint2d();
+   private final FramePoint2D tempCoM = new FramePoint2D();
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ICPPlanner}.
@@ -974,7 +974,7 @@ public class ICPPlanner
     * @return the estimated time remaining before the capture point reaches its desired position at
     *         the end of this state.
     */
-   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
    {
       if (isDone())
          return 0.0;
@@ -990,13 +990,13 @@ public class ICPPlanner
       return estimatedTimeRemaining;
    }
 
-   private final FramePoint2d desiredICP2d = new FramePoint2d();
-   private final FramePoint2d finalICP2d = new FramePoint2d();
+   private final FramePoint2D desiredICP2d = new FramePoint2D();
+   private final FramePoint2D finalICP2d = new FramePoint2D();
    private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
-   private final FramePoint2d actualICP2d = new FramePoint2d();
+   private final FramePoint2D actualICP2d = new FramePoint2D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2d actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
    {
       desiredICPPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
       singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
@@ -1140,7 +1140,7 @@ public class ICPPlanner
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   public void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
    {
       desiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
    }
@@ -1182,7 +1182,7 @@ public class ICPPlanner
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   public void getDesiredCenterOfMassPosition(FramePoint2d desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(FramePoint2D desiredCenterOfMassPositionToPack)
    {
       desiredCoMPosition.getFrameTuple2dIncludingFrame(desiredCenterOfMassPositionToPack);
    }
@@ -1265,7 +1265,7 @@ public class ICPPlanner
     * 
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
@@ -1503,14 +1503,14 @@ public class ICPPlanner
       }
    }
 
-   private final FramePoint2d tempFinalCoM = new FramePoint2d();
+   private final FramePoint2D tempFinalCoM = new FramePoint2D();
 
    /**
     * Retrieves the desired CoM position at the end of the current step.
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint2D finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {

@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2D;
@@ -219,7 +219,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
-      endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
+      endPose.setPosition(new FramePoint2D(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
       boolean computeFootstepsWithFlippedInitialTurnDirection = pathType.getAngle() != 0.0;

@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -101,7 +101,7 @@ public class Handstep
       poseReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
 
-   public void setPositionChangeOnlyXY(FramePoint2d position2d)
+   public void setPositionChangeOnlyXY(FramePoint2D position2d)
    {
       poseReferenceFrame.setXYFromPosition2dAndUpdate(position2d);
    }
@@ -221,7 +221,7 @@ public class Handstep
       poseReferenceFrame.getPose2dIncludingFrame(framePose2dToPack);
    }
 
-   public void getPosition2d(FramePoint2d framePoint2dToPack)
+   public void getPosition2d(FramePoint2D framePoint2dToPack)
    {
       poseReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
    }

@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -38,8 +38,8 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       }
    }
 
-   private final FramePoint2d measuredCoP2d = new FramePoint2d();
-   private final FramePoint2d desiredCoP2d = new FramePoint2d();
+   private final FramePoint2D measuredCoP2d = new FramePoint2D();
+   private final FramePoint2D desiredCoP2d = new FramePoint2D();
 
    @Override
    public void processDataAtControllerRate()

@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotController.RobotController;
@@ -1281,7 +1281,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private class VizUpdater implements RobotController
    {
       FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
-      FramePoint2d point = new FramePoint2d(worldFrame);
+      FramePoint2D point = new FramePoint2D(worldFrame);
       FramePoint3D point3d = new FramePoint3D();
 
       @Override

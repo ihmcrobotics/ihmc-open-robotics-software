@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -191,7 +191,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();
-   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
+   private final FramePoint2D comPositionAsFramePoint2d = new FramePoint2D();
    private final Twist currentPelvisTwist = new Twist();
    
    @Override

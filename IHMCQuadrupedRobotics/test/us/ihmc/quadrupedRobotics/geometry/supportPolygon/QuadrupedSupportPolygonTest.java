@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -595,7 +595,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
       FramePoint3D centroidToPack2d = new FramePoint3D();
-      FramePoint2d centroid2dToPack2d = new FramePoint2d();
+      FramePoint2D centroid2dToPack2d = new FramePoint2D();
       poly.getCentroid(centroidToPack2d);
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3D(0.5, 0.5, 0.0), 1e-7));
@@ -835,8 +835,8 @@ public class QuadrupedSupportPolygonTest
       assertFalse("not correct", poly.isInside(new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.5, 0.5, 0.0)));
       assertTrue("not correct", poly.isInside(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 1.0)));
       assertTrue("not correct", poly.isInside(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, 0.5, -1.0)));
-      assertTrue("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, 0.5)));
-      assertFalse("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, -0.5)));
+      assertTrue("not correct", poly.isInside(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.5, 0.5)));
+      assertFalse("not correct", poly.isInside(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.5, -0.5)));
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1088,7 +1088,7 @@ public class QuadrupedSupportPolygonTest
    {
       final QuadrupedSupportPolygon poly = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly.setFootstep(RobotQuadrant.FRONT_RIGHT, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, 1.0, 0.0));
-      final FramePoint2d centerToPack = new FramePoint2d();
+      final FramePoint2D centerToPack = new FramePoint2D();
       poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.309015, centerToPack);
       Vector2D expected = new Vector2D(0.5, 0.309);
       assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
@@ -1197,7 +1197,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 4; i++)
       {
          FramePoint3D polyPoint = poly.getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         FramePoint2d convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2D convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
          polyPoint.checkReferenceFrameMatch(convexPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getX(), convexPoint.getX(), 1e-7));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getY(), convexPoint.getY(), 1e-7));
@@ -1212,7 +1212,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 3; i++)
       {
          FramePoint3D polyPoint = poly.getFootstep(quadrant);
-         expected.addVertex(new FramePoint2d(polyPoint));
+         expected.addVertex(new FramePoint2D(polyPoint));
 
          quadrant = poly.getNextClockwiseSupportingQuadrant(quadrant);
       }
@@ -1220,8 +1220,8 @@ public class QuadrupedSupportPolygonTest
 
       for (int i = 0; i < 3; i++)
       {
-         FramePoint2d convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
-         FramePoint2d polyPoint = new FramePoint2d();
+         FramePoint2D convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2D polyPoint = new FramePoint2D();
          expected.getFrameVertex(i, polyPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));
       }

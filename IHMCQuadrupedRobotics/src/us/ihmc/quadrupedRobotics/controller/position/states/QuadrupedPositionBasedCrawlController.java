@@ -46,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
@@ -217,9 +217,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
-   private final FramePoint2d endPoint2d = new FramePoint2d();
+   private final FramePoint2D endPoint2d = new FramePoint2D();
    private final FramePoint3D centroidFramePoint = new FramePoint3D();
-   private final FramePoint2d centroidFramePoint2d = new FramePoint2d();
+   private final FramePoint2D centroidFramePoint2d = new FramePoint2D();
 
    private final QuadrupedSupportPolygon safeToStepSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon currentSupportPolygon = new QuadrupedSupportPolygon();
@@ -261,7 +261,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final QuadrantDependentList<YoArtifactPolygon> tripleSupportArtifactPolygons = new QuadrantDependentList<YoArtifactPolygon>();
 
    private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
-   private final FramePoint2d circleCenter2d = new FramePoint2d();
+   private final FramePoint2D circleCenter2d = new FramePoint2D();
    private final FramePoint3D circleCenter3d = new FramePoint3D();
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.005, YoAppearance.Green());
 
@@ -288,7 +288,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final FramePoint3D centerOfMassFramePoint = new FramePoint3D();
-   private final FramePoint2d centerOfMassPoint2d = new FramePoint2d();
+   private final FramePoint2D centerOfMassPoint2d = new FramePoint2D();
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
    private final YoFramePoint currentSwingTarget = new YoFramePoint("currentSwingTarget", ReferenceFrame.getWorldFrame(), registry);
@@ -1559,11 +1559,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          centerOfMassPoint2d.setIncludingFrame(centerOfMassFramePoint);
 
-         FramePoint2d sameSideFootstep2d = new FramePoint2d(sameSideFootstep);
-         FramePoint2d diagonalFootstep2d = new FramePoint2d(diagonalFootstep);
-         FramePoint2d acrossBodyFootstep2d = new FramePoint2d(acrossBodyFootstep);
+         FramePoint2D sameSideFootstep2d = new FramePoint2D(sameSideFootstep);
+         FramePoint2D diagonalFootstep2d = new FramePoint2D(diagonalFootstep);
+         FramePoint2D acrossBodyFootstep2d = new FramePoint2D(acrossBodyFootstep);
          FrameLineSegment2d lineSegment = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
-         FramePoint2d comProjectionOnOutsideLegs2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
+         FramePoint2D comProjectionOnOutsideLegs2d = new FramePoint2D(ReferenceFrame.getWorldFrame());
          FramePoint3D comProjectionOnOutsideLegs = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
          QuadrupedSupportPolygon tripleStateWithoutCurrentSwing = new QuadrupedSupportPolygon();
@@ -1606,7 +1606,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          case TROTLINE_MIDPOINT:
             lineSegment.set(sameSideFootstep2d, acrossBodyFootstep2d);
 
-            FramePoint2d midpoint = lineSegment.midpoint();
+            FramePoint2D midpoint = lineSegment.midpoint();
             double bisectorLengthDesired = 0.1;
             FrameVector2D perpendicularBisector = new FrameVector2D();
             lineSegment.getPerpendicular(true, perpendicularBisector);
@@ -1847,7 +1847,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       private final FrameVector2D tempFrameVector = new FrameVector2D();
 
-      private void calculateTrajectoryTarget(RobotQuadrant upcomingSwingLeg, QuadrupedSupportPolygon commonTriangle, FramePoint2d comTargetToPack)
+      private void calculateTrajectoryTarget(RobotQuadrant upcomingSwingLeg, QuadrupedSupportPolygon commonTriangle, FramePoint2D comTargetToPack)
       {
          commonSupportPolygon.set(commonTriangle);
          double radius = subCircleRadius.getDoubleValue();
@@ -1877,7 +1877,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          FramePoint3D finalPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          comTrajectoryGenerator.getFinalPosition(finalPosition);
-         initializeCoMTrajectory(new FramePoint2d(ReferenceFrame.getWorldFrame(), finalPosition.getX(), finalPosition.getY()));
+         initializeCoMTrajectory(new FramePoint2D(ReferenceFrame.getWorldFrame(), finalPosition.getX(), finalPosition.getY()));
       }
 
       public void setCoMTrajectoryToCurrentAndSetToDone()
@@ -1885,12 +1885,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          desiredCoMVelocity.setToZero();
          FramePoint3D desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
          initialCoMPosition.set(desiredBodyCurrent);
-         initializeCoMTrajectory(new FramePoint2d(ReferenceFrame.getWorldFrame(), initialCoMPosition.getX(), initialCoMPosition.getY()));
+         initializeCoMTrajectory(new FramePoint2D(ReferenceFrame.getWorldFrame(), initialCoMPosition.getX(), initialCoMPosition.getY()));
          comTrajectoryGenerator.setToDone();
       }
 
       Random random = new Random(100L);
-      private void initializeCoMTrajectory(FramePoint2d target)
+      private void initializeCoMTrajectory(FramePoint2D target)
       {
          FramePoint3D desiredBodyCurrent = desiredCoMPose.getPosition().getFrameTuple();
          initialCoMPosition.set(desiredBodyCurrent);

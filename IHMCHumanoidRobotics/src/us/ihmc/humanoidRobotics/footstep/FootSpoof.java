@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -33,7 +33,7 @@ public class FootSpoof implements ContactablePlaneBody
    private final PoseReferenceFrame shinFrame;
    private final ReferenceFrame soleFrame;
    private final List<FramePoint3D> contactPoints = new ArrayList<FramePoint3D>();
-   private final List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>();
+   private final List<FramePoint2D> contactPoints2d = new ArrayList<FramePoint2D>();
    private final double coefficientOfFriction;
    private final int totalNumberOfContactPoints;
 
@@ -61,7 +61,7 @@ public class FootSpoof implements ContactablePlaneBody
       {
          FramePoint3D point = new FramePoint3D(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
-         contactPoints2d.add(new FramePoint2d(point));
+         contactPoints2d.add(new FramePoint2D(point));
       }
 
       totalNumberOfContactPoints = contactPoints.size();
@@ -91,10 +91,10 @@ public class FootSpoof implements ContactablePlaneBody
       contactPoints.add(point2);
       contactPoints.add(point3);
       contactPoints.add(point4);
-      contactPoints2d.add(new FramePoint2d(point1));
-      contactPoints2d.add(new FramePoint2d(point2));
-      contactPoints2d.add(new FramePoint2d(point3));
-      contactPoints2d.add(new FramePoint2d(point4));
+      contactPoints2d.add(new FramePoint2D(point1));
+      contactPoints2d.add(new FramePoint2D(point2));
+      contactPoints2d.add(new FramePoint2D(point3));
+      contactPoints2d.add(new FramePoint2D(point4));
 
       totalNumberOfContactPoints = contactPoints.size();
 
@@ -167,7 +167,7 @@ public class FootSpoof implements ContactablePlaneBody
       return soleFrame;
    }
 
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2d()
    {
       return contactPoints2d;
    }

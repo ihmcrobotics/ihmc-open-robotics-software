@@ -331,8 +331,8 @@ public class GeometryTools
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static boolean doLineSegmentsIntersect(FramePoint2d lineSegmentStart1, FramePoint2d lineSegmentEnd1, FramePoint2d lineSegmentStart2,
-                                                 FramePoint2d lineSegmentEnd2)
+   public static boolean doLineSegmentsIntersect(FramePoint2D lineSegmentStart1, FramePoint2D lineSegmentEnd1, FramePoint2D lineSegmentStart2,
+                                                 FramePoint2D lineSegmentEnd2)
    {
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentEnd1);
       lineSegmentStart2.checkReferenceFrameMatch(lineSegmentEnd2);
@@ -781,16 +781,16 @@ public class GeometryTools
     * @param points the list of points to transform. Not modified.
     * @return the result of the transformation.
     */
-   public static List<FramePoint2d> changeFrameAndProjectToXYPlane(ReferenceFrame referenceFrame, List<FramePoint3D> points)
+   public static List<FramePoint2D> changeFrameAndProjectToXYPlane(ReferenceFrame referenceFrame, List<FramePoint3D> points)
    {
-      List<FramePoint2d> ret = new ArrayList<>(points.size());
+      List<FramePoint2D> ret = new ArrayList<>(points.size());
 
       for (int i = 0; i < points.size(); i++)
       {
          FramePoint3D framePoint = new FramePoint3D(points.get(i));
          framePoint.changeFrame(referenceFrame);
 
-         ret.add(new FramePoint2d(framePoint));
+         ret.add(new FramePoint2D(framePoint));
       }
 
       return ret;
@@ -805,14 +805,14 @@ public class GeometryTools
     * @param points the list of points to transform. Not modified.
     * @return the result of the transformation.
     */
-   public static List<FramePoint2d> projectOntoXYPlane(List<FramePoint3D> points)
+   public static List<FramePoint2D> projectOntoXYPlane(List<FramePoint3D> points)
    {
-      List<FramePoint2d> ret = new ArrayList<>(points.size());
+      List<FramePoint2D> ret = new ArrayList<>(points.size());
 
       for (int i = 0; i < points.size(); i++)
       {
          FramePoint3D point3d = points.get(i);
-         ret.add(new FramePoint2d(point3d.getReferenceFrame(), point3d.getX(), point3d.getY()));
+         ret.add(new FramePoint2D(point3d.getReferenceFrame(), point3d.getX(), point3d.getY()));
       }
 
       return ret;
@@ -953,7 +953,7 @@ public class GeometryTools
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public static void yawAboutPoint(FramePoint2DReadOnly pointToTransform, FramePoint2DReadOnly pointToYawAbout, double yaw, FramePoint2d resultToPack)
+   public static void yawAboutPoint(FramePoint2DReadOnly pointToTransform, FramePoint2DReadOnly pointToYawAbout, double yaw, FramePoint2D resultToPack)
    {
       pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
       double tempX = pointToTransform.getX() - pointToYawAbout.getX();

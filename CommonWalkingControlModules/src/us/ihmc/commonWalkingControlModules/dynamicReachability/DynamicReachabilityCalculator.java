@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -127,7 +127,7 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<ReferenceFrame> predictedHipFrames = new SideDependentList<>();
    private final SideDependentList<Vector2dZUpFrame> stepDirectionFrames = new SideDependentList<>();
 
-   private final FramePoint2d adjustedCoMPosition = new FramePoint2d();
+   private final FramePoint2D adjustedCoMPosition = new FramePoint2D();
    private final FramePoint3D predictedCoMPosition = new FramePoint3D();
 
    private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
@@ -138,8 +138,8 @@ public class DynamicReachabilityCalculator
    private final FrameVector3D tempVector = new FrameVector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FramePoint2d tempPoint2d = new FramePoint2d();
-   private final FramePoint2d tempFinalCoM = new FramePoint2d();
+   private final FramePoint2D tempPoint2d = new FramePoint2D();
+   private final FramePoint2D tempFinalCoM = new FramePoint2D();
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final double thighLength;
@@ -1180,7 +1180,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.setSwingDuration(stepNumber, duration);
    }
 
-   private void applyVariation(FramePoint2d comToPack)
+   private void applyVariation(FramePoint2D comToPack)
    {
       if (isInTransfer)
          icpPlanner.computeFinalCoMPositionInTransfer();
@@ -1190,7 +1190,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
    }
 
-   private void initializePlan(FramePoint2d comToPack)
+   private void initializePlan(FramePoint2D comToPack)
    {
       double currentInitialTime = icpPlanner.getInitialTime();
 
@@ -1203,7 +1203,7 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private void computeGradient(FramePoint3D originalPosition, FramePoint2d adjustedPosition, double variation, FrameVector3D gradientToPack)
+   private void computeGradient(FramePoint3D originalPosition, FramePoint2D adjustedPosition, double variation, FrameVector3D gradientToPack)
    {
       originalPosition.changeFrame(worldFrame);
       tempPoint.setToZero(worldFrame);

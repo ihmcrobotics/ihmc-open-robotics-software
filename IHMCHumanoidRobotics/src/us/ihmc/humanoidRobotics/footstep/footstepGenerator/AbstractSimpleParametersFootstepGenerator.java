@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.Composit
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -207,7 +207,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
          planningPose = ((CompositeOverheadPath) path).getPoseAtS(pathSParameter,subPathIndex);
       else
          planningPose = path.getPoseAtS(pathSParameter);
-      FramePoint2d footstepPosition2d = new FramePoint2d();
+      FramePoint2D footstepPosition2d = new FramePoint2D();
       planningPose.getPositionIncludingFrame(footstepPosition2d);
       double footHeading = planningPose.getYaw();
       footstepPosition2d = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
