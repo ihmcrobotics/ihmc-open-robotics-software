@@ -7,6 +7,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -902,7 +903,7 @@ public class GeometryTools
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }
 
-   public static void pitchAboutPoint(FramePoint pointToTransform, FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
+   public static void pitchAboutPoint(FramePoint3DReadOnly pointToTransform, FramePoint3DReadOnly pointToPitchAbout, double pitch, FramePoint resultToPack)
    {
       pointToTransform.checkReferenceFrameMatch(pointToPitchAbout);
       double tempX = pointToTransform.getX() - pointToPitchAbout.getX();
@@ -927,7 +928,7 @@ public class GeometryTools
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public static void yawAboutPoint(FramePoint pointToTransform, FramePoint pointToYawAbout, double yaw, FramePoint resultToPack)
+   public static void yawAboutPoint(FramePoint3DReadOnly pointToTransform, FramePoint3DReadOnly pointToYawAbout, double yaw, FramePoint resultToPack)
    {
       pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
       double tempX = pointToTransform.getX() - pointToYawAbout.getX();

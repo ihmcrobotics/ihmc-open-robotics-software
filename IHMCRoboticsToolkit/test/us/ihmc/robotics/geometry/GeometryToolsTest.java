@@ -482,7 +482,7 @@ public class GeometryToolsTest
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
       result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
-      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, result, pitch);
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
       assertEquals("not equal", -256.24551976827297, result.getX(), epsilon);
       assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
@@ -493,7 +493,7 @@ public class GeometryToolsTest
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
       result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
-      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, result, pitch);
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
       assertEquals("not equal", -2273.346187036131, result.getX(), epsilon);
       assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
@@ -504,7 +504,7 @@ public class GeometryToolsTest
       point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
       result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
-      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, result, pitch);
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
       assertEquals("not equal", 3978.4131392851787, result.getX(), epsilon);
       assertEquals("not equal", 682.5708442089929, result.getY(), epsilon);
@@ -581,7 +581,7 @@ public class GeometryToolsTest
       double pitch = Math.PI;
 
       FramePoint result = new FramePoint();
-      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, result, pitch);
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       //      System.out.println(result);
       assertEquals("These should be equal", -1.0, result.getX(), epsilon);
       assertEquals("These should be equal", 1.0, result.getY(), epsilon);
