@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -21,8 +20,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> implements Vector2DBasics
 {
    private static final long serialVersionUID = -610124454205790361L;
-
-   private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
 
    /**
     * FrameVector2d
@@ -166,15 +163,5 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
          return;
 
       scale(maxLength / length);
-   }
-
-   public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
-   {
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-      getGeometryObject().applyTransform(temporaryTransformToDesiredFrame, false);
-      this.referenceFrame = desiredFrame;
    }
 }
