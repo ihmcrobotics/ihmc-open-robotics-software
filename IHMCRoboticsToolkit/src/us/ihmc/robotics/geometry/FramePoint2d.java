@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -27,8 +26,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2DReadOnly, Point2DBasics
 {
    private static final long serialVersionUID = -1287148635726098768L;
-
-   private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    /**
     * FramePoint2d
@@ -115,43 +112,6 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    public Point2DReadOnly getPoint()
    {
       return tuple;
-   }
-
-   /**
-    * Creates a new FramePoint based on the x and y components of this FramePoint2d
-    */
-   public FramePoint toFramePoint()
-   {
-      return new FramePoint(getReferenceFrame(), getX(), getY(), 0.0);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // Check for the trivial case: the geometry is already expressed in the desired frame.
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
-      applyTransform(transformToDesiredFrame);
-      referenceFrame = desiredFrame;
-   }
-
-   /**
-    * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane.
-    *
-    * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
-    */
-   public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
-   {
-      // Check for the trivial case: the geometry is already expressed in the desired frame.
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
-      applyTransform(transformToDesiredFrame, false);
-      referenceFrame = desiredFrame;
    }
 
    /**

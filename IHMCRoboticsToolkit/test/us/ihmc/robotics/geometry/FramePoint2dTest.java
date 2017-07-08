@@ -262,29 +262,6 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testToFramePoint()
-   {
-      FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0);
-      FramePoint framePoint = point1.toFramePoint();
-      assertEquals("Should be equal", point1.getX(), framePoint.getX(), epsilon);
-      assertEquals("Should be equal", point1.getY(), framePoint.getY(), epsilon);
-      point1.checkReferenceFrameMatch(framePoint.getReferenceFrame());
-
-      try
-      {
-         point1.checkReferenceFrameMatch(worldFrame);
-         fail("Should have thrown ReferenceFrameMismatchException");
-      }
-      catch (ReferenceFrameMismatchException rfme)
-      {
-         //Good
-      }
-
-      assertEquals("Should be equal", 0.0, framePoint.getZ(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testApplyTransform_Transform3D_boolean()
    {
       boolean requireTransformInPlane = false;
