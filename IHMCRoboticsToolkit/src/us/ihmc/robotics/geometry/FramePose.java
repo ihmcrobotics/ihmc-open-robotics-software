@@ -10,6 +10,10 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -565,7 +569,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
       RigidBodyTransform transformToOtherPose = getTransformFromThisToThat(otherPose);
       FrameVector3D ret = new FrameVector3D(referenceFrame);
-      transformToOtherPose.getTranslation(ret.tuple);
+      transformToOtherPose.getTranslation(ret);
 
       return ret;
    }

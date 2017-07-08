@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration of each

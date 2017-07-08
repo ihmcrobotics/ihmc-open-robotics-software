@@ -12,6 +12,8 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnlyTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -50,7 +52,7 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
 
    public FrameTuple3D<?, ?> createFrameTuple(FrameTuple3D<?, ?> frameTuple)
    {
-      return createFrameTuple(frameTuple.getReferenceFrame(), frameTuple.tuple);
+      return createFrameTuple(frameTuple.getReferenceFrame(), frameTuple);
    }
 
    protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
@@ -204,9 +206,9 @@ public abstract class FrameTuple3DTest<F extends FrameTuple3D<F, T>, T extends T
       assertEquals(y, tuple3dToTest.getY(), epsilon);
       assertEquals(z, tuple3dToTest.getZ(), epsilon);
 
-      assertEquals(x, frameTuple.tuple.getX(), epsilon);
-      assertEquals(y, frameTuple.tuple.getY(), epsilon);
-      assertEquals(z, frameTuple.tuple.getZ(), epsilon);
+      assertEquals(x, frameTuple.getX(), epsilon);
+      assertEquals(y, frameTuple.getY(), epsilon);
+      assertEquals(z, frameTuple.getZ(), epsilon);
    }
 
    // Tests copied from FramePointTest and FrameVectorTest
