@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 
