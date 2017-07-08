@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -29,7 +28,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
-   private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
+   private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    /**
     * FramePoint2d
@@ -86,9 +85,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(FrameTuple2DReadOnly frameTuple2d)
+   public FramePoint2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
+      this(frameTuple2DReadOnly.getReferenceFrame(), frameTuple2DReadOnly.getX(), frameTuple2DReadOnly.getY());
    }
 
    /**
@@ -96,15 +95,14 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(FrameTuple3DReadOnly frameTuple2d)
+   public FramePoint2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
+      this(frameTuple3DReadOnly.getReferenceFrame(), frameTuple3DReadOnly.getX(), frameTuple3DReadOnly.getY());
    }
 
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax),
-                                                  RandomNumbers.nextDouble(random, yMin, yMax));
+      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax));
 
       return randomPoint;
    }
@@ -124,7 +122,20 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     */
    public FramePoint toFramePoint()
    {
-      return new FramePoint(this.getReferenceFrame(), this.getX(), this.getY(), 0.0);
+      return new FramePoint(getReferenceFrame(), getX(), getY(), 0.0);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void changeFrame(ReferenceFrame desiredFrame)
+   {
+      // Check for the trivial case: the geometry is already expressed in the desired frame.
+      if (desiredFrame == referenceFrame)
+         return;
+
+      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
+      applyTransform(transformToDesiredFrame);
+      referenceFrame = desiredFrame;
    }
 
    /**
@@ -134,13 +145,13 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     */
    public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
    {
-      // this is in the correct frame already
+      // Check for the trivial case: the geometry is already expressed in the desired frame.
       if (desiredFrame == referenceFrame)
          return;
 
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-      applyTransform(temporaryTransformToDesiredFrame, false);
-      this.referenceFrame = desiredFrame;
+      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
+      applyTransform(transformToDesiredFrame, false);
+      referenceFrame = desiredFrame;
    }
 
    /**
@@ -155,10 +166,5 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
       FramePoint2d ret = new FramePoint2d(this);
       ret.changeFrameAndProjectToXYPlane(desiredFrame);
       return ret;
-   }
-
-   public void applyTransform(Transform transform, boolean requireTransformInXYPlane)
-   {
-      this.getGeometryObject().applyTransform(transform, requireTransformInXYPlane);
    }
 }
