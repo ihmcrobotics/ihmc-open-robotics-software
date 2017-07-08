@@ -377,6 +377,7 @@ public class TaskNodeTree
       BufferedWriter bw = null;
       FileWriter fw = null;
       
+      System.out.println("Save Start");
       try {
          String savingContent = "";
          
@@ -432,18 +433,21 @@ public class TaskNodeTree
          /*
           * path nodes
           */
-         for(int i=0;i<getFailNodes().size();i++)
+         if(getPath().size() > 1)
          {
-            String convertedNodeData = "";            
-            
-            convertedNodeData = convertedNodeData + "3\t";
-            for(int j=0;j<getPath().get(i).getDimensionOfNodeData();j++)
+            for(int i=0;i<getFailNodes().size();i++)
             {
-               convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));               
+               String convertedNodeData = "";            
+               
+               convertedNodeData = convertedNodeData + "3\t";
+               for(int j=0;j<getPath().get(i).getDimensionOfNodeData();j++)
+               {
+                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));               
+               }
+               convertedNodeData = convertedNodeData + "\n";
+               
+               savingContent = savingContent + convertedNodeData;
             }
-            convertedNodeData = convertedNodeData + "\n";
-            
-            savingContent = savingContent + convertedNodeData;
          }
          
          fw = new FileWriter(fileName);

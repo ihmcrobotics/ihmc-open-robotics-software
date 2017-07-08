@@ -11,6 +11,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PushDoorTrajectory extends EndEffectorTrajectory
 {
@@ -37,7 +38,7 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
    {
       double rotationAngle = time/trajectoryTime * openingAngle;
       
-      PushDoorPose pushDoorPose = new PushDoorPose(pushDoor, rotationAngle, pitchAngle);
+      PushDoorPose pushDoorPose = new PushDoorPose(pushDoor, getRobotSide(), rotationAngle, pitchAngle);
       
       return pushDoorPose.getEndEffectorPose();
    }
@@ -78,8 +79,20 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
          FramePoint framePoint = new FramePoint(worldFrame, pose.getPoint());
          framePoint.changeFrame(midFeetFrame);
          
+         Point3D point = new Point3D(pose.getPoint());
+         Quaternion orientation = new Quaternion(pose.getOrientation());
+         
+         if(getRobotSide() == RobotSide.RIGHT)
+         {
+            orientation.appendRollRotation(-Math.PI*0.5);
+         }
+         else
+         {
+            orientation.appendRollRotation(Math.PI*0.5);   
+         }
+         
          time = time + firstTime;
-         endEffectorTrajectoryMessage.setTrajectoryPoint(i, time, new Point3D(pose.getPoint()), new Quaternion(pose.getOrientation()), desiredLinearVelocity, new Vector3D(), worldFrame);
+         endEffectorTrajectoryMessage.setTrajectoryPoint(i, time, point, orientation, desiredLinearVelocity, new Vector3D(), worldFrame);
       }      
       
       return endEffectorTrajectoryMessage;

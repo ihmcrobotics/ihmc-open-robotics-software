@@ -144,7 +144,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
    
-   private static int maximumCntForUpdateInternal = 1000;
+   private static int maximumCntForUpdateInternal = 500;
    private static int cntForUpdateInternal = 0;
    
    private static int numberOfTest = 0;
@@ -637,16 +637,14 @@ public class WheneverWholeBodyKinematicsSolver
          preMultipliedOrientation.appendRollRotation(Math.PI*0.5);
          preMultipliedOrientation.appendYawRotation(-Math.PI*0.5);
       }
-      
+            
       FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
-      
+            
       desiredOrientationToWorld.multiply(preMultipliedOrientation);
-//      desiredOrientationToWorld.appendPitchRotation(Math.PI*0.5);
-//      desiredOrientationToWorld.appendRollRotation(-Math.PI*0.5);
       
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-      
+            
       desiredPoseToWorld.changeFrame(worldFrame);
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
       
