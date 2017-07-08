@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -29,6 +30,13 @@ public class PushDoor
       this.doorAxisFramePose = doorAxisFramePose;
       this.rotationRadius = rotationRadius;
       this.knobHeight = knobHeight;
+   }
+   
+   public PushDoor(FramePose doorAxisFramePose, Vector2D handleOffset)
+   {
+      this.doorAxisFramePose = doorAxisFramePose;
+      this.rotationRadius = handleOffset.getX();
+      this.knobHeight = handleOffset.getY();
    }
    
    public FramePose getDoorAxis()

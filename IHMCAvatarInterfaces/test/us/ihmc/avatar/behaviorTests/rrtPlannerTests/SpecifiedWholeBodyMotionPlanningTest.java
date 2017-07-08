@@ -1,4 +1,4 @@
-package us.ihmc.avatar.behaviorTests.SolarPanel;
+package us.ihmc.avatar.behaviorTests.rrtPlannerTests;
 
 import static org.junit.Assert.assertTrue;
 
@@ -44,7 +44,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.DoorEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -128,10 +128,13 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+//      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+      CommonAvatarEnvironmentInterface environment = new DoorEnvironment();
+      
 
 //      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, simulationTestingParameters, getRobotModel());
+//      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
@@ -238,7 +241,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       System.out.println(constrainedEndEffectorTrajectory.getEndEffectorPose(5.5));
    }
    
-//   @Test
+   @Test
    public void testForWheneverWholeBodyKinematicsSolver() throws SimulationExceededMaximumTimeException, IOException
    {      
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -252,11 +255,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
-                             
-      /*
-       * test 1 
-       */
-      // construct
+        
+      
       WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
       
       // create initial robot configuration
@@ -268,8 +268,8 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       // Desired
       Quaternion desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
-      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
+      wbikTester.setDesiredHandPose(RobotSide.LEFT, new Pose(new Point3D(0.6, 0.4, 1.0), desiredHandOrientation));
+      wbikTester.setHandSelectionMatrixFree(RobotSide.RIGHT);
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
@@ -281,51 +281,80 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       PrintTools.info(""+wbikTester.isSolved());      
       
-      /*
-       * reversible test
-       */
-      
-      wbikTester.initialize();      
-      wbikTester.holdCurrentTrajectoryMessages();
-      
-      // Desired
-      desiredHandOrientation = new Quaternion();
-      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.5, -0.6, 1.1), desiredHandOrientation));
-      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
-      
-      desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
-      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
-            
-      wbikTester.setDesiredPelvisHeight(0.75);
-      
-      wbikTester.putTrajectoryMessages();
-
-      PrintTools.info(""+wbikTester.isSolved());      
       
       /*
-       * reversible test
+       * test 1 
        */
-      
-      wbikTester.initialize();      
-      wbikTester.holdCurrentTrajectoryMessages();
-      
-      // Desired
-      desiredHandOrientation = new Quaternion();
-      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
-      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
-      
-      desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
-      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
-            
-      wbikTester.setDesiredPelvisHeight(0.75);
-      
-      wbikTester.putTrajectoryMessages();
-
-      PrintTools.info(""+wbikTester.isSolved());   
+      // construct
+//      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
+//      
+//      // create initial robot configuration
+//      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());      
+//      
+//      wbikTester.initialize();      
+//      wbikTester.holdCurrentTrajectoryMessages();
+//      
+//      // Desired
+//      Quaternion desiredHandOrientation = new Quaternion();
+//      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
+//      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+//      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
+//      
+//      Quaternion desiredChestOrientation = new Quaternion();
+//      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
+//      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
+//            
+//      wbikTester.setDesiredPelvisHeight(0.75);
+//      
+//      wbikTester.putTrajectoryMessages();
+//
+//      PrintTools.info(""+wbikTester.isSolved());      
+//      
+//      /*
+//       * reversible test
+//       */
+//      
+//      wbikTester.initialize();      
+//      wbikTester.holdCurrentTrajectoryMessages();
+//      
+//      // Desired
+//      desiredHandOrientation = new Quaternion();
+//      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
+//      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.5, -0.6, 1.1), desiredHandOrientation));
+//      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
+//      
+//      desiredChestOrientation = new Quaternion();
+//      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
+//      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
+//            
+//      wbikTester.setDesiredPelvisHeight(0.75);
+//      
+//      wbikTester.putTrajectoryMessages();
+//
+//      PrintTools.info(""+wbikTester.isSolved());      
+//      
+//      /*
+//       * reversible test
+//       */
+//      
+//      wbikTester.initialize();      
+//      wbikTester.holdCurrentTrajectoryMessages();
+//      
+//      // Desired
+//      desiredHandOrientation = new Quaternion();
+//      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
+//      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+//      wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
+//      
+//      desiredChestOrientation = new Quaternion();
+//      desiredChestOrientation.appendPitchRotation(Math.PI*10/180);
+//      wbikTester.setDesiredChestOrientation(desiredChestOrientation);
+//            
+//      wbikTester.setDesiredPelvisHeight(0.75);
+//      
+//      wbikTester.putTrajectoryMessages();
+//
+//      PrintTools.info(""+wbikTester.isSolved());   
       
       /*
        * Show up
@@ -442,10 +471,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       System.out.println(node6.isValidNode());
             
       PrintTools.info("END");     
-   } 
-   
-
-      
+   }       
    
 //   @Test
    public void testForPushDoorKinematics() throws SimulationExceededMaximumTimeException, IOException
@@ -547,118 +573,108 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
    
-   @Test
+//   @Test
    public void testForPlannerPushDoorOpeningTask() throws SimulationExceededMaximumTimeException, IOException
    {
-//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      assertTrue(success);
-//
-//      drcBehaviorTestHelper.updateRobotModel();
-//      
-//      /*
-//       * Motion planning node.
-//       * 
-//       * Input @param.
-//       * solar panel position and orientation.
-//       * cleaning path. - robot side, via points, type(linear, circular_not yet).
-//       * trajectory time for initial position to root node pose.
-//       * finding initial node.
-//       * 
-//       * 
-//       * Output @param.
-//       * wholebody trajectory message.
-//       * -> hand trajectory message(end effector) is obtained from end effector path.
-//       * -> chest and pelvis trajectory message is obtained from planner.
-//       */
-//      
-//      /*
-//       * Initialize tester.
-//       */
-//      
-//      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-//      sdfFullRobotModel.updateFrames();
-//      
-//      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-//      
-//      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
-//                  
-//      TaskNode3D.nodeTester = wbikTester;
-//
-//      /*
-//       * Wall to be cut define
-//       */
-//      
-//      
-//      
-//      
-//      /*
-//       * Define end effector trajectory.  
-//       */
-//      
-//      Quaternion desiredHandOrientation = new Quaternion();
-//      desiredHandOrientation.appendPitchRotation(Math.PI*30/180);      
-//      
-//      Pose pose1 = .getPose();
-//      Pose pose2 = .getPose();
-//      Pose pose3 = .getPose();
-//      Pose pose4 = .getPose();
-//      
-//      EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
-//      
-//      constrainedEndEffectorTrajectory.setInitialPose(pose1);
-//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose2, 3.0);
-//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose3, 3.0);
-//      constrainedEndEffectorTrajectory.addLinearTrajectory(pose4, 3.0); 
-//      constrainedEndEffectorTrajectory.setRobotSideOfEndEffector(RobotSide.RIGHT);
-//            
-//      TaskNode3D.endEffectorTrajectory = constrainedEndEffectorTrajectory;      
-//      
-//      /*
-//       * Tree expanding.
-//       */
-//      
-//      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-//      
-//      TaskNode3D rootNode = new TaskNode3D(0.0, initialPelvisHeight, 0.0, 0.0);     
-//      rootNode.setConfigurationJoints(sdfFullRobotModel);
-//      
-//      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
-//      
-//      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, constrainedEndEffectorTrajectory.getTrajectoryTime());
-//      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.9);
-//      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
-//      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
-//      
-//      System.out.println(taskNodeTree.getTrajectoryTime());
-//      PrintTools.info(""+rootNode.isValidNode());
-//      
-//      FullHumanoidRobotModel createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
-//      HumanoidReferenceFrames createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
-//      
-//      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
-//      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
-//      
-////      taskNodeTree.expandTree(30);
-////      
-//      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-//      
-//      TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
-//      taskNodeTreeVisualizer.visualize();
-//   
-//      taskNodeTree.saveNodes();
-//      
-//      
-//      /*
-//       * Debug.
-//       */
-//      
-//      scs.addStaticLinkGraphics(getGraphicsSphere(pose1));
-//      scs.addStaticLinkGraphics(getGraphicsSphere(pose2));
-//      scs.addStaticLinkGraphics(getGraphicsSphere(pose3));
-//      scs.addStaticLinkGraphics(getGraphicsSphere(pose4));
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      /*
+       * Motion planning node.
+       * 
+       * Input @param.
+       * solar panel position and orientation.
+       * cleaning path. - robot side, via points, type(linear, circular_not yet).
+       * trajectory time for initial position to root node pose.
+       * finding initial node.
+       * 
+       * 
+       * Output @param.
+       * wholebody trajectory message.
+       * -> hand trajectory message(end effector) is obtained from end effector path.
+       * -> chest and pelvis trajectory message is obtained from planner.
+       */
+      
+      /*
+       * Initialize tester.
+       */      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
+      
+      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
+                  
+      TaskNode3D.nodeTester = wbikTester;
+
+      /*
+       * Push Door Define
+       */
+      Point3D pushDoorLocation = new Point3D(0.6, -0.35, 0.0);
+      Quaternion pushDoorOrientation = new Quaternion();
+      pushDoorOrientation.appendYawRotation(Math.PI/180*0);
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      PushDoor pushDoor = new PushDoor(pushDoorFramePose, 0.7, 0.9);
+      
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -30*Math.PI/180);
+      pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
+                  
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;      
+      
+      /*
+       * Debug.
+       */
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());
+      HandTrajectoryMessage handTrajectoryMessage = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFootZUpGroundFrame());
+      
+      System.out.println(handTrajectoryMessage.getNumberOfTrajectoryPoints());
+      for(int i=0;i<handTrajectoryMessage.getNumberOfTrajectoryPoints();i++)
+      {
+         Point3D point = new Point3D();
+         handTrajectoryMessage.getTrajectoryPoints()[i].getPosition(point);
+         
+         Quaternion orientation = new Quaternion();
+         handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
+         
+         Pose pose = new Pose(point, orientation);
+         scs.addStaticLinkGraphics(getXYZAxis(pose));
+      }
+      
+      /*
+       * Tree expanding.
+       */
+      
+      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      
+      TaskNode3D rootNode = new TaskNode3D(0.0, initialPelvisHeight, 0.0, 0.0);     
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
+      
+      TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
+      
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, pushDoorTrajectory.getTrajectoryTime());
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.9);
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
+      
+      System.out.println(taskNodeTree.getTrajectoryTime());
+            
+      taskNodeTree.expandTree(10);
+            
+      TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
+      taskNodeTreeVisualizer.visualize();
+   
+      taskNodeTree.saveNodes();
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+      PrintTools.info("END"); 
    }
    
-   
+
    
    
    
