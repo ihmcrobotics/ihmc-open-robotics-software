@@ -154,20 +154,6 @@ public class FrameVectorTest extends FrameTuple3DTest<FrameVector, Vector3D>
       FrameVector frameVector3 = new FrameVector(aFrame, 0.0, 1.0, 2.0);
       frameVector1.angle(frameVector3);
    }
-	
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testIsParallel()
-   {
-      Random random = new Random(100L);
-
-      FrameVector randomFrameVector = new FrameVector(theFrame, RandomGeometry.nextVector3D(random));
-      FrameVector parallelVector = new FrameVector(randomFrameVector);
-      parallelVector.scale(RandomNumbers.nextDouble(random, -1.0, 1.0));
-
-      String errorMsg = "\n" + randomFrameVector + "\n should be parallel to: \n" + parallelVector + "\n Angle between vectors = " + randomFrameVector.angle(parallelVector);
-      assertTrue(errorMsg, randomFrameVector.isEpsilonParallel(parallelVector, 1e-7));
-   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)

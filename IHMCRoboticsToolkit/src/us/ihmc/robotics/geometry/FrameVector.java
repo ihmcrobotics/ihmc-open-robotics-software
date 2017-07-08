@@ -6,6 +6,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -23,9 +24,8 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    private static final long serialVersionUID = -4475317718392284548L;
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes it components to zero and its reference frame to
+    * {@link ReferenceFrame#getWorldFrame()}.
     */
    public FrameVector()
    {
@@ -33,9 +33,10 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    }
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes it components to zero and its reference frame to
+    * the {@code referenceFrame}.
+    * 
+    * @param referenceFrame the initial frame for this frame vector.
     */
    public FrameVector(ReferenceFrame referenceFrame)
    {
@@ -43,9 +44,13 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    }
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes it with the given components and the given
+    * reference frame.
+    * 
+    * @param referenceFrame the initial frame for this frame vector.
+    * @param x the x-component.
+    * @param y the y-component.
+    * @param z the z-component.
     */
    public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
    {
@@ -53,29 +58,33 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    }
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes its component {@code x}, {@code y}, {@code z} in
+    * order from the given array and initializes its reference frame.
+    * 
+    * @param referenceFrame the initial frame for this frame vector.
+    * @param vectorArray the array containing this vector's components. Not modified.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vector)
+   public FrameVector(ReferenceFrame referenceFrame, double[] vectorArray)
    {
-      super(referenceFrame, new Vector3D(vector));
+      super(referenceFrame, new Vector3D(vectorArray));
    }
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes it to {@code tuple3DReadOnly} and to the given
+    * reference frame.
+    *
+    * @param referenceFrame the initial frame for this frame vector.
+    * @param tuple3DReadOnly the tuple to copy the components from. Not modified.
     */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
+   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
-      super(referenceFrame, new Vector3D(tuple));
+      super(referenceFrame, new Vector3D(tuple3DReadOnly));
    }
 
    /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
+    * Creates a new frame vector and initializes it to {@code other}.
+    *
+    * @param other the tuple to copy the components and reference frame from. Not modified.
     */
    public FrameVector(FrameTuple3DReadOnly other)
    {
@@ -96,6 +105,13 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return randomVector;
    }
 
+   /**
+    * Sets this frame vector to {@code other} and then calls {@link #normalize()}.
+    *
+    * @param other the other frame vector to copy the values from. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
+    *            reference frame as {@code this}.
+    */
    public void setAndNormalize(FrameTuple3DReadOnly other)
    {
       checkReferenceFrameMatch(other);
@@ -103,47 +119,64 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    }
 
    /**
-    * Retrieves the vector inside this FrameVector
+    * Sets this frame vector to the cross product of {@code this} and {@code other}.
+    * <p>
+    * this = this &times; other
+    * </p>
     *
-    * @return Vector3d
+    * @param other the second frame vector in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
+    *            reference frame as {@code this}.
     */
-   public Vector3D getVector()
+   public void cross(FrameVector3DReadOnly other)
    {
-      return this.tuple;
+      checkReferenceFrameMatch(other);
+      tuple.cross(tuple, other);
    }
 
-   public boolean isEpsilonParallel(FrameVector frameVector, double epsilonAngle)
+   /**
+    * Sets this frame vector to the cross product of {@code this} and {@code frameTuple3DReadOnly}.
+    * <p>
+    * this = this &times; frameTuple3DReadOnly
+    * </p>
+    *
+    * @param frameTuple3DReadOnly the second frame tuple in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code frameTuple3DReadOnly} is not expressed in
+    *            the same reference frame as {@code this}.
+    */
+   public void cross(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      checkReferenceFrameMatch(frameVector);
-
-      double angleMinusZeroToPi = Math.abs(AngleTools.trimAngleMinusPiToPi(this.angle(frameVector)));
-
-      double errorFromParallel = Math.min(angleMinusZeroToPi, Math.PI - angleMinusZeroToPi);
-      return errorFromParallel < epsilonAngle;
+      checkReferenceFrameMatch(frameTuple3DReadOnly);
+      tuple.cross(tuple, frameTuple3DReadOnly);
    }
 
-   public boolean isEpsilonParallel(FrameVector frameVector)
+   /**
+    * Sets this frame vector to the cross product of {@code frameVector1} and {@code frameVector2}.
+    * <p>
+    * this = frameVector1 &times; frameVector2
+    * </p>
+    *
+    * @param frameVector1 the first frame vector in the cross product. Not modified.
+    * @param frameVector2 the second frame vector in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if either {@code frameVector1} or {@code frameVector2}
+    *            is not expressed in the same reference frame as {@code this}.
+    */
+   public void cross(FrameVector3DReadOnly frameVector1, FrameVector3DReadOnly frameVector2)
    {
-      return isEpsilonParallel(frameVector, 1e-7);
+      cross((FrameTuple3DReadOnly) frameVector1, (FrameTuple3DReadOnly) frameVector2);
    }
 
-   public void cross(FrameVector3DReadOnly frameTuple1)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      tuple.cross(tuple, frameTuple1);
-   }
-
-   public void cross(FrameTuple3DReadOnly frameTuple1)
-   {
-      checkReferenceFrameMatch(frameTuple1);
-      tuple.cross(tuple, frameTuple1);
-   }
-
-   public void cross(FrameVector3DReadOnly frameTuple1, FrameVector3DReadOnly frameTuple2)
-   {
-      cross((FrameTuple3DReadOnly) frameTuple1, (FrameTuple3DReadOnly) frameTuple2);
-   }
-
+   /**
+    * Sets this frame vector to the cross product of {@code frameTuple1} and {@code frameTuple2}.
+    * <p>
+    * this = frameTuple1 &times; frameTuple2
+    * </p>
+    *
+    * @param frameTuple1 the first frame tuple in the cross product. Not modified.
+    * @param frameTuple2 the second frame tuple in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if either {@code frameTuple1} or {@code frameTuple2}
+    *            is not expressed in the same reference frame as {@code this}.
+    */
    public void cross(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
@@ -151,15 +184,47 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       tuple.cross(frameTuple1, frameTuple2);
    }
 
-   public void cross(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly frameTuple2)
+   /**
+    * Sets this frame vector to the cross product of {@code frameTuple1} and {@code tuple2}.
+    * <p>
+    * this = frameTuple1 &times; tuple2
+    * </p>
+    *
+    * @param frameTuple1 the first frame tuple in the cross product. Not modified.
+    * @param tuple2 the second tuple in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code frameTuple1} is not expressed in the same
+    *            reference frame as {@code this}.
+    */
+   public void cross(FrameTuple3DReadOnly frameTuple1, Tuple3DReadOnly tuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
-      tuple.cross(frameTuple1, frameTuple2);
+      tuple.cross(frameTuple1, tuple2);
    }
 
+   /**
+    * Sets this frame vector to the cross product of {@code tuple1} and {@code frameTuple2}.
+    * <p>
+    * this = tuple1 &times; frameTuple2
+    * </p>
+    *
+    * @param tuple1 the first tuple in the cross product. Not modified.
+    * @param frameTuple2 the second frame tuple in the cross product. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code frameTuple2} is not expressed in the same
+    *            reference frame as {@code this}.
+    */
    public void cross(Tuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple2);
       tuple.cross(frameTuple1, frameTuple2);
+   }
+
+   /**
+    * Gets the read-only reference to the vector used in {@code this}.
+    *
+    * @return the vector of {@code this}.
+    */
+   public Vector3D getVector()
+   {
+      return tuple;
    }
 }
