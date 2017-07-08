@@ -284,18 +284,6 @@ public class FramePointTest extends FrameTuple3DTest<FramePoint, Point3D>
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testToFramePoint2d() //Brett
-   {
-      FramePoint framePoint = new FramePoint(theFrame, 1.0, 2.0, 5.0);
-      FramePoint2d framePoint2d = framePoint.toFramePoint2d();
-
-      assertSame(theFrame, framePoint2d.getReferenceFrame());
-      assertEquals(1.0, framePoint2d.getX(), epsilon);
-      assertEquals(2.0, framePoint2d.getY(), epsilon);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetPoint()
    {
       Point3D tuple3d = new Point3D(1.0, 1.0, 1.0);

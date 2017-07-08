@@ -1212,7 +1212,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 3; i++)
       {
          FramePoint polyPoint = poly.getFootstep(quadrant);
-         expected.addVertex(polyPoint.toFramePoint2d());
+         expected.addVertex(new FramePoint2d(polyPoint));
 
          quadrant = poly.getNextClockwiseSupportingQuadrant(quadrant);
       }

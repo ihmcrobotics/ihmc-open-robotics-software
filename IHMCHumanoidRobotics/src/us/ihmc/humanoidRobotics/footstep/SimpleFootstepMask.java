@@ -44,7 +44,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
       if (DEBUG)
          System.out.printf("SimpleFootstepMask: testing point input is <%.2f,%.2f> in frame %s", test.getX(), test.getY(), test.getReferenceFrame());
       test.changeFrame(yawFrame2d);
-      boolean isPointInside = footPolygon.isPointInside(test.toFramePoint2d());
+      boolean isPointInside = footPolygon.isPointInside(new FramePoint2d(test));
       if (DEBUG)
          System.out.printf("SimpleFootstepMask: testing point <%.2f,%.2f> in frame %s. Point is in is %s.  ", test.getX(), test.getY(), test.getReferenceFrame(),isPointInside ? "true":"false");
 

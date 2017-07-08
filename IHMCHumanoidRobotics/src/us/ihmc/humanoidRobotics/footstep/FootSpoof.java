@@ -61,7 +61,7 @@ public class FootSpoof implements ContactablePlaneBody
       {
          FramePoint point = new FramePoint(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
-         contactPoints2d.add(point.toFramePoint2d());
+         contactPoints2d.add(new FramePoint2d(point));
       }
 
       totalNumberOfContactPoints = contactPoints.size();
@@ -91,10 +91,10 @@ public class FootSpoof implements ContactablePlaneBody
       contactPoints.add(point2);
       contactPoints.add(point3);
       contactPoints.add(point4);
-      contactPoints2d.add(point1.toFramePoint2d());
-      contactPoints2d.add(point2.toFramePoint2d());
-      contactPoints2d.add(point3.toFramePoint2d());
-      contactPoints2d.add(point4.toFramePoint2d());
+      contactPoints2d.add(new FramePoint2d(point1));
+      contactPoints2d.add(new FramePoint2d(point2));
+      contactPoints2d.add(new FramePoint2d(point3));
+      contactPoints2d.add(new FramePoint2d(point4));
 
       totalNumberOfContactPoints = contactPoints.size();
 
