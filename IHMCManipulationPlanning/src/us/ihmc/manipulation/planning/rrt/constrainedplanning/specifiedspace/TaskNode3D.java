@@ -5,13 +5,18 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TaskNode3D extends TaskNode
 {   
    public static WheneverWholeBodyKinematicsSolver nodeTester;
    public static EndEffectorTrajectory endEffectorTrajectory;
+   public static ReferenceFrame midZUpFrame;
+   public static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    
    public TaskNode3D()
@@ -56,8 +61,16 @@ public class TaskNode3D extends TaskNode
       /*
        * set whole body tasks.
        */            
-      System.out.println(endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
-      nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), endEffectorTrajectory.getEndEffectorPose(getNodeData(0)));
+      Pose desiredPose = endEffectorTrajectory.getEndEffectorPose(getNodeData(0));
+      FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
+      FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
+            
+      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);      
+      
+      desiredPoseToWorld.changeFrame(midZUpFrame);
+      
+      Pose desiredPoseToMidZUp = new Pose(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
+      nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(endEffectorTrajectory.getAnotherRobotSide());
       
       Quaternion desiredChestOrientation = new Quaternion();
