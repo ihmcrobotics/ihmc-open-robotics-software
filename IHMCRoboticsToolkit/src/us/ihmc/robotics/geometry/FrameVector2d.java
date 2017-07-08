@@ -149,19 +149,4 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
 
       return this.tuple.angle(frameVector.tuple);
    }
-
-   public void clipMaxLength(double maxLength)
-   {
-      if (maxLength < 1e-7)
-      {
-         this.set(0.0, 0.0);
-         return;
-      }
-
-      double length = this.length();
-      if (length < maxLength)
-         return;
-
-      scale(maxLength / length);
-   }
 }
