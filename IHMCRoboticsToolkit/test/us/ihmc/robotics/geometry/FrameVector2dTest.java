@@ -221,7 +221,7 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2D>
       {
          double firstVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
          double secondVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         FrameVector2D firstVector = EuclidFrameRandomTools.generateRandomFrameVector2d(random, worldFrame);
+         FrameVector2D firstVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, worldFrame);
          firstVector.scale(firstVectorLength / firstVector.length());
          FrameVector2D secondVector = new FrameVector2D();
 

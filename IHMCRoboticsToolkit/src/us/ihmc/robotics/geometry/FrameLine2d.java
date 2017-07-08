@@ -449,7 +449,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public static FrameLine2d generateRandomFrameLine2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
       FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
-      FrameVector2D randomVector = EuclidFrameRandomTools.generateRandomFrameVector2d(random, zUpFrame);
+      FrameVector2D randomVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, zUpFrame);
 
       return new FrameLine2d(randomPoint, randomVector);
    }
