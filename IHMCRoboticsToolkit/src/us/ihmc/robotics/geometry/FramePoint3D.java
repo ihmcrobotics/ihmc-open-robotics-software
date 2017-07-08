@@ -32,7 +32,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    private static final long serialVersionUID = -4831948077397801540L;
 
    /**
-    * Creates a new frame point and initializes it components to zero and its reference frame to
+    * Creates a new frame point and initializes it coordinates to zero and its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
    public FramePoint3D()
@@ -41,8 +41,8 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    }
 
    /**
-    * Creates a new frame point and initializes it components to zero and its reference frame to the
-    * {@code referenceFrame}.
+    * Creates a new frame point and initializes it coordinates to zero and its reference frame to
+    * the {@code referenceFrame}.
     * 
     * @param referenceFrame the initial frame for this frame point.
     */
@@ -52,13 +52,13 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    }
 
    /**
-    * Creates a new frame point and initializes it with the given components and the given reference
-    * frame.
+    * Creates a new frame point and initializes it with the given coordinates and the given
+    * reference frame.
     * 
     * @param referenceFrame the initial frame for this frame point.
-    * @param x the x-component.
-    * @param y the y-component.
-    * @param z the z-component.
+    * @param x the x-coordinate.
+    * @param y the y-coordinate.
+    * @param z the z-coordinate.
     */
    public FramePoint3D(ReferenceFrame referenceFrame, double x, double y, double z)
    {
@@ -66,7 +66,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    }
 
    /**
-    * Creates a new frame point and initializes its component {@code x}, {@code y}, {@code z} in
+    * Creates a new frame point and initializes its coordinates {@code x}, {@code y}, {@code z} in
     * order from the given array and initializes its reference frame.
     * 
     * @param referenceFrame the initial frame for this frame point.
@@ -82,7 +82,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
     * reference frame.
     *
     * @param referenceFrame the initial frame for this frame point.
-    * @param tuple3DReadOnly the tuple to copy the components from. Not modified.
+    * @param tuple3DReadOnly the tuple to copy the coordinates from. Not modified.
     */
    public FramePoint3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
@@ -93,7 +93,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
     * Creates a new frame point and initializes its reference frame x and y coordinates from
     * {@code frameTuple2DReadOnly}.
     *
-    * @param frameTuple2DReadOnly the tuple to copy the components and reference frame from. Not
+    * @param frameTuple2DReadOnly the tuple to copy the coordinates and reference frame from. Not
     *           modified.
     */
    public FramePoint3D(FrameTuple2DReadOnly frameTuple2DReadOnly)
@@ -104,7 +104,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    /**
     * Creates a new frame point and initializes it to {@code other}.
     *
-    * @param other the tuple to copy the components and reference frame from. Not modified.
+    * @param other the tuple to copy the coordinates and reference frame from. Not modified.
     */
    public FramePoint3D(FrameTuple3DReadOnly other)
    {
