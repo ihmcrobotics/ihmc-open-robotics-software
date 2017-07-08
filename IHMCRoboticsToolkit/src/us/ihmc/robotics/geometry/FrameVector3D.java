@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -88,6 +89,18 @@ public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> impleme
    public FrameVector3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
       super(referenceFrame, new Vector3D(tuple3DReadOnly));
+   }
+
+   /**
+    * Creates a new frame vector and initializes its reference frame x and y components from
+    * {@code frameTuple2DReadOnly}.
+    *
+    * @param frameTuple2DReadOnly the tuple to copy the components and reference frame from. Not
+    *           modified.
+    */
+   public FrameVector3D(FrameTuple2DReadOnly frameTuple2DReadOnly)
+   {
+      super(frameTuple2DReadOnly.getReferenceFrame(), new Vector3D(frameTuple2DReadOnly));
    }
 
    /**
