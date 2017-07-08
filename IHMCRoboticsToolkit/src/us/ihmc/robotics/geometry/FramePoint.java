@@ -94,8 +94,8 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX),
-                                              RandomNumbers.nextDouble(random, yMaxAbsoluteY), RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
+      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX), RandomNumbers.nextDouble(random, yMaxAbsoluteY),
+                                              RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
@@ -114,6 +114,6 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     */
    public Point3D getPoint()
    {
-      return this.tuple;
+      return tuple;
    }
 }

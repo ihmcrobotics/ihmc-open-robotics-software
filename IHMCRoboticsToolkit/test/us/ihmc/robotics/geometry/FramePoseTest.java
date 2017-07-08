@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -523,7 +523,7 @@ public class FramePoseTest
 
          String errorMsg = "Computed rotation axis, \n" + rotationAxisComputed + "\n is not parallel with actual rotation axis, \n" + rotationAxis
                + rotationAngleMsg + "\n Number of Passed Tests: " + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, rotationAxisComputed.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(rotationAxisComputed, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }
@@ -564,7 +564,7 @@ public class FramePoseTest
          String errorMsg = "Computed rotation axis origin must coincide with actual origin, or lie along rotation axis.\n Alignment error = "
                + Math.toDegrees(actualToComputedOrigin.angle(rotationAxis)) + " degrees" + rotationAngleMsg + "\n Number of Passed Tests: "
                + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, actualToComputedOrigin.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(actualToComputedOrigin, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }

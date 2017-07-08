@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on vectors occur
@@ -117,8 +116,8 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D> impleme
     *
     * @return Vector2d
     */
-   public Vector2DReadOnly getVector()
+   public Vector2D getVector()
    {
-      return this.tuple;
+      return tuple;
    }
 }
