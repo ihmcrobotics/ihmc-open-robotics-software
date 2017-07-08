@@ -19,14 +19,14 @@ import us.ihmc.robotics.random.RandomGeometry;
  * In addition to representing a {@link Vector3DBasics}, a {@link ReferenceFrame} is associated to a
  * {@code FrameVector3D}. This allows, for instance, to enforce, at runtime, that operations on
  * vectors occur in the same coordinate system. Also, via the method
- * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of vector in different
- * reference frame.
+ * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of a vector in
+ * different reference frame.
  * </p>
  * <p>
- * Because a {@code FrameVector3D} extends {@code FrameVector3DReadOnly}, it is compatible with
- * methods only requiring {@code FrameVector3DReadOnly}. However, these methods do NOT assert that
- * the operation occur in the proper coordinate system. Use this feature carefully and always prefer
- * using methods requiring {@code FrameVector3D}.
+ * Because a {@code FrameVector3D} extends {@code Vector3DBasics}, it is compatible with methods
+ * only requiring {@code Vector3DBasics}. However, these methods do NOT assert that the operation
+ * occur in the proper coordinate system. Use this feature carefully and always prefer using methods
+ * requiring {@code FrameVector3D}.
  * </p>
  */
 public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> implements FrameVector3DReadOnly, Vector3DBasics

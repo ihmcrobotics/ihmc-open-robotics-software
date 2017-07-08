@@ -12,11 +12,20 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
- * One of the main goals of this class is to check, at runtime, that operations on points occur
- * within the same Frame. This method checks for one Vector argument.
- *
- * @author Learning Locomotion Team
- * @version 2.0
+ * {@code FramePoint3D} is a 3D point expressed in a given reference frame.
+ * <p>
+ * In addition to representing a {@link Point3DBasics}, a {@link ReferenceFrame} is associated to a
+ * {@code FramePoint3D}. This allows, for instance, to enforce, at runtime, that operations on
+ * vectors occur in the same coordinate system. Also, via the method
+ * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of a point in different
+ * reference frame.
+ * </p>
+ * <p>
+ * Because a {@code FramePoint3D} extends {@code Point3DBasics}, it is compatible with methods only
+ * requiring {@code Point3DBasics}. However, these methods do NOT assert that the operation occur in
+ * the proper coordinate system. Use this feature carefully and always prefer using methods
+ * requiring {@code FrameVector3D}.
+ * </p>
  */
 public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements FramePoint3DReadOnly, Point3DBasics
 {
@@ -105,15 +114,15 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
       FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX), RandomNumbers.nextDouble(random, yMaxAbsoluteY),
-                                              RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
+                                                  RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
    public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
-                                                     double zMax)
+                                                       double zMax)
    {
       FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
-                                              RandomNumbers.nextDouble(random, zMin, zMax));
+                                                  RandomNumbers.nextDouble(random, zMin, zMax));
       return randomPoint;
    }
 
