@@ -6,6 +6,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 
@@ -152,7 +153,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
    public void transform(FrameTuple3D<?, ?> frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleToPack);
-      matrix.transform(frameTupleToPack.tuple);
+      matrix.transform(frameTupleToPack);
    }
 
    /**
@@ -166,7 +167,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
    {
       checkReferenceFrameMatch(frameTupleOriginal);
       frameTupleToPack.setIncludingFrame(frameTupleOriginal);
-      matrix.transform(frameTupleToPack.tuple);
+      matrix.transform(frameTupleToPack);
    }
 
    public void setMainDiagonal(double x, double y, double z)

@@ -4,6 +4,9 @@ import java.util.Random;
 
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -89,7 +92,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public void getFramePoint2d(FramePoint2D framePoint2d)
    {
       framePoint2d.setToZero(referenceFrame);
-      line.getPoint(framePoint2d.tuple);
+      line.getPoint(framePoint2d);
    }
 
    public void getNormalizedFrameVector(Vector2DBasics vector2dToPack)
@@ -399,7 +402,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(point);
 
-      return line.isPointOnSideOfLine(point.tuple, side == RobotSide.LEFT);
+      return line.isPointOnSideOfLine(point, side == RobotSide.LEFT);
    }
    
    public boolean isPointInFrontOfLine(FrameVector2D frontDirection, FramePoint2D framePoint)

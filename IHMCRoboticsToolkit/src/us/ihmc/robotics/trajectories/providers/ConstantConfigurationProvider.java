@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class ConstantConfigurationProvider implements SE3ConfigurationProvider

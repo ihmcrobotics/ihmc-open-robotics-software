@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint3D;
 
 public class CurrentPositionProvider implements PositionProvider
 {

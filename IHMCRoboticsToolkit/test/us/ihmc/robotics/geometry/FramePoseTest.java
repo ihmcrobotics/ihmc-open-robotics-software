@@ -10,6 +10,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -414,7 +416,7 @@ public class FramePoseTest
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
          actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
 
-         thatPose.prependTranslation(actualTranslationNOTfromRotation.tuple);
+         thatPose.prependTranslation(actualTranslationNOTfromRotation);
 
          FrameVector3D translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
          FrameVector3D translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);
