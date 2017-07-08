@@ -187,7 +187,7 @@ public class CenterOfPressureResolverTest
 
       double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector,
             groundPlaneFrame);
-      FramePoint centerOfPressure = centerOfPressure2d.toFramePoint();
+      FramePoint centerOfPressure = new FramePoint(centerOfPressure2d);
       centerOfPressure.changeFrame(worldFrame);
       return new ImmutablePair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }

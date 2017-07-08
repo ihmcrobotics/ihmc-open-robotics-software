@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
@@ -19,6 +20,8 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
    private static final long serialVersionUID = 6275308250031489785L;
 
    protected final T tuple;
+
+   private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    public FrameTuple2D(ReferenceFrame referenceFrame, T tuple)
    {
@@ -273,13 +276,13 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
       checkReferenceFrameMatch(tuple2);
       tuple.scaleSub(scalar, tuple1, tuple2);
    }
-   
+
    public void scaleSub(double scalar, Tuple2DReadOnly tuple1, FrameTuple2DReadOnly tuple2)
    {
       checkReferenceFrameMatch(tuple2);
       tuple.scaleSub(scalar, tuple1, tuple2);
    }
-   
+
    public void scaleSub(double scalar, FrameTuple2DReadOnly tuple1, Tuple2DReadOnly tuple2)
    {
       checkReferenceFrameMatch(tuple1);
@@ -398,5 +401,38 @@ public abstract class FrameTuple2D<S extends FrameTuple2D<S, T>, T extends Tuple
    {
       checkReferenceFrameMatch(frameTuple1);
       tuple.interpolate(frameTuple1, frameTuple2, alpha);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void changeFrame(ReferenceFrame desiredFrame)
+   {
+      // Check for the trivial case: the geometry is already expressed in the desired frame.
+      if (desiredFrame == referenceFrame)
+         return;
+
+      /*
+       * By overriding changeFrame, on the transformToDesiredFrame is being checked instead of
+       * checking both referenceFrame.transformToRoot and desiredFrame.transformToRoot.
+       */
+      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
+      applyTransform(transformToDesiredFrame);
+      referenceFrame = desiredFrame;
+   }
+
+   /**
+    * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane.
+    *
+    * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
+    */
+   public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
+   {
+      // Check for the trivial case: the geometry is already expressed in the desired frame.
+      if (desiredFrame == referenceFrame)
+         return;
+
+      referenceFrame.getTransformToDesiredFrame(transformToDesiredFrame, desiredFrame);
+      applyTransform(transformToDesiredFrame, false);
+      referenceFrame = desiredFrame;
    }
 }
