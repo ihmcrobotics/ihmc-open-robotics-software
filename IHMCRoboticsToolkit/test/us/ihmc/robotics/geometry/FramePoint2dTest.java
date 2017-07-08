@@ -389,26 +389,6 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testChangeFrameAndProjectToXYPlaneCopy_ReferenceFrame()
-   {
-      FramePoint2d frame = new FramePoint2d(theFrame);
-      FramePoint2d copy = frame.changeFrameAndProjectToXYPlaneCopy(theFrame);
-
-      copy = frame.changeFrameAndProjectToXYPlaneCopy(childFrame);
-      copy.checkReferenceFrameMatch(childFrame);
-      try
-      {
-         copy.checkReferenceFrameMatch(theFrame);
-         fail("Should have thrown ReferenceFrameMismatchException");
-      }
-      catch (ReferenceFrameMismatchException rfme)
-      {
-         //Good 
-      }
-   }
-
    double sumOfSquares(FramePoint2d framePoint1, FramePoint2d framePoint2)
    {
       double ret = (framePoint2.getX() - framePoint1.getX()) * (framePoint2.getX() - framePoint1.getX()) + (framePoint2.getY() - framePoint1.getY())
