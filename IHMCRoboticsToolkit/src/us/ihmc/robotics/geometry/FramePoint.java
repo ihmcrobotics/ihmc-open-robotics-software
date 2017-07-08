@@ -27,9 +27,9 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly position)
+   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple3DReadOnly)
    {
-      super(referenceFrame, new Point3D(position));
+      super(referenceFrame, new Point3D(tuple3DReadOnly));
    }
 
    /**
@@ -37,9 +37,9 @@ public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements Fra
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double[] position)
+   public FramePoint(ReferenceFrame referenceFrame, double[] pointArray)
    {
-      super(referenceFrame, new Point3D(position));
+      super(referenceFrame, new Point3D(pointArray));
    }
 
    /**
