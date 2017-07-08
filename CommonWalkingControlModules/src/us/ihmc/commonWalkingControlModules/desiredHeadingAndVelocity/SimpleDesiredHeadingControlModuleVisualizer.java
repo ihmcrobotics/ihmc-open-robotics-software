@@ -49,7 +49,7 @@ public class SimpleDesiredHeadingControlModuleVisualizer
 
    private void updatedDesiredHeadingLine(double desiredHeading)
    {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
+      FramePoint2d endpoint1 = new FramePoint2d(processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()));
       FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
       double length = 1.0;
       endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeading));
@@ -61,7 +61,7 @@ public class SimpleDesiredHeadingControlModuleVisualizer
 
    private void updatedFinalHeadingLine(double desiredHeadingFinal)
    {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
+      FramePoint2d endpoint1 = new FramePoint2d(processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()));
       FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
       double length = 1.0;
       endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeadingFinal));

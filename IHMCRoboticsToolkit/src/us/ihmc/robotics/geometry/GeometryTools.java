@@ -790,7 +790,7 @@ public class GeometryTools
          FramePoint framePoint = new FramePoint(points.get(i));
          framePoint.changeFrame(referenceFrame);
 
-         ret.add(framePoint.toFramePoint2d());
+         ret.add(new FramePoint2d(framePoint));
       }
 
       return ret;
