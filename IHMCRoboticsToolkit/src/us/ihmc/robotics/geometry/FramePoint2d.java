@@ -4,6 +4,8 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -35,19 +37,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(FrameTuple2D<?, ?> frameTuple2d)
+   public FramePoint2d()
    {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
-   public FramePoint2d(FrameTuple3D<?, ?> frameTuple2d)
-   {
-      this(frameTuple2d.getReferenceFrame(), frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY());
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -58,16 +50,6 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    public FramePoint2d(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, 0.0, 0.0);
-   }
-
-   /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
-    */
-   public FramePoint2d()
-   {
-      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -100,26 +82,32 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
       this(referenceFrame, position.getX(), position.getY());
    }
 
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FramePoint2d(FrameTuple2DReadOnly frameTuple2d)
+   {
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
+   }
+
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FramePoint2d(FrameTuple3DReadOnly frameTuple2d)
+   {
+      this(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
+   }
+
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
       FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax),
                                                   RandomNumbers.nextDouble(random, yMin, yMax));
 
       return randomPoint;
-   }
-
-   public double distance(FramePoint2d framePoint)
-   {
-      checkReferenceFrameMatch(framePoint);
-
-      return this.tuple.distance(framePoint.tuple);
-   }
-
-   public double distanceSquared(FramePoint2d framePoint)
-   {
-      checkReferenceFrameMatch(framePoint);
-
-      return this.tuple.distanceSquared(framePoint.tuple);
    }
 
    /**
@@ -199,5 +187,4 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
       pointToPack.setIncludingFrame(pointToYawAbout);
       pointToPack.add(temporaryPointForYawing);
    }
-
 }
