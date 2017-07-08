@@ -27,9 +27,8 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    private static final long serialVersionUID = -1287148635726098768L;
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it coordinates to zero and its reference frame to
+    * {@link ReferenceFrame#getWorldFrame()}.
     */
    public FramePoint2d()
    {
@@ -37,9 +36,10 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it coordinates to zero and its reference frame to
+    * the {@code referenceFrame}.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
     */
    public FramePoint2d(ReferenceFrame referenceFrame)
    {
@@ -47,9 +47,12 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it with the given coordinates and the given
+    * reference frame.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
+    * @param x the x-coordinate.
+    * @param y the y-coordinate.
     */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y)
    {
@@ -57,9 +60,11 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes its coordinates {@code x}, {@code y} in order from
+    * the given array and initializes its reference frame.
+    * 
+    * @param referenceFrame the initial frame for this frame point.
+    * @param pointArray the array containing this point's coordinates. Not modified.
     */
    public FramePoint2d(ReferenceFrame referenceFrame, double[] pointArray)
    {
@@ -67,9 +72,11 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it to {@code tuple2DReadOnly} and to the given
+    * reference frame.
+    *
+    * @param referenceFrame the initial frame for this frame point.
+    * @param tuple2DReadOnly the tuple to copy the coordinates from. Not modified.
     */
    public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2DReadOnly)
    {
@@ -77,19 +84,21 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it to {@code other}.
+    *
+    * @param other the tuple to copy the components and reference frame from. Not modified.
     */
-   public FramePoint2d(FrameTuple2DReadOnly frameTuple2DReadOnly)
+   public FramePoint2d(FrameTuple2DReadOnly other)
    {
-      super(frameTuple2DReadOnly.getReferenceFrame(), new Point2D(frameTuple2DReadOnly));
+      super(other.getReferenceFrame(), new Point2D(other));
    }
 
    /**
-    * FramePoint2d
-    * <p/>
-    * A normal point2d associated with a specific reference frame.
+    * Creates a new frame point and initializes it to the x and y coordinates of
+    * {@code frameTuple3DReadOnly}.
+    *
+    * @param frameTuple3DReadOnly the tuple to copy the coordinates and reference frame from. Not
+    *           modified.
     */
    public FramePoint2d(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
@@ -104,9 +113,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
    }
 
    /**
-    * Returns the point in this FramePoint2d.
+    * Gets the read-only reference to the point used in {@code this}.
     *
-    * @return Point2d
+    * @return the point of {@code this}.
     */
    public Point2D getPoint()
    {
