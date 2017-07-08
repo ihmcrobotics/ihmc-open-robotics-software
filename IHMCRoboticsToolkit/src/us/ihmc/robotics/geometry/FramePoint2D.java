@@ -12,15 +12,20 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 /**
+ * {@code FramePoint2D} is a 2D point expressed in a given reference frame.
  * <p>
- * Title: FramePoint2d
+ * In addition to representing a {@link Point2DBasics}, a {@link ReferenceFrame} is associated to a
+ * {@code FramePoint2D}. This allows, for instance, to enforce, at runtime, that operations on
+ * vectors occur in the same coordinate system. Also, via the method
+ * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of a point in different
+ * reference frame.
  * </p>
- *
  * <p>
- * Description: A FramePoint2d is a normal point associated with a specified reference frame
+ * Because a {@code FramePoint2D} extends {@code Point2DBasics}, it is compatible with methods only
+ * requiring {@code Point2DBasics}. However, these methods do NOT assert that the operation occur in
+ * the proper coordinate system. Use this feature carefully and always prefer using methods
+ * requiring {@code FrameVector2D}.
  * </p>
- *
- * @author Learning Locomotion Team
  */
 public class FramePoint2D extends FrameTuple2D<FramePoint2D, Point2D> implements FramePoint2DReadOnly, Point2DBasics
 {
