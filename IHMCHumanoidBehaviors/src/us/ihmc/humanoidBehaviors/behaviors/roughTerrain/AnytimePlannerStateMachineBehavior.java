@@ -46,10 +46,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -60,6 +56,10 @@ import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
@@ -508,7 +508,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
 
          ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-         FramePoint2d goalPositionInMidFeetZUp = goalPosition.changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
+         FramePoint2d goalPositionInMidFeetZUp = new FramePoint2d(goalPosition);
+         goalPositionInMidFeetZUp.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
          reachedGoal.set(goalPositionInMidFeetZUp.distanceFromOrigin() < reachedGoalThreshold.getDoubleValue());
       }
 
