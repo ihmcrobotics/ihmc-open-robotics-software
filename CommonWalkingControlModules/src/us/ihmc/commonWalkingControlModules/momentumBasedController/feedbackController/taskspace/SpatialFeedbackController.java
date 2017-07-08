@@ -267,12 +267,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.setIncludingFrame(linearProportionalFeedback);
       desiredLinearAcceleration.add(linearDerivativeFeedback);
       desiredLinearAcceleration.add(linearIntegralFeedback);
-      desiredLinearAcceleration.limitLength(positionGains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxLength(positionGains.getMaximumFeedback());
 
       desiredAngularAcceleration.setIncludingFrame(angularProportionalFeedback);
       desiredAngularAcceleration.add(angularDerivativeFeedback);
       desiredAngularAcceleration.add(angularIntegralFeedback);
-      desiredAngularAcceleration.limitLength(orientationGains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxLength(orientationGains.getMaximumFeedback());
 
       yoFeedbackAcceleration.setAndMatchFrame(desiredLinearAcceleration, desiredAngularAcceleration);
       rateLimitedFeedbackAcceleration.update();
@@ -305,11 +305,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredLinearVelocity.setIncludingFrame(linearProportionalFeedback);
       desiredLinearVelocity.add(linearIntegralFeedback);
-      desiredLinearVelocity.limitLength(positionGains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxLength(positionGains.getMaximumFeedback());
 
       desiredAngularVelocity.setIncludingFrame(angularProportionalFeedback);
       desiredAngularVelocity.add(angularIntegralFeedback);
-      desiredAngularVelocity.limitLength(orientationGains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxLength(orientationGains.getMaximumFeedback());
 
       yoFeedbackVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
       rateLimitedFeedbackVelocity.update();
@@ -376,8 +376,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredPose.getPositionIncludingFrame(linearFeedbackTermToPack);
       desiredPose.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.limitLength(positionGains.getMaximumProportionalError());
-      angularFeedbackTermToPack.limitLength(orientationGains.getMaximumProportionalError());
+      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumProportionalError());
+      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorVector.getYoAngularPart());
@@ -433,8 +433,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.setToZero(worldFrame);
       linearFeedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
       angularFeedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
-      linearFeedbackTermToPack.limitLength(positionGains.getMaximumDerivativeError());
-      angularFeedbackTermToPack.limitLength(orientationGains.getMaximumDerivativeError());
+      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumDerivativeError());
+      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumDerivativeError());
       yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
 
       if (linearGainsFrame != null)
@@ -488,7 +488,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorVector.getLinearPartIncludingFrame(linearFeedbackTermToPack);
          linearFeedbackTermToPack.scale(dt);
          linearFeedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
-         linearFeedbackTermToPack.limitLength(maximumLinearIntegralError);
+         linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
 
          if (linearGainsFrame != null)
@@ -518,7 +518,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          errorOrientationCumulated.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(dt);
-         angularFeedbackTermToPack.limitLength(maximumAngularIntegralError);
+         angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.set(angularFeedbackTermToPack);
 
          if (angularGainsFrame != null)

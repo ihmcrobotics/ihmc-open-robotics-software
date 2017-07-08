@@ -128,7 +128,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          normalVector.setToNaN(plane.getReferenceFrame());
          plane.getNormal(normalVector);
          normalVector.changeFrame(WORLD_FRAME);
-         normalVector.getVector(normalToPack);
+         normalVector.get(normalToPack);
          
          xyPoint.setToNaN(planeFrame);
          xyPoint.setIncludingFrame(testPoint);
