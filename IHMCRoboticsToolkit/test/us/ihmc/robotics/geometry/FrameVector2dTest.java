@@ -163,18 +163,6 @@ public class FrameVector2dTest extends FrameTuple2DTest<FrameVector2d>
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testRotate90()
-   {
-      Random random = new Random(45456L);
-      double x = random.nextDouble(), y = random.nextDouble();
-      FrameVector2d frame = new FrameVector2d(aFrame, x, y);
-      frame.rotate90();
-      assertEquals("Should be equal", frame.getX(), -y, epsilon);
-      assertEquals("Should be equal", frame.getY(), x, epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
    public void testDot_FrameVector2d()
    {
       Random random = new Random(4556L);
