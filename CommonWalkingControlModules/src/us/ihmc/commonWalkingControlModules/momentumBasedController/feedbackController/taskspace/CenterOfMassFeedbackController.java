@@ -189,7 +189,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
-      desiredLinearAcceleration.limitLength(gains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       rateLimitedFeedbackLinearAcceleration.getFrameTupleIncludingFrame(desiredLinearAcceleration);
@@ -218,7 +218,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
-      desiredLinearVelocity.limitLength(gains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       rateLimitedFeedbackLinearVelocity.update();
       rateLimitedFeedbackLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
@@ -270,7 +270,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
-      feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
@@ -300,7 +300,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
-      feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
@@ -333,7 +333,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
-      feedbackTermToPack.limitLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);

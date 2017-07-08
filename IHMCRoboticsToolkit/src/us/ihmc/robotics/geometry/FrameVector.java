@@ -4,11 +4,11 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
 /**
@@ -18,29 +18,9 @@ import us.ihmc.robotics.random.RandomGeometry;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements VectorInterface, Vector3DBasics
+public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements FrameVector3DReadOnly, Vector3DBasics
 {
    private static final long serialVersionUID = -4475317718392284548L;
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
-   {
-      super(referenceFrame, new Vector3D(tuple));
-   }
-
-   /**
-    * FrameVector
-    * <p/>
-    * A normal vector associated with a specific reference frame.
-    */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vector)
-   {
-      super(referenceFrame, new Vector3D(vector));
-   }
 
    /**
     * FrameVector
@@ -67,9 +47,9 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(FrameTuple3D<?, ?> frameTuple)
+   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
    {
-      super(frameTuple.getReferenceFrame(), new Vector3D(frameTuple.tuple));
+      super(referenceFrame, new Vector3D(x, y, z));
    }
 
    /**
@@ -77,9 +57,29 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
+   public FrameVector(ReferenceFrame referenceFrame, double[] vector)
    {
-      super(referenceFrame, new Vector3D(x, y, z));
+      super(referenceFrame, new Vector3D(vector));
+   }
+
+   /**
+    * FrameVector
+    * <p/>
+    * A normal vector associated with a specific reference frame.
+    */
+   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
+   {
+      super(referenceFrame, new Vector3D(tuple));
+   }
+
+   /**
+    * FrameVector
+    * <p/>
+    * A normal vector associated with a specific reference frame.
+    */
+   public FrameVector(FrameTuple3DReadOnly other)
+   {
+      super(other.getReferenceFrame(), new Vector3D(other));
    }
 
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)
@@ -120,20 +120,6 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return new FrameVector2d(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
-   public double dot(FrameVector frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-
-      return this.tuple.dot(frameVector.tuple);
-   }
-
-   public double angle(FrameVector frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-
-      return this.tuple.angle(frameVector.tuple);
-   }
-
    public boolean isEpsilonParallel(FrameVector frameVector, double epsilonAngle)
    {
       checkReferenceFrameMatch(frameVector);
@@ -149,7 +135,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return isEpsilonParallel(frameVector, 1e-7);
    }
 
-   public void cross(FrameVector frameTuple1)
+   public void cross(FrameVector3DReadOnly frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       tuple.cross(tuple, frameTuple1);
@@ -161,7 +147,7 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       tuple.cross(tuple, frameTuple1);
    }
 
-   public void cross(FrameVector frameTuple1, FrameVector frameTuple2)
+   public void cross(FrameVector3DReadOnly frameTuple1, FrameVector3DReadOnly frameTuple2)
    {
       cross((FrameTuple3DReadOnly) frameTuple1, (FrameTuple3DReadOnly) frameTuple2);
    }
@@ -183,48 +169,5 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
    {
       checkReferenceFrameMatch(frameTuple2);
       tuple.cross(frameTuple1, frameTuple2);
-   }
-
-   /**
-    * Limits this vector to a given maximum length.
-    * <p>
-    * Note that the sign of {@code maximumLength} should be positive, but this is not verified in
-    * this method.
-    * </p>
-    * 
-    * @param maximumLength the maximum length this vector can have.
-    * @return {@code true} is this vector has been limited/modified, {@code false} otherwise.
-    */
-   public boolean limitLength(double maximumLength)
-   {
-      double lengthSquared = lengthSquared();
-
-      if (lengthSquared > maximumLength * maximumLength)
-      {
-         scale(maximumLength / Math.sqrt(lengthSquared));
-         return true;
-      }
-      else
-      {
-         return false;
-      }
-   }
-
-   @Override
-   public void getVector(Vector3D vectorToPack)
-   {
-      this.get(vectorToPack);
-   }
-
-   @Override
-   public void setVector(VectorInterface vectorInterface)
-   {
-      vectorInterface.getVector(this.getVector());
-   }
-
-   @Override
-   public void setVector(Vector3D vector)
-   {
-      this.set(vector);
    }
 }

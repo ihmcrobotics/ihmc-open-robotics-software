@@ -118,7 +118,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
       differenceVector.set(yawUnfiltered, pitchUnfiltered, rollUnfiltered);
       differenceVector.sub(getYaw().getDoubleValue(), getPitch().getDoubleValue(), getRoll().getDoubleValue());
 
-      limited.set(differenceVector.limitLength(maxRateVariable.getDoubleValue() * dt));
+      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getDoubleValue() * dt));
       add(differenceVector.getX(), differenceVector.getY(), differenceVector.getZ());
    }
 }

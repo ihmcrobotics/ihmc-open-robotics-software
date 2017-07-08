@@ -116,7 +116,7 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       differenceVector.set(xUnfiltered, yUnfiltered, zUnfiltered);
       differenceVector.sub(getX(), getY(), getZ());
 
-      limited.set(differenceVector.limitLength(maxRateVariable.getDoubleValue() * dt));
+      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getDoubleValue() * dt));
       add(differenceVector);
    }
 }
