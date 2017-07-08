@@ -112,14 +112,6 @@ public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements 
       return this.tuple;
    }
 
-   /**
-    * Creates a new FrameVector2d based on the x and y components of this FrameVector
-    */
-   public FrameVector2d toFrameVector2d()
-   {
-      return new FrameVector2d(this.getReferenceFrame(), this.getX(), this.getY());
-   }
-
    public boolean isEpsilonParallel(FrameVector frameVector, double epsilonAngle)
    {
       checkReferenceFrameMatch(frameVector);
