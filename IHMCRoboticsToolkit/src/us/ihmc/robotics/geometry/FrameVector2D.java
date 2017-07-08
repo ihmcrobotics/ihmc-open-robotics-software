@@ -13,11 +13,20 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 
 /**
- * One of the main goals of this class is to check, at runtime, that operations on vectors occur
- * within the same Frame. This method checks for one Vector argument.
- *
- * @author Learning Locomotion Team
- * @version 2.0
+ * {@code FrameVector2D} is a 2D vector expressed in a given reference frame.
+ * <p>
+ * In addition to representing a {@link Vector2DBasics}, a {@link ReferenceFrame} is associated to a
+ * {@code FrameVector2D}. This allows, for instance, to enforce, at runtime, that operations on
+ * vectors occur in the same coordinate system. Also, via the method
+ * {@link #changeFrame(ReferenceFrame)}, one can easily calculates the value of a vector in
+ * different reference frame.
+ * </p>
+ * <p>
+ * Because a {@code FrameVector2D} extends {@code Vector2DBasics}, it is compatible with methods
+ * only requiring {@code Vector2DBasics}. However, these methods do NOT assert that the operation
+ * occur in the proper coordinate system. Use this feature carefully and always prefer using methods
+ * requiring {@code FrameVector2D}.
+ * </p>
  */
 public class FrameVector2D extends FrameTuple2D<FrameVector2D, Vector2D> implements FrameVector2DReadOnly, Vector2DBasics
 {
