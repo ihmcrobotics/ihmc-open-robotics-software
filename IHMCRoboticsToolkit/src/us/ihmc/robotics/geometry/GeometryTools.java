@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -942,5 +943,29 @@ public class GeometryTools
    
       resultToPack.setIncludingFrame(pointToYawAbout);
       resultToPack.add(tempX, tempY, tempZ);
+   }
+
+   /**
+    * yawAboutPoint
+    *
+    * @param pointToYawAbout FramePoint2d
+    * @param yaw double
+    * @return CartesianPositionFootstep
+    */
+   public static void yawAboutPoint(FramePoint2DReadOnly pointToTransform, FramePoint2DReadOnly pointToYawAbout, double yaw, FramePoint2d resultToPack)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = pointToTransform.getX() - pointToYawAbout.getX();
+      double tempY = pointToTransform.getY() - pointToYawAbout.getY();
+   
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
+   
+      double x = cosAngle * tempX + -sinAngle * tempY;
+      tempY = sinAngle * tempX + cosAngle * tempY;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToYawAbout);
+      resultToPack.add(tempX, tempY);
    }
 }

@@ -432,30 +432,6 @@ public class FramePoint2dTest extends FrameTuple2DTest<FramePoint2d>
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testYawAboutPoint_FramePoint2d_double()
-   {
-      FramePoint2d original = new FramePoint2d(theFrame, 5.0, 7.0);
-      FramePoint2d pointToYawAbout = new FramePoint2d(theFrame);
-      double yaw = Math.PI;
-
-      FramePoint2d result = new FramePoint2d(theFrame); 
-      original.yawAboutPoint(pointToYawAbout, result, yaw);
-      assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
-      assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
-      try
-      {
-         FramePoint2d pointToYawAbout2 = new FramePoint2d(aFrame);
-         original.yawAboutPoint(pointToYawAbout2, result, yaw);
-         fail("Should have thrown ReferenceFrameMismatchException");
-      }
-      catch (ReferenceFrameMismatchException rfme)
-      {
-         //Good
-      }
-   }
-
    double sumOfSquares(FramePoint2d framePoint1, FramePoint2d framePoint2)
    {
       double ret = (framePoint2.getX() - framePoint1.getX()) * (framePoint2.getX() - framePoint1.getX()) + (framePoint2.getY() - framePoint1.getY())
