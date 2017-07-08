@@ -120,16 +120,6 @@ public class FrameVectorTest extends FrameTuple3DTest<FrameVector, Vector3D>
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testToFrameVector2d() //Brett was here
-   {
-      FrameVector frameVector = new FrameVector(theFrame, 11.0, 22.0, 33.0);
-      FrameVector2d expected = frameVector.toFrameVector2d();
-      assertEquals("These should be equal", 11.0, expected.getX(), epsilon);
-      assertEquals("These should be equal", 22.0, expected.getY(), epsilon);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testDot() //Brett
    {
