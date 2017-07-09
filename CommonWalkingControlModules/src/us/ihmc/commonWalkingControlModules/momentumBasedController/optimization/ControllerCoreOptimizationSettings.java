@@ -43,6 +43,11 @@ public interface ControllerCoreOptimizationSettings
     */
    double getJointJerkWeight();
 
+   default double getJointTorqueWeight()
+   {
+      return 0.005;
+   }
+
    /**
     * Gets the weight specifying how much high contact force values should be penalized in the
     * optimization problem.

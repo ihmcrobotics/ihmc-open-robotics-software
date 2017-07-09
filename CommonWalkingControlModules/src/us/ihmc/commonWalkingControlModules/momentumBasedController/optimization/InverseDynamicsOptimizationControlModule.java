@@ -42,6 +42,8 @@ public class InverseDynamicsOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
+   private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
+
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
@@ -68,9 +70,16 @@ public class InverseDynamicsOptimizationControlModule
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
+      this(toolbox, null, parentRegistry);
+   }
+
+   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, DynamicsMatrixCalculator dynamicsMatrixCalculator,
+                                                   YoVariableRegistry parentRegistry)
+   {
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -116,6 +125,7 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, hasFloatingBase, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
+      qpSolver.setJointTorqueWeight(optimizationSettings.getJointTorqueWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -242,6 +252,13 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
+   }
+
+   public void setupTorqueMinimizationCommand()
+   {
+      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationAccelerationJacobian(),
+                                              dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(),
+                                              dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
