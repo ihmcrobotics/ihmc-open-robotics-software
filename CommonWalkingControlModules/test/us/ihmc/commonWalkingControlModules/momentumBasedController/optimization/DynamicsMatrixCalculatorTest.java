@@ -21,7 +21,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,6 +36,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DynamicsMatrixCalculatorTest
 {
@@ -359,14 +359,14 @@ public class DynamicsMatrixCalculatorTest
       
       FloatingInverseDynamicsJoint rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
+                                                yoGraphicsListRegistry, registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
       wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
       jointIndexHandler = toolbox.getJointIndexHandler();
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody(), gravityZ);
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
 
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
@@ -379,7 +379,6 @@ public class DynamicsMatrixCalculatorTest
    private void update()
    {
       fullHumanoidRobotModel.updateFrames();
-      toolbox.getTwistCalculator().compute();
 
       wrenchMatrixCalculator.computeMatrices();
       dynamicsMatrixCalculator.compute();
@@ -389,7 +388,6 @@ public class DynamicsMatrixCalculatorTest
    private void solveAndCompare(DenseMatrix64F qddotSolution, DenseMatrix64F rhoSolution, boolean checkRigidBodyDynamics)
    {
       fullHumanoidRobotModel.updateFrames();
-      toolbox.getTwistCalculator().compute();
 
       wrenchMatrixCalculator.computeMatrices();
       Map<RigidBody, Wrench> contactWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
