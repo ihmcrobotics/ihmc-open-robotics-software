@@ -62,8 +62,8 @@ public class FullRobotModelTestTools
 
       public RandomFullHumanoidRobotModel(Random random)
       {
-         ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-         elevator = new RigidBody("elevator", elevatorFrame);
+         //ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+         elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
 
          rootJoint = new SixDoFJoint("rootJoint", elevator);
          pelvis = ScrewTestTools.addRandomRigidBody("pelvis", random, rootJoint);
