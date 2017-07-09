@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.beetle.planning;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -11,9 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -28,7 +28,6 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class FootStepPlanner
 {
@@ -36,7 +35,6 @@ public class FootStepPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private FullRobotModel fullRobotModel;
    private HexapodReferenceFrames referenceFrames;
-   private TwistCalculator twistCalculator;
 
    private SegmentDependentList<RobotSextant, YoFrameVector> nominalOffsetsFromBodyToFeet = new SegmentDependentList<>(RobotSextant.class);
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -44,7 +42,7 @@ public class FootStepPlanner
    private FrameVector desiredVelocityScaled = new FrameVector();
    private ReferenceFrame centerOfMassFrameWithOrientation;
    private ReferenceFrame bodyZUpFrame;
-   private DoubleYoVariable swingTimeScalar = new DoubleYoVariable("swingTimeScalar", registry);
+   private YoDouble swingTimeScalar = new YoDouble("swingTimeScalar", registry);
    private final YoFrameConvexPolygon2d stancePolygon = new YoFrameConvexPolygon2d("stancePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d swingPolygon = new YoFrameConvexPolygon2d("swingPolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameVector footScalarFromNominalToBody;
@@ -64,12 +62,11 @@ public class FootStepPlanner
    private final CircleArtifact bodyFrameProjectedInFutureCircleArtifact = new CircleArtifact("bodyFrameProjectedInFutureArtifact", 0.0, 0.0, 0.03, false);
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
-   public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames, TwistCalculator twistCalculator,
+   public FootStepPlanner(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames hexapodReferenceFrames,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
-      this.twistCalculator = twistCalculator;
       pelvis = fullRobotModel.getPelvis();
       swingTimeScalar.set(1.1);
 
@@ -214,8 +211,7 @@ public class FootStepPlanner
 
    public void getDesiredFootPosition(RobotSextant robotSextant, double swingTime, FramePoint framePointToPack)
    {
-      twistCalculator.compute();
-      twistCalculator.getTwistOfBody(pelvis, twistToPack);
+      pelvis.getBodyFixedFrame().getTwistOfFrame(twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
       twistToPack.getAngularPart(angularVelocity);
 
@@ -237,11 +233,11 @@ public class FootStepPlanner
    }
 
    FramePoint footPosition = new FramePoint();
-   ConvexPolygon2d polygon = new ConvexPolygon2d();
+   ConvexPolygon2D polygon = new ConvexPolygon2D();
 
    private void drawSupportPolygon(RobotSextant[] feet, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      polygon = new ConvexPolygon2d();
+      polygon = new ConvexPolygon2D();
       for (RobotSextant robotSextant : feet)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);

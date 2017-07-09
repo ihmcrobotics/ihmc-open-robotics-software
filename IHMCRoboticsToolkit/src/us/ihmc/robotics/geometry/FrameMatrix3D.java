@@ -228,4 +228,11 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Matrix3D>
    {
       return "Expressed in frame: " + referenceFrame + "\n" + matrix.toString();
    }
+
+   public void setMainDiagonal(double x, double y, double z)
+   {
+      setElement(0, 0, x);
+      setElement(1, 1, y);
+      setElement(2, 2, z);
+   }
 }

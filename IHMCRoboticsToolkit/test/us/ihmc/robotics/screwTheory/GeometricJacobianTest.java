@@ -19,8 +19,6 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class GeometricJacobianTest
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final Random random = new Random(101L);
 
    private GeometricJacobian bodyManipulatorJacobian;
@@ -58,7 +56,6 @@ public class GeometricJacobianTest
 
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -67,7 +64,6 @@ public class GeometricJacobianTest
       {
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
-         twistCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -77,7 +73,7 @@ public class GeometricJacobianTest
          DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
-         twistCalculator.getRelativeTwist(rootBody, randomEndEffector, expectedTwist);
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
@@ -89,7 +85,7 @@ public class GeometricJacobianTest
          jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
-         twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
@@ -110,7 +106,6 @@ public class GeometricJacobianTest
       List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -121,7 +116,7 @@ public class GeometricJacobianTest
          ScrewTestTools.setRandomVelocity(floatingJoint, random);
          ScrewTestTools.setRandomPositions(revoluteJoints, random);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
-         twistCalculator.compute();
+         floatingChain.getElevator().updateFramesRecursively();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -131,7 +126,7 @@ public class GeometricJacobianTest
          DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
-         twistCalculator.getRelativeTwist(rootBody, randomEndEffector, expectedTwist);
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
          rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
@@ -143,7 +138,7 @@ public class GeometricJacobianTest
          jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
          ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
 
-         twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
+         randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(randomBase.getBodyFixedFrame(), expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
 
          TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);

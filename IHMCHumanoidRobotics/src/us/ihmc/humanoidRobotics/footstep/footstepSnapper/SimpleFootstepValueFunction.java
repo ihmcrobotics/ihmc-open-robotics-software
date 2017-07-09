@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 /**
  * Created by agrabertilton on 1/20/15.
@@ -37,7 +37,7 @@ public class SimpleFootstepValueFunction implements FootstepValueFunction
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
          return Double.NEGATIVE_INFINITY;
 
-      ConvexPolygon2d supportPolygon = new ConvexPolygon2d(footstepData.getPredictedContactPoints());
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(footstepData.getPredictedContactPoints());
       supportPolygon.update();
       double inPlaneArea = supportPolygon.getArea();
       double horizonalArea = inPlaneArea * footstepNormal.getZ();

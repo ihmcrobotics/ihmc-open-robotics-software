@@ -1,34 +1,29 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportDataDialogConstructor;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportDataDialogConstructor;
-
-public class ExportDataAction extends AbstractAction
+@SuppressWarnings("serial")
+public class ExportDataAction extends SCSAction
 {
-   private static final long serialVersionUID = -5481556236530603500L;
-
    private ExportDataDialogConstructor constructor;
 
    public ExportDataAction(ExportDataDialogConstructor constructor)
    {
-      super("Export Data...");
-      this.constructor = constructor;
+      super("Export Data...",
+              "icons/ExportData.png",
+              KeyEvent.VK_E,
+              "Export Data",
+              "Export simulation data to a file."
+      );
 
-      String iconFilename = "icons/Export24.gif";
-      int shortKey = KeyEvent.VK_E;
-      String longDescription = "Export simulation data to a file.";
-      String shortDescription = "Export Data";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }

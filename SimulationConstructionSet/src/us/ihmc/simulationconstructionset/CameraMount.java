@@ -5,8 +5,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.TransformTools;
 
 public class CameraMount implements CameraMountInterface
@@ -21,7 +21,7 @@ public class CameraMount implements CameraMountInterface
 
    private final Robot rob;
 
-   private DoubleYoVariable pan, tilt, roll;
+   private YoDouble pan, tilt, roll;
 
    private double fieldOfView, clipDistanceNear, clipDistanceFar;
    private int imageWidth, imageHeight;
@@ -82,9 +82,9 @@ public class CameraMount implements CameraMountInterface
    {
       YoVariableRegistry registry = new YoVariableRegistry("CameraMount");
 
-      pan = new DoubleYoVariable("pan_" + name, registry);
-      tilt = new DoubleYoVariable("tilt_" + name, registry);
-      roll = new DoubleYoVariable("roll_" + name, registry);
+      pan = new YoDouble("pan_" + name, registry);
+      tilt = new YoDouble("tilt_" + name, registry);
+      roll = new YoDouble("roll_" + name, registry);
 
       panTiltRollTransform3D = new RigidBodyTransform();
       temp1 = new RigidBodyTransform();

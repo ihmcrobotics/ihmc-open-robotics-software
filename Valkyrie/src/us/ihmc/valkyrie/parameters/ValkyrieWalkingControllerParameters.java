@@ -11,20 +11,24 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -55,8 +59,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
+
+   private final StraightLegWalkingParameters straightLegWalkingParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -67,6 +74,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       this.jointMap = jointMap;
       this.target = target;
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
 
       // Genreated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -805,6 +815,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      if (bodyName.equals(jointMap.getChestName()))
+      {
+         return RigidBodyControlMode.TASKSPACE;
+      }
+      else
+      {
+         return RigidBodyControlMode.JOINTSPACE;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       if (jointHomeConfiguration != null)
@@ -832,6 +856,21 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
+   {
+      if (bodyHomeConfiguration != null)
+         return bodyHomeConfiguration;
+
+      bodyHomeConfiguration = new HashMap<String, Pose3D>();
+
+      Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
+      bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
+
+      return bodyHomeConfiguration;
    }
 
    /** {@inheritDoc} */
@@ -902,13 +941,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
-      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SwingFoot", true, registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 100.0; // 150.0
+      double kpX = 150.0; // Might cause some shakies.
+      double kpY = 100.0; // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
+      double zetaXZ = runningOnRealRobot ? 0.8 : 0.7; // Might cause some shakies.
+      double zetaY = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
       double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7;
@@ -918,11 +959,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      gains.setPositionProportionalGains(kpXY, kpZ);
-      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionProportionalGains(kpX, kpY, kpZ);
+      gains.setPositionDampingRatios(zetaXZ, zetaY, zetaXZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationZ);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
@@ -1292,6 +1333,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public void useVirtualModelControlCore()
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      return straightLegWalkingParameters;
    }
 
    /** {@inheritDoc} */

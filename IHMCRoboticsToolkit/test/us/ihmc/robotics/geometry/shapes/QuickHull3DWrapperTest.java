@@ -10,14 +10,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class QuickHull3DWrapperTest
 {
@@ -161,7 +162,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 6);
 
       List<HullFace> faces = quickHull.getFaces();
-      Plane3d facePlane = new Plane3d();
+      Plane3D facePlane = new Plane3D();
       Vector3D planeNormal = new Vector3D();
       for (HullFace face : faces)
       {
@@ -208,8 +209,8 @@ public class QuickHull3DWrapperTest
       List<HullFace> faces = quickHull.getFaces();
 
       List<Point3D> vertices = new ArrayList<Point3D>();
-      ConvexPolygon2d currentPolygon = new ConvexPolygon2d();
-      Pose polygonPose = new Pose(new Point3D(), new Quaternion());
+      ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
+      Pose3D polygonPose = new Pose3D(new Point3D(), new Quaternion());
       faces.get(0).get2DPolygonAndPose(currentPolygon, polygonPose);
       vertices.addAll(faces.get(0).getPoints());
 
@@ -221,12 +222,12 @@ public class QuickHull3DWrapperTest
       assertTrue(vertices.get(2).epsilonEquals(new Point3D(-2, 2, 0), tolerance));
       assertTrue(vertices.get(3).epsilonEquals(new Point3D(-2, -2, 0), tolerance));
 
-      assertTrue(currentPolygon.getVertex(0).epsilonEquals(new Point2D(sideLength, 0.0), tolerance));
-      assertTrue(currentPolygon.getVertex(1).epsilonEquals(new Point2D(0.0, -sideLength), tolerance));
-      assertTrue(currentPolygon.getVertex(2).epsilonEquals(new Point2D(-sideLength, 0.0), tolerance));
-      assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2D(0.0, sideLength), tolerance));
+      assertTrue(currentPolygon.getVertex(0).epsilonEquals(new Point2D(-sideLength, 0.0), tolerance));
+      assertTrue(currentPolygon.getVertex(1).epsilonEquals(new Point2D(0.0, sideLength), tolerance));
+      assertTrue(currentPolygon.getVertex(2).epsilonEquals(new Point2D(sideLength, 0.0), tolerance));
+      assertTrue(currentPolygon.getVertex(3).epsilonEquals(new Point2D(0.0, -sideLength), tolerance));
 
-      assertTrue(polygonPose.getPoint().epsilonEquals(new Point3D(), tolerance));
+      assertTrue(polygonPose.getPosition().epsilonEquals(new Point3D(), tolerance));
       Assert.assertEquals(polygonPose.getOrientation().getYaw(), -Math.PI / 4, tolerance);
    }
 }

@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
 
 /**
@@ -26,39 +26,39 @@ import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
  * </pre>
  *
  */
-public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
+public class FilteredDiscreteVelocityYoVariable3 extends YoDouble
 {
-	private final DoubleYoVariable time;
-	private final DoubleYoVariable position;
+	private final YoDouble time;
+	private final YoDouble position;
 	
-	private final DoubleYoVariable timeSinceLastPosChange;
-	private final DoubleYoVariable lastPosChangeTimeInterval;
+	private final YoDouble timeSinceLastPosChange;
+	private final YoDouble lastPosChangeTimeInterval;
 	
 	private final TimestampedVelocityYoVariable finiteDifferenceVelocity;
 	private final TimestampedVelocityYoVariable finiteDifferenceAccel;
-	private final DoubleYoVariable velocityIfEncoderTicksNowConstantAccel;
+	private final YoDouble velocityIfEncoderTicksNowConstantAccel;
 
 	private boolean updateHasBeenCalled;
-	private final BooleanYoVariable assumeConstantAccel;
+	private final YoBoolean assumeConstantAccel;
 	
 	private final double alpha;
-	private final DoubleYoVariable alphaVariable;
+	private final YoDouble alphaVariable;
 
-	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, DoubleYoVariable time, YoVariableRegistry registry)
+	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, YoDouble time, YoVariableRegistry registry)
 	{
 		super(name, description, registry);
 		
 		this.time = time;
 		this.position = null;
 
-		timeSinceLastPosChange = new DoubleYoVariable(name + "_timeSinceLastTick", registry);
-		lastPosChangeTimeInterval = new DoubleYoVariable(name + "_lastUpdateTimeInterval", registry);
+		timeSinceLastPosChange = new YoDouble(name + "_timeSinceLastTick", registry);
+		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
 		
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
-		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
+		velocityIfEncoderTicksNowConstantAccel = new YoDouble(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alpha = alpha;
 		this.alphaVariable = null;
@@ -66,7 +66,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		reset();
 	}
 
-	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, DoubleYoVariable positionVariable, DoubleYoVariable time,
+	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, YoDouble positionVariable, YoDouble time,
 			YoVariableRegistry registry)
 	{
 		super(name, description, registry);
@@ -74,14 +74,14 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		this.time = time;
 		this.position = positionVariable;
 
-		timeSinceLastPosChange = new DoubleYoVariable(name + "_timeSinceLastTick", registry);
-		lastPosChangeTimeInterval = new DoubleYoVariable(name + "_lastUpdateTimeInterval", registry);
+		timeSinceLastPosChange = new YoDouble(name + "_timeSinceLastTick", registry);
+		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
 		
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
-		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
+		velocityIfEncoderTicksNowConstantAccel = new YoDouble(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alpha = alpha;
 		this.alphaVariable = null;
@@ -89,22 +89,22 @@ public class FilteredDiscreteVelocityYoVariable3 extends DoubleYoVariable
 		reset();
 	}
 
-	public FilteredDiscreteVelocityYoVariable3(String name, String description, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable,
-			DoubleYoVariable time, YoVariableRegistry registry)
+	public FilteredDiscreteVelocityYoVariable3(String name, String description, YoDouble alphaVariable, YoDouble positionVariable,
+			YoDouble time, YoVariableRegistry registry)
 	{
 		super(name, description, registry);
 
 		this.time = time;
 		this.position = positionVariable;
 
-		timeSinceLastPosChange = new DoubleYoVariable(name + "_timeSinceLastTick", registry);
-		lastPosChangeTimeInterval = new DoubleYoVariable(name + "_lastUpdateTimeInterval", registry);
+		timeSinceLastPosChange = new YoDouble(name + "_timeSinceLastTick", registry);
+		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
 		
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		finiteDifferenceAccel = new TimestampedVelocityYoVariable(name + "_finiteDiffAccel", "", finiteDifferenceVelocity, time, registry, 1e-20);
-		velocityIfEncoderTicksNowConstantAccel = new DoubleYoVariable(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
+		velocityIfEncoderTicksNowConstantAccel = new YoDouble(name + "_velocityIfEncoderTicksNowConstantAccel", registry);
 		
-		assumeConstantAccel = new BooleanYoVariable(name + "_assumeConstAccel", registry);
+		assumeConstantAccel = new YoBoolean(name + "_assumeConstAccel", registry);
 		
 		this.alphaVariable = alphaVariable;
 		this.alpha = 0.0;

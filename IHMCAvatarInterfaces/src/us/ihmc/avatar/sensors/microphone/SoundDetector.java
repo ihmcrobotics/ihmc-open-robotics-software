@@ -300,7 +300,11 @@ public class SoundDetector implements Runnable
 
             double[][] fftData = computeFreqMagPhase(time, input);
             double[] frequency = fftData[0];
-            double[] magnitude = Conversions.convertMagnitudeToDecibels(fftData[1]);
+            double[] magnitude = new double[fftData[1].length];
+            for (int j = 0; j < fftData[1].length; j++)
+            {
+               magnitude[j] = Conversions.amplitudeToDecibels(fftData[1][j]);
+            }
             //            double[] phase = fftData[2];
 
             if (!runningTheRealSchebang)

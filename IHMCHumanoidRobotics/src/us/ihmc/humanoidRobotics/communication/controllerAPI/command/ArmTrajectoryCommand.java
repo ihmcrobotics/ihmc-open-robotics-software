@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -11,6 +13,12 @@ public class ArmTrajectoryCommand extends JointspaceTrajectoryCommand<ArmTraject
    {
       super();
       robotSide = null;
+   }
+
+   public ArmTrajectoryCommand(Random random)
+   {
+      super(random);
+      robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
    }
 
    @Override
@@ -60,5 +68,15 @@ public class ArmTrajectoryCommand extends JointspaceTrajectoryCommand<ArmTraject
    public boolean isCommandValid()
    {
       return robotSide != null && super.isCommandValid();
+   }
+   
+   @Override
+   public boolean epsilonEquals(ArmTrajectoryCommand other, double epsilon)
+   {
+      if(robotSide != other.robotSide)
+      {
+         return false;
+      }
+      return super.epsilonEquals(other, epsilon);
    }
 }

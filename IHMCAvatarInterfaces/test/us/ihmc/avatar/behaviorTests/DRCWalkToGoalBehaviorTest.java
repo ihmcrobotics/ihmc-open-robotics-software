@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -80,12 +80,12 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       
       if(behaviorCommunicatorClient != null)
       {
-         behaviorCommunicatorClient.close();
+         behaviorCommunicatorClient.disconnect();
       }
       
       if(behaviorCommunicatorServer != null)
       {
-         behaviorCommunicatorServer.close();
+         behaviorCommunicatorServer.disconnect();
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -101,7 +101,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
    private final DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private ForceSensorDataHolder forceSensorDataHolder;
    private HumanoidRobotDataReceiver robotDataReceiver;
@@ -277,7 +277,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose2d ret = new FramePose2d();
-      ret.setPoseIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
+      ret.setIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }
@@ -287,7 +287,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
       FramePose2d ret = new FramePose2d();
-      ret.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }

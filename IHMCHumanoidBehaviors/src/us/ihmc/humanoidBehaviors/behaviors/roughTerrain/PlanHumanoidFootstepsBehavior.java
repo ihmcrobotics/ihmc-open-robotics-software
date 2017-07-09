@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,16 +26,14 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -53,12 +52,12 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
-   private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
-   private final BooleanYoVariable foundPlan = new BooleanYoVariable(prefix + "FoundPlan", registry);
-   private final BooleanYoVariable requestedPlanarRegion = new BooleanYoVariable(prefix + "RequestedPlanarRegion", registry);
-   private final DoubleYoVariable shorterGoalLength = new DoubleYoVariable(prefix + "ShorterGoalLength", registry);
+   private final YoInteger planarRegionsListCount = new YoInteger(prefix + "PlanarRegionsListCount", registry);
+   private final YoBoolean foundPlan = new YoBoolean(prefix + "FoundPlan", registry);
+   private final YoBoolean requestedPlanarRegion = new YoBoolean(prefix + "RequestedPlanarRegion", registry);
+   private final YoDouble shorterGoalLength = new YoDouble(prefix + "ShorterGoalLength", registry);
 
-   private final EnumYoVariable<RobotSide> nextSideToSwing;
+   private final YoEnum<RobotSide> nextSideToSwing;
 
    private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
@@ -77,7 +76,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
    private final YoStopwatch plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public PlanHumanoidFootstepsBehavior(YoDouble yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
                                         HumanoidReferenceFrames referenceFrames)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
@@ -89,7 +88,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       footstepPlanner = createFootstepPlanner();
 
-      nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
+      nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
       plannerTimer = new YoStopwatch(yoTime);
@@ -133,7 +132,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);
@@ -142,7 +141,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    public void createAndAttachSCSListenerToPlanner()
    {
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithSimulationConstructionSet(0.01,
                                                                                                                                                       footPolygonsInSoleFrame);
 
@@ -156,7 +155,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
    {
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                              fullRobotModel,
                                                                                                                                              logModelProvider,
@@ -354,7 +353,6 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
          FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
                                                                             new Quaternion(tempFirstFootstepPoseOrientation));
-         firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);
       }
@@ -376,13 +374,13 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       return foundPlan.getBooleanValue();
    }
 
-   private static ConvexPolygon2d createDefaultFootPolygon()
+   private static ConvexPolygon2D createDefaultFootPolygon()
    {
       //TODO: Get this from the robot model itself.
       double footLength = 0.26;
       double footWidth = 0.18;
 
-      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
@@ -392,9 +390,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       return footPolygon;
    }
 
-   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   private static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons()
    {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createDefaultFootPolygon());
       return footPolygons;

@@ -7,8 +7,8 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -20,7 +20,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
 
    private final FullQuadrupedRobotModel fullRobotModel;
 
-   private final ArrayList<DoubleYoVariable> desiredDoNothingTorques = new ArrayList<>();
+   private final ArrayList<YoDouble> desiredDoNothingTorques = new ArrayList<>();
    private final ArrayList<OneDoFJoint> legJoints = new ArrayList<>();
 
    public QuadrupedForceBasedDoNothingController(QuadrupedRuntimeEnvironment environment, YoVariableRegistry parentRegistry)
@@ -31,7 +31,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
             legJoints.add(joint);
-            desiredDoNothingTorques.add(new DoubleYoVariable(joint.getName() + "DoNothingTorque", registry));
+            desiredDoNothingTorques.add(new YoDouble(joint.getName() + "DoNothingTorque", registry));
          }
       }
 

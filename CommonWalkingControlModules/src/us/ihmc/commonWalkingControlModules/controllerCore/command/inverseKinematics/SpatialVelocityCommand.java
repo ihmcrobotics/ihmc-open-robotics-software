@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.*;
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,13 +16,15 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link SpatialVelocityCommand} is a command meant to be submitted to the
@@ -58,22 +58,20 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private final Vector3D desiredAngularVelocity = new Vector3D();
 
    /**
-    * Weights on a per component basis to use in the optimization function. A higher weight means
-    * higher priority of this task.
+    * The Weight matrix describes the qp weights used for optimization. All weights are initially set to NaN. If the weights are NaN the controller will use the default weights.
+    * A higher weight means a higher priority of this task.
     */
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(Twist.SIZE, 1);
+   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * If the selection frame is not set, it is assumed that the selection frame is equal to the
+    * control frame.
     * </p>
     */
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(Twist.SIZE);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
@@ -92,6 +90,20 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private String optionalPrimaryBaseName;
 
    /**
+    * Flag to indicate whether or not to custom scale the weights below the intermediate base
+    * {@code optionalPrimaryBase} to control against, as opposed to using the default weight in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    */
+   private boolean scaleSecondaryTaskJointWeight = false;
+
+   /**
+    * Scale factor to apply to the weights on the task below the {@code optionalPrimaryBase}.
+    * This weight replaces the scale factor in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    */
+   private double secondaryTaskJointWeightScale = 1.0;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -106,9 +118,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public void set(SpatialVelocityCommand other)
    {
-      setWeights(other.getWeightVector());
+      setWeightMatrix(other.getWeightMatrix());
 
-      selectionMatrix.set(other.getSelectionMatrix());
+      selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
       baseName = other.baseName;
@@ -116,6 +128,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+      scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
+      secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
       controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularVelocity.set(other.desiredAngularVelocity);
@@ -130,9 +144,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
-      setWeights(command.getWeightVector());
+      setWeightMatrix(command.getWeightMatrix());
 
-      selectionMatrix.set(command.getSelectionMatrix());
+      command.getSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
       baseName = command.getBaseName();
@@ -185,6 +199,21 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   /**
+    * Indicates that we would like to custom scale the weights on the joints in the kinematic chain
+    * below the {@code primaryBase} when controlling the {@code endEffector}.
+    *
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
+    *                                      below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
+    *                                      Optional.
+    */
+   public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
+   {
+      this.scaleSecondaryTaskJointWeight = scaleSecondaryTaskJointWeight;
+      this.secondaryTaskJointWeightScale = secondaryTaskJointWeightScale;
    }
 
    /**
@@ -365,46 +394,59 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.resetSelection();
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the linear part of this
     * command will be considered in the optimization.
-    * 
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = | 0 0 0 0 1 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 3, 1.0);
-      selectionMatrix.set(1, 4, 1.0);
-      selectionMatrix.set(2, 5, 1.0);
+      selectionMatrix.setToLinearSelectionOnly();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the angular part of this
+    * command and applying the given selection matrix to the linear part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
+    * </p>
+    * 
+    * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
+   {
+      selectionMatrix.clearSelection();
+      selectionMatrix.setLinearPart(linearSelectionMatrix);
    }
 
    /**
     * Convenience method that sets up the selection matrix such that only the angular part of this
     * command will be considered in the optimization.
-    * 
-    * <pre>
-    *     / 1 0 0 0 0 0 \
-    * S = | 0 1 0 0 0 0 |
-    *     \ 0 0 1 0 0 0 /
-    * </pre>
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
+      selectionMatrix.setToAngularSelectionOnly();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the linear part of this
+    * command and applying the given selection matrix to the angular part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
+    * </p>
+    * 
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this
+    *           command. Not modified.
+    */
+   public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
+   {
+      selectionMatrix.clearSelection();
+      selectionMatrix.setAngularPart(angularSelectionMatrix);
    }
 
    /**
@@ -415,20 +457,13 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * XZ-plane.
     * </p>
     * 
-    * <pre>
-    *     / 0 1 0 0 0 0 \
-    * S = | 0 0 0 1 0 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
-    * 
     */
    public void setSelectionMatrixForPlanarControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 1, 1.0);
-      selectionMatrix.set(1, 3, 1.0);
-      selectionMatrix.set(2, 5, 1.0);
+      selectionMatrix.clearSelection();
+      selectionMatrix.selectAngularY(true);
+      selectionMatrix.selectLinearX(true);
+      selectionMatrix.selectLinearZ(true);
    }
 
    /**
@@ -438,47 +473,29 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * This configuration is useful especially when dealing with planar robots evolving in the
     * XZ-plane.
     * </p>
-    * 
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = |             |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
-    * 
     */
    public void setSelectionMatrixForPlanarLinearControl()
    {
-      selectionMatrix.reshape(2, Twist.SIZE);
-      selectionMatrix.zero();
-      selectionMatrix.set(0, 3, 1.0);
-      selectionMatrix.set(1, 5, 1.0);
+      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearY(false);
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Sets this command's selection matrix to the given one.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * </p>
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
-    *            number of columns different to 6.
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > Twist.SIZE)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != Twist.SIZE)
-         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
-
       this.selectionMatrix.set(selectionMatrix);
    }
 
@@ -507,8 +524,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double weight)
    {
-      for (int i = 0; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, weight);
+      weightMatrix.setLinearWeights(weight, weight, weight);
+      weightMatrix.setAngularWeights(weight, weight, weight);
    }
 
    /**
@@ -524,10 +541,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double angular, double linear)
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, angular);
-      for (int i = 3; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, linear);
+      weightMatrix.setLinearWeights(linear, linear, linear);
+      weightMatrix.setAngularWeights(angular, angular, angular);
    }
 
    /**
@@ -538,18 +553,14 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weight dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           velocity. Not modified.
     */
-   public void setWeights(DenseMatrix64F weight)
+   public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
-      for (int i = 0; i < Twist.SIZE; i++)
-      {
-         weightVector.set(i, 0, weight.get(i, 0));
-      }
+      this.weightMatrix.set(weightMatrix);
    }
+
 
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom.
@@ -563,9 +574,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAngularWeights(Tuple3DReadOnly angular)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
+      weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
 
    /**
@@ -580,9 +589,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
    /**
@@ -598,42 +605,32 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
+      weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
+      weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
 
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom to
     * zero.
     * <p>
-    * By doing so, the angular part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForLinearControl()} as by doing so
-    * the angular part will not be submitted to the optimization.
+    * By doing so, the angular part of this command will be ignored during the optimization.
     * </p>
     */
    public void setAngularWeightsToZero()
    {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
    }
 
    /**
     * Sets the weights to use in the optimization problem for each translational degree of freedom
     * to zero.
     * <p>
-    * By doing so, the linear part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForAngularControl()} as by doing
-    * so the linear part will not be submitted to the optimization.
+    * By doing so, the linear part of this command will be ignored during the optimization. 
     * </p>
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
-         weightVector.set(i, 0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**
@@ -648,72 +645,47 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public boolean isHardConstraint()
    {
-      for (int i = 0; i < Twist.SIZE; i++)
-      {
-         if (weightVector.get(i, 0) == HARD_CONSTRAINT)
-            return true;
-      }
-      return false;
+      return weightMatrix.containsHardConstraint();
+   }
+   /**
+    * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
+    * this command.
+    * 
+    * @param destinationFrame the reference frame in which the weight matrix should be expressed
+    *           in.
+    * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is
+    *           stored in. Modified.
+    */
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   {
+      weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
 
    /**
-    * Packs the weights to use for this command in {@code weightMatrixToPack} as follows:
+    * Returns the weight Matrix used in this command:
     * 
-    * <pre>
-    *     / w0 0  0  0  0  0  \
-    *     | 0  w1 0  0  0  0  |
-    * W = | 0  0  w2 0  0  0  |
-    *     | 0  0  0  w3 0  0  |
-    *     | 0  0  0  0  w4 0  |
-    *     \ 0  0  0  0  0  w5 /
-    * </pre>
-    * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
-    * </p>
-    * <p>
-    * The packed matrix is a 6-by-6 matrix independently from the selection matrix.
-    * </p>
-    * 
-    * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
-    *           reshaped to ensure proper size. Modified.
+    * @return the reference to the weight matrix to use with this command.
     */
-   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
+   public WeightMatrix6D getWeightMatrix()
    {
-      weightMatrixToPack.reshape(Twist.SIZE, Twist.SIZE);
-      CommonOps.setIdentity(weightMatrixToPack);
-      for (int i = 0; i < Twist.SIZE; i++)
-         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
+      return weightMatrix;
    }
 
    /**
-    * Returns the reference to the 6-by-1 weight vector to use with this command:
-    * 
-    * <pre>
-    *     / w0 \
-    *     | w1 |
-    * W = | w2 |
-    *     | w3 |
-    *     | w4 |
-    *     \ w5 /
-    * </pre>
-    * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
-    * </p>
-    * 
-    * @return the reference to the weights to use with this command.
+    * Sets the weightMatrixToPack to the weight matrix used in this command:
+    * @param weightMatrixToPack the weightMatrix To Pack. parameter is Modified
     */
-   public DenseMatrix64F getWeightVector()
+   public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
    {
-      return weightVector;
+      weightMatrixToPack.set(weightMatrix);
    }
+
 
    /**
     * Packs the control frame and desired spatial velocity held in this command.
     * <p>
     * The first argument {@code controlFrameToPack} is required to properly express the
-    * {@code desiredSpatialVelocityToPack}. Indeed the desired spatial acceleration has to be
+    * {@code desiredSpatialVelocityToPack}. Indeed the desired spatial velocity has to be
     * expressed in the control frame.
     * </p>
     * 
@@ -790,13 +762,28 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
-    * Gets the reference to the selection matrix to use with this command.
+    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
+    * this command.
     * 
-    * @return the selection matrix.
+    * @param destinationFrame the reference frame in which the selection matrix should be expressed
+    *           in.
+    * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
+    *           stored in. Modified.
     */
-   public DenseMatrix64F getSelectionMatrix()
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      return selectionMatrix;
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+   }
+
+   /**
+    * Packs the value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    * 
+    * @param selectionMatrixToPack the selection matrix to pack.
+    */
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix);
    }
 
    /**
@@ -871,6 +858,56 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
+   }
+
+   /**
+    * Gets whether or not to scale the weights on the joints below the {@code primaryBase}
+    * when controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will
+    * use the joints in the kinematic chain between the {@code primaryBase} and the
+    * {@code endEffector} more to control the {@code endEffector}, while a factor larger than
+    * 1.0 makes it more likely to use the joints before the {@code primaryBase} (such as the
+    * floating base) to control the {@code endEffector}.
+    *
+    * <p>
+    *    This parameter is optional. If provided, it will scale the weights before the
+    *    {@code primaryBase} by the factor defined in {@code secondaryTaskJointWeightScale}
+    *    to control the {@code endEffector}.
+    * </p>
+    *
+    * @return whether or not to scale the joints below the {@code primaryBase} (true) or not (false and default).
+    */
+   public boolean scaleSecondaryTaskJointWeight()
+   {
+      return scaleSecondaryTaskJointWeight;
+   }
+
+   /**
+    * Gets the scaling factor for the weights on the joints below the {@code primaryBase}
+    * when controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will
+    * use the joints in the kinematic chain between the {@code primaryBase} and the
+    * {@code endEffector} more to control the {@code endEffector}, while a factor larger than
+    * 1.0 makes it more likely to use the joints before the {@code primaryBase} (such as the
+    * floating base) to control the {@code endEffector}.
+    *
+    * <p>
+    *    This parameter is optional. If provided, it will be used to scale the weights before the
+    *    {@code primaryBase} to control the {@code endEffector}.
+    * </p>
+    *
+    * @return scale factor for the joints below the {@code primaryBase}.
+    */
+   public double getSecondaryTaskJointWeightScale()
+   {
+      return secondaryTaskJointWeightScale;
+   }
+
+   /**
+    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase} to its
+    * default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      secondaryTaskJointWeightScale = 1.0;
    }
 
    /**

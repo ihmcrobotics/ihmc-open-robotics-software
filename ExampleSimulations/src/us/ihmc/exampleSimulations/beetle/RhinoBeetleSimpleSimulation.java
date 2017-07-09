@@ -14,8 +14,8 @@ import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleVirtualModelContr
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -57,8 +57,8 @@ public class RhinoBeetleSimpleSimulation
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       SimulationOverheadPlotter overheadPlotter = simulationOverheadPlotterFactory.createOverheadPlotter();
-      overheadPlotter.setXVariableToTrack((DoubleYoVariable) sdfRobot.getVariable("q_x"));
-      overheadPlotter.setYVariableToTrack((DoubleYoVariable) sdfRobot.getVariable("q_y"));
+      overheadPlotter.setXVariableToTrack((YoDouble) sdfRobot.getVariable("q_x"));
+      overheadPlotter.setYVariableToTrack((YoDouble) sdfRobot.getVariable("q_y"));
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(SIMULATION_DT, 10);

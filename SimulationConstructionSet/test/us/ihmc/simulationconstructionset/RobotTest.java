@@ -20,8 +20,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -994,9 +994,9 @@ public class RobotTest
       double totalEnergyStart = translationalKineticEnergyStart + rotationalKineticEnergyStart;
 
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      DoubleYoVariable translationalKineticEnergy = new DoubleYoVariable("translationalKineticEnergy", registry);
-      DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", registry);
-      DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", registry);
+      YoDouble translationalKineticEnergy = new YoDouble("translationalKineticEnergy", registry);
+      YoDouble rotationalKineticEnergy = new YoDouble("rotationalKineticEnergy", registry);
+      YoDouble totalEnergy = new YoDouble("totalEnergy", registry);
       YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
       YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
 

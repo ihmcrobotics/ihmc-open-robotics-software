@@ -68,9 +68,9 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       return createFrameTuple(frameTuple.referenceFrame, frameTuple.tuple);
    }
 
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", false, true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
 
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
 
    protected RigidBodyTransform theFrameToChildFrame;
 
@@ -80,7 +80,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    public final void setUp() throws Exception
    {
       theFrameToChildFrame = new RigidBodyTransform();
-      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
+      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -106,7 +106,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       Random random = new Random(15613L);
 
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
+      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform);
 
       double x = RandomNumbers.nextDouble(random, -100.0, 100.0);
       double y = RandomNumbers.nextDouble(random, -100.0, 100.0);
@@ -128,7 +128,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       FrameTuple<?, ?> frameTuple = createEmptyFrameTuple();
       Random random = new Random(15613L);
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
+      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform);
       Tuple3DBasics randomTuple = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
 
       frameTuple.set(randomTuple);
@@ -155,7 +155,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       Random random = new Random(15613L);
 
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
+      ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform);
 
       Tuple3DBasics randomTuple = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
 

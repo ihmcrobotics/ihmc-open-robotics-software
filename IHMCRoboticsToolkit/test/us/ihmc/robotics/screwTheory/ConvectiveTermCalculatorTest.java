@@ -38,12 +38,11 @@ public class ConvectiveTermCalculatorTest
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector();
       convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, acceleration);
 
-      TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, true);
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, ReferenceFrame.getWorldFrame(), rootFrame);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootAcceleration, true, true);
 
-      twistCalculator.compute();
+      elevator.updateFramesRecursively();
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector accelerationBack = new SpatialAccelerationVector();
@@ -77,10 +76,9 @@ public class ConvectiveTermCalculatorTest
          RigidBody body = joints.get(0).getPredecessor();
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
-         TwistCalculator twistCalculator = new  TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false , false);
-         
-         twistCalculator.compute();
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, rootAcceleration, true, false, false);
+
+         rootBody.updateFramesRecursively();
          spatialAccelerationCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfRevoluteJoints + 1);

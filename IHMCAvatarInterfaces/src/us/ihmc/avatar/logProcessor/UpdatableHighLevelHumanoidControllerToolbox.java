@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -18,7 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -35,20 +34,20 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
-         double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime,
+         double gravityZ, double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
          ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          InverseDynamicsJoint... jointsToIgnore)
    {
       super(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
-            twistCalculator, feet, controlDT, updatables, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+            feet, controlDT, updatables, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)
       {
          String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
-         DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
-         DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
-         DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
+         YoDouble capturePointX = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointX");
+         YoDouble capturePointY = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointY");
+         YoDouble capturePointZ = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointZ");
          capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
       }
       else
@@ -61,8 +60,8 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
-         DoubleYoVariable desiredCoPx = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
-         DoubleYoVariable desiredCoPy = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
+         YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPsUpdatedFromSCS.put(robotSide, desiredCoP);

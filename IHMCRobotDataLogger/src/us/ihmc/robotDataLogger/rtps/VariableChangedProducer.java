@@ -5,12 +5,13 @@ import java.util.List;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.robotDataLogger.Announcement;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VariableChangedProducer
 {
    private boolean sendVariableChanges = true;
+   private boolean connected = true;
    private final DataConsumerParticipant participant;
    private final TObjectIntHashMap<YoVariable<?>> variableIdentifiers = new TObjectIntHashMap<>();
    private final VariableListener variableListener = new VariableListener();
@@ -42,7 +43,7 @@ public class VariableChangedProducer
       @Override
       public void variableChanged(YoVariable<?> v)
       {
-         if (sendVariableChanges)
+         if (sendVariableChanges && connected)
          {
             try
             {
@@ -61,5 +62,10 @@ public class VariableChangedProducer
    public void setSendingChangesEnabled(boolean sendVariableChanges)
    {
       this.sendVariableChanges = sendVariableChanges;
+   }
+
+   public void disconnect()
+   {
+      connected = false;
    }
 }

@@ -4,13 +4,12 @@ package us.ihmc.wholeBodyController.concurrent;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.listener.RewoundListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 
 public class FullRobotModelRootJointRewinder implements RewoundListener
 {
@@ -31,10 +30,9 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    public void recordCurrentState()
    {
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      FloatingInverseDynamicsJointReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       
-      rootJointFrame.getTranslation(rootJointTranslation);
-      rootJointFrame.getRotation(rootJointRotation);
+      rootJoint.getTranslation(rootJointTranslation);
+      rootJoint.getRotation(rootJointRotation);
 
       yoRootJointTranslation.set(rootJointTranslation);
       yoRootJointRotation.set(rootJointRotation);

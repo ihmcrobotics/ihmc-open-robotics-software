@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -57,11 +56,11 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
          linearVelocity = new Vector3D(trajectoryPoint.linearVelocity);
    }
 
-   public EuclideanTrajectoryPointMessage(double time, Point3D position, Vector3D linearVelocity)
+   public EuclideanTrajectoryPointMessage(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       this.time = time;
-      this.position = position;
-      this.linearVelocity = linearVelocity;
+      this.position = new Point3D(position);
+      this.linearVelocity = new Vector3D(linearVelocity);
    }
 
    @Override
@@ -188,6 +187,21 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    {
       return position.distance(other.position);
    }
+   
+   public double getX()
+   {
+      return position.getX();
+   }
+   
+   public double getY()
+   {
+      return position.getY();
+   }
+   
+   public double getZ()
+   {
+      return position.getZ();
+   }
 
    @Override
    public boolean containsNaN()
@@ -227,28 +241,27 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    @Override
    public EuclideanTrajectoryPointMessage transform(RigidBodyTransform transform)
    {
-      EuclideanTrajectoryPointMessage transformedTrajectoryPointMessage = new EuclideanTrajectoryPointMessage();
-
-      transformedTrajectoryPointMessage.time = time;
-
-      if (position != null)
-         transformedTrajectoryPointMessage.position = TransformTools.getTransformedPoint(position, transform);
-      else
-         transformedTrajectoryPointMessage.position = null;
-
-      if (linearVelocity != null)
-         transformedTrajectoryPointMessage.linearVelocity = TransformTools.getTransformedVector(linearVelocity, transform);
-      else
-         transformedTrajectoryPointMessage.linearVelocity = null;
-
+      EuclideanTrajectoryPointMessage transformedTrajectoryPointMessage = new EuclideanTrajectoryPointMessage(this);
+      transformedTrajectoryPointMessage.applyTransform(transform);
       return transformedTrajectoryPointMessage;
    }
 
    @Override
    public void applyTransform(Transform transform)
    {
-      transform.transform(position);
-      transform.transform(linearVelocity);
+      if (position != null)
+         transform.transform(position);
+      if (linearVelocity != null)
+         transform.transform(linearVelocity);
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      if (position != null)
+         transform.inverseTransform(position);
+      if (linearVelocity != null)
+         transform.inverseTransform(linearVelocity);
    }
 
    @Override

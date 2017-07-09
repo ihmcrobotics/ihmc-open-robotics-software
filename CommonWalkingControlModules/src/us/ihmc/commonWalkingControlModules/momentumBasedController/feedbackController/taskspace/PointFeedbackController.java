@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -11,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -24,7 +26,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
@@ -32,7 +33,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -75,10 +76,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final Matrix3DReadOnly kp, kd, ki;
    private final YoSE3OffsetFrame controlFrame;
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
+   private ReferenceFrame controlBaseFrame;
+   private ReferenceFrame linearGainsFrame;
 
    private final RigidBody endEffector;
 
@@ -89,7 +91,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       this.endEffector = endEffector;
 
-      twistCalculator = toolbox.getTwistCalculator();
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
@@ -99,32 +100,32 @@ public class PointFeedbackController implements FeedbackControllerInterface
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, Type.DESIRED);
-      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, Type.CURRENT);
-      yoErrorPosition = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR, Space.POSITION);
+      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, DESIRED, isEnabled);
+      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, CURRENT, isEnabled);
+      yoErrorPosition = feedbackControllerToolbox.getDataVector(endEffector, ERROR, POSITION, isEnabled);
 
-      yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR_INTEGRATED, Space.POSITION);
+      yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled);
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_VELOCITY, isEnabled);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
-         yoErrorLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR, Space.LINEAR_VELOCITY);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, LINEAR_VELOCITY, isEnabled);
+         yoErrorLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, ERROR, LINEAR_VELOCITY, isEnabled);
 
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_ACCELERATION);
-         rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_ACCELERATION, dt,
-                                                                                                    maximumRate);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_ACCELERATION, isEnabled);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_ACCELERATION, isEnabled);
+         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_ACCELERATION, isEnabled);
+         rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_ACCELERATION, dt, maximumRate,
+                                                                                                    isEnabled);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, LINEAR_ACCELERATION, isEnabled);
       }
       else
       {
@@ -140,10 +141,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
-         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY, dt,
-                                                                                                maximumRate);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, LINEAR_VELOCITY, isEnabled);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_VELOCITY, isEnabled);
+         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_VELOCITY, dt, maximumRate,
+                                                                                                isEnabled);
       }
       else
       {
@@ -161,10 +162,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
+      controlBaseFrame = command.getControlBaseFrame();
 
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
       controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
@@ -297,8 +300,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kp.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -316,10 +325,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void computeDerivativeTerm(FrameVector feedbackTermToPack)
    {
-      currentPosition.setToZero(controlFrame);
-      currentPosition.changeFrame(endEffector.getBodyFixedFrame());
-
-      twistCalculator.getLinearVelocityOfBodyFixedPoint(base, endEffector, currentPosition, currentLinearVelocity);
+      controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
+      currentTwist.getLinearPart(currentLinearVelocity);
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
@@ -330,8 +337,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       kd.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -364,8 +377,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+      if (linearGainsFrame != null)
+         feedbackTermToPack.changeFrame(linearGainsFrame);
+      else
+         feedbackTermToPack.changeFrame(controlFrame);
+
       ki.transform(feedbackTermToPack.getVector());
+
+      feedbackTermToPack.changeFrame(controlFrame);
    }
 
    /**
@@ -385,10 +404,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void addCoriolisAcceleration(FrameVector linearAccelerationToModify)
    {
-      twistCalculator.getTwistOfBody(endEffector, currentTwist);
-      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
-      currentTwist.changeFrame(controlFrame);
-
+      controlFrame.getTwistOfFrame(currentTwist);
       currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.getLinearPart(currentLinearVelocity);
 
@@ -415,10 +431,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void subtractCoriolisAcceleration(FrameVector linearAccelerationToModify)
    {
-      twistCalculator.getTwistOfBody(endEffector, currentTwist);
-      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
-      currentTwist.changeFrame(controlFrame);
-
+      controlFrame.getTwistOfFrame(currentTwist);
       currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.getLinearPart(currentLinearVelocity);
 

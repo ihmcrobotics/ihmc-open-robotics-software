@@ -1,20 +1,20 @@
 package us.ihmc.footstepPlanning.aStar.implementations;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SnapBasedNodeChecker implements FootstepNodeChecker
 {
    private PlanarRegionsList planarRegions;
-   private final ConvexPolygon2d footPolygon = new ConvexPolygon2d();
-   private final SideDependentList<ConvexPolygon2d> footPolygons;
+   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
 
-   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2d> footPolygons)
+   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.footPolygons = footPolygons;
    }

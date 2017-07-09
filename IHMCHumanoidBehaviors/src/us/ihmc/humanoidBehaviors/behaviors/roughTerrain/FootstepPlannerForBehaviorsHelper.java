@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -15,14 +15,14 @@ public class FootstepPlannerForBehaviorsHelper
    private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.1;
    private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.6;
    
-   public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(RobotContactPointParameters contactPointParameters)
+   public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(RobotContactPointParameters contactPointParameters)
    {
       return createDefaultFootPolygons(contactPointParameters, SCALING_FACTOR_FOR_FOOTHOLD_X, SCALING_FACTOR_FOR_FOOTHOLD_Y);
    }
 
-   public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters, double scalingFactorForFootholdX, double scalingFactorForFootholdY)
+   public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters, double scalingFactorForFootholdX, double scalingFactorForFootholdY)
    {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
          ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);         
@@ -36,7 +36,7 @@ public class FootstepPlannerForBehaviorsHelper
             scaledFootPoints.add(footPoint);
          }
          
-         ConvexPolygon2d scaledFoot = new ConvexPolygon2d(scaledFootPoints);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(scaledFootPoints);
          footPolygons.set(side, scaledFoot);         
       }
       

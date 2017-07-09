@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,7 +40,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    @Before
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST", false, true, true);
+      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST");
       orientation = new FrameOrientation(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PlanarRegionsList
@@ -41,7 +44,7 @@ public class PlanarRegionsList
     * @param convexPolygon the query.
     * @return the list of planar regions intersecting with the given polygon. Returns null when no region intersects.
     */
-   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2d convexPolygon)
+   public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2D convexPolygon)
    {
       List<PlanarRegion> containers = null;
 
@@ -67,7 +70,7 @@ public class PlanarRegionsList
     * @param lineSegmentInWorld the query.
     * @param intersectingRegionsToPack ArrayList were the intersecting regions will be packed into.
     */
-   public void findPlanarRegionsIntersectingLineSegment(LineSegment2d lineSegmentInWorld, ArrayList<PlanarRegion> intersectingRegionsToPack)
+   public void findPlanarRegionsIntersectingLineSegment(LineSegment2D lineSegmentInWorld, ArrayList<PlanarRegion> intersectingRegionsToPack)
    {
       for (int i = 0; i < regions.size(); i++)
       {
@@ -90,7 +93,7 @@ public class PlanarRegionsList
     * @param lineSegmentInWorld
     * @return
     */
-   private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2d lineSegmentInWorld)
+   private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2D lineSegmentInWorld)
    {
 	   BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
 
@@ -99,8 +102,8 @@ public class PlanarRegionsList
        double xMax = boundingBox.getMaxX();
        double yMax = boundingBox.getMaxY();
 
-       Point2D firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
-       Point2D secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
+       Point2DReadOnly firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
+       Point2DReadOnly secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
 
        if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;
        if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax)) return true;

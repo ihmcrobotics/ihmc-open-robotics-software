@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
@@ -17,16 +17,16 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
    private final Online1DSignalFourierAnalysis tauDesiredFourierAnalysis;
 
    private final boolean hasYoVariables;
-   private final DoubleYoVariable velocity;
-   private final DoubleYoVariable tau;
-   private final DoubleYoVariable tauDesired;
+   private final YoDouble velocity;
+   private final YoDouble tau;
+   private final YoDouble tauDesired;
 
    public OneDoFJointFourierAnalysis(OneDoFJoint joint, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
    {
       this(joint, estimationWindow, dt, null, null, null, parentRegistry);
    }
 
-   public OneDoFJointFourierAnalysis(OneDoFJoint joint, double estimationWindow, double dt, DoubleYoVariable velocity, DoubleYoVariable tau, DoubleYoVariable tauDesired, YoVariableRegistry parentRegistry)
+   public OneDoFJointFourierAnalysis(OneDoFJoint joint, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoVariableRegistry parentRegistry)
    {
       this.joint = joint;
       String jointName = joint.getName();
@@ -154,7 +154,7 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       return velocityFourierAnalysis.hasAnalysisStarted();
    }
 
-   private void verifyYoVariableNames(String jointName, DoubleYoVariable velocity, DoubleYoVariable tau, DoubleYoVariable tauDesired)
+   private void verifyYoVariableNames(String jointName, YoDouble velocity, YoDouble tau, YoDouble tauDesired)
    {
       if (!velocity.getName().contains(jointName))
          throw new RuntimeException("The velocity variable: " + velocity.getName() + " may not belong to the joint: " + jointName);

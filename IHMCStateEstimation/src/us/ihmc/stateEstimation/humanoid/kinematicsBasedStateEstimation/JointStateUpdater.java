@@ -1,14 +1,13 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -24,7 +23,6 @@ public class JointStateUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody rootBody;
 
@@ -32,14 +30,13 @@ public class JointStateUpdater
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
 
-   private final BooleanYoVariable enableIMUBasedJointVelocityEstimator = new BooleanYoVariable("enableIMUBasedJointVelocityEstimator", registry);
+   private final YoBoolean enableIMUBasedJointVelocityEstimator = new YoBoolean("enableIMUBasedJointVelocityEstimator", registry);
 
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
-      twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
-      rootBody = twistCalculator.getRootBody();
+      rootBody = inverseDynamicsStructure.getElevator();
 
       this.sensorMap = sensorOutputMapReadOnly;
 
@@ -87,7 +84,9 @@ public class JointStateUpdater
          double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
          IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
          iMUBasedJointVelocityEstimator.compute();
-         iMUBasedJointVelocityEstimator.setAlphaFuse(stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation());
+         double alphaIMUsForSpineJointVelocityEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation();
+         double alphaIMUsForSpineJointPositionEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointPositionEstimation();
+         iMUBasedJointVelocityEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
          return iMUBasedJointVelocityEstimator;
       }
       else
@@ -128,22 +127,24 @@ public class JointStateUpdater
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
 
-         oneDoFJoint.setQ(positionSensorData);
-         oneDoFJoint.setEnabled(jointEnabledIndicator);
-
          if (enableIMUBasedJointVelocityEstimator.getBooleanValue() && iMUBasedJointVelocityEstimator != null)
          {
             double estimatedJointVelocity = iMUBasedJointVelocityEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
+
+            double estimatedJointPosition = iMUBasedJointVelocityEstimator.getEstimatedJointPosition(oneDoFJoint);
+            if (!Double.isNaN(estimatedJointPosition))
+               positionSensorData = estimatedJointPosition;
          }
 
+         oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
          oneDoFJoint.setTauMeasured(torqueSensorData);
+         oneDoFJoint.setEnabled(jointEnabledIndicator);
       }
 
       rootBody.updateFramesRecursively();
-      twistCalculator.compute();
       spatialAccelerationCalculator.compute();
    }
 }

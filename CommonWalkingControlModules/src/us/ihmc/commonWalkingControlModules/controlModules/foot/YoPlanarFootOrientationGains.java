@@ -6,34 +6,34 @@ import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterface
 {
-   private final DoubleYoVariable proportionalYGain;
-   private final DoubleYoVariable derivativeYGain;
-   private final DoubleYoVariable dampingRatioY;
+   private final YoDouble proportionalYGain;
+   private final YoDouble derivativeYGain;
+   private final YoDouble dampingRatioY;
 
-   private final DoubleYoVariable maxDerivativeError;
-   private final DoubleYoVariable maxProportionalError;
+   private final YoDouble maxDerivativeError;
+   private final YoDouble maxProportionalError;
 
-   private final DoubleYoVariable maximumFeedback;
-   private final DoubleYoVariable maximumFeedbackRate;
+   private final YoDouble maximumFeedback;
+   private final YoDouble maximumFeedbackRate;
 
    public YoPlanarFootOrientationGains(String suffix, YoVariableRegistry registry)
    {
-      proportionalYGain = new DoubleYoVariable("kpYAngular" + suffix, registry);
-      derivativeYGain = new DoubleYoVariable("kdYAngular" + suffix, registry);
-      dampingRatioY = new DoubleYoVariable("zetaYAngular" + suffix, registry);
+      proportionalYGain = new YoDouble("kpYAngular" + suffix, registry);
+      derivativeYGain = new YoDouble("kdYAngular" + suffix, registry);
+      dampingRatioY = new YoDouble("zetaYAngular" + suffix, registry);
 
-      maximumFeedback = new DoubleYoVariable("maximumAngularFeedback" + suffix, registry);
-      maximumFeedbackRate = new DoubleYoVariable("maximumAngularFeedbackRate" + suffix, registry);
+      maximumFeedback = new YoDouble("maximumAngularFeedback" + suffix, registry);
+      maximumFeedbackRate = new YoDouble("maximumAngularFeedbackRate" + suffix, registry);
 
-      maxDerivativeError = new DoubleYoVariable("maximumAngularDerivativeError" + suffix, registry);
-      maxProportionalError = new DoubleYoVariable("maximumAngularProportionalError" + suffix, registry);
+      maxDerivativeError = new YoDouble("maximumAngularDerivativeError" + suffix, registry);
+      maxProportionalError = new YoDouble("maximumAngularProportionalError" + suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -189,25 +189,25 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedback()
+   public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumFeedbackRate()
+   public YoDouble getYoMaximumFeedbackRate()
    {
       return maximumFeedbackRate;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumDerivativeError()
+   public YoDouble getYoMaximumDerivativeError()
    {
       return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumProportionalError()
+   public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
    }

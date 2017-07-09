@@ -1,12 +1,13 @@
 package us.ihmc.robotDataVisualizer.logger;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+
 import java.io.IOException;
 
 public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
@@ -21,7 +22,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
 
    private OneDegreeOfFreedomJoint[] joints;
    private FloatingJoint origin;
-   private DoubleYoVariable desiredCoMHeight;
+   private YoDouble desiredCoMHeight;
 
    @Override
    public void setRobot(FloatingRootJointRobot robot)
@@ -54,7 +55,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
       //
       // You only have to give the last part of the namespace, more might break if we rename parts of the name.
 
-      desiredCoMHeight = (DoubleYoVariable) registry.getVariable("LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight");
+      desiredCoMHeight = (YoDouble) registry.getVariable("LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight");
    }
 
 }

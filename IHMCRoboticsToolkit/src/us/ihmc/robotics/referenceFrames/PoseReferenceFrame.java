@@ -20,7 +20,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public PoseReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
-      super(frameName, parentFrame);
+      super(frameName, parentFrame, parentFrame.isAStationaryFrame(), false);
 
       originPose = new FramePose(parentFrame);
    }
@@ -29,6 +29,11 @@ public class PoseReferenceFrame extends ReferenceFrame
    {
       this(frameName, pose.getReferenceFrame());
       setPoseAndUpdate(pose);
+   }
+
+   public boolean containsNaN()
+   {
+      return originPose.containsNaN();
    }
 
    public void setX(double x)
@@ -129,7 +134,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void translateAndUpdate(double x, double y, double z)
    {
-      originPose.translate(x, y, z);
+      originPose.prependTranslation(x, y, z);
       this.update();
    }
 

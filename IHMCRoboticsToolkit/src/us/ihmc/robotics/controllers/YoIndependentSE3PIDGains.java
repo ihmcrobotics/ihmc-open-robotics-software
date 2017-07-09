@@ -1,6 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 {
@@ -9,8 +9,13 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 
    public YoIndependentSE3PIDGains(String prefix, YoVariableRegistry registry)
    {
-      positionGains = new YoEuclideanPositionGains(prefix, registry);
-      orientationGains = new YoAxisAngleOrientationGains(prefix, registry);
+      this(prefix, false, registry);
+   }
+
+   public YoIndependentSE3PIDGains(String prefix, boolean createDampingRatio, YoVariableRegistry registry)
+   {
+      positionGains = new YoEuclideanPositionGains(prefix, createDampingRatio, registry);
+      orientationGains = new YoAxisAngleOrientationGains(prefix, createDampingRatio, registry);
    }
 
    public void reset()
@@ -61,6 +66,16 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
       positionGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
+   public void setPositionDampingRatio(double dampingRatio)
+   {
+      positionGains.setDampingRatio(dampingRatio);
+   }
+
+   public void setPositionDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
+   {
+      positionGains.setDampingRatios(dampingRatioX, dampingRatioY, dampingRatioZ);
+   }
+
    public void setPositionMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
       positionGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
@@ -106,6 +121,16 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
       orientationGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
+   public void setOrientationDampingRatio(double dampingRatio)
+   {
+      orientationGains.setDampingRatio(dampingRatio);
+   }
+
+   public void setOrientationDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
+   {
+      orientationGains.setDampingRatios(dampingRatioX, dampingRatioY, dampingRatioZ);
+   }
+
    public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
       orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
@@ -138,5 +163,11 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    public void set(OrientationPIDGainsInterface orientationGains)
    {
       this.orientationGains.set(orientationGains);
+   }
+
+   public void createDerivativeGainUpdater(boolean updateNow)
+   {
+      positionGains.createDerivativeGainUpdater(updateNow);
+      orientationGains.createDerivativeGainUpdater(updateNow);
    }
 }

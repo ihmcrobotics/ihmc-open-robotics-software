@@ -8,7 +8,6 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -50,8 +49,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
@@ -70,8 +68,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
       RevoluteJoint rootJoint = ScrewTestTools.addRandomRevoluteJoint("rootJoint", random, elevator); // Just to make sure there is only one root joint for the SCS robot
       RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 

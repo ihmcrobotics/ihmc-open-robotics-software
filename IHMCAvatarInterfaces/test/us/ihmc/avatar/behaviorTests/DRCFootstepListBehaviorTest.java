@@ -1,6 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -34,13 +37,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -182,7 +185,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          desiredFootsteps.add(desiredFootStep);
       }
       assertTrue(!areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps));
-      
+
       PrintTools.debug(this, "Initializing Behavior");
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
@@ -254,12 +257,13 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       for (int i = 0; i < desiredFootsteps.size(); i++)
       {
          Footstep footstep = desiredFootsteps.get(i);
-         Point3D location = new Point3D(footstep.getX(), footstep.getY(), footstep.getZ());
-         Quaternion orientation = new Quaternion();
-         footstep.getOrientation(orientation);
+
+         FramePoint position = new FramePoint();
+         FrameOrientation orientation = new FrameOrientation();
+         footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
          ret.add(footstepData);
       }
 
@@ -276,9 +280,9 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       {
          PrintTools.debug(this, "foot step length : " + footStepLength);
       }
-      
+
       boolean footStepsAreTooFarApart = footstepListBehavior.areFootstepsTooFarApart(createFootstepDataList(desiredFootsteps), fullRobotModel, getRobotModel().getWalkingControllerParameters());
-      
+
       return footStepsAreTooFarApart;
    }
 
@@ -343,7 +347,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          footPosesFinal.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
       }
 
-      // Foot position and orientation may change after stop command if the robot is currently in single support, 
+      // Foot position and orientation may change after stop command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually stopping
       double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
@@ -386,8 +390,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
-      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
-      footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));
+      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      Footstep footstep = new Footstep(foot, robotSide, footstepPose);
 
       return footstep;
    }
@@ -400,7 +404,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
       FramePose2d ret = new FramePose2d();
-      ret.setPose(ankleTransformToWorld);
+      ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), ankleTransformToWorld, false);
 
       return ret;
    }

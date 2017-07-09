@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import java.io.Serializable;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -57,6 +59,83 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    {
       this.referenceFrame = referenceFrame;
       set(x, y);
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleArray);
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startIndex the first index to start reading from in the array.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startIndex, tupleArray);
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y} in order from the given column
+    * vector starting to read from its first row index and sets this tuple frame to
+    * {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleDenseMatrix);
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y} in order from the given column
+    * vector starting to read from {@code startRow} and sets this tuple frame to
+    * {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, tupleDenseMatrix);
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y} in order from the given matrix
+    * starting to read from {@code startRow} at the column index {@code column} and sets this tuple
+    * frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column the column index to read in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, column, tupleDenseMatrix);
    }
 
    @Override
@@ -189,6 +268,42 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    public final void get(Tuple3DBasics tuple3dToPack)
    {
       tuple3dToPack.set(tuple.getX(), tuple.getY(), 0.0);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y} in order in a column vector starting from
+    * its first row index.
+    *
+    * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
+    */
+   public final void get(DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y} in order in a column vector starting from
+    * {@code startRow}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param tupleMatrixToPack the column vector in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y} in order in a column vector starting from
+    * {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param column the column index to write in the dense-matrix.
+    * @param tupleMatrixToPack the matrix in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, column, tupleMatrixToPack);
    }
 
    @Override

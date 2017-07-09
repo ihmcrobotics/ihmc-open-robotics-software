@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -26,45 +26,45 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private final DRCOutputWriter drcOutputWriter;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable alphaDesiredVelocity = new DoubleYoVariable(
+   private final YoDouble alphaDesiredVelocity = new YoDouble(
          "alphaDesiredVelocity",
          "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking",
          registry);
-   private final DoubleYoVariable alphaDesiredPosition = new DoubleYoVariable(
+   private final YoDouble alphaDesiredPosition = new YoDouble(
          "alphaDesiredPosition",
          "Filter for position control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking",
          registry);
 
-   private final DoubleYoVariable alphaArmDesiredVelocity = new DoubleYoVariable(
+   private final YoDouble alphaArmDesiredVelocity = new YoDouble(
          "alphaArmDesiredVelocity",
          "Filter for velocity control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking (Arms only)",
          registry);
-   private final DoubleYoVariable alphaArmDesiredPosition = new DoubleYoVariable(
+   private final YoDouble alphaArmDesiredPosition = new YoDouble(
          "alphaArmDesiredPosition",
          "Filter for position control in order to achieve acceleration control. Zero means compliant, but poor acceleration. One means stiff, but good acceleration tracking (Arms only)",
          registry);
 
-   private final DoubleYoVariable kVelJointTorque = new DoubleYoVariable("kVelJointTorque",
+   private final YoDouble kVelJointTorque = new YoDouble("kVelJointTorque",
          "Gain for velocity control in order to achieve acceleration control using additional joint torque", registry);
 
-   private final DoubleYoVariable kPosJointTorque = new DoubleYoVariable("kPosJointTorque",
+   private final YoDouble kPosJointTorque = new YoDouble("kPosJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque", registry);
 
-   private final DoubleYoVariable kVelArmJointTorque = new DoubleYoVariable("kVelArmJointTorque",
+   private final YoDouble kVelArmJointTorque = new YoDouble("kVelArmJointTorque",
          "Gain for velocity control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private final DoubleYoVariable kPosArmJointTorque = new DoubleYoVariable("kPosArmJointTorque",
+   private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
    private ArrayList<OneDoFJoint> oneDoFJoints;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredVelocityMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> alphaDesiredPositionMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> velocityTorqueMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> positionTorqueMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kVelJointTorqueMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> kPosJointTorqueMap;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities;
-   private LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions;
+   private LinkedHashMap<OneDoFJoint, YoDouble> alphaDesiredVelocityMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> alphaDesiredPositionMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> velocityTorqueMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> positionTorqueMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> kVelJointTorqueMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> kPosJointTorqueMap;
+   private LinkedHashMap<OneDoFJoint, YoDouble> desiredVelocities;
+   private LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions;
 
    private final double updateDT;
    private final boolean conservative;
@@ -167,8 +167,8 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         DoubleYoVariable qd_d_joint = desiredVelocities.get(oneDoFJoint);
-         DoubleYoVariable q_d_joint = desiredPositions.get(oneDoFJoint);
+         YoDouble qd_d_joint = desiredVelocities.get(oneDoFJoint);
+         YoDouble q_d_joint = desiredPositions.get(oneDoFJoint);
 
          boolean integrateDesiredAccelerations = oneDoFJoint.getIntegrateDesiredAccelerations();
          // Don't call the listener there, we want to be able to set those both from the controller and SCS.
@@ -201,7 +201,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       drcOutputWriter.writeAfterController(timestamp);
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint oneDoFJoint, DoubleYoVariable qd_d_joint, DoubleYoVariable q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint oneDoFJoint, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
       double currentPosition = oneDoFJoint.getQ();
       double currentVelocity = oneDoFJoint.getQd();
@@ -233,7 +233,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
    }
 
-   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
    public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
@@ -273,14 +273,14 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
          }
       }
 
-      desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-      desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      desiredVelocities = new LinkedHashMap<OneDoFJoint, YoDouble>();
+      desiredPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
       alphaDesiredVelocityMap = new LinkedHashMap<>();
       alphaDesiredPositionMap = new LinkedHashMap<>();
 
-      kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-      kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+      kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
+      kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
       velocityTorqueMap = new LinkedHashMap<>();
       positionTorqueMap = new LinkedHashMap<>();
@@ -288,15 +288,15 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
          final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         final BooleanYoVariable doAccelerationIntegration = new BooleanYoVariable("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
-         DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_" + oneDoFJoint.getName(), registry);
-         DoubleYoVariable desiredPosition = new DoubleYoVariable("q_d_" + oneDoFJoint.getName(), registry);
+         final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
+         YoDouble desiredVelocity = new YoDouble("qd_d_" + oneDoFJoint.getName(), registry);
+         YoDouble desiredPosition = new YoDouble("q_d_" + oneDoFJoint.getName(), registry);
 
          desiredVelocities.put(oneDoFJoint, desiredVelocity);
          desiredPositions.put(oneDoFJoint, desiredPosition);
 
-         DoubleYoVariable velocityTorque = new DoubleYoVariable("tau_vel_" + oneDoFJoint.getName(), registry);
-         DoubleYoVariable positionTorque = new DoubleYoVariable("tau_pos_" + oneDoFJoint.getName(), registry);
+         YoDouble velocityTorque = new YoDouble("tau_vel_" + oneDoFJoint.getName(), registry);
+         YoDouble positionTorque = new YoDouble("tau_pos_" + oneDoFJoint.getName(), registry);
 
          velocityTorqueMap.put(oneDoFJoint, velocityTorque);
          positionTorqueMap.put(oneDoFJoint, positionTorque);

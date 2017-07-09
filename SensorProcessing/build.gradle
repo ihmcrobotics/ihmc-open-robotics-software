@@ -41,7 +41,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
+    compile group: 'us.ihmc', name: 'euclid', version: '0.5.0'
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
@@ -62,7 +64,7 @@ dependencies {
     compile ihmc.getProjectDependency(":KalmanProject")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
@@ -71,7 +73,7 @@ dependencies {
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 

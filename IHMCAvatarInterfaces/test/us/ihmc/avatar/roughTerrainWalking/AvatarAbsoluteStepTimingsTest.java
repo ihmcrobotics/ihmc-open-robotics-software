@@ -1,6 +1,7 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -16,41 +17,36 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithAngularMomentumOffset;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   static
-   {
-      simulationTestingParameters.setRunMultiThreaded(false);
-   }
-
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final int TICK_EPSILON = 4;
+   private static final double swingStartTimeEpsilon = 0.04 * 4.0;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -80,10 +76,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
-         Point3D location = new Point3D((double) stepIndex * stepLength, y, 0.0);
+         Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (stepIndex == 0)
             footstepData.setTransferDuration(swingStartInterval);
@@ -94,24 +89,77 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footsteps.add(footstepData);
       }
 
-      double controllerDt = getRobotModel().getControllerDT();
-      double timeEpsilon = (double) TICK_EPSILON * controllerDt;
+      YoVariable<?> yoTime = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("t");
+      TimingChecker timingChecker = new TimingChecker(scs, footsteps);
+      yoTime.addVariableChangedListener(timingChecker);
 
       drcSimulationTestHelper.send(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingStartInterval - timeEpsilon));
-      String failMessage = "Swing did not start at the expected time.";
-
-      for (int stepIndex = 0; stepIndex < steps; stepIndex++)
+      while (!timingChecker.isDone())
       {
-         assertTrue(failMessage, getWalkingState(scs).isDoubleSupport());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * timeEpsilon));
-         assertTrue(failMessage, getWalkingState(scs).isSingleSupport());
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingStartInterval - 2.0 * timeEpsilon));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2));
       }
-
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
+   private class TimingChecker implements VariableChangedListener
+   {
+      private static final String failMessage = "Swing did not start at expected time.";
+
+      private int stepCount = 0;
+      private double expectedStartTimeOfNextStep = 0.0;
+      private WalkingStateEnum previousWalkingState = WalkingStateEnum.STANDING;
+
+      private final SimulationConstructionSet scs;
+      private final FootstepDataListMessage footsteps;
+
+      private boolean isDone = false;
+
+      public TimingChecker(SimulationConstructionSet scs, FootstepDataListMessage footsteps)
+      {
+         this.scs = scs;
+         this.footsteps = footsteps;
+      }
+
+      @Override
+      public void variableChanged(YoVariable<?> v)
+      {
+         if (isDone)
+         {
+            return;
+         }
+
+         double time = v.getValueAsDouble();
+         WalkingStateEnum walkingState = getWalkingState(scs);
+
+         if (previousWalkingState.isDoubleSupport() && walkingState.isSingleSupport())
+         {
+            if (stepCount == 0)
+            {
+               expectedStartTimeOfNextStep = time;
+            }
+
+            assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
+
+            if (stepCount > footsteps.getDataList().size() - 2)
+            {
+               isDone = true;
+               return;
+            }
+
+            double swingTime = footsteps.get(stepCount).getSwingDuration();
+            double transferTime = footsteps.get(stepCount + 1).getTransferDuration();
+            expectedStartTimeOfNextStep += swingTime + transferTime;
+            stepCount++;
+         }
+
+         previousWalkingState = walkingState;
+      }
+
+      public boolean isDone()
+      {
+         return isDone;
+      }
+
+   }
 
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
@@ -137,7 +185,6 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Point3D location = new Point3D(0.0, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepData.setTransferDuration(minimumTransferTime / 2.0);
          footsteps.add(footstepData);
       }
@@ -149,18 +196,19 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithTimeFreezer.class.getSimpleName());
+      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithAngularMomentumOffset.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 
-   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoDouble getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
-   private WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
+   @SuppressWarnings("unchecked")
+   private static WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
    {
-      return (WalkingStateEnum) getYoVariable(scs, "WalkingState", WalkingHighLevelHumanoidController.class.getSimpleName(), EnumYoVariable.class).getEnumValue();
+      return (WalkingStateEnum) getYoVariable(scs, "WalkingState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
    }
 
    private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
@@ -189,7 +237,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
          for (int i = 0; i < 50; i++)
          {
-            double xStart = flatArea + (double) i * flatArea - flatArea / 2.0;
+            double xStart = flatArea + i * flatArea - flatArea / 2.0;
             double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
             double length = flatArea;
             terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);

@@ -1,170 +1,153 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+/**
+ * Class that represents constraining a variable to lie in a convex region. This constraint has the form<br>
+ *    A<sub>in</sub>x <= b<sub>in</sub><br>
+ * where x is the variable to be constrained. This class also allows the formulation<br>
+ *    A<sub>in</sub>(x - a) <= b<sub>in</sub>,<br>
+ * allowing the constrained variable to be offset inside the polygon. <br>
+ * Note that this representation
+ * relies on the ability to represent lying in a convex polygon as a linear inequality constraint.
+ * Higher complexity convex regions can be represented, but may require more complex constraints. As
+ * an example, the variable can be constrained to a circle, but this requires a quadratic constraint.
+ */
 public class ConstraintToConvexRegion
 {
-   public final DenseMatrix64F quadraticTerm;
+   /** position offset of the constrained variable. */
+   public final DenseMatrix64F positionOffset;
 
-   public final DenseMatrix64F indexSelectionMatrix = CommonOps.identity(2, 2);
-
-   public final DenseMatrix64F dynamics_Aeq;
-   public final DenseMatrix64F dynamics_beq;
-
-   public final DenseMatrix64F sum_Aeq;
-   public final DenseMatrix64F sum_beq;
-
+   /** matrix multiplier of the constrained variable. */
    public final DenseMatrix64F Aineq;
+   /** desired convex region for the constrained variable. */
    public final DenseMatrix64F bineq;
 
-   private final ArrayList<DenseMatrix64F> vertexLocations = new ArrayList<>();
+   /** distance inside the convex region required for the constrained variable. */
+   private double deltaInside = 0.0;
 
-   private final int maximumNumberOfVertices;
-   private int indexOfVariableToConstrain;
-   private int numberOfVertices = 0;
+   /** convex polygon in which to constrain the variable. */
+   private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
 
-   private double smoothingWeight = 0.001;
-   private double vertexMinimum = 0.0;
-
+   /**
+    * Creates the Constraint To Convex Region. Refer to the class documentation: {@link ConstraintToConvexRegion}.
+    *
+    * @param maximumNumberOfVertices maximum number of vertices to initialize the convex region size.
+    */
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
-      this.maximumNumberOfVertices = maximumNumberOfVertices;
-
-      quadraticTerm = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
-      CommonOps.scale(-1.0, indexSelectionMatrix);
-
-      dynamics_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 2);
-      dynamics_beq = new DenseMatrix64F(2, 1);
-
-      sum_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 1);
-      sum_beq = new DenseMatrix64F(1, 1);
+      positionOffset = new DenseMatrix64F(2, 1);
 
       Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
-
-      for (int i = 0; i < maximumNumberOfVertices; i++)
-         vertexLocations.add(new DenseMatrix64F(1, 2));
    }
 
+   /**
+    * Resets the convex region, requiring all the vertices to be readded. Should be called whenever
+    * the shape of the convex region changes.
+    */
    public void reset()
    {
-      quadraticTerm.zero();
-
-      dynamics_Aeq.zero();
-      dynamics_beq.zero();
-
-      sum_Aeq.zero();
-      sum_beq.zero();
+      positionOffset.zero();
+      convexPolygon.clear();
 
       Aineq.zero();
       bineq.zero();
-
-      numberOfVertices = 0;
-      for (int i = 0; i < maximumNumberOfVertices; i++)
-         vertexLocations.get(i).zero();
    }
 
-   private void reshape()
-   {
-      quadraticTerm.reshape(numberOfVertices, numberOfVertices);
-
-      dynamics_Aeq.reshape(numberOfVertices, 2);
-      sum_Aeq.reshape(numberOfVertices, 1);
-
-      Aineq.reshape(numberOfVertices, numberOfVertices);
-      bineq.reshape(numberOfVertices, 1);
-   }
-
-   public void setIndexOfVariableToConstrain(int index)
-   {
-      indexOfVariableToConstrain = index;
-   }
-
-   public void addVertex(DenseMatrix64F vertex)
-   {
-      vertexLocations.get(numberOfVertices).set(vertex);
-      numberOfVertices++;
-   }
-
-   private final DenseMatrix64F tmpPoint = new DenseMatrix64F(1, 2);
+   /**
+    * Adds a vertex to the convex region.
+    *
+    * @param vertex vertex to add.
+    */
    public void addVertex(FramePoint2d vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      tmpPoint.zero();
-      tmpPoint.set(0, 0, vertex.getX());
-      tmpPoint.set(0, 1, vertex.getY());
-
-      addVertex(tmpPoint);
+      convexPolygon.addVertex(vertex.getPoint());
    }
 
+   public void addPolygon(FrameConvexPolygon2d polygon)
+   {
+      convexPolygon.addVertices(polygon.getConvexPolygon2d());
+   }
+
+   /**
+    * Adds a vertex to the convex region.
+    *
+    * @param vertex vertex to add.
+    */
    public void addVertex(FramePoint vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      tmpPoint.zero();
-      tmpPoint.set(0, 0, vertex.getX());
-      tmpPoint.set(0, 1, vertex.getY());
-
-      addVertex(tmpPoint);
+      convexPolygon.addVertex(vertex.getX(), vertex.getY());
    }
 
+   /**
+    * Sets the polygon for the convex constraint to use. Should be called after
+    * all the vertices have been added using {@link #addVertex(FramePoint)} or
+    * {@link #addVertex(FramePoint2d)}.
+    */
+   public void setPolygon()
+   {
+      convexPolygon.update();
+   }
+
+   /**
+    * Sets the position offset of the variable that is being constrained. This is
+    * useful when the constrained variable is a vector from a point, such as a feedback
+    * modification.
+    * @param offset offset from the constrained variable.
+    */
    public void setPositionOffset(DenseMatrix64F offset)
    {
-      MatrixTools.setMatrixBlock(dynamics_beq, 0, 0, offset, 0, 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(positionOffset, 0, 0, offset, 0, 0, 2, 1, 1.0);
    }
 
-   public void setSmoothingWeight(double smoothingWeight)
+   /**
+    * Sets a desired distance inside the convex region for the constrained variable to
+    * be. It is useful to use this as some small value, so that the constrained variable
+    * does not sit completely on the bounds of the convex region.
+    *
+    * @param deltaInside distance inside the convex region.
+    */
+   public void setDeltaInside(double deltaInside)
    {
-      this.smoothingWeight = smoothingWeight;
+      this.deltaInside = deltaInside;
    }
 
-   public void setVertexMinimum(double vertexMinimum)
-   {
-      this.vertexMinimum = vertexMinimum;
-   }
-
+   /**
+    * Formulates the actual constraint from the {@link #convexPolygon}
+    */
    public void formulateConstraint()
    {
-      reshape();
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         dynamics_Aeq.set(i, 0, vertexLocations.get(i).get(0, 0));
-         dynamics_Aeq.set(i, 1, vertexLocations.get(i).get(0, 1));
-
-         sum_Aeq.set(i, 0, 1.0);
-
-         Aineq.set(i, i, -1.0);
-         bineq.set(i, 0, -vertexMinimum);
-      }
-      sum_beq.set(0, 0, 1.0);
-
-      setSmoothingCost();
-
+      PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, deltaInside);
+      CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 
-   private void setSmoothingCost()
+   /**
+    * Gets the total size of the required inequality constraint.
+    *
+    * @return number of vertices.
+    */
+   public int getInequalityConstraintSize()
    {
-      CommonOps.setIdentity(quadraticTerm);
-      CommonOps.scale(smoothingWeight, quadraticTerm);
-   }
-
-   public int getNumberOfVertices()
-   {
-      return numberOfVertices;
-   }
-
-   public int getIndexOfVariableToConstrain()
-   {
-      return indexOfVariableToConstrain;
+      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      if (numberOfVertices > 2)
+         return numberOfVertices;
+      else if (numberOfVertices > 0)
+         return 4;
+      else
+         return 0;
    }
 }

@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
-import javax.swing.plaf.synth.SynthSplitPaneUI;
-
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
@@ -21,8 +19,8 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableClient implements LogPacketHandler
@@ -310,6 +308,11 @@ public class YoVariableClient implements LogPacketHandler
    {
       if (state == ClientState.RUNNING)
       {
+         if(variableChangedProducer != null)
+         {
+            variableChangedProducer.disconnect();
+         }
+
          dataConsumerParticipant.remove();
          yoVariablesUpdatedListener.disconnected();
 

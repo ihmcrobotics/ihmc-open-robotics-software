@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -56,7 +56,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
       initRobotConfiguration();
       
       packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, new IHMCCommunicationKryoNetClassList());
-      packetCommunicator.attachStateListener(new NetStateListener()
+      packetCommunicator.attachStateListener(new ConnectionStateListener()
       {
          @Override
          public void disconnected()

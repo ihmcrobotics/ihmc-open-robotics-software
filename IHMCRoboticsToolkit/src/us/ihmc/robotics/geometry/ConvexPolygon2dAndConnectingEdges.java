@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 
 /**
  * <p>Title: </p>
@@ -15,27 +17,27 @@ package us.ihmc.robotics.geometry;
  */
 public class ConvexPolygon2dAndConnectingEdges
 {
-   private final ConvexPolygon2d polygon;
-   private final LineSegment2d connectingEdge1, connectingEdge2;
+   private final ConvexPolygon2D polygon;
+   private final LineSegment2D connectingEdge1, connectingEdge2;
 
-   public ConvexPolygon2dAndConnectingEdges(ConvexPolygon2d polygon, LineSegment2d connectingEdge1, LineSegment2d connectingEdge2)
+   public ConvexPolygon2dAndConnectingEdges(ConvexPolygon2D polygon, LineSegment2D connectingEdge1, LineSegment2D connectingEdge2)
    {
       this.polygon = polygon;
       this.connectingEdge1 = connectingEdge1;
       this.connectingEdge2 = connectingEdge2;
    }
 
-   public ConvexPolygon2d getConvexPolygon2d()
+   public ConvexPolygon2D getConvexPolygon2d()
    {
       return polygon;
    }
 
-   public LineSegment2d getConnectingEdge1()
+   public LineSegment2D getConnectingEdge1()
    {
       return connectingEdge1;
    }
 
-   public LineSegment2d getConnectingEdge2()
+   public LineSegment2D getConnectingEdge2()
    {
       return connectingEdge2;
    }

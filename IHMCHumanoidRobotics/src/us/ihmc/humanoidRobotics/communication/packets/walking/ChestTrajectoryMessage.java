@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -52,19 +51,25 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed in World.
     */
-   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long expressedInReferenceFrameId, long trajectoryReferenceFrameID)
+   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long trajectoryReferenceFrameID)
    {
-      super(trajectoryTime, desiredOrientation, expressedInReferenceFrameId, trajectoryReferenceFrameID);
+      super(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID);
    }
-   
+
    /**
     * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed the supplied frame.
     */
-   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame expressedInReferenceFrame, ReferenceFrame trajectoryFrame)
+   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame trajectoryFrame)
    {
-      super(trajectoryTime, desiredOrientation, expressedInReferenceFrame, trajectoryFrame);
+      super(trajectoryTime, desiredOrientation, trajectoryFrame);
+   }
+
+   public ChestTrajectoryMessage(double trajectoryTime, Quaternion quaternion, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
+   {
+      this(trajectoryTime, quaternion, trajectoryFrame);
+      getFrameInformation().setDataReferenceFrame(dataFrame);
    }
 
    /**
@@ -77,8 +82,5 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
    public ChestTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      super.setTrajectoryReferenceFrameId(CommonReferenceFrameIds.PELVIS_ZUP_FRAME.getHashId());
-      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
    }
-
 }

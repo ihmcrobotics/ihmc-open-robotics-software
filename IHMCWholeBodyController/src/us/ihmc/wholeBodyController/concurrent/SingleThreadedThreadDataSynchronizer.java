@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -40,9 +40,9 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final ContactSensorHolder controllerContactSensorHolder;
    private final DesiredJointDataHolder controllerDesiredJointDataHolder;
 
-   private final LongYoVariable timestamp;
-   private final LongYoVariable estimatorClockStartTime;
-   private final LongYoVariable estimatorTick;
+   private final YoLong timestamp;
+   private final YoLong estimatorClockStartTime;
+   private final YoLong estimatorTick;
    
    private final FullRobotModelRootJointRewinder fullRobotModelRewinder;
    
@@ -54,9 +54,9 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
     */
    public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, WholeBodyControllerParameters wholeBodyControlParameters, YoVariableRegistry registry)
    {
-      timestamp = new LongYoVariable(getClass().getSimpleName() + "Timestamp", registry);
-      estimatorClockStartTime = new LongYoVariable(getClass().getSimpleName() + "EstimatorClockStartTime", registry);
-      estimatorTick = new LongYoVariable(getClass().getSimpleName() + "EstimatorTick", registry);
+      timestamp = new YoLong(getClass().getSimpleName() + "Timestamp", registry);
+      estimatorClockStartTime = new YoLong(getClass().getSimpleName() + "EstimatorClockStartTime", registry);
+      estimatorTick = new YoLong(getClass().getSimpleName() + "EstimatorTick", registry);
       
       estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));

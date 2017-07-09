@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,26 +10,20 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Cylinder3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
-   private static final double EPS = 1.0e-12;
-
    protected final BoundingBox3D boundingBox;
-   protected final Cylinder3d cylinder;
+   protected final Cylinder3D cylinder;
    private final RigidBodyTransform location;
    private final double height;
    private final double radius;
    protected Graphics3DObject linkGraphics;
 
    private final Point3D tempPoint = new Point3D();
-   private final Vector3D zVector = new Vector3D(0.0, 0.0, 1.0);
+   private final Vector3D zVector = new Vector3D(0.0, 0.0, -1.0);
 
    // TODO: change box based surface equations to cylinder surface equations
 
@@ -39,9 +33,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       this.radius = radius;
       this.location = location;
       RigidBodyTransform bottomTransform = transformToBottomOfCylinder();
-      cylinder = new Cylinder3d(bottomTransform, height, radius);
+      cylinder = new Cylinder3D(bottomTransform, height, radius);
 
-      Box3d box = new Box3d(location, radius * 2, radius * 2, height);
+      Box3D box = new Box3D(location, radius * 2, radius * 2, height);
       Point3D[] vertices = box.getVertices();
       Point3D minPoint = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point3D maxPoint = new Point3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
@@ -80,7 +74,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    private RigidBodyTransform transformToBottomOfCylinder()
    {
-      return TransformTools.transformLocalZ(location, -height / 2.0);
+      RigidBodyTransform ret = new RigidBodyTransform(location);
+      ret.appendTranslation(0.0, 0.0, -height / 2.0);
+      return ret;
    }
 
    @Override
@@ -107,115 +103,29 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    @Override
    public double heightAt(double x, double y, double z)
    {
-      Line3D axis = getAxis();
       Point3D testPoint = new Point3D(x, y, z);
       Line3D zLine = new Line3D(testPoint, zVector);
 
-      double distance = axis.distance(zLine);
+      Point3D intersection1 = new Point3D();
+      Point3D intersection2 = new Point3D();
+      int numberOfIntersections = cylinder.intersectionWith(zLine, intersection1, intersection2);
 
-      if (distance > radius)
-         return 0.0;
-
-      ArrayList<Point3D> intersections = new ArrayList<Point3D>();
-
-      // Find intersections of line with planes at end of cylinder
-      Vector3D testDirection = zVector;
-
-      addCylinderEndIntersectionsWithLine(intersections, testPoint, testDirection);
-
-      if (intersections.size() < 2)
+      if (numberOfIntersections == 0)
+         return 0;
+      else if (numberOfIntersections == 1)
+         return intersection1.getZ();
+      else
       {
-         addCylinderSideIntersectionsWithLine(intersections, testPoint, testDirection);
+         /*
+          * TODO Review the following.
+          * I think it should return only the highest of the two intersections which always
+          * is intersection1.
+          */
+         if (testPoint.distanceSquared(intersection1) < testPoint.distanceSquared(intersection2))
+            return intersection1.getZ();
+         else
+            return intersection2.getZ();
       }
-
-      if (intersections.isEmpty())
-         return 0.0;
-
-      // TODO: This returns the closest, not the highest, which is what heightAt should return...
-      Point3D closestPoint = intersections.get(0);
-      double closestSquaredDistance = closestPoint.distanceSquared(testPoint);
-      for (Point3D intersection : intersections)
-      {
-         double nextSquaredDistance = intersection.distanceSquared(testPoint);
-         if (nextSquaredDistance < closestSquaredDistance)
-         {
-            closestSquaredDistance = nextSquaredDistance;
-            closestPoint = intersection;
-         }
-      }
-
-      return closestPoint.getZ();
-
-      // If not finite, then the line is perpendicular
-      // Find abscissa on axis of closest point to line
-      // If not in range (z0 to zh), no intersection
-      // Else continue with finding intersections with side of cylinder
-      // If both plane intersections d < r
-      // Choose and return closest point of two (Takes care of parallel condition which would cause following to fail)
-      // Find intersection(s) with side of cylinder and corresponding ptx, pty, ptz
-      // in cylinder coordinates ptx^2+pty^2=r^2
-      // If both ptz in zrange
-      // Return closest point
-      // If both ptz on same side of zrange
-      // no answer
-      // Should have one ptz in range, and one point with d<r
-      // ->Return the point closest to x,y,z
-
-   }
-
-   private void addCylinderSideIntersectionsWithLine(ArrayList<Point3D> intersections, Point3D testPoint, Vector3D testDirection)
-   {
-      Point3D localTestPoint = new Point3D(testPoint);
-      Vector3D localVector = new Vector3D(testDirection);
-      transformLineToLocalCoordinates(localTestPoint, localVector);
-
-      double a = localVector.getX() * localVector.getX() + localVector.getY() * localVector.getY();
-      double b = 2 * (localTestPoint.getX() * localVector.getX() + localTestPoint.getY() * localVector.getY());
-      double c = localTestPoint.getX() * localTestPoint.getX() + localTestPoint.getY() * localTestPoint.getY() - radius * radius;
-      double[] t = solveQuadraticEquation(a, b, c);
-
-      for (int i = 0; i < t.length; i++)
-      {
-         Point3D localSideIntersection = new Point3D();
-         localSideIntersection.scaleAdd(t[i], localVector, localTestPoint);
-
-         if ((localSideIntersection.getZ() > -height / 2 - EPS) && (localSideIntersection.getZ() < height / 2 + EPS))
-         {
-            location.transform(localSideIntersection);
-            intersections.add(localSideIntersection);
-         }
-      }
-   }
-
-   private void addCylinderEndIntersectionsWithLine(ArrayList<Point3D> intersections, Point3D testPoint, Vector3D testDirection)
-   {
-      for (Cylinder3d.CylinderFaces face : Cylinder3d.CylinderFaces.values())
-      {
-         Plane3d plane = cylinder.getPlane(face);
-         Point3D intersectionToPack = new Point3D();
-         plane.getIntersectionWithLine(intersectionToPack, testPoint, testDirection);
-
-         if (EuclidCoreMissingTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius + EPS))
-         {
-            intersections.add(intersectionToPack);
-         }
-      }
-   }
-
-   private double[] solveQuadraticEquation(double ax2, double bx, double c)
-   {
-      double val = Math.sqrt(bx * bx - 4 * ax2 * c);
-      double[] x = {(-bx + val) / (2 * ax2), (-bx - val) / (2 * ax2)};
-
-      return x;
-   }
-
-   private void transformLineToLocalCoordinates(Point3D localPointToPack, Vector3D localDirectionVectorToPack)
-   {
-      RigidBodyTransform inverseTransform = new RigidBodyTransform();
-      inverseTransform.setAndInvert(location);
-      inverseTransform.transform(localPointToPack);
-      inverseTransform.transform(localDirectionVectorToPack);
    }
 
    public Line3D getAxis()

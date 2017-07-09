@@ -1,11 +1,10 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class JerryEncoderProcessor extends AbstractEncoderProcessor
 {
@@ -18,46 +17,46 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
       ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15;    // 0.1; //0.15;
 
-   private final EnumYoVariable<EncoderState> state;
+   private final YoEnum<EncoderState> state;
 
-   private final IntegerYoVariable previousRawTicks, previousRawTicksTwoBack;
-   private final IntegerYoVariable previousProcessedTicks, previousProcessedTicksTwoBack;
-   private final DoubleYoVariable previousTime, previousTimeTwoBack;
+   private final YoInteger previousRawTicks, previousRawTicksTwoBack;
+   private final YoInteger previousProcessedTicks, previousProcessedTicksTwoBack;
+   private final YoDouble previousTime, previousTimeTwoBack;
 
    private final double dt;
 
-   private final DoubleYoVariable maxPossibleRate;
-   private final DoubleYoVariable minPriorRate, maxPriorRate, averagePriorRate;
+   private final YoDouble maxPossibleRate;
+   private final YoDouble minPriorRate, maxPriorRate, averagePriorRate;
    private int updateCount=0;
    private final int slowUpdateFactor;
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt,YoVariableRegistry registry)
    {
       this( name,  rawTicks,  time,  distancePerTick,  dt, 1, registry);
    }
 
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
       this.slowUpdateFactor = slowUpdateFactor;
       this.dt = dt*slowUpdateFactor;
 
-      this.state = EnumYoVariable.create(name + "state", EncoderState.class, registry);
+      this.state = YoEnum.create(name + "state", EncoderState.class, registry);
 
-      this.minPriorRate = new DoubleYoVariable(name + "minPriorRate", registry);
-      this.maxPriorRate = new DoubleYoVariable(name + "maxPriorRate", registry);
+      this.minPriorRate = new YoDouble(name + "minPriorRate", registry);
+      this.maxPriorRate = new YoDouble(name + "maxPriorRate", registry);
 
 
-      this.maxPossibleRate = new DoubleYoVariable(name + "maxPossibleRate", registry);
-      this.averagePriorRate = new DoubleYoVariable(name + "averagePriorRate", registry);
+      this.maxPossibleRate = new YoDouble(name + "maxPossibleRate", registry);
+      this.averagePriorRate = new YoDouble(name + "averagePriorRate", registry);
 
-      this.previousRawTicksTwoBack = new IntegerYoVariable(name + "prevRawPos2", registry);
-      this.previousRawTicks = new IntegerYoVariable(name + "prevRawPos", registry);
-      this.previousTime = new DoubleYoVariable(name + "prevTime", registry);
+      this.previousRawTicksTwoBack = new YoInteger(name + "prevRawPos2", registry);
+      this.previousRawTicks = new YoInteger(name + "prevRawPos", registry);
+      this.previousTime = new YoDouble(name + "prevTime", registry);
 
-      this.previousProcessedTicks = new IntegerYoVariable(name + "prevPos", registry);
-      this.previousProcessedTicksTwoBack = new IntegerYoVariable(name + "prevPos2", registry);
-      this.previousTimeTwoBack = new DoubleYoVariable(name + "prevTime2", registry);
+      this.previousProcessedTicks = new YoInteger(name + "prevPos", registry);
+      this.previousProcessedTicksTwoBack = new YoInteger(name + "prevPos2", registry);
+      this.previousTimeTwoBack = new YoDouble(name + "prevTime2", registry);
    }
 
    public void initialize()

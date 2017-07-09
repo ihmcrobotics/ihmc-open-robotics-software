@@ -25,7 +25,7 @@ public abstract class RosCameraReceiver
       else if(cameraParameters.useStaticTransformFromHeadFrameToSensor())
       {
          staticTransform.set(cameraParameters.getStaticTransformFromHeadFrameToCameraFrame());
-         ReferenceFrame headFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("headToCamera", cameraDataReceiver.getHeadFrame(), staticTransform);
+         ReferenceFrame headFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("headToCamera", cameraDataReceiver.getHeadFrame(), staticTransform);
          cameraDataReceiver.setCameraFrame(headFrame);
       }
       else

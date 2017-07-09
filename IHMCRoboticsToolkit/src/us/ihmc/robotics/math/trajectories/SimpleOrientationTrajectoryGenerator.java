@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -16,13 +16,13 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 {
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
 
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameQuaternion finalOrientation;
-   
+
    private final YoFrameQuaternion currentOrientation;
    private final YoFrameVector currentAngularVelocity;
    private final YoFrameVector currentAngularAcceleration;
@@ -38,10 +38,10 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
       parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
-      
+
       String initialOrientationName = namePrefix + "InitialOrientation";
       String finalOrientationName = namePrefix + "FinalOrientation";
       String currentOrientationName = namePrefix + "CurrentOrientation";
@@ -78,12 +78,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
    public void setInitialOrientation(FrameOrientation initialOrientation)
    {
-      this.initialOrientation.set(initialOrientation);
+      this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
    public void setFinalOrientation(FrameOrientation finalOrientation)
    {
-      this.finalOrientation.set(finalOrientation);
+      this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
 
    public void setTrajectoryTime(double newTrajectoryTime)
@@ -97,7 +97,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       currentTime.set(0.0);
       MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       parameterPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-      
+
       currentOrientation.set(initialOrientation);
       currentAngularVelocity.setToZero();
       currentAngularAcceleration.setToZero();
@@ -163,7 +163,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    public String toString()
    {
       String ret = "";
-      
+
       ret += "Current time: " + currentTime.getDoubleValue() + ", trajectory time: " + trajectoryTime.getDoubleValue();
       ret += "\nCurrent orientation: " + currentOrientation.toString();
       ret += "\nCurrent angular velocity: " + currentAngularVelocity.toString();

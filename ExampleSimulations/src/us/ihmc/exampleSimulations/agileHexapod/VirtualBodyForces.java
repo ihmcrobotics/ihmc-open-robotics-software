@@ -1,59 +1,57 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VirtualBodyForces
 {
 
    // private YoVariable q_yaw, q_roll, q_pitch;
-   private DoubleYoVariable q_hip1_x, q_hip1_z, q_knee1;
-   private DoubleYoVariable q_hip2_x, q_hip2_z, q_knee2;
-   private DoubleYoVariable q_hip3_x, q_hip3_z, q_knee3;
-   private DoubleYoVariable q_hip4_x, q_hip4_z, q_knee4;
-   private DoubleYoVariable q_hip5_x, q_hip5_z, q_knee5;
-   private DoubleYoVariable q_hip6_x, q_hip6_z, q_knee6;
+   private YoDouble q_hip1_x, q_hip1_z, q_knee1;
+   private YoDouble q_hip2_x, q_hip2_z, q_knee2;
+   private YoDouble q_hip3_x, q_hip3_z, q_knee3;
+   private YoDouble q_hip4_x, q_hip4_z, q_knee4;
+   private YoDouble q_hip5_x, q_hip5_z, q_knee5;
+   private YoDouble q_hip6_x, q_hip6_z, q_knee6;
 
 
-   private DoubleYoVariable q_yaw, q_roll, q_pitch;
+   private YoDouble q_yaw, q_roll, q_pitch;
 
-   private DoubleYoVariable fx1, fy1, fz1, tx1, ty1, tz1;
-   private DoubleYoVariable fx2, fy2, fz2, tx2, ty2, tz2;
-   private DoubleYoVariable fx3, fy3, fz3, tx3, ty3, tz3;
-   private DoubleYoVariable fx4, fy4, fz4, tx4, ty4, tz4;
-   private DoubleYoVariable fx5, fy5, fz5, tx5, ty5, tz5;
-   private DoubleYoVariable fx6, fy6, fz6, tx6, ty6, tz6;
+   private YoDouble fx1, fy1, fz1, tx1, ty1, tz1;
+   private YoDouble fx2, fy2, fz2, tx2, ty2, tz2;
+   private YoDouble fx3, fy3, fz3, tx3, ty3, tz3;
+   private YoDouble fx4, fy4, fz4, tx4, ty4, tz4;
+   private YoDouble fx5, fy5, fz5, tx5, ty5, tz5;
+   private YoDouble fx6, fy6, fz6, tx6, ty6, tz6;
 
-   private DoubleYoVariable ff_hip1_x, ff_hip1_z, ff_knee1;
-   private DoubleYoVariable ff_hip2_x, ff_hip2_z, ff_knee2;
-   private DoubleYoVariable ff_hip3_x, ff_hip3_z, ff_knee3;
-   private DoubleYoVariable ff_hip4_x, ff_hip4_z, ff_knee4;
-   private DoubleYoVariable ff_hip5_x, ff_hip5_z, ff_knee5;
-   private DoubleYoVariable ff_hip6_x, ff_hip6_z, ff_knee6;
+   private YoDouble ff_hip1_x, ff_hip1_z, ff_knee1;
+   private YoDouble ff_hip2_x, ff_hip2_z, ff_knee2;
+   private YoDouble ff_hip3_x, ff_hip3_z, ff_knee3;
+   private YoDouble ff_hip4_x, ff_hip4_z, ff_knee4;
+   private YoDouble ff_hip5_x, ff_hip5_z, ff_knee5;
+   private YoDouble ff_hip6_x, ff_hip6_z, ff_knee6;
 
    public VirtualBodyForces(AgileHexapodRobot rob, AgileHexapodController con)
    {
       // q_yaw = con.getVar("q_yaw"); q_roll = con.getVar("q_roll"); q_pitch = con.getVar("q_pitch");
 
-      q_hip1_x = (DoubleYoVariable)rob.getVariable("q_hip1_x");
-      q_hip1_z = (DoubleYoVariable)rob.getVariable("q_hip1_z");
-      q_knee1 = (DoubleYoVariable)rob.getVariable("q_knee1");
-      q_hip2_x = (DoubleYoVariable)rob.getVariable("q_hip2_x");
-      q_hip2_z = (DoubleYoVariable)rob.getVariable("q_hip2_z");
-      q_knee2 = (DoubleYoVariable)rob.getVariable("q_knee2");
-      q_hip3_x = (DoubleYoVariable)rob.getVariable("q_hip3_x");
-      q_hip3_z = (DoubleYoVariable)rob.getVariable("q_hip3_z");
-      q_knee3 = (DoubleYoVariable)rob.getVariable("q_knee3");
-      q_hip4_x = (DoubleYoVariable)rob.getVariable("q_hip4_x");
-      q_hip4_z = (DoubleYoVariable)rob.getVariable("q_hip4_z");
-      q_knee4 = (DoubleYoVariable)rob.getVariable("q_knee4");
-      q_hip5_x = (DoubleYoVariable)rob.getVariable("q_hip5_x");
-      q_hip5_z = (DoubleYoVariable)rob.getVariable("q_hip5_z");
-      q_knee5 = (DoubleYoVariable)rob.getVariable("q_knee5");
-      q_hip6_x = (DoubleYoVariable)rob.getVariable("q_hip6_x");
-      q_hip6_z = (DoubleYoVariable)rob.getVariable("q_hip6_z");
-      q_knee6 = (DoubleYoVariable)rob.getVariable("q_knee6");
+      q_hip1_x = (YoDouble)rob.getVariable("q_hip1_x");
+      q_hip1_z = (YoDouble)rob.getVariable("q_hip1_z");
+      q_knee1 = (YoDouble)rob.getVariable("q_knee1");
+      q_hip2_x = (YoDouble)rob.getVariable("q_hip2_x");
+      q_hip2_z = (YoDouble)rob.getVariable("q_hip2_z");
+      q_knee2 = (YoDouble)rob.getVariable("q_knee2");
+      q_hip3_x = (YoDouble)rob.getVariable("q_hip3_x");
+      q_hip3_z = (YoDouble)rob.getVariable("q_hip3_z");
+      q_knee3 = (YoDouble)rob.getVariable("q_knee3");
+      q_hip4_x = (YoDouble)rob.getVariable("q_hip4_x");
+      q_hip4_z = (YoDouble)rob.getVariable("q_hip4_z");
+      q_knee4 = (YoDouble)rob.getVariable("q_knee4");
+      q_hip5_x = (YoDouble)rob.getVariable("q_hip5_x");
+      q_hip5_z = (YoDouble)rob.getVariable("q_hip5_z");
+      q_knee5 = (YoDouble)rob.getVariable("q_knee5");
+      q_hip6_x = (YoDouble)rob.getVariable("q_hip6_x");
+      q_hip6_z = (YoDouble)rob.getVariable("q_hip6_z");
+      q_knee6 = (YoDouble)rob.getVariable("q_knee6");
 
       q_yaw = con.q_yaw;
       q_roll = con.q_roll;
@@ -130,7 +128,7 @@ public class VirtualBodyForces
     *
     */
 
-   public void transform_forces_to_body(DoubleYoVariable fX, DoubleYoVariable fY, DoubleYoVariable fZ, DoubleYoVariable tX, DoubleYoVariable tY, DoubleYoVariable tZ)
+   public void transform_forces_to_body(YoDouble fX, YoDouble fY, YoDouble fZ, YoDouble tX, YoDouble tY, YoDouble tZ)
    {
       double f_x, f_y, f_z, t_x, t_y, t_z;
 
@@ -260,7 +258,7 @@ public class VirtualBodyForces
     */
 
    public void Jacobian(double force_x, double force_y, double force_z, double torq_x, double torq_y, double torq_z, double theta_ha, double theta_hb,
-                        double theta_k, double pos_x, double pos_y, DoubleYoVariable torq_ha, DoubleYoVariable torq_hb, DoubleYoVariable torq_k)
+                        double theta_k, double pos_x, double pos_y, YoDouble torq_ha, YoDouble torq_hb, YoDouble torq_k)
    {
       torq_ha.set((-pos_x * Math.sin(theta_hb) + pos_y * Math.cos(theta_hb)) * force_z - Math.cos(theta_hb) * torq_x - Math.sin(theta_hb) * torq_y);
       torq_hb.set(-pos_y * force_x + pos_x * force_y - torq_z);
@@ -280,7 +278,7 @@ public class VirtualBodyForces
     * ouput: modified values for the RFS(3v.)
     */
 
-   public void RedundantForces(double fx1, double fz1, double fx2, double fy2, double fz2, double fz3, DoubleYoVariable fx3, DoubleYoVariable fy3, DoubleYoVariable fy1)
+   public void RedundantForces(double fx1, double fz1, double fx2, double fy2, double fz2, double fz3, YoDouble fx3, YoDouble fy3, YoDouble fy1)
 
    {
       fx3.set(fx2);
@@ -302,7 +300,7 @@ public class VirtualBodyForces
    *********************************************************************** */
 
    public void ConstrainedForces(double force_x, double force_y, double force_z, double pos_x, double pos_y, double hip_x, double hip_z, double knee,
-                                 DoubleYoVariable torq_x, DoubleYoVariable torq_y, DoubleYoVariable torq_z)
+                                 YoDouble torq_x, YoDouble torq_y, YoDouble torq_z)
    {
       double JB_12, JB_13, JB_21, JB_23, JB_31, JB_32;
 

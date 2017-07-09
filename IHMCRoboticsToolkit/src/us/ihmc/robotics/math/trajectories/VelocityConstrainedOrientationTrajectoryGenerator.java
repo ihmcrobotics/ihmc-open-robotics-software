@@ -4,9 +4,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -47,8 +47,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 {
    private static final double PI = 1.0 * Math.PI;
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
 
    private final YoFrameQuaternion initialOrientation;
@@ -63,13 +63,13 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    private final YoFrameVector currentAngularAcceleration;
 
    private final YoPolynomial saturationPolynomial;
-   private final DoubleYoVariable maxAngularVelocityMagnitudeAtLimits;
-   private final DoubleYoVariable initialAngularVelocityMagnitude;
-   private final DoubleYoVariable finalAngularVelocityMagnitude;
-   private final BooleanYoVariable initialDriftSaturated;
-   private final BooleanYoVariable finalDriftSaturated;
-   private final DoubleYoVariable initialAlphaSaturation;
-   private final DoubleYoVariable finalAlphaSaturation;
+   private final YoDouble maxAngularVelocityMagnitudeAtLimits;
+   private final YoDouble initialAngularVelocityMagnitude;
+   private final YoDouble finalAngularVelocityMagnitude;
+   private final YoBoolean initialDriftSaturated;
+   private final YoBoolean finalDriftSaturated;
+   private final YoDouble initialAlphaSaturation;
+   private final YoDouble finalAlphaSaturation;
 
    private final ReferenceFrame trajectoryFrame;
 
@@ -90,8 +90,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       super(allowMultipleFrames, referenceFrame);
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
       parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
       trajectoryFrame = referenceFrame;
 
@@ -148,14 +148,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
       saturationPolynomial = new YoPolynomial(namePrefix + "SaturationPolynomial", 6, registry);
       saturationPolynomial.setQuintic(0, PI, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-      maxAngularVelocityMagnitudeAtLimits = new DoubleYoVariable(namePrefix + "MaxAngularVelocityMagnitudeAtLimits", registry);
-      initialAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "InitialAngularVelocityMagnitude", registry);
-      finalAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "FinalAngularVelocityMagnitude", registry);
+      maxAngularVelocityMagnitudeAtLimits = new YoDouble(namePrefix + "MaxAngularVelocityMagnitudeAtLimits", registry);
+      initialAngularVelocityMagnitude = new YoDouble(namePrefix + "InitialAngularVelocityMagnitude", registry);
+      finalAngularVelocityMagnitude = new YoDouble(namePrefix + "FinalAngularVelocityMagnitude", registry);
 
-      initialDriftSaturated = new BooleanYoVariable(namePrefix + "InitialDriftSaturated", registry);
-      finalDriftSaturated = new BooleanYoVariable(namePrefix + "FinalDriftSaturated", registry);
-      initialAlphaSaturation = new DoubleYoVariable(namePrefix + "InitialAlphaSaturation", registry);
-      finalAlphaSaturation = new DoubleYoVariable(namePrefix + "FinalAlphaSaturation", registry);
+      initialDriftSaturated = new YoBoolean(namePrefix + "InitialDriftSaturated", registry);
+      finalDriftSaturated = new YoBoolean(namePrefix + "FinalDriftSaturated", registry);
+      initialAlphaSaturation = new YoDouble(namePrefix + "InitialAlphaSaturation", registry);
+      finalAlphaSaturation = new YoDouble(namePrefix + "FinalAlphaSaturation", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -389,7 +389,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
-   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, DoubleYoVariable angularVelocityMagnitude, Quaternion driftToPack)
+   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, YoDouble angularVelocityMagnitude, Quaternion driftToPack)
    {
       angularVelocity.get(tempAngularVelocityForDrift);
 

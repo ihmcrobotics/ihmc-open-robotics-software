@@ -16,7 +16,8 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+   private final AdditionalSimulationContactPoints footContactPoints = new AdditionalSimulationContactPoints(3, 4, true, true);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, footContactPoints);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -27,7 +28,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Override
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
-      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 3, true, true);
+      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 4, true, true);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
       return robotModel;
    }

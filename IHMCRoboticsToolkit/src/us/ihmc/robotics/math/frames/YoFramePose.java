@@ -4,9 +4,9 @@ import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -288,32 +288,32 @@ public class YoFramePose extends AbstractReferenceFrameHolder implements Clearab
       getOrientation().add(yoFramePose.getOrientation());
    }
 
-   public DoubleYoVariable getYoX()
+   public YoDouble getYoX()
    {
       return getPosition().getYoX();
    }
 
-   public DoubleYoVariable getYoY()
+   public YoDouble getYoY()
    {
       return getPosition().getYoY();
    }
 
-   public DoubleYoVariable getYoZ()
+   public YoDouble getYoZ()
    {
       return getPosition().getYoZ();
    }
 
-   public DoubleYoVariable getYoPitch()
+   public YoDouble getYoPitch()
    {
       return getOrientation().getPitch();
    }
 
-   public DoubleYoVariable getYoRoll()
+   public YoDouble getYoRoll()
    {
       return getOrientation().getRoll();
    }
 
-   public DoubleYoVariable getYoYaw()
+   public YoDouble getYoYaw()
    {
       return getOrientation().getYaw();
    }

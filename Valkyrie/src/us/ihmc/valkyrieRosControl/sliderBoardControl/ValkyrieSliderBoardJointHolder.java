@@ -1,8 +1,8 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -16,16 +16,16 @@ abstract class ValkyrieSliderBoardJointHolder
    protected final double dt;
    protected final YoVariableRegistry registry;
    protected final PDController pdController;
-   protected final DoubleYoVariable q;
-   protected final DoubleYoVariable qd;
-   protected final DoubleYoVariable tau;
+   protected final YoDouble q;
+   protected final YoDouble qd;
+   protected final YoDouble tau;
    protected final RevisedBacklashCompensatingVelocityYoVariable bl_qd;
-   protected final DoubleYoVariable q_d;
-   protected final DoubleYoVariable qd_d;
-   protected final DoubleYoVariable tau_offset;
-   protected final DoubleYoVariable jointCommand_pd;
-   protected final DoubleYoVariable jointCommand_function;
-   protected final DoubleYoVariable tau_d;
+   protected final YoDouble q_d;
+   protected final YoDouble qd_d;
+   protected final YoDouble tau_offset;
+   protected final YoDouble jointCommand_pd;
+   protected final YoDouble jointCommand_function;
+   protected final YoDouble tau_d;
 
    public ValkyrieSliderBoardJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJoint joint, YoVariableRegistry parentRegistry, double dt)
    {
@@ -39,21 +39,21 @@ abstract class ValkyrieSliderBoardJointHolder
       pdController.setProportionalGain(ValkyrieRosControlSliderBoard.KP_DEFAULT);
       pdController.setDerivativeGain(ValkyrieRosControlSliderBoard.KD_DEFAULT);
 
-      q = new DoubleYoVariable(jointName + "_q", registry);
-      qd = new DoubleYoVariable(jointName + "_qd", registry);
+      q = new YoDouble(jointName + "_q", registry);
+      qd = new YoDouble(jointName + "_qd", registry);
       bl_qd = new RevisedBacklashCompensatingVelocityYoVariable("bl_qd_" + jointName, "", valkyrieRosControlSliderBoard.jointVelocityAlphaFilter, q, dt, valkyrieRosControlSliderBoard.jointVelocitySlopTime, registry);
-      tau = new DoubleYoVariable(jointName + "_tau", registry);
+      tau = new YoDouble(jointName + "_tau", registry);
 
-      q_d = new DoubleYoVariable(jointName + "_q_d", registry);
-      qd_d = new DoubleYoVariable(jointName + "_qd_d", registry);
+      q_d = new YoDouble(jointName + "_q_d", registry);
+      qd_d = new YoDouble(jointName + "_qd_d", registry);
 
       if (valkyrieRosControlSliderBoard.setPointMap != null && valkyrieRosControlSliderBoard.setPointMap.containsKey(jointName))
          q_d.set(valkyrieRosControlSliderBoard.setPointMap.get(jointName));
 
-      tau_offset = new DoubleYoVariable(joint.getName() + "_tau_offset", parentRegistry);
-      tau_d = new DoubleYoVariable(joint.getName() + "_tau_d", registry);
-      jointCommand_pd = new DoubleYoVariable(joint.getName() + "_tau_pd", registry);
-      jointCommand_function = new DoubleYoVariable(joint.getName() + "_tau_function", registry);
+      tau_offset = new YoDouble(joint.getName() + "_tau_offset", parentRegistry);
+      tau_d = new YoDouble(joint.getName() + "_tau_d", registry);
+      jointCommand_pd = new YoDouble(joint.getName() + "_tau_pd", registry);
+      jointCommand_function = new YoDouble(joint.getName() + "_tau_function", registry);
 
       if (valkyrieRosControlSliderBoard.torqueOffsetMap != null && valkyrieRosControlSliderBoard.torqueOffsetMap.containsKey(joint.getName()))
          tau_offset.set(-valkyrieRosControlSliderBoard.torqueOffsetMap.get(joint.getName()));

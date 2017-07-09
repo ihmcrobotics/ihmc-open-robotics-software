@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -12,12 +13,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.TickAndUpdatable;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -36,9 +36,9 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final IntegerYoVariable plannerUpdateIndex = new IntegerYoVariable("plannerUpdateIndex", registry);
-   private final IntegerYoVariable planarRegionUpdateIndex = new IntegerYoVariable("planarRegionUpdateIndex", registry);
-   private final DoubleYoVariable plannerTime = new DoubleYoVariable("plannerTime", registry);
+   private final YoInteger plannerUpdateIndex = new YoInteger("plannerUpdateIndex", registry);
+   private final YoInteger planarRegionUpdateIndex = new YoInteger("planarRegionUpdateIndex", registry);
+   private final YoDouble plannerTime = new YoDouble("plannerTime", registry);
 
    private final YoFrameConvexPolygon2d leftFootstepStart, rightFootstepStart;
    private final YoFrameConvexPolygon2d leftFootstepGoal, rightFootstepGoal;
@@ -57,10 +57,10 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    
    private final SideDependentList<YoGraphicPolygon> footstepStartsViz, footstepGoalsViz, footstepsUnderConsiderationViz, acceptedFootstepsViz, rejectedFootstepsViz;
 
-   private final BooleanYoVariable leftNodeIsAtGoal, rightNodeIsAtGoal;
-   private final SideDependentList<BooleanYoVariable> nodeIsAtGoal;
+   private final YoBoolean leftNodeIsAtGoal, rightNodeIsAtGoal;
+   private final SideDependentList<YoBoolean> nodeIsAtGoal;
 
-   private final EnumYoVariable<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
+   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
 
    private final YoFrameVector leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal;
    private final SideDependentList<YoFrameVector> acceptedFootstepSurfaceNormals;
@@ -71,12 +71,12 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private TickAndUpdatable tickAndUpdatable;
 
-   public PlanarRegionBipedalFootstepPlannerVisualizer(int numberOfSolutionPolygons, SideDependentList<ConvexPolygon2d> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PlanarRegionBipedalFootstepPlannerVisualizer(int numberOfSolutionPolygons, SideDependentList<ConvexPolygon2D> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.numberOfSolutionPolygons = numberOfSolutionPolygons;
 
-      ConvexPolygon2d leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
-      ConvexPolygon2d rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
+      ConvexPolygon2D leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
+      ConvexPolygon2D rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
 
       int maxNumberOfVertices = leftFootInSoleFrame.getNumberOfVertices();
 
@@ -130,8 +130,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       acceptedFootstepsViz = new SideDependentList<>(leftAcceptedFootstepViz, rightAcceptedFootstepViz);
       rejectedFootstepsViz = new SideDependentList<>(leftRejectedFootstepViz, rightRejectedFootstepViz);
 
-      leftNodeIsAtGoal = new BooleanYoVariable("leftNodeIsAtGoal", registry);
-      rightNodeIsAtGoal = new BooleanYoVariable("rightNodeIsAtGoal", registry);
+      leftNodeIsAtGoal = new YoBoolean("leftNodeIsAtGoal", registry);
+      rightNodeIsAtGoal = new YoBoolean("rightNodeIsAtGoal", registry);
       nodeIsAtGoal = new SideDependentList<>(leftNodeIsAtGoal, rightNodeIsAtGoal);
 
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepStartViz);
@@ -177,7 +177,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       rightAcceptedFootstepSurfaceNormal = new YoFrameVector("rightAcceptedFootstepSurfaceNormal", worldFrame, registry);
       acceptedFootstepSurfaceNormals = new SideDependentList<>(leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal);
 
-      nodeRejectedReason = new EnumYoVariable<>("nodeRejectedReason", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
+      nodeRejectedReason = new YoEnum<>("nodeRejectedReason", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
       nodeRejectedReason.set(null);
 
       int vertexBufferSize = 100;

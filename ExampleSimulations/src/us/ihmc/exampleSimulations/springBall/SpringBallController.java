@@ -1,28 +1,28 @@
 package us.ihmc.exampleSimulations.springBall;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class SpringBallController implements RobotController
 {
    private SpringBallRobot rob;
 
-   private DoubleYoVariable t, q_x, q_y, q_z;
-   private DoubleYoVariable qd_wx, qd_wy, qd_wz;
+   private YoDouble t, q_x, q_y, q_z;
+   private YoDouble qd_wx, qd_wy, qd_wz;
 
-   private DoubleYoVariable[]
-      pos = new DoubleYoVariable[SpringBallRobot.NUM_SPIKES], vel = new DoubleYoVariable[SpringBallRobot.NUM_SPIKES], tau = new DoubleYoVariable[SpringBallRobot.NUM_SPIKES];
+   private YoDouble[]
+      pos = new YoDouble[SpringBallRobot.NUM_SPIKES], vel = new YoDouble[SpringBallRobot.NUM_SPIKES], tau = new YoDouble[SpringBallRobot.NUM_SPIKES];
 
    private YoVariableRegistry registry = new YoVariableRegistry("SpringBallController");
 
-   private DoubleYoVariable offset_spike = new DoubleYoVariable("offset_spike", registry), amp_spike = new DoubleYoVariable("amp_spike", registry),
-                      freq_spike = new DoubleYoVariable("freq_spike", registry);
-   private DoubleYoVariable q_d_spike = new DoubleYoVariable("q_d_spike", registry), k_spike = new DoubleYoVariable("k_spike", registry),
-                      b_spike = new DoubleYoVariable("b_spike", registry);
+   private YoDouble offset_spike = new YoDouble("offset_spike", registry), amp_spike = new YoDouble("amp_spike", registry),
+                      freq_spike = new YoDouble("freq_spike", registry);
+   private YoDouble q_d_spike = new YoDouble("q_d_spike", registry), k_spike = new YoDouble("k_spike", registry),
+                      b_spike = new YoDouble("b_spike", registry);
 
 
-   private DoubleYoVariable[] controlVars = new DoubleYoVariable[]
+   private YoDouble[] controlVars = new YoDouble[]
    {
       offset_spike, amp_spike, freq_spike, q_d_spike, k_spike, b_spike
    };
@@ -38,23 +38,23 @@ public class SpringBallController implements RobotController
 
    private void initControl()
    {
-      t = (DoubleYoVariable)rob.getVariable("t");
+      t = (YoDouble)rob.getVariable("t");
 
-      q_x = (DoubleYoVariable)rob.getVariable("q_x");
-      q_y = (DoubleYoVariable)rob.getVariable("q_y");
-      q_z = (DoubleYoVariable)rob.getVariable("q_z");
+      q_x = (YoDouble)rob.getVariable("q_x");
+      q_y = (YoDouble)rob.getVariable("q_y");
+      q_z = (YoDouble)rob.getVariable("q_z");
 
-      qd_wx = (DoubleYoVariable)rob.getVariable("qd_wx");
-      qd_wy = (DoubleYoVariable)rob.getVariable("qd_wy");
-      qd_wz = (DoubleYoVariable)rob.getVariable("qd_wz");
+      qd_wx = (YoDouble)rob.getVariable("qd_wx");
+      qd_wy = (YoDouble)rob.getVariable("qd_wy");
+      qd_wz = (YoDouble)rob.getVariable("qd_wz");
 
       q_z.set(1.0);
 
       for (int i = 0; i < SpringBallRobot.NUM_SPIKES; i++)
       {
-         pos[i] = (DoubleYoVariable)rob.getVariable("q_slider" + i);
-         vel[i] = (DoubleYoVariable)rob.getVariable("qd_slider" + i);
-         tau[i] = (DoubleYoVariable)rob.getVariable("tau_slider" + i);
+         pos[i] = (YoDouble)rob.getVariable("q_slider" + i);
+         vel[i] = (YoDouble)rob.getVariable("qd_slider" + i);
+         tau[i] = (YoDouble)rob.getVariable("tau_slider" + i);
       }
 
       q_d_spike.set(0.0);
@@ -71,7 +71,7 @@ public class SpringBallController implements RobotController
    }
 
 
-   public DoubleYoVariable[] getControlVars()
+   public YoDouble[] getControlVars()
    {
       return controlVars;
    }

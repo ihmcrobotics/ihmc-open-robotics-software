@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class StewartPlatformController implements RobotController
@@ -10,63 +10,63 @@ public class StewartPlatformController implements RobotController
 
    private StewartPlatformRobot rob;
 
-   private DoubleYoVariable t, q_platform_x, q_platform_y, q_platform_z;
-   private DoubleYoVariable qd_platform_x, qd_platform_y, qd_platform_z;
+   private YoDouble t, q_platform_x, q_platform_y, q_platform_z;
+   private YoDouble qd_platform_x, qd_platform_y, qd_platform_z;
 
-   private DoubleYoVariable qd_platform_wx, qd_platform_wy, qd_platform_wz;
+   private YoDouble qd_platform_wx, qd_platform_wy, qd_platform_wz;
 
-   private DoubleYoVariable q_act0, q_act1, q_act2, q_act3, q_act4, q_act5;
+   private YoDouble q_act0, q_act1, q_act2, q_act3, q_act4, q_act5;
    //private YoVariable qd_act0, qd_act1, qd_act2, qd_act3, qd_act4, qd_act5;
-   private DoubleYoVariable tau_act0, tau_act1, tau_act2, tau_act3, tau_act4, tau_act5;
+   private YoDouble tau_act0, tau_act1, tau_act2, tau_act3, tau_act4, tau_act5;
 
-   private DoubleYoVariable ef_p_x[] = new DoubleYoVariable[6], ef_p_y[] = new DoubleYoVariable[6], ef_p_z[] = new DoubleYoVariable[6];
-   private DoubleYoVariable ef_p_dx[] = new DoubleYoVariable[6], ef_p_dy[] = new DoubleYoVariable[6], ef_p_dz[] = new DoubleYoVariable[6];
-   private DoubleYoVariable ef_p_fx[] = new DoubleYoVariable[6], ef_p_fy[] = new DoubleYoVariable[6], ef_p_fz[] = new DoubleYoVariable[6];
+   private YoDouble ef_p_x[] = new YoDouble[6], ef_p_y[] = new YoDouble[6], ef_p_z[] = new YoDouble[6];
+   private YoDouble ef_p_dx[] = new YoDouble[6], ef_p_dy[] = new YoDouble[6], ef_p_dz[] = new YoDouble[6];
+   private YoDouble ef_p_fx[] = new YoDouble[6], ef_p_fy[] = new YoDouble[6], ef_p_fz[] = new YoDouble[6];
 
-   private DoubleYoVariable ef_a_x[] = new DoubleYoVariable[6], ef_a_y[] = new DoubleYoVariable[6], ef_a_z[] = new DoubleYoVariable[6];
-   private DoubleYoVariable ef_a_dx[] = new DoubleYoVariable[6], ef_a_dy[] = new DoubleYoVariable[6], ef_a_dz[] = new DoubleYoVariable[6];
-   private DoubleYoVariable ef_a_fx[] = new DoubleYoVariable[6], ef_a_fy[] = new DoubleYoVariable[6], ef_a_fz[] = new DoubleYoVariable[6];
+   private YoDouble ef_a_x[] = new YoDouble[6], ef_a_y[] = new YoDouble[6], ef_a_z[] = new YoDouble[6];
+   private YoDouble ef_a_dx[] = new YoDouble[6], ef_a_dy[] = new YoDouble[6], ef_a_dz[] = new YoDouble[6];
+   private YoDouble ef_a_fx[] = new YoDouble[6], ef_a_fy[] = new YoDouble[6], ef_a_fz[] = new YoDouble[6];
 
-   private DoubleYoVariable ef_platform_x, ef_platform_y, ef_platform_z;
+   private YoDouble ef_platform_x, ef_platform_y, ef_platform_z;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StewartPlatformController");
 
-   private DoubleYoVariable x_offset = new DoubleYoVariable("x_offset", registry), y_offset = new DoubleYoVariable("y_offset", registry),
-                      z_offset = new DoubleYoVariable("z_offset", registry);
-   private DoubleYoVariable yaw_offset = new DoubleYoVariable("yaw_offset", registry), roll_offset = new DoubleYoVariable("roll_offset", registry),
-                      pitch_offset = new DoubleYoVariable("pitch_offset", registry);
+   private YoDouble x_offset = new YoDouble("x_offset", registry), y_offset = new YoDouble("y_offset", registry),
+                      z_offset = new YoDouble("z_offset", registry);
+   private YoDouble yaw_offset = new YoDouble("yaw_offset", registry), roll_offset = new YoDouble("roll_offset", registry),
+                      pitch_offset = new YoDouble("pitch_offset", registry);
 
-   private DoubleYoVariable x_amp = new DoubleYoVariable("x_amp", registry), y_amp = new DoubleYoVariable("y_amp", registry), z_amp = new DoubleYoVariable("z_amp", registry);
-   private DoubleYoVariable yaw_amp = new DoubleYoVariable("yaw_amp", registry), roll_amp = new DoubleYoVariable("roll_amp", registry),
-                      pitch_amp = new DoubleYoVariable("pitch_amp", registry);
+   private YoDouble x_amp = new YoDouble("x_amp", registry), y_amp = new YoDouble("y_amp", registry), z_amp = new YoDouble("z_amp", registry);
+   private YoDouble yaw_amp = new YoDouble("yaw_amp", registry), roll_amp = new YoDouble("roll_amp", registry),
+                      pitch_amp = new YoDouble("pitch_amp", registry);
 
-   private DoubleYoVariable x_freq = new DoubleYoVariable("x_freq", registry), y_freq = new DoubleYoVariable("y_freq", registry), z_freq = new DoubleYoVariable("z_freq", registry);
-   private DoubleYoVariable yaw_freq = new DoubleYoVariable("yaw_freq", registry), roll_freq = new DoubleYoVariable("roll_freq", registry),
-                      pitch_freq = new DoubleYoVariable("pitch_freq", registry);
+   private YoDouble x_freq = new YoDouble("x_freq", registry), y_freq = new YoDouble("y_freq", registry), z_freq = new YoDouble("z_freq", registry);
+   private YoDouble yaw_freq = new YoDouble("yaw_freq", registry), roll_freq = new YoDouble("roll_freq", registry),
+                      pitch_freq = new YoDouble("pitch_freq", registry);
 
-   private DoubleYoVariable x_phase = new DoubleYoVariable("x_phase", registry), y_phase = new DoubleYoVariable("y_phase", registry),
-                      z_phase = new DoubleYoVariable("z_phase", registry);
-   private DoubleYoVariable yaw_phase = new DoubleYoVariable("yaw_phase", registry), roll_phase = new DoubleYoVariable("roll_phase", registry),
-                      pitch_phase = new DoubleYoVariable("pitch_phase", registry);
+   private YoDouble x_phase = new YoDouble("x_phase", registry), y_phase = new YoDouble("y_phase", registry),
+                      z_phase = new YoDouble("z_phase", registry);
+   private YoDouble yaw_phase = new YoDouble("yaw_phase", registry), roll_phase = new YoDouble("roll_phase", registry),
+                      pitch_phase = new YoDouble("pitch_phase", registry);
 
-   private DoubleYoVariable outside_limits = new DoubleYoVariable("outside_limits", registry);
-   private DoubleYoVariable Fx = new DoubleYoVariable("Fx", registry), Fy = new DoubleYoVariable("Fy", registry), Fz = new DoubleYoVariable("Fz", registry);
-   private DoubleYoVariable Nx = new DoubleYoVariable("Nx", registry), Ny = new DoubleYoVariable("Ny", registry), Nz = new DoubleYoVariable("Nz", registry);
+   private YoDouble outside_limits = new YoDouble("outside_limits", registry);
+   private YoDouble Fx = new YoDouble("Fx", registry), Fy = new YoDouble("Fy", registry), Fz = new YoDouble("Fz", registry);
+   private YoDouble Nx = new YoDouble("Nx", registry), Ny = new YoDouble("Ny", registry), Nz = new YoDouble("Nz", registry);
 
-   private DoubleYoVariable k_loop = new DoubleYoVariable("k_loop", registry), b_loop = new DoubleYoVariable("b_loop", registry);
+   private YoDouble k_loop = new YoDouble("k_loop", registry), b_loop = new YoDouble("b_loop", registry);
 
-   private DoubleYoVariable k_x = new DoubleYoVariable("k_x", registry), k_y = new DoubleYoVariable("k_y", registry), k_z = new DoubleYoVariable("k_z", registry);
-   private DoubleYoVariable b_x = new DoubleYoVariable("b_x", registry), b_y = new DoubleYoVariable("b_y", registry), b_z = new DoubleYoVariable("b_z", registry);
+   private YoDouble k_x = new YoDouble("k_x", registry), k_y = new YoDouble("k_y", registry), k_z = new YoDouble("k_z", registry);
+   private YoDouble b_x = new YoDouble("b_x", registry), b_y = new YoDouble("b_y", registry), b_z = new YoDouble("b_z", registry);
 
-   private DoubleYoVariable k_yaw = new DoubleYoVariable("k_yaw", registry), k_pitch = new DoubleYoVariable("k_pitch", registry), k_roll = new DoubleYoVariable("k_roll", registry);
-   private DoubleYoVariable b_yaw = new DoubleYoVariable("b_yaw", registry), b_pitch = new DoubleYoVariable("b_pitch", registry), b_roll = new DoubleYoVariable("b_roll", registry);
+   private YoDouble k_yaw = new YoDouble("k_yaw", registry), k_pitch = new YoDouble("k_pitch", registry), k_roll = new YoDouble("k_roll", registry);
+   private YoDouble b_yaw = new YoDouble("b_yaw", registry), b_pitch = new YoDouble("b_pitch", registry), b_roll = new YoDouble("b_roll", registry);
 
-   private DoubleYoVariable q_d_x = new DoubleYoVariable("q_d_x", registry), q_d_y = new DoubleYoVariable("q_d_y", registry), q_d_z = new DoubleYoVariable("q_d_z", registry);
-   private DoubleYoVariable q_yaw = new DoubleYoVariable("q_yaw", registry), q_pitch = new DoubleYoVariable("q_pitch", registry), q_roll = new DoubleYoVariable("q_roll", registry);
-   private DoubleYoVariable q_d_yaw = new DoubleYoVariable("q_d_yaw", registry), q_d_pitch = new DoubleYoVariable("q_d_pitch", registry),
-                      q_d_roll = new DoubleYoVariable("q_d_roll", registry);
+   private YoDouble q_d_x = new YoDouble("q_d_x", registry), q_d_y = new YoDouble("q_d_y", registry), q_d_z = new YoDouble("q_d_z", registry);
+   private YoDouble q_yaw = new YoDouble("q_yaw", registry), q_pitch = new YoDouble("q_pitch", registry), q_roll = new YoDouble("q_roll", registry);
+   private YoDouble q_d_yaw = new YoDouble("q_d_yaw", registry), q_d_pitch = new YoDouble("q_d_pitch", registry),
+                      q_d_roll = new YoDouble("q_d_roll", registry);
 
-   private DoubleYoVariable[] controlVars = new DoubleYoVariable[]
+   private YoDouble[] controlVars = new YoDouble[]
    {
       x_offset, y_offset, z_offset, yaw_offset, roll_offset, pitch_offset, x_amp, y_amp, z_amp, yaw_amp, roll_amp, pitch_amp, x_freq, y_freq, z_freq, yaw_freq,
       roll_freq, pitch_freq, x_phase, y_phase, z_phase, yaw_phase, roll_phase, pitch_phase, q_yaw, q_roll, q_pitch, k_x, k_y, k_z, k_yaw, k_pitch, k_roll, b_x,
@@ -80,63 +80,63 @@ public class StewartPlatformController implements RobotController
       this.name = name;
       this.rob = rob;
 
-      t = (DoubleYoVariable)rob.getVariable("t");
-      q_platform_x = (DoubleYoVariable)rob.getVariable("q_platform_x");
-      q_platform_y = (DoubleYoVariable)rob.getVariable("q_platform_y");
-      q_platform_z = (DoubleYoVariable)rob.getVariable("q_platform_z");
-      qd_platform_x = (DoubleYoVariable)rob.getVariable("qd_platform_x");
-      qd_platform_y = (DoubleYoVariable)rob.getVariable("qd_platform_y");
-      qd_platform_z = (DoubleYoVariable)rob.getVariable("qd_platform_z");
+      t = (YoDouble)rob.getVariable("t");
+      q_platform_x = (YoDouble)rob.getVariable("q_platform_x");
+      q_platform_y = (YoDouble)rob.getVariable("q_platform_y");
+      q_platform_z = (YoDouble)rob.getVariable("q_platform_z");
+      qd_platform_x = (YoDouble)rob.getVariable("qd_platform_x");
+      qd_platform_y = (YoDouble)rob.getVariable("qd_platform_y");
+      qd_platform_z = (YoDouble)rob.getVariable("qd_platform_z");
 
-      qd_platform_wx = (DoubleYoVariable)rob.getVariable("qd_platform_wx");
-      qd_platform_wy = (DoubleYoVariable)rob.getVariable("qd_platform_wy");
-      qd_platform_wz = (DoubleYoVariable)rob.getVariable("qd_platform_wz");
+      qd_platform_wx = (YoDouble)rob.getVariable("qd_platform_wx");
+      qd_platform_wy = (YoDouble)rob.getVariable("qd_platform_wy");
+      qd_platform_wz = (YoDouble)rob.getVariable("qd_platform_wz");
 
-      q_act0 = (DoubleYoVariable)rob.getVariable("q_act0");
-      q_act1 = (DoubleYoVariable)rob.getVariable("q_act1");
-      q_act2 = (DoubleYoVariable)rob.getVariable("q_act2");
-      q_act3 = (DoubleYoVariable)rob.getVariable("q_act3");
-      q_act4 = (DoubleYoVariable)rob.getVariable("q_act4");
-      q_act5 = (DoubleYoVariable)rob.getVariable("q_act5");
+      q_act0 = (YoDouble)rob.getVariable("q_act0");
+      q_act1 = (YoDouble)rob.getVariable("q_act1");
+      q_act2 = (YoDouble)rob.getVariable("q_act2");
+      q_act3 = (YoDouble)rob.getVariable("q_act3");
+      q_act4 = (YoDouble)rob.getVariable("q_act4");
+      q_act5 = (YoDouble)rob.getVariable("q_act5");
 
-      tau_act0 = (DoubleYoVariable)rob.getVariable("tau_act0");
-      tau_act1 = (DoubleYoVariable)rob.getVariable("tau_act1");
-      tau_act2 = (DoubleYoVariable)rob.getVariable("tau_act2");
-      tau_act3 = (DoubleYoVariable)rob.getVariable("tau_act3");
-      tau_act4 = (DoubleYoVariable)rob.getVariable("tau_act4");
-      tau_act5 = (DoubleYoVariable)rob.getVariable("tau_act5");
+      tau_act0 = (YoDouble)rob.getVariable("tau_act0");
+      tau_act1 = (YoDouble)rob.getVariable("tau_act1");
+      tau_act2 = (YoDouble)rob.getVariable("tau_act2");
+      tau_act3 = (YoDouble)rob.getVariable("tau_act3");
+      tau_act4 = (YoDouble)rob.getVariable("tau_act4");
+      tau_act5 = (YoDouble)rob.getVariable("tau_act5");
 
       for (int i = 0; i < 6; i++)
       {
-         ef_p_x[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_x");
-         ef_p_y[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_y");
-         ef_p_z[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_z");
-         ef_p_dx[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_dx");
-         ef_p_dy[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_dy");
-         ef_p_dz[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_dz");
-         ef_p_fx[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_fx");
-         ef_p_fy[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_fy");
-         ef_p_fz[i] = (DoubleYoVariable)rob.getVariable("ef_p" + i + "_fz");
+         ef_p_x[i] = (YoDouble)rob.getVariable("ef_p" + i + "_x");
+         ef_p_y[i] = (YoDouble)rob.getVariable("ef_p" + i + "_y");
+         ef_p_z[i] = (YoDouble)rob.getVariable("ef_p" + i + "_z");
+         ef_p_dx[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dx");
+         ef_p_dy[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dy");
+         ef_p_dz[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dz");
+         ef_p_fx[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fx");
+         ef_p_fy[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fy");
+         ef_p_fz[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fz");
 
-         ef_a_x[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_x");
-         ef_a_y[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_y");
-         ef_a_z[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_z");
-         ef_a_dx[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_dx");
-         ef_a_dy[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_dy");
-         ef_a_dz[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_dz");
-         ef_a_fx[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_fx");
-         ef_a_fy[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_fy");
-         ef_a_fz[i] = (DoubleYoVariable)rob.getVariable("ef_a" + i + "_fz");
+         ef_a_x[i] = (YoDouble)rob.getVariable("ef_a" + i + "_x");
+         ef_a_y[i] = (YoDouble)rob.getVariable("ef_a" + i + "_y");
+         ef_a_z[i] = (YoDouble)rob.getVariable("ef_a" + i + "_z");
+         ef_a_dx[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dx");
+         ef_a_dy[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dy");
+         ef_a_dz[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dz");
+         ef_a_fx[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fx");
+         ef_a_fy[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fy");
+         ef_a_fz[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fz");
 
       }
 
-      ef_platform_x = (DoubleYoVariable)rob.getVariable("ef_platform_x");
-      ef_platform_y = (DoubleYoVariable)rob.getVariable("ef_platform_y");
-      ef_platform_z = (DoubleYoVariable)rob.getVariable("ef_platform_z");
+      ef_platform_x = (YoDouble)rob.getVariable("ef_platform_x");
+      ef_platform_y = (YoDouble)rob.getVariable("ef_platform_y");
+      ef_platform_z = (YoDouble)rob.getVariable("ef_platform_z");
       initControl();
    }
 
-   public DoubleYoVariable[] getControlVars()
+   public YoDouble[] getControlVars()
    {
       return controlVars;
    }

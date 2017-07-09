@@ -47,17 +47,17 @@ public abstract class MassMatrixCalculatorTest
    protected double computeKineticEnergy(ArrayList<RevoluteJoint> joints)
    {
       double ret = 0.0;
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      Twist twistWithRespectToWorld = new Twist(worldFrame, worldFrame, worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
+      Twist twistWithRespectToWorld = new Twist(elevatorFrame, elevatorFrame, elevatorFrame);
       Twist successorTwist = new Twist();
       for (RevoluteJoint joint : joints)
       {
          joint.getSuccessorTwist(successorTwist);
-         successorTwist.changeFrame(worldFrame);
+         successorTwist.changeFrame(elevatorFrame);
          twistWithRespectToWorld.add(successorTwist);
 
-         RigidBodyInertia inertia = joint.getSuccessor().getInertiaCopy();
-         inertia.changeFrame(worldFrame);
+         RigidBodyInertia inertia = new RigidBodyInertia(joint.getSuccessor().getInertia());
+         inertia.changeFrame(elevatorFrame);
 
          ret += inertia.computeKineticCoEnergy(twistWithRespectToWorld);
       }

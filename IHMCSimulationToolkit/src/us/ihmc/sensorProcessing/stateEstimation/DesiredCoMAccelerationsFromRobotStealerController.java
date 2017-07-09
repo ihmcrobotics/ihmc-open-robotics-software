@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -63,7 +63,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       RigidBody elevator = generator.getElevator();
 
       perfectTwistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
-      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, perfectTwistCalculator, 0.0, false);
+      perfectSpatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, 0.0, false);
 
       perfectCenterOfMassCalculator = new CenterOfMassCalculator(elevator, ReferenceFrame.getWorldFrame());
       perfectCenterOfMassJacobian = new CenterOfMassJacobian(elevator);

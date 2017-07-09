@@ -63,7 +63,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    RigidBodyTransform targetToEE;
 
    ReferenceFrame cameraImageFrame = ReferenceFrame.
-         constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
+         constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
    boolean isleft = true;
    List<String> calJointNames = KinematicCalibrationHeadLoopResidual.getOrderedArmJointsNames(fullRobotModel, isleft);
@@ -296,7 +296,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 

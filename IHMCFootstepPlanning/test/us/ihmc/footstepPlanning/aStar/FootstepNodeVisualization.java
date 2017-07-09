@@ -9,9 +9,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -26,12 +26,12 @@ public class FootstepNodeVisualization implements GraphVisualization
    private final SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable time = new DoubleYoVariable("Time", registry);
+   private final YoDouble time = new YoDouble("Time", registry);
 
    private final HashMap<FootstepNode, YoGraphicPosition> activeNodes = new HashMap<>();
    private final HashMap<FootstepNode, YoGraphicPosition> inactiveNodes = new HashMap<>();
 
-   private final IntegerYoVariable nodeCount = new IntegerYoVariable("NodeCount", registry);
+   private final YoInteger nodeCount = new YoInteger("NodeCount", registry);
 
    private final Queue<YoGraphicPosition> activeNodeGraphicsQueue = new ArrayDeque<>();
    private final Queue<YoGraphicPosition> inactiveNodeGraphicsQueue = new ArrayDeque<>();

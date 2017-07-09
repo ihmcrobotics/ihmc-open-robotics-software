@@ -12,14 +12,18 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,7 +33,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -71,10 +75,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private final StraightLegWalkingParameters straightLegWalkingParameters;
 
    public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -94,6 +100,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
+      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -183,6 +190,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(45.0);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean enableToeOffSlippingDetection()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   {
+      double forceMagnitudeThreshold = 25.0;
+      double velocityThreshold = 0.4;
+      double slippageDistanceThreshold = 0.04;
+      double filterBreakFrequency = 10.0;
+      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
    }
 
    @Override
@@ -782,6 +807,20 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
+   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   {
+      if (bodyName.equals(jointMap.getChestName()))
+      {
+         return RigidBodyControlMode.TASKSPACE;
+      }
+      else
+      {
+         return RigidBodyControlMode.JOINTSPACE;
+      }
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       if (jointHomeConfiguration != null)
@@ -807,6 +846,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
+   {
+      if (bodyHomeConfiguration != null)
+         return bodyHomeConfiguration;
+
+      bodyHomeConfiguration = new HashMap<String, Pose3D>();
+
+      Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
+      bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
+
+      return bodyHomeConfiguration;
    }
 
    /** {@inheritDoc} */
@@ -954,7 +1008,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = 0.0;
+      double kpZ = 100.0;
       double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
       double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
@@ -1355,6 +1409,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      return straightLegWalkingParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean controlHeightWithMomentum()
    {
       return true;
@@ -1364,6 +1425,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.18;
+      return 0.05; // JCarff ToeOff
    }
 }

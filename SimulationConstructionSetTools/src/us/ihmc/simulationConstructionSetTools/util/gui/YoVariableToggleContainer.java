@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.gui;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
 public interface YoVariableToggleContainer

@@ -2,14 +2,13 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,24 +34,22 @@ public class FootstepUtils
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
-      FramePose footFramePose = new FramePose(endEffector.getFrameAfterParentJoint());
+      FramePose footFramePose = new FramePose(endEffector.getSoleFrame());
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footFramePose);
-      Footstep footstep = new Footstep(endEffector.getRigidBody(), side, endEffector.getSoleFrame(), footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(endEffector.getRigidBody(), side, footFramePose, trustHeight);
 
       return footstep;
    }
 
    public static Footstep generateStandingFootstep(RobotSide side, RigidBody foot, ReferenceFrame soleFrame)
    {
-      FramePose footFramePose = new FramePose(foot.getParentJoint().getFrameAfterJoint());
+      FramePose footFramePose = new FramePose(soleFrame);
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footFramePose);
-      Footstep footstep = new Footstep(foot, side, soleFrame, footstepPoseFrame, trustHeight);
+      Footstep footstep = new Footstep(foot, side, footFramePose, trustHeight);
 
       return footstep;
    }
@@ -81,7 +78,7 @@ public class FootstepUtils
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null)
       {
-         ConvexPolygon2d contactPolygon = new ConvexPolygon2d(predictedContactPoints);
+         ConvexPolygon2D contactPolygon = new ConvexPolygon2D(predictedContactPoints);
          footstepCenter = new Point2D(contactPolygon.getCentroid());
       }
       else
@@ -126,7 +123,7 @@ public class FootstepUtils
       for (RobotSide side : RobotSide.values)
       {
          FramePoint footstepPosition = new FramePoint();
-         footSteps.get(side).getPositionIncludingFrame(footstepPosition);
+         footSteps.get(side).getPosition(footstepPosition);
          footstepPosition.changeFrame(worldFrame);
          distances.set(side, new Double(footstepPosition.distanceSquared(destinationInWorld)));
       }

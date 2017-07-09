@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.wanderer.hardware.WandererActuator;
-
 
 public class WandererBatteryMonitor
 {
@@ -19,19 +18,19 @@ public class WandererBatteryMonitor
    private final EnumMap<WandererActuator, AcsellActuatorState> actuatorStates;
       
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererBatteryMonitor");
-   private final ArrayList<DoubleYoVariable> batteryVoltages = new ArrayList<DoubleYoVariable>();
-   private final ArrayList<DoubleYoVariable>  batteryCurrents = new ArrayList<DoubleYoVariable>();
-   private final ArrayList<DoubleYoVariable>  batteryTemperatures = new ArrayList<DoubleYoVariable>();
-   private final DoubleYoVariable totalVoltage = new DoubleYoVariable("totalBatteryVoltage", registry);
+   private final ArrayList<YoDouble> batteryVoltages = new ArrayList<YoDouble>();
+   private final ArrayList<YoDouble>  batteryCurrents = new ArrayList<YoDouble>();
+   private final ArrayList<YoDouble>  batteryTemperatures = new ArrayList<YoDouble>();
+   private final YoDouble totalVoltage = new YoDouble("totalBatteryVoltage", registry);
    
    public WandererBatteryMonitor(EnumMap<WandererActuator, AcsellActuatorState> actuatorStates, YoVariableRegistry parentRegistry)
    {
       this.actuatorStates = actuatorStates;
       for(int i=0;i<NUM_BATTERIES; i++)
       {
-         batteryVoltages.add(new DoubleYoVariable("battery" + i + "Voltage", registry));
-         batteryCurrents.add(new DoubleYoVariable("battery" + i + "Current", registry));
-         batteryTemperatures.add(new DoubleYoVariable("battery" + i + "Temperature", registry));
+         batteryVoltages.add(new YoDouble("battery" + i + "Voltage", registry));
+         batteryCurrents.add(new YoDouble("battery" + i + "Current", registry));
+         batteryTemperatures.add(new YoDouble("battery" + i + "Temperature", registry));
       }    
       
       parentRegistry.addChild(registry);

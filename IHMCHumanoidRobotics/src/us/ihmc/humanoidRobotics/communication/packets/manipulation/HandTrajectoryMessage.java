@@ -61,12 +61,12 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long expressedInReferenceFrameId, long trajectoryReferenceFrameId)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long trajectoryReferenceFrameId)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, expressedInReferenceFrameId, trajectoryReferenceFrameId);
+      super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
       this.robotSide = robotSide;
    }
-   
+
    /**
     * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the base for the control.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -75,9 +75,9 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame expressedInReferenceFrame, ReferenceFrame trajectoryReferenceFrame)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, expressedInReferenceFrame, trajectoryReferenceFrame);
+      super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
       this.robotSide = robotSide;
    }
 
@@ -93,9 +93,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       super(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
-      super.setTrajectoryReferenceFrameId(CommonReferenceFrameIds.CHEST_FRAME.getHashId());
-      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
-      
    }
 
    @Override

@@ -290,6 +290,40 @@ public class FrameMatrix3DTest
          }
       }
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetMainDiagonal()
+   {
+      for (int testIndex = 0; testIndex < 1000; testIndex++)
+      {
+         FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
+         frameMatrix3D.setIncludingFrame(aFrame, RandomGeometry.nextMatrix3D(random, 10.0));
+
+         FrameMatrix3D controlFrameMatrix3D = new FrameMatrix3D(frameMatrix3D);
+
+         double x = random.nextDouble();
+         double y = random.nextDouble();
+         double z = random.nextDouble();
+
+         frameMatrix3D.setMainDiagonal(x, y, z);
+
+         for (int i = 0; i < 3; i++)
+         {
+            for (int j = 0; j < 3; j++)
+            {
+               if (i != j)
+               {
+                  assertEquals(controlFrameMatrix3D.getElement(i, j), frameMatrix3D.getElement(i, j), 1e-8);
+               }
+            }
+         }
+
+         assertEquals(x, frameMatrix3D.getElement(0, 0), 1e-8);
+         assertEquals(y, frameMatrix3D.getElement(1, 1), 1e-8);
+         assertEquals(z, frameMatrix3D.getElement(2, 2), 1e-8);
+      }
+   }
 
    /**
     * Check that changing frame applies the expected transformation to the matrix3d held in

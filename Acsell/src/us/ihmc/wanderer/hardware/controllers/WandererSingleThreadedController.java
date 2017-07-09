@@ -13,10 +13,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -108,7 +108,7 @@ public class WandererSingleThreadedController extends RealtimeThread
 
       if (visualizer != null)
       {
-         visualizer.setMainRegistry(registry, fullRobotModel, null);
+         visualizer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
       }
 
       outputWriter.connect(new WandererNetworkParameters());

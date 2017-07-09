@@ -12,8 +12,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
 {
-   public abstract FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint();
-
    public abstract void setRotation(double yaw, double pitch, double roll);
 
    public abstract void setRotation(QuaternionReadOnly jointRotation);

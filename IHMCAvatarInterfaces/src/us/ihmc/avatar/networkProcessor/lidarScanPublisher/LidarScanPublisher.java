@@ -77,7 +77,7 @@ public class LidarScanPublisher
 
       lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
       RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
-      lidarSensorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
+      lidarSensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
       packetCommunicator.attachListener(RequestLidarScanMessage.class, createRequestLidarScanMessageConsumer());

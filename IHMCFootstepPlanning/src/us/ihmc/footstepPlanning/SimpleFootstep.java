@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -8,7 +8,7 @@ public class SimpleFootstep
 {
    private RobotSide robotSide;
    private final FramePose soleFramePose = new FramePose();
-   private final ConvexPolygon2d foothold = new ConvexPolygon2d();
+   private final ConvexPolygon2D foothold = new ConvexPolygon2D();
 
    public SimpleFootstep(RobotSide robotSide, FramePose soleFramePose)
    {
@@ -37,7 +37,7 @@ public class SimpleFootstep
       this.soleFramePose.setIncludingFrame(soleFramePose);
    }
 
-   public void setFoothold(ConvexPolygon2d foothold)
+   public void setFoothold(ConvexPolygon2D foothold)
    {
       this.foothold.setAndUpdate(foothold);
    }
@@ -49,7 +49,7 @@ public class SimpleFootstep
       return true;
    }
 
-   public void getFoothold(ConvexPolygon2d footholdToPack)
+   public void getFoothold(ConvexPolygon2D footholdToPack)
    {
       if (!hasFoothold())
          footholdToPack.setToNaN();

@@ -68,12 +68,29 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       set(x, y, z);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
    {
       this.referenceFrame = referenceFrame;
       tuple.set(tupleArray);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startIndex the first index to start reading from in the array.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
    {
       this.referenceFrame = referenceFrame;

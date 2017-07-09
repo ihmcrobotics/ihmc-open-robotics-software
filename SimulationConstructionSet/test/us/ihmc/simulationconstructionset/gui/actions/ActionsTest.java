@@ -34,8 +34,6 @@ import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExe
 import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.GotoInPointCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.GotoOutPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.PlayCommandExecutor;
@@ -51,8 +49,6 @@ import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.StopCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ThinBufferCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
@@ -105,6 +101,10 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
+import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.GotoOutPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
 
 @ContinuousIntegrationPlan(categories = { IntegrationCategory.UI})
 public class ActionsTest

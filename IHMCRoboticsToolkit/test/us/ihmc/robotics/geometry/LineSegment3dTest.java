@@ -82,21 +82,21 @@ public class LineSegment3dTest
       LineSegment3D segmentAB = new LineSegment3D(pointA, pointB);
       Point3D pointC = new Point3D(3.0, 3.0, 1.5); //PointC projection is below pointA
       Point3D expectedPointCprojection = new Point3D(pointA);
-      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
       pointC = new Point3D(3.0, 3.0, 5.5);
       expectedPointCprojection = new Point3D(pointB); //PointC projection is up pointB	
-      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
       pointC = new Point3D(3.0, 3.0, 4.5);
       expectedPointCprojection = new Point3D(1.0, 2.0, 4.5); //PointC projection is between pointA and pointB	
-      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
    }
 
@@ -153,9 +153,9 @@ public class LineSegment3dTest
 
          expectedPointCdistance = pointC.distance(expectedPointCprojection);
 
-         assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjection(pointC).getX(), 1e-12);
-         assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjection(pointC).getY(), 1e-12);
-         assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjection(pointC).getZ(), 1e-12);
+         assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-12);
+         assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-12);
+         assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-12);
 
          assertEquals(expectedPointCdistance, segmentAB.distance(pointC), 1e-12);
       }

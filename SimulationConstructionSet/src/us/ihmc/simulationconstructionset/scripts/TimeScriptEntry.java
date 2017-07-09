@@ -2,11 +2,10 @@ package us.ihmc.simulationconstructionset.scripts;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class TimeScriptEntry implements Comparable<Object>
 {
@@ -21,7 +20,7 @@ public class TimeScriptEntry implements Comparable<Object>
       timeScriptCommands = new ArrayList<TimeScriptCommand>();
    }
 
-   public void addVarValue(DoubleYoVariable variable, double value)
+   public void addVarValue(YoDouble variable, double value)
    {
       if (variable == null)
          return;
@@ -29,7 +28,7 @@ public class TimeScriptEntry implements Comparable<Object>
       varValuePairs.add(variableValuePair);
    }
    
-   public void addVarValue(BooleanYoVariable variable, boolean value)
+   public void addVarValue(YoBoolean variable, boolean value)
    {
       if (variable == null)
          return;
@@ -37,7 +36,7 @@ public class TimeScriptEntry implements Comparable<Object>
       varValuePairs.add(variableValuePair);
    }
    
-   public void addVarValue(IntegerYoVariable variable, int value)
+   public void addVarValue(YoInteger variable, int value)
    {
       if (variable == null)
          return;
@@ -46,7 +45,7 @@ public class TimeScriptEntry implements Comparable<Object>
    }
    
    @SuppressWarnings("rawtypes")
-   public void addVarValue(EnumYoVariable variable, Enum value)
+   public void addVarValue(YoEnum variable, Enum value)
    {
       if (variable == null)
          return;
@@ -101,10 +100,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class DoubleVariableValuePair implements VariableValuePair
    {
-      protected DoubleYoVariable variable;
+      protected YoDouble variable;
       protected double value;
 
-      public DoubleVariableValuePair(DoubleYoVariable variable, double value)
+      public DoubleVariableValuePair(YoDouble variable, double value)
       {
          this.variable = variable;
          this.value = value;
@@ -119,10 +118,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class BooleanVariableValuePair implements VariableValuePair
    {
-      protected BooleanYoVariable variable;
+      protected YoBoolean variable;
       protected boolean value;
 
-      public BooleanVariableValuePair(BooleanYoVariable variable, boolean value)
+      public BooleanVariableValuePair(YoBoolean variable, boolean value)
       {
          this.variable = variable;
          this.value = value;
@@ -137,10 +136,10 @@ public class TimeScriptEntry implements Comparable<Object>
    
    private class IntegerVariableValuePair implements VariableValuePair
    {
-      protected IntegerYoVariable variable;
+      protected YoInteger variable;
       protected int value;
 
-      public IntegerVariableValuePair(IntegerYoVariable variable, int value)
+      public IntegerVariableValuePair(YoInteger variable, int value)
       {
          this.variable = variable;
          this.value = value;
@@ -156,12 +155,12 @@ public class TimeScriptEntry implements Comparable<Object>
    private class EnumVariableValuePair implements VariableValuePair
    {
       @SuppressWarnings("rawtypes")
-      protected EnumYoVariable variable;
+      protected YoEnum variable;
       @SuppressWarnings("rawtypes")
       protected Enum value;
 
       @SuppressWarnings("rawtypes")
-      public EnumVariableValuePair(EnumYoVariable variable, Enum value)
+      public EnumVariableValuePair(YoEnum variable, Enum value)
       {
          this.variable = variable;
          this.value = value;

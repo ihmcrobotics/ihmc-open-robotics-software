@@ -21,7 +21,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
    public static void main(String[] args)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      SixDoFJoint rootJoint = new SixDoFJoint("sixdof", elevator, ReferenceFrame.getWorldFrame());
+      SixDoFJoint rootJoint = new SixDoFJoint("sixdof", elevator);
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
       Matrix3D momentOfInertia = new Matrix3D();
 

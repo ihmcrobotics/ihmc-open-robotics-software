@@ -7,16 +7,16 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WalkToFiducialBehavior extends AbstractBehavior
 {
-   private final BooleanYoVariable sentPlanningRequest = new BooleanYoVariable("SentPlanningRequest", registry);
-   private final BooleanYoVariable recievedPlan = new BooleanYoVariable("RecievedPlan", registry);
-   private final BooleanYoVariable planValid = new BooleanYoVariable("PlanValid", registry);
+   private final YoBoolean sentPlanningRequest = new YoBoolean("SentPlanningRequest", registry);
+   private final YoBoolean recievedPlan = new YoBoolean("RecievedPlan", registry);
+   private final YoBoolean planValid = new YoBoolean("PlanValid", registry);
 
    private final FramePose goalPose = new FramePose();
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);

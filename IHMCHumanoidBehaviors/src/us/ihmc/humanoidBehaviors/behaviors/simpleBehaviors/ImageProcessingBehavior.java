@@ -3,14 +3,14 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
@@ -31,20 +31,20 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler());
    }
 
-   public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3D cameraPositionToPack, Quaternion cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
+   public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack, IntrinsicParameters intrinsicParametersToPack);
 
    @Override
-   public void updateImage(BufferedImage bufferedImage, Point3D cameraPosition, Quaternion cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
-      videoDataServer.updateImage(VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
+      videoDataServer.onFrame(VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
    }
 
    class UIVideoHandler implements CompressedVideoHandler
    {
       @Override
-      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation,
+      public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
             IntrinsicParameters intrinsicParameters)
       {
          VideoPacket videoPacket = new VideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
@@ -56,7 +56,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       }
 
       @Override
-      public void addNetStateListener(NetStateListener compressedVideoDataServer)
+      public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
       {
       }
 

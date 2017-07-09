@@ -1,18 +1,32 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 
-public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectoryCommand<T, M>, M extends AbstractJointspaceTrajectoryMessage<M>> extends QueueableCommand<T, M>
+public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectoryCommand<T, M>, M extends AbstractJointspaceTrajectoryMessage<M>>
+      extends QueueableCommand<T, M>
 {
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
 
    public JointspaceTrajectoryCommand()
    {
       clear();
+   }
+
+   public JointspaceTrajectoryCommand(Random random)
+   {
+      clear();
+      int degreesOfFreedom = random.nextInt(10) + 1;
+      for(int i = 0; i < degreesOfFreedom; i++)
+      {
+         OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = new OneDoFJointTrajectoryCommand(random);
+         jointTrajectoryInputs.add().set(oneDoFJointTrajectoryCommand);
+      }
    }
 
    @Override
@@ -25,14 +39,14 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    @Override
    public void set(T other)
    {
-      setQueueqableCommandVariables(other);
+      setQueueableCommandVariables(other);
       set(other.getTrajectoryPointLists());
    }
 
    @Override
    public void set(M message)
    {
-      setQueueqableCommandVariables(message);
+      setQueueableCommandVariables(message);
       set(message.getTrajectoryPointLists());
    }
 
@@ -50,7 +64,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
-         if(oneJointTrajectoryMessage != null)
+         if (oneJointTrajectoryMessage != null)
          {
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
@@ -101,5 +115,23 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    {
       for (int i = 0; i < jointTrajectoryInputs.size(); i++)
          jointTrajectoryInputs.get(i).addTimeOffset(timeOffsetToAdd);
+   }
+
+   @Override
+   public boolean epsilonEquals(T other, double epsilon)
+   {
+      if (this.jointTrajectoryInputs.size() != other.getTrajectoryPointLists().size())
+      {
+         return false;
+      }
+
+      for (int i = 0; i < this.jointTrajectoryInputs.size(); i++)
+      {
+         if (!this.jointTrajectoryInputs.get(i).epsilonEquals(other.getTrajectoryPointLists().get(i), epsilon))
+         {
+            return false;
+         }
+      }
+      return super.epsilonEquals(other, epsilon);
    }
 }

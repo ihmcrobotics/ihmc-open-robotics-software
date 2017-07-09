@@ -14,7 +14,6 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
-import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
@@ -22,13 +21,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand.BodyWeights;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -81,7 +79,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
+         toolboxCommunicator.disconnect();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
@@ -124,33 +122,36 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
-      RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
       FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
+      ReferenceFrame pelvisControlFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
       ik.holdCurrentPelvisOrientation();
+      ik.holdCurrentPelvisHeight();
 
       drcBehaviorTestHelper.updateRobotModel();
       FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
-      ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
+      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       desiredHandPoseCopy.changeFrame(chestFrame);
 
       drcBehaviorTestHelper.dispatchBehavior(ik);
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -158,15 +159,16 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      String pelvisName = fullRobotModel.getPelvis().getName();
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
-      Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+      Quaternion controllerDesiredPelvisOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(pelvisName, scs);
 
       double angleEpsilon = Math.toRadians(1.0);
 
       EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
       EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
 
-      String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
+      String handName = fullRobotModel.getHand(robotSide).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
       Point3D handPosition = new Point3D();
@@ -203,12 +205,12 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FramePose desiredHandPoseR = new FramePose(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);
+      desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
       FramePose desiredHandPoseL = new FramePose(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseL.translate(0.20, 0.0, 0.0);
+      desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
       ik.holdCurrentChestOrientation();
@@ -225,7 +227,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -243,7 +246,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Quaternion desiredHandOrientationL = new Quaternion();
       desiredHandPoseL.getOrientation(desiredHandOrientationL);
 
-      double handAngleEpsilon = Math.toRadians(1);
+      double handAngleEpsilon = Math.toRadians(1.0);
 
       assertTrue(isOrientationEqual(desiredHandOrientationR, controllerDesiredHandOrientationR, handAngleEpsilon));
       assertTrue(isOrientationEqual(desiredHandOrientationL, controllerDesiredHandOrientationL, handAngleEpsilon));
@@ -298,7 +301,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.setOrientation(offsetOrientation);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
@@ -313,7 +316,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -379,7 +383,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPoseR.getOrientation(handQuatRight);
       handQuatRight.multiply(handQuatRight, offsetOrientationRight);
       desiredHandPoseR.setOrientation(handQuatRight);
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);
+      desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlOnly(RobotSide.RIGHT);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
@@ -394,7 +398,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPoseL.getOrientation(handQuatLeft);
       handQuatLeft.multiply(handQuatLeft, offsetOrientationLeft);
       desiredHandPoseL.setOrientation(handQuatLeft);
-      desiredHandPoseL.translate(0.20, 0.0, 0.0);
+      desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlOnly(RobotSide.LEFT);
       ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
@@ -413,7 +417,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -447,10 +452,10 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
-      double positionEpsilon = 1.0e-4;
+      double positionEpsilon = 1.0e-3;
 
-      assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
-      assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
+      assertTrue("Position difference: " + rightDifference, rightDifference < positionEpsilon);
+      assertTrue("Position difference: " + leftDifference, leftDifference < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -483,7 +488,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPose.getOrientation(handQuat);
       handQuat.multiply(handQuat, offsetOrientation);
       desiredHandPose.setOrientation(handQuat);
-      desiredHandPose.translate(0.20, 0.0, 0.0);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setHandLinearControlAndYawPitchOnly(RobotSide.RIGHT);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
@@ -500,7 +505,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -563,7 +569,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -617,7 +624,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       while (!ik.isDone())
       {
-         ThreadTools.sleep(100);
+         success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         assertTrue(success);
       }
 
       assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
@@ -636,88 +644,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertEquals("Expected: " + desiredPelvisOrientation.getRoll() + " Received: " + currentPelvisRoll, desiredPelvisOrientation.getRoll(), currentPelvisRoll, angleEpsilon);
       assertEquals("Expected: " + initialPelvisYaw + " Received: " + currentPelvisYaw, initialPelvisYaw, currentPelvisYaw, angleEpsilon);
       assertEquals("Expected: " + initialPelvisPitch + " Received: " + currentPelvisPitch, initialPelvisPitch, currentPelvisPitch, angleEpsilon);
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = {IntegrationCategory.FLAKY})
-   @Test(timeout = 300000)
-   public void testSolvingForTrackingWeights() throws SimulationExceededMaximumTimeException, IOException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      // simulate for a while to make sure the robot is still so small time differences between frame changes in the
-      // controller and the unit test will not affect the outcome too much.
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      assertTrue(success);
-
-      RobotSide robotSide = RobotSide.RIGHT;
-
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      drcBehaviorTestHelper.updateRobotModel();
-
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                     drcBehaviorTestHelper.getSDFFullRobotModel());
-
-      ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-
-      RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
-      ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
-      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
-      initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
-      initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      ik.setDesiredChestOrientation(initialChestOrientation);
-      ik.setDesiredPelvisOrientation(initialPelvisOrientation);
-
-      FramePose desiredHandPose = new FramePose(handControlFrame);
-      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.translate(0.08, 0.0, 0.0);
-      ik.setTrajectoryTime(0.5);
-      ik.setDesiredHandPose(robotSide, desiredHandPose);
-      ik.setBodyWeights(BodyWeights.HIGH);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
-      ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
-      desiredHandPoseCopy.changeFrame(chestFrame);
-
-      drcBehaviorTestHelper.dispatchBehavior(ik);
-
-      while (!ik.isDone())
-      {
-         ThreadTools.sleep(100);
-      }
-
-      assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
-
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
-      Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
-
-      double chestAngleEpsilon = Math.toRadians(1.0e-2);
-      double pelvisAngleEpsilon = Math.toRadians(1.0e-1);
-
-      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, chestAngleEpsilon));
-      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, pelvisAngleEpsilon));
-
-      String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
-      Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
-
-      Point3D handPosition = new Point3D();
-      desiredHandPose.getPosition(handPosition);
-
-      double positionEpsilon = 1.0e-4;
-      double positionDifference = handPosition.distance(controllerDesiredHandPosition);
-
-      assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }

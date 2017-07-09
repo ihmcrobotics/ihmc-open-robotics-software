@@ -5,17 +5,17 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 
 public class GraphTester
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("registry");
    private final DataBuffer buffer = new DataBuffer(10);
-   private final DoubleYoVariable xPlot = new DoubleYoVariable("xPlot", registry);
-   private final DoubleYoVariable yPlot = new DoubleYoVariable("yPlot", registry);
+   private final YoDouble xPlot = new YoDouble("xPlot", registry);
+   private final YoDouble yPlot = new YoDouble("yPlot", registry);
 
    public GraphTester()
    {

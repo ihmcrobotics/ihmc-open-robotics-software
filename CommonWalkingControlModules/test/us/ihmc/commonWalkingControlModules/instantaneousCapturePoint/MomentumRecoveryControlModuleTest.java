@@ -30,14 +30,13 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -62,12 +61,12 @@ public class MomentumRecoveryControlModuleTest
    private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
 
-   private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
-   private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
-   private BooleanYoVariable allowUsingHighMomentumWeight;
+   private YoBoolean allowUpperBodyMomentumInSingleSupport;
+   private YoBoolean allowUpperBodyMomentumInDoubleSupport;
+   private YoBoolean allowUsingHighMomentumWeight;
 
-   private BooleanYoVariable usingUpperBodyMomentum;
-   private BooleanYoVariable usingHighMomentumWeight;
+   private YoBoolean usingUpperBodyMomentum;
+   private YoBoolean usingHighMomentumWeight;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test (timeout = 30000)
@@ -325,7 +324,7 @@ public class MomentumRecoveryControlModuleTest
       RobotSide stepSide = RobotSide.RIGHT;
       FrameConvexPolygon2d supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
       FramePose stepPose = new FramePose(worldFrame, rightFootPosition, new Quaternion());
-      Footstep footStep = new Footstep(feet.get(stepSide), stepSide, soleFrames.get(stepSide), new PoseReferenceFrame("stepFrame", stepPose));
+      Footstep footStep = new Footstep(feet.get(stepSide), stepSide, stepPose);
 
       momentumRecoveryControlModule.setSupportSide(RobotSide.LEFT);
       momentumRecoveryControlModule.setICPError(new FrameVector2d(worldFrame));
@@ -365,7 +364,7 @@ public class MomentumRecoveryControlModuleTest
       RobotSide stepSide = RobotSide.RIGHT;
       FrameConvexPolygon2d supportPolygon = makeSupportPolygon(stepSide == RobotSide.RIGHT, stepSide == RobotSide.LEFT);
       FramePose stepPose = new FramePose(worldFrame, rightFootPosition, new Quaternion());
-      Footstep footStep = new Footstep(feet.get(stepSide), stepSide, soleFrames.get(stepSide), new PoseReferenceFrame("stepFrame", stepPose));
+      Footstep footStep = new Footstep(feet.get(stepSide), stepSide, stepPose);
 
       momentumRecoveryControlModule.setSupportSide(RobotSide.LEFT);
       momentumRecoveryControlModule.setICPError(new FrameVector2d(worldFrame));
@@ -432,7 +431,7 @@ public class MomentumRecoveryControlModuleTest
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = robotSide.getLowerCaseName();
-         SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator, worldFrame);
+         SixDoFJoint footJoint = new SixDoFJoint(prefix + "FootJoint", elevator);
          RigidBody foot = ScrewTools.addRigidBody(prefix + "Foot", footJoint, new Matrix3D(), 1.0, new Vector3D());
          ReferenceFrame ankleFrame = foot.getBodyFixedFrame();
          ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(prefix + "Sole", ankleFrame, new RigidBodyTransform());
@@ -455,16 +454,16 @@ public class MomentumRecoveryControlModuleTest
       elevator.updateFramesRecursively();
 
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, 0.1, registry, yoGraphicsListRegistry);
-      allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) registry.getVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) registry.getVariable("allowUpperBodyMomentumInDoubleSupport");
-      allowUsingHighMomentumWeight = (BooleanYoVariable) registry.getVariable("allowUsingHighMomentumWeight");
+      allowUpperBodyMomentumInSingleSupport = (YoBoolean) registry.getVariable("allowUpperBodyMomentumInSingleSupport");
+      allowUpperBodyMomentumInDoubleSupport = (YoBoolean) registry.getVariable("allowUpperBodyMomentumInDoubleSupport");
+      allowUsingHighMomentumWeight = (YoBoolean) registry.getVariable("allowUsingHighMomentumWeight");
 
       allowUpperBodyMomentumInSingleSupport.set(true);
       allowUpperBodyMomentumInDoubleSupport.set(true);
       allowUsingHighMomentumWeight.set(true);
 
-      usingUpperBodyMomentum = (BooleanYoVariable) registry.getVariable("usingUpperBodyMomentum");
-      usingHighMomentumWeight = (BooleanYoVariable) registry.getVariable("usingHighMomentumWeight");
+      usingUpperBodyMomentum = (YoBoolean) registry.getVariable("usingUpperBodyMomentum");
+      usingHighMomentumWeight = (YoBoolean) registry.getVariable("usingHighMomentumWeight");
 
       ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
       for (RobotSide robotSide : RobotSide.values)

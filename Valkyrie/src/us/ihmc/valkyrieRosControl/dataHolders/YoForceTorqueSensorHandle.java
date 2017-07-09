@@ -2,8 +2,8 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 
@@ -12,8 +12,8 @@ public class YoForceTorqueSensorHandle
    private final ForceTorqueSensorHandle handle;
    private final ForceSensorDefinition forceSensorDefinition;
 
-   private final DoubleYoVariable tx, ty, tz;
-   private final DoubleYoVariable fx, fy, fz;
+   private final YoDouble tx, ty, tz;
+   private final YoDouble fx, fy, fz;
 
    public YoForceTorqueSensorHandle(ForceTorqueSensorHandle handle, ForceSensorDefinition forceSensorDefinition, YoVariableRegistry parentRegistry)
    {
@@ -23,13 +23,13 @@ public class YoForceTorqueSensorHandle
       String name = forceSensorDefinition.getSensorName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
 
-      this.tx = new DoubleYoVariable(name + "_tx", registry);
-      this.ty = new DoubleYoVariable(name + "_ty", registry);
-      this.tz = new DoubleYoVariable(name + "_tz", registry);
+      this.tx = new YoDouble(name + "_tx", registry);
+      this.ty = new YoDouble(name + "_ty", registry);
+      this.tz = new YoDouble(name + "_tz", registry);
 
-      this.fx = new DoubleYoVariable(name + "_fx", registry);
-      this.fy = new DoubleYoVariable(name + "_fy", registry);
-      this.fz = new DoubleYoVariable(name + "_fz", registry);
+      this.fx = new YoDouble(name + "_fx", registry);
+      this.fy = new YoDouble(name + "_fy", registry);
+      this.fz = new YoDouble(name + "_fz", registry);
    }
 
    public void update()

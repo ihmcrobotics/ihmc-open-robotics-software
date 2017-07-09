@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.Hei
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -116,7 +116,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          HeightQuadTreeToolboxRequestCommand command = commandInputManager.pollNewestCommand(HeightQuadTreeToolboxRequestCommand.class);
 
          if (command.isQuadTreeUpdateRequested())
-            quadTreeUpdateRequested.setTrue();
+            quadTreeUpdateRequested.setValue(true);
 
          if (command.isClearQuadTreeRequested())
          {
@@ -180,7 +180,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          rootJoint.getTranslation(rootJointPosition);
          robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
          reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
-         quadTreeUpdateRequested.setFalse();
+         quadTreeUpdateRequested.setValue(false);
       }
    }
 

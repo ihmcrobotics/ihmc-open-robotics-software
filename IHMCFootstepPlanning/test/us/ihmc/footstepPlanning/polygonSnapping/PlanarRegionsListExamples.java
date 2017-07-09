@@ -3,10 +3,10 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -191,9 +191,9 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
 
-   public static ConvexPolygon2d createRectanglePolygon(double lengthX, double widthY)
+   public static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
    {
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
       convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
       convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);

@@ -10,7 +10,12 @@ public interface PositionTrajectoryGenerator extends TrajectoryGenerator, Positi
 
    public abstract void getAcceleration(FrameVector accelerationToPack);
 
-   public abstract void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack);
+   public default void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
+   }
 
    public abstract void showVisualization();
 

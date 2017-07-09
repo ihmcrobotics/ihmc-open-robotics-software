@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -15,10 +14,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -29,8 +27,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>
 {
-   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
-   public FootstepOrigin origin;
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
@@ -44,6 +40,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public List<Point2D> predictedContactPoints;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -51,7 +50,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage()
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
@@ -73,7 +71,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          TrajectoryType trajectoryType, double swingHeight)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -86,10 +83,10 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
+      this.executionDelayTime = footstepData.executionDelayTime;
       orientation.checkIfUnitary();
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
@@ -105,6 +102,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       }
    }
 
+   @Override
    public AdjustFootstepMessage clone()
    {
       return new AdjustFootstepMessage(this);
@@ -113,12 +111,14 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(Footstep footstep)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3D();
-      orientation = new Quaternion();
-      footstep.getPositionInWorldFrame(location);
-      footstep.getOrientationInWorldFrame(orientation);
+
+      FramePoint location = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(location, orientation);
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      this.location = location.getPoint();
+      this.orientation = orientation.getQuaternion();
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -140,11 +140,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       {
          predictedContactPoints = null;
       }
-   }
-
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
    }
 
    public List<Point2D> getPredictedContactPoints()
@@ -182,11 +177,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.robotSide = robotSide;
    }
 
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
-   }
-
    public void setLocation(Point3D location)
    {
       if (this.location == null) this.location = new Point3D();
@@ -203,7 +193,26 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       this.predictedContactPoints = predictedContactPoints;
    }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
+   }
 
+   @Override
    public String toString()
    {
       String ret = "";
@@ -225,6 +234,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return ret;
    }
 
+   @Override
    public boolean epsilonEquals(AdjustFootstepMessage footstepData, double epsilon)
    {
       boolean robotSideEquals = robotSide == footstepData.robotSide;
@@ -265,22 +275,20 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
    }
 
+   @Override
    public AdjustFootstepMessage transform(RigidBodyTransform transform)
    {
       AdjustFootstepMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
       return ret;
    }
 
    public AdjustFootstepMessage(Random random)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
       this.orientation = RandomGeometry.nextQuaternion(random);

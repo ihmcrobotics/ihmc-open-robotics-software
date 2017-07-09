@@ -21,7 +21,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PlanarJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {
-   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
    private final Quaternion jointRotation = new Quaternion();
    private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
@@ -32,20 +31,24 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    private Wrench successorWrench;
 
-   public PlanarJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
+   public PlanarJoint(String name, RigidBody predecessor)
    {
-      super(name, predecessor, beforeJointFrame);
+      this(name, predecessor, null);
+   }
 
-      afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
+   public PlanarJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
+   {
+      super(name, predecessor, transformToParent);
+
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
 
    @Override
-   public FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint()
+   protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      return afterJointFrame;
+      jointTransform.set(jointRotation, jointTranslation);
    }
 
    @Override
@@ -184,14 +187,12 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setRotation(double yaw, double pitch, double roll)
    {
       jointRotation.setToPitchQuaternion(pitch);
-      afterJointFrame.setRotation(jointRotation);
    }
 
    @Override
    public void setRotation(QuaternionReadOnly jointRotation)
    {
       this.jointRotation.setToPitchQuaternion(jointRotation.getPitch());
-      afterJointFrame.setRotation(this.jointRotation);
    }
 
    @Override
@@ -205,21 +206,18 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    public void setRotation(RotationMatrixReadOnly jointRotation)
    {
       this.jointRotation.setToPitchQuaternion(jointRotation.getPitch());
-      afterJointFrame.setRotation(this.jointRotation);
    }
 
    @Override
    public void setPosition(Tuple3DReadOnly jointTranslation)
    {
       this.jointTranslation.set(jointTranslation.getX(), 0.0, jointTranslation.getZ());
-      afterJointFrame.setTranslation(this.jointTranslation);
    }
 
    @Override
    public void setPosition(double x, double y, double z)
    {
       jointTranslation.set(x, 0.0, z);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override
@@ -294,8 +292,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
       transform.getTranslation(jointTranslation);
       jointTranslation.setY(0.0);
-      afterJointFrame.setRotation(jointRotation);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override
@@ -371,8 +367,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       double z = matrix.get(index++, 0);
       jointRotation.setToPitchQuaternion(qRot);
       jointTranslation.set(x, 0.0, z);
-      afterJointFrame.setRotation(jointRotation);
-      afterJointFrame.setTranslation(jointTranslation);
    }
 
    @Override

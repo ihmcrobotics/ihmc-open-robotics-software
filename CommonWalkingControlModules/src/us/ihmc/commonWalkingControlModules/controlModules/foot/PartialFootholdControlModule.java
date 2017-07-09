@@ -11,11 +11,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PartialFootholdControlModule
 {
@@ -39,7 +38,7 @@ public class PartialFootholdControlModule
 
    private final YoVariableRegistry registry;
 
-   private final EnumYoVariable<PartialFootholdState> footholdState;
+   private final YoEnum<PartialFootholdState> footholdState;
 
    public enum RotationCalculatorType
    {
@@ -48,7 +47,7 @@ public class PartialFootholdControlModule
    }
    private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
    private final EnumMap<RotationCalculatorType, FrameLine2d> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
-   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
+   private final YoEnum<RotationCalculatorType> rotationCalculatorType;
 
    private final RotationVerificator rotationVerificator;
 
@@ -69,21 +68,21 @@ public class PartialFootholdControlModule
    private final FrameConvexPolygon2d fullSupportAfterShrinking = new FrameConvexPolygon2d();
    private final YoFrameConvexPolygon2d yoFullSupportAfterShrinking;
 
-   private final IntegerYoVariable shrinkMaxLimit;
-   private final IntegerYoVariable shrinkCounter;
+   private final YoInteger shrinkMaxLimit;
+   private final YoInteger shrinkCounter;
 
-   private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
+   private final YoInteger numberOfCellsOccupiedOnSideOfLine;
 
-   private final IntegerYoVariable thresholdForCoPRegionOccupancy;
-   private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
+   private final YoInteger thresholdForCoPRegionOccupancy;
+   private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
 
-   private final BooleanYoVariable doPartialFootholdDetection;
+   private final YoBoolean doPartialFootholdDetection;
 
    private final FrameLine2d lineOfRotation;
 
-   private final BooleanYoVariable useCoPOccupancyGrid;
-   private final BooleanYoVariable cropToConvexHullOfCoPs;
-   private final BooleanYoVariable fitLineToCoPs;
+   private final YoBoolean useCoPOccupancyGrid;
+   private final YoBoolean cropToConvexHullOfCoPs;
+   private final YoBoolean fitLineToCoPs;
 
    private final int footCornerPoints;
 
@@ -94,11 +93,11 @@ public class PartialFootholdControlModule
    /**
     * Variables for checking the area of the unsafe part of the foothold.
     */
-   private final DoubleYoVariable unsafeArea;
-   private final DoubleYoVariable minAreaToConsider;
-   private final BooleanYoVariable unsafeAreaAboveThreshold;
+   private final YoDouble unsafeArea;
+   private final YoDouble minAreaToConsider;
+   private final YoBoolean unsafeAreaAboveThreshold;
 
-   private final BooleanYoVariable expectingLineContact;
+   private final YoBoolean expectingLineContact;
    private final FramePoint2d dummyDesiredCop = new FramePoint2d();
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -124,14 +123,14 @@ public class PartialFootholdControlModule
       parentRegistry.addChild(registry);
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
 
-      footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
+      footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
       yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
       yoFullSupportAfterShrinking = new YoFrameConvexPolygon2d(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);
 
-      shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
+      shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
 
-      numberOfCellsOccupiedOnSideOfLine = new IntegerYoVariable(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
+      numberOfCellsOccupiedOnSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -155,23 +154,22 @@ public class PartialFootholdControlModule
       rotationCalculatorType = explorationParameters.getRotationCalculatorType();
       minAreaToConsider = explorationParameters.getMinAreaToConsider();
 
-      doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
+      doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
 
-      cropToConvexHullOfCoPs = new BooleanYoVariable(namePrefix + "CropToConvexHullOfCoPs", registry);
+      cropToConvexHullOfCoPs = new YoBoolean(namePrefix + "CropToConvexHullOfCoPs", registry);
       cropToConvexHullOfCoPs.set(false);
 
-      fitLineToCoPs = new BooleanYoVariable(namePrefix + "FitLineToCoPs", registry);
+      fitLineToCoPs = new YoBoolean(namePrefix + "FitLineToCoPs", registry);
       fitLineToCoPs.set(false);
 
-      expectingLineContact = new BooleanYoVariable(namePrefix + "ExpectingLineContact", registry);
+      expectingLineContact = new YoBoolean(namePrefix + "ExpectingLineContact", registry);
       expectingLineContact.set(false);
 
       double dt = controllerToolbox.getControlDT();
-      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
 
       FootRotationCalculator velocityFootRotationCalculator =
-            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, explorationParameters, yoGraphicsListRegistry, registry);
+            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       FootRotationCalculator geometricFootRotationCalculator =
             new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
@@ -181,8 +179,8 @@ public class PartialFootholdControlModule
 
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
 
-      unsafeArea = new DoubleYoVariable(namePrefix + "UnsafeArea", registry);
-      unsafeAreaAboveThreshold = new BooleanYoVariable(namePrefix + "UnsafeAreaAboveThreshold", registry);
+      unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
+      unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -360,7 +358,14 @@ public class PartialFootholdControlModule
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
       {
          controllerFootPolygon.getFrameVertexXY(i, tempPosition);
-         contactPoints.get(i).setPosition(tempPosition);
+         YoContactPoint contactPoint = contactPoints.get(i);
+         contactPoint.setPosition(tempPosition);
+         contactPoint.setInContact(true);
+      }
+
+      for (int i = controllerFootPolygon.getNumberOfVertices(); i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).setInContact(false);
       }
 
       backupFootPolygon.set(shrunkFootPolygon);

@@ -3,14 +3,14 @@ package us.ihmc.robotics.math.frames;
 import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
 {
-   private final LongYoVariable currentFrameId;
+   private final YoLong currentFrameId;
    private final TLongObjectHashMap<ReferenceFrame> referenceFrames = new TLongObjectHashMap<ReferenceFrame>();
 
    public YoMultipleFramesHelper(String namePrefix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
@@ -18,7 +18,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
       if (referenceFrames == null || referenceFrames.length == 0)
          throw new RuntimeException("Need to provide at least one ReferenceFrame.");
       
-      currentFrameId = new LongYoVariable(namePrefix + "FrameId", registry);
+      currentFrameId = new YoLong(namePrefix + "FrameId", registry);
       currentFrameId.set(referenceFrames[0].getNameBasedHashCode());
 
       for (ReferenceFrame referenceFrame : referenceFrames)
@@ -70,12 +70,12 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
    /**
     * Register a new reference frame.
     * @param newReferenceFrame
-    * @throws RuntimeException if newReferenceFrame is null
     */
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
-      if (newReferenceFrame == null) throw new RuntimeException("The Reference Frames cannot be null.");
-      
+      if (newReferenceFrame == null)
+         return;
+
       if (isReferenceFrameRegistered(newReferenceFrame))
       {
          return;

@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.SliderJointPhysics;
 
 /**
@@ -20,8 +20,8 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
 {
    private static final long serialVersionUID = 1364230363983913667L;
    private final YoVariableRegistry registry;
-   protected DoubleYoVariable q, qd, qdd, tau;
-   public DoubleYoVariable tauJointLimit, tauDamping;
+   protected YoDouble q, qd, qdd, tau;
+   public YoDouble tauJointLimit, tauDamping;
 
    // private int axis;
    public Vector3D vTranslate = new Vector3D();
@@ -44,10 +44,10 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
 
       registry = rob.getRobotsYoVariableRegistry();
 
-      q = new DoubleYoVariable("q_" + jname, "SliderJoint position", registry);
-      qd = new DoubleYoVariable("qd_" + jname, "SliderJoint linear velocity", registry);
-      qdd = new DoubleYoVariable("qdd_" + jname, "SliderJoint linear acceleration", registry);
-      tau = new DoubleYoVariable("tau_" + jname, "SliderJoint torque", registry);
+      q = new YoDouble("q_" + jname, "SliderJoint position", registry);
+      qd = new YoDouble("qd_" + jname, "SliderJoint linear velocity", registry);
+      qdd = new YoDouble("qdd_" + jname, "SliderJoint linear acceleration", registry);
+      tau = new YoDouble("tau_" + jname, "SliderJoint torque", registry);
 
       physics.u_i = new Vector3D();
 
@@ -87,10 +87,10 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
 
       registry = rob.getRobotsYoVariableRegistry();
 
-      q = new DoubleYoVariable("q_" + jname, "Slider joint displacement", registry);
-      qd = new DoubleYoVariable("qd_" + jname, "Slider joint linear velocity", registry);
-      qdd = new DoubleYoVariable("qdd_" + jname, "Slider joint linear acceleration", registry);
-      tau = new DoubleYoVariable("tau_" + jname, "Slider joint torque", registry);
+      q = new YoDouble("q_" + jname, "Slider joint displacement", registry);
+      qd = new YoDouble("qd_" + jname, "Slider joint linear velocity", registry);
+      qdd = new YoDouble("qdd_" + jname, "Slider joint linear acceleration", registry);
+      tau = new YoDouble("tau_" + jname, "Slider joint torque", registry);
 
       physics.u_i = new Vector3D(u_hat);
       physics.u_i.normalize();
@@ -123,7 +123,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
    {
       if (tauJointLimit == null)
       {
-         tauJointLimit = new DoubleYoVariable("tau_joint_limit_" + this.name, "SliderJoint limit stop torque", registry);
+         tauJointLimit = new YoDouble("tau_joint_limit_" + this.name, "SliderJoint limit stop torque", registry);
       }
 
       this.q_min = q_min;
@@ -147,7 +147,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
    {
       if (tauDamping == null)
       {
-         tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "SliderJoint damping torque", registry);
+         tauDamping = new YoDouble("tau_damp_" + this.name, "SliderJoint damping torque", registry);
       }
 
       this.b_damp = b_damp;
@@ -157,7 +157,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
    {
       if (tauDamping == null)
       {
-         tauDamping = new DoubleYoVariable("tau_damp_" + this.name, "SliderJoint damping torque", registry);
+         tauDamping = new YoDouble("tau_damp_" + this.name, "SliderJoint damping torque", registry);
       }
 
       this.f_stiction = f_stiction;
@@ -227,7 +227,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the current position
     */
    @Override
-   public DoubleYoVariable getQYoVariable()
+   public YoDouble getQYoVariable()
    {
       return q;
    }
@@ -249,7 +249,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the current velocity
     */
    @Override
-   public DoubleYoVariable getQDYoVariable()
+   public YoDouble getQDYoVariable()
    {
       return qd;
    }
@@ -271,7 +271,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the current acceleration
     */
    @Override
-   public DoubleYoVariable getQDDYoVariable()
+   public YoDouble getQDDYoVariable()
    {
       return qdd;
    }
@@ -293,7 +293,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @return YoVariable representing the currently applied torque
     */
    @Override
-   public DoubleYoVariable getTauYoVariable()
+   public YoDouble getTauYoVariable()
    {
       return tau;
    }

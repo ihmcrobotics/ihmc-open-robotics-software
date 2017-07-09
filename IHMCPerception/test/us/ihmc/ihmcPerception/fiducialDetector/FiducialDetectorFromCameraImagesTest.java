@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -20,22 +22,20 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingFiducialBoxRobot;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
-import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingFiducialBoxRobot;
-import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -88,10 +88,10 @@ public class FiducialDetectorFromCameraImagesTest
 
       int width = 800;
       int height = 800;
-      RenderedSceneHandler videoDataServer = new RenderedSceneHandler()
+      VideoDataServer videoDataServer = new VideoDataServer()
       {
          @Override
-         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+         public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
          {
             FloatingJoint cameraJoint = (FloatingJoint) simpleRobotWithCamera.getRootJoints().get(0);
 
@@ -119,14 +119,9 @@ public class FiducialDetectorFromCameraImagesTest
          }
 
          @Override
-         public boolean isReadyForNewData()
+         public boolean isConnected()
          {
             return true;
-         }
-
-         @Override
-         public void close()
-         {
          }
       };
 
@@ -137,28 +132,28 @@ public class FiducialDetectorFromCameraImagesTest
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
-      BooleanYoVariable fiducialTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
-      BooleanYoVariable fiducialTargetIDHasBeenLocatedFiltered = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocatedFiltered");
+      YoBoolean fiducialTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
+      YoBoolean fiducialTargetIDHasBeenLocatedFiltered = (YoBoolean) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocatedFiltered");
 
-      DoubleYoVariable fiducialReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameX");
-      DoubleYoVariable fiducialReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameY");
-      DoubleYoVariable fiducialReportedPoseWorldFrameZ = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameZ");
+      YoDouble fiducialReportedPoseWorldFrameX = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameX");
+      YoDouble fiducialReportedPoseWorldFrameY = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameY");
+      YoDouble fiducialReportedPoseWorldFrameZ = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameZ");
 
-      DoubleYoVariable fiducialReportedPoseWorldFrameQS = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQS");
-      DoubleYoVariable fiducialReportedPoseWorldFrameQX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQX");
-      DoubleYoVariable fiducialReportedPoseWorldFrameQY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQY");
-      DoubleYoVariable fiducialReportedPoseWorldFrameQZ = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQZ");
+      YoDouble fiducialReportedPoseWorldFrameQS = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQS");
+      YoDouble fiducialReportedPoseWorldFrameQX = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQX");
+      YoDouble fiducialReportedPoseWorldFrameQY = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQY");
+      YoDouble fiducialReportedPoseWorldFrameQZ = (YoDouble) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQZ");
 
-      DoubleYoVariable q_qrCode_x = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_x");
-      DoubleYoVariable q_qrCode_y = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_y");
-      DoubleYoVariable q_qrCode_z = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_z");
+      YoDouble q_qrCode_x = (YoDouble) scsForDetecting.getVariable("q_qrCode_x");
+      YoDouble q_qrCode_y = (YoDouble) scsForDetecting.getVariable("q_qrCode_y");
+      YoDouble q_qrCode_z = (YoDouble) scsForDetecting.getVariable("q_qrCode_z");
 
-      DoubleYoVariable q_qrCode_qs = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qs");
-      DoubleYoVariable q_qrCode_qx = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qx");
-      DoubleYoVariable q_qrCode_qy = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qy");
-      DoubleYoVariable q_qrCode_qz = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qz");
+      YoDouble q_qrCode_qs = (YoDouble) scsForDetecting.getVariable("q_qrCode_qs");
+      YoDouble q_qrCode_qx = (YoDouble) scsForDetecting.getVariable("q_qrCode_qx");
+      YoDouble q_qrCode_qy = (YoDouble) scsForDetecting.getVariable("q_qrCode_qy");
+      YoDouble q_qrCode_qz = (YoDouble) scsForDetecting.getVariable("q_qrCode_qz");
 
-      final DoubleYoVariable time = simpleRobotWithCamera.getYoTime();
+      final YoDouble time = simpleRobotWithCamera.getYoTime();
 
       time.addVariableChangedListener(new VariableChangedListener()
       {

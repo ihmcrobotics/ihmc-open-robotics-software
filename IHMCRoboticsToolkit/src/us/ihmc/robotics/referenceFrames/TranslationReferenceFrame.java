@@ -12,7 +12,7 @@ public class TranslationReferenceFrame extends ReferenceFrame
 
    public TranslationReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
-      super(frameName, parentFrame, false, false, parentFrame.isZupFrame());
+      super(frameName, parentFrame, false, parentFrame.isZupFrame());
 
       originVector = new FrameVector(parentFrame);
    }

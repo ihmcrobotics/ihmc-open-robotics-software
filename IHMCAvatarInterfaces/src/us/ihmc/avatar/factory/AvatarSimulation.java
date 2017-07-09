@@ -183,4 +183,9 @@ public class AvatarSimulation
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
    }
+
+   public void addRobotControllerOnEstimatorThread(RobotController controller)
+   {
+      stateEstimationThread.addRobotController(controller);
+   }
 }

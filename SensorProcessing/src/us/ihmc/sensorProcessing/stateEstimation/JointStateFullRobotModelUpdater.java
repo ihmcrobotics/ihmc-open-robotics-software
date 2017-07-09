@@ -84,11 +84,9 @@ public class JointStateFullRobotModelUpdater extends AbstractControlFlowElement
       // TODO: Does it make sense to do this yet if the orientation of the pelvis isn't known yet?
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureOutputPort.getData();
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
-      twistCalculator.getRootBody().updateFramesRecursively();
-      twistCalculator.compute();
+      inverseDynamicsStructure.getElevator().updateFramesRecursively();
       spatialAccelerationCalculator.compute();
 
       inverseDynamicsStructureOutputPort.setData(inverseDynamicsStructure);

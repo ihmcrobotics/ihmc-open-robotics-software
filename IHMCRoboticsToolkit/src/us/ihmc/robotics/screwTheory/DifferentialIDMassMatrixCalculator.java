@@ -17,7 +17,6 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    private final InverseDynamicsCalculator idCalculator;
    private final InverseDynamicsJoint[] jointsInOrder;
    private final DenseMatrix64F massMatrix;
-   private final TwistCalculator twistCalculator;
    private final DenseMatrix64F storedJointDesiredAccelerations;
    private final DenseMatrix64F tmpDesiredJointAccelerationsMatrix;
    private final DenseMatrix64F tmpTauMatrix;
@@ -28,12 +27,11 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBody rootBody)
    {
-      twistCalculator = new TwistCalculator(inertialFrame, rootBody);
       LinkedHashMap<RigidBody, Wrench> zeroExternalWrench = new LinkedHashMap<RigidBody, Wrench>();
       ArrayList<InverseDynamicsJoint> zeroJointToIgnore = new ArrayList<InverseDynamicsJoint>();
       SpatialAccelerationVector zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
       
-      idCalculator = new InverseDynamicsCalculator(inertialFrame, zeroRootAcceleration, zeroExternalWrench, zeroJointToIgnore, false, true, twistCalculator);
+      idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroExternalWrench, zeroJointToIgnore, false, true);
       jointsInOrder = ScrewTools.computeSubtreeJoints(rootBody);
       totalNumberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrix = new DenseMatrix64F(totalNumberOfDoFs, totalNumberOfDoFs);

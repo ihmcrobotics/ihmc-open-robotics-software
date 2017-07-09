@@ -410,6 +410,10 @@ public class DataConsumerParticipant
     */
    public void sendClearLogRequest(Announcement announcement) throws IOException
    {
+      if (clearLogPublisher == null)
+      {
+         return;
+      }
       ClearLogRequest request = new ClearLogRequest();
       request.setGuid(announcement.getIdentifierAsString());
       clearLogPublisher.write(request);
@@ -464,6 +468,8 @@ public class DataConsumerParticipant
 
    public void remove()
    {
+      variableChangeDataPublisher = null;
+      clearLogPublisher = null;
       domain.removeParticipant(participant);
    }
 

@@ -14,8 +14,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -24,13 +24,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -42,9 +40,9 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
@@ -61,12 +59,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final HumanoidFloatingRootJointRobot robot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
-   private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> differenceJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> differenceJointTorques = new LinkedHashMap<OneDoFJoint, YoDouble>();
 
    private final YoFrameVector computedRootJointLinearAcceleration = new YoFrameVector("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector computedRootJointAngularAcceleration;
@@ -112,19 +109,18 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
 
-         DoubleYoVariable computedJointTorque = new DoubleYoVariable("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble computedJointTorque = new YoDouble("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointTorques.put(oneDoFJoint, computedJointTorque);
 
-         DoubleYoVariable differenceJointTorque = new DoubleYoVariable("tau_difference_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble differenceJointTorque = new YoDouble("tau_difference_" + oneDegreeOfFreedomJoint.getName(), registry);
          differenceJointTorques.put(oneDoFJoint, differenceJointTorque);
 
-         DoubleYoVariable computedJointAcceleration = new DoubleYoVariable("qdd_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
+         YoDouble computedJointAcceleration = new YoDouble("qdd_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
-      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
       double gravity = -robot.getGravityZ();
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravity);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getElevator(), gravity);
 
       robot.addYoVariableRegistry(registry);
 
@@ -184,7 +180,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
       }
    }
@@ -207,12 +203,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
 
          double otherRobotJointTorque = otherOneDegreeOfFreedomJoint.getTauYoVariable().getDoubleValue();
 
-         DoubleYoVariable differenceJointTorque = differenceJointTorques.get(oneDoFJoint);
+         YoDouble differenceJointTorque = differenceJointTorques.get(oneDoFJoint);
          differenceJointTorque.set(otherRobotJointTorque - inverseDynamicsTorque);
          if (Math.abs(differenceJointTorque.getDoubleValue()) > epsilon)
          {
@@ -260,7 +256,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsAcceleration = oneDoFJoint.getQddDesired();
          double simulatedRobotAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
 
-         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
          computedJointAcceleration.set(inverseDynamicsAcceleration);
 
          boolean accelerationsMatch = Math.abs(inverseDynamicsAcceleration - simulatedRobotAcceleration) < epsilon;
@@ -320,7 +316,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double inverseDynamicsTorque = oneDoFJoint.getTau();
          double simulatedRobotTorque = oneDegreeOfFreedomJoint.getTauYoVariable().getDoubleValue();
 
-         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         YoDouble computedJointTorque = computedJointTorques.get(oneDoFJoint);
          computedJointTorque.set(inverseDynamicsTorque);
 
          boolean torquesMatch = Math.abs(inverseDynamicsTorque - simulatedRobotTorque) < epsilon;
@@ -472,7 +468,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          double robotJointAcceleration = oneDegreeOfFreedomJoint.getQDDYoVariable().getDoubleValue();
          oneDoFJoint.setQddDesired(robotJointAcceleration);
 
-         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         YoDouble computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
          computedJointAcceleration.set(robotJointAcceleration);
       }
    }
@@ -767,7 +763,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void copyAccelerationFromForwardToInverseBroken(FloatingJoint floatingJoint, FloatingInverseDynamicsJoint sixDoFJoint)
    {
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       FrameVector angularAccelerationInBody = new FrameVector();
       floatingJoint.getAngularAcceleration(angularAccelerationInBody, bodyFrame);
@@ -787,7 +783,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -806,7 +802,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -828,7 +824,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -856,7 +852,6 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void computeTwistCalculatorAndInverseDynamicsCalculator()
    {
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
    }
 

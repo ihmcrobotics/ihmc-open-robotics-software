@@ -1,19 +1,22 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
+public class HandHybridJointspaceTaskspaceTrajectoryCommand
+      extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>
+      implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final ArmTrajectoryCommand jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
    private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
-   
+
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
-   
+
    public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, ArmTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
@@ -39,13 +42,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
+      setQueueableCommandVariables(message);
    }
-   
+
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, HandHybridJointspaceTaskspaceTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getHandTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
+      setQueueableCommandVariables(message);
    }
 
    @Override
@@ -59,6 +64,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+      setQueueableCommandVariables(other);
    }
 
    @Override
@@ -76,5 +82,23 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
    public HandTrajectoryCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
+   }
+
+   @Override
+   public void setQueueableCommandVariables(QueueableMessage<?> message)
+   {
+      // this override is needed to correctly store queuing information into the sub-messages
+      super.setQueueableCommandVariables(message);
+      jointspaceTrajectoryCommand.setQueueableCommandVariables(message);
+      taskspaceTrajectoryCommand.setQueueableCommandVariables(message);
+   }
+
+   @Override
+   public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
+   {
+      // this override is needed to correctly store queuing information into the sub-messages
+      taskspaceTrajectoryCommand.setQueueableCommandVariables(other);
+      jointspaceTrajectoryCommand.setQueueableCommandVariables(other);
+      super.setQueueableCommandVariables(other);
    }
 }

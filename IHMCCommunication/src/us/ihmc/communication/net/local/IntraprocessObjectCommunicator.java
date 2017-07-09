@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
@@ -18,7 +18,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    private final Kryo kryo = new Kryo();
    private final LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>> listeners = new LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>>();
    private final ArrayList<GlobalObjectConsumer> globalListeners = new ArrayList<GlobalObjectConsumer>();
-   private final ArrayList<NetStateListener> stateListeners = new ArrayList<NetStateListener>();
+   private final ArrayList<ConnectionStateListener> stateListeners = new ArrayList<ConnectionStateListener>();
 
    private final int port;
 
@@ -82,7 +82,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    }
 
    @Override
-   public void attachStateListener(NetStateListener stateListener)
+   public void attachStateListener(ConnectionStateListener stateListener)
    {
       stateListeners.add(stateListener);
    }
@@ -137,11 +137,11 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    @Override
    public void closeConnection()
    {
-      close();
+      disconnect();
    }
    
    @Override
-   public void close()
+   public void disconnect()
    {
       IntraprocessCommunicationNetwork.disconnect(this, port);
    }
@@ -154,7 +154,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
 
    /* package-private */void connected()
    {
-      for (NetStateListener stateListener : stateListeners)
+      for (ConnectionStateListener stateListener : stateListeners)
       {
          stateListener.connected();
       }
@@ -162,7 +162,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
 
    /* package-private */void disconnected()
    {
-      for (NetStateListener stateListener : stateListeners)
+      for (ConnectionStateListener stateListener : stateListeners)
       {
          stateListener.disconnected();
       }
@@ -173,7 +173,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    {
       if(isConnected())
       {
-         close();         
+         disconnect();         
       }
    }
 

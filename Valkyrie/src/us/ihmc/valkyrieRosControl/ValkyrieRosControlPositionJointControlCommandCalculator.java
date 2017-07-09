@@ -3,8 +3,8 @@ package us.ihmc.valkyrieRosControl;
 import java.util.Map;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
@@ -15,8 +15,8 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
 
-   private final DoubleYoVariable standPrepAngle;
-   private final DoubleYoVariable initialAngle;
+   private final YoDouble standPrepAngle;
+   private final YoDouble initialAngle;
 
    public ValkyrieRosControlPositionJointControlCommandCalculator(YoPositionJointHandleHolder yoPositionJointHandleHolder, Map<String, Double> gains,
          double standPrepAngle, double controlDT, YoVariableRegistry parentRegistry)
@@ -26,8 +26,8 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
       String positionJumpLimiterBaseName = yoPositionJointHandleHolder.getName();
       YoVariableRegistry registry = new YoVariableRegistry(positionJumpLimiterBaseName + "Command");
 
-      this.standPrepAngle = new DoubleYoVariable(positionJumpLimiterBaseName + "StandPrepAngle", registry);
-      this.initialAngle = new DoubleYoVariable(positionJumpLimiterBaseName + "InitialAngle", registry);
+      this.standPrepAngle = new YoDouble(positionJumpLimiterBaseName + "StandPrepAngle", registry);
+      this.initialAngle = new YoDouble(positionJumpLimiterBaseName + "InitialAngle", registry);
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(positionJumpLimiterBaseName + "PositionStepSizeLimiter", registry, 0.15);
 

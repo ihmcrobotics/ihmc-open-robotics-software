@@ -7,8 +7,8 @@ import java.text.NumberFormat;
 
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<YoOneDoFTrajectoryPoint>
@@ -16,7 +16,7 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
    private final String namePrefix;
    private final String nameSuffix;
 
-   private final DoubleYoVariable time;
+   private final YoDouble time;
    private final YoOneDoFWaypoint waypoint1d;
 
    public YoOneDoFTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
@@ -24,7 +24,7 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
       waypoint1d = new YoOneDoFWaypoint(namePrefix, nameSuffix, registry);
    }
 
@@ -159,5 +159,11 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
    public void applyTransform(Transform transform)
    {
       waypoint1d.applyTransform(transform);
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      waypoint1d.applyInverseTransform(transform);
    }
 }

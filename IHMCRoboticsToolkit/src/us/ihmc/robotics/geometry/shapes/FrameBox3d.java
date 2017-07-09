@@ -1,19 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
+public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 {
-   private Box3d box3d;
+   private Box3D box3d;
 
    public FrameBox3d(FrameBox3d other)
    {
@@ -22,35 +22,35 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public FrameBox3d(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Box3d());
+      super(referenceFrame, new Box3D());
       box3d = getGeometryObject();
    }
 
-   public FrameBox3d(ReferenceFrame referenceFrame, Box3d box3d)
+   public FrameBox3d(ReferenceFrame referenceFrame, Box3D box3d)
    {
-      super(referenceFrame, new Box3d(box3d));
+      super(referenceFrame, new Box3D(box3d));
       this.box3d = getGeometryObject();
    }
 
    public FrameBox3d(ReferenceFrame referenceFrame, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
    public FrameBox3d(ReferenceFrame referenceFrame, RigidBodyTransform configuration, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(configuration, lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(configuration, lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
-   public FrameBox3d(ReferenceFrame referenceFrame, Pose pose, double lengthX, double widthY, double heightZ)
+   public FrameBox3d(ReferenceFrame referenceFrame, Pose3D pose, double lengthX, double widthY, double heightZ)
    {
-      super(referenceFrame, new Box3d(pose.getPoint(), pose.getOrientation(), lengthX, widthY, heightZ));
+      super(referenceFrame, new Box3D(pose.getPosition(), pose.getOrientation(), lengthX, widthY, heightZ));
       box3d = getGeometryObject();
    }
 
-   public Box3d getBox3d()
+   public Box3D getBox3d()
    {
       return box3d;
    }
@@ -74,11 +74,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       getCenter(ret);
 
       return ret;
-   }
-
-   public double getDimension(Direction direction)
-   {
-      return box3d.getDimension(direction);
    }
 
    public void getTransform(RigidBodyTransform transformToPack)
@@ -112,14 +107,14 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       box3d.setPose(position, orientation);
    }
    
-   public void setPose(Pose pose)
+   public void setPose(Pose3D pose)
    {
-      box3d.setPose(pose.getPoint(), pose.getOrientation());
+      box3d.setPose(pose.getPosition(), pose.getOrientation());
    }
    
    public void setTransform(RigidBodyTransform transform3D)
    {
-      box3d.setFromTransform(transform3D);
+      box3d.setPose(transform3D);
    }
 
    @Override
@@ -135,7 +130,8 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void getFramePose(FramePose framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(referenceFrame, box3d.getPosition(), box3d.getOrientation());
+      framePoseToPack.setToZero(referenceFrame);
+      box3d.getPose(framePoseToPack.getGeometryObject());
    }
 
    public void scale(double scale)
@@ -145,6 +141,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void computeVertices(Point3D[] vertices)
    {
-      box3d.computeVertices(vertices);
+      box3d.getVertices(vertices);
    }
 }

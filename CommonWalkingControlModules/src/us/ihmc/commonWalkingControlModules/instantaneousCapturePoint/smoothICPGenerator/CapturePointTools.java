@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.List;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -13,6 +13,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -150,7 +151,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
                                                               double doubleSupportSplitFraction, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
@@ -201,7 +202,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
@@ -254,7 +255,7 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-                                                              List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
+                                                              List<YoDouble> swingTimes, List<YoDouble> transferTimes,
                                                               double doubleSupportSplitFraction, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
@@ -301,8 +302,8 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
-         List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes,
+         List<YoDouble> doubleSupportSplitFractions, double omega0)
    {
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
 
@@ -402,8 +403,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
                                                               List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-                                                              List<DoubleYoVariable> transferTimes, double swingSplitFraction, double transferSplitFraction,
+                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
                                                               double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
@@ -469,8 +470,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
          List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs,
-         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions,
-         List<DoubleYoVariable> transferSplitFractions, double omega0)
+         List<YoDouble> swingTimes, List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions,
+         List<YoDouble> transferSplitFractions, double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
@@ -536,8 +537,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
                                                               List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs,
-                                                              List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-                                                              List<DoubleYoVariable> transferTimes, double swingSplitFraction, double transferSplitFraction,
+                                                              List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+                                                              List<YoDouble> transferTimes, double swingSplitFraction, double transferSplitFraction,
                                                               double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
@@ -596,8 +597,8 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-         List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, double omega0)
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<YoDouble> swingTimes,
+         List<YoDouble> transferTimes, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions, double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
@@ -1054,4 +1055,103 @@ public class CapturePointTools
       else
          desiredCapturePointToPack.set(initialCapturePoint);
    }
+
+   /**
+    * Compute the angular momentum about the center of mass in the world frame.
+    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>,
+    * -&tau;<sup>x</sup>]. Assumes no acceleration in the vertical direction.
+    *
+    * @param mass total mass of the robot
+    * @param gravity gravityZ
+    * @param eCMP location of the eCMP
+    * @param zmp location of the ZMP
+    * @param angularMomentumToPack angular momentum about the center of mass. Modified.
+    */
+   public static void computeAngularMomentum(double mass, double gravity, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   {
+      computeAngularMomentum(mass, gravity, 0.0, eCMP, zmp, angularMomentumToPack);
+   }
+
+   /**
+    * Compute the angular momentum about the center of mass in the world frame.
+    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * -&tau;<sup>x</sup>].
+    *
+    * @param mass total mass of the robot
+    * @param gravity gravityZ
+    * @param comAcceleration acceleration of the center of mass
+    * @param eCMP location of the eCMP
+    * @param zmp location of the ZMP
+    * @param angularMomentumToPack angular momentum about the center of mass. Modified.
+    */
+   public static void computeAngularMomentum(double mass, double gravity, FrameVector comAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   {
+      comAcceleration.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      computeAngularMomentum(mass, gravity, comAcceleration.getZ(), eCMP, zmp, angularMomentumToPack);
+   }
+
+   /**
+    * Compute the angular momentum about the center of mass in the world frame.
+    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * -&tau;<sup>x</sup>].
+    *
+    * @param mass total mass of the robot
+    * @param gravity gravityZ
+    * @param comVerticalAcceleration acceleration of the center of mass in the vertical direction
+    * @param eCMP location of the eCMP
+    * @param zmp location of the ZMP
+    * @param angularMomentumToPack angular momentum about the center of mass. Modified.
+    */
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   {
+      angularMomentumToPack.setToZero(ReferenceFrame.getWorldFrame());
+      angularMomentumToPack.set(eCMP);
+      angularMomentumToPack.sub(zmp);
+
+      double xValue = angularMomentumToPack.getX();
+      double yValue = angularMomentumToPack.getY();
+
+      angularMomentumToPack.setX(yValue);
+      angularMomentumToPack.setY(-xValue);
+      angularMomentumToPack.scale(1.0 / (mass * (gravity + comVerticalAcceleration)));
+   }
+
+   /**
+    * Compute the angular momentum about the center of mass in the world frame.
+    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m g ) * [&tau;<sup>y</sup>,
+    * -&tau;<sup>x</sup>]. Assumes no acceleration in the vertical direction.
+    *
+    * @param mass total mass of the robot
+    * @param gravity gravityZ
+    * @param delta distance between the eCMP and the ZMP.
+    * @param angularMomentumToPack angular momentum about the center of mass. Modified.
+    */
+   public static void computeAngularMomentum(double mass, double gravity, FramePoint2d delta, FramePoint2d angularMomentumToPack)
+   {
+      computeAngularMomentum(mass, gravity, 0.0, delta, angularMomentumToPack);
+   }
+
+   /**
+    * Compute the angular momentum about the center of mass in the world frame.
+    * x<sup>eCMP</sup> = x<sup>ZMP</sup> + 1 / (m (g + \ddot{z}<sup>CoM</sup>)) * [&tau;<sup>y</sup>,
+    * -&tau;<sup>x</sup>].
+    *
+    * @param mass total mass of the robot
+    * @param gravity gravityZ
+    * @param comVerticalAcceleration acceleration of the center of mass in the vertical direction
+    * @param delta distance between the eCMP and the ZMP.
+    * @param angularMomentumToPack angular momentum about the center of mass. Modified.
+    */
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2d delta, FramePoint2d angularMomentumToPack)
+   {
+      delta.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double xValue = delta.getX();
+      double yValue = delta.getY();
+
+      angularMomentumToPack.setX(yValue);
+      angularMomentumToPack.setY(-xValue);
+      angularMomentumToPack.scale(1.0 / (mass * (gravity + comVerticalAcceleration)));
+   }
+
 }

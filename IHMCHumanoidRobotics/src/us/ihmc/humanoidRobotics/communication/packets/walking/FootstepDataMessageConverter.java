@@ -2,14 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 
@@ -37,11 +36,10 @@ public class FootstepDataMessageConverter
          footstepPose.getOrientation(orientation);
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (footstep.hasFoothold())
          {
-            ConvexPolygon2d foothold = new ConvexPolygon2d();
+            ConvexPolygon2D foothold = new ConvexPolygon2D();
             footstep.getFoothold(foothold);
 
             if (foothold.getNumberOfVertices() != 4)
@@ -74,11 +72,10 @@ public class FootstepDataMessageConverter
          footstepPose.getOrientation(orientation);
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          if (footstep.hasFoothold())
          {
-            ConvexPolygon2d foothold = new ConvexPolygon2d();
+            ConvexPolygon2D foothold = new ConvexPolygon2D();
             footstep.getFoothold(foothold);
 
             if (foothold.getNumberOfVertices() != 4)

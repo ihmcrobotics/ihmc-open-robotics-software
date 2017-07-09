@@ -3,46 +3,46 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
-   private final DoubleYoVariable finalPosition;
-   private final ArrayList<DoubleYoVariable> intermediatePositions;
+   private final YoDouble finalPosition;
+   private final ArrayList<YoDouble> intermediatePositions;
    private final ArrayList<YoPolynomial> connectingPolynomials;
    private final YoPolynomial startMotionPolynomial, finalizeMotionPolynomial;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable subTrajectoryTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble subTrajectoryTime;
    private final DoubleProvider trajectoryTimeProvider;
-   private final DoubleYoVariable currentTime;
+   private final YoDouble currentTime;
    private final OneDoFJoint joint;
-   private final DoubleYoVariable currentTimeOffset;
-   private final IntegerYoVariable currentPolynomialIndex;
-   private final IntegerYoVariable currentNumberOfWaypoints;
+   private final YoDouble currentTimeOffset;
+   private final YoInteger currentPolynomialIndex;
+   private final YoInteger currentNumberOfWaypoints;
 
    public OneDoFJointWayPointTrajectoryGenerator(String namePrefix, OneDoFJoint joint, DoubleProvider trajectoryTimeProvider, int maxNumberOfWayPoints,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.joint = joint;
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      subTrajectoryTime = new DoubleYoVariable(namePrefix + "SubTrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      subTrajectoryTime = new YoDouble(namePrefix + "SubTrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
       this.trajectoryTimeProvider = trajectoryTimeProvider;
-      finalPosition = new DoubleYoVariable(namePrefix + "FinalPosition", registry);
+      finalPosition = new YoDouble(namePrefix + "FinalPosition", registry);
       intermediatePositions = new ArrayList<>(maxNumberOfWayPoints);
 
       startMotionPolynomial = new YoPolynomial(namePrefix + "StartMotionPolynomial", 4, registry);
       finalizeMotionPolynomial = new YoPolynomial(namePrefix + "FinalizeMotionPolynomial", 4, registry);
 
-      currentTimeOffset = new DoubleYoVariable(namePrefix + "CurrentTimeOffset", registry);
-      currentNumberOfWaypoints = new IntegerYoVariable(namePrefix + "CurrentNumberOfWayPoints", registry);
-      currentPolynomialIndex = new IntegerYoVariable(namePrefix + "CurrentPolynomialIndex", registry);
+      currentTimeOffset = new YoDouble(namePrefix + "CurrentTimeOffset", registry);
+      currentNumberOfWaypoints = new YoInteger(namePrefix + "CurrentNumberOfWayPoints", registry);
+      currentPolynomialIndex = new YoInteger(namePrefix + "CurrentPolynomialIndex", registry);
       connectingPolynomials = new ArrayList<>(maxNumberOfWayPoints - 2);
       for (int i = 0; i < maxNumberOfWayPoints - 2; i++)
       {
@@ -52,7 +52,7 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
 
       for (int i = 0; i < maxNumberOfWayPoints; i++)
       {
-         DoubleYoVariable intermediatePosition = new DoubleYoVariable(namePrefix + "IntermediatePosition" + Integer.toString(i), registry);
+         YoDouble intermediatePosition = new YoDouble(namePrefix + "IntermediatePosition" + Integer.toString(i), registry);
          intermediatePosition.set(Double.NaN);
          intermediatePositions.add(intermediatePosition);
       }

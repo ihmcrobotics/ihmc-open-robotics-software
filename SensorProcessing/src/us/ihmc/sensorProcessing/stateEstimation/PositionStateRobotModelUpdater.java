@@ -16,7 +16,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class PositionStateRobotModelUpdater implements Runnable
@@ -57,9 +56,7 @@ public class PositionStateRobotModelUpdater implements Runnable
       updateRootJointPosition(rootJoint, estimationFrame, centerOfMassPositionOutputPort.getData());
       rootJoint.getFrameAfterJoint().update();
 
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       updateRootJointTwistLinearPart(centerOfMassVelocityOutputPort.getData(), rootJoint);
-      twistCalculator.compute();
    }
 
    private final Twist tempRootJointTwist = new Twist();

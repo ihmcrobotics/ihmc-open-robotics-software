@@ -12,6 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -455,13 +456,25 @@ public class TwistCalculatorTest
 
    public static void assertTwistEquals(Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
    {
+      assertTwistEquals(null, expectedTwist, actualTwist, epsilon);
+   }
+
+   public static void assertTwistEquals(String messagePrefix, Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
+   {
       try
       {
          assertTrue(expectedTwist.epsilonEquals(actualTwist, epsilon));
       }
       catch (AssertionError e)
       {
-         throw new AssertionError("expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">");
+         Vector3D difference = new Vector3D();
+         difference.sub(expectedTwist.getLinearPart(), actualTwist.getLinearPart());
+         double linearPartDifference = difference.length();
+         difference.sub(expectedTwist.getAngularPart(), actualTwist.getAngularPart());
+         double angularPartDifference = difference.length();
+         messagePrefix = messagePrefix != null ? messagePrefix + " " : "";
+         throw new AssertionError(messagePrefix + "expected:\n<" + expectedTwist + ">\n but was:\n<" + actualTwist + ">\n difference: linear part: " + linearPartDifference
+               + ", angular part: " + angularPartDifference);
       }
    }
 

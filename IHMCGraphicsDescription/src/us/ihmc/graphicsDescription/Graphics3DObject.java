@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Shape3D;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,12 +51,9 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstru
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.shapes.Shape3d;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DObject
@@ -68,12 +68,12 @@ public class Graphics3DObject
 
    private boolean changeable = false;
 
-   public Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance)
+   public Graphics3DObject(Shape3D<?> shape, AppearanceDefinition appearance)
    {
       this(shape, appearance, null);
    }
 
-   public Graphics3DObject(Shape3d<?> shape)
+   public Graphics3DObject(Shape3D<?> shape)
    {
       this(shape, null, null);
    }
@@ -83,7 +83,7 @@ public class Graphics3DObject
       this(null, null, graphics3DInstructions);
    }
 
-   private Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   private Graphics3DObject(Shape3D<?> shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
       if (graphics3DInstructions != null)
       {
@@ -478,16 +478,16 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape)
+   public PrimitiveGraphics3DInstruction add(Shape3D<?> shape)
    {
       return add(shape, DEFAULT_APPEARANCE);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape, AppearanceDefinition app)
+   public PrimitiveGraphics3DInstruction add(Shape3D<?> shape, AppearanceDefinition app)
    {
-      if (shape instanceof Sphere3d)
+      if (shape instanceof Sphere3D)
       {
-         return addSphere(((Sphere3d) shape).getRadius(), app);
+         return addSphere(((Sphere3D) shape).getRadius(), app);
       }
       else
       {
@@ -1071,7 +1071,7 @@ public class Graphics3DObject
     * @param convexPolygon2d ConvexPolygon2d containing the points.
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
+   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2D convexPolygon2d, AppearanceDefinition yoAppearance)
    {
       ArrayList<Point3D> polygonPoints = new ArrayList<Point3D>();
       int numPoints = convexPolygon2d.getNumberOfVertices();
@@ -1085,7 +1085,7 @@ public class Graphics3DObject
       return addPolygon(polygonPoints, yoAppearance);
    }
 
-   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2d convexPolygon2d)
+   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2D convexPolygon2d)
    {
       return addPolygon(convexPolygon2d, DEFAULT_APPEARANCE);
    }
@@ -1140,7 +1140,7 @@ public class Graphics3DObject
 
       for (int i = 0; i < numberOfConvexPolygons; i++)
       {
-         ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(i);
+         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
          MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.0001);
          addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
       }
@@ -1183,12 +1183,12 @@ public class Graphics3DObject
       return addPolygon(polygonPoints, yoAppearance);
    }
 
-   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2D convexPolygon2d, double height)
    {
       return addExtrudedPolygon(convexPolygon2d, height, DEFAULT_APPEARANCE);
    }
 
-   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2D convexPolygon2d, double height, AppearanceDefinition appearance)
    {
       ArrayList<Point2DReadOnly> polygonPoints = new ArrayList<>();
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)

@@ -6,6 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -41,7 +43,7 @@ public class Twist extends SpatialMotionVector
     * @param linearVelocity linear velocity part of the twist
     * @param angularVelocity angular velocity part of the twist
     */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearVelocity, Vector3D angularVelocity)
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       super(bodyFrame, baseFrame, expressedInFrame, linearVelocity, angularVelocity);
    }
@@ -79,9 +81,7 @@ public class Twist extends SpatialMotionVector
     */
    public Twist(Twist other)
    {
-      this.angularPart = new Vector3D();
-      this.linearPart = new Vector3D();
-      set(other);
+      super(other);
    }
 
    /**
@@ -96,7 +96,7 @@ public class Twist extends SpatialMotionVector
     * @param offset any vector from the origin of expressedInFrame to axisOfRotation
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-                double linearVelocityMagnitude, Vector3D axisOfRotation, Vector3D offset)
+                double linearVelocityMagnitude, Vector3DReadOnly axisOfRotation, Vector3DReadOnly offset)
    {
       setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
    }
@@ -324,18 +324,15 @@ public class Twist extends SpatialMotionVector
 
    public void set(Twist other)
    {
-      this.bodyFrame = other.bodyFrame;
-      this.baseFrame = other.baseFrame;
-      this.expressedInFrame = other.expressedInFrame;
-
-      this.linearPart.set(other.linearPart);
-      this.angularPart.set(other.angularPart);
+      super.set(other);
    }
 
    public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-         double linearVelocityMagnitude, Vector3D axisOfRotation, Vector3D offset)
+         double linearVelocityMagnitude, Vector3DReadOnly axisOfRotation, Vector3DReadOnly offset)
    {
-      axisOfRotation.normalize();
+      double epsilon = 1e-12;
+      if (!MathTools.epsilonEquals(1.0, axisOfRotation.lengthSquared(), epsilon))
+         throw new RuntimeException("axis of rotation must be of unit magnitude. axisOfRotation: " + axisOfRotation);
 
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -344,11 +341,11 @@ public class Twist extends SpatialMotionVector
       this.freeVector.cross(offset, axisOfRotation);
       this.freeVector.scale(angularVelocityMagnitude);
 
-      this.linearPart = new Vector3D(axisOfRotation);
+      this.linearPart.set(axisOfRotation);
       this.linearPart.scale(linearVelocityMagnitude);
       this.linearPart.add(freeVector);
 
-      this.angularPart = new Vector3D(axisOfRotation);
+      this.angularPart.set(axisOfRotation);
       this.angularPart.scale(angularVelocityMagnitude);
    }
 

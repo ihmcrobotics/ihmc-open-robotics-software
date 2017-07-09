@@ -30,7 +30,7 @@ public class FrameLine2dTest
    {
       double xMin = -1.0, xMax = 2.0, yMin = -1.0, yMax = 2.0;
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("zUpFrame", true, false, true);
+      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("zUpFrame");
 
       FramePoint2d point1 = new FramePoint2d(zUpFrame, 0.0, 0.0);
       FrameVector2d vector1 = new FrameVector2d(zUpFrame, 1.0, 1.0);

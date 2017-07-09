@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -13,9 +11,11 @@ import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 /**
  * {@link PointFeedbackControlCommand} is a command meant to be submit to the
@@ -49,6 +49,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PositionPIDGains gains = new PositionPIDGains();
+   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame linearGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -58,6 +60,13 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * </p>
     */
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+
+   /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    */
+   private ReferenceFrame controlBaseFrame = null;
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -80,6 +89,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       setGains(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
+
+      controlBaseFrame = other.controlBaseFrame;
    }
 
    /**
@@ -123,6 +134,21 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    * 
+    * @param controlBaseFrame the new control base frame.
+    */
+   public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
+   {
+      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+         this.controlBaseFrame = controlBaseFrame;
+      else
+         throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
+   }
+
+   /**
     * Sets the gains to use during the next control tick.
     * 
     * @param gains the new set of gains to use. Not modified.
@@ -130,6 +156,19 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setGains(PositionPIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   /**
+    * Sets the reference frame in which the gains should be applied.
+    * <p>
+    * If the reference frame is {@code null}, the gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param linearGainsFrame the reference frame to use for the position gains.
+    */
+   public void setGainsFrame(ReferenceFrame linearGainsFrame)
+   {
+      this.linearGainsFrame = linearGainsFrame;
    }
 
    /**
@@ -217,17 +256,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick to the following 3-by-6 matrix:
-    * 
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = | 0 0 0 0 1 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
-    * <p>
     * This specifies that the 3 translational degrees of freedom of the end-effector are to be
     * controlled.
-    * </p>
     */
    public void setSelectionMatrixToIdentity()
    {
@@ -235,35 +265,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Sets this command's selection matrix to the given one.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. Using the following 3-by-6 matrix will request the control of all
-    * the 3 translational degrees of freedom:
-    * 
-    * <pre>
-    *     / 0 0 0 1 0 0 \
-    * S = | 0 0 0 0 1 0 |
-    *     \ 0 0 0 0 0 1 /
-    * </pre>
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * </p>
     * <p>
-    * Removing a row to the selection matrix using for instance
-    * {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a specific
-    * DoF of the end-effector.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
-    * <p>
     * 
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 3 or has a
-    *            number of columns different to 6.
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > 3)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-
-      spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl(selectionMatrix);
    }
 
    /**
@@ -282,6 +299,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
+    * Sets the linear weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   {
+      spatialAccelerationCommand.setLinearPartOfWeightMatrix(weightMatrix);
+   }
+
+   /**
     * Sets the weights to use in the optimization problem for each individual degree of freedom.
     * <p>
     * WARNING: It is not the value of each individual command's weight that is relevant to how the
@@ -295,6 +328,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    {
       spatialAccelerationCommand.setLinearWeights(weight);
       spatialAccelerationCommand.setAngularWeightsToZero();
+   }
+
+   public void getIncludingFrame(FramePoint desiredPositionToPack)
+   {
+      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
@@ -319,6 +357,14 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       return spatialAccelerationCommand.getEndEffector();
    }
 
+   public ReferenceFrame getControlBaseFrame()
+   {
+      if (controlBaseFrame != null)
+         return controlBaseFrame;
+      else
+         return spatialAccelerationCommand.getBase().getBodyFixedFrame();
+   }
+
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
@@ -327,6 +373,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public PositionPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getLinearGainsFrame()
+   {
+      return linearGainsFrame;
    }
 
    @Override

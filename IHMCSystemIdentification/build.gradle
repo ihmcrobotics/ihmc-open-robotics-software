@@ -38,7 +38,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
@@ -48,7 +48,8 @@ dependencies {
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
 }
 jar {
     manifest {

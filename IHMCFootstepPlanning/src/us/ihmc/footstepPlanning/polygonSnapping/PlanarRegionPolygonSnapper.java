@@ -2,13 +2,13 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionPolygonSnapper
@@ -19,9 +19,9 @@ public class PlanarRegionPolygonSnapper
     * @param planarRegionToSnapTo
     * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2d polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3D highestVertexInWorld)
+   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2D polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3D highestVertexInWorld)
    {
-      ArrayList<ConvexPolygon2d> polygonIntersections = new ArrayList<>();
+      ArrayList<ConvexPolygon2D> polygonIntersections = new ArrayList<>();
       planarRegionToSnapTo.getPolygonIntersectionsWhenProjectedVertically(polygonToSnap, polygonIntersections);
 
       if (polygonIntersections.isEmpty())
@@ -37,7 +37,7 @@ public class PlanarRegionPolygonSnapper
 
       for (int i = 0; i < numberOfIntersectingPolygons; i++)
       {
-         ConvexPolygon2d intersectingPolygon = polygonIntersections.get(i);
+         ConvexPolygon2D intersectingPolygon = polygonIntersections.get(i);
 
          int numberOfVertices = intersectingPolygon.getNumberOfVertices();
 

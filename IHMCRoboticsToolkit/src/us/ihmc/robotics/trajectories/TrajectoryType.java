@@ -2,7 +2,7 @@ package us.ihmc.robotics.trajectories;
 
 public enum TrajectoryType
 {
-   DEFAULT, OBSTACLE_CLEARANCE, CUSTOM;
+   DEFAULT, OBSTACLE_CLEARANCE, CUSTOM, WAYPOINTS;
 
    public final static TrajectoryType[] values = values();
 
@@ -11,14 +11,16 @@ public enum TrajectoryType
       switch (var)
       {
       case DEFAULT:
-         return "is a default trajectory";
+         return "The controller will execute a default trajectory.";
       case OBSTACLE_CLEARANCE:
-         return "will attempt to step over an obstacle";
+         return "The controller will attempt to step on/off an obstacle.";
       case CUSTOM:
-         return "allows to specify trajectory waypoints";
+         return "In this mode two trajectory position waypoints can be specified.";
+      case WAYPOINTS:
+         return "The swing trajectory is fully defined by the given waypoints.";
 
       default:
-         return "no documentation available";
+         throw new RuntimeException("Document this case.");
       }
    }
 }

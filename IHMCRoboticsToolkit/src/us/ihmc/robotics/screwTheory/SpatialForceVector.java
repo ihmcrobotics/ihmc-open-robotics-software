@@ -407,6 +407,16 @@ public class SpatialForceVector
       matrix.set(5, column, linearPart.getZ());
    }
 
+   public double getAngularPartMagnitude()
+   {
+      return angularPart.length();
+   }
+
+   public double getLinearPartMagnitude()
+   {
+      return linearPart.length();
+   }
+
    /**
     * @return a matrix representation of this spatial force vector. [linearPart; angularPart]
     */

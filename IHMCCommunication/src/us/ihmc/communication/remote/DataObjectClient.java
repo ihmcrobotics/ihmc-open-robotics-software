@@ -18,13 +18,12 @@ public class DataObjectClient extends DataObjectTransponder
       ThreadTools.startAsDaemon(new ClientConnectionDaemon(), "Data Object Client Conn Daemon");
    }
 
-
-
    public class ClientConnectionDaemon implements Runnable
    {
       private static final int RECONNECTION_PAUSE_DURATION = 100;
       private static final int LOST_CONNECTION_SLEEP_DURATION = 100;
 
+      @Override
       public void run()
       {
          while (true)
@@ -67,6 +66,4 @@ public class DataObjectClient extends DataObjectTransponder
          }
       }
    }
-
-   // see DataObjectServerTest
 }

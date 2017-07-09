@@ -6,8 +6,6 @@ import java.util.LinkedHashMap;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
@@ -16,7 +14,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -48,7 +46,7 @@ public class Step5IDandSCSRobot extends Robot
 
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+   private final ReferenceFrame elevatorFrame;
    private FramePoint bodyPosition = new FramePoint();
 
    private final Vector3D jointAxesHip = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
@@ -92,7 +90,7 @@ public class Step5IDandSCSRobot extends Robot
    Vector3D comOffsetBody = new Vector3D((3.0 * cubeX) / 4.0, 0.0, cubeZ / 2.0);
    Vector3D comOffsetFoot = new Vector3D(footOffsetX, 0.0, -footZ / 2.0); //TODO is it correct to include the footOffsetX (since the foot isn't centered)?
 
-   public DoubleYoVariable qd_x;
+   public YoDouble qd_x;
    
    /**
     * Joints
@@ -103,9 +101,10 @@ public class Step5IDandSCSRobot extends Robot
       super("Robot");
 
       /****************** ID ROBOT ***********************/
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      elevatorFrame = elevator.getBodyFixedFrame();
 
-      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
+      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -204,7 +203,7 @@ public class Step5IDandSCSRobot extends Robot
     */
    public void initializeForBallisticWalking()
    {
-      qd_x = (DoubleYoVariable)getVariable("qd_x");
+      qd_x = (YoDouble)getVariable("qd_x");
       qd_x.set(7.458267603119068);   //initial velocity 
    }
    
@@ -403,7 +402,7 @@ public class Step5IDandSCSRobot extends Robot
 
    public void getBodyPitch(Quaternion rotationToPack)
    {
-      bodyJointID.getFrameAfterJoint().getRotation(rotationToPack);
+      bodyJointID.getRotation(rotationToPack);
    }
 
    public void getBodyLinearVel(Vector3D linearVelocityToPack)

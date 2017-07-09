@@ -50,8 +50,8 @@ public class GeometricJacobianCalculator
 
    private final SpatialAccelerationVector zeroAcceleration = new SpatialAccelerationVector();
    private final SpatialAccelerationVector biasAcceleration = new SpatialAccelerationVector();
-   private final Twist twistOfCurrentWithRespectToBase = new Twist();
-   private final Twist jointTwist = new Twist();
+   private final Twist twistOfCurrentBodyRelativeToEndEffector = new Twist();
+   private final Twist twistOfCurrentBodyRelativeToPredecessor = new Twist();
 
    /**
     * Creates an empty calculator.
@@ -232,7 +232,33 @@ public class GeometricJacobianCalculator
    }
 
    /**
-    * Computes the convective term C<sub>6x1</sub> = JDot * qDot.
+    * Computes the convective term C<sub>6x1</sub> = JDot<sub>6xN</sub> * qDot<sub>Nx1</sub>.<br>
+    * where N is the number of degrees of freedom between the {@code base} and {@code endEffector},
+    * JDot<sub>6xN</sub> is the time-derivative of the Jacobian matrix, and qDot<sub>Nx1</sub> the
+    * vector of joint velocities.
+    * <p>
+    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the
+    * end-effector.</b>
+    * </p>
+    * <p>
+    * The convective term represents the Coriolis acceleration of the {@code endEffector} relative
+    * to the {@code base} expressed at the {@code jacobianFrame}. The Coriolis acceleration is an
+    * acceleration that results from the combination of the angular and linear velocities happening
+    * on the end-effector.
+    * </p>
+    * <p>
+    * As shown in <a href="https://en.wikipedia.org/wiki/Coriolis_force">Wikipedia</a>, the Coriolis
+    * acceleration also depends on the velocity of the frame it is expressed in. This method assumes
+    * that the {@code jacobianFrame} is attached to the end-effector. If this is not the case, the
+    * computed acceleration will be biased.
+    * </p>
+    * <p>
+    * Using the convective term, the spatial acceleration xDDot<sub>6x1</sub> of the
+    * {@code endEffector} relative to the {@code base} expressed in the {@code jacbianFrame} can be
+    * computed as follows:<br>
+    * xDDot<sub>6x1</sub> = J<sub>6xN</sub> * qDDot<sub>Nx1</sub> + C<sub>6x1</sub><br>
+    * where qDDot<sub>Nx1</sub> is the vector of joint accelerations.
+    * </p>
     * <p>
     * The base, end-effector, jacobian frame, and end-effector fixed point, have all to be properly
     * set before calling this method.
@@ -247,28 +273,42 @@ public class GeometricJacobianCalculator
          throw new RuntimeException("The base and end-effector have to be set first.");
 
       ReferenceFrame endEffectorFrame = getEndEffectorFrame();
-      twistOfCurrentWithRespectToBase.setToZero(endEffectorFrame, endEffectorFrame, endEffectorFrame);
+      twistOfCurrentBodyRelativeToEndEffector.setToZero(endEffectorFrame, endEffectorFrame, endEffectorFrame);
       biasAcceleration.setToZero(endEffectorFrame, endEffectorFrame, jacobianFrame);
 
       RigidBody currentBody = endEffector;
 
       while (currentBody != base)
       {
-         ReferenceFrame bodyFixedFrame = currentBody.getBodyFixedFrame();
-         twistOfCurrentWithRespectToBase.changeFrame(bodyFixedFrame);
          InverseDynamicsJoint joint = currentBody.getParentJoint();
-         joint.getSuccessorTwist(jointTwist);
+         ReferenceFrame currentBodyFrame = currentBody.getBodyFixedFrame();
+         RigidBody predecessor = joint.getPredecessor();
+         ReferenceFrame predecessorFrame = predecessor.getBodyFixedFrame();
 
-         zeroAcceleration.setToZero(bodyFixedFrame, jointTwist.getBaseFrame(), bodyFixedFrame);
-         zeroAcceleration.changeFrame(endEffectorFrame, twistOfCurrentWithRespectToBase, jointTwist);
+         // This is now the velocity of the current body relative to the end-effector expressed in the current body frame.
+         twistOfCurrentBodyRelativeToEndEffector.changeFrame(currentBodyFrame);
+         // Velocity of the current body relative to the predecessor expressed in the current body frame.
+         joint.getSuccessorTwist(twistOfCurrentBodyRelativeToPredecessor);
+
+         zeroAcceleration.setToZero(currentBodyFrame, predecessorFrame, currentBodyFrame);
+         /*
+          * This change frame on the 'zero-acceleration' vector is used to calculate the Coriolis
+          * acceleration induced by the combination of the velocities from the joints that are
+          * between the end-effector and the current body. As the reference frames are well enforced
+          * in the changeFrame method, these specific twists have to be used.
+          */
+         zeroAcceleration.changeFrame(endEffectorFrame, twistOfCurrentBodyRelativeToEndEffector, twistOfCurrentBodyRelativeToPredecessor);
+         // The following line is where the jacobianFrame is assumed to be rigidly attached to the end-effector.
          zeroAcceleration.changeFrameNoRelativeMotion(jacobianFrame);
          zeroAcceleration.add(biasAcceleration);
          biasAcceleration.set(zeroAcceleration);
 
-         jointTwist.invert();
-         twistOfCurrentWithRespectToBase.add(jointTwist);
+         // This is now the twist of the predecessor relative to the current body expressed in the current body frame.
+         twistOfCurrentBodyRelativeToPredecessor.invert();
+         // The velocity of the predecessor relative to the end-effector expressed in the current body frame.
+         twistOfCurrentBodyRelativeToEndEffector.add(twistOfCurrentBodyRelativeToPredecessor);
 
-         currentBody = joint.getPredecessor();
+         currentBody = predecessor;
       }
 
       convectiveTerm.reshape(6, 1);

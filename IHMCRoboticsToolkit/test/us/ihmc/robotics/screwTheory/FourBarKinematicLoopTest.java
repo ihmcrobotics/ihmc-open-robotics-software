@@ -1,8 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -25,8 +23,7 @@ public class FourBarKinematicLoopTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, new RigidBodyTransform());
-   private final RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+   private final RigidBody elevator = new RigidBody("elevator", worldFrame);
 
    private RigidBody rigidBodyAB, rigidBodyBC, rigidBodyCD, rigidBodyDA;
    private RevoluteJoint masterJointA;

@@ -6,9 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MirroredYoVariableRegistry extends YoVariableRegistry
 {

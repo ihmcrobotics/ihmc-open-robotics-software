@@ -26,7 +26,7 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
     * Copy constructor. Just copies the references to the objects; not a deep copy.
     * @param other the SideDependentList to be copied
     */
-   public SideDependentList(SideDependentList<V> other)
+   public SideDependentList(SideDependentList<? extends V> other)
    {
       super(RobotSide.class);
 

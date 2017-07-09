@@ -24,17 +24,17 @@ public class DRCNetworkModuleParameters
    private boolean useZeroPoseRobotConfigurationPublisher;
    private boolean useMocapModule;
    private boolean useLocalControllerCommunicator;
-   private boolean runAutomaticDiagnostic = false;
+   private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
-   private boolean useKinematicsToolbox = true;
-   private boolean useFootstepPlanningToolbox = true;
-   private boolean useKinematicsToolboxVisualizer = false;
-   private boolean useFootstepPlanningToolboxVisualizer = true;
-   private boolean useTextToSpeechModule = false;
-   private boolean useRobotEnvironmentAwarenessModule = true;
-   private boolean useHeightQuadTreeToolbox = true;
-   private boolean useRemoteObjectDetectionFeedback = true;
+   private boolean useKinematicsToolbox;
+   private boolean useFootstepPlanningToolbox;
+   private boolean useKinematicsToolboxVisualizer;
+   private boolean useFootstepPlanningToolboxVisualizer;
+   private boolean useTextToSpeechModule;
+   private boolean useRobotEnvironmentAwarenessModule;
+   private boolean useHeightQuadTreeToolbox;
+   private boolean useRemoteObjectDetectionFeedback;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 

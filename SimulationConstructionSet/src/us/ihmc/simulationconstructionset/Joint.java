@@ -7,13 +7,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-
-
 
 /**
  * Motion constraint between {@link Link Links} and physics simulation.<p>
@@ -814,7 +812,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param y YoVariable to store the y component.
     * @param z YoVariable to store the z component.
     */
-   public void getXYZToWorld(DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
+   public void getXYZToWorld(YoDouble x, YoDouble y, YoDouble z)
    {
       getTranslationToWorld(tempVector3d);
       x.set(tempVector3d.getX());
@@ -830,7 +828,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param pitch YoVariable to store pitch.
     * @param roll YoVariable to store roll.
     */
-   public void getYawPitchRollToWorld(DoubleYoVariable yaw, DoubleYoVariable pitch, DoubleYoVariable roll)
+   public void getYawPitchRollToWorld(YoDouble yaw, YoDouble pitch, YoDouble roll)
    {
       getRotationToWorld(tempQuat4d);
       double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getS();

@@ -126,6 +126,14 @@ public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedSta
       return leftFootSupportPolygonLength != 0 & rightFootSupportPolygonLength != 0;
    }
 
+   public boolean isSupportFoot(RobotSide robotside)
+   {
+      if (robotside == RobotSide.LEFT)
+         return leftFootSupportPolygonLength != 0;
+      else
+         return rightFootSupportPolygonLength != 0;
+   }
+
    @Override
    public boolean epsilonEquals(CapturabilityBasedStatus other, double epsilon)
    {

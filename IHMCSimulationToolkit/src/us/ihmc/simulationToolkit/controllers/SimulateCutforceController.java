@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotController.RobotController;
@@ -35,8 +35,8 @@ public class SimulateCutforceController implements RobotController
    private final Vector3D xAxisVector;
    private final Vector3D tangentionalVelocity;
 
-   private final DoubleYoVariable efpHandControlFrameVelocity;
-   private final DoubleYoVariable efpForce;
+   private final YoDouble efpHandControlFrameVelocity;
+   private final YoDouble efpForce;
 
    private final FloatingRootJointRobot sdfRobot;
    private final FullRobotModel fullRobotModel;
@@ -48,7 +48,7 @@ public class SimulateCutforceController implements RobotController
    private final static double gGRAVITY = 9.81;
 
    //TODO estimate:
-   private DoubleYoVariable quadraticForceCoeff;
+   private YoDouble quadraticForceCoeff;
 
    // Graphicregistry for viz
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -72,8 +72,8 @@ public class SimulateCutforceController implements RobotController
       climbingForceVector = new Vector3D();
       xAxisVector = new Vector3D(1.0, 0.0, 0.0);
 
-      efpHandControlFrameVelocity = new DoubleYoVariable("cutforceSimulatorVelocity", registry);
-      efpForce = new DoubleYoVariable("cutforceSimulatorForce", registry);
+      efpHandControlFrameVelocity = new YoDouble("cutforceSimulatorVelocity", registry);
+      efpForce = new YoDouble("cutforceSimulatorForce", registry);
 
       switch (this.robotSide)
       {
@@ -104,7 +104,7 @@ public class SimulateCutforceController implements RobotController
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
       handControlFramePose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
-      handControlFramePose.translate(tangentVector);
+      handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose = new YoFramePose("handControlFrame",HumanoidReferenceFrames.getWorldFrame(), registry);
       yoHandControlFramePose.set(handControlFramePose);
       YoGraphicCoordinateSystem yoToolTip = new YoGraphicCoordinateSystem("toolTipViz", yoHandControlFramePose, 0.1, YoAppearance.Yellow());
@@ -114,7 +114,7 @@ public class SimulateCutforceController implements RobotController
       yoGraphicsListRegistry.registerYoGraphic("drillToolTipViz", yoToolTip);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      quadraticForceCoeff = new DoubleYoVariable("quadraticForceCoeff", registry);
+      quadraticForceCoeff = new YoDouble("quadraticForceCoeff", registry);
       quadraticForceCoeff.set(1000.0);
 
    }
@@ -154,7 +154,7 @@ public class SimulateCutforceController implements RobotController
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
       handControlFramePose.setPose(transform);
-      handControlFramePose.translate(tangentVector);
+      handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose.set(handControlFramePose);
       handControlFramePose.getPosition(handControlFramePositionInWorld);
 

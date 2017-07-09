@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -14,7 +14,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
@@ -22,8 +21,8 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 {
    private final SkippyRobotV2 skippy;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
-   private final DoubleYoVariable totalMass = new DoubleYoVariable("totalMass", registry);
+   private final YoDouble kCapture = new YoDouble("kCapture", registry);
+   private final YoDouble totalMass = new YoDouble("totalMass", registry);
 
    private final FramePoint com = new FramePoint(worldFrame);
    private final FramePoint icp = new FramePoint(worldFrame);
@@ -35,13 +34,12 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final TwistCalculator twistCalculator;
 
    private final Wrench endEffectorWrench = new Wrench();
    private final FrameVector errorVector = new FrameVector();
    private final YoFramePoint targetPosition;
    private final FramePoint endEffectorPosition = new FramePoint();
-   private final DoubleYoVariable kp;
+   private final YoDouble kp;
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFrameGraphics = new ArrayList<>();
 
@@ -49,13 +47,12 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    {
       this.skippy = skippy;
 
-      twistCalculator = new TwistCalculator(worldFrame, skippy.getElevator());
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -skippy.getGravityZ());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(skippy.getElevator(), -skippy.getGravityZ());
 
       setupGraphics(graphicsListRegistry);
       totalMass.set(skippy.computeCenterOfMass(new Point3D()));
 
-      kp = new DoubleYoVariable("kpTaskspace", registry);
+      kp = new YoDouble("kpTaskspace", registry);
       kp.set(0.5);
 
       targetPosition = new YoFramePoint("targetPosition", skippy.getRightShoulderFrame(), registry);
@@ -115,14 +112,12 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       inverseDynamicsCalculator.setExternalWrench(endEffectorBody, endEffectorWrench);
       // ---
 
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
       skippy.updateSimulationFromInverseDynamicsTorques();
 
       skippy.updateInverseDynamicsStructureFromSimulation();
 
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       skippy.updateSimulationFromInverseDynamicsTorques();
 

@@ -5,7 +5,9 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -15,17 +17,15 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
-   private final ConvexPolygon2d convexPolygon;
-   private final Plane3d topPlane;
-   private final List<Plane3d> sidePlanes = new ArrayList<Plane3d>();
+   private final ConvexPolygon2D convexPolygon;
+   private final Plane3D topPlane;
+   private final List<Plane3D> sidePlanes = new ArrayList<Plane3D>();
 
    private final Graphics3DObject linkGraphics;
    private final AppearanceDefinition appearance;
@@ -33,18 +33,18 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    private static final double EPSILON = Double.MIN_VALUE;
    private static final boolean VISUALIZE_SURFACE_NORMALS = false;
 
-   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2d convexPolygon, double centroidHeight)
+   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2D convexPolygon, double centroidHeight)
    {
       this(normal, convexPolygon, centroidHeight, YoAppearance.StoneTexture());
    }
 
-   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2d convexPolygon, double centroidHeight, AppearanceDefinition appearance)
+   public RotatableConvexPolygonTerrainObject(Vector3D normal, ConvexPolygon2D convexPolygon, double centroidHeight, AppearanceDefinition appearance)
    {
       if (normal.getZ() <= 0.0)
          throw new RuntimeException("Top surface normal must have a positive z-value. Normal.z = " + normal.getZ());
-      this.convexPolygon = new ConvexPolygon2d(convexPolygon);
+      this.convexPolygon = new ConvexPolygon2D(convexPolygon);
       Point3D centroid = new Point3D(convexPolygon.getCentroid().getX(), convexPolygon.getCentroid().getY(), centroidHeight);
-      this.topPlane = new Plane3d(centroid, normal);
+      this.topPlane = new Plane3D(centroid, normal);
 
       BoundingBox2D polygonBoundingBox = convexPolygon.getBoundingBoxCopy();
       double highest = Double.NEGATIVE_INFINITY;
@@ -75,7 +75,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       addLinkGraphics(convexPolygon, boundingBox);
    }
 
-   private void addLinkGraphics(ConvexPolygon2d convexPolygon, BoundingBox3D boundingBox)
+   private void addLinkGraphics(ConvexPolygon2D convexPolygon, BoundingBox3D boundingBox)
    {
       double lowValue = boundingBox.getMinZ();
 
@@ -105,14 +105,14 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       {
          visualizeNormalVector(topPlane);
 
-         for (Plane3d sidePlane : sidePlanes)
+         for (Plane3D sidePlane : sidePlanes)
          {
             visualizeNormalVector(sidePlane);
          }
       }
    }
 
-   private void visualizeNormalVector(Plane3d plane)
+   private void visualizeNormalVector(Plane3D plane)
    {
       this.linkGraphics.identity();
       linkGraphics.translate(new Vector3D(plane.getPointCopy()));
@@ -151,7 +151,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             centerPoint.add(checkingPoint);
          }
 
-         Plane3d sidePlane = new Plane3d(centerPoint, normal);
+         Plane3D sidePlane = new Plane3D(centerPoint, normal);
          sidePlanes.add(sidePlane);
       }
    }
@@ -192,7 +192,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 //      closestIntersectionAndNormalAt(x, y, z, intersectionToPack, null);
 //   }
 
-   public boolean isInsideTheFace(Plane3d facePlane, ArrayList<Point3D> faceVertices3d, Point3D PointOnThePlane)
+   public boolean isInsideTheFace(Plane3D facePlane, ArrayList<Point3D> faceVertices3d, Point3D PointOnThePlane)
    {
       // Create 2d frame reference for the plane
       // The Origin of the reference frame is facePlane.point
@@ -230,7 +230,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       Point2D pointToCheck = new Point2D(u, v);
 
       // Check if it is inside
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(faceVertices2d);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(faceVertices2d);
 
       return convexPolygon.isPointInside(pointToCheck);
    }
@@ -253,7 +253,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       ArrayList<Point3D> faceVertices = new ArrayList<Point3D>();
       double height;
       Point3D projectedPoint = new Point3D();
-      Plane3d face;
+      Plane3D face;
       int i;
       ArrayList<Boolean> lateralFacesLookingThePoint = new ArrayList<Boolean>();
       boolean topFaceLookingThePoint = false;
@@ -272,7 +272,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       // Check on the lateral surfaces
       for (i = 0; i < sidePlanes.size(); i++)
       {
-         face = new Plane3d(sidePlanes.get(i));
+         face = new Plane3D(sidePlanes.get(i));
          lateralFacesLookingThePoint.add(face.isOnOrAbove(pointToCheck));
 
             projectedPoint.set(face.orthogonalProjectionCopy(pointToCheck));
@@ -323,7 +323,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
 
@@ -336,7 +336,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
       }

@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,11 +28,11 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
    private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
    private final FloatingRootJointRobot robot;
-   private final BooleanYoVariable slipNextStep;
-   private final DoubleYoVariable minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
-   private final DoubleYoVariable minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;
-   private final EnumMap<RobotSide, DoubleYoVariable> touchdownTimeForSlipMap = new EnumMap<RobotSide, DoubleYoVariable>(RobotSide.class);
-   private final EnumMap<RobotSide, EnumYoVariable<SlipState>> slipStateMap = new EnumMap<RobotSide, EnumYoVariable<SlipState>>(RobotSide.class);
+   private final YoBoolean slipNextStep;
+   private final YoDouble minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
+   private final YoDouble minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;
+   private final EnumMap<RobotSide, YoDouble> touchdownTimeForSlipMap = new EnumMap<RobotSide, YoDouble>(RobotSide.class);
+   private final EnumMap<RobotSide, YoEnum<SlipState>> slipStateMap = new EnumMap<RobotSide, YoEnum<SlipState>>(RobotSide.class);
    private final EnumMap<RobotSide, List<GroundContactPoint>> groundContactPointsMap = new EnumMap<RobotSide, List<GroundContactPoint>>(RobotSide.class);
 
    private final YoFrameVector maxTranslationToSlipNextStep;
@@ -63,11 +63,11 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         DoubleYoVariable touchdownTimeForSlip = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownTimeForSlip"
+         YoDouble touchdownTimeForSlip = new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownTimeForSlip"
                + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
          touchdownTimeForSlipMap.put(robotSide, touchdownTimeForSlip);
 
-         EnumYoVariable<SlipState> slipState = new EnumYoVariable<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
+         YoEnum<SlipState> slipState = new YoEnum<SlipState>(name + "SlipState" + robotSide.getCamelCaseNameForMiddleOfExpression(), registry,
                SlipState.class);
          slipState.set(SlipState.NO_CONTACT);
          slipStateMap.put(robotSide, slipState);
@@ -79,14 +79,14 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
          this.addRobotController(groundContactPointsSlipper);
       }
 
-      this.minSlipAfterTimeDelta = new DoubleYoVariable(name + "MinSlipAfterTimeDelta", registry);
-      this.maxSlipAfterTimeDelta = new DoubleYoVariable(name + "MaxSlipAfterTimeDelta", registry);
-      this.nextSlipAfterTimeDelta = new DoubleYoVariable(name + "NextSlipAfterTimeDelta", registry);
-      this.minSlipPercentSlipPerTick = new DoubleYoVariable(name + "MinSlipPercentSlipPerTick", registry);
-      this.maxSlipPercentSlipPerTick = new DoubleYoVariable(name + "MaxSlipPercentSlipPerTick", registry);
-      this.nextSlipPercentSlipPerTick = new DoubleYoVariable(name + "NextSlipPercentSlipPerTick", registry);
+      this.minSlipAfterTimeDelta = new YoDouble(name + "MinSlipAfterTimeDelta", registry);
+      this.maxSlipAfterTimeDelta = new YoDouble(name + "MaxSlipAfterTimeDelta", registry);
+      this.nextSlipAfterTimeDelta = new YoDouble(name + "NextSlipAfterTimeDelta", registry);
+      this.minSlipPercentSlipPerTick = new YoDouble(name + "MinSlipPercentSlipPerTick", registry);
+      this.maxSlipPercentSlipPerTick = new YoDouble(name + "MaxSlipPercentSlipPerTick", registry);
+      this.nextSlipPercentSlipPerTick = new YoDouble(name + "NextSlipPercentSlipPerTick", registry);
 
-      this.slipNextStep = new BooleanYoVariable(name + "SlipNextStep", registry);
+      this.slipNextStep = new YoBoolean(name + "SlipNextStep", registry);
 
       maxTranslationToSlipNextStep = new YoFrameVector(name + "MaxTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       minTranslationToSlipNextStep = new YoFrameVector(name + "MinTranslationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);

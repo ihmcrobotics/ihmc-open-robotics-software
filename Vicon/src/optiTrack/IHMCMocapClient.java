@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 //import us.ihmc.userInterface.ThirdPersonPerspective;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
@@ -33,7 +33,6 @@ public class IHMCMocapClient extends MocapDataClient
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(-90), 0, 0);
-            setTransformToParent(transformToParent);
          }
       };
 
@@ -44,7 +43,7 @@ public class IHMCMocapClient extends MocapDataClient
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            setTransformToParent(rigidBodyInformationInMocapOrigin);
+            transformToParent.set(rigidBodyInformationInMocapOrigin);
          }
       };
 
@@ -54,7 +53,6 @@ public class IHMCMocapClient extends MocapDataClient
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(90), 0, 0);
-            setTransformToParent(transformToParent);
          }
       };
    }

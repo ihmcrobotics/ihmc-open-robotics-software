@@ -9,7 +9,6 @@ import us.ihmc.robotics.kinematics.CommonJoint;
 public class GraphicsJoint extends Graphics3DNode
 {
    private final CommonJoint joint;
-   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
 
    public GraphicsJoint(String name, CommonJoint joint, Graphics3DObject graphics3DObject, Graphics3DNodeType nodeType)
    {
@@ -22,6 +21,7 @@ public class GraphicsJoint extends Graphics3DNode
 
    public final void updateFromJoint()
    {
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.set(joint.getOffsetTransform3D());
       transformToParent.multiply(joint.getJointTransform3D());
       setTransform(transformToParent);

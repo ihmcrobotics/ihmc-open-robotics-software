@@ -2,10 +2,10 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import java.util.logging.Logger;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 {
@@ -18,34 +18,34 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable input;
-   private final DoubleYoVariable inputPrevious;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoDouble input;
+   private final YoDouble inputPrevious;
+   private final YoBoolean hasBeenCalled;
 
-   private final BooleanYoVariable isVariableDead;
-   private final IntegerYoVariable hasBeenDeadForNTicks;
+   private final YoBoolean isVariableDead;
+   private final YoInteger hasBeenDeadForNTicks;
 
-   private final BooleanYoVariable isVariableNaN;
-   private final IntegerYoVariable hasBeenNaNForNTicks;
+   private final YoBoolean isVariableNaN;
+   private final YoInteger hasBeenNaNForNTicks;
 
-   private final BooleanYoVariable isVariableInfinite;
-   private final IntegerYoVariable hasBeenInfiniteForNTicks;
+   private final YoBoolean isVariableInfinite;
+   private final YoInteger hasBeenInfiniteForNTicks;
 
-   private final BooleanYoVariable enabled;
+   private final YoBoolean enabled;
 
-   private final BooleanYoVariable cannotBeTrusted;
+   private final YoBoolean cannotBeTrusted;
 
    public DoubleYoVariableValidityChecker(String inputName, YoVariableRegistry parentRegistry)
    {
       this(inputName, null, parentRegistry);
    }
 
-   public DoubleYoVariableValidityChecker(DoubleYoVariable input, YoVariableRegistry parentRegistry)
+   public DoubleYoVariableValidityChecker(YoDouble input, YoVariableRegistry parentRegistry)
    {
       this(input.getName(), input, parentRegistry);
    }
 
-   private DoubleYoVariableValidityChecker(String inputName, DoubleYoVariable input, YoVariableRegistry parentRegistry)
+   private DoubleYoVariableValidityChecker(String inputName, YoDouble input, YoVariableRegistry parentRegistry)
    {
       this.input = input;
       this.inputName = inputName;
@@ -53,24 +53,24 @@ public class DoubleYoVariableValidityChecker implements DiagnosticUpdatable
       registry = new YoVariableRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);
 
-      inputPrevious = new DoubleYoVariable(inputName + "Previous", registry);
-      hasBeenCalled = new BooleanYoVariable(inputName + "ValidityCheckerHasBeenCalled", registry);
+      inputPrevious = new YoDouble(inputName + "Previous", registry);
+      hasBeenCalled = new YoBoolean(inputName + "ValidityCheckerHasBeenCalled", registry);
 
-      isVariableDead = new BooleanYoVariable(inputName + "IsDead", registry);
+      isVariableDead = new YoBoolean(inputName + "IsDead", registry);
       isVariableDead.set(false);
-      hasBeenDeadForNTicks = new IntegerYoVariable(inputName + "HasBeenDeadForNTicks", registry);
+      hasBeenDeadForNTicks = new YoInteger(inputName + "HasBeenDeadForNTicks", registry);
 
-      isVariableNaN = new BooleanYoVariable(inputName + "IsNaN", registry);
+      isVariableNaN = new YoBoolean(inputName + "IsNaN", registry);
       isVariableNaN.set(false);
-      hasBeenNaNForNTicks = new IntegerYoVariable(inputName + "HasBeenNaNForNTicks", registry);
+      hasBeenNaNForNTicks = new YoInteger(inputName + "HasBeenNaNForNTicks", registry);
 
-      isVariableInfinite = new BooleanYoVariable(inputName + "IsInfinite", registry);
+      isVariableInfinite = new YoBoolean(inputName + "IsInfinite", registry);
       isVariableInfinite.set(false);
-      hasBeenInfiniteForNTicks = new IntegerYoVariable(inputName + "HasBeenInfiniteForNTicks", registry);
+      hasBeenInfiniteForNTicks = new YoInteger(inputName + "HasBeenInfiniteForNTicks", registry);
 
-      enabled = new BooleanYoVariable(registry.getName() + "Enabled", registry);
+      enabled = new YoBoolean(registry.getName() + "Enabled", registry);
 
-      cannotBeTrusted = new BooleanYoVariable(inputName + "CannotBeTrusted", registry);
+      cannotBeTrusted = new YoBoolean(inputName + "CannotBeTrusted", registry);
    }
 
    public void setupForLogging(String loggerName)

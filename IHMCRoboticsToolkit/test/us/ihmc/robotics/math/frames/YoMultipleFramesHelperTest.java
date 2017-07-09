@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
@@ -97,25 +97,8 @@ public class YoMultipleFramesHelperTest
       {
       }
 
-      try
-      {
-         new YoMultipleFramesHelper("framesHelperThree", registry, ReferenceFrame.getWorldFrame(), null);
-         fail("None of the individual reference frames can be null");
-      }
-      catch (RuntimeException e)
-      {
-      }
-
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       YoMultipleFramesHelper helper = new YoMultipleFramesHelper("framesHelperFour", registry, worldFrame);
-      try
-      {
-         helper.registerReferenceFrame(null);
-         fail("None of the individual reference frames can be null");
-      }
-      catch (RuntimeException e)
-      {
-      }
       assertEquals(1, helper.getNumberOfReferenceFramesRegistered());
 
       ReferenceFrame unregisteredFrame = new TranslationReferenceFrame("unregistered", ReferenceFrame.getWorldFrame());

@@ -1,12 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 
@@ -17,7 +17,7 @@ public class ContactableSphereRobot extends ContactableRobot
    private static final double DEFAULT_MASS = 10.0;
 
    private final FloatingJoint floatingJoint;
-   private final Sphere3d originalSphere3d, currentSphere3d;
+   private final Sphere3D originalSphere3d, currentSphere3d;
 
    private Link sphereLink;
 
@@ -41,8 +41,8 @@ public class ContactableSphereRobot extends ContactableRobot
       floatingJoint.setLink(sphereLink);
       this.addRootJoint(floatingJoint);
 
-      originalSphere3d = new Sphere3d(radius);
-      currentSphere3d = new Sphere3d(radius);
+      originalSphere3d = new Sphere3D(radius);
+      currentSphere3d = new Sphere3D(radius);
    }
 
    private Link ball(double radius, double mass)

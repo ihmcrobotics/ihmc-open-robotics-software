@@ -4,21 +4,19 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class MomentumCalculator
 {
-   private final TwistCalculator twistCalculator;
    private final Twist tempTwist = new Twist();
    private final Momentum tempMomentum = new Momentum();
    private final Vector3D zero = new Vector3D();
    private final RigidBody[] rigidBodiesInOrders;
 
-   public MomentumCalculator(TwistCalculator twistCalculator, RigidBody... rigidBodies)
+   public MomentumCalculator(RigidBody... rigidBodies)
    {
-      this.twistCalculator = twistCalculator;
       rigidBodiesInOrders = rigidBodies;
    }
 
-   public MomentumCalculator(TwistCalculator twistCalculator)
+   public MomentumCalculator(RigidBody rootBody)
    {
-      this(twistCalculator, ScrewTools.computeSupportAndSubtreeSuccessors(twistCalculator.getRootBody()));
+      this(ScrewTools.computeSupportAndSubtreeSuccessors(rootBody));
    }
 
    public void computeAndPack(Momentum momentum)
@@ -29,7 +27,7 @@ public class MomentumCalculator
       for (RigidBody rigidBody : rigidBodiesInOrders)
       {
          RigidBodyInertia inertia = rigidBody.getInertia();
-         twistCalculator.getTwistOfBody(rigidBody, tempTwist);
+         rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          tempMomentum.compute(inertia, tempTwist);
          tempMomentum.changeFrame(momentum.getExpressedInFrame());
          momentum.add(tempMomentum);

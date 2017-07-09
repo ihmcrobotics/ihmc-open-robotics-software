@@ -1,10 +1,11 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -22,7 +23,7 @@ public class SnapAndWiggleSingleStep
       this.planarRegionsList = planarRegionsList;
    }
 
-   public ConvexPolygon2d snapAndWiggle(FramePose solePose, ConvexPolygon2d footStepPolygon) throws SnappingFailedException
+   public ConvexPolygon2D snapAndWiggle(FramePose solePose, ConvexPolygon2D footStepPolygon) throws SnappingFailedException
    {
 
       if (planarRegionsList == null)
@@ -52,7 +53,7 @@ public class SnapAndWiggleSingleStep
       PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
 
       RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
-      ConvexPolygon2d footPolygonInRegion = new ConvexPolygon2d(footStepPolygon);
+      ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
       footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
 
       // TODO: make the delta inside value part of the optimization.
@@ -80,7 +81,7 @@ public class SnapAndWiggleSingleStep
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
          footPolygonInRegion.setAndUpdate(footStepPolygon);
          footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-         ConvexPolygon2d foothold = regionToMoveTo.getConvexHull().intersectionWith(footPolygonInRegion);
+         ConvexPolygon2D foothold = ConvexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion);
          soleToRegion.invert();
          foothold.applyTransformAndProjectToXYPlane(soleToRegion);
          return foothold;

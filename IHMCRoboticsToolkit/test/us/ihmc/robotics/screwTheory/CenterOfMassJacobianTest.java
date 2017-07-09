@@ -103,7 +103,7 @@ public class CenterOfMassJacobianTest
 	@Test(timeout = 30000)
    public void testComputeJacobianSixDoFPlusRandomChain()
    {
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
       RigidBody floatingBody = ScrewTools.addRigidBody("floating", sixDoFJoint, new Matrix3D(), random.nextDouble(), RandomGeometry.nextVector3D(random));
       ArrayList<RevoluteJoint> revoluteJoints = setUpRandomChain(floatingBody);
 
@@ -160,7 +160,7 @@ public class CenterOfMassJacobianTest
 
       RigidBody elevator = new RigidBody("elevator", worldFrame);
 
-      SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator, worldFrame);
+      SixDoFJoint rootJoint = new SixDoFJoint("rootJoint", elevator);
       RigidBody body0 = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
       ArrayList<RevoluteJoint> revoluteJoints = new ArrayList<RevoluteJoint>();

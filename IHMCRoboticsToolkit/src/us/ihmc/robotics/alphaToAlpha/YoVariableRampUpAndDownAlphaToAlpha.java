@@ -1,16 +1,16 @@
 package us.ihmc.robotics.alphaToAlpha;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Created by Peter on 9/9/2016.
  */
 public class YoVariableRampUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
 {
-   private final DoubleYoVariable startOfRampUp;
-   private final DoubleYoVariable endOfRamp;
-   private final DoubleYoVariable startOfRampDown;
-   private final DoubleYoVariable endOfRampDown;
+   private final YoDouble startOfRampUp;
+   private final YoDouble endOfRamp;
+   private final YoDouble startOfRampDown;
+   private final YoDouble endOfRampDown;
 
    /*
       alpha < startOfRampUp => alphaPrime = 0
@@ -26,7 +26,7 @@ public class YoVariableRampUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
       alphaPrime will alway be ZERO!
 
     */
-   public YoVariableRampUpAndDownAlphaToAlpha(DoubleYoVariable startOfRampUp, DoubleYoVariable endOfRamp, DoubleYoVariable startOfRampDown, DoubleYoVariable endOfRampDown)
+   public YoVariableRampUpAndDownAlphaToAlpha(YoDouble startOfRampUp, YoDouble endOfRamp, YoDouble startOfRampDown, YoDouble endOfRampDown)
    {
       this.startOfRampUp = startOfRampUp;
       this.endOfRamp = endOfRamp;

@@ -1,21 +1,22 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingStateEndMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferStateEndMatrix;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.List;
 
 public class StateEndCurrentMultiplier
 {
-   private final CubicMatrix cubicMatrix;
-   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+   private final EfficientCubicMatrix cubicMatrix;
+   private final EfficientCubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final boolean givenCubicMatrix;
    private final boolean givenCubicDerivativeMatrix;
@@ -23,45 +24,51 @@ public class StateEndCurrentMultiplier
    private final TransferStateEndMatrix transferStateEndMatrix;
    private final SwingStateEndMatrix swingStateEndMatrix;
 
-   private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   private final DoubleYoVariable startOfSplineTime;
-   private final DoubleYoVariable endOfSplineTime;
+   private final YoDouble startOfSplineTime;
+   private final YoDouble endOfSplineTime;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
-   private final DoubleYoVariable positionMultiplier;
-   private final DoubleYoVariable velocityMultiplier;
+   private final YoDouble positionMultiplier;
+   private final YoDouble velocityMultiplier;
 
-   private final boolean projectForward;
+   private final boolean clipTime;
+   private final boolean blendFromInitial;
+   private final double blendingFraction;
+   private final double minimumBlendingTime;
 
-   public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean projectForward, YoVariableRegistry registry)
+   public StateEndCurrentMultiplier(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
+         YoDouble startOfSplineTime, YoDouble endOfSplineTime, String yoNamePrefix, boolean clipTime, boolean blendFromInitial,
+         double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
-      this(upcomingDoubleSupportSplitRatio, defaultDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, null, null, projectForward, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, clipTime, blendFromInitial,
+            blendingFraction, minimumBlendingTime, registry);
    }
 
-   public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
-         CubicDerivativeMatrix cubicDerivativeMatrix, boolean projectForward, YoVariableRegistry registry)
+   public StateEndCurrentMultiplier(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
+         YoDouble startOfSplineTime, YoDouble endOfSplineTime, EfficientCubicMatrix cubicMatrix, EfficientCubicDerivativeMatrix cubicDerivativeMatrix,
+         String yoNamePrefix, boolean clipTime, boolean blendFromInitial, double blendingFraction, double minimumBlendingTime, YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable("StateEndCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("StateEndCurrentVelocityMultiplier", registry);
+      positionMultiplier = new YoDouble(yoNamePrefix + "StateEndCurrentMultiplier", registry);
+      velocityMultiplier = new YoDouble(yoNamePrefix + "StateEndCurrentVelocityMultiplier", registry);
 
-      this.exitCMPRatio = exitCMPRatio;
-      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
-      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
 
-      this.projectForward = projectForward;
+      this.clipTime = clipTime;
+      this.blendFromInitial = blendFromInitial;
+      this.blendingFraction = blendingFraction;
+      this.minimumBlendingTime = minimumBlendingTime;
 
       if (cubicMatrix == null)
       {
-         this.cubicMatrix = new CubicMatrix();
+         this.cubicMatrix = new EfficientCubicMatrix();
          givenCubicMatrix = false;
       }
       else
@@ -72,7 +79,7 @@ public class StateEndCurrentMultiplier
 
       if (cubicDerivativeMatrix == null)
       {
-         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         this.cubicDerivativeMatrix = new EfficientCubicDerivativeMatrix();
          givenCubicDerivativeMatrix = false;
       }
       else
@@ -81,14 +88,15 @@ public class StateEndCurrentMultiplier
          givenCubicDerivativeMatrix = true;
       }
 
-      transferStateEndMatrix = new TransferStateEndMatrix(defaultDoubleSupportSplitRatio);
-      swingStateEndMatrix = new SwingStateEndMatrix(upcomingDoubleSupportSplitRatio, exitCMPRatio, endOfSplineTime);
+      transferStateEndMatrix = new TransferStateEndMatrix(swingSplitFractions, transferSplitFractions);
+      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, blendFromInitial,
+            minimumBlendingTime);
    }
 
    public void reset()
    {
-      positionMultiplier.set(0.0);
-      velocityMultiplier.set(0.0);
+      positionMultiplier.setToNaN();
+      velocityMultiplier.setToNaN();
    }
 
    public double getPositionMultiplier()
@@ -101,42 +109,40 @@ public class StateEndCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(int numberOfFootstepsToConsider,
+         List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
+         double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      double positionMultiplier, velocityMultiplier;
-
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, omega0, timeInState);
+         computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, omega0);
       }
       else
       {
          if (useTwoCMPs)
-            positionMultiplier = computeSwingSegmented(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+            computeSwingSegmented(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
          else
-            positionMultiplier = computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+            computeInSwingOneCMP(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       }
-      this.positionMultiplier.set(positionMultiplier);
 
       if (isInTransfer)
       {
-         velocityMultiplier = computeInTransferVelocity();
+         computeInTransferVelocity();
       }
       else
       {
          if (useTwoCMPs)
-            velocityMultiplier = computeSwingSegmentedVelocity(timeInState, omega0);
+            computeSwingSegmentedVelocity(timeInState, omega0);
          else
-            velocityMultiplier = computeInSwingOneCMPVelocity(omega0);
+            computeInSwingOneCMPVelocity(omega0);
       }
-
-      this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0, double timeInState)
+   public void computeInTransfer(int numberOfFootstepsToConsider,
+         List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
+         double timeInState, boolean useTwoCMPs, double omega0)
    {
-      transferStateEndMatrix.compute(doubleSupportDurations, omega0);
+      transferStateEndMatrix.compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
@@ -154,85 +160,97 @@ public class StateEndCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, transferStateEndMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
-   private double computeInTransferVelocity()
+   public void computeInTransferVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, transferStateEndMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
    }
 
 
 
 
 
-   private double computeInSwingOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
-   {
-      return computeInSwingOneCMP(doubleSupportDurations.get(1).getDoubleValue(), doubleSupportDurations.get(0).getDoubleValue(),
-            singleSupportDurations.get(0).getDoubleValue(), timeInState, omega0);
-   }
-
-   private double computeInSwingOneCMP(double upcomingDoubleSupportDuration, double doubleSupportDuration, double singleSupportDuration, double timeInState, double omega0)
-   {
-      double stepDuration = doubleSupportDuration + singleSupportDuration;
-      double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
-      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-
-      double duration = timeInState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
-      return Math.exp(omega0 * duration);
-   }
-
-
-   private double computeInSwingOneCMPVelocity(double omega0)
-   {
-      return omega0 * positionMultiplier.getDoubleValue();
-   }
-
-
-
-
-   private double computeSwingSegmented(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void computeInSwingOneCMP(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          double timeInState, double omega0)
+   {
+      double timeRemaining = singleSupportDurations.get(0).getDoubleValue() - timeInState;
+      double nextTransferOnCurrent = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      if (clipTime)
+         timeRemaining = Math.max(timeRemaining, 0.0);
+
+      if (blendFromInitial)
+      {
+         double recursionMultiplier = Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining));
+         double projectionMultiplier = 0.0;
+
+         double blendingTime = blendingFraction * singleSupportDurations.get(0).getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
+         double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
+
+         double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
+         positionMultiplier.set(multiplier);
+      }
+      else
+      {
+         positionMultiplier.set(Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining)));
+      }
+   }
+
+
+   public void computeInSwingOneCMPVelocity(double omega0)
+   {
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
+   }
+
+
+
+
+   public void computeSwingSegmented(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations, double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         computeSwingFirstSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
-         return computeSwingThirdSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         computeSwingThirdSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       else
-         return computeSwingSecondSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         computeSwingSecondSegment(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
    }
 
-   private double computeSwingFirstSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void computeSwingFirstSegment(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          double timeInState, double omega0)
    {
-      if (projectForward)
+      if (blendFromInitial)
       {
-         return 0.0;
+         double nextTransferOnExitCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+         double timeOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
+
+         double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+
+         double recursionMultiplier = Math.exp(omega0 * (timeInState - timeOnExitCMP - currentSwingOnEntryCMP));
+         double projectionMultiplier = 0.0;
+
+         double blendingTime = blendingFraction * startOfSplineTime.getDoubleValue();
+         blendingTime = Math.max(blendingTime, minimumBlendingTime);
+         double phaseInState = MathTools.clamp(timeInState / blendingTime, 0.0, 1.0);
+
+         double multiplier = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseInState);
+         positionMultiplier.set(multiplier);
       }
       else
       {
-         double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-         double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
-         double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
-
-
-         double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
-         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
-         double initialSingleSupportDuration = timeSpentOnEntryCMP - endOfDoubleSupportDuration;
-
-         double duration = timeInState - initialSingleSupportDuration;
-         double projection = Math.exp(omega0 * duration);
-
-         return projection;
+         positionMultiplier.set(0.0);
       }
    }
 
-   private double computeSwingSecondSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void computeSwingSecondSegment(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          double timeInState, double omega0)
    {
-      swingStateEndMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
+      swingStateEndMatrix.compute(singleSupportDurations, doubleSupportDurations, omega0);
 
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
@@ -250,41 +268,47 @@ public class StateEndCurrentMultiplier
 
       CommonOps.mult(cubicMatrix, swingStateEndMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      positionMultiplier.set(matrixOut.get(0, 0));
    }
 
-   private double computeSwingThirdSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   public void computeSwingThirdSegment(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations, double timeInState, double omega0)
    {
-      return computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+      double timeRemaining = singleSupportDurations.get(0).getDoubleValue() - timeInState;
+      double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      if (clipTime)
+         timeRemaining = Math.max(timeRemaining, 0.0);
+
+      positionMultiplier.set(Math.exp(-omega0 * (nextTransferOnExit + timeRemaining)));
    }
 
 
 
 
-   private double computeSwingSegmentedVelocity(double timeInState, double omega0)
+   public void computeSwingSegmentedVelocity(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegmentVelocity(omega0);
+         computeSwingFirstSegmentVelocity(omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
-         return computeSwingThirdSegmentVelocity(omega0);
+         computeSwingThirdSegmentVelocity(omega0);
       else
-         return computeSwingSecondSegmentVelocity();
+         computeSwingSecondSegmentVelocity();
    }
 
-   private double computeSwingFirstSegmentVelocity(double omega0)
+   public void computeSwingFirstSegmentVelocity(double omega0)
    {
-      return omega0 * positionMultiplier.getDoubleValue();
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 
-   private double computeSwingSecondSegmentVelocity()
+   public void computeSwingSecondSegmentVelocity()
    {
       CommonOps.mult(cubicDerivativeMatrix, swingStateEndMatrix, matrixOut);
 
-      return matrixOut.get(0, 0);
+      velocityMultiplier.set(matrixOut.get(0, 0));
    }
 
-   private double computeSwingThirdSegmentVelocity(double omega0)
+   public void computeSwingThirdSegmentVelocity(double omega0)
    {
-      return omega0 * positionMultiplier.getDoubleValue();
+      velocityMultiplier.set(omega0 * positionMultiplier.getDoubleValue());
    }
 }

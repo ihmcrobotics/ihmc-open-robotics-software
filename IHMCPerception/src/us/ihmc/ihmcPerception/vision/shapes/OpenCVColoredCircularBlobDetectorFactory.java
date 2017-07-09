@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.vision.shapes;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
@@ -10,7 +11,14 @@ public class OpenCVColoredCircularBlobDetectorFactory
 {
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error("Failed to load the OpenCV library.");
+      }
    }
 
    private String videoFileName = null;
