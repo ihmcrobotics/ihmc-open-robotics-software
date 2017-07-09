@@ -28,8 +28,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
    private final Twist tempTwist = new Twist();
 
-   private final int degreesOfFreedom;
-
    private final boolean doVelocityTerms;
 
    private static final boolean DEFAULT_DO_VELOCITY_TERMS = true;
@@ -61,8 +59,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
 
       populateMapsAndLists();
-
-      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(allJoints);
    }
 
    public void setRootAcceleration(SpatialAccelerationVector newRootAcceleration)
@@ -204,11 +200,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          Wrench externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
          externalWrench.setToZero(externalWrench.getBodyFrame(), externalWrench.getExpressedInFrame());
       }
-   }
-
-   public int getNumberOfDegreesOfFreedom()
-   {
-      return degreesOfFreedom;
    }
 
    public void getJointCoriolisMatrix(InverseDynamicsJoint joint, DenseMatrix64F jointCoriolisMatrixToPack)
