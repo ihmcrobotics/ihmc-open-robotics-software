@@ -50,7 +50,7 @@ public class FullRobotModelTestTools
       private final SideDependentList<RigidBody> hands = new SideDependentList<>();
       private final SideDependentList<RigidBody> feet = new SideDependentList<>();
 
-      private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
 
       private final double totalMass;
 
@@ -65,7 +65,7 @@ public class FullRobotModelTestTools
          ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
          elevator = new RigidBody("elevator", elevatorFrame);
 
-         rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
+         rootJoint = new SixDoFJoint("rootJoint", elevator);
          pelvis = ScrewTestTools.addRandomRigidBody("pelvis", random, rootJoint);
 
          addSpine(random);
@@ -88,7 +88,7 @@ public class FullRobotModelTestTools
 
             RigidBodyTransform soleToAnkleTransform = new RigidBodyTransform();
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-            ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+            MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
             soleFrames.put(robotSide, soleFrame);
          }
 
@@ -280,12 +280,7 @@ public class FullRobotModelTestTools
          elevator.updateFramesRecursively();
       }
 
-      @Override public ReferenceFrame getWorldFrame()
-      {
-         return worldFrame;
-      }
-
-      @Override public ReferenceFrame getElevatorFrame()
+      @Override public MovingReferenceFrame getElevatorFrame()
       {
          return elevator.getBodyFixedFrame();
       }
@@ -426,7 +421,7 @@ public class FullRobotModelTestTools
          return totalMass;
       }
 
-      @Override public ReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
+      @Override public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName).getFrameAfterJoint();
       }
@@ -456,27 +451,22 @@ public class FullRobotModelTestTools
          return endEffectors.get(robotSide).get(limbName);
       }
 
-      @Override public ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
+      @Override public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
       {
          return endEffectors.get(robotSide).get(limbName).getBodyFixedFrame();
       }
 
-      @Override public ReferenceFrame getHandControlFrame(RobotSide robotSide)
+      @Override public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
       {
          return hands.get(robotSide).getBodyFixedFrame();
       }
 
-      @Override public FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName)
-      {
-         return null;
-      }
-
-      @Override public ReferenceFrame getSoleFrame(RobotSide robotSide)
+      @Override public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
       {
          return soleFrames.get(robotSide);
       }
 
-      @Override public SideDependentList<ReferenceFrame> getSoleFrames()
+      @Override public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleFrames;
       }
