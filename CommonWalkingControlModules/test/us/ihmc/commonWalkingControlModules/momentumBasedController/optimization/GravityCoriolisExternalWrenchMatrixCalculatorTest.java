@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 {
@@ -111,7 +111,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
    private void update()
    {
       fullHumanoidRobotModel.updateFrames();
-      toolbox.getTwistCalculator().compute();
 
       coriolisMatrixCalculator.compute();
    }
@@ -141,13 +140,13 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new InverseDynamicsJoint[0]);
       FloatingInverseDynamicsJoint rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
+                                                yoGraphicsListRegistry, registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
       jointIndexHandler = toolbox.getJointIndexHandler();
 
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), new ArrayList<>(), toolbox.getGravityZ());
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getRootBody(), new ArrayList<>(), toolbox.getGravityZ());
 
       degreesOfFreedom = jointIndexHandler.getNumberOfDoFs();
       floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
