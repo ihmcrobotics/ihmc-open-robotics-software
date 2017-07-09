@@ -4,8 +4,8 @@ package us.ihmc.exampleSimulations.m2;
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 public class M2SimulationConstructor implements SimulationConstructor, SimulationDoneCriterion
 {
    private static final long serialVersionUID = 4634305300496002L;
-   private DoubleYoVariable t;
+   private YoDouble t;
    private TerrainObject3D profile;
 
    public M2SimulationConstructor()
@@ -58,7 +58,7 @@ public class M2SimulationConstructor implements SimulationConstructor, Simulatio
 
       m2Sim.setSimulateDoneCriterion(this);
 
-      t = (DoubleYoVariable) m2Sim.getVariable("t");
+      t = (YoDouble) m2Sim.getVariable("t");
 
       return m2Sim;
    }

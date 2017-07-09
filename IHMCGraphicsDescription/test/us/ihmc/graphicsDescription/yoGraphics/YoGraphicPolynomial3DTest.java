@@ -9,9 +9,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
@@ -34,7 +34,7 @@ public class YoGraphicPolynomial3DTest
          YoFramePoseUsingQuaternions poseToPolynomialFrame = new YoFramePoseUsingQuaternions(name + "Pose", ReferenceFrame.getWorldFrame(), registry);
 
          List<YoPolynomial3D> yoPolynomial3Ds = new ArrayList<>();
-         List<DoubleYoVariable> waypointTimes = new ArrayList<>();
+         List<YoDouble> waypointTimes = new ArrayList<>();
 
          for (int i = 0; i < numberOfPolynomials; i++)
          {
@@ -42,7 +42,7 @@ public class YoGraphicPolynomial3DTest
             YoPolynomial yPolynomial = new YoPolynomial(name + "YPoly" + i, random.nextInt(20) + 1, registry);
             YoPolynomial zPolynomial = new YoPolynomial(name + "ZPoly" + i, random.nextInt(20) + 1, registry);
             yoPolynomial3Ds.add(new YoPolynomial3D(xPolynomial, yPolynomial, zPolynomial));
-            waypointTimes.add(new DoubleYoVariable(name + "WaypointTime" + i, registry));
+            waypointTimes.add(new YoDouble(name + "WaypointTime" + i, registry));
          }
 
          double radius = random.nextDouble();

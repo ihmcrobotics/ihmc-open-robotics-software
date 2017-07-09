@@ -4,6 +4,7 @@ import java.awt.Container;
 
 import javax.swing.JFrame;
 
+import javafx.application.Platform;
 import us.ihmc.simulationconstructionset.gui.ActiveCameraHolder;
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
@@ -27,7 +28,7 @@ public class CameraPropertiesDialogGenerator implements CameraPropertiesDialogCo
    @Override
    public void constructCameraPropertiesDialog(TrackCheckBox trackCheckBox, DollyCheckBox dollyCheckBox)
    {
-      new CameraPropertiesDialog(parentContainer, frame, trackCheckBox, dollyCheckBox, cameraHolder);
+      Platform.runLater(() -> new CameraPropertiesDialog(parentContainer, frame, trackCheckBox, dollyCheckBox, cameraHolder));
    }
 
    public void closeAndDispose()

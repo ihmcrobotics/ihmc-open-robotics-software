@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
@@ -19,7 +19,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3D>
    private double yaw;
    private double safetyBuffer;
    private boolean initialized = false;
-   private ConvexPolygon2d footShapeWithBufferPolygon = new ConvexPolygon2d();
+   private ConvexPolygon2D footShapeWithBufferPolygon = new ConvexPolygon2D();
 
    public BasicFootstepMask(ContactablePlaneBody foot, double maskBufferSize)
    {
@@ -47,7 +47,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3D>
       footShapeWithBufferPolygon.update();
    }
 
-   public BasicFootstepMask(ConvexPolygon2d footstepShape, double maskBufferSize)
+   public BasicFootstepMask(ConvexPolygon2D footstepShape, double maskBufferSize)
    {
       int numVertices = footstepShape.getNumberOfVertices();
       Point2DReadOnly vertex;

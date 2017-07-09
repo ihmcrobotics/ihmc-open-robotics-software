@@ -141,7 +141,7 @@ public class SensorConfigurationFactory
          return perfectFrameAfterJoint;
       }
 
-      ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + frameName, perfectFrameAfterJoint,
+      ReferenceFrame perfectMeasurementFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensorName + frameName, perfectFrameAfterJoint,
                                                   transformFromIMUToJoint);
 
       return perfectMeasurementFrame;

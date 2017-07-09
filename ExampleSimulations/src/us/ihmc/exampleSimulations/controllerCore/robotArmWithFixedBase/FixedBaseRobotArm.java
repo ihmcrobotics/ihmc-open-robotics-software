@@ -17,8 +17,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -41,7 +41,6 @@ public class FixedBaseRobotArm extends Robot
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double gravity = 9.81;
 
-   private final ReferenceFrame elevatorFrame;
    private final RigidBody elevator;
    private final Vector3D shoulderYawOffset = new Vector3D(0.0, 0.0, 0.3);
    private final Vector3D shoulderRollOffset = new Vector3D(0.0, 0.0, 0.0);
@@ -89,7 +88,7 @@ public class FixedBaseRobotArm extends Robot
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
    private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslationVector(), this);
-   private final DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummy", new YoVariableRegistry("dummy"));
+   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoVariableRegistry("dummy"));
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
@@ -100,8 +99,7 @@ public class FixedBaseRobotArm extends Robot
       super(FixedBaseRobotArm.class.getSimpleName());
       this.setGravity(0.0, 0.0, -gravity);
 
-      elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
 
       shoulderYaw = ScrewTools.addRevoluteJoint("shoulderYaw", elevator, shoulderYawOffset, Z_AXIS);
       shoulderYawLink = ScrewTools.addRigidBody("shoulderYawLink", shoulderYaw, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
@@ -123,7 +121,7 @@ public class FixedBaseRobotArm extends Robot
 
       hand = ScrewTools.addRigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
-      handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
+      handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
       controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
                                                                            controlFrameTracker.getYoVelocity());

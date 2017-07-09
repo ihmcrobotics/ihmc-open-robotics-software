@@ -1,7 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
 
 import java.util.Random;
 
@@ -18,8 +19,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,11 +28,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -62,7 +63,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = new Quaternion();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
       ReferenceFrame chestCoMFrame = chest.getBodyFixedFrame();
-      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, chestCoMFrame);
+      headTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       drcSimulationTestHelper.send(headTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
@@ -107,7 +109,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       lookRightQuat.appendRollRotation(Math.PI / 16.0);
       FrameOrientation lookRight = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       HeadTrajectoryMessage lookStraightAheadMessage = new HeadTrajectoryMessage(trajectoryTime, lookStraightAhead.getQuaternion(), ReferenceFrame.getWorldFrame(), chestCoMFrame);
@@ -151,7 +153,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    {
       String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
       String headControlStateName = "headControlState";
-      return ((EnumYoVariable<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
+      return ((YoEnum<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 
    public static double findControllerSwitchTime(SimulationConstructionSet scs)
@@ -170,7 +172,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    {
       String numberOfWaypointsVarName = bodyName + "NumberOfWaypoints";
       String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-      return ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
    public static void assertSingleWaypointExecuted(Quaternion desiredOrientation, String bodyName, SimulationConstructionSet scs)

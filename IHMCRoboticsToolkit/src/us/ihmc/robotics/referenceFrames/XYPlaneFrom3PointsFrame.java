@@ -22,7 +22,7 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
 
    public XYPlaneFrom3PointsFrame(ReferenceFrame parentFrame, String name)
    {
-      super(name, parentFrame, false, false, true);
+      super(name, parentFrame, false, true);
    }
 
    public void setPoints(FramePoint p1, FramePoint p2, FramePoint p3)

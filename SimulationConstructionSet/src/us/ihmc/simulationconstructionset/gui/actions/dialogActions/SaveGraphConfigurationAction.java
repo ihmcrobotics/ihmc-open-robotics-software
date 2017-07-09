@@ -1,21 +1,31 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
-
-public class SaveGraphConfigurationAction extends AbstractAction
+@SuppressWarnings("serial")
+public class SaveGraphConfigurationAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
    private SaveGraphConfigurationDialogConstructor constructor;
 
    public SaveGraphConfigurationAction(SaveGraphConfigurationDialogConstructor constructor)
    {
-      super("Save GraphGroup Configuration");
-      this.constructor= constructor;
+      super("Save GraphGroup Configuration",
+              "",
+              KeyEvent.VK_UNDEFINED,
+              "Save GraphGroup Config",
+              "Save GraphGroup Configuration"
+      );
+
+      this.constructor = constructor;
+   }
+
+   @Override
+   public void doAction()
+   {
+      constructor.constructDialog();
    }
 
    public void setCurrentDirectory(File directory)
@@ -28,9 +38,4 @@ public class SaveGraphConfigurationAction extends AbstractAction
       constructor.setCurrentDirectory(directory);
    }
 
-   @Override
-   public void actionPerformed(ActionEvent e)
-   {
-      constructor.constructDialog();
-   }
 }

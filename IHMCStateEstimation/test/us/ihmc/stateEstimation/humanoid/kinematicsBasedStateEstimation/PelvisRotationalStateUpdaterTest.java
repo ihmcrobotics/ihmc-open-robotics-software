@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -196,7 +196,7 @@ public class PelvisRotationalStateUpdaterTest
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
          RigidBody measurementLink = imuDefinition.getRigidBody();
          Twist twistIMU = new Twist();
-         inverseDynamicsStructure.getTwistCalculator().getTwistOfBody(measurementLink, twistIMU);
+         measurementLink.getBodyFixedFrame().getTwistOfFrame(twistIMU);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
          twistIMU.changeBodyFrameNoRelativeTwist(imuSensors.get(i).getMeasurementFrame());
          

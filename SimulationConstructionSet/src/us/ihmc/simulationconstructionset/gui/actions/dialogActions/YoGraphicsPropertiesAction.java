@@ -1,31 +1,28 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.YoGraphicsPropertiesDialogConstructor;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.YoGraphicsPropertiesDialogConstructor;
-
-public class YoGraphicsPropertiesAction extends AbstractAction
+@SuppressWarnings("serial")
+public class YoGraphicsPropertiesAction extends SCSAction
 {
-   private static final long serialVersionUID = -2806456517432086216L;
    private final YoGraphicsPropertiesDialogConstructor constructor;
    
    public YoGraphicsPropertiesAction(YoGraphicsPropertiesDialogConstructor constructor)
    {
-      super("YoGraphics Properties...");
+      super("YoGraphics Properties...",
+              "",
+              KeyEvent.VK_Y,
+              "Open YoGraphics Properties",
+              "Open YoGraphics Properties for in-depth settings adjustment."
+      );
       
       this.constructor = constructor;
-
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_Y));
-      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
-      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
    @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       constructor.constructDialog();
    }

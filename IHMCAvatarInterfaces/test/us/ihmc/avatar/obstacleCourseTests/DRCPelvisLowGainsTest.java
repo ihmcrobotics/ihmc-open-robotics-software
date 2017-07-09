@@ -15,7 +15,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -99,7 +99,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
+      final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
@@ -112,8 +112,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
-      DoubleYoVariable kpPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable(getKpPelvisOrientationName());
-      DoubleYoVariable zetaPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable(getZetaPelvisOrientationName());
+      YoDouble kpPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(getKpPelvisOrientationName());
+      YoDouble zetaPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(getZetaPelvisOrientationName());
 
       // kp = 20.0, zeta = 0.7 causes problems when running multithreaded. kp = 1.0, zeta = 0.7 causes problems when running single threaded.
       kpPelvisOrientation.set(1.0);
@@ -145,6 +145,6 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
+   protected abstract YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
 
 }

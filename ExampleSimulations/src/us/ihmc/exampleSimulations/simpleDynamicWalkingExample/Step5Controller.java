@@ -4,8 +4,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,15 +23,15 @@ public class Step5Controller implements RobotController
    private PIDController controllerKneeZ;
    private PIDController controllerAnkle;
    
-   private DoubleYoVariable desiredBodyZ;
-   private DoubleYoVariable desiredLegPitch;
-   private DoubleYoVariable desiredKneeZ;
-   private DoubleYoVariable desiredBodyPitch;
-   private DoubleYoVariable desiredAnklePitch;
+   private YoDouble desiredBodyZ;
+   private YoDouble desiredLegPitch;
+   private YoDouble desiredKneeZ;
+   private YoDouble desiredBodyPitch;
+   private YoDouble desiredAnklePitch;
 
-   private DoubleYoVariable kneeTau;
-   private DoubleYoVariable hipTau;
-   private DoubleYoVariable ankleTau;
+   private YoDouble kneeTau;
+   private YoDouble hipTau;
+   private YoDouble ankleTau;
 
    Point3D bodyPositionToPack = new Point3D(); //global so that it is created only once to avoid generating garbage
    private Quaternion rotationToPack = new Quaternion();
@@ -49,33 +49,33 @@ public class Step5Controller implements RobotController
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(50000.0);
       controllerBodyZ.setDerivativeGain(5000.0);
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", controllerRegistry);
       desiredBodyZ.set(1.2);
 
       controllerLegPitch = new PIDController("legPitch", controllerRegistry);
       controllerLegPitch.setProportionalGain(50000.0);
       controllerLegPitch.setDerivativeGain(5000.0);
-      desiredLegPitch = new DoubleYoVariable("desiredLegPitch", controllerRegistry);
+      desiredLegPitch = new YoDouble("desiredLegPitch", controllerRegistry);
       desiredLegPitch.set(0.2);
 
       controllerKneeZ = new PIDController("kneeZ", controllerRegistry);
       controllerKneeZ.setProportionalGain(15000.0);
       controllerKneeZ.setDerivativeGain(2000.0);
-      desiredKneeZ = new DoubleYoVariable("desiredKneeZ", controllerRegistry);
+      desiredKneeZ = new YoDouble("desiredKneeZ", controllerRegistry);
       desiredKneeZ.set(0.2);
       
       controllerAnkle = new PIDController("anklePitch", controllerRegistry);
       controllerAnkle.setProportionalGain(1000.0);
       controllerAnkle.setDerivativeGain(100.0);
-      desiredAnklePitch = new DoubleYoVariable("desiredAnklePitch", controllerRegistry);
+      desiredAnklePitch = new YoDouble("desiredAnklePitch", controllerRegistry);
       desiredAnklePitch.set(0.0);
       
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(0.0);
       
-      hipTau = new DoubleYoVariable("hipTau", controllerRegistry);
-      kneeTau = new DoubleYoVariable("kneeTau", controllerRegistry);
-      ankleTau = new DoubleYoVariable("ankleTau", controllerRegistry);
+      hipTau = new YoDouble("hipTau", controllerRegistry);
+      kneeTau = new YoDouble("kneeTau", controllerRegistry);
+      ankleTau = new YoDouble("ankleTau", controllerRegistry);
    }
 
    /////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,12 +1,12 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoubleYoVariableParameterToOptimize extends DoubleParameterToOptimize
 {
-   private final DoubleYoVariable yoVariable;
+   private final YoDouble yoVariable;
    
-   public DoubleYoVariableParameterToOptimize(double min, double max, DoubleYoVariable yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
+   public DoubleYoVariableParameterToOptimize(double min, double max, YoDouble yoVariable, ListOfParametersToOptimize listOfParametersToOptimize)
    {
       super(yoVariable.getName(), min, max, listOfParametersToOptimize);
       this.yoVariable = yoVariable;

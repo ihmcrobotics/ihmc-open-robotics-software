@@ -203,14 +203,17 @@ public class TwistCalculator
    }
 
    /**
-    * Computes and packs the angular velocity of the given {@code body} with respect to the given {@code base}.
+    * Computes and packs the angular velocity of the given {@code body} with respect to the given
+    * {@code base}.
     * <p>
-    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to {@code base.getBodyFixedFrame()} expressed in {@code body.getBodyFixedFrame()}.
+    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to
+    * {@code base.getBodyFixedFrame()} expressed in {@code body.getBodyFixedFrame()}.
     * </p>
     * 
     * @param base the rigid-body with respect to which the angular velocity is to be computed.
     * @param body the rigid-body to compute the angular velocity of.
-    * @param angularVelocityToPack the angular velocity of {@code body} relative to the {@code base}. Modified.
+    * @param angularVelocityToPack the angular velocity of {@code body} relative to the
+    *           {@code base}. Modified.
     */
    public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector angularVelocityToPack)
    {

@@ -39,7 +39,7 @@ public class RigidBodyInertiaTest
    @Before
    public void setUp() throws Exception
    {
-      worldFrame = ReferenceFrame.constructAWorldFrame("worldFrame");
+      worldFrame = ReferenceFrame.constructARootFrame("worldFrame");
       frameB = new ReferenceFrame("B", worldFrame)
       {
          private static final long serialVersionUID = 1L;

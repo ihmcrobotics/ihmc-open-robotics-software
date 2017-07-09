@@ -7,14 +7,13 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.parameters.WandererPhysicalProperties;
-
 
 public class WandererFootSensorManager
 {
@@ -38,14 +37,14 @@ public class WandererFootSensorManager
    private final SideDependentList<DenseMatrix64F> footWrenches;
       
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererFootManager");
-   private final ArrayList<DoubleYoVariable> leftPressureSensorValues = new ArrayList<DoubleYoVariable>();
-   private final ArrayList<DoubleYoVariable>  rightPressureSensorValues = new ArrayList<DoubleYoVariable>();
-   private final SideDependentList<DoubleYoVariable> feetForceZ = new SideDependentList<DoubleYoVariable>();
-   private final SideDependentList<DoubleYoVariable> feetTauX = new SideDependentList<DoubleYoVariable>();
-   private final SideDependentList<DoubleYoVariable> feetTauY = new SideDependentList<DoubleYoVariable>();
-   private final SideDependentList<DoubleYoVariable> feetCoPX = new SideDependentList<DoubleYoVariable>();
-   private final SideDependentList<DoubleYoVariable> feetCoPY = new SideDependentList<DoubleYoVariable>();
-   private final SideDependentList<ArrayList<DoubleYoVariable>> pressureSensorValues = new SideDependentList<ArrayList<DoubleYoVariable>>();
+   private final ArrayList<YoDouble> leftPressureSensorValues = new ArrayList<YoDouble>();
+   private final ArrayList<YoDouble>  rightPressureSensorValues = new ArrayList<YoDouble>();
+   private final SideDependentList<YoDouble> feetForceZ = new SideDependentList<YoDouble>();
+   private final SideDependentList<YoDouble> feetTauX = new SideDependentList<YoDouble>();
+   private final SideDependentList<YoDouble> feetTauY = new SideDependentList<YoDouble>();
+   private final SideDependentList<YoDouble> feetCoPX = new SideDependentList<YoDouble>();
+   private final SideDependentList<YoDouble> feetCoPY = new SideDependentList<YoDouble>();
+   private final SideDependentList<ArrayList<YoDouble>> pressureSensorValues = new SideDependentList<ArrayList<YoDouble>>();
    
    public WandererFootSensorManager(SideDependentList<DenseMatrix64F> footWrenches, EnumMap<WandererJoint, AcsellJointState> jointStates, EnumMap<WandererActuator, AcsellActuatorState> actuatorStates, YoVariableRegistry parentRegistry)
    {
@@ -54,16 +53,16 @@ public class WandererFootSensorManager
       this.footWrenches = footWrenches;
       for(int i=0;i<PRESSURE_SENSORS_PER_FOOT; i++)
       {
-         leftPressureSensorValues.add(new DoubleYoVariable("leftFootSensor" + i, registry));
-         rightPressureSensorValues.add(new DoubleYoVariable("rightFootSensor" + i, registry));
+         leftPressureSensorValues.add(new YoDouble("leftFootSensor" + i, registry));
+         rightPressureSensorValues.add(new YoDouble("rightFootSensor" + i, registry));
       }
       for(RobotSide side : RobotSide.values)
       {
-         feetForceZ.put(side,new DoubleYoVariable(side.getLowerCaseName()+"WandererFootForceZ", registry));
-         feetTauX.put(side,new DoubleYoVariable(side.getLowerCaseName()+"WandererFootTauX", registry));
-         feetTauY.put(side,new DoubleYoVariable(side.getLowerCaseName()+"WandererFootTauY", registry));
-         feetCoPX.put(side,new DoubleYoVariable(side.getLowerCaseName()+"WandererFootCoPX", registry));
-         feetCoPY.put(side,new DoubleYoVariable(side.getLowerCaseName()+"WandererFootCoPY", registry));
+         feetForceZ.put(side,new YoDouble(side.getLowerCaseName()+"WandererFootForceZ", registry));
+         feetTauX.put(side,new YoDouble(side.getLowerCaseName()+"WandererFootTauX", registry));
+         feetTauY.put(side,new YoDouble(side.getLowerCaseName()+"WandererFootTauY", registry));
+         feetCoPX.put(side,new YoDouble(side.getLowerCaseName()+"WandererFootCoPX", registry));
+         feetCoPY.put(side,new YoDouble(side.getLowerCaseName()+"WandererFootCoPY", registry));
       }
       pressureSensorValues.put(RobotSide.LEFT,leftPressureSensorValues);
       pressureSensorValues.put(RobotSide.RIGHT,rightPressureSensorValues);      

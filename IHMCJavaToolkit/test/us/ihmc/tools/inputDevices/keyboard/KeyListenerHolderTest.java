@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.inputDevices.keyboard.Key;
 
 public class KeyListenerHolderTest
 {

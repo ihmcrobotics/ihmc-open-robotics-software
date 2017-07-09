@@ -29,10 +29,10 @@ public class ViconFrames
    protected void initialize(ReferenceFrame parentReferenceFrame) throws Exception
    {
       if (parentReferenceFrame == null)
-         viconWorldFrame = ReferenceFrame.constructAWorldFrame(worldFrameName);
+         viconWorldFrame = ReferenceFrame.constructARootFrame(worldFrameName);
       else
       {
-         viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, false, true, false)
+         viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, true, false)
          {
             /**
              * 
@@ -41,7 +41,6 @@ public class ViconFrames
 
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               setTransformToParent(transformToParent);
             }
          };
       }

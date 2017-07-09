@@ -1,6 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -73,8 +73,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       waypoint0.getPose(waypointPosition0, waypointOrientation0);
       waypoint1.getPose(waypointPosition1, waypointOrientation1);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
-      handTrajectoryMessage.setTrajectoryReferenceFrameId(chest.getBodyFixedFrame());
-      handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(chest.getBodyFixedFrame());
+      handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
       handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D(), worldFrame);
       handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D(), worldFrame);
 

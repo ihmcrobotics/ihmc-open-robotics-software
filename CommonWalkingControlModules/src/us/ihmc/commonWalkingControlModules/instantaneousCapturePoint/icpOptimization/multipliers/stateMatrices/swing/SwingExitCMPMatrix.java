@@ -1,26 +1,34 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.InterpolationTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import java.util.List;
 
 public class SwingExitCMPMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
-   private final DoubleYoVariable exitCMPRatio;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   private final DoubleYoVariable endOfSplineTime;
+   private final YoDouble endOfSplineTime;
+   private final YoDouble startOfSplineTime;
 
-   public SwingExitCMPMatrix(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable endOfSplineTime)
+   private final boolean blendFromInitial;
+   private final double minimumBlendingTime;
+
+   public SwingExitCMPMatrix(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
+         YoDouble startOfSplineTime, YoDouble endOfSplineTime, boolean blendFromInitial, double minimumBlendingTime)
    {
       super(4, 1);
 
-      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
-      this.exitCMPRatio = exitCMPRatio;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
 
+      this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
+      this.blendFromInitial = blendFromInitial;
+      this.minimumBlendingTime = minimumBlendingTime;
    }
 
    public void reset()
@@ -28,23 +36,44 @@ public class SwingExitCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
+         double omega0)
    {
-      compute(doubleSupportDurations.get(1).getDoubleValue(), doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0);
-   }
+      // recurse backward from upcoming corner point to current corner point, then project forward to end of spline
+      double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnExitCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double timeOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
 
-   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0)
-   {
-      double currentStepDuration = currentDoubleSupportDuration + singleSupportDuration;
-      double upcomingInitialDoubleSupportTime = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-      double timeSpentOnCurentExitCMP = exitCMPRatio.getDoubleValue() * currentStepDuration;
+      double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double splineDurationOnExitCMP = endOfSplineTime.getDoubleValue() - currentSwingOnEntryCMP;
 
-      double duration = endOfSplineTime.getDoubleValue() - singleSupportDuration + timeSpentOnCurentExitCMP - upcomingInitialDoubleSupportTime;
-      double projection = Math.exp(omega0 * duration);
+      double projection = Math.exp(omega0 * (splineDurationOnExitCMP - timeOnExitCMP));
 
       zero();
 
       set(2, 0, 1.0 - projection);
       set(3, 0, -omega0 * projection);
+
+      if (blendFromInitial)
+      {
+         double splineDurationOnEntryCMP = currentSwingOnEntryCMP - startOfSplineTime.getDoubleValue();
+
+         if (startOfSplineTime.getDoubleValue() >= minimumBlendingTime)
+         {
+            projection = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+         }
+         else
+         { // haven't phased in completely yet, so its a combination of both recursion and projection
+            double phaseAtStart = startOfSplineTime.getDoubleValue() / minimumBlendingTime;
+
+            double recursionMultiplier = Math.exp(-omega0 * splineDurationOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+            double projectionMultiplier = 0.0;
+
+            projection = InterpolationTools.linearInterpolate(projectionMultiplier, recursionMultiplier, phaseAtStart);
+         }
+
+         set(0, 0, projection);
+         set(1, 0, omega0 * projection);
+      }
    }
 }

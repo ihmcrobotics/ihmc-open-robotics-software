@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -10,9 +11,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -67,16 +67,16 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.03, YoAppearance.Green());
 
-   private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
+   private final YoDouble inscribedCircleRadius = new YoDouble("inscribedCircleRadius", registry);
    private final YoArtifactOval inscribedCircle = new YoArtifactOval("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
    
    private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
    
-//   private final BooleanYoVariable miniCircleRadiusSuccess = new BooleanYoVariable("miniCircleRadiusSuccess", registry);
-   private final DoubleYoVariable miniCircleRadius = new DoubleYoVariable("miniCircleRadius", registry);
+//   private final YoBoolean miniCircleRadiusSuccess = new YoBoolean("miniCircleRadiusSuccess", registry);
+   private final YoDouble miniCircleRadius = new YoDouble("miniCircleRadius", registry);
    private final YoArtifactOval miniCircle = new YoArtifactOval("miniCircle", miniCircleCenter, miniCircleRadius, Color.YELLOW);
    
-   private DoubleYoVariable bodyHeadingAngle = new DoubleYoVariable("bodyHeadingAngle", registry);
+   private YoDouble bodyHeadingAngle = new YoDouble("bodyHeadingAngle", registry);
 
    public QuadrupedSupportPolygonVisualizer()
    {
@@ -249,7 +249,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())
       {
          FramePoint footstep = supportPolygon.getFootstep(quadrant);

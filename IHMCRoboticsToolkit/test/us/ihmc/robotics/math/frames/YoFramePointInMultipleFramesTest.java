@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -22,11 +22,11 @@ public class YoFramePointInMultipleFramesTest
    private static final Random random = new Random(1516351L);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final ReferenceFrame frameA = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameA", worldFrame,
+   private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
          EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-   private static final ReferenceFrame frameB = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameB", worldFrame,
+   private static final ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame,
          EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-   private static final ReferenceFrame frameC = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameC", worldFrame,
+   private static final ReferenceFrame frameC = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameC", worldFrame,
          EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
    private static final ReferenceFrame[] allFrames = new ReferenceFrame[] { worldFrame, frameA, frameB, frameC };

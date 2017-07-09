@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
@@ -15,8 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFoot
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -57,7 +57,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       for(RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 
@@ -103,7 +103,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       for(RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 
@@ -202,7 +202,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(parameters, registry);
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       if (visualize)

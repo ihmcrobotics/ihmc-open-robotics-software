@@ -19,8 +19,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,7 +34,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    {
       STOPPED,
       SETUP_ROBOT,
-      SEARCHING_FOR_VAVLE,
+      SEARCHING_FOR_VALVE,
       WALKING_TO_VALVE,
       SEARCHING_FOR_VALVE_FINAL,
       TURNING_VALVE,
@@ -60,7 +60,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    RobotSide side = RobotSide.RIGHT;
 
-   public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
@@ -105,7 +105,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       };
 
       //TODO setup search for ball behavior
-      BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VAVLE,
+      BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VALVE,
             searchForValveBehavior)
       {
          @Override
@@ -200,7 +200,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
+      statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VALVE);
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
       statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
       statemachine.addStateWithDoneTransition(searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);

@@ -18,6 +18,7 @@ import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
@@ -75,7 +76,15 @@ public class NaiveFaceTracker
 
    public static void main(String[] arg) throws IOException
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      //NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error("Failed to load the OpenCV library.");
+      }
       VideoCapture cap = new VideoCapture(1);
       OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
       NaiveFaceTracker faceTracker = new NaiveFaceTracker();

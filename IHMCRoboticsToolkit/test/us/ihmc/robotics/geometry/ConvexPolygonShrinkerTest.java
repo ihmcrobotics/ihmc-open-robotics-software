@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -29,9 +30,9 @@ public class ConvexPolygonShrinkerTest
       vertices.add(new Point2D(1.0, 1.0));
       vertices.add(new Point2D(0.0, 1.0));
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(vertices);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(vertices);
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
       shrinker.shrinkConstantDistanceInto(polygon, 0.1, shrunkenPolygon);
 
@@ -41,7 +42,7 @@ public class ConvexPolygonShrinkerTest
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.9), shrunkenPolygon.getVertexCCW(3), 1e-7);
 
 
-      polygon = new ConvexPolygon2d(vertices);
+      polygon = new ConvexPolygon2D(vertices);
 
       shrinker.shrinkConstantDistanceInto(polygon, 1.1, shrunkenPolygon);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 0.5), shrunkenPolygon.getVertexCCW(0), 1e-7);
@@ -58,9 +59,9 @@ public class ConvexPolygonShrinkerTest
       vertices.add(new Point2D(1.0, 0.0));
       vertices.add(new Point2D(2.2, 1.0));
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(vertices);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(vertices);
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
       shrinker.shrinkConstantDistanceInto(polygon, 0.1, shrunkenPolygon);
 
@@ -69,7 +70,7 @@ public class ConvexPolygonShrinkerTest
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(1.8160104213223893, 0.8101795123671021), shrunkenPolygon.getVertexCCW(1), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.2947361006115917, 0.4644353485691937), shrunkenPolygon.getVertexCCW(2), 1e-7);
 
-      polygon = new ConvexPolygon2d(vertices);
+      polygon = new ConvexPolygon2D(vertices);
 
       shrinker.shrinkConstantDistanceInto(polygon, 1.1, shrunkenPolygon);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(1.0666666666, 0.5), shrunkenPolygon.getVertexCCW(0), 1e-7);
@@ -86,16 +87,16 @@ public class ConvexPolygonShrinkerTest
       vertices.add(new Point2D(-1.0, 3.0));
       vertices.add(new Point2D(1.0, 3.0));
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(vertices);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(vertices);
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
       shrinker.shrinkConstantDistanceInto(polygon, 0.1, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.9, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(-0.9, 3.0), shrunkenPolygon.getVertexCCW(1), 1e-7);
 
-      polygon = new ConvexPolygon2d(vertices);
+      polygon = new ConvexPolygon2D(vertices);
 
       shrinker.shrinkConstantDistanceInto(polygon, 1.1, shrunkenPolygon);
 
@@ -111,9 +112,9 @@ public class ConvexPolygonShrinkerTest
 
       vertices.add(new Point2D(-1.0, 3.0));
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(vertices);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(vertices);
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
       shrinker.shrinkConstantDistanceInto(polygon, 0.1, shrunkenPolygon);
 
@@ -146,8 +147,8 @@ public class ConvexPolygonShrinkerTest
          double distance = RandomNumbers.nextDouble(random, 0.001, 5.0);
          shrinker.shrinkConstantDistanceInto(randomPolygon, distance, shrunkenPolygon);
 
-         ConvexPolygon2d bigPolygon = randomPolygon.getConvexPolygon2dCopy();
-         ConvexPolygon2d smallPolygon = shrunkenPolygon.getConvexPolygon2dCopy();
+         ConvexPolygon2D bigPolygon = randomPolygon.getConvexPolygon2dCopy();
+         ConvexPolygon2D smallPolygon = shrunkenPolygon.getConvexPolygon2dCopy();
 
          boolean completelyInside = ConvexPolygon2dCalculator.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
@@ -170,9 +171,9 @@ public class ConvexPolygonShrinkerTest
       vertices.add(new Point2D(0.0, 1.0));
       vertices.add(new Point2D(-0.2, 0.5));
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(vertices);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(vertices);
       ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
       int numberOfTests = 2000;
 

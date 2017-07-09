@@ -5,8 +5,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -125,7 +125,7 @@ public class AgileHexapodRobot extends Robot
 
    private FloatingJoint floatingJoint;
 
-   DoubleYoVariable gc_lheel_x, gc_lheel_z, gc_lheel_dx, gc_lheel_dz, gc_lheel_fs, gc_lheel_tdx, gc_lheel_tdz, gc_lheel_fx, gc_lheel_fz;
+   YoDouble gc_lheel_x, gc_lheel_z, gc_lheel_dx, gc_lheel_dz, gc_lheel_fs, gc_lheel_tdx, gc_lheel_tdz, gc_lheel_fx, gc_lheel_fz;
    private static final int
       LEFT = 0, RIGHT = 1;
 

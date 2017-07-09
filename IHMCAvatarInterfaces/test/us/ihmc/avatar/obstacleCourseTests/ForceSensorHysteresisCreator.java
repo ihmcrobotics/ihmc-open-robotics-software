@@ -2,8 +2,8 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
@@ -22,10 +22,10 @@ public class ForceSensorHysteresisCreator extends ModularRobotController
    private final double totalRobotWeightInNewtons;
    private DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE,1);
    private double tmpHysteresis = 0;
-   private DoubleYoVariable hysteresisInZDirection;
+   private YoDouble hysteresisInZDirection;
    
    private boolean hasNormalForceGonePastLimit = false;
-   private final GlitchFilteredBooleanYoVariable isForcePastThresholdFiltered;
+   private final GlitchFilteredYoBoolean isForcePastThresholdFiltered;
    private boolean unfilteredIsForcePastThresh = false;
    private int hysteresisSampleCounter = 0;
    private double normalForceThreshold;
@@ -39,10 +39,10 @@ public class ForceSensorHysteresisCreator extends ModularRobotController
       this.totalRobotWeightInNewtons = totalRobotMass * 9.81;
       this.normalForceThreshold = totalRobotWeightInNewtons * PERCENT_OF_FULL_WEIGHT_TO_TRIGGER_HYSTERESIS/100;
       
-      hysteresisInZDirection = new DoubleYoVariable(parentJointName + "ForceSensorZHysteresis", registry);
+      hysteresisInZDirection = new YoDouble(parentJointName + "ForceSensorZHysteresis", registry);
       hysteresisInZDirection.set(0);
       
-      this.isForcePastThresholdFiltered = new GlitchFilteredBooleanYoVariable(parentJointName + "ForceSensorZHysteresisIsForcePastThreshold", registry, ITERS_BEFORE_HYSTERESIS_TRIGGERS);
+      this.isForcePastThresholdFiltered = new GlitchFilteredYoBoolean(parentJointName + "ForceSensorZHysteresisIsForcePastThreshold", registry, ITERS_BEFORE_HYSTERESIS_TRIGGERS);
    }
 
    @Override

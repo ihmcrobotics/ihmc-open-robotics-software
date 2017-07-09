@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
@@ -17,8 +16,8 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFoots
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -56,14 +55,14 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
 
-   private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
-   private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
-   private final BooleanYoVariable haveFootstepsBeenGenerated = new BooleanYoVariable("haveFootstepsBeenGenerated", registry);
+   private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
+   private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
+   private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
    private final YoFrameVector walkPathVector = new YoFrameVector(getName(), worldFrame, registry);
-   private final DoubleYoVariable walkDistance = new DoubleYoVariable(getName() + "WalkDistance", registry);
+   private final YoDouble walkDistance = new YoDouble(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
 
@@ -256,13 +255,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
          else
          {
             footsteps.addAll(footstepsNominalOrientation);
-         }
-
-         Vector3D footlocation = new Vector3D();
-         referenceFrames.getAnkleZUpFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(footlocation);
-         for (Footstep footstep : footsteps)
-         {
-            footstep.setZ(footlocation.getZ());
          }
       }
 

@@ -25,7 +25,6 @@ public class InverseDynamicsCalculator
    private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
    private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final LinkedHashMap<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
-   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
@@ -35,32 +34,31 @@ public class InverseDynamicsCalculator
 
    private InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener;
    
-   public InverseDynamicsCalculator(TwistCalculator twistCalculator, double gravity)
+   public InverseDynamicsCalculator(RigidBody body, double gravity)
    {
-      this(twistCalculator, gravity, new ArrayList<InverseDynamicsJoint>());
+      this(body, gravity, new ArrayList<InverseDynamicsJoint>());
    }
 
-   public InverseDynamicsCalculator(TwistCalculator twistCalculator, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
+   public InverseDynamicsCalculator(RigidBody body, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
    {
-      this(ReferenceFrame.getWorldFrame(), ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), gravity),
-            new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, true, true, twistCalculator);
+      this(body, ScrewTools.createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity),
+            new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, true, true);
    }
 
    // FIXME: doVelocityTerms = false does not seem to work
-   public InverseDynamicsCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
-         List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms, TwistCalculator twistCalculator)
+   public InverseDynamicsCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
+         List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
-      this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
-            doAccelerationTerms, true), twistCalculator);
+      this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms,
+            doAccelerationTerms, true));
    }
 
-   public InverseDynamicsCalculator(ReferenceFrame inertialFrame, HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
-         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator)
+   public InverseDynamicsCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
+         SpatialAccelerationCalculator spatialAccelerationCalculator)
    {
-      this.rootBody = twistCalculator.getRootBody();
+      this.rootBody = spatialAccelerationCalculator.getRootBody();
       this.externalWrenches = new LinkedHashMap<RigidBody, Wrench>(externalWrenches);
       this.jointsToIgnore = new ArrayList<InverseDynamicsJoint>(jointsToIgnore);
-      this.twistCalculator = twistCalculator;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
 
       this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
@@ -119,7 +117,7 @@ public class InverseDynamicsCalculator
       {
          RigidBody body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
-         twistCalculator.getTwistOfBody(body, tempTwist);
+         body.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(body, tempAcceleration);

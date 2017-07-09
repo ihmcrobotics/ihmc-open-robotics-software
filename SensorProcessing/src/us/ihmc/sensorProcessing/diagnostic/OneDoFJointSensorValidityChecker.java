@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
@@ -15,7 +15,7 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
 
    private final boolean hasYoVariables;
 
-   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, DoubleYoVariable position, DoubleYoVariable velocity, DoubleYoVariable tau,
+   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
          YoVariableRegistry parentRegistry)
    {
       hasYoVariables = true;
@@ -101,7 +101,7 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       return positionChecker.variableCannotBeTrusted() || velocityChecker.variableCannotBeTrusted() || tauChecker.variableCannotBeTrusted();
    }
 
-   private void verifyYoVariableNames(String jointName, DoubleYoVariable position, DoubleYoVariable velocity, DoubleYoVariable tau)
+   private void verifyYoVariableNames(String jointName, YoDouble position, YoDouble velocity, YoDouble tau)
    {
       if (!position.getName().contains(jointName))
          throw new RuntimeException("The position variable: " + position.getName() + " may not belong to the joint: " + jointName);

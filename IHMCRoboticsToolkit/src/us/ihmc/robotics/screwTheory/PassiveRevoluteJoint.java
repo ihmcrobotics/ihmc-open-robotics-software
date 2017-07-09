@@ -2,9 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
@@ -20,9 +20,9 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-   public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis, boolean isPartOfClosedKinematicLoop)
+   public PassiveRevoluteJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis, boolean isPartOfClosedKinematicLoop)
    {
-      super(name, predecessor, beforeJointFrame, jointAxis);
+      super(name, predecessor, transformToParent, jointAxis);
       this.isPartOfClosedKinematicLoop = isPartOfClosedKinematicLoop;
    }
 

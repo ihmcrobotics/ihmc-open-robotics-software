@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -15,23 +15,23 @@ public class Step4Controller implements RobotController
    private YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
    private double deltaT;
    //private double ffComponent = -38.0 * 9.81; TODO CAREFULL!! Now both feet are on the ground so the FF term is different
-   private DoubleYoVariable distanceBetweenFeet;
-   private DoubleYoVariable desiredLegLength;
-   private DoubleYoVariable desiredFeetSpacing;
+   private YoDouble distanceBetweenFeet;
+   private YoDouble desiredLegLength;
+   private YoDouble desiredFeetSpacing;
 
    private PIDController controllerBodyZ;
    private PIDController controllerBodyX;
    private PIDController controllerLegPitch;
    private PIDController controllerKneeZ;
 
-   private DoubleYoVariable desiredBodyZ;
-   private DoubleYoVariable desiredBodyX;
-   private DoubleYoVariable desiredLegPitch;
-   private DoubleYoVariable desiredKneeZ;
-   private DoubleYoVariable desiredBodyPitch;
+   private YoDouble desiredBodyZ;
+   private YoDouble desiredBodyX;
+   private YoDouble desiredLegPitch;
+   private YoDouble desiredKneeZ;
+   private YoDouble desiredBodyPitch;
 
-   private DoubleYoVariable kneeTau;
-   private DoubleYoVariable hipTau;
+   private YoDouble kneeTau;
+   private YoDouble hipTau;
 
    public Step4Controller(Step4Robot rob, String name, double deltaT)
    {
@@ -42,33 +42,33 @@ public class Step4Controller implements RobotController
       controllerBodyZ = new PIDController("bodyZ", controllerRegistry);
       controllerBodyZ.setProportionalGain(50000.0);
       controllerBodyZ.setDerivativeGain(5000.0);
-      desiredBodyZ = new DoubleYoVariable("desiredBodyZ", controllerRegistry);
+      desiredBodyZ = new YoDouble("desiredBodyZ", controllerRegistry);
       desiredBodyZ.set(1.4);
 
       controllerBodyX = new PIDController("bodyX", controllerRegistry);
       controllerBodyX.setProportionalGain(1e3);
       controllerBodyX.setDerivativeGain(1e2);
-      desiredBodyX = new DoubleYoVariable("desiredBodyX", controllerRegistry);
+      desiredBodyX = new YoDouble("desiredBodyX", controllerRegistry);
       desiredBodyX.set(0.5);
 
       controllerLegPitch = new PIDController("legPitch", controllerRegistry);
       controllerLegPitch.setProportionalGain(500000.0); //50000 (previous value)
       controllerLegPitch.setDerivativeGain(50000.0);  //5000
-      desiredLegPitch = new DoubleYoVariable("desiredLegPitch", controllerRegistry);
+      desiredLegPitch = new YoDouble("desiredLegPitch", controllerRegistry);
       desiredLegPitch.set(0.4);
 
       controllerKneeZ = new PIDController("kneeZ", controllerRegistry);
       controllerKneeZ.setProportionalGain(15000.0);
       controllerKneeZ.setDerivativeGain(2000.0);
-      desiredKneeZ = new DoubleYoVariable("desiredKneeZ", controllerRegistry);
+      desiredKneeZ = new YoDouble("desiredKneeZ", controllerRegistry);
       desiredKneeZ.set(0.2);
 
-      hipTau = new DoubleYoVariable("hipTau", controllerRegistry);
-      kneeTau = new DoubleYoVariable("kneeTau", controllerRegistry);
-      distanceBetweenFeet = new DoubleYoVariable("distaceBetweenFeet", controllerRegistry);
-      desiredLegLength = new DoubleYoVariable("legLength", controllerRegistry);
-      desiredFeetSpacing = new DoubleYoVariable("desiredFeetSpacing", controllerRegistry);
-      desiredBodyPitch = new DoubleYoVariable("desiredBodyPitch", controllerRegistry);
+      hipTau = new YoDouble("hipTau", controllerRegistry);
+      kneeTau = new YoDouble("kneeTau", controllerRegistry);
+      distanceBetweenFeet = new YoDouble("distaceBetweenFeet", controllerRegistry);
+      desiredLegLength = new YoDouble("legLength", controllerRegistry);
+      desiredFeetSpacing = new YoDouble("desiredFeetSpacing", controllerRegistry);
+      desiredBodyPitch = new YoDouble("desiredBodyPitch", controllerRegistry);
       desiredBodyPitch.set(0.0);
    }
 

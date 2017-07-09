@@ -5,13 +5,14 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class FootControlHelper
 {
@@ -25,11 +26,13 @@ public class FootControlHelper
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FrameVector fullyConstrainedNormalContactVector;
-   private final BooleanYoVariable isDesiredCoPOnEdge;
+   private final YoBoolean isDesiredCoPOnEdge;
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+
+   private final ToeSlippingDetector toeSlippingDetector;
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry registry)
@@ -53,7 +56,7 @@ public class FootControlHelper
          partialFootholdControlModule = null;
       }
 
-      isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
+      isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
@@ -61,6 +64,18 @@ public class FootControlHelper
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, controllerToolbox, registry);
+
+      if (walkingControllerParameters.enableToeOffSlippingDetection())
+      {
+         double controlDT = controllerToolbox.getControlDT();
+         FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
+         toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, footSwitch, registry);
+         walkingControllerParameters.configureToeSlippingDetector(toeSlippingDetector);
+      }
+      else
+      {
+         toeSlippingDetector = null;
+      }
    }
 
    private final FramePoint2d desiredCoP = new FramePoint2d();
@@ -125,5 +140,10 @@ public class FootControlHelper
    public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
    {
       return legSingularityAndKneeCollapseAvoidanceControlModule;
+   }
+
+   public ToeSlippingDetector getToeSlippingDetector()
+   {
+      return toeSlippingDetector;
    }
 }

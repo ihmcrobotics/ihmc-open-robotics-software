@@ -30,7 +30,7 @@ public class CenterOfMassReferenceFrameTest
       int nJoints = 10;
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(nJoints);
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevator.getBodyFixedFrame());
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
       RigidBody floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
                                   RandomGeometry.nextVector3D(random));
 

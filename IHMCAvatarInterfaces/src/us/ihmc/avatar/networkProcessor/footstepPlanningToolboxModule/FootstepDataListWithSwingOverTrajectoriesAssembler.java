@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,12 +16,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -34,7 +33,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private final FramePose stanceFootPose;
    private final FramePose swingStartPose;
    private final FramePose swingEndPose;
-   private final ConvexPolygon2d partialFootholdPolygon;
+   private final ConvexPolygon2D partialFootholdPolygon;
 
    private static final double maxSwingSpeed = 1.0;
 
@@ -50,7 +49,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       stanceFootPose = new FramePose();
       swingStartPose = new FramePose();
       swingEndPose = new FramePose();
-      partialFootholdPolygon = new ConvexPolygon2d();
+      partialFootholdPolygon = new ConvexPolygon2D();
    }
 
    public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()
@@ -79,14 +78,13 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
                                                                            new Quaternion(swingEndPose.getOrientation()));
-         footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
-         footstepDataMessage.setTrajectoryWaypoints(waypoints);
+         footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (simpleFootstep.hasFoothold())
          {
@@ -139,19 +137,17 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          }
 
          Footstep footstep = footstepList.get(i);
-
-         footstep.getSolePose(swingEndPose);
+         footstep.getPose(swingEndPose);
 
          FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
                                                                            new Quaternion(swingEndPose.getOrientation()));
-         footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
-         footstepDataMessage.setTrajectoryWaypoints(waypoints);
+         footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {

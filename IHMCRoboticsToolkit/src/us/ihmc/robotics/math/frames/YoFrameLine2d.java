@@ -1,36 +1,36 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
 public class YoFrameLine2d extends AbstractReferenceFrameHolder
 {
-   private final DoubleYoVariable pointX, pointY, vectorX, vectorY; // This is where the data is stored. All operations must act on these numbers.
+   private final YoDouble pointX, pointY, vectorX, vectorY; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
    protected FrameLine2d frameLine; // This is only for assistance. The data is stored in the YoVariables, not in here!
 
    public YoFrameLine2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
    {
-      pointX = new DoubleYoVariable(namePrefix + "PointX" + nameSuffix, registry);
-      pointY = new DoubleYoVariable(namePrefix + "PointY" + nameSuffix, registry);
-      vectorX = new DoubleYoVariable(namePrefix + "VectorX" + nameSuffix, registry);
-      vectorY = new DoubleYoVariable(namePrefix + "VectorY" + nameSuffix, registry);
+      pointX = new YoDouble(namePrefix + "PointX" + nameSuffix, registry);
+      pointY = new YoDouble(namePrefix + "PointY" + nameSuffix, registry);
+      vectorX = new YoDouble(namePrefix + "VectorX" + nameSuffix, registry);
+      vectorY = new YoDouble(namePrefix + "VectorY" + nameSuffix, registry);
 
       this.referenceFrame = frame;
    }
 
-   public YoFrameLine2d(DoubleYoVariable pointX, DoubleYoVariable pointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, ReferenceFrame frame)
+   public YoFrameLine2d(YoDouble pointX, YoDouble pointY, YoDouble vectorX, YoDouble vectorY, ReferenceFrame frame)
    {
       this.pointX = pointX;
       this.pointY = pointY;
@@ -60,22 +60,22 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
       return vectorY.getDoubleValue();
    }
 
-   public DoubleYoVariable getYoPointX()
+   public YoDouble getYoPointX()
    {
       return pointX;
    }
 
-   public DoubleYoVariable getYoPointY()
+   public YoDouble getYoPointY()
    {
       return pointY;
    }
 
-   public DoubleYoVariable getYoVectorX()
+   public YoDouble getYoVectorX()
    {
       return vectorX;
    }
 
-   public DoubleYoVariable getYoVectorY()
+   public YoDouble getYoVectorY()
    {
       return vectorY;
    }
@@ -100,12 +100,12 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
 
       frameLine2d.checkReferenceFrameMatch(referenceFrame);
 
-      Line2d line = frameLine2d.getLine2d();
+      Line2D line = frameLine2d.getLine2d();
 
       pointX.set(line.getPoint().getX());
       pointY.set(line.getPoint().getY());
-      vectorX.set(line.getNormalizedVector().getX());
-      vectorY.set(line.getNormalizedVector().getY());
+      vectorX.set(line.getDirection().getX());
+      vectorY.set(line.getDirection().getY());
    }
 
    public FrameLine2d getFrameLine2d()
@@ -160,27 +160,6 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
       putYoValuesIntoFrameLine();
 
       return frameLine.distance(point);
-   }
-
-   public double distance(FrameLine2d line)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(line);
-   }
-
-   public double distance(FrameLineSegment2d secondLineSegment)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(secondLineSegment);
-   }
-
-   public double distance(FrameConvexPolygon2d convexPolygon)
-   {
-      putYoValuesIntoFrameLine();
-
-      return frameLine.distance(convexPolygon);
    }
 
    protected void putYoValuesIntoFrameLine()

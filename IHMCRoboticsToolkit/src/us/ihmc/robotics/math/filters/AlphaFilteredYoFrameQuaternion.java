@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements ProcessingYoVariable
 {
    private final YoFrameQuaternion unfilteredQuaternion;
-   private final DoubleYoVariable alpha;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoDouble alpha;
+   private final YoBoolean hasBeenCalled;
    private final Quaternion qMeasured = new Quaternion();
    private final Quaternion qPreviousFiltered = new Quaternion();
    private final Quaternion qNewFiltered = new Quaternion();
@@ -19,29 +19,29 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, double alpha,
          YoVariableRegistry registry)
    {
-      this(namePrefix, nameSuffix, unfilteredQuaternion, new DoubleYoVariable(namePrefix + "Alpha", registry), registry);
+      this(namePrefix, nameSuffix, unfilteredQuaternion, new YoDouble(namePrefix + "Alpha", registry), registry);
       this.setAlpha(alpha);
    }
 
-   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, DoubleYoVariable alpha, ReferenceFrame referenceFrame,
+   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoDouble alpha, ReferenceFrame referenceFrame,
          YoVariableRegistry registry)
    {
       this(namePrefix, nameSuffix, null, alpha, referenceFrame, registry);
    }
 
-   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleYoVariable alpha,
+   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, YoDouble alpha,
          YoVariableRegistry registry)
    {
       this(namePrefix, nameSuffix, unfilteredQuaternion, alpha, unfilteredQuaternion.getReferenceFrame(), registry);
    }
 
-   private AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleYoVariable alpha,
+   private AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, YoDouble alpha,
          ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
       this.unfilteredQuaternion = unfilteredQuaternion;
       this.alpha = alpha;
-      this.hasBeenCalled = new BooleanYoVariable(namePrefix + nameSuffix + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
    }
 
    @Override

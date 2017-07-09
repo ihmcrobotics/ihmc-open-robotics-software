@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -151,7 +151,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
    {
       AxisAngle orientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), yaw);
       RigidBodyTransform blockPose = new RigidBodyTransform(orientation, position);
-      Box3d block = new Box3d(blockPose, dimensions.getX(), dimensions.getY(), dimensions.getZ());
+      Box3D block = new Box3D(blockPose, dimensions.getX(), dimensions.getY(), dimensions.getZ());
       terrainObject.addTerrainObject(new RotatableBoxTerrainObject(block, color));
    }
 

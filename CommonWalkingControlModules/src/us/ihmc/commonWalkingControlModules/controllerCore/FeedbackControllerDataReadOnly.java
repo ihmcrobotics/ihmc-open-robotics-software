@@ -62,6 +62,37 @@ public interface FeedbackControllerDataReadOnly
    }
 
    /**
+    * Retrieves if possible the position data about the center of mass.
+    * <p>
+    * If no feedback controller has used the requested data, it will not be available in which case
+    * the method returns {@code false}.
+    * </p>
+    * 
+    * @param positionDataToPack the {@link FramePoint} in which the position data is stored. Data is
+    *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
+    * @param type whether the current or desired position is requested, the other values in
+    *           {@link Type} are not applicable.
+    * @return whether the data is available or not.
+    */
+   boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type);
+
+   /**
+    * Retrieves if possible the vector data about the center of mass.
+    * <p>
+    * If no feedback controller has used the requested data, it will not be available in which case
+    * the method returns {@code false}.
+    * </p>
+    * 
+    * @param vectorDataToPack the {@link FrameVector} in which the vector data is stored. Data is
+    *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
+    * @param type specifies the data type requested. Look up the options available in {@link Type}.
+    * @param space specifies the physical quantity requested. Look up the options available in
+    *           {@link Space}.
+    * @return whether the data is available or not.
+    */
+   boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space);
+
+   /**
     * Retrieves if possible the position data about a specific end-effector.
     * <p>
     * If no feedback controller has used the requested data, it will not be available in which case

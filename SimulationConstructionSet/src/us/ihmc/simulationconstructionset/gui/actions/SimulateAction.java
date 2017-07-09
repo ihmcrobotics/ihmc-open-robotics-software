@@ -1,34 +1,28 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-
 import us.ihmc.simulationconstructionset.commands.SimulateCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
 
-public class SimulateAction extends AbstractAction
+@SuppressWarnings("serial")
+public class SimulateAction extends SCSAction
 {
-   private static final long serialVersionUID = 2609814986889034283L;
-
    private final SimulateCommandExecutor executor;
 
    public SimulateAction(SimulateCommandExecutor listener)
    {
-      super("Simulate");
-      this.executor = listener;
+      super("Simulate",
+              "icons/Simulate6.png",
+              KeyEvent.VK_S,
+              "Simulate",
+              "Start simulating."
+      );
 
-      String iconFilename = "icons/YoSimulate32.gif";
-      int shortKey = KeyEvent.VK_S;
-      String longDescription = "Start simulating.";
-      String shortDescription = "Simulate";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.executor = listener;
    }
 
    @Override
-   public void actionPerformed(ActionEvent actionEvent)
+   public void doAction()
    {
       executor.simulate();
    }

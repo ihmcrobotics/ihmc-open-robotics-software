@@ -31,9 +31,9 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
 
    protected static final double epsilon = 1e-10;
 
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame", false, true, true);
+   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
 
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
+   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
 
    protected RigidBodyTransform theFrameToChildFrame;
 
@@ -120,7 +120,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    public final void setUp() throws Exception
    {
       theFrameToChildFrame = new RigidBodyTransform();
-      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
+      childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

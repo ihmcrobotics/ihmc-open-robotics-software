@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
@@ -15,7 +14,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -45,7 +44,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
    // ID
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+   private final ReferenceFrame elevatorFrame;
    private FramePoint bodyPosition = new FramePoint();
 
    private final Vector3D jointAxesPinJoints = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
@@ -84,7 +83,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    Vector3D comOffsetFoot = new Vector3D(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
-   public DoubleYoVariable qd_x;
+   public YoDouble qd_x;
    private double initialBodyHeight = RobotParameters.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters.LENGTHS.get(LinkNames.LOWER_LINK) - 0.1 + footZ - 0.029 + 0.024;
 
    /**
@@ -96,9 +95,10 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       super("Robot");
 
       /****************** ID ROBOT ***********************/
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      elevatorFrame = elevator.getBodyFixedFrame();
 
-      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator, elevatorFrame);
+      bodyJointID = new SixDoFJoint(JointNames.BODY.getName(), elevator);
       createAndAttachBodyRB(LinkNames.BODY_LINK, bodyJointID);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -208,7 +208,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
     */
    public void setInitialVelocity()
    {
-      qd_x = (DoubleYoVariable) getVariable("qd_x");
+      qd_x = (YoDouble) getVariable("qd_x");
       qd_x.set(0.8); 
    }
    
@@ -410,7 +410,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
    public void getBodyPitch(Quaternion rotationToPack)
    {
-      bodyJointID.getFrameAfterJoint().getRotation(rotationToPack);
+      bodyJointID.getRotation(rotationToPack);
    }
 
    public void getBodyLinearVel(Vector3D linearVelocityToPack)

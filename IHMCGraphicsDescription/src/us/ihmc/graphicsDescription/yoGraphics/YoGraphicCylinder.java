@@ -7,8 +7,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 {
-   private DoubleYoVariable baseX, baseY, baseZ, x, y, z;
+   private YoDouble baseX, baseY, baseZ, x, y, z;
    private double lineThickness;
    private final AppearanceDefinition appearance;
 
@@ -37,14 +37,14 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       }
    }
 
-   public YoGraphicCylinder(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-         DoubleYoVariable z, AppearanceDefinition appearance)
+   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
+         YoDouble z, AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, appearance, -1.0);
    }
 
-   public YoGraphicCylinder(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-         DoubleYoVariable z, AppearanceDefinition appearance, double lineThickness)
+   public YoGraphicCylinder(String name, YoDouble baseX, YoDouble baseY, YoDouble baseZ, YoDouble x, YoDouble y,
+         YoDouble z, AppearanceDefinition appearance, double lineThickness)
    {
       super(name);
 
@@ -149,7 +149,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
    public YoVariable<?>[] getVariables()
    {
-      return new DoubleYoVariable[] { baseX, baseY, baseZ, x, y, z };
+      return new YoDouble[] { baseX, baseY, baseZ, x, y, z };
    }
 
    public double[] getConstants()

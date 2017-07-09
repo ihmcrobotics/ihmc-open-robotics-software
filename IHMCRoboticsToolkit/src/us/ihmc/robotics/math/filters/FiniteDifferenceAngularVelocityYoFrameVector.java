@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -15,7 +15,7 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
    private final YoFrameQuaternion orientation;
    private final YoFrameQuaternion orientationPreviousValue;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
    private final RotationMatrix currentOrientationMatrix = new RotationMatrix();
    private final RotationMatrix previousOrientationMatrix = new RotationMatrix();
@@ -43,7 +43,7 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
       orientation = orientationToDifferentiate;
       orientationPreviousValue = new YoFrameQuaternion(namePrefix + "_previous", referenceFrame, registry);
 
-      hasBeenCalled = new BooleanYoVariable(namePrefix + "HasBeenCalled", registry);
+      hasBeenCalled = new YoBoolean(namePrefix + "HasBeenCalled", registry);
       hasBeenCalled.set(false);
    }
 

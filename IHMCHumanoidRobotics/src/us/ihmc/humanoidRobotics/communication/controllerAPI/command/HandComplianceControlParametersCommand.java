@@ -8,8 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandComplianceControlParametersCommand
-      implements Command<HandComplianceControlParametersCommand, HandComplianceControlParametersMessage>
+public class HandComplianceControlParametersCommand implements Command<HandComplianceControlParametersCommand, HandComplianceControlParametersMessage>
 {
    private RobotSide robotSide;
    private boolean enable = false;

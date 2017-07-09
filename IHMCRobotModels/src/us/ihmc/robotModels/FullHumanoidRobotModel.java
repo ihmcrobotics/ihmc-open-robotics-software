@@ -1,13 +1,12 @@
 package us.ihmc.robotModels;
 
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -21,7 +20,7 @@ public interface FullHumanoidRobotModel extends FullRobotModel
     * @param robotSide Refers to which leg the frame's joint belongs to (assuming there is only one left leg and one right leg).
     * @param legJointName Refers to which joint the frame is attached to.
     */
-   public abstract ReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName);
+   public abstract MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName);
 
    /**
     * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
@@ -66,17 +65,14 @@ public interface FullHumanoidRobotModel extends FullRobotModel
    /**
     * This methods returns the frame located right after the parent joint of this end-effector (see {@link FullHumanoidRobotModel#getEndEffector(RobotSide, LimbName)}).
     */
-   public abstract ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName);
+   public abstract MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName);
 
    /**
     * Returns a control frame attached to the right or left hand that the controller uses to control the hand in taskspace.
     * @param robotSide
     * @return
     */
-   public abstract ReferenceFrame getHandControlFrame(RobotSide robotSide);
-
-   // TODO This methods is currently for the DRCDemo0 in BoxMovingHighLevelHumanoidController. We should get rid of it.
-   public abstract FramePoint getStaticWristToFingerOffset(RobotSide robotSide, FingerName fingerName); // FIXME Should be moved to somewhere where current joint data may be used once we start grasping
+   public abstract MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
 
    /**
     * Returns the left or right sole reference frame.
@@ -85,9 +81,9 @@ public interface FullHumanoidRobotModel extends FullRobotModel
     * @param robotSide
     * @return
     */
-   public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
+   public abstract MovingReferenceFrame getSoleFrame(RobotSide robotSide);
 
-   public abstract SideDependentList<ReferenceFrame> getSoleFrames();
+   public abstract SideDependentList<MovingReferenceFrame> getSoleFrames();
 
    public abstract void setJointAngles(RobotSide side, LimbName limb, double[] q);
 

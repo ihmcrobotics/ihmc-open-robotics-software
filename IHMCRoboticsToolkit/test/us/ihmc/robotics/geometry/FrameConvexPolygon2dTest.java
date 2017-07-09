@@ -4,13 +4,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameConvexPolygon2dTest
 {
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private ConvexPolygon2d convexPolygon2d;
+   private ConvexPolygon2D convexPolygon2d;
    private FrameConvexPolygon2d frameConvexPolygon2d;
 
    @Before
@@ -27,7 +28,7 @@ public class FrameConvexPolygon2dTest
       
    }
    
-   private ConvexPolygon2d createSomeValidPolygon()
+   private ConvexPolygon2D createSomeValidPolygon()
    {
       double[][] polygonPoints = new double[][]
             {
@@ -35,7 +36,7 @@ public class FrameConvexPolygon2dTest
                {0.12219695435431865, -0.041946248489056696}, {0.12163937361471142, -0.1435447184761526}, {-0.05107802536335154, -0.14259683121882027}
             };
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d(polygonPoints);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(polygonPoints);
       return polygon;
    }
 

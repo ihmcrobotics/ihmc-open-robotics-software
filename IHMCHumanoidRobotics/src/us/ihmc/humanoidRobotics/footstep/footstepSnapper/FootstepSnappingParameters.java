@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 
 /**
  * Created by agrabertilton on 1/20/15.
  */
 public class FootstepSnappingParameters
 {
-   protected ConvexPolygon2d collisionPolygon;
-   protected ConvexPolygon2d supportPolygon;
+   protected ConvexPolygon2D collisionPolygon;
+   protected ConvexPolygon2D supportPolygon;
    protected double boundingSquareSizeLength;
    protected double maxAngle;
    protected double minArea;
@@ -20,11 +20,11 @@ public class FootstepSnappingParameters
    private double distanceAdjustment = 0;
    private double angleAdjustment = 0;
 
-   public FootstepSnappingParameters(ConvexPolygon2d collisionPolygon, ConvexPolygon2d supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance){
+   public FootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance){
       this(collisionPolygon, supportPolygon, boundingSquareSizeLength, maxAngle, minArea, zDistanceTolerance, 0.0, 0.0, 1);
    }
 
-   public FootstepSnappingParameters(ConvexPolygon2d collisionPolygon, ConvexPolygon2d supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance, double distanceAdjustment, double angleAdjustment, int badnumberOfPointsthreshold){
+   public FootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance, double distanceAdjustment, double angleAdjustment, int badnumberOfPointsthreshold){
       this.collisionPolygon = collisionPolygon;
       this.supportPolygon = supportPolygon;
       this.boundingSquareSizeLength = boundingSquareSizeLength;
@@ -36,11 +36,11 @@ public class FootstepSnappingParameters
       this.badnumberOfPointsthreshold = badnumberOfPointsthreshold;
    }
 
-   public ConvexPolygon2d getCollisionPolygon()
+   public ConvexPolygon2D getCollisionPolygon()
    {
       return collisionPolygon;
    }
-   public ConvexPolygon2d getSupportPolygon()
+   public ConvexPolygon2D getSupportPolygon()
    {
       return supportPolygon;
    }

@@ -42,32 +42,25 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       packetRouter = new PacketRouter<>(PacketDestination.class);
-      try
-      {
-         setupControllerCommunicator(params);
-         setupUiModule(params);
-         setupSensorModule(robotModel, params);
-         setupBehaviorModule(robotModel, params);
-         setupHandModules(robotModel, params);
-         setupRosModule(robotModel, params);
-         setupROSAPIModule(params);
-         setupMocapModule(robotModel, params);
-         setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
-         setupMultisenseManualTestModule(robotModel, params);
-         setupDrillDetectionModule(params);
-         setupKinematicsToolboxModule(robotModel, params);
-         setupFootstepPlanningToolboxModule(robotModel, params);
-         addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
-         addTextToSpeechEngine(params);
-         setupRobotEnvironmentAwarenessModule(params);
-         setupHeightQuadTreeToolboxModule(robotModel, params);
-         setupLidarScanLogger();
-         setupRemoteObjectDetectionFeedbackEndpoint(params);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      tryToStartModule(() -> setupControllerCommunicator(params));
+      tryToStartModule(() -> setupUiModule(params));
+      tryToStartModule(() -> setupSensorModule(robotModel, params));
+      tryToStartModule(() -> setupBehaviorModule(robotModel, params));
+      tryToStartModule(() -> setupHandModules(robotModel, params));
+      tryToStartModule(() -> setupRosModule(robotModel, params));
+      tryToStartModule(() -> setupROSAPIModule(params));
+      tryToStartModule(() -> setupMocapModule(robotModel, params));
+      tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
+      tryToStartModule(() -> setupMultisenseManualTestModule(robotModel, params));
+      tryToStartModule(() -> setupDrillDetectionModule(params));
+      tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
+      tryToStartModule(() -> addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts()));
+      tryToStartModule(() -> addTextToSpeechEngine(params));
+      tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params));
+      tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupLidarScanLogger());
+      tryToStartModule(() -> setupRemoteObjectDetectionFeedbackEndpoint(params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -438,5 +431,23 @@ public class DRCNetworkProcessor
       {
          PrintTools.debug(this, methodName + ": " + destination);
       }
+   }
+
+   private void tryToStartModule(ModuleStarter runnable)
+   {
+      try
+      {
+         runnable.startModule();
+      }
+      catch (RuntimeException | IOException e)
+      {
+         PrintTools.error(this, "Failed to start a module in the network processor, stack trace:");
+         e.printStackTrace();
+      }
+   }
+
+   private interface ModuleStarter
+   {
+      void startModule() throws IOException;
    }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableCylinderRobot;
@@ -293,7 +293,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] { (cinderBlockLength - rampRise) / 2, 0 }, yawDegrees);
       blockSupportLocation.setTranslation(new Vector3D(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2
             + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
             cinderBlockAppearance);
       combinedTerrainObject.addTerrainObject(newBox);
 
@@ -320,7 +320,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
       location.setTranslation(new Vector3D(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
-      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3D(location, cinderBlockLength, cinderBlockWidth,
             cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
@@ -370,7 +370,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps,
+      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3D(location, cinderBlockLength + overlapToPreventGaps,
             cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps), app);
       combinedTerrainObject.addTerrainObject(newBox);
 

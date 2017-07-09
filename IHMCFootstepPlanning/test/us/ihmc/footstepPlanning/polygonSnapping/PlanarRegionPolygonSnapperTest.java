@@ -11,11 +11,11 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -26,15 +26,15 @@ public class PlanarRegionPolygonSnapperTest
    @Test(timeout = 30000)
    public void testSnapPolygonToFlatPlanarRegion()
    {
-      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
       polygonToSnap.addVertex(1.0, 1.0);
       polygonToSnap.addVertex(-1.0, 1.0);
       polygonToSnap.addVertex(-1.0, -1.0);
       polygonToSnap.addVertex(1.0, -1.0);
       polygonToSnap.update();
 
-      ArrayList<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d planarRegionPolygon = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planarRegionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
       planarRegionPolygon.addVertex(10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, -10.0);
@@ -66,15 +66,15 @@ public class PlanarRegionPolygonSnapperTest
    @Test(timeout = 30000)
    public void testSnapPolygonToLargeRotatedRegion()
    {
-      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
       polygonToSnap.addVertex(1.0, 1.0);
       polygonToSnap.addVertex(-1.0, 1.0);
       polygonToSnap.addVertex(-1.0, -1.0);
       polygonToSnap.addVertex(1.0, -1.0);
       polygonToSnap.update();
 
-      ArrayList<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d planarRegionPolygon = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planarRegionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
       planarRegionPolygon.addVertex(10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, -10.0);
@@ -115,15 +115,15 @@ public class PlanarRegionPolygonSnapperTest
    @Test(timeout = 30000)
    public void testYawOfRegionDoesNotYawSnappedPolygon()
    {
-      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
       polygonToSnap.addVertex(1.0, 1.0);
       polygonToSnap.addVertex(-1.0, 1.0);
       polygonToSnap.addVertex(-1.0, -1.0);
       polygonToSnap.addVertex(1.0, -1.0);
       polygonToSnap.update();
 
-      ArrayList<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d planarRegionPolygon = new ConvexPolygon2d();
+      ArrayList<ConvexPolygon2D> planarRegionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
       planarRegionPolygon.addVertex(10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, 10.0);
       planarRegionPolygon.addVertex(-10.0, -10.0);

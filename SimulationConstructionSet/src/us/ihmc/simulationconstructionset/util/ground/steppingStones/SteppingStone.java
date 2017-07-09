@@ -3,12 +3,12 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,28 +19,28 @@ public class SteppingStone
 
    private final double baseZ;
    private final double height;
-   private final ConvexPolygon2d convexPolygon2d;
-   private final ConvexPolygon2d shrunkenPolygon;
+   private final ConvexPolygon2D convexPolygon2d;
+   private final ConvexPolygon2D shrunkenPolygon;
 
-   private final ConvexPolygon2d polygonToShrink;
+   private final ConvexPolygon2D polygonToShrink;
 
-   public SteppingStone(String name, double baseZ, double height, ConvexPolygon2d convexPolygon2d, ConvexPolygon2d footPolygon)
+   public SteppingStone(String name, double baseZ, double height, ConvexPolygon2D convexPolygon2d, ConvexPolygon2D footPolygon)
    {
       this.name = name;
       this.baseZ = baseZ;
       this.height = height;
-      this.convexPolygon2d = new ConvexPolygon2d(convexPolygon2d);
-      polygonToShrink = new ConvexPolygon2d(footPolygon);
+      this.convexPolygon2d = new ConvexPolygon2D(convexPolygon2d);
+      polygonToShrink = new ConvexPolygon2D(footPolygon);
       shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
    }
 
-   public SteppingStone(String name, double baseZ, double height, ArrayList<Point2D> points, ConvexPolygon2d footPolygon)
+   public SteppingStone(String name, double baseZ, double height, ArrayList<Point2D> points, ConvexPolygon2D footPolygon)
    {
       this.name = name;
       this.baseZ = baseZ;
       this.height = height;
-      convexPolygon2d = new ConvexPolygon2d(points);
-      polygonToShrink = new ConvexPolygon2d(footPolygon);
+      convexPolygon2d = new ConvexPolygon2D(points);
+      polygonToShrink = new ConvexPolygon2D(footPolygon);
       shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
    }
 
@@ -54,12 +54,12 @@ public class SteppingStone
       return height;
    }
 
-   public ConvexPolygon2d getConvexPolygon2d()
+   public ConvexPolygon2D getConvexPolygon2d()
    {
       return convexPolygon2d;
    }
 
-   public ConvexPolygon2d getShrunkenConvexPolygon2d()
+   public ConvexPolygon2D getShrunkenConvexPolygon2d()
    {
       return shrunkenPolygon;
    }
@@ -92,17 +92,17 @@ public class SteppingStone
    }
 
    public static SteppingStone generateRandomCicularStone(String name, Random random, double xCenter, double yCenter, double baseZ, double height,
-           double radius, ConvexPolygon2d shrunkenPolygon)
+           double radius, ConvexPolygon2D shrunkenPolygon)
    {
       ArrayList<Point2D> points = generateRandomCircularPoints(xCenter, yCenter, radius, 40);
-      ConvexPolygon2d polygon2d = new ConvexPolygon2d(points);
+      ConvexPolygon2D polygon2d = new ConvexPolygon2D(points);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, polygon2d, shrunkenPolygon);
 
       return steppingStone;
    }
 
    public static SteppingStone createRectangularStone(String name, double xMin, double xMax, double yMin, double yMax, double baseZ, double height,
-           ConvexPolygon2d shrunkenPolygon)
+           ConvexPolygon2D shrunkenPolygon)
    {
       ArrayList<Point2D> points = generateRectangularPoints(xMin, xMax, yMin, yMax);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);
@@ -112,7 +112,7 @@ public class SteppingStone
 
 
    public static SteppingStone generateRandomPolygonalStone(String name, Random random, double xCenter, double yCenter, double baseZ, double height,
-           double radius, int numSides, ConvexPolygon2d shrunkenPolygon)
+           double radius, int numSides, ConvexPolygon2D shrunkenPolygon)
    {
       ArrayList<Point2D> points = generateRandomPolygonalPoints(random, xCenter, yCenter, radius, numSides);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);
@@ -121,7 +121,7 @@ public class SteppingStone
    }
 
    public static SteppingStone generateRegularPolygonalStone(String name, double xCenter, double yCenter, double baseZ, double height, double radius,
-           int numSides, ConvexPolygon2d shrunkenPolygon)
+           int numSides, ConvexPolygon2D shrunkenPolygon)
    {
       ArrayList<Point2D> points = generateRegularPolygonalPoints(xCenter, yCenter, radius, numSides);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);

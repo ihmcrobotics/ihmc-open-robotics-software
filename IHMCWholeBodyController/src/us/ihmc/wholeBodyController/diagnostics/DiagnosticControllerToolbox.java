@@ -5,8 +5,8 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
@@ -24,7 +24,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 public class DiagnosticControllerToolbox
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    private final DiagnosticParameters diagnosticParameters;
 
@@ -44,7 +44,7 @@ public class DiagnosticControllerToolbox
    private final SensorOutputMapReadOnly sensorOutputMap;
 
    public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
-         WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime, double dt,
+         WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
          DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
@@ -83,7 +83,7 @@ public class DiagnosticControllerToolbox
       return walkingControllerParameters;
    }
 
-   public DoubleYoVariable getYoTime()
+   public YoDouble getYoTime()
    {
       return yoTime;
    }

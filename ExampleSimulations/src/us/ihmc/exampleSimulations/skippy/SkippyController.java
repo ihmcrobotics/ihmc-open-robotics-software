@@ -16,9 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -78,15 +78,15 @@ public class SkippyController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
-   // private DoubleYoVariable q_foot_X, q_hip, qHipIncludingOffset, qd_foot_X,
+   // private YoDouble q_foot_X, q_hip, qHipIncludingOffset, qd_foot_X,
    // qd_hip, qd_shoulder;
-   private final DoubleYoVariable k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angleToCoMInXZPlane, angularVelocityToCoMYZPlane,
+   private final YoDouble k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angleToCoMInXZPlane, angularVelocityToCoMYZPlane,
          angularVelocityToCoMXZPlane; // controller
    // gain
    // parameters
-   private final DoubleYoVariable planarDistanceYZPlane, planarDistanceXZPlane;
+   private final YoDouble planarDistanceYZPlane, planarDistanceXZPlane;
 
-   private final DoubleYoVariable alphaAngularVelocity;
+   private final YoDouble alphaAngularVelocity;
    private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
    private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
@@ -108,13 +108,13 @@ public class SkippyController implements RobotController
 
    private final YoFrameVector icpToFootError = new YoFrameVector("icpToFootError", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector comToFootError = new YoFrameVector("comToFootError", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable w0 = new DoubleYoVariable("fixedW0", registry);
+   private final YoDouble w0 = new YoDouble("fixedW0", registry);
 
    private final YoFrameVector tauShoulderFromReaction = new YoFrameVector("tauShoulderJoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector tauHipFromReaction = new YoFrameVector("tauHipJoint", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable q_d_hip = new DoubleYoVariable("q_d_hip", registry);
-   private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
+   private final YoDouble q_d_hip = new YoDouble("q_d_hip", registry);
+   private final YoDouble q_d_shoulder = new YoDouble("q_d_shoulder", registry);
 
    private final YoFramePoint hipJointPosition = new YoFramePoint("hipJointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipJointUnitVector = new YoFrameVector("hipJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
@@ -134,26 +134,26 @@ public class SkippyController implements RobotController
    private final YoFramePoint cmpFromParameterizedReaction = new YoFramePoint("cmpFromParametrizedReaction", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("footLocation", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
-   private final DoubleYoVariable robotWeight = new DoubleYoVariable("robotWeight", registry);
-   private final DoubleYoVariable qHipIncludingOffset = new DoubleYoVariable("qHipIncludingOffset", registry);
-   private final DoubleYoVariable qDHipIncludingOffset = new DoubleYoVariable("qDHipIncludingOffset", registry);
-   private final DoubleYoVariable qDShoulderIncludingOffset = new DoubleYoVariable("qDShoulderIncludingOffset", registry);
-   private final DoubleYoVariable qd_hip = new DoubleYoVariable("qd_hip", registry);
-   private final DoubleYoVariable qShoulderIncludingOffset = new DoubleYoVariable("qShoulderIncludingOffset", registry);
-   private final DoubleYoVariable qd_shoulder = new DoubleYoVariable("qd_shoulder", registry);
+   private final YoDouble robotMass = new YoDouble("robotMass", registry);
+   private final YoDouble robotWeight = new YoDouble("robotWeight", registry);
+   private final YoDouble qHipIncludingOffset = new YoDouble("qHipIncludingOffset", registry);
+   private final YoDouble qDHipIncludingOffset = new YoDouble("qDHipIncludingOffset", registry);
+   private final YoDouble qDShoulderIncludingOffset = new YoDouble("qDShoulderIncludingOffset", registry);
+   private final YoDouble qd_hip = new YoDouble("qd_hip", registry);
+   private final YoDouble qShoulderIncludingOffset = new YoDouble("qShoulderIncludingOffset", registry);
+   private final YoDouble qd_shoulder = new YoDouble("qd_shoulder", registry);
 
    private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private final DoubleYoVariable z0 = new DoubleYoVariable("z0", registry);
-   private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
+   private final YoDouble z0 = new YoDouble("z0", registry);
+   private final YoDouble kCapture = new YoDouble("kCapture", registry);
 
-   private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
-   private final EnumYoVariable<SkippyPlaneControlMode> hipPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("hipPlaneControlMode", registry,
+   private final YoEnum<SkippyToDo> skippyToDo = new YoEnum<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
+   private final YoEnum<SkippyPlaneControlMode> hipPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("hipPlaneControlMode", registry,
                                                                                                                          SkippyPlaneControlMode.class);
-   private final EnumYoVariable<SkippyPlaneControlMode> shoulderPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("shoulderPlaneControlMode",
+   private final YoEnum<SkippyPlaneControlMode> shoulderPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("shoulderPlaneControlMode",
                                                                                                                               registry,
                                                                                                                               SkippyPlaneControlMode.class);
    private String name;
@@ -197,14 +197,14 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
       forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
-      k1 = new DoubleYoVariable("k1", registry);
-      k2 = new DoubleYoVariable("k2", registry);
-      k3 = new DoubleYoVariable("k3", registry);
-      k4 = new DoubleYoVariable("k4", registry);
-      k5 = new DoubleYoVariable("k5", registry);
-      k6 = new DoubleYoVariable("k6", registry);
-      k7 = new DoubleYoVariable("k7", registry);
-      k8 = new DoubleYoVariable("k8", registry);
+      k1 = new YoDouble("k1", registry);
+      k2 = new YoDouble("k2", registry);
+      k3 = new YoDouble("k3", registry);
+      k4 = new YoDouble("k4", registry);
+      k5 = new YoDouble("k5", registry);
+      k6 = new YoDouble("k6", registry);
+      k7 = new YoDouble("k7", registry);
+      k8 = new YoDouble("k8", registry);
 
       skippyToDo.set(SkippyToDo.JUMP_FORWARD);//skippyToDo.set(SkippyToDo.BALANCE);
       hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
@@ -221,14 +221,14 @@ public class SkippyController implements RobotController
          qd_shoulder.set(0.0);
       }
 
-      planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
-      planarDistanceXZPlane = new DoubleYoVariable("planarDistanceXZPlane", registry);
-      angleToCoMInYZPlane = new DoubleYoVariable("angleToCoMYZPlane", registry);
-      angleToCoMInXZPlane = new DoubleYoVariable("angleToCoMXZPlane", registry);
-      angularVelocityToCoMYZPlane = new DoubleYoVariable("angularVelocityToCoMYZPlane", registry);
-      angularVelocityToCoMXZPlane = new DoubleYoVariable("angularVelocityToCoMXZPlane", registry);
+      planarDistanceYZPlane = new YoDouble("planarDistanceYZPlane", registry);
+      planarDistanceXZPlane = new YoDouble("planarDistanceXZPlane", registry);
+      angleToCoMInYZPlane = new YoDouble("angleToCoMYZPlane", registry);
+      angleToCoMInXZPlane = new YoDouble("angleToCoMXZPlane", registry);
+      angularVelocityToCoMYZPlane = new YoDouble("angularVelocityToCoMYZPlane", registry);
+      angularVelocityToCoMXZPlane = new YoDouble("angularVelocityToCoMXZPlane", registry);
 
-      alphaAngularVelocity = new DoubleYoVariable("alphaAngularVelocity", registry);
+      alphaAngularVelocity = new YoDouble("alphaAngularVelocity", registry);
       alphaAngularVelocity.set(0.8);
       angularVelocityToCoMYZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT,
                                                                     registry);
@@ -474,7 +474,7 @@ public class SkippyController implements RobotController
     * Torque on joint from reaction on foot
     */
    public void tauOnJointFromReactionOnCmp(YoFrameVector jointUnitVector, YoFrameVector jointToFootPositionVector, YoFrameVector footReaction,
-                                           YoFrameVector tauOnJointToPack, DoubleYoVariable tauOnJointAxisToPack)
+                                           YoFrameVector tauOnJointToPack, YoDouble tauOnJointAxisToPack)
    {
       tauOnJointToPack.cross(jointToFootPositionVector, footReaction);
       /*

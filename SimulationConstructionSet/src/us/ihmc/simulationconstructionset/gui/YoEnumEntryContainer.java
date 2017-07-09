@@ -13,8 +13,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionListener
@@ -25,7 +25,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    private static final int HORIZONTAL_ENTRYBOX_SLOP = 6;
    private static final int COMBO_BOX_MIN_LENGTH = 28;
    
-   private EnumYoVariable<?> variableInThisBox;
+   private YoEnum<?> variableInThisBox;
 //   private LinkedHashMap<E, String> enumToNameMap;
 //   private LinkedHashMap<Integer, E> indexToEnumMap;
 //   private LinkedHashMap<E, Integer> enumToIndexMap;
@@ -105,12 +105,12 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    @Override
    public void bindToVariable(YoEntryBox yoEntryBox, YoVariable<?> variable)
    {
-      if (variable instanceof EnumYoVariable<?>)
+      if (variable instanceof YoEnum<?>)
       {
-         EnumYoVariable<?> enumYoVariable = (EnumYoVariable<?>) variable;
-//         if (enumYoVariable.getEnumType() == enumType)
+         YoEnum<?> yoEnum = (YoEnum<?>) variable;
+//         if (yoEnum.getEnumType() == enumType)
 //         {
-            variableInThisBox = (EnumYoVariable<?>)enumYoVariable;
+            variableInThisBox = (YoEnum<?>) yoEnum;
             label.setText(variableInThisBox.getName());
             labelTextLength = label.getFontMetrics(label.getFont()).stringWidth(label.getText());
             setupComboBox();
@@ -122,7 +122,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       }
       else
       {
-         throw new RuntimeException("Cannot bind a YoEnumEntryContainer to a varible which is not an EnumYoVariable!");
+         throw new RuntimeException("Cannot bind a YoEnumEntryContainer to a varible which is not an YoEnum!");
       }
    }
 
@@ -256,7 +256,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    {
       if (this.variableInThisBox.getAllowNullValue())
       {
-         if(ordinal == EnumYoVariable.NULL_VALUE)
+         if(ordinal == YoEnum.NULL_VALUE)
          {
             return this.variableInThisBox.getEnumSize();
          }

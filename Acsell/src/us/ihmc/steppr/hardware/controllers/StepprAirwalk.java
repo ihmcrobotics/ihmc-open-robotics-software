@@ -6,10 +6,10 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -26,28 +26,28 @@ public class StepprAirwalk implements StepprController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprAirwalk");
 
-   private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
+   private final YoDouble initialTime = new YoDouble("initialTime", registry);
    private final YoPolynomial trajectory = new YoPolynomial("trajectory", 4, registry);
 
    private final EnumMap<StepprJoint, OneDoFJoint> joints = new EnumMap<>(StepprJoint.class);
    private final EnumMap<StepprJoint, PDController> controllers = new EnumMap<>(StepprJoint.class);
 
-   private final EnumMap<StepprJoint, DoubleYoVariable> desiredOffsets = new EnumMap<>(StepprJoint.class);
+   private final EnumMap<StepprJoint, YoDouble> desiredOffsets = new EnumMap<>(StepprJoint.class);
    private final EnumDoubleMap<StepprJoint> initialPositions = new EnumDoubleMap<>(StepprJoint.class);
 
-   private final BooleanYoVariable startAirwalk = new BooleanYoVariable("startAirwalk", registry);
-   private final EnumYoVariable<AirwalkState> airwalkState = new EnumYoVariable<>("airwalkState", registry, AirwalkState.class);
+   private final YoBoolean startAirwalk = new YoBoolean("startAirwalk", registry);
+   private final YoEnum<AirwalkState> airwalkState = new YoEnum<>("airwalkState", registry, AirwalkState.class);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableOutput", registry);
 
-   private final DoubleYoVariable hipAmplitude = new DoubleYoVariable("hipAmplitude", registry);
-   private final DoubleYoVariable hipFrequency = new DoubleYoVariable("hipFrequency", registry);
+   private final YoDouble hipAmplitude = new YoDouble("hipAmplitude", registry);
+   private final YoDouble hipFrequency = new YoDouble("hipFrequency", registry);
 
-   private final DoubleYoVariable kneeAmplitude = new DoubleYoVariable("kneeAmplitude", registry);
-   private final DoubleYoVariable kneeFrequency = new DoubleYoVariable("kneeFrequency", registry);
+   private final YoDouble kneeAmplitude = new YoDouble("kneeAmplitude", registry);
+   private final YoDouble kneeFrequency = new YoDouble("kneeFrequency", registry);
 
-   private final DoubleYoVariable ankleAmplitude = new DoubleYoVariable("ankleAmplitude", registry);
-   private final DoubleYoVariable ankleFrequency = new DoubleYoVariable("ankleFrequency", registry);
+   private final YoDouble ankleAmplitude = new YoDouble("ankleAmplitude", registry);
+   private final YoDouble ankleFrequency = new YoDouble("ankleFrequency", registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
@@ -64,7 +64,7 @@ public class StepprAirwalk implements StepprController
          for (int i = 0; i < setpoint.getJoints().length; i++)
          {
             StepprJoint joint = setpoint.getJoints()[i];
-            DoubleYoVariable desiredPosition = new DoubleYoVariable(setpoint.getName() + "_q_d", registry);
+            YoDouble desiredPosition = new YoDouble(setpoint.getName() + "_q_d", registry);
             desiredPosition.set(setpoint.getQ());
 
             if (i == 1)

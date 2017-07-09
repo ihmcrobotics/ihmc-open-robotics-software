@@ -11,6 +11,8 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,9 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -202,7 +202,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       normal.normalize();
 
       BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
-      Plane3d plane3d = new Plane3d(center, normal);
+      Plane3D plane3d = new Plane3D(center, normal);
       ArrayList<Point3D> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
 //      Collections.shuffle(points);
@@ -230,7 +230,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       normal.normalize();
 
       BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
-      Plane3d plane3d = new Plane3d(center, normal);
+      Plane3D plane3d = new Plane3D(center, normal);
       ArrayList<Point3D> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       
       int pointsPerBallUpdate = 1;
@@ -255,7 +255,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    }
 
 
-   private static ArrayList<Point3D> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
+   private static ArrayList<Point3D> generatePointsForStairs(Plane3D plane3d, double halfWidth, double stepSize, double stairSeparation,
            double oneStairLandingHeight)
    {
       ArrayList<Point3D> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
@@ -264,7 +264,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       return ret;
    }
 
-   private static ArrayList<Point3D> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
+   private static ArrayList<Point3D> generatePointsForSlope(Plane3D plane3d, double halfWidth, double stepSize)
    {
       Point3D centerPoint = plane3d.getPointCopy();
 
@@ -624,7 +624,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 

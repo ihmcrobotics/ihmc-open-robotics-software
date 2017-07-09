@@ -8,19 +8,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {
    private RotatableConvexPolygonTerrainObject flatTopFaceOctagon3d, inclinedTopFaceOctagon3d, inclinedTopFaceOctagon3dSecond;
    private Vector3D normalZVector, normalYZVector;
-   private ConvexPolygon2d convexPolygon;
+   private ConvexPolygon2D convexPolygon;
    private double[][] pointList;
    private double centroidHeight;
    private double epsilon = 1e-8;
@@ -34,7 +34,7 @@ public class RotatableConvexPolygonTerrainObjectTest
          {2.0, 1.0}, {1.0, 2.0}, {-1.0, 2.0}, {-2.0, 1.0}, {-2.0, -1.0}, {-1.0, -2.0}, {1.0, -2.0}, {2.0, -1.0}
       };
       this.pointList = pointList;
-      convexPolygon = new ConvexPolygon2d(pointList);
+      convexPolygon = new ConvexPolygon2D(pointList);
 
       centroidHeight = 1.0;
 
@@ -160,7 +160,7 @@ public class RotatableConvexPolygonTerrainObjectTest
    {
       Point3D faceCenter = new Point3D(1.0, 0.0, 0.0);
       Vector3D faceNormal = new Vector3D(1.0, 0.0, 0.0);
-      Plane3d facePlane = new Plane3d(faceCenter, faceNormal);
+      Plane3D facePlane = new Plane3D(faceCenter, faceNormal);
       ArrayList<Point3D> faceVertices3d = new ArrayList<Point3D>();
       faceVertices3d.add(new Point3D(1.0, -2.0, 0.0));
       faceVertices3d.add(new Point3D(1.0, 0.0, -2.0));

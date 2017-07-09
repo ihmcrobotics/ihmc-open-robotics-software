@@ -26,11 +26,11 @@ public class SimulatedSensorsTestFullRobotModel
    public SimulatedSensorsTestFullRobotModel()
    {
       worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
 
-      elevator = new RigidBody("elevator", elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
-      rootJoint = new SixDoFJoint("imu", elevator, elevatorFrame);    // origin is at the IMU
+      rootJoint = new SixDoFJoint("imu", elevator);    // origin is at the IMU
       Matrix3D momentOfInertia = new Matrix3D();
       momentOfInertia.setM00(1.0);
       momentOfInertia.setM11(1.0);

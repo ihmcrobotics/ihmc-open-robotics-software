@@ -78,7 +78,7 @@ public class LidarScanLogReader
       else
       {
          packetCommunicator.closeConnection();
-         packetCommunicator.close();
+         packetCommunicator.disconnect();
          packetCommunicator = null;
       }
 

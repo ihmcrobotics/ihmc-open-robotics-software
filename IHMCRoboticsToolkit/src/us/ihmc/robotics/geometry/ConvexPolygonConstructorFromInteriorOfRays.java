@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -16,7 +18,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
    private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>();
    private final RecyclingArrayList<MutableBoolean> removeRay = new RecyclingArrayList<MutableBoolean>(MutableBoolean.class);
    
-   public boolean constructFromInteriorOfRays(List<Line2d> rays, ConvexPolygon2d polygonToPack)
+   public boolean constructFromInteriorOfRays(List<Line2D> rays, ConvexPolygon2D polygonToPack)
    {      
       removeRay.clear();
       
@@ -34,7 +36,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
             continue;    // This ray was removed already. Don't consider it.
          }
 
-         Line2d ray = rays.get(rayIndex);
+         Line2D ray = rays.get(rayIndex);
          if (ray == null)
             continue;
 
@@ -68,7 +70,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
             }
 
             // Found a previous Ray that may be ok. Use it to find this rays potential intersection point:
-            Line2d previousRayToCheck = rays.get(previousIndexToCheck);
+            Line2D previousRayToCheck = rays.get(previousIndexToCheck);
 
             Point2D intersection = getAndRemovePointFromPool();
             if (intersection == null) throw new RuntimeException("intersection == null!");
@@ -100,7 +102,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
 
                if (removeRay.get(evenMorePreviousIndexToCheck).booleanValue())
                   continue;    // That ray was removed already. Check a previous ray.
-               Line2d evenMorePreviousRayToCheck = rays.get(evenMorePreviousIndexToCheck);
+               Line2D evenMorePreviousRayToCheck = rays.get(evenMorePreviousIndexToCheck);
 
                // If the intersection point is not valid, then need to remove the previousRayToCheck and continue looking for more to remove...
                if (evenMorePreviousRayToCheck.isPointOnLeftSideOfLine(intersection))

@@ -7,21 +7,20 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 @SuppressWarnings("serial")
 public abstract class PixelsReferenceFrame extends PlotterReferenceFrame
 {
-   public PixelsReferenceFrame(String frameName, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)
+   public PixelsReferenceFrame(String frameName, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, isBodyCenteredFrame, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
+      super(frameName, PlotterFrameSpace.PIXELS, spaceConverter);
    }
 
-   public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame,
-                               PlotterSpaceConverter spaceConverter)
+   public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, parentFrame, isBodyCenteredFrame, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
+      super(frameName, parentFrame, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
    }
 
-   public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isBodyCenteredFrame,
-                               boolean isWorldFrame, boolean isZupFrame, PlotterSpaceConverter spaceConverter)
+   public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isWorldFrame,
+                               boolean isZupFrame, PlotterSpaceConverter spaceConverter)
    {
-      super(frameName, parentFrame, transformToParent, isBodyCenteredFrame, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
+      super(frameName, parentFrame, transformToParent, isWorldFrame, isZupFrame, PlotterFrameSpace.PIXELS, spaceConverter);
    }
 
    public PixelsReferenceFrame(String frameName, ReferenceFrame parentFrame, PlotterSpaceConverter spaceConverter)

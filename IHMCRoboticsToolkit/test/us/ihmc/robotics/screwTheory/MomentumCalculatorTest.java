@@ -144,10 +144,7 @@ public class MomentumCalculatorTest
    private Momentum computeMomentum(RigidBody elevator, ReferenceFrame frame)
    {
       elevator.updateFramesRecursively();
-      TwistCalculator twistCalculator = new TwistCalculator(world, elevator);
-      twistCalculator.compute();
-
-      MomentumCalculator momentumCalculator = new MomentumCalculator(twistCalculator);
+      MomentumCalculator momentumCalculator = new MomentumCalculator(elevator);
       Momentum momentum = new Momentum(frame);
       momentumCalculator.computeAndPack(momentum);
 

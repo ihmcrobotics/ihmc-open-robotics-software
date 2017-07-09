@@ -7,11 +7,14 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
@@ -21,19 +24,17 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class HighLevelControlManagerFactory
 {
@@ -46,6 +47,7 @@ public class HighLevelControlManagerFactory
    private HeadOrientationManager headOrientationManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private LegConfigurationManager legConfigurationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -115,6 +117,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
+      centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
       return centerOfMassHeightManager;
    }
 
@@ -149,18 +152,21 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
+      Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
       Map<String, JointAccelerationIntegrationSettings> integrationSettings = walkingControllerParameters.getOrCreateIntegrationSettings();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
+      RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModeForRigidBody(bodyName);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, positionControlledJoints,
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, positionControlledJoints,
             integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
+      manager.setDefaultControlMode(defaultControlModeForRigidBody);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
@@ -187,6 +193,22 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
+   public LegConfigurationManager getOrCreateKneeAngleManager()
+   {
+      if (legConfigurationManager != null)
+         return legConfigurationManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(LegConfigurationManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(LegConfigurationManager.class))
+         return null;
+      if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
+         return null;
+
+      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
+      return legConfigurationManager;
+   }
+
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()
    {
       if (pelvisOrientationManager != null)
@@ -199,8 +221,12 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
-      pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, controllerToolbox, registry);
-      pelvisOrientationManager.setWeights(momentumOptimizationSettings.getPelvisAngularWeight());
+      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
+      Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
+
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
+      pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }
 
@@ -249,6 +275,8 @@ public class HighLevelControlManagerFactory
          centerOfMassHeightManager.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
+      if (pelvisOrientationManager != null)
+         pelvisOrientationManager.initialize();
 
       Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
       for (RigidBodyControlManager bodyManager : bodyManagers)
@@ -281,9 +309,11 @@ public class HighLevelControlManagerFactory
             ret.addCommand(bodyManager.createFeedbackControlTemplate());
       }
 
+      ret.addCommand(centerOfMassHeightManager.createFeedbackControlTemplate());
+      
       if (pelvisOrientationManager != null)
       {
-         ret.addCommand(pelvisOrientationManager.getFeedbackControlCommand());
+         ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());
       }
 
       return ret;

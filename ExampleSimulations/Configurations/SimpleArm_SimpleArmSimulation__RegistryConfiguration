@@ -1,4 +1,5 @@
 root*false*false
 root.SimpleArm*false*false
 root.SimpleArm.LinearGroundContactModel*false*false
-root.SimpleArm.ArmController*false*false
+root.SimpleArm.SimpleArmController*false*false
+root.SimpleArm.SimpleArmEstimator*false*false

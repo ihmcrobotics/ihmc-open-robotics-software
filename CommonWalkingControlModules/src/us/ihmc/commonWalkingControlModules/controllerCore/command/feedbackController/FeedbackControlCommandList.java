@@ -36,6 +36,17 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    }
 
    /**
+    * Creates a new command list and initializes it to contain all the commands contained in
+    * {@code other}.
+    * 
+    * @param other the other list from which all the commands added to this list. Not modified.
+    */
+   public FeedbackControlCommandList(FeedbackControlCommandList other)
+   {
+      addCommandList(other);
+   }
+
+   /**
     * Adds the given command to this list.
     * <p>
     * If the given command is a list, only its elements are added to this list not the list itself.

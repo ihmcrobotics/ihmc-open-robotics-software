@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -13,9 +11,10 @@ import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
  * A {@code OrientationFeedbackControlCommand} can be used to request the
@@ -50,6 +49,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final OrientationPIDGains gains = new OrientationPIDGains();
+   /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame angularGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -59,6 +60,13 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * </p>
     */
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+
+   /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    */
+   private ReferenceFrame controlBaseFrame = null;
 
    /**
     * Creates an empty command.
@@ -82,6 +90,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       gains.set(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
+      controlBaseFrame = other.controlBaseFrame;
    }
 
    /**
@@ -125,6 +134,21 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    * 
+    * @param controlBaseFrame the new control base frame.
+    */
+   public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
+   {
+      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+         this.controlBaseFrame = controlBaseFrame;
+      else
+         throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
+   }
+
+   /**
     * Sets the gains to use during the next control tick.
     * 
     * @param gains the new set of gains to use. Not modified.
@@ -132,6 +156,19 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void setGains(OrientationPIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   /**
+    * Sets the reference frame in which the gains should be applied.
+    * <p>
+    * If the reference frame is {@code null}, the gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param angularGainsFrame the reference frame to use for the orientation gains.
+    */
+   public void setGainsFrame(ReferenceFrame angularGainsFrame)
+   {
+      this.angularGainsFrame = angularGainsFrame;
    }
 
    /**
@@ -202,17 +239,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick to the following 3-by-6 matrix:
-    * 
-    * <pre>
-    *     / 1 0 0 0 0 0 \
-    * S = | 0 1 0 0 0 0 |
-    *     \ 0 0 1 0 0 0 /
-    * </pre>
-    * <p>
     * This specifies that the 3 rotational degrees of freedom of the end-effector are to be
     * controlled.
-    * </p>
     */
    public void setSelectionMatrixToIdentity()
    {
@@ -220,35 +248,22 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Sets this command's selection matrix to the given one.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. Using the following 3-by-6 matrix will request the control of all
-    * the 3 rotational degrees of freedom:
-    * 
-    * <pre>
-    *     / 1 0 0 0 0 0 \
-    * S = | 0 1 0 0 0 0 |
-    *     \ 0 0 1 0 0 0 /
-    * </pre>
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * </p>
     * <p>
-    * Removing a row to the selection matrix using for instance
-    * {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a specific
-    * DoF of the end-effector.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
-    * <p>
     * 
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 3 or has a
-    *            number of columns different to 6.
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > 3)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-
-      spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl(selectionMatrix);
    }
 
    /**
@@ -283,6 +298,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
+   public void getIncludingFrame(FrameOrientation desiredOrientationToPack)
+   {
+      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
+   }
+
    public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
                                  FrameVector feedForwardAngularAccelerationToPack)
    {
@@ -301,6 +321,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return spatialAccelerationCommand.getEndEffector();
    }
 
+   public ReferenceFrame getControlBaseFrame()
+   {
+      if (controlBaseFrame != null)
+         return controlBaseFrame;
+      else
+         return spatialAccelerationCommand.getBase().getBodyFixedFrame();
+   }
+
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
@@ -315,6 +343,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public OrientationPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getAngularGainsFrame()
+   {
+      return angularGainsFrame;
    }
 
    @Override

@@ -5,8 +5,8 @@ import java.util.List;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,7 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
@@ -37,7 +36,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameOrientation yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
-   private final DoubleYoVariable rootJointYawOffsetFromFrozenState;
+   private final YoDouble rootJointYawOffsetFromFrozenState;
 
    private final YoFrameVector yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector yoRootJointAngularVelocity;
@@ -47,7 +46,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
    private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
-   private final TwistCalculator twistCalculator;
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
@@ -73,7 +71,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
-      twistCalculator = inverseDynamicsStructure.getTwistCalculator();
 
       measurementFrame = imuProcessedOutput.getMeasurementFrame();
       measurementLink = imuProcessedOutput.getMeasurementLink();
@@ -81,7 +78,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
 
-      rootJointYawOffsetFromFrozenState = new DoubleYoVariable("rootJointYawOffsetFromFrozenState", registry);
+      rootJointYawOffsetFromFrozenState = new YoDouble("rootJointYawOffsetFromFrozenState", registry);
 
       yoRootJointAngularVelocity = new YoFrameVector("estimatedRootJointAngularVelocity", rootJointFrame, registry);
       yoRootJointAngularVelocityInWorld = new YoFrameVector("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
@@ -255,7 +252,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private void updateRootJointTwistAngularPart()
    {
       // T_{rootBody}^{rootBody, measurementLink}
-      twistCalculator.getRelativeTwist(measurementLink, rootJoint.getSuccessor(), twistRootJointFrameRelativeToMeasurementLink);
+      rootJoint.getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(measurementLink.getBodyFixedFrame(), twistRootJointFrameRelativeToMeasurementLink);
       // T_{rootBody}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeFrame(rootJointFrame);
       // T_{rootJointFrame}^{rootJointFrame, measurementLink}
@@ -282,7 +279,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
-      twistCalculator.compute();
+      rootJoint.updateFramesRecursively();
 
       yoRootJointAngularVelocity.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);
       yoRootJointAngularVelocityMeasFrame.setAndMatchFrame(angularVelocityMeasurementLinkRelativeToWorld);

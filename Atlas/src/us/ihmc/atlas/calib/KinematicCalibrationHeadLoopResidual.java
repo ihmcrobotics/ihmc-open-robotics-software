@@ -111,7 +111,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
-            constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
+            constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
       //compute error
       int offset = 0;
@@ -156,7 +156,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    {
 
       ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 

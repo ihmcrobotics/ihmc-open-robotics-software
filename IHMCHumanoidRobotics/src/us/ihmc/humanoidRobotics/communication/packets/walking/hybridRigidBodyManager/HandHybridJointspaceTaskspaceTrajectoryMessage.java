@@ -6,12 +6,10 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
@@ -19,7 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
                   topic = "/control/hybrid_hand_trajectory")
 public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
-   
+
    public HandTrajectoryMessage handTrajectoryMessage;
    public ArmTrajectoryMessage armTrajectoryMessage;
    /**
@@ -29,6 +27,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -47,8 +46,10 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHandTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getArmTrajectoryMessage());
+      setExecutionMode(hybridJointspaceTaskspaceMessage.getExecutionMode(), hybridJointspaceTaskspaceMessage.previousMessageId);
+      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
    }
-   
+
    /**
     * Typical constructor to use, pack the two taskspace and joint space commands.
     * If these messages conflict, the qp weights and gains will dictate the desireds
@@ -81,58 +82,10 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    {
       this.armTrajectoryMessage = armTrajectoryMessage;
    }
-   
-   @Override
-   public long getTrajectoryReferenceFrameId()
-   {
-      return handTrajectoryMessage.getTrajectoryReferenceFrameId();
-   }
 
    @Override
-   public long getDataReferenceFrameId()
+   public FrameInformation getFrameInformation()
    {
-      return handTrajectoryMessage.getDataReferenceFrameId();
-   }
-
-   @Override
-   public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
-   {
-      handTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
-   }
-
-   @Override
-   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
-   {
-      handTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
-   }
-
-   @Override
-   public void setDataReferenceFrameId(long expressedInReferenceFrameId)
-   {
-      handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
-   }
-
-   @Override
-   public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
-   {
-      handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
-   }
-
-   @Override
-   public Point3D getControlFramePosition()
-   {
-      return handTrajectoryMessage.getControlFramePosition();
-   }
-
-   @Override
-   public Quaternion getControlFrameOrientation()
-   {
-      return handTrajectoryMessage.getControlFrameOrientation();
-   }
-   
-   @Override
-   public boolean useCustomControlFrame()
-   {
-      return handTrajectoryMessage.useCustomControlFrame();
+      return handTrajectoryMessage.getFrameInformation();
    }
 }

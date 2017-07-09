@@ -1,7 +1,7 @@
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.SimpleArm.t</Variables>
+		<Variables>root.SimpleArm.q_yaw,root.SimpleArm.SimpleArmEstimator.qYaw</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleArm.q_yaw</Variables>
+		<Variables>root.SimpleArm.qd_yaw,root.SimpleArm.SimpleArmEstimator.qdYaw</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleArm.q_pitch1</Variables>
+		<Variables>root.SimpleArm.qdd_yaw,root.SimpleArm.SimpleArmEstimator.qddYaw</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,9 +37,69 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleArm.q_pitch2</Variables>
+		<Variables>root.SimpleArm.q_pitch1,root.SimpleArm.SimpleArmEstimator.qPitch1</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SimpleArm.qd_pitch1,root.SimpleArm.SimpleArmEstimator.qdPitch1</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SimpleArm.qdd_pitch1,root.SimpleArm.SimpleArmEstimator.qddPitch1</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SimpleArm.q_pitch2,root.SimpleArm.SimpleArmEstimator.qPitch2</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SimpleArm.qd_pitch2,root.SimpleArm.SimpleArmEstimator.qdPitch2</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SimpleArm.qdd_pitch2,root.SimpleArm.SimpleArmEstimator.qddPitch2</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -54,7 +114,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>targetPositionX,targetPositionY,targetPositionZ,kpTaskspace</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -73,9 +133,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-1.1898363788799524</Camera X>
- <Camera Y>-5.452674508293583</Camera Y>
- <Camera Z>2.838890372059134</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

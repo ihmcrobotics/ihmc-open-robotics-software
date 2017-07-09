@@ -32,7 +32,7 @@ public class WrenchTest
    @Before
    public void setUp() throws Exception
    {
-      frameA = ReferenceFrame.constructAWorldFrame("A");
+      frameA = ReferenceFrame.constructARootFrame("A");
       frameB = new ReferenceFrame("B", frameA)
       {
          private static final long serialVersionUID = 1L;

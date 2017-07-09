@@ -369,7 +369,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testKnownTranslationAndYawDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose stateEstimatorPresent = new FramePose(worldFrame);

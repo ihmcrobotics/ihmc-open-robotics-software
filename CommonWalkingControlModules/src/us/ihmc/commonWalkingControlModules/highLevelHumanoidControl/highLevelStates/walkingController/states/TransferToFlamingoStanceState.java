@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToFlamingoStanceState extends TransferState
@@ -30,20 +30,20 @@ public class TransferToFlamingoStanceState extends TransferState
       {
          TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
          double extraToeOffHeight = 0.0;
-         if (feetManager.willDoToeOff(null, transferToSide))
-            extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+         if (feetManager.canDoDoubleSupportToeOff(null, transferToSide))
+            extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
          comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
       }
 
       // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      double swingTime = Double.POSITIVE_INFINITY;
+      double transferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      double defaultSwingTime = Double.POSITIVE_INFINITY;
-      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer(swingTime, transferTime, finalTransferTime);
    }
 }

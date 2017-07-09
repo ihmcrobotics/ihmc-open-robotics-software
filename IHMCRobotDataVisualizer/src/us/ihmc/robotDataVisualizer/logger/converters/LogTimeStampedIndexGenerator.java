@@ -12,6 +12,7 @@ import us.ihmc.idl.serializers.extra.PropertiesSerializer;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
 import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -31,7 +32,7 @@ public class LogTimeStampedIndexGenerator
       byte[] handshakeData = new byte[(int) handshake.length()];
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
-      int logLineLength = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
+      int logLineLength = YoVariableHandshakeParser.getNumberOfStateVariables(logProperties.getVariables().getHandshakeFileType(), handshakeData);
 
       File logdata = new File(logDirectory, logProperties.getVariables().getDataAsString());
       if (!logdata.exists())

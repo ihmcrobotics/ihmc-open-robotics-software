@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.ThreadTools;
 
 
@@ -205,7 +205,7 @@ public class TCPYoWhiteBoardEvaluation
 
       for (int i = 0; i < numberOfVariables; i++)
       {
-         DoubleYoVariable variable = new DoubleYoVariable(name + i, registry);
+         YoDouble variable = new YoDouble(name + i, registry);
          variable.set(Math.random());
          ret.add(variable);
       }

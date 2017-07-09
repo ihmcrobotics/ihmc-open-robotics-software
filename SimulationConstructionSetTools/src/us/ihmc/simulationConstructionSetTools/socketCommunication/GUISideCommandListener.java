@@ -1,16 +1,18 @@
 package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 
@@ -174,7 +176,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       NameSpace fullNameSpace = NameSpace.createNameSpaceFromAFullVariableName(fullVariableName);
       YoVariableRegistry registry = rootRegistry.getRegistry(fullNameSpace);
       String shortVariableName = NameSpace.stripOffNameSpaceToGetVariableName(fullVariableName);
-      DoubleYoVariable newVar = new DoubleYoVariable(shortVariableName, "", registry);
+      YoDouble newVar = new YoDouble(shortVariableName, "", registry);
 
       allVariables.addVariable(newVar);
 
@@ -314,8 +316,8 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       if (numTicks > 50000)
       {
          numTicks = 0;
-         Date today = new Date();
-         System.out.println(today.toString());
+         
+         PrintTools.info(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
       }
 
    }

@@ -1,10 +1,10 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InverseFunction
 {
-   private static DoubleYoVariable DET = new DoubleYoVariable("DET", null);
+   private static YoDouble DET = new YoDouble("DET", null);
 
 
    /*
@@ -19,7 +19,7 @@ public class InverseFunction
 
    public static void InverseA(double pos_x1, double pos_x2, double pos_x3, double pos_y1, double pos_y2, double pos_y3, double fX, double fY, double fZ,
                                double tX, double tY, double tZ, double h11, double h21, double k1, double h12, double h22, double k2, double h13, double h23,
-                               double k3, DoubleYoVariable fx1, DoubleYoVariable fz1, DoubleYoVariable fx2, DoubleYoVariable fy2, DoubleYoVariable fz2, DoubleYoVariable fz3)
+                               double k3, YoDouble fx1, YoDouble fz1, YoDouble fx2, YoDouble fy2, YoDouble fz2, YoDouble fz3)
 
    {
       double s42, s44, s45, s46, s51, s52;

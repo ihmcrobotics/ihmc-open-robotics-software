@@ -3,8 +3,8 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,8 +16,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
-   private final BooleanYoVariable touchdownDetected;
-   private final BooleanYoVariable trustTouchdownDetectors;
+   private final YoBoolean touchdownDetected;
+   private final YoBoolean trustTouchdownDetectors;
    private boolean touchdownDetectorsUpdated = false;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, double totalRobotWeight, YoVariableRegistry parentRegistry)
@@ -27,11 +27,11 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.foot = foot;
       this.totalRobotWeight = totalRobotWeight;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-      touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
-      trustTouchdownDetectors = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
+      touchdownDetected = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
+      trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
    }
 
-   public BooleanYoVariable getControllerSetFootSwitch()
+   public YoBoolean getControllerSetFootSwitch()
    {
       return controllerThinksHasTouchedDown;
    }

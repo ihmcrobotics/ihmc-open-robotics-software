@@ -3,9 +3,9 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.convexOptimization.QpOASESCWrapper;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class OASESConstrainedQPSolver extends ConstrainedQPSolver
@@ -26,10 +26,10 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver
     * @return returnCode from C-API
     */
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   DoubleYoVariable maxCPUTime = new DoubleYoVariable("maxCPUTime", registry);
-   DoubleYoVariable currentCPUTime = new DoubleYoVariable("currentCPUTime", registry);
-   IntegerYoVariable maxWorkingSetChange = new IntegerYoVariable("maxWorkingSetchange", registry);
-   IntegerYoVariable currentWorkingSetChange = new IntegerYoVariable("currentWorkingSetchange", registry);
+   YoDouble maxCPUTime = new YoDouble("maxCPUTime", registry);
+   YoDouble currentCPUTime = new YoDouble("currentCPUTime", registry);
+   YoInteger maxWorkingSetChange = new YoInteger("maxWorkingSetchange", registry);
+   YoInteger currentWorkingSetChange = new YoInteger("currentWorkingSetchange", registry);
 
    QpOASESCWrapper qpWrapper;
 

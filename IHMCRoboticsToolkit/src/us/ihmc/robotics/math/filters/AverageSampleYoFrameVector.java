@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -10,9 +10,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AverageSampleYoFrameVector extends YoFrameVector
 {
-   private final AverageSampleDoubleYoVariable x, y, z;
+   private final AverageSampleYoDouble x, y, z;
    
-   private AverageSampleYoFrameVector(AverageSampleDoubleYoVariable x, AverageSampleDoubleYoVariable y, AverageSampleDoubleYoVariable z, ReferenceFrame referenceFrame)
+   private AverageSampleYoFrameVector(AverageSampleYoDouble x, AverageSampleYoDouble y, AverageSampleYoDouble z, ReferenceFrame referenceFrame)
    {
       super(x, y, z, referenceFrame);
 
@@ -28,9 +28,9 @@ public class AverageSampleYoFrameVector extends YoFrameVector
 
    public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
    {
-      AverageSampleDoubleYoVariable x = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
-      AverageSampleDoubleYoVariable y = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
-      AverageSampleDoubleYoVariable z = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble x = new AverageSampleYoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble y = new AverageSampleYoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry);
+      AverageSampleYoDouble z = new AverageSampleYoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
       
       AverageSampleYoFrameVector ret = new AverageSampleYoFrameVector(x, y, z, referenceFrame);
       
@@ -44,9 +44,9 @@ public class AverageSampleYoFrameVector extends YoFrameVector
 
    public static AverageSampleYoFrameVector createAverageSampleYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoFrameVector dataSource, ReferenceFrame referenceFrame)
    {
-      AverageSampleDoubleYoVariable x = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), dataSource.getYoX(), registry);
-      AverageSampleDoubleYoVariable y = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), dataSource.getYoY(), registry);
-      AverageSampleDoubleYoVariable z = new AverageSampleDoubleYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), dataSource.getYoZ(), registry);
+      AverageSampleYoDouble x = new AverageSampleYoDouble(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), dataSource.getYoX(), registry);
+      AverageSampleYoDouble y = new AverageSampleYoDouble(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), dataSource.getYoY(), registry);
+      AverageSampleYoDouble z = new AverageSampleYoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), dataSource.getYoZ(), registry);
       
       AverageSampleYoFrameVector ret = new AverageSampleYoFrameVector(x, y, z, referenceFrame);
       

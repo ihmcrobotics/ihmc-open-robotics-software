@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -50,12 +51,12 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       return new FrameVector(referenceFrame, line.getDirection());
    }
 
-   public Point3D getPoint()
+   public Point3DReadOnly getPoint()
    {
       return line.getPoint();
    }
 
-   public Vector3D getNormalizedVector()
+   public Vector3DReadOnly getNormalizedVector()
    {
       return line.getDirection();
    }
@@ -107,7 +108,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       lineToPack.set(getReferenceFrame(), line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
    }
    
-   public void projectOntoXYPlane(Line2d lineToPack)
+   public void projectOntoXYPlane(Line2D lineToPack)
    {
       lineToPack.set(line.getPoint().getX(), line.getPoint().getY(), line.getDirection().getX(), line.getDirection().getY());
    }

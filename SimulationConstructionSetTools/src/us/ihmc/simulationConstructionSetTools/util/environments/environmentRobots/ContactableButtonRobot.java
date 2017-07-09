@@ -8,9 +8,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -42,7 +42,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private double caseWidth;
    private double caseDepth;
    
-   private BooleanYoVariable buttonStatus;
+   private YoBoolean buttonStatus;
    private boolean buttonIsSwitchable = true;
    private double buttonSwitchLimit = 0.95;
    
@@ -70,7 +70,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    {
       super(name);
       this.name = name;
-      this.buttonStatus = new BooleanYoVariable(this.name + "_Status", yoVariableRegistry);
+      this.buttonStatus = new YoBoolean(this.name + "_Status", yoVariableRegistry);
       buttonStatus.set(true);
      
       this.name = name;

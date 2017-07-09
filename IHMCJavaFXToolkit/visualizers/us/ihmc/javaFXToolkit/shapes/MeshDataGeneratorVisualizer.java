@@ -8,12 +8,12 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class MeshDataGeneratorVisualizer extends Application
@@ -126,7 +126,7 @@ public class MeshDataGeneratorVisualizer extends Application
    {
       int numberOfPoints = 20;
 
-      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
 
       Point2D randomVertex = new Point2D();
       Random random = new Random(234523L);

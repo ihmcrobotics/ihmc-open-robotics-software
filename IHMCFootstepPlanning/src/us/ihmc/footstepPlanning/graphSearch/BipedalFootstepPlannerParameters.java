@@ -1,37 +1,37 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BipedalFootstepPlannerParameters
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable maximumStepReach = new DoubleYoVariable("maximumStepReach", registry);
-   private final DoubleYoVariable minimumFootholdPercent = new DoubleYoVariable("minimumFootholdPercent", registry);
+   private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
+   private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
 
-   private final DoubleYoVariable idealFootstepLength = new DoubleYoVariable("idealFootstepLength", registry);
-   private final DoubleYoVariable idealFootstepWidth = new DoubleYoVariable("idealFootstepWidth", registry);
+   private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
+   private final YoDouble idealFootstepWidth = new YoDouble("idealFootstepWidth", registry);
 
-   private final DoubleYoVariable maximumStepZ = new DoubleYoVariable("maximumStepZ", registry);
-   private final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
-   private final DoubleYoVariable maximumStepWidth = new DoubleYoVariable("maximumStepWidth", registry);
-   private final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
-   private final DoubleYoVariable minimumStepLength = new DoubleYoVariable("minimumStepLength", registry);
+   private final YoDouble maximumStepZ = new YoDouble("maximumStepZ", registry);
+   private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
+   private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
+   private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
+   private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
 
-   private final DoubleYoVariable maximumStepXWhenForwardAndDown = new DoubleYoVariable("maximumStepXWhenForwardAndDown", registry);
-   private final DoubleYoVariable maximumStepZWhenForwardAndDown = new DoubleYoVariable("maximumStepZWhenForwardAndDown", registry);
+   private final YoDouble maximumStepXWhenForwardAndDown = new YoDouble("maximumStepXWhenForwardAndDown", registry);
+   private final YoDouble maximumStepZWhenForwardAndDown = new YoDouble("maximumStepZWhenForwardAndDown", registry);
 
-   private final DoubleYoVariable wiggleInsideDelta = new DoubleYoVariable("wiggleInsideDelta", registry);
-   private final BooleanYoVariable rejectIfCannotFullyWiggleInside = new BooleanYoVariable("rejectIfCannotFullyWiggleInside", registry);
-   private final BooleanYoVariable wiggleIntoConvexHullOfPlanarRegions = new BooleanYoVariable("WiggleIntoConvexHullOfPlanarRegions", registry);
+   private final YoDouble wiggleInsideDelta = new YoDouble("wiggleInsideDelta", registry);
+   private final YoBoolean rejectIfCannotFullyWiggleInside = new YoBoolean("rejectIfCannotFullyWiggleInside", registry);
+   private final YoBoolean wiggleIntoConvexHullOfPlanarRegions = new YoBoolean("WiggleIntoConvexHullOfPlanarRegions", registry);
 
-   private final DoubleYoVariable maximumXYWiggleDistance = new DoubleYoVariable("maximumXYWiggleDistance", registry);
-   private final DoubleYoVariable maximumYawWiggle = new DoubleYoVariable("maximumYawWiggle", registry);
+   private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
+   private final YoDouble maximumYawWiggle = new YoDouble("maximumYawWiggle", registry);
 
-   private final DoubleYoVariable cliffHeightToShiftAwayFrom = new DoubleYoVariable("cliffHeightToShiftAwayFrom", registry);
-   private final DoubleYoVariable minimumDistanceFromCliffBottoms = new DoubleYoVariable("minimumDistanceFromCliffBottoms", registry);
+   private final YoDouble cliffHeightToShiftAwayFrom = new YoDouble("cliffHeightToShiftAwayFrom", registry);
+   private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumDistanceFromCliffBottoms", registry);
 
    private double minimumSurfaceNormalZ = 0.7;
    private double maximumZPenetrationOnVRegions = 0.008;

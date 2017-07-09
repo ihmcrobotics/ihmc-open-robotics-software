@@ -30,6 +30,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -37,15 +38,14 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.tools.containers.ContainerTools;
 
 public class FullRobotModelFromDescription implements FullRobotModel
 {
    protected final RobotDescription description;
 
    protected final JointNameMap sdfJointNameMap;
-   protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
-   protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
+   protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = new EnumMap<>(NeckJointName.class);
+   protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
 //   protected final SDFLinkHolder rootLink;
    protected RigidBody chest;
@@ -98,9 +98,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
       /*
        * Create root object
        */
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
-      elevator = new RigidBody("elevator", elevatorFrame);
-      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator, elevatorFrame);
+      elevator = new RigidBody("elevator", worldFrame);
+      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator);
       if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");
@@ -185,14 +184,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public ReferenceFrame getWorldFrame()
-   {
-      return worldFrame;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public ReferenceFrame getElevatorFrame()
+   public MovingReferenceFrame getElevatorFrame()
    {
       return elevator.getBodyFixedFrame();
    }

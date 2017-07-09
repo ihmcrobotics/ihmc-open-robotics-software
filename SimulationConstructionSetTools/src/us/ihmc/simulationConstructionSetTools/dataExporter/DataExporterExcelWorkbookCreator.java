@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,8 +25,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -119,7 +120,7 @@ public class DataExporterExcelWorkbookCreator
       int row = 0;
 
       addStringToSheet(infoSheet, labelColumn, row, "Date: ", headerCellFormat);
-      WritableCell dateCell = new DateTime(dataColumn, row, new Date());
+      WritableCell dateCell = new DateTime(dataColumn, row, Date.from(ZonedDateTime.now().toInstant()));
       addCell(infoSheet, dateCell);
       row++;
 

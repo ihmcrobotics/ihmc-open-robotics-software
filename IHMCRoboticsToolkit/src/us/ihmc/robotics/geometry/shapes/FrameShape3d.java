@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
@@ -7,7 +8,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3d<G>> extends AbstractFrameObject<F, G>
+public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends AbstractFrameObject<F, G>
 {
    public FrameShape3d(G shape3d)
    {
@@ -85,7 +86,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideOrOnSurface(pointToCheck.getPoint(), epsilon);
+      return getGeometryObject().isInsideEpsilon(pointToCheck.getPoint(), epsilon);
    }
 
    /**

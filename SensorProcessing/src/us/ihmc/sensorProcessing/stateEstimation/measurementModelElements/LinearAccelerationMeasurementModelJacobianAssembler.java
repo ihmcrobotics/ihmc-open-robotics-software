@@ -11,7 +11,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class LinearAccelerationMeasurementModelJacobianAssembler
@@ -54,14 +53,13 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
    public void preCompute(Vector3D unbiasedEstimatedMeasurement)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
-      TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
 
       RigidBody elevator = spatialAccelerationCalculator.getRootBody();
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       // T, Td
-      twistCalculator.getRelativeTwist(elevator, measurementLink, twistOfMeasurementLink);
+      measurementLink.getBodyFixedFrame().getTwistRelativeToOther(elevatorFrame, twistOfMeasurementLink);
       spatialAccelerationCalculator.getRelativeAcceleration(elevator, measurementLink, spatialAccelerationOfMeasurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
       twistOfMeasurementLink.changeFrame(elevatorFrame);

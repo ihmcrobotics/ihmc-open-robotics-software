@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 import java.awt.Color;
 import java.util.HashMap;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.robotModels.FullRobotModel;
@@ -20,13 +21,12 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -58,11 +58,11 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final double dt;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final DoubleYoVariable robotTimestamp;
-   private DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
-   private DoubleYoVariable footZHeightOnPickUp = new DoubleYoVariable("footZHeightOnPickUp", registry);
-   private DoubleYoVariable footZHeightOnTouchdown = new DoubleYoVariable("footZHeightOnTouchdown", registry);
-   private DoubleYoVariable timeToSTayInMoveFeetAfterTouchDown = new DoubleYoVariable("timeToSTayInMoveFeetAfterTouchDown", registry);
+   private final YoDouble robotTimestamp;
+   private YoDouble swingTime = new YoDouble("swingTime", registry);
+   private YoDouble footZHeightOnPickUp = new YoDouble("footZHeightOnPickUp", registry);
+   private YoDouble footZHeightOnTouchdown = new YoDouble("footZHeightOnTouchdown", registry);
+   private YoDouble timeToSTayInMoveFeetAfterTouchDown = new YoDouble("timeToSTayInMoveFeetAfterTouchDown", registry);
    private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
 
 
@@ -78,12 +78,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final QuadrupedReferenceFrames referenceFrames;
    private final OneDoFJoint[] oneDoFJoints;
 
-   private final EnumYoVariable<TrotPair> trotPairToRaise = new EnumYoVariable<>("trotPairToRaise", getYoVariableRegistry(), TrotPair.class);
-   private final EnumYoVariable<TrotPair> trotPairInAir = new EnumYoVariable<>("trotPairInAir", getYoVariableRegistry(), TrotPair.class);
+   private final YoEnum<TrotPair> trotPairToRaise = new YoEnum<>("trotPairToRaise", getYoVariableRegistry(), TrotPair.class);
+   private final YoEnum<TrotPair> trotPairInAir = new YoEnum<>("trotPairInAir", getYoVariableRegistry(), TrotPair.class);
 
-   private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
-   private final DoubleYoVariable filteredDesiredCoMHeightAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMHeightAlphaBreakFrequency", registry);
-   private final DoubleYoVariable filteredDesiredCoMHeightAlpha = new DoubleYoVariable("filteredDesiredCoMHeightAlpha", registry);
+   private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
+   private final YoDouble filteredDesiredCoMHeightAlphaBreakFrequency = new YoDouble("filteredDesiredCoMHeightAlphaBreakFrequency", registry);
+   private final YoDouble filteredDesiredCoMHeightAlpha = new YoDouble("filteredDesiredCoMHeightAlpha", registry);
    private final AlphaFilteredYoVariable filteredDesiredCoMHeight = new AlphaFilteredYoVariable("filteredDesiredCoMHeight", registry, filteredDesiredCoMHeightAlpha, desiredCoMHeight);
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -93,7 +93,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final FramePose desiredCenterOfMassPoseForPacking = new FramePose(worldFrame);
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", desiredCenterOfMassPoseForPacking);
 
-   private final ConvexPolygon2d supportPolygonHolder = new ConvexPolygon2d();
+   private final ConvexPolygon2D supportPolygonHolder = new ConvexPolygon2D();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
 
@@ -394,12 +394,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
    private class CenterOfMassIncrementVariableHolder
    {
-      private final DoubleYoVariable alpha;
+      private final YoDouble alpha;
 
-      private final DoubleYoVariable desiredCenterOfMassLargeIncrementX;
-      private final DoubleYoVariable desiredCenterOfMassSmallIncrementX;
-      private final DoubleYoVariable desiredCenterOfMassLargeIncrementY;
-      private final DoubleYoVariable desiredCenterOfMassSmallIncrementY;
+      private final YoDouble desiredCenterOfMassLargeIncrementX;
+      private final YoDouble desiredCenterOfMassSmallIncrementX;
+      private final YoDouble desiredCenterOfMassLargeIncrementY;
+      private final YoDouble desiredCenterOfMassSmallIncrementY;
 
       private final AlphaFilteredYoVariable filteredDesiredCenterOfMassLargeIncrementX;
       private final AlphaFilteredYoVariable filteredDesiredCenterOfMassSmallIncrementX;
@@ -420,13 +420,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          this.initialCenterOfMassReferenceFrame = initialCenterOfMassReferenceFrame;
          initialCenterOfMass = new FramePoint(initialCenterOfMassReferenceFrame);
 
-         alpha = new DoubleYoVariable(name + "desiredCenterOfMassIncrementAlpha", registry);
+         alpha = new YoDouble(name + "desiredCenterOfMassIncrementAlpha", registry);
          alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt));
 
-         desiredCenterOfMassLargeIncrementX = new DoubleYoVariable(name + "DesiredCenterOfMassLargeIncrementX", registry);
-         desiredCenterOfMassSmallIncrementX = new DoubleYoVariable(name + "DesiredCenterOfMassSmallIncrementX", registry);
-         desiredCenterOfMassLargeIncrementY = new DoubleYoVariable(name + "DesiredCenterOfMassLargeIncrementY", registry);
-         desiredCenterOfMassSmallIncrementY = new DoubleYoVariable(name + "DesiredCenterOfMassSmallIncrementY", registry);
+         desiredCenterOfMassLargeIncrementX = new YoDouble(name + "DesiredCenterOfMassLargeIncrementX", registry);
+         desiredCenterOfMassSmallIncrementX = new YoDouble(name + "DesiredCenterOfMassSmallIncrementX", registry);
+         desiredCenterOfMassLargeIncrementY = new YoDouble(name + "DesiredCenterOfMassLargeIncrementY", registry);
+         desiredCenterOfMassSmallIncrementY = new YoDouble(name + "DesiredCenterOfMassSmallIncrementY", registry);
 
          filteredDesiredCenterOfMassLargeIncrementX = new AlphaFilteredYoVariable(name + "FilteredDesiredCenterOfMassLargeIncrementX", registry, alpha, desiredCenterOfMassLargeIncrementX);
          filteredDesiredCenterOfMassSmallIncrementX = new AlphaFilteredYoVariable(name + "FilteredDesiredCenterOfMassSmallIncrementX", registry, alpha, desiredCenterOfMassSmallIncrementX);
@@ -487,7 +487,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
    private class MoveCenterOfMassAround extends State<COM_ESTIMATE_STATES>
    {
-      private final EnumYoVariable<TrotPair> frameToIncrementOver = new EnumYoVariable<>("trotPairToMoveCenterOfMassOver", registry, TrotPair.class);
+      private final YoEnum<TrotPair> frameToIncrementOver = new YoEnum<>("trotPairToMoveCenterOfMassOver", registry, TrotPair.class);
       private final ReferenceFrame rootFrame = referenceFrames.getRootJointFrame();
       private final YoFramePoint rootJointToCenterOfTrotLines = new YoFramePoint("rootJointToCenterOfTrotLines", rootFrame, registry);
       private final YoFramePoint estimatedBodyCenterOfMassPosition = new YoFramePoint("estimatedBodyCenterOfMassPosition", rootFrame, registry);
@@ -498,7 +498,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       private final HashMap<TrotPair, CenterOfMassIncrementVariableHolder> incrementHolders = new HashMap<>();
       private final double totalMass;
       private final double bodyMass;
-      private final BooleanYoVariable shiftCoMOverCenterOfFeet = new BooleanYoVariable("shiftCoMOverCenterOfFeet", registry);
+      private final YoBoolean shiftCoMOverCenterOfFeet = new YoBoolean("shiftCoMOverCenterOfFeet", registry);
 
       public MoveCenterOfMassAround()
       {
@@ -601,18 +601,18 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
    private class MoveFeet extends State<COM_ESTIMATE_STATES>
    {
-      private final DoubleYoVariable zHeight;
+      private final YoDouble zHeight;
       private final COM_ESTIMATE_STATES state;
-      private EnumYoVariable<TrotPair> currentTrotPairToMove;
-      private EnumYoVariable<TrotPair> trotPairSource;
+      private YoEnum<TrotPair> currentTrotPairToMove;
+      private YoEnum<TrotPair> trotPairSource;
 
-      public MoveFeet(String name, DoubleYoVariable zHeight, EnumYoVariable<TrotPair> trotPairToManage, COM_ESTIMATE_STATES state)
+      public MoveFeet(String name, YoDouble zHeight, YoEnum<TrotPair> trotPairToManage, COM_ESTIMATE_STATES state)
       {
          super(state);
          this.state = state;
          this.zHeight = zHeight;
          this.trotPairSource = trotPairToManage;
-         this.currentTrotPairToMove = new EnumYoVariable<>(name + "CurrentTrotPairToMove", registry, TrotPair.class);
+         this.currentTrotPairToMove = new YoEnum<>(name + "CurrentTrotPairToMove", registry, TrotPair.class);
          this.setDefaultNextState(COM_ESTIMATE_STATES.MOVE_COM_AROUND);
       }
 

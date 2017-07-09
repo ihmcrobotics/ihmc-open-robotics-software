@@ -3,9 +3,11 @@ package us.ihmc.sensorProcessing.frames;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -13,26 +15,27 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
- * 
+ *
  * This class is Immutable, you shouldn't add reference frames to it except through the constructor or you will be fired... from a cannon.. into the sun
- * 
- * This class keeps track of all the reference frames from the full robot model and reference frames. 
+ *
+ * This class keeps track of all the reference frames from the full robot model and reference frames.
  * It uses reflection to pull all the frames from the full robot model and the reference frames, it looks at all models
- * that return a reference frame or a RobotSide,  robotQuadrant, or RobotSextant. If we get more robot segments we should 
+ * that return a reference frame or a RobotSide,  robotQuadrant, or RobotSextant. If we get more robot segments we should
  * switch to using reflection and generics to pull them automatically.
- * 
+ *
  * @author bs
  *
  */
 public class ReferenceFrameHashCodeResolver
 {
-   
-   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
+   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
+   
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
+      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
       checkAndAddReferenceFrame(ReferenceFrame.getWorldFrame());
-      
+
       try
       {
          referenceFrameExtractor(referenceFrames);
@@ -56,7 +59,7 @@ public class ReferenceFrameHashCodeResolver
          checkAndAddReferenceFrame(comLinkBefore);
          checkAndAddReferenceFrame(comLinkAfter);
       }
-      
+
       TLongObjectHashMap<ReferenceFrame> referenceFrameDefaultHashIds = referenceFrames.getReferenceFrameDefaultHashIds();
       if(referenceFrameDefaultHashIds != null)
       {
@@ -68,6 +71,22 @@ public class ReferenceFrameHashCodeResolver
                checkAndAddReferenceFrame(referenceFrame);
             }
             checkAndAddReferenceFrame(referenceFrame, key);
+         }
+      }
+   }
+   
+   /**
+    * For Testing
+    * @param referenceFrames
+    */
+   public ReferenceFrameHashCodeResolver(List<ReferenceFrame> referenceFrames)
+   {
+      nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
+      for(ReferenceFrame referenceFrame : referenceFrames)
+      {
+         if(referenceFrame != null)
+         {
+            nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.getNameBasedHashCode(), referenceFrame);
          }
       }
    }
@@ -85,7 +104,7 @@ public class ReferenceFrameHashCodeResolver
       Method[] declaredMethods = clazz.getMethods();
       for (Method method : declaredMethods)
       {
-         if (method.getReturnType() == ReferenceFrame.class)
+         if (ReferenceFrame.class.isAssignableFrom(method.getReturnType()))
          {
             if (method.getParameterCount() == 0)
             {
@@ -131,16 +150,16 @@ public class ReferenceFrameHashCodeResolver
          }
       }
    }
-   
+
    /**
-    * Check to see if the map already has a frame under the hashcode. If so check if the two frames are the same, if not throw an exception. 
+    * Check to see if the map already has a frame under the hashcode. If so check if the two frames are the same, if not throw an exception.
     * @param referenceFrame
     */
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame)
    {
       checkAndAddReferenceFrame(referenceFrame, referenceFrame.getNameBasedHashCode());
    }
-   
+
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame, long nameBasedHashCode)
    {
       if(nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
@@ -157,6 +176,9 @@ public class ReferenceFrameHashCodeResolver
 
    public ReferenceFrame getReferenceFrameFromNameBaseHashCode(long nameBasedHashCode)
    {
+      if (!nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
+         throw new RuntimeException("Recieved reference frame id that is unknown in the controller.");
+
       return nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
    }
 

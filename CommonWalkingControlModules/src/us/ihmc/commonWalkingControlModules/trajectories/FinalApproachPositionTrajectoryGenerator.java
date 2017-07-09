@@ -11,11 +11,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -31,9 +31,9 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable currentTime;
-   private final DoubleYoVariable trajectoryTime;
-   private final DoubleYoVariable approachTime;
+   private final YoDouble currentTime;
+   private final YoDouble trajectoryTime;
+   private final YoDouble approachTime;
    private final YoPolynomial xyPolynomial, zPolynomial;
 
    private final YoFramePointInMultipleFrames initialPosition;
@@ -44,7 +44,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    private final YoFrameVectorInMultipleFrames currentVelocity;
    private final YoFrameVectorInMultipleFrames currentAcceleration;
 
-   private final DoubleYoVariable approachDistance;
+   private final YoDouble approachDistance;
 
    /** The current trajectory frame chosen by the user. */
    private ReferenceFrame currentTrajectoryFrame;
@@ -61,8 +61,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    private final FramePoint ballPosition = new FramePoint();
    private final int numberOfBalls = 50;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
-   private final BooleanYoVariable showViz;
+   /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
+   private final YoBoolean showViz;
 
    public FinalApproachPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -86,9 +86,9 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      approachTime = new DoubleYoVariable(namePrefix + "ApproachTime", registry);
-      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
-      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
+      approachTime = new YoDouble(namePrefix + "ApproachTime", registry);
+      trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+      currentTime = new YoDouble(namePrefix + "Time", registry);
       xyPolynomial = new YoPolynomial(namePrefix + "PositionPolynomial", 4, registry);
       zPolynomial = new YoPolynomial(namePrefix + "VelocityPolynomial", 7, registry);
 
@@ -112,7 +112,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame, tangentialPlane);
       currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame, tangentialPlane);
 
-      approachDistance = new DoubleYoVariable(namePrefix + "ApproachDistance", registry);
+      approachDistance = new YoDouble(namePrefix + "ApproachDistance", registry);
 
       registerMultipleFramesHolders(initialPosition, finalPosition, currentPosition, currentVelocity, currentAcceleration);
 
@@ -137,7 +137,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
 
          bagOfBalls = new BagOfBalls(numberOfBalls, 0.01, yoGraphicsList.getLabel(), registry, yoGraphicsListRegistry);
 
-         showViz = new BooleanYoVariable(namePrefix + "ShowViz", registry);
+         showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             @Override

@@ -53,8 +53,8 @@ public class MocapToPelvisFrameConverterTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      ReferenceFrame pelvisFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent("pelvisFrame", ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 0.0, 0.0));
-      ReferenceFrame mocapFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, 1.0));
+      ReferenceFrame pelvisFrame = ReferenceFrame.constructFrameWithUnchangingTranslationFromParent("pelvisFrame", ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 0.0, 0.0));
+      ReferenceFrame mocapFrame = ReferenceFrame.constructFrameWithUnchangingTranslationFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, 1.0));
       MocapRigidBody markerRigidBody = createMocapRigidBody(pelvisFrame, mocapFrame);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -41,8 +41,8 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
 	@Test(timeout = 30000)
    public void testSixDoFJoint()
    {
-      random = new Random(1982L);
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
+      Random random = new Random(1982L);
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
 
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
@@ -58,7 +58,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       massMatrixCalculator.compute();
       DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
 
-      RigidBodyInertia inertia = floating.getInertiaCopy();
+      RigidBodyInertia inertia = new RigidBodyInertia(floating.getInertia());
       inertia.changeFrame(ReferenceFrame.getWorldFrame());
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(sixDoFJoint.getDegreesOfFreedom(), sixDoFJoint.getDegreesOfFreedom());
       inertia.getMatrix(inertiaMatrix);
@@ -71,7 +71,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
    public void testFloatingTree()
    {
       random = new Random(1982L);
-      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
+      SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
 
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
@@ -88,12 +88,6 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
 
       MassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
       massMatrixCalculator.compute();
-      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
-
-      RigidBodyInertia inertia = floating.getInertiaCopy();
-      inertia.changeFrame(ReferenceFrame.getWorldFrame());
-      DenseMatrix64F inertiaMatrix = new DenseMatrix64F(sixDoFJoint.getDegreesOfFreedom(), sixDoFJoint.getDegreesOfFreedom());
-      inertia.getMatrix(inertiaMatrix);
    }
 
    private void setUpRandomTree(RigidBody elevator)

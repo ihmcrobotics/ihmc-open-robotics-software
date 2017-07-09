@@ -7,10 +7,9 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -23,33 +22,33 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticLoggerConfiguration
 {
-   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName)
+   public static void setupLogging(YoDouble yoTime, Class<?> clazz, String robotName)
    {
       setupLogging(yoTime, clazz, robotName, false);
    }
 
-   public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName, boolean useInternetDate)
+   public static void setupLogging(YoDouble yoTime, Class<?> clazz, String robotName, boolean useInternetDate)
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-      Date time;
+      LocalDateTime now;
 
       if (!useInternetDate)
       {
-         time = getLocalTime();
+         now = LocalDateTime.now();
       }
       else
       {
-         time = getTimeFromServer();
-         if (time == null)
-            time = getLocalTime();
+         now = getTimeFromServer();
+         if (now == null)
+            now = LocalDateTime.now();
       }
 
-      String timestamp = dateFormat.format(time);
+      String timestamp = now.format(dateTimeFormatter);
 
       Path diagnosticOutputDirectory = Paths.get(System.getProperty("user.home"), ".ihmc", "Diagnostic",
             timestamp + "_" + robotName + "_" + clazz.getSimpleName() + "_Outputs");
@@ -67,19 +66,8 @@ public class DiagnosticLoggerConfiguration
       setupSystemOut(diagnosticOutputDirectory);
       setupLogFiles(diagnosticOutputDirectory, formatter);
    }
-
-   private static Date getLocalTime()
-   {
-      Calendar calendar = Calendar.getInstance();
-      return calendar.getTime();
-   }
-
-   public static void main(String[] args)
-   {
-      System.out.println(getTimeFromServer());
-   }
    
-   private static Date getTimeFromServer()
+   private static LocalDateTime getTimeFromServer()
    {
       InetAddress inetAddress;
       try
@@ -91,8 +79,7 @@ public class DiagnosticLoggerConfiguration
          TimeInfo timeInfo = timeClient.getTime(inetAddress);
          timeInfo.computeDetails();
          long actualTime = timeInfo.getReturnTime() + timeInfo.getOffset();
-         System.out.println(timeInfo.getOffset());
-         Date time = new Date(actualTime);
+         LocalDateTime time = LocalDateTime.ofEpochSecond(actualTime / 1000, (int) (actualTime % 1000) * 1000000, ZoneOffset.UTC);
          return time;
       }
       catch (IOException e)
@@ -222,5 +209,4 @@ public class DiagnosticLoggerConfiguration
          e.printStackTrace();
       }
    }
-
 }

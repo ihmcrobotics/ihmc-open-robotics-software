@@ -1,8 +1,5 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -11,8 +8,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -20,6 +17,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class HexapodMomentumController
 {
@@ -34,11 +32,11 @@ public class HexapodMomentumController
    private final Vector3D angularMomentumWeight = new Vector3D(0.01, 0.01, 0.01);
    
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final HexapodReferenceFrames referenceFrames;
    private final FramePoint desiredComPosition = new FramePoint();
    private final StraightLineCartesianTrajectoryGenerator trajectoryGenerator;
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final CenterOfMassJacobian comJacobian;
    private final YoFramePoint yoCurrentCenterOfMassPosition;
    private final YoFramePoint yoCurrentCenterOfFeetPosition;
@@ -55,7 +53,7 @@ public class HexapodMomentumController
       this.referenceFrames = referenceFrames;
       this.dt = dt;
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      yoTime = new DoubleYoVariable(prefix + "yoTime", registry);
+      yoTime = new YoDouble(prefix + "yoTime", registry);
       yoLinearMomentumRateOfChange = new YoFrameVector(prefix + "desiredLinearMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);  
       yoAngularMomentumRateOfChange = new YoFrameVector(prefix + "desiredAngularMomentumRateOfChange", ReferenceFrame.getWorldFrame(), registry);
       trajectoryGenerator = new StraightLineCartesianTrajectoryGenerator("comTrajectoryGenerator", ReferenceFrame.getWorldFrame(), 3.0, 10.0, yoTime, registry);
@@ -102,8 +100,7 @@ public class HexapodMomentumController
       yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
       yoAngularMomentumRateOfChange.set(angularMomentumRateOfChange);
       
-      momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setAngularMomentumRateOfChange(angularMomentumRateOfChange);
+      momentumRateCommand.setMomentumRate(angularMomentumRateOfChange, linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumWeight.getX(), angularMomentumWeight.getY(), angularMomentumWeight.getZ(), linearMomentumWeight.getX(),
             linearMomentumWeight.getY(), linearMomentumWeight.getZ());

@@ -1,43 +1,43 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * This does essentially the same as RevisedBacklashCompensatingVelocityYoVariable, except it takes a velocity signal as input.
  *
  */
-public class BacklashProcessingYoVariable extends DoubleYoVariable implements ProcessingYoVariable
+public class BacklashProcessingYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final DoubleYoVariable velocity;
+   private final YoDouble velocity;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
-   private final EnumYoVariable<BacklashState> backlashState;
-   private final DoubleYoVariable slopTime;
+   private final YoEnum<BacklashState> backlashState;
+   private final YoDouble slopTime;
 
-   private final DoubleYoVariable timeSinceSloppy;
+   private final YoDouble timeSinceSloppy;
 
    private final double dt;
 
-   public BacklashProcessingYoVariable(String name, String description, double dt, DoubleYoVariable slopTime, YoVariableRegistry registry)
+   public BacklashProcessingYoVariable(String name, String description, double dt, YoDouble slopTime, YoVariableRegistry registry)
    {
       this(name, description, null, dt, slopTime, registry);
    }
 
-   public BacklashProcessingYoVariable(String name, String description, DoubleYoVariable velocityVariable, double dt, DoubleYoVariable slopTime,
+   public BacklashProcessingYoVariable(String name, String description, YoDouble velocityVariable, double dt, YoDouble slopTime,
          YoVariableRegistry registry)
    {
       super(name, description, registry);
 
-      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
 
-      backlashState = new EnumYoVariable<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
+      backlashState = new YoEnum<BacklashState>(name + "BacklashState", registry, BacklashState.class, true);
       backlashState.set(null);
-      timeSinceSloppy = new DoubleYoVariable(name + "TimeSinceSloppy", registry);
+      timeSinceSloppy = new YoDouble(name + "TimeSinceSloppy", registry);
 
       velocity = velocityVariable;
 

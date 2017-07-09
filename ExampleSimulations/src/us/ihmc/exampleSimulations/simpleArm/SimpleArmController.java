@@ -1,103 +1,66 @@
 package us.ihmc.exampleSimulations.simpleArm;
 
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
+import java.util.Random;
+
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 /**
- * Simple example of using the inverse dynamics structure to control a robotic arm.
+ * Random controller to test state estimation.
  */
-public class SimpleArmController implements RobotController
+public class SimpleArmController extends SimpleRobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry;
-   private final SimpleArmRobot robot;
+
+   private final SimpleRobotInputOutputMap robot;
+   private final YoDouble time;
+
+   private static final Random random = new Random(94929438248L);
+   private YoDouble noiseMagnitude = new YoDouble("NoiseMagnitude", registry);
+   private YoDouble decay = new YoDouble("Decay", registry);
+   private YoDouble frequency = new YoDouble("Frequency", registry);
+   private YoDouble magnitude = new YoDouble("Magnitude", registry);
+   private YoDouble offset = new YoDouble("Offset", registry);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final TwistCalculator twistCalculator;
 
-   private final YoFramePoint targetPosition;
-   private final DoubleYoVariable kp;
-   private final FramePoint endEffectorPosition = new FramePoint();
-   private final FrameVector errorVector = new FrameVector();
-   private final Wrench endEffectorWrench = new Wrench();
-
-   public SimpleArmController(SimpleArmRobot simpleArmRobot, String name)
+   public SimpleArmController(SimpleRobotInputOutputMap robot, RigidBody endEffectorBody, YoDouble time)
    {
-      robot = simpleArmRobot;
-      registry = new YoVariableRegistry(name);
-      targetPosition = new YoFramePoint("targetPosition", worldFrame, registry);
-      kp = new DoubleYoVariable("kpTaskspace", registry);
-      kp.set(0.5);
+      this.time = time;
+      this.robot = robot;
 
-      targetPosition.setX(0.3);
-      targetPosition.setY(0.3);
-      targetPosition.setZ(0.7);
+      noiseMagnitude.set(0.5);
+      decay.set(0.05);
+      frequency.set(0.5);
 
-      twistCalculator = new TwistCalculator(worldFrame, robot.getEndEffectorBody());
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -robot.getGravityZ());
-   }
-
-   @Override
-   public void initialize()
-   {
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
-   @Override
-   public String getName()
-   {
-      return registry.getName();
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return registry.getName();
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(endEffectorBody, SimpleArmRobot.gravity);
    }
 
    @Override
    public void doControl()
    {
-      robot.updateInverseDynamicsStructureFromSimulation();
+      robot.readFromSimulation();
 
-      // --- compute force to pull the end effector towards the target position
-      ReferenceFrame endEffectorFrame = robot.getEndEffectorFrame();
-      RigidBody endEffectorBody = robot.getEndEffectorBody();
-      ReferenceFrame endEffectorBodyFrame = endEffectorBody.getBodyFixedFrame();
+      magnitude.add(noiseMagnitude.getDoubleValue() * (random.nextDouble() - 0.5));
+      offset.add(noiseMagnitude.getDoubleValue() * (random.nextDouble() - 0.5));
 
-      endEffectorPosition.setToZero(endEffectorFrame);
-      endEffectorPosition.changeFrame(worldFrame);
-      errorVector.setIncludingFrame(targetPosition.getFrameTuple());
-      errorVector.sub(endEffectorPosition);
-      errorVector.changeFrame(endEffectorFrame);
+      double angle = 2.0 * Math.PI * frequency.getDoubleValue() * time.getDoubleValue();
+      double randomTorque = magnitude.getDoubleValue() * Math.sin(angle) + offset.getDoubleValue();
 
-      endEffectorWrench.setToZero(endEffectorBodyFrame, endEffectorFrame);
-      endEffectorWrench.setLinearPart(errorVector);
-      endEffectorWrench.changeFrame(endEffectorBodyFrame);
-
-      endEffectorWrench.scale(-kp.getDoubleValue());
-      inverseDynamicsCalculator.setExternalWrench(endEffectorBody, endEffectorWrench);
-      // ---
-
-      twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
-      robot.updateSimulationFromInverseDynamicsTorques();
+      robot.addYawTorque(randomTorque);
+      robot.addPitch1Torque(randomTorque);
+      robot.addPitch2Torque(randomTorque);
+
+      magnitude.mul(1.0 - decay.getDoubleValue());
+      offset.mul(1.0 - decay.getDoubleValue());
+
+      robot.writeToSimulation();
    }
 
 }

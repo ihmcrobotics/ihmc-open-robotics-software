@@ -5,11 +5,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -37,14 +37,14 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final BooleanYoVariable isRotationCorrectionEnabled;
+   private final YoBoolean isRotationCorrectionEnabled;
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean hasBeenCalled;
 
-   private final DoubleYoVariable alphaFilter_BreakFrequency;
-   private final DoubleYoVariable dt;
+   private final YoDouble alphaFilter_BreakFrequency;
+   private final YoDouble dt;
 
    ////////////////////////////////////////////
    private final FramePose stateEstimatorPose_Translation = new FramePose(worldFrame);
@@ -74,26 +74,26 @@ public class ClippedSpeedOffsetErrorInterpolator
    ////////////////////////////////////////////
 
    private final AlphaFilteredYoVariable alphaFilter;
-   private final DoubleYoVariable alphaFilter_AlphaValue;
-   private final DoubleYoVariable alphaFilter_PositionValue;
-   private final DoubleYoVariable cLippedAlphaFilterValue;
-   private final DoubleYoVariable previousClippedAlphaFilterValue;
+   private final YoDouble alphaFilter_AlphaValue;
+   private final YoDouble alphaFilter_PositionValue;
+   private final YoDouble cLippedAlphaFilterValue;
+   private final YoDouble previousClippedAlphaFilterValue;
 
-   private final DoubleYoVariable maxTranslationalCorrectionVelocity;
-   private final DoubleYoVariable maxRotationalCorrectionVelocity;
+   private final YoDouble maxTranslationalCorrectionVelocity;
+   private final YoDouble maxRotationalCorrectionVelocity;
 
    private final Vector3D distanceToTravelVector = new Vector3D();
-   private final DoubleYoVariable distanceToTravel;
+   private final YoDouble distanceToTravel;
 
    private final FrameOrientation rotationToTravel = new FrameOrientation(worldFrame);
-   private final DoubleYoVariable angleToTravel;
+   private final YoDouble angleToTravel;
    private final AxisAngle axisAngletoTravel = new AxisAngle();
 
-   private final DoubleYoVariable translationalSpeedForGivenDistanceToTravel;
-   private final DoubleYoVariable rotationalSpeedForGivenAngleToTravel;
+   private final YoDouble translationalSpeedForGivenDistanceToTravel;
+   private final YoDouble rotationalSpeedForGivenAngleToTravel;
 
-   private final DoubleYoVariable temporaryTranslationAlphaClipped;
-   private final DoubleYoVariable temporaryRotationAlphaClipped;
+   private final YoDouble temporaryTranslationAlphaClipped;
+   private final YoDouble temporaryRotationAlphaClipped;
 
    private final ReferenceFrame stateEstimatorReferenceFrame;
    private final RigidBodyTransform stateEstimatorTransform_Translation = new RigidBodyTransform();
@@ -101,44 +101,44 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    
    //Deadzone translation variables
-   private final DoubleYoVariable xDeadzoneSize;
-   private final DoubleYoVariable yDeadzoneSize;
-   private final DoubleYoVariable zDeadzoneSize;
+   private final YoDouble xDeadzoneSize;
+   private final YoDouble yDeadzoneSize;
+   private final YoDouble zDeadzoneSize;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneX;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneY;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneZ;
-   private final DoubleYoVariable goalTranslationRawX;
-   private final DoubleYoVariable goalTranslationRawY;
-   private final DoubleYoVariable goalTranslationRawZ;
+   private final YoDouble goalTranslationRawX;
+   private final YoDouble goalTranslationRawY;
+   private final YoDouble goalTranslationRawZ;
    private final Vector3D offsetBetweenStartAndGoalVector_Translation = new Vector3D();
    private final Vector3D updatedGoalOffsetWithDeadzone_Translation = new Vector3D();
    
    //Deadzone rotation Variables
-   private final DoubleYoVariable yawDeadzoneSize;
+   private final YoDouble yawDeadzoneSize;
    private final DeadzoneYoVariable goalYawWithDeadZone;
-   private final DoubleYoVariable goalYawRaw;
+   private final YoDouble goalYawRaw;
    private final FrameOrientation offsetBetweenStartAndGoal_Rotation = new FrameOrientation(worldFrame);
    private final FrameOrientation updatedGoalOffsetWithDeadZone_Rotation = new FrameOrientation(worldFrame);
    private final Quaternion updatedGoalOffsetWithDeadZone_Rotation_quat = new Quaternion();
    
    double[] stateEstimatorYawPitchRoll = new double[3];
    double[] temporaryYawPitchRoll = new double[3];
-   private final DoubleYoVariable startYaw;
-   private final DoubleYoVariable goalYaw;
-   private final DoubleYoVariable interpolatedYaw;
+   private final YoDouble startYaw;
+   private final YoDouble goalYaw;
+   private final YoDouble interpolatedYaw;
    
    //used to check if the orientation error is too big
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
    private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
    private final FramePoint iterativeClosestPointTranslation = new FramePoint();
    private final AxisAngle axisAngleForError = new AxisAngle();
-   private final DoubleYoVariable maximumErrorAngleInDegrees;
-   private final DoubleYoVariable maximumErrorTranslation;
+   private final YoDouble maximumErrorAngleInDegrees;
+   private final YoDouble maximumErrorTranslation;
    
-   private final DoubleYoVariable angleError;
-   private final DoubleYoVariable translationErrorX;
-   private final DoubleYoVariable translationErrorY;
-   private final DoubleYoVariable translationErrorZ;
+   private final YoDouble angleError;
+   private final YoDouble translationErrorX;
+   private final YoDouble translationErrorY;
+   private final YoDouble translationErrorZ;
    
    //for feedBack in scs
    private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
@@ -161,70 +161,70 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFrameOrientation yoGoalOffsetFrameOrientation_Rotation;
    private final YoFrameOrientation yoInterpolatedOffsetFrameOrientation_Rotation;
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, DoubleYoVariable alphaFilterBreakFrequency,
+   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, YoDouble alphaFilterBreakFrequency,
          double estimator_dt, boolean correctRotation)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.alphaFilter_BreakFrequency = alphaFilterBreakFrequency;
-      this.dt = new DoubleYoVariable("dt", registry);
+      this.dt = new YoDouble("dt", registry);
       this.dt.set(estimator_dt);
 
       this.stateEstimatorReferenceFrame = referenceFrame;
 
-      isRotationCorrectionEnabled = new BooleanYoVariable("isRotationCorrectionEnabled", registry);
+      isRotationCorrectionEnabled = new YoBoolean("isRotationCorrectionEnabled", registry);
       isRotationCorrectionEnabled.set(correctRotation);
 
-      hasBeenCalled = new BooleanYoVariable("hasbeenCalled", registry);
+      hasBeenCalled = new YoBoolean("hasbeenCalled", registry);
       hasBeenCalled.set(false);
 
-      alphaFilter_AlphaValue = new DoubleYoVariable("alphaFilter_AlphaValue", registry);
+      alphaFilter_AlphaValue = new YoDouble("alphaFilter_AlphaValue", registry);
       alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(this.alphaFilter_BreakFrequency.getDoubleValue(),
             this.dt.getDoubleValue()));
-      alphaFilter_PositionValue = new DoubleYoVariable("alphaFilter_PositionValue", registry);
+      alphaFilter_PositionValue = new YoDouble("alphaFilter_PositionValue", registry);
       alphaFilter_PositionValue.set(0.0);
       alphaFilter = new AlphaFilteredYoVariable("alphaFilter", registry, alphaFilter_AlphaValue, alphaFilter_PositionValue);
 
-      cLippedAlphaFilterValue = new DoubleYoVariable("cLippedAlphaFilterValue", registry);
+      cLippedAlphaFilterValue = new YoDouble("cLippedAlphaFilterValue", registry);
       cLippedAlphaFilterValue.set(0.0);
-      previousClippedAlphaFilterValue = new DoubleYoVariable("previousClippedAlphaFilterValue", registry);
+      previousClippedAlphaFilterValue = new YoDouble("previousClippedAlphaFilterValue", registry);
       previousClippedAlphaFilterValue.set(0.0);
 
-      maxTranslationalCorrectionVelocity = new DoubleYoVariable("maxTranslationalCorrectionVelocity", registry);
+      maxTranslationalCorrectionVelocity = new YoDouble("maxTranslationalCorrectionVelocity", registry);
       maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
-      maxRotationalCorrectionVelocity = new DoubleYoVariable("maxRotationalCorrectionVelocity", registry);
+      maxRotationalCorrectionVelocity = new YoDouble("maxRotationalCorrectionVelocity", registry);
       maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED);
 
-      distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
+      distanceToTravel = new YoDouble("distanceToTravel", registry);
       distanceToTravel.set(0.0);
-      angleToTravel = new DoubleYoVariable("angleToTravel", registry);
+      angleToTravel = new YoDouble("angleToTravel", registry);
       angleToTravel.set(0.0);
 
-      translationalSpeedForGivenDistanceToTravel = new DoubleYoVariable("translationalSpeedForGivenDistanceToTravel", registry);
-      rotationalSpeedForGivenAngleToTravel = new DoubleYoVariable("rotationalSpeedForGivenAngleToTravel", registry);
+      translationalSpeedForGivenDistanceToTravel = new YoDouble("translationalSpeedForGivenDistanceToTravel", registry);
+      rotationalSpeedForGivenAngleToTravel = new YoDouble("rotationalSpeedForGivenAngleToTravel", registry);
 
-      temporaryTranslationAlphaClipped = new DoubleYoVariable("temporaryTranslationAlphaClipped", registry);
-      temporaryRotationAlphaClipped = new DoubleYoVariable("temporaryRotationAlphaClipped", registry);
+      temporaryTranslationAlphaClipped = new YoDouble("temporaryTranslationAlphaClipped", registry);
+      temporaryRotationAlphaClipped = new YoDouble("temporaryRotationAlphaClipped", registry);
 
-      xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
+      xDeadzoneSize = new YoDouble("xDeadzoneSize", registry);
       xDeadzoneSize.set(X_DEADZONE_SIZE);
-      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);
+      yDeadzoneSize = new YoDouble("yDeadzoneSize", registry);
       yDeadzoneSize.set(Y_DEADZONE_SIZE);
-      zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
+      zDeadzoneSize = new YoDouble("zDeadzoneSize", registry);
       zDeadzoneSize.set(Z_DEADZONE_SIZE);
 
-      goalTranslationRawX = new DoubleYoVariable("goalTranslationRawX", registry);
-      goalTranslationRawY = new DoubleYoVariable("goalTranslationRawY", registry);
-      goalTranslationRawZ = new DoubleYoVariable("goalTranslationRawZ", registry);
+      goalTranslationRawX = new YoDouble("goalTranslationRawX", registry);
+      goalTranslationRawY = new YoDouble("goalTranslationRawY", registry);
+      goalTranslationRawZ = new YoDouble("goalTranslationRawZ", registry);
 
       goalTranslationWithDeadzoneX = new DeadzoneYoVariable("goalTranslationWithDeadzoneX", goalTranslationRawX, xDeadzoneSize, registry);
       goalTranslationWithDeadzoneY = new DeadzoneYoVariable("goalTranslationWithDeadzoneY", goalTranslationRawY, yDeadzoneSize, registry);
       goalTranslationWithDeadzoneZ = new DeadzoneYoVariable("goalTranslationWithDeadzoneZ", goalTranslationRawZ, zDeadzoneSize, registry);
       
-      yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
+      yawDeadzoneSize = new YoDouble("yawDeadzoneSize", registry);
       yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
-      goalYawRaw = new DoubleYoVariable("goalYawRaw", registry);
+      goalYawRaw = new YoDouble("goalYawRaw", registry);
       goalYawWithDeadZone = new DeadzoneYoVariable("goalYawWithDeadZone", goalYawRaw, yawDeadzoneSize, registry);
       
       // for feedback in SCS
@@ -248,19 +248,19 @@ public class ClippedSpeedOffsetErrorInterpolator
          }
       });
 
-      maximumErrorAngleInDegrees = new DoubleYoVariable("maximumErrorAngleInDegrees", registry);
+      maximumErrorAngleInDegrees = new YoDouble("maximumErrorAngleInDegrees", registry);
       maximumErrorAngleInDegrees.set(MAXIMUM_ANGLE_ERROR_IN_DEGRESS);
-      maximumErrorTranslation = new DoubleYoVariable("maximumErrorTranslation", registry);
+      maximumErrorTranslation = new YoDouble("maximumErrorTranslation", registry);
       maximumErrorTranslation.set(MAXIMUM_TRANSLATION_ERROR);
       
-      startYaw = new DoubleYoVariable("startYaw", registry);
-      goalYaw = new DoubleYoVariable("goalYaw", registry);
-      interpolatedYaw = new DoubleYoVariable("interpolatedYaw", registry);
+      startYaw = new YoDouble("startYaw", registry);
+      goalYaw = new YoDouble("goalYaw", registry);
+      interpolatedYaw = new YoDouble("interpolatedYaw", registry);
     
-      angleError = new DoubleYoVariable("angleError", registry);
-      translationErrorX = new DoubleYoVariable("translationErrorX", registry);
-      translationErrorY = new DoubleYoVariable("translationErrorY", registry);
-      translationErrorZ = new DoubleYoVariable("translationErrorZ", registry);
+      angleError = new YoDouble("angleError", registry);
+      translationErrorX = new YoDouble("translationErrorX", registry);
+      translationErrorY = new YoDouble("translationErrorY", registry);
+      translationErrorZ = new YoDouble("translationErrorZ", registry);
       
    }
 

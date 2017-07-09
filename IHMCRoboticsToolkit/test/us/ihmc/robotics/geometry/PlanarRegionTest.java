@@ -11,6 +11,8 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -103,8 +105,8 @@ public class PlanarRegionTest
       Point3D minPoint = new Point3D(1.0, 1.0, zLocationOfPlanarRegion);
       Point3D maxPoint = new Point3D(2.0, 2.0, zLocationOfPlanarRegion);
 
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(minPoint.getX(), minPoint.getY());
       polygon1.addVertex(maxPoint.getX(), minPoint.getY());
       polygon1.addVertex(minPoint.getX(), maxPoint.getY());
@@ -112,7 +114,7 @@ public class PlanarRegionTest
 
       regionConvexPolygons.add(polygon1);
 
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
@@ -143,8 +145,8 @@ public class PlanarRegionTest
       Point3D maxPoint = new Point3D(-1.0, -1.0, zLocationOfPlanarRegion);
       Point3D minPoint = new Point3D(-2.0, -2.0, zLocationOfPlanarRegion);
 
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(minPoint.getX(), minPoint.getY());
       polygon1.addVertex(maxPoint.getX(), minPoint.getY());
       polygon1.addVertex(minPoint.getX(), maxPoint.getY());
@@ -152,7 +154,7 @@ public class PlanarRegionTest
 
       regionConvexPolygons.add(polygon1);
 
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
@@ -182,8 +184,8 @@ public class PlanarRegionTest
       Point3D maxPoint = new Point3D(2.0, 2.0, 0.0);
       Point3D minPoint = new Point3D(-2.0, -2.0, 0.0);
 
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(minPoint.getX(), minPoint.getY());
       polygon1.addVertex(maxPoint.getX(), minPoint.getY());
       polygon1.addVertex(minPoint.getX(), maxPoint.getY());
@@ -191,7 +193,7 @@ public class PlanarRegionTest
 
       regionConvexPolygons.add(polygon1);
 
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
@@ -217,18 +219,18 @@ public class PlanarRegionTest
    @Test(timeout = 30000)
    public void testBoundingBoxForLShapedPlanarRegionWithIdentifyTransform()
    {
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(1.0, 1.0);
       polygon1.addVertex(1.0, -1.0);
       polygon1.addVertex(-1.0, -1.0);
       polygon1.addVertex(-1.0, 1.0);
-      ConvexPolygon2d polygon2 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
       polygon2.addVertex(3.0, 1.0);
       polygon2.addVertex(3.0, -1.0);
       polygon2.addVertex(1.0, -1.0);
       polygon2.addVertex(1.0, 1.0);
-      ConvexPolygon2d polygon3 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
       polygon3.addVertex(1.0, 3.0);
       polygon3.addVertex(1.0, 1.0);
       polygon3.addVertex(-1.0, 1.0);
@@ -237,7 +239,7 @@ public class PlanarRegionTest
       regionConvexPolygons.add(polygon1);
       regionConvexPolygons.add(polygon2);
       regionConvexPolygons.add(polygon3);
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
@@ -255,18 +257,18 @@ public class PlanarRegionTest
    public void testWithLShapedPlanarRegionWithIdentityTransform()
    {
       // polygons forming a L-shaped region.
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(1.0, 1.0);
       polygon1.addVertex(1.0, -1.0);
       polygon1.addVertex(-1.0, -1.0);
       polygon1.addVertex(-1.0, 1.0);
-      ConvexPolygon2d polygon2 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
       polygon2.addVertex(3.0, 1.0);
       polygon2.addVertex(3.0, -1.0);
       polygon2.addVertex(1.0, -1.0);
       polygon2.addVertex(1.0, 1.0);
-      ConvexPolygon2d polygon3 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
       polygon3.addVertex(1.0, 3.0);
       polygon3.addVertex(1.0, 1.0);
       polygon3.addVertex(-1.0, 1.0);
@@ -275,7 +277,7 @@ public class PlanarRegionTest
       regionConvexPolygons.add(polygon1);
       regionConvexPolygons.add(polygon2);
       regionConvexPolygons.add(polygon3);
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
@@ -372,19 +374,19 @@ public class PlanarRegionTest
       assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
 
       // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
-      LineSegment2d lineSegment = new LineSegment2d(0.0, 0.0, 2.0, 2.0);
+      LineSegment2D lineSegment = new LineSegment2D(0.0, 0.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       ArrayList<Point2D[]> intersectionsInPlaneFrame = new ArrayList<>();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(3, intersectionsInPlaneFrame.size());
 
-      lineSegment = new LineSegment2d(0.0, 0.0, 0.5, 0.5);
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.5, 0.5);
       assertFalse("Not intersecting if fully inside a single polygon", planarRegion.isLineSegmentIntersecting(lineSegment));
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(0, intersectionsInPlaneFrame.size());
 
-      lineSegment = new LineSegment2d(0.0, 0.0, 0.0, 1.5);
+      lineSegment = new LineSegment2D(0.0, 0.0, 0.0, 1.5);
       assertTrue("Intersecting if fully inside but cross two polygons", planarRegion.isLineSegmentIntersecting(lineSegment));
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
@@ -396,12 +398,12 @@ public class PlanarRegionTest
       assertEquals(1, points.length);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       
-      lineSegment = new LineSegment2d(2.5, 0.5, 3.0, 9.0);
+      lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
-      lineSegment = new LineSegment2d(2.5, 4.5, 3.0, 9.0);
+      lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
       assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
 
-      lineSegment = new LineSegment2d(2.0, -2.0, 2.0, 2.0);
+      lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));  
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
@@ -411,7 +413,7 @@ public class PlanarRegionTest
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
 
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
       convexPolygon.addVertex(0.2, -0.2);
       convexPolygon.addVertex(-0.2, -0.2);
@@ -428,7 +430,7 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.09, convexPolygon)));
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.21, convexPolygon)));
 
-      ArrayList<ConvexPolygon2d> intersections = new ArrayList<>();
+      ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
       planarRegion.getPolygonIntersectionsWhenProjectedVertically(convexPolygon, intersections);
       assertEquals(1, intersections.size());
 
@@ -461,7 +463,7 @@ public class PlanarRegionTest
       transform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
       transform.setTranslation(1.2, 3.4, 5.6);
 
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
       convexPolygon.addVertex(0.2, -0.2);
       convexPolygon.addVertex(-0.2, -0.2);
@@ -470,7 +472,7 @@ public class PlanarRegionTest
 
       PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
 
-      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
       polygonToSnap.addVertex(0.1, 0.1);
       polygonToSnap.addVertex(0.1, -0.1);
       polygonToSnap.addVertex(-0.1, -0.1);
@@ -492,18 +494,18 @@ public class PlanarRegionTest
       Random random = new Random(42L);
 
       // polygons forming a L-shaped region.
-      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
-      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
       polygon1.addVertex(1.0, 1.0);
       polygon1.addVertex(1.0, -1.0);
       polygon1.addVertex(-1.0, -1.0);
       polygon1.addVertex(-1.0, 1.0);
-      ConvexPolygon2d polygon2 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
       polygon2.addVertex(3.0, 1.0);
       polygon2.addVertex(3.0, -1.0);
       polygon2.addVertex(1.0, -1.0);
       polygon2.addVertex(1.0, 1.0);
-      ConvexPolygon2d polygon3 = new ConvexPolygon2d();
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
       polygon3.addVertex(1.0, 3.0);
       polygon3.addVertex(1.0, 1.0);
       polygon3.addVertex(-1.0, 1.0);
@@ -512,7 +514,7 @@ public class PlanarRegionTest
       regionConvexPolygons.add(polygon1);
       regionConvexPolygons.add(polygon2);
       regionConvexPolygons.add(polygon3);
-      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -522,7 +524,7 @@ public class PlanarRegionTest
          Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
          Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
-         ReferenceFrame localFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
+         ReferenceFrame localFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
          assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
@@ -655,7 +657,7 @@ public class PlanarRegionTest
          point3d.setZ(Double.POSITIVE_INFINITY);
          assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d.getPoint()));
 
-         ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
          convexPolygon.addVertex(0.2, 0.2);
          convexPolygon.addVertex(0.2, -0.2);
          convexPolygon.addVertex(-0.2, -0.2);
@@ -676,9 +678,9 @@ public class PlanarRegionTest
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          planarRegion.getTransformToWorld(transformToWorld);
 
-         for (ConvexPolygon2d convexPolygon2d : regionConvexPolygons)
+         for (ConvexPolygon2D convexPolygon2d : regionConvexPolygons)
          {
-            ConvexPolygon2d convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
+            ConvexPolygon2D convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
             for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
             {
                Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
@@ -696,13 +698,13 @@ public class PlanarRegionTest
    @Test(timeout = 30000)
    public void testGetPlaneZGivenXY()
    {
-      ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d();
+      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D();
       convexPolygon2d.addVertex(1.0, 1.0);
       convexPolygon2d.addVertex(-1.0, 1.0);
       convexPolygon2d.addVertex(-1.0, -1.0);
       convexPolygon2d.addVertex(1.0, -1.0);
       convexPolygon2d.update();
-      ArrayList<ConvexPolygon2d> polygonList = new ArrayList<>();
+      ArrayList<ConvexPolygon2D> polygonList = new ArrayList<>();
       polygonList.add(convexPolygon2d);
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       PlanarRegion planarRegion = new PlanarRegion(transformToWorld, polygonList);
@@ -768,23 +770,23 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.5), 1e-7));
    }
 
-   static ConvexPolygon2d translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2d convexPolygon)
+   static ConvexPolygon2D translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2D convexPolygon)
    {
       Vector2D translation = new Vector2D(xTranslation, yTranslation);
-      return ConvexPolygon2dCalculator.translatePolygonCopy(translation, convexPolygon);
+      return convexPolygon.translateCopy(translation);
    }
 
-   private static ConvexPolygon2d transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2d convexPolygon)
+   private static ConvexPolygon2D transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2D convexPolygon)
    {
-      ConvexPolygon2d transformedConvexPolygon = new ConvexPolygon2d(convexPolygon);
+      ConvexPolygon2D transformedConvexPolygon = new ConvexPolygon2D(convexPolygon);
       transformedConvexPolygon.applyTransformAndProjectToXYPlane(transform);
       return transformedConvexPolygon;
    }
 
-   private void assertThatAllPolygonVerticesAreInBoundingBox(List<ConvexPolygon2d> regionConvexPolygons, PlanarRegion planarRegion,
+   private void assertThatAllPolygonVerticesAreInBoundingBox(List<ConvexPolygon2D> regionConvexPolygons, PlanarRegion planarRegion,
          BoundingBox3D boundingBox3dInWorld)
    {
-      for (ConvexPolygon2d convexPolygon2dInWorld : regionConvexPolygons)
+      for (ConvexPolygon2D convexPolygon2dInWorld : regionConvexPolygons)
       {
          for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
          {

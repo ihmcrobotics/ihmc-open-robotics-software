@@ -27,7 +27,7 @@ public class ScriptBasedControllerCommandGenerator
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    private final ReferenceFrame worldFrame;
    private final FullHumanoidRobotModel fullRobotModel;
-   
+
    public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands, FullHumanoidRobotModel fullRobotModel)
    {
       this.controllerCommands = controllerCommands;
@@ -41,7 +41,7 @@ public class ScriptBasedControllerCommandGenerator
       try
       {
          scriptFileLoader = new ScriptFileLoader(scriptFilePath);
-         
+
          RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromReferenceFrameToWorldFrame);
          scriptObjects.addAll(scriptObjectsList);
@@ -50,16 +50,16 @@ public class ScriptBasedControllerCommandGenerator
       catch (IOException e)
       {
          System.err.println("Could not load script file " + scriptFilePath);
-      }            
+      }
    }
-   
+
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
    {
       ScriptFileLoader scriptFileLoader;
       try
       {
          scriptFileLoader = new ScriptFileLoader(scriptInputStream);
-         
+
          RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromReferenceFrameToWorldFrame);
          scriptObjects.addAll(scriptObjectsList);
@@ -68,8 +68,8 @@ public class ScriptBasedControllerCommandGenerator
       catch (IOException e)
       {
          System.err.println("Could not load script file " + scriptInputStream);
-      }           
-      
+      }
+
    }
 
    private void convertFromScriptObjectsToControllerCommands()
@@ -89,8 +89,8 @@ public class ScriptBasedControllerCommandGenerator
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-         message.setTrajectoryReferenceFrameId(worldFrame);
-         message.setDataReferenceFrameId(worldFrame);
+         message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+         message.getFrameInformation().setDataReferenceFrame(worldFrame);
          FootTrajectoryCommand command = new FootTrajectoryCommand();
          command.set(worldFrame, worldFrame, message);
          controllerCommands.add(command);
@@ -99,8 +99,8 @@ public class ScriptBasedControllerCommandGenerator
       {
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
-         message.setTrajectoryReferenceFrameId(chestFrame);
-         message.setDataReferenceFrameId(worldFrame);
+         message.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+         message.getFrameInformation().setDataReferenceFrame(worldFrame);
          HandTrajectoryCommand command = new HandTrajectoryCommand();
          command.set(worldFrame, chestFrame, message);
          controllerCommands.add(command);
@@ -119,17 +119,17 @@ public class ScriptBasedControllerCommandGenerator
          command.set(message);
          controllerCommands.add(command);
       }
-      
+
 
 //      else if (scriptObject instanceof ArmTrajectoryMessage)
 //      {
 //         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
 //         armTrajectoryMessageSubscriber.receivedPacket(armTrajectoryMessage);
-//         
+//
 //         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
 //      }
 
-      
+
       else
       {
          System.err.println("ScriptBasedControllerCommandGenerator: Didn't process script object " + nextObject);
@@ -141,5 +141,5 @@ public class ScriptBasedControllerCommandGenerator
 
 
 
-  
+
 }

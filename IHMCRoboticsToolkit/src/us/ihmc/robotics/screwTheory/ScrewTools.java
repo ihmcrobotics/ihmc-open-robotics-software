@@ -13,10 +13,11 @@ import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -34,20 +35,7 @@ public class ScrewTools
 
    public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-      RevoluteJoint joint = new RevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis));
-
-      return joint;
+      return new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
    public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis,
@@ -59,19 +47,7 @@ public class ScrewTools
    public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis,
                                                               boolean isPartOfClosedKinematicLoop)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-
-      return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
+      return new PassiveRevoluteJoint(jointName, parentBody, transformToParent, jointAxis, isPartOfClosedKinematicLoop);
    }
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
@@ -81,55 +57,29 @@ public class ScrewTools
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
-      String beforeJointName = "before" + jointName;
-
-      ReferenceFrame parentFrame;
-      if (parentBody.isRootBody())
-         parentFrame = parentBody.getBodyFixedFrame();
-      else
-         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
-
-      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
-
-      String afterJointName = jointName;
-      PrismaticJoint joint = new PrismaticJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis));
-
-      return joint;
+      return new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, Vector3D centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, double Ixx, double Iyy, double Izz, double mass, Vector3D centerOfMassOffset)
    {
-      String comFrameName = name + "CoM";
-      ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), centerOfMassOffset, comFrameName);
-      RigidBodyInertia inertia = new RigidBodyInertia(comFrame, momentOfInertia, mass);
-      RigidBody ret = new RigidBody(name, inertia, parentJoint);
-
-      return ret;
+      Matrix3D momentOfInertia = new Matrix3D();
+      momentOfInertia.setIdentity();
+      momentOfInertia.setM00(Ixx);
+      momentOfInertia.setM11(Iyy);
+      momentOfInertia.setM22(Izz);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, centerOfMassOffset);
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset)
    {
-      String comFrameName = name + "CoM";
-      ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), inertiaPose, comFrameName);
-      RigidBodyInertia inertia = new RigidBodyInertia(comFrame, momentOfInertia, mass);
-      RigidBody ret = new RigidBody(name, inertia, parentJoint);
-
-      return ret;
+      RigidBodyTransform inertiaPose = new RigidBodyTransform();
+      inertiaPose.setTranslation(centerOfMassOffset);
+      return addRigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
-   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3D offset, String frameName)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-      transformToParent.setTranslationAndIdentityRotation(offset);
-
-      return createOffsetFrame(parentFrame, transformToParent, frameName);
-   }
-
-   public static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent, String frameName)
-   {
-      ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
-
-      return beforeJointFrame;
+      return new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
    }
 
    public static RigidBody[] computeSuccessors(InverseDynamicsJoint... joints)
@@ -510,7 +460,7 @@ public class ScrewTools
             originalToClonedRigidBodies.put(rootBody, rootBodyCopy);
 
             String jointNameOriginal = jointOriginal.getName();
-            SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy, rootBodyFrame);
+            SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy);
             cloned[i] = jointCopy;
          }
          else

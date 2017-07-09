@@ -19,6 +19,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import javax.imageio.ImageIO;
@@ -33,7 +35,14 @@ public class USBFiducialDetector
 {
    static
    {
-      NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      try
+      {
+         NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         PrintTools.error("Failed to load the OpenCV library.");
+      }
    }
 
    public static void main(String[] args) throws IOException, InterruptedException

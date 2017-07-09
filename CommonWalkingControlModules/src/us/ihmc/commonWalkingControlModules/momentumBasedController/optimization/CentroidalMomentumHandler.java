@@ -35,6 +35,7 @@ public class CentroidalMomentumHandler
    private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
    private final double robotMass;
@@ -129,7 +130,7 @@ public class CentroidalMomentumHandler
 
    public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateCommand momentumRateCommand)
    {
-      DenseMatrix64F selectionMatrix = momentumRateCommand.getSelectionMatrix();
+      momentumRateCommand.getSelectionMatrix(centerOfMassFrame, selectionMatrix);
       DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
 
       CommonOps.mult(selectionMatrix, momentumRate, centroidalMomentumEquationRightHandSide);

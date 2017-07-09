@@ -32,7 +32,7 @@ public class RRTValidConnection
       }
       else
       {
-         for (int i = 0; i < numberOfPiece; i++)
+         for (int i = 1; i < numberOfPiece-1; i++)
          {
             RRTNode aNode = nodeCreator.createNode();
 
@@ -61,11 +61,13 @@ public class RRTValidConnection
       }
       return true;
    }
-   
-   public void initialize(int numberOfPiece)
+   /*
+    * numberOfPiece should larger than 2
+    */
+   public void reInitialize(int numberOfPiece)
    {
       nodes.clear();
       this.numberOfPiece = numberOfPiece;
       initialize();
-   }
+   }   
 }

@@ -6,7 +6,7 @@ public class ChestTrajectoryCommand extends SO3TrajectoryControllerCommand<Chest
 {
    public ChestTrajectoryCommand()
    {
-      
+
    }
 
    @Override

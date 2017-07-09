@@ -3,9 +3,7 @@ package us.ihmc.humanoidRobotics.frames;
 import java.util.EnumMap;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -13,12 +11,13 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
+import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
@@ -32,23 +31,23 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
-   private final ReferenceFrame chestFrame;
-   private final ReferenceFrame pelvisFrame;
-   private final ZUpFrame pelvisZUpFrame;
+   private final MovingReferenceFrame chestFrame;
+   private final MovingReferenceFrame pelvisFrame;
+   private final MovingZUpFrame pelvisZUpFrame;
 
-   private final EnumMap<SpineJointName, ReferenceFrame> spineReferenceFrames = ContainerTools.createEnumMap(SpineJointName.class);
-   private final EnumMap<NeckJointName, ReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
-   private final SideDependentList<EnumMap<ArmJointName, ReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
-   private final SideDependentList<EnumMap<LegJointName, ReferenceFrame>> legJointFrames = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   private final EnumMap<SpineJointName, MovingReferenceFrame> spineReferenceFrames = ContainerTools.createEnumMap(SpineJointName.class);
+   private final EnumMap<NeckJointName, MovingReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
+   private final SideDependentList<EnumMap<ArmJointName, MovingReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   private final SideDependentList<EnumMap<LegJointName, MovingReferenceFrame>> legJointFrames = SideDependentList.createListOfEnumMaps(LegJointName.class);
 
-   private final SideDependentList<ReferenceFrame> handZUpFrames = new SideDependentList<ReferenceFrame>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>();
-   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
-   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<ReferenceFrame>();
-   private final MidFrameZUpFrame midFeetZUpFrame;
-   private final MidFootZUpGroundFrame midFootZUpGroundFrame;
-   private final ReferenceFrame midFeetZUpWalkDirectionFrame;
-   private final ReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
+   private final SideDependentList<MovingReferenceFrame> handZUpFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames = new SideDependentList<>();
+   private final MovingMidFrameZUpFrame midFeetZUpFrame;
+   private final MovingMidFootZUpGroundFrame midFootZUpGroundFrame;
+   private final MovingReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -72,20 +71,22 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          chestFrame = null;
       }
-      pelvisZUpFrame = new ZUpFrame(worldFrame, pelvisFrame, "pelvisZUpFrame");
+      pelvisZUpFrame = new MovingZUpFrame(pelvisFrame, "pelvisZUpFrame");
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
 
       if (robotJointNames.getNeckJointNames() != null)
       {
-         for (NeckJointName neckJointName : robotJointNames.getNeckJointNames()) {
+         for (NeckJointName neckJointName : robotJointNames.getNeckJointNames())
+         {
             this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
          }
       }
 
       if (robotJointNames.getSpineJointNames() != null)
       {
-         for (SpineJointName spineJointName : robotJointNames.getSpineJointNames()) {
+         for (SpineJointName spineJointName : robotJointNames.getSpineJointNames())
+         {
             this.spineReferenceFrames.put(spineJointName, fullRobotModel.getSpineJoint(spineJointName).getFrameAfterJoint());
          }
       }
@@ -94,7 +95,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            for (ArmJointName armJointName : robotJointNames.getArmJointNames()) {
+            for (ArmJointName armJointName : robotJointNames.getArmJointNames())
+            {
                this.armJointFrames.get(robotSide).put(armJointName, fullRobotModel.getArmJoint(robotSide, armJointName).getFrameAfterJoint());
             }
          }
@@ -104,86 +106,43 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            for (LegJointName legJointName : robotJointNames.getLegJointNames()) {
-               ReferenceFrame legJointFrame = fullRobotModel.getFrameAfterLegJoint(robotSide, legJointName);
+            for (LegJointName legJointName : robotJointNames.getLegJointNames())
+            {
+               MovingReferenceFrame legJointFrame = fullRobotModel.getFrameAfterLegJoint(robotSide, legJointName);
                legJointFrames.get(robotSide).put(legJointName, legJointFrame);
             }
          }
       }
 
+      SideDependentList<MovingZUpFrame> localSoleZUpFrames = new SideDependentList<>();
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
+         MovingReferenceFrame footFrame = getFootFrame(robotSide);
+         footReferenceFrames.put(robotSide, footFrame);
+
+         MovingZUpFrame ankleZUpFrame = new MovingZUpFrame(footFrame, robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
-         ReferenceFrame handFrame = getHandFrame(robotSide);
+         MovingReferenceFrame handFrame = getHandFrame(robotSide);
          if (handFrame != null)
          {
-            ZUpFrame handZUpFrame = new ZUpFrame(worldFrame, handFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
+            MovingZUpFrame handZUpFrame = new MovingZUpFrame(handFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
             handZUpFrames.put(robotSide, handZUpFrame);
          }
-         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+         MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
 
-         ZUpFrame soleZUpFrame = new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp");
+         MovingZUpFrame soleZUpFrame = new MovingZUpFrame(soleFrame, soleFrame.getName() + "ZUp");
+         localSoleZUpFrames.put(robotSide, soleZUpFrame);
          soleZUpFrames.put(robotSide, soleZUpFrame);
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
-      midFootZUpGroundFrame = new MidFootZUpGroundFrame("midFeetZUpAverageYaw", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+      midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+      midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw", localSoleZUpFrames.get(RobotSide.LEFT),
+                                                              localSoleZUpFrames.get(RobotSide.RIGHT));
 
-      //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
-      midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
-      {
-         private static final long serialVersionUID = 8156971218482020008L;
-         private final FramePose midFootZUpPose = new FramePose();
-         private final FramePose leftFootPose = new FramePose();
-         private final FramePose rightFootPose = new FramePose();
-         private final SideDependentList<FramePose> footPoses = new SideDependentList<>(leftFootPose, rightFootPose);
-
-         private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-         private final double[] tempYawPitchRoll = new double[3];
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               ReferenceFrame footFrame = getFootFrame(robotSide);
-               footFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-               FramePose footPose = footPoses.get(robotSide);
-               footPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempTransform);
-               footPose.getOrientation(tempYawPitchRoll);
-               tempYawPitchRoll[1] = 0.0;
-               tempYawPitchRoll[2] = 0.0;
-               footPose.setYawPitchRoll(tempYawPitchRoll);
-            }
-
-            midFootZUpPose.interpolate(leftFootPose, rightFootPose, 0.5);
-            midFootZUpPose.setZ(Math.min(leftFootPose.getZ(), rightFootPose.getZ()));
-            midFootZUpPose.getPose(transformToParent);
-         }
-      };
-
-      // this is a
-      midFeetUnderPelvisWalkDirectionFrame = new ReferenceFrame("midFeetUnderPelvisWalkDirectionFrame", ReferenceFrame.getWorldFrame())
-      {
-         private static final long serialVersionUID = -8209218692291863332L;
-         private final FramePose midFeetPose = new FramePose();
-         private final FramePose pelvisPose = new FramePose();
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            midFeetPose.setToZero(midFeetZUpWalkDirectionFrame);
-            pelvisPose.setToZero(getPelvisFrame());
-
-            pelvisPose.changeFrame(midFeetZUpWalkDirectionFrame);
-            midFeetPose.setX(pelvisPose.getX());
-            midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
-            midFeetPose.getPose(transformToParent);
-         }
-      };
+      midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame);
 
       RigidBody elevator = fullRobotModel.getElevator();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
@@ -196,12 +155,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.RIGHT_SOLE_FRAME, getSoleFrame(RobotSide.RIGHT));
       RigidBody chest = fullRobotModel.getChest();
-      if(chest != null)
+      if (chest != null)
       {
          addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());
       }
    }
-   
+
    private void addDefaultIDToReferenceFrame(CommonReferenceFrameIds commonId, ReferenceFrame referenceFrame)
    {
       referenceFrame.setAdditionalNameBasedHashCode(commonId.getHashId());
@@ -209,19 +168,19 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    }
 
    @Override
-   public SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames()
+   public SideDependentList<MovingReferenceFrame> getAnkleZUpReferenceFrames()
    {
       return ankleZUpFrames;
    }
 
    @Override
-   public SideDependentList<ReferenceFrame> getFootReferenceFrames()
+   public SideDependentList<MovingReferenceFrame> getFootReferenceFrames()
    {
-      return new SideDependentList<ReferenceFrame>(getFootFrame(RobotSide.LEFT), getFootFrame(RobotSide.RIGHT));
+      return footReferenceFrames;
    }
 
    @Override
-   public ReferenceFrame getFootFrame(RobotSide robotSide)
+   public MovingReferenceFrame getFootFrame(RobotSide robotSide)
    {
       return fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
    }
@@ -232,13 +191,13 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    }
 
    // TORSO
-   public ReferenceFrame getSpineFrame(SpineJointName spineJointName)
+   public MovingReferenceFrame getSpineFrame(SpineJointName spineJointName)
    {
       return spineReferenceFrames.get(spineJointName);
    }
 
    @Override
-   public ReferenceFrame getABodyAttachedZUpFrame()
+   public MovingReferenceFrame getABodyAttachedZUpFrame()
    {
       return pelvisZUpFrame;
    }
@@ -247,7 +206,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
     * Return the ReferenceFrame located after the parent joint of the pelvis.
     */
    @Override
-   public ReferenceFrame getPelvisZUpFrame()
+   public MovingReferenceFrame getPelvisZUpFrame()
    {
       return pelvisZUpFrame;
    }
@@ -256,106 +215,77 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
     * Return the ReferenceFrame located after the parent joint of the chest.
     */
    @Override
-   public ReferenceFrame getChestFrame()
+   public MovingReferenceFrame getChestFrame()
    {
       return chestFrame;
    }
 
    @Override
-   public ReferenceFrame getPelvisFrame()
+   public MovingReferenceFrame getPelvisFrame()
    {
       return pelvisFrame;
    }
 
-   public ReferenceFrame getNeckFrame(NeckJointName neckJointName)
+   public MovingReferenceFrame getNeckFrame(NeckJointName neckJointName)
    {
       return neckReferenceFrames.get(neckJointName);
    }
 
-   public ReferenceFrame getArmFrame(RobotSide robotSide, ArmJointName armJointName)
+   public MovingReferenceFrame getArmFrame(RobotSide robotSide, ArmJointName armJointName)
    {
       return armJointFrames.get(robotSide).get(armJointName);
    }
 
-   public ReferenceFrame getHandZUpFrame(RobotSide robotSide)
+   public MovingReferenceFrame getHandZUpFrame(RobotSide robotSide)
    {
       return handZUpFrames.get(robotSide);
    }
 
    // LEGS
    @Override
-   public ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
+   public MovingReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointFrames.get(robotSide).get(legJointName);
    }
 
-   public ReferenceFrame getHipYawFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.HIP_YAW);
-   }
-
-   public ReferenceFrame getHipRollFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.HIP_ROLL);
-   }
-
-   public ReferenceFrame getHipPitchFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.HIP_PITCH);
-   }
-
-   public ReferenceFrame getKneeFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.KNEE_PITCH);
-   }
-
-   public ReferenceFrame getAnkleRollFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.ANKLE_ROLL);
-   }
-
-   public ReferenceFrame getAnklePitchFrame(RobotSide robotSide)
-   {
-      return getLegJointFrame(robotSide, LegJointName.ANKLE_PITCH);
-   }
-
    @Override
-   public ReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
+   public MovingReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
    {
       return ankleZUpFrames.get(robotSide);
    }
 
    @Override
-   public ReferenceFrame getMidFeetZUpFrame()
+   public MovingReferenceFrame getMidFeetZUpFrame()
    {
       return midFeetZUpFrame;
    }
 
    @Override
-   public ReferenceFrame getMidFootZUpGroundFrame()
+   public MovingReferenceFrame getMidFootZUpGroundFrame()
    {
       return midFootZUpGroundFrame;
    }
 
    /**
-    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right)
-    * but under the pelvis (to remove forward and backwards swaying)
+    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right) but
+    * under the pelvis (to remove forward and backwards swaying)
     */
    @Override
-   public ReferenceFrame getMidFeetUnderPelvisFrame()
+   public MovingReferenceFrame getMidFeetUnderPelvisFrame()
    {
       return midFeetUnderPelvisWalkDirectionFrame;
    }
 
    /**
-    * Returns the control frame of a hand.
-    * The control frame is robot specific and is meant to be located at a key position for grasping.
+    * Returns the control frame of a hand. The control frame is robot specific and is meant to be
+    * located at a key position for grasping.
     * <p>
     * TODO rename the method to getHandControlFrame(RobotSide).
+    * 
     * @param robotSide from which hand the control frame has to be returned.
     * @return the hand control frame.
     */
-   public ReferenceFrame getHandFrame(RobotSide robotSide)
+   public MovingReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHandControlFrame(robotSide);
    }
@@ -367,17 +297,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       pelvisZUpFrame.update();
 
-      midFeetZUpFrame.update();
-      midFootZUpGroundFrame.update();
-      midFeetZUpWalkDirectionFrame.update();
-      midFeetUnderPelvisWalkDirectionFrame.update();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
 
          ReferenceFrame handZUpFrame = handZUpFrames.get(robotSide);
-         if(handZUpFrame != null)
+         if (handZUpFrame != null)
          {
             handZUpFrame.update();
          }
@@ -385,11 +310,15 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          soleZUpFrames.get(robotSide).update();
       }
 
+      midFeetZUpFrame.update();
+      midFootZUpGroundFrame.update();
+      midFeetUnderPelvisWalkDirectionFrame.update();
+
       centerOfMassFrame.update();
    }
 
    @Override
-   public EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide)
+   public EnumMap<LegJointName, MovingReferenceFrame> getLegJointFrames(RobotSide robotSide)
    {
       return legJointFrames.get(robotSide);
    }
@@ -407,25 +336,25 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    }
 
    @Override
-   public ReferenceFrame getSoleFrame(RobotSide robotSide)
+   public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
    {
       return soleFrames.get(robotSide);
    }
 
    @Override
-   public SideDependentList<ReferenceFrame> getSoleFrames()
+   public SideDependentList<MovingReferenceFrame> getSoleFrames()
    {
       return soleFrames;
    }
 
    @Override
-   public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+   public MovingReferenceFrame getSoleZUpFrame(RobotSide robotSide)
    {
       return soleZUpFrames.get(robotSide);
    }
 
    @Override
-   public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+   public SideDependentList<MovingReferenceFrame> getSoleZUpFrames()
    {
       return soleZUpFrames;
    }

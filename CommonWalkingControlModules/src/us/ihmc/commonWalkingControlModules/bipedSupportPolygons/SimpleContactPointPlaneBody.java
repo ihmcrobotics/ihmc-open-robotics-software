@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -49,7 +50,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public ReferenceFrame getFrameAfterParentJoint()
+   public MovingReferenceFrame getFrameAfterParentJoint()
    {
       return rigidBody.getParentJoint().getFrameAfterJoint();
    }

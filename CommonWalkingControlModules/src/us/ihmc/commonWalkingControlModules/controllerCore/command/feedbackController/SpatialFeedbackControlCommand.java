@@ -1,17 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -19,9 +17,11 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
@@ -60,6 +60,10 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final SE3PIDGains gains = new SE3PIDGains();
+   /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame angularGainsFrame = null;
+   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   private ReferenceFrame linearGainsFrame = null;
 
    /**
     * Acceleration command used to save different control properties such as: the end-effector, the
@@ -69,6 +73,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     */
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+
+   /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    */
+   private ReferenceFrame controlBaseFrame = null;
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -97,6 +108,10 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredOrientationInWorld.set(other.desiredOrientationInWorld);
       desiredAngularVelocityInWorld.set(other.desiredAngularVelocityInWorld);
       feedForwardAngularAccelerationInWorld.set(other.feedForwardAngularAccelerationInWorld);
+
+      controlBaseFrame = other.controlBaseFrame;
+
+      gains.set(other.gains);
    }
 
    /**
@@ -140,6 +155,70 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * The control base frame is the reference frame with respect to which the end-effector is to be
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
+    * to the control base frame.
+    * 
+    * @param controlBaseFrame the new control base frame.
+    */
+   public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
+   {
+      if (controlBaseFrame.isAStationaryFrame() || controlBaseFrame instanceof MovingReferenceFrame)
+         this.controlBaseFrame = controlBaseFrame;
+      else
+         throw new IllegalArgumentException("The control base frame has to either be a stationary frame or a MovingReferenceFrame.");
+   }
+
+   /**
+    * Sets whether or not to scale the weights on the joints below the intermediate base defined by
+    * {@link #setPrimaryBase(RigidBody)}. Indicates that we would like to custom scale the weights
+    * on the joints in the kinematic chain below the {@code primaryBase} when controlling the
+    * {@code endEffector}.
+    * <p>
+    * If false, as is the case in the default setting, the controller uses the default scaling
+    * factor
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    * </p>
+    * <p>
+    * If true, the controller uses the custom defined scaling factor
+    * {@param secondaryTaskJointWeightScale} to scale the weights before the {@code primaryBase} in
+    * the kinematic chain between the {@code base} and {@code endEffector}.
+    * </p>
+    * <p>
+    * A scale factor greater than 1.0 indicates that it is desired to use the joints in the
+    * kinematic chain between {@code base} and {@code primaryBase} to control the
+    * {@code endEffector} more than the joints between the {@code primaryBase} and the
+    * {@code endEffector}. For example, this can be used to say that we would prefer to use the
+    * pelvis to control the foot acceleration than the leg joints.
+    * </p>
+    * <p>
+    * A scale factor less than 1.0 indicates that it is desired to use the joints in the kinematic
+    * chain between {@code primaryBase} and {@code endEffector} to control the {@code endEffector}
+    * more than the joints between the {@code base} and the {@code primaryBase}. For example, this
+    * can be used to say that we would prefer to use the leg joints to control the foot acceleration
+    * than the pelvis.
+    * </p>
+    *
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the
+    *           joints below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary
+    *           base. Optional.
+    */
+   public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
+   {
+      spatialAccelerationCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryTaskJointWeight, secondaryTaskJointWeightScale);
+   }
+
+   /**
+    * Resets the secondary task joint weight scaling factor on the joints below the
+    * {@code primaryBase} to its default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      spatialAccelerationCommand.resetSecondaryTaskJointWeightScale();
+   }
+
+   /**
     * Sets the gains for both the position and orientation to use during the next control tick.
     * 
     * @param gains the new set of gains to use. Not modified.
@@ -167,6 +246,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setGains(PositionPIDGainsInterface positionGains)
    {
       this.gains.set(positionGains);
+   }
+
+   /**
+    * Sets the reference frames in which the gains should be applied.
+    * <p>
+    * If a reference frame is {@code null}, the corresponding gains will be applied in the control frame.
+    * </p>
+    * 
+    * @param angularGainsFrame the reference frame to use for the orientation gains.
+    * @param linearGainsFrame the reference frame to use for the position gains.
+    */
+   public void setGainsFrames(ReferenceFrame angularGainsFrame, ReferenceFrame linearGainsFrame)
+   {
+      this.angularGainsFrame = angularGainsFrame;
+      this.linearGainsFrame = linearGainsFrame;
    }
 
    /**
@@ -490,24 +584,20 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick.
+    * Sets this command's selection matrix to the given one.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
+    * that are to be controlled. It is initialized such that the controller will by default control
+    * all the end-effector DoFs.
     * </p>
     * <p>
-    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
-    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
-    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
+    * selection frame is equal to the control frame.
     * </p>
     * 
-    * @param selectionMatrix the new selection matrix to be used. Not modified.
-    * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
-    *            number of columns different to 6.
+    * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
    {
       spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
    }
@@ -535,12 +625,34 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
+    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
+    *           acceleration. Not modified.
+    */
+   public void setWeightMatrixForSolver(WeightMatrix6D weightMatrix)
+   {
+      spatialAccelerationCommand.setWeightMatrix(weightMatrix);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
     * @param angular the weights to use for the angular part of this command. Not modified.
     * @param linear the weights to use for the linear part of this command. Not modified.
     */
    public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
+   }
+
+   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameOrientation desiredOrientationToPack)
+   {
+      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
+      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
@@ -575,6 +687,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       return spatialAccelerationCommand.getEndEffector();
    }
 
+   public ReferenceFrame getControlBaseFrame()
+   {
+      if (controlBaseFrame != null)
+         return controlBaseFrame;
+      else
+         return spatialAccelerationCommand.getBase().getBodyFixedFrame();
+   }
+
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
@@ -583,6 +703,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public SE3PIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   public ReferenceFrame getAngularGainsFrame()
+   {
+      return angularGainsFrame;
+   }
+
+   public ReferenceFrame getLinearGainsFrame()
+   {
+      return linearGainsFrame;
    }
 
    @Override

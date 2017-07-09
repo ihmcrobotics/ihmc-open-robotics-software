@@ -10,5 +10,10 @@ public interface OrientationTrajectoryGenerator extends TrajectoryGenerator, Ori
 
    public abstract void getAngularAcceleration(FrameVector angularAccelerationToPack);
 
-   public abstract void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack);
+   public default void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   {
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
+   }
 }

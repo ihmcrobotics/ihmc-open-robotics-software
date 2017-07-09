@@ -25,13 +25,12 @@ import org.junit.Test;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.FileToolsTest;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DeprecatedFileToolsTest
 {
-   private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(FileToolsTest.class);
+   private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(DeprecatedFileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");

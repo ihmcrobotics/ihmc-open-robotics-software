@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.scripts;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class ConditionalScriptEntry
 {
@@ -25,7 +24,7 @@ public abstract class ConditionalScriptEntry
 
    public static final int
       DISARMED = 0, ARMED = 1, ACTIVE = 2, FINISHED = 3;
-   protected DoubleYoVariable event_state;
+   protected YoDouble event_state;
    private ArrayList<ConditionalScriptEntry> parentEntries;
    private ArrayList<ConditionalScriptEntry> childEntries;
 
@@ -35,7 +34,7 @@ public abstract class ConditionalScriptEntry
          name = "event";
       this.name = name;
 
-      event_state = new DoubleYoVariable(name + "_" + eventNumber + "_state", registry);
+      event_state = new YoDouble(name + "_" + eventNumber + "_state", registry);
       event_state.set(ARMED);    // Default to armed until given a parent or two.
       eventNumber++;
 

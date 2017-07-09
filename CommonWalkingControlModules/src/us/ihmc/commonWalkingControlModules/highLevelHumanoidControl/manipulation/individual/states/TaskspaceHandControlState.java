@@ -4,7 +4,6 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.Collection;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -19,9 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -35,6 +34,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.tools.FormattingTools;
 
 /**
@@ -79,11 +79,11 @@ public class TaskspaceHandControlState extends HandControlState
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
-   private final BooleanYoVariable abortTaskspaceControlState;
-   private final LongYoVariable lastCommandId;
+   private final YoBoolean abortTaskspaceControlState;
+   private final YoLong lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
-   private final LongYoVariable numberOfQueuedCommands;
+   private final YoBoolean isReadyToHandleQueuedCommands;
+   private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
    public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoSE3PIDGainsInterface gains,
@@ -122,12 +122,12 @@ public class TaskspaceHandControlState extends HandControlState
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
-      abortTaskspaceControlState = new BooleanYoVariable(namePrefix + "AbortTaskspaceControlState", registry);
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      abortTaskspaceControlState = new YoBoolean(namePrefix + "AbortTaskspaceControlState", registry);
+      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
-      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
+      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
+      numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
    }

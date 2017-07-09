@@ -3,23 +3,20 @@ package us.ihmc.robotics.geometry.algorithms;
 import org.apache.commons.math3.util.Pair;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.Line2d;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -234,9 +231,9 @@ public class FrameConvexPolygon2dIntersector
     * Gets the closest point to a filled polygon. If inside, packs that point.
     * If outside, the closest vertex or point along edge.
     */
-   public static void getClosestPoint(Point2D point, ConvexPolygon2d polygon, Point2D closestPointToPack)
+   public static void getClosestPoint(Point2D point, ConvexPolygon2D polygon, Point2D closestPointToPack)
    {
-      if (ConvexPolygon2dCalculator.isPointInside(point, polygon))
+      if (polygon.isPointInside(point))
       {
          closestPointToPack.set(point);
          return;
@@ -295,95 +292,40 @@ public class FrameConvexPolygon2dIntersector
       }
    }
 
-   private static final ThreadLocal<PoseReferenceFrame> tempIntersectPlaneReferenceFrame = new ThreadLocal<PoseReferenceFrame>()
+   private static final ThreadLocal<Point3D> pointOnIntersectionThreadLocal = new ThreadLocal<Point3D>()
    {
       @Override
-      public PoseReferenceFrame initialValue()
+      public Point3D initialValue()
       {
-         return new PoseReferenceFrame("tempIntersectPlaneReferenceFrame", ReferenceFrame.getWorldFrame());
+         return new Point3D();
       }
    };
-   private static final ThreadLocal<FrameLine> tempIntersectFrameLineOne = new ThreadLocal<FrameLine>()
+   private static final ThreadLocal<Vector3D> intersectionDirectionThreadLocal = new ThreadLocal<Vector3D>()
    {
       @Override
-      public FrameLine initialValue()
+      public Vector3D initialValue()
       {
-         return new FrameLine();
-      }
-   };
-   private static final ThreadLocal<FrameLine> tempIntersectFrameLineTwo = new ThreadLocal<FrameLine>()
-   {
-      @Override
-      public FrameLine initialValue()
-      {
-         return new FrameLine();
-      }
-   };
-   private static final ThreadLocal<Line2d> tempIntersectLine2dOne = new ThreadLocal<Line2d>()
-   {
-      @Override
-      public Line2d initialValue()
-      {
-         return new Line2d();
-      }
-   };
-   private static final ThreadLocal<Line2d> tempIntersectLine2dTwo = new ThreadLocal<Line2d>()
-   {
-      @Override
-      public Line2d initialValue()
-      {
-         return new Line2d();
-      }
-   };
-   private static final ThreadLocal<Quaternion> tempQuaternion = new ThreadLocal<Quaternion>()
-   {
-      @Override
-      public Quaternion initialValue()
-      {
-         return new Quaternion();
+         return new Vector3D();
       }
    };
 
-   // TODO check out GeometryTools.getIntersectionBetweenTwoPlanes => no thread local and tested.
    public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
    {
       ReferenceFrame previousPlaneTwoReferenceFrame = planeTwo.getReferenceFrame();
       planeTwo.changeFrame(planeOne.getReferenceFrame());
-
-      if (planeOne.isParallel(planeTwo, Epsilons.ONE_HUNDRED_MILLIONTH))
+      Point3D pointOnIntersection = pointOnIntersectionThreadLocal.get();
+      Vector3DBasics intersectionDirection = intersectionDirectionThreadLocal.get();
+      boolean success = EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(planeOne.getPoint(), planeOne.getNormal(), planeTwo.getPoint(), planeTwo.getNormal(),
+                                                                           pointOnIntersection, intersectionDirection);
+      if (success)
       {
-         intersectionToPack.setToNaN();
+         intersectionToPack.setToZero(planeOne.getReferenceFrame());
+         intersectionToPack.setPointWithoutChecks(pointOnIntersection);
+         intersectionToPack.setVectorWithoutChecks(intersectionDirection);
       }
       else
       {
-         intersectionToPack.setToZero(planeOne.getReferenceFrame());
-         Vector3D intersectPlaneNormal = intersectionToPack.getNormalizedVector();
-         intersectPlaneNormal.cross(planeOne.getNormal(), planeTwo.getNormal());
-         intersectionToPack.setVectorWithoutChecks(intersectPlaneNormal);
-
-         tempIntersectPlaneReferenceFrame.get().getOrientation(tempQuaternion.get());
-         RotationTools.computeQuaternionFromYawAndZNormal(0.0, intersectionToPack.getNormalizedVector(),
-                                                          tempQuaternion.get());
-         tempIntersectPlaneReferenceFrame.get().setOrientationAndUpdate(tempQuaternion.get());
-         tempIntersectPlaneReferenceFrame.get().setPositionWithoutChecksAndUpdate(planeOne.getPoint());
-
-         tempIntersectFrameLineOne.get().setPointWithoutChecks(planeOne.getPoint());
-         tempIntersectFrameLineTwo.get().setPointWithoutChecks(planeTwo.getPoint());
-
-         Vector3D intersectVectorOne = tempIntersectFrameLineOne.get().getNormalizedVector();
-         Vector3D intersectVectorTwo = tempIntersectFrameLineTwo.get().getNormalizedVector();
-         intersectVectorOne.cross(planeOne.getNormal(), intersectionToPack.getNormalizedVector());
-         intersectVectorTwo.cross(planeTwo.getNormal(), intersectionToPack.getNormalizedVector());
-         tempIntersectFrameLineOne.get().setVectorWithoutChecks(intersectVectorOne);
-         tempIntersectFrameLineTwo.get().setVectorWithoutChecks(intersectVectorTwo);
-
-         tempIntersectFrameLineOne.get().changeFrame(tempIntersectPlaneReferenceFrame.get());
-         tempIntersectFrameLineTwo.get().changeFrame(tempIntersectPlaneReferenceFrame.get());
-
-         tempIntersectFrameLineOne.get().projectOntoXYPlane(tempIntersectLine2dOne.get());
-         tempIntersectFrameLineTwo.get().projectOntoXYPlane(tempIntersectLine2dTwo.get());
-
-         tempIntersectLine2dOne.get().intersectionWith(tempIntersectLine2dTwo.get(), intersectionToPack.getPoint());
+         intersectionToPack.setToNaN();
       }
 
       planeTwo.changeFrame(previousPlaneTwoReferenceFrame);

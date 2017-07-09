@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
@@ -111,6 +111,14 @@ public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F exte
    {
       putYoValuesIntoFrameWaypoint();
       frameWaypoint.applyTransform(transform);
+      getYoValuesFromFrameWaypoint();
+   }
+
+   @Override
+   public final void applyInverseTransform(Transform transform)
+   {
+      putYoValuesIntoFrameWaypoint();
+      frameWaypoint.applyInverseTransform(transform);
       getYoValuesFromFrameWaypoint();
    }
 

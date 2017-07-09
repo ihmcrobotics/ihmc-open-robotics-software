@@ -7,7 +7,6 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,59 +17,59 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
-   public enum FootstepOrigin
-   {
-      @Deprecated
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the ankle frame."
-            + " The ankle frame is fixed in the foot, centered at the last ankle joint."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This option is for backward compatibility only and will be gone in an upcoming release."
-            + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.")
-      AT_ANKLE_FRAME,
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the sole frame."
-            + " The sole frame is fixed in the foot, centered at the center of the sole."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.")
-      AT_SOLE_FRAME
-   }
-
-   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
-   public FootstepOrigin origin;
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @RosExportedField(documentation = "Specifies the position of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the position of the footstep (sole frame) in world frame.")
    public Point3D location;
-   @RosExportedField(documentation = "Specifies the orientation of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame) in world frame.")
    public Quaternion orientation;
 
+   @RosExportedField(documentation = "(Optional) Specifies the expected initial position of the swing foot (sole frame) in world frame at the start "
+         + "of the swing phase. A valid position is required to enable swing foot trajectory blending. If undefined, the position defaults to NaN.")
+   public Point3D expectedInitialLocation;
+   @RosExportedField(documentation = "(Optional) Specifies the expected initial orientation of the swing foot (sole frame) in world frame at the start "
+         + "of the swing phase. A valid orientation is required to enable swing foot trajectory blending. If undefined, the orientation defaults to NaN.")
+   public Quaternion expectedInitialOrientation;
+
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
-         + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
+         + "the world. A value of null or an empty list will default to using the entire foot. Contact points are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2D> predictedContactPoints;
 
-   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
+   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
-         + "The waypoints specify the sole position in the world frame.")
-   public Point3D[] trajectoryWaypoints = new Point3D[0];
-   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
-         + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
+   @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE."
+         + "If a value smaller then the minumal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.")
    public double swingHeight = 0.0;
+   @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
+         + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
+         + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
+   public Point3D[] positionWaypoints = new Point3D[0];
+   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The waypoints do not include the"
+         + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
+         + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
+   public SE3TrajectoryPointMessage[] swingTrajectory = null;
+   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory blend duration "
+         + " in seconds. If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning "
+         + " the desired blend duration) will be adjusted to account for the initial error between the actual and expected position and orientation of the "
+         + "swing foot. Note that the expectedInitialLocation and expectedInitialOrientation fields must be defined in order to enable trajectory blending.")
+   public double swingTrajectoryBlendDuration = 0.0;
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default swingDuration.")
@@ -78,13 +77,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
     */
    public FootstepDataMessage()
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
@@ -108,9 +109,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-         TrajectoryType trajectoryType, double swingHeight)
+                              TrajectoryType trajectoryType, double swingHeight)
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -124,11 +124,18 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
    {
-      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
       this.orientation.checkIfUnitary();
+      if (footstepData.expectedInitialLocation == null)
+         this.expectedInitialLocation = null;
+      else
+         this.expectedInitialLocation = new Point3D(footstepData.expectedInitialLocation);
+      if (footstepData.expectedInitialOrientation == null)
+         this.expectedInitialOrientation = null;
+      else
+         this.expectedInitialOrientation = new Quaternion(footstepData.expectedInitialOrientation);
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
          this.predictedContactPoints = null;
@@ -143,16 +150,18 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       this.trajectoryType = footstepData.trajectoryType;
       this.swingHeight = footstepData.swingHeight;
+      this.swingTrajectoryBlendDuration = footstepData.swingTrajectoryBlendDuration;
 
-      if (footstepData.trajectoryWaypoints != null)
+      if (footstepData.positionWaypoints != null)
       {
-         this.trajectoryWaypoints = new Point3D[footstepData.trajectoryWaypoints.length];
-         for (int i = 0; i < footstepData.trajectoryWaypoints.length; i++)
-            trajectoryWaypoints[i] = new Point3D(footstepData.trajectoryWaypoints[i]);
+         this.positionWaypoints = new Point3D[footstepData.positionWaypoints.length];
+         for (int i = 0; i < footstepData.positionWaypoints.length; i++)
+            positionWaypoints[i] = new Point3D(footstepData.positionWaypoints[i]);
       }
 
       this.swingDuration = footstepData.swingDuration;
       this.transferDuration = footstepData.transferDuration;
+      this.executionDelayTime = footstepData.executionDelayTime;
    }
 
    @Override
@@ -163,12 +172,20 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(Footstep footstep)
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3D();
-      orientation = new Quaternion();
-      footstep.getPositionInWorldFrame(location);
-      footstep.getOrientationInWorldFrame(orientation);
+
+      FramePoint location = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(location, orientation);
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      this.location = location.getPoint();
+      this.orientation = orientation.getQuaternion();
+
+      FramePose expectedInitialPose = new FramePose();
+      footstep.getExpectedInitialPose(expectedInitialPose);
+      expectedInitialPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      this.expectedInitialLocation = expectedInitialPose.getFramePointCopy().getPoint();
+      this.expectedInitialOrientation = expectedInitialPose.getFrameOrientationCopy().getQuaternion();
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -192,18 +209,18 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       trajectoryType = footstep.getTrajectoryType();
       swingHeight = footstep.getSwingHeight();
+      swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
-      if (footstep.getSwingWaypoints().size() != 0)
+      if (footstep.getCustomPositionWaypoints().size() != 0)
       {
-         trajectoryWaypoints = new Point3D[footstep.getSwingWaypoints().size()];
-         for (int i = 0; i < footstep.getSwingWaypoints().size(); i++)
-            trajectoryWaypoints[i] = new Point3D(footstep.getSwingWaypoints().get(i));
+         positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
+         for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
+         {
+            FramePoint framePoint = footstep.getCustomPositionWaypoints().get(i);
+            framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+            positionWaypoints[i] = new Point3D(framePoint.getPoint());
+         }
       }
-   }
-
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
    }
 
    public ArrayList<Point2D> getPredictedContactPoints()
@@ -231,6 +248,16 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       orientationToPack.set(this.orientation);
    }
 
+   public Point3D getExpectedInitialLocation()
+   {
+      return expectedInitialLocation;
+   }
+
+   public Quaternion getExpectedInitialOrientation()
+   {
+      return expectedInitialOrientation;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -241,31 +268,52 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return swingHeight;
    }
 
+   public double getSwingTrajectoryBlendDuration()
+   {
+      return swingTrajectoryBlendDuration;
+   }
+
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;
    }
 
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
-   }
-
    public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3D();
+      if (this.location == null)
+         this.location = new Point3D();
       this.location.set(location);
    }
 
    public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quaternion();
+      if (this.orientation == null)
+         this.orientation = new Quaternion();
       this.orientation.set(orientation);
+   }
+
+   public void setExpectedInitialLocation(Point3D location)
+   {
+      if (this.expectedInitialLocation == null)
+         this.expectedInitialLocation = new Point3D();
+      this.expectedInitialLocation.set(location);
+   }
+
+   public void setExpectedInitialOrientation(Quaternion orientation)
+   {
+      if (this.expectedInitialOrientation == null)
+         this.expectedInitialOrientation = new Quaternion();
+      this.expectedInitialOrientation.set(orientation);
    }
 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
+   }
+
+   public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
+   {
+      this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2D> predictedContactPoints)
@@ -283,14 +331,24 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = trajectoryType;
    }
 
-   public Point3D[] getTrajectoryWaypoints()
+   public Point3D[] getCustomPositionWaypoints()
    {
-      return trajectoryWaypoints;
+      return positionWaypoints;
    }
 
-   public void setTrajectoryWaypoints(Point3D[] trajectoryWaypoints)
+   public void setCustomPositionWaypoints(Point3D[] trajectoryWaypoints)
    {
-      this.trajectoryWaypoints = trajectoryWaypoints;
+      this.positionWaypoints = trajectoryWaypoints;
+   }
+
+   public SE3TrajectoryPointMessage[] getSwingTrajectory()
+   {
+      return swingTrajectory;
+   }
+
+   public void setSwingTrajectory(SE3TrajectoryPointMessage[] swingTrajectory)
+   {
+      this.swingTrajectory = swingTrajectory;
    }
 
    public void setTimings(double swingDuration, double transferDuration)
@@ -318,6 +376,24 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       return transferDuration;
    }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
+   }
 
    @Override
    public String toString()
@@ -340,9 +416,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       ret += trajectoryType.name() + "\n";
 
-      if(trajectoryWaypoints != null)
+      if (positionWaypoints != null)
       {
-         ret += "waypoints = " + trajectoryWaypoints.length + "\n";
+         ret += "waypoints = " + positionWaypoints.length + "\n";
       }
       else
       {
@@ -392,21 +468,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       boolean trajectoryWaypointsEqual = true;
 
-      if ((this.trajectoryWaypoints == null) && (footstepData.trajectoryWaypoints != null))
+      if ((this.positionWaypoints == null) && (footstepData.positionWaypoints != null))
          trajectoryWaypointsEqual = false;
-      else if ((this.trajectoryWaypoints != null) && (footstepData.trajectoryWaypoints == null))
+      else if ((this.positionWaypoints != null) && (footstepData.positionWaypoints == null))
          trajectoryWaypointsEqual = false;
-      else if (this.trajectoryWaypoints != null)
+      else if (this.positionWaypoints != null)
       {
-         int size = trajectoryWaypoints.length;
-         if (size != footstepData.trajectoryWaypoints.length)
+         int size = positionWaypoints.length;
+         if (size != footstepData.positionWaypoints.length)
             trajectoryWaypointsEqual = false;
          else
          {
             for (int i = 0; i < size; i++)
             {
-               Point3D pointOne = trajectoryWaypoints[i];
-               Point3D pointTwo = footstepData.trajectoryWaypoints[i];
+               Point3D pointOne = positionWaypoints[i];
+               Point3D pointTwo = footstepData.positionWaypoints[i];
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   trajectoryWaypointsEqual = false;
@@ -417,7 +493,26 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
       sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
 
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings;
+      boolean expectedInitialLocationEquals = true;
+      if ((expectedInitialLocation == null) && (footstepData.expectedInitialLocation != null))
+         expectedInitialLocationEquals = false;
+      else if ((expectedInitialLocation != null) && (footstepData.expectedInitialLocation == null))
+         expectedInitialLocationEquals = false;
+      else if (expectedInitialLocation != null)
+         expectedInitialLocationEquals = expectedInitialLocation.epsilonEquals(footstepData.expectedInitialLocation, epsilon);
+
+      boolean expectedInitialOrientationEquals = true;
+      if ((expectedInitialOrientation == null) && (footstepData.expectedInitialOrientation != null))
+         expectedInitialOrientationEquals = false;
+      else if ((expectedInitialOrientation != null) && (footstepData.expectedInitialOrientation == null))
+         expectedInitialOrientationEquals = false;
+      else if (expectedInitialOrientation != null)
+         expectedInitialOrientationEquals = expectedInitialOrientation.epsilonEquals(footstepData.expectedInitialOrientation, epsilon);
+
+      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
+
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
+            && expectedInitialLocationEquals && expectedInitialOrientationEquals && swingTrajectoryBlendDurationEquals;
    }
 
    @Override
@@ -425,17 +520,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       FootstepDataMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
       // Waypoints if they exist:
-      if (trajectoryWaypoints != null)
+      if (positionWaypoints != null)
       {
-         for (int i = 0; i < trajectoryWaypoints.length; i++)
-            ret.trajectoryWaypoints[i] = TransformTools.getTransformedPoint(trajectoryWaypoints[i], transform);
+         for (int i = 0; i < positionWaypoints.length; i++)
+            ret.positionWaypoints[i].applyTransform(transform);
       }
 
       return ret;
@@ -446,7 +538,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);
 
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
       this.orientation = RandomGeometry.nextQuaternion(random);
@@ -466,9 +557,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         trajectoryWaypoints = new Point3D[2];
-         trajectoryWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         trajectoryWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         positionWaypoints = new Point3D[2];
+         positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
       }
    }
 

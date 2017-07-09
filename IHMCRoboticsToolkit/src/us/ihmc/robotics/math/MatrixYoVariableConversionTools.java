@@ -6,44 +6,44 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixFeatures;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MatrixYoVariableConversionTools
 {
-   public static void populateYoVariables(DoubleYoVariable[][] yoVariableArray, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariables(YoDouble[][] yoVariableArray, String prefix, YoVariableRegistry registry)
    {
       for (int i = 0; i < yoVariableArray.length; i++)
       {
          for (int j = 0; j < yoVariableArray[0].length; j++)
          {
-            yoVariableArray[i][j] = new DoubleYoVariable(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry);
+            yoVariableArray[i][j] = new YoDouble(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry);
          }
       }
    }
 
-   public static void populateYoVariablesSymmetric(DoubleYoVariable[] yoVariableArray, String prefix, int size, YoVariableRegistry registry)
+   public static void populateYoVariablesSymmetric(YoDouble[] yoVariableArray, String prefix, int size, YoVariableRegistry registry)
    {
       int n = 0;
       for (int i = 0; i < size; i++)
       {
          for (int j = i; j < size; j++)
          {
-            yoVariableArray[n] = new DoubleYoVariable(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry);
+            yoVariableArray[n] = new YoDouble(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry);
             n++;
          }
       }
    }
 
-   public static void populateYoVariables(DoubleYoVariable[] yoVariableArray, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariables(YoDouble[] yoVariableArray, String prefix, YoVariableRegistry registry)
    {
       for (int i = 0; i < yoVariableArray.length; i++)
       {
-         yoVariableArray[i] = new DoubleYoVariable(prefix + Integer.toString(i), registry);
+         yoVariableArray[i] = new YoDouble(prefix + Integer.toString(i), registry);
       }
    }
 
-   public static void storeInYoVariables(DenseMatrix64F m, DoubleYoVariable[][] yoM)
+   public static void storeInYoVariables(DenseMatrix64F m, YoDouble[][] yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
@@ -54,7 +54,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void storeInYoVariablesSymmetric(DenseMatrix64F m, DoubleYoVariable[] yoM)
+   public static void storeInYoVariablesSymmetric(DenseMatrix64F m, YoDouble[] yoM)
    {
       int size = m.getNumRows();
 
@@ -69,7 +69,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void storeInYoVariables(DenseMatrix64F v, DoubleYoVariable[] yoV)
+   public static void storeInYoVariables(DenseMatrix64F v, YoDouble[] yoV)
    {
       for (int i = 0; i < v.getNumRows(); i++)
       {
@@ -77,7 +77,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariables(DenseMatrix64F m, DoubleYoVariable[][] yoM)
+   public static void getFromYoVariables(DenseMatrix64F m, YoDouble[][] yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
@@ -88,7 +88,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariablesSymmetric(DenseMatrix64F m, DoubleYoVariable[] yoM)
+   public static void getFromYoVariablesSymmetric(DenseMatrix64F m, YoDouble[] yoM)
    {
       int size = m.getNumRows();
 
@@ -104,7 +104,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariables(DenseMatrix64F m, DoubleYoVariable[] yoM)
+   public static void getFromYoVariables(DenseMatrix64F m, YoDouble[] yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
@@ -112,45 +112,45 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void populateYoVariablesMatrix(List<List<DoubleYoVariable>> yoVariableArray, int nRows, int nColumns, String prefix,
+   public static void populateYoVariablesMatrix(List<List<YoDouble>> yoVariableArray, int nRows, int nColumns, String prefix,
          YoVariableRegistry registry)
    {
       for (int i = 0; i < nRows; i++)
       {
-         List<DoubleYoVariable> row = getOrAddRow(yoVariableArray, i);
+         List<YoDouble> row = getOrAddRow(yoVariableArray, i);
          for (int j = row.size(); j < nColumns; j++)
          {
-            row.add(new DoubleYoVariable(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry));
+            row.add(new YoDouble(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry));
          }
       }
    }
 
-   public static void populateYoVariablesSymmetricMatrix(List<List<DoubleYoVariable>> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariablesSymmetricMatrix(List<List<YoDouble>> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
    {
       for (int i = 0; i < size; i++)
       {
-         List<DoubleYoVariable> row = getOrAddRow(yoVariableArray, i);
+         List<YoDouble> row = getOrAddRow(yoVariableArray, i);
 
          for (int j = row.size(); j <= i; j++)
          {
-            row.add(new DoubleYoVariable(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry));
+            row.add(new YoDouble(prefix + Integer.toString(i) + "_" + Integer.toString(j), registry));
          }
       }
    }
 
-   public static void populateYoVariablesVector(List<DoubleYoVariable> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariablesVector(List<YoDouble> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
    {
       for (int i = yoVariableArray.size(); i < size; i++)
       {
-         yoVariableArray.add(new DoubleYoVariable(prefix + Integer.toString(i), registry));
+         yoVariableArray.add(new YoDouble(prefix + Integer.toString(i), registry));
       }
    }
 
-   public static void storeInYoVariablesMatrix(DenseMatrix64F m, List<List<DoubleYoVariable>> yoM)
+   public static void storeInYoVariablesMatrix(DenseMatrix64F m, List<List<YoDouble>> yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
-         List<DoubleYoVariable> row = yoM.get(i);
+         List<YoDouble> row = yoM.get(i);
          for (int j = 0; j < m.getNumCols(); j++)
          {
             row.get(j).set(m.get(i, j));
@@ -158,13 +158,13 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void storeInYoVariablesSymmetric(DenseMatrix64F m, List<List<DoubleYoVariable>> yoM)
+   public static void storeInYoVariablesSymmetric(DenseMatrix64F m, List<List<YoDouble>> yoM)
    {
       int size = m.getNumRows();
 
       for (int i = 0; i < size; i++)
       {
-         List<DoubleYoVariable> row = yoM.get(i);
+         List<YoDouble> row = yoM.get(i);
          for (int j = 0; j <= i; j++)
          {
             row.get(j).set(m.get(i, j));
@@ -172,7 +172,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void storeInYoVariablesVector(DenseMatrix64F v, List<DoubleYoVariable> yoV)
+   public static void storeInYoVariablesVector(DenseMatrix64F v, List<YoDouble> yoV)
    {
       for (int i = 0; i < v.getNumRows(); i++)
       {
@@ -180,11 +180,11 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariablesMatrix(DenseMatrix64F m, List<List<DoubleYoVariable>> yoM)
+   public static void getFromYoVariablesMatrix(DenseMatrix64F m, List<List<YoDouble>> yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
-         List<DoubleYoVariable> row = yoM.get(i);
+         List<YoDouble> row = yoM.get(i);
          for (int j = 0; j < m.getNumCols(); j++)
          {
             m.set(i, j, row.get(j).getDoubleValue());
@@ -192,13 +192,13 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariablesSymmetric(DenseMatrix64F m, List<List<DoubleYoVariable>> yoM)
+   public static void getFromYoVariablesSymmetric(DenseMatrix64F m, List<List<YoDouble>> yoM)
    {
       int size = m.getNumRows();
 
       for (int i = 0; i < size; i++)
       {
-         List<DoubleYoVariable> row = yoM.get(i);
+         List<YoDouble> row = yoM.get(i);
          for (int j = 0; j <= i; j++)
          {
             double value = row.get(j).getDoubleValue();
@@ -208,7 +208,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void getFromYoVariablesVector(DenseMatrix64F m, List<DoubleYoVariable> yoM)
+   public static void getFromYoVariablesVector(DenseMatrix64F m, List<YoDouble> yoM)
    {
       for (int i = 0; i < m.getNumRows(); i++)
       {
@@ -216,16 +216,16 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   private static List<DoubleYoVariable> getOrAddRow(List<List<DoubleYoVariable>> yoVariableArray, int i)
+   private static List<YoDouble> getOrAddRow(List<List<YoDouble>> yoVariableArray, int i)
    {
-      List<DoubleYoVariable> row;
+      List<YoDouble> row;
       if (i < yoVariableArray.size())
       {
          row = yoVariableArray.get(i);
       }
       else
       {
-         row = new ArrayList<DoubleYoVariable>();
+         row = new ArrayList<YoDouble>();
          yoVariableArray.add(row);
       }
       return row;

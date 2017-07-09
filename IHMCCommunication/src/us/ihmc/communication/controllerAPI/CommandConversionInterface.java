@@ -16,7 +16,6 @@ public interface CommandConversionInterface
     */
    <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message);
    
-   
    /**
     * actually update the command based on the message
     * @param command the command to update
