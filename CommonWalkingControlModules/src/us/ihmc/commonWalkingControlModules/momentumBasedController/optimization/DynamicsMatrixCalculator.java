@@ -44,15 +44,14 @@ public class DynamicsMatrixCalculator
    public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
-      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      RigidBody rootBody = twistCalculator.getRootBody();
+      RigidBody rootBody = toolbox.getRootBody();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
       massMatrixHandler = new CompositeRigidBodyMassMatrixHandler(rootBody, jointsToIgnore);
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(twistCalculator, jointsToIgnore, toolbox.getGravityZ());
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootBody, jointsToIgnore, toolbox.getGravityZ());
       contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(rootBody, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler);
 
       helper = new DynamicsMatrixCalculatorHelper(coriolisMatrixCalculator, jointIndexHandler);
