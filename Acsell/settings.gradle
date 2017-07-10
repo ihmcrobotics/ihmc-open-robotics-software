@@ -1,9 +1,27 @@
-rootProject.name = ''
+rootProject.name = 'acsell'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating Acsell settings.gradle'
 
 def includes = [
-'../IHMCCommonsStaging',
+'../IHMCJavaExtensions',
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../IHMCAvatarInterfaces',
+'../IHMCStateEstimation',
+'../CommonWalkingControlModules',
+'../IHMCJMonkeyEngineToolkit',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../IHMCRobotDataLogger',
+'../IHMCPerception',
+'../IHMCWholeBodyController',
+'../IHMCJavaToolkit',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCRobotDataVisualizer',
+'../IHMCGraphicsDescription',
 ]
 
 if (startParameter.searchUpwards)
