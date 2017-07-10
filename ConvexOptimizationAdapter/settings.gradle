@@ -1,9 +1,11 @@
-rootProject.name = ''
+rootProject.name = 'convex-optimization-adapter'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating ConvexOptimizationAdapter settings.gradle'
 
 def includes = [
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
 ]
 
 if (startParameter.searchUpwards)
