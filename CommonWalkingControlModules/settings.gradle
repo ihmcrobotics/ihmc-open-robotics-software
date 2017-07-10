@@ -1,9 +1,20 @@
-rootProject.name = ''
+rootProject.name = 'common-walking-control-modules'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating CommonWalkingControlModules settings.gradle'
 
 def includes = [
+'../IHMCRobotModels',
+'../SensorProcessing',
+'../IHMCCommunication',
+'../ConvexOptimizationAdapter',
+'../IHMCRoboticsToolkit',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCHumanoidRobotics',
+'../IHMCJavaToolkit',
+'../IHMCGraphicsDescription',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
 ]
 
 if (startParameter.searchUpwards)
