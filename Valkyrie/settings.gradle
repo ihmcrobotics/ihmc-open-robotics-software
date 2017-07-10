@@ -1,0 +1,13 @@
+rootProject.name = ''
+
+println 'Evaluating  settings.gradle'
+
+def includes = [
+'../IHMCCommonsStaging',
+]
+
+if (startParameter.searchUpwards)
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
