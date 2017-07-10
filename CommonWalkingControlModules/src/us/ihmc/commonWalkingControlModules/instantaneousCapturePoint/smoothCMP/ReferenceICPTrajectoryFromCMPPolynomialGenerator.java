@@ -28,9 +28,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private final static int FIRST_SEGMENT = 0;
 
    private final static int defaultSize = 1000;
-
-   private final List<FramePoint> icpDesiredInitialPositionsNEW = new ArrayList<>();
-   private final List<FramePoint> icpDesiredFinalPositionsNEW = new ArrayList<>();
    
    private final List<FramePoint> icpDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint> icpDesiredFinalPositions = new ArrayList<>();
@@ -79,9 +76,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
-         icpDesiredInitialPositionsNEW.add(new FramePoint());
-         icpDesiredFinalPositionsNEW.add(new FramePoint());
-         
          icpDesiredInitialPositions.add(new FramePoint());
          icpDesiredFinalPositions.add(new FramePoint());
          cmpDesiredFinalPositions.add(new FramePoint());
@@ -193,9 +187,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          {
             CapturePointMatrixTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
-         
+         icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
          getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
-
       }
    }
 
@@ -229,7 +222,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
                                                                        icpAccelerationDesiredCurrent);
          }
 
-         timeCurrentPhase.set(timeCurrentPhase.getDoubleValue() + 0.006);
+         timeCurrentPhase.set(timeCurrentPhase.getDoubleValue() + 0.001);
       }
    }
    
