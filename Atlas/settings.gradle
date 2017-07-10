@@ -1,9 +1,33 @@
-rootProject.name = ''
+rootProject.name = 'atlas'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating Atlas settings.gradle'
 
 def includes = [
+'../IHMCHumanoidBehaviors',
+'../Vicon',
+'../CommonWalkingControlModules',
+'../IHMCAvatarInterfaces',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCHumanoidRobotics',
+'../IHMCCommunication',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCPerception',
+'../IHMCRoboticsToolkit',
+'../IHMCROSTools',
+'../IHMCWholeBodyController',
+'../IHMCRobotDataLogger',
+'../RobotiqHandDrivers',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCSimulationToolkit',
+'../IHMCRobotDataVisualizer',
+'../IHMCManipulationPlanning',
 ]
 
 if (startParameter.searchUpwards)
