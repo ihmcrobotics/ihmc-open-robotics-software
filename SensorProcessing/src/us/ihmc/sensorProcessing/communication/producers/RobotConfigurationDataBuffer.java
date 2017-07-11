@@ -175,9 +175,12 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       float[] newJointAngles = robotConfigurationData.getJointAngles();
+      float[] newJointVelocities = robotConfigurationData.getJointVelocities();
+      
       for (int i = 0; i < newJointAngles.length; i++)
       {
          fullRobotModelCache.allJoints[i].setQ(newJointAngles[i]);
+         fullRobotModelCache.allJoints[i].setQd(newJointVelocities[i]);
       }
 
       Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
