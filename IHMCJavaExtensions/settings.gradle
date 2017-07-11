@@ -1,13 +1,4 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-java-extensions'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCJavaExtensions settings.gradle'
 
-def includes = [
-'../IHMCJavaExtensions',
-]
-
-if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
-   }
