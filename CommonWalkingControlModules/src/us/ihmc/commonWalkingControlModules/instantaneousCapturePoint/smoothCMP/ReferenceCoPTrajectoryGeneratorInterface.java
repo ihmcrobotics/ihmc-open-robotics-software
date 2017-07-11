@@ -83,21 +83,4 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
    List<? extends CoPTrajectory> getTransferCoPTrajectories();
 
    List<? extends CoPTrajectory> getSwingCoPTrajectories();
-
-   void setInitialCoPPosition(FramePoint initialCoPPosition);
-
-   void setInitialCoPPosition(FramePoint2d initialCoPPosition);
-
-   void setInitialCoPVelocity(FrameVector initialCoPVelocity);
-
-   void setInitialCoPVelocity(FrameVector2d initialCoPVelocity);
-
-   void setInitialCoPAcceleration(FrameVector initialCoPAcceleration);
-
-   void setInitialCoPAcceleration(FrameVector2d initialCoPAccel);
-
-   void setFinalCoPVelocity(FrameVector finalCoPVelocity);
-
-   void setFinalCoPVelocity(FrameVector2d finalCoPVelocity);
-
 }
