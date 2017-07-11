@@ -1,9 +1,11 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-javafx-toolkit'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCJavaFXToolkit settings.gradle'
 
 def includes = [
-'../IHMCJavaExtensions',
+'../IHMCGraphicsDescription',
+'../IHMCJavaToolkit',
+'../IHMCRoboticsToolkit',
 ]
 
 if (startParameter.searchUpwards)
