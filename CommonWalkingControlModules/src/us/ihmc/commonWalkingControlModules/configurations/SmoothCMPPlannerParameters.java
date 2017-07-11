@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /**
     * List of CoP points to plan in the order of planning
     */
-   private final List<CoPPointName> copPointsToPlan = Arrays.asList(CoPPointName.HEEL_COP, CoPPointName.BALL_COP);
+   private final CoPPointName[] copPointsToPlan = {CoPPointName.HEEL_COP, CoPPointName.BALL_COP};
    /**
     * CoP offsets in foot frame
     */
@@ -62,7 +61,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
-      return copPointsToPlan.size();
+      return copPointsToPlan.length;
    }
 
    @Override
@@ -110,6 +109,24 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public double getMinTimeToSpendOnExitCoPInSingleSupport()
    {
       return 0.0;
+   }
+
+   public EnumMap<CoPPointName, Double> getMaxXCoPOffsets()
+   {
+      for (int i = 0; i < copPointsToPlan.length; i++)
+      {
+         maxXCoPOffsets.put(copPointsToPlan[i], copOffsetLimits[i].getMaxX() * modelScale);
+      }
+      return maxXCoPOffsets;
+   }
+
+   public EnumMap<CoPPointName, Double> getMinXCoPOffsets()
+   {
+      for (int i = 0; i < copPointsToPlan.length; i++)
+      {
+         minXCoPOffsets.put(copPointsToPlan[i], copOffsetLimits[i].getMinX() * modelScale);
+      }
+      return minXCoPOffsets;
    }
 
    @Override
@@ -168,7 +185,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public List<Vector2D> getCoPOffsets()
    {
       Vector2D tempVec;
-      for (int i = 0; i < copPointsToPlan.size(); i++)
+      for (int i = 0; i < copPointsToPlan.length; i++)
       {
          tempVec = copOffsets[i];
          tempVec.scale(modelScale);
@@ -179,12 +196,12 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    
    public CoPPointName getEntryCoPName()
    {
-      return copPointsToPlan.get(0);
+      return copPointsToPlan[0];
    }
    
    public CoPPointName getExitCoPName()
    {
-      return copPointsToPlan.get(copPointsToPlan.size() -1);
+      return copPointsToPlan[copPointsToPlan.length -1];
    }
 
    @Override
@@ -194,7 +211,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       return modelScale * 0.01;
    }
 
-   public List<CoPPointName> getCoPPointsToPlan()
+   public CoPPointName[] getCoPPointsToPlan()
    {
       return copPointsToPlan;
    }
@@ -263,10 +280,4 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    {
       return CoPSplineType.LINEAR;
    }
-
-
-
-
-
-
 }
