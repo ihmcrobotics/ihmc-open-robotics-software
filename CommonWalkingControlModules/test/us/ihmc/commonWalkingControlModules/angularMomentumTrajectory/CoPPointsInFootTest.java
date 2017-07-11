@@ -71,7 +71,7 @@ public class CoPPointsInFootTest
    {
       FramePoint testLocation = new FramePoint(footSpoof.getSoleFrame(), 0.01, 0.0, 0.01);
       assert (copPointsInFoot.getCoPPointList().isEmpty());
-      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, testLocation);
+      copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.0, testLocation);
       assert (copPointsInFoot.getCoPPointList().size() == 1);
       for (CoPPointName copPointName : CoPPointName.values)
       {

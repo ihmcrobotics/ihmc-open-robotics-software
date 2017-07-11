@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Co
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,7 +17,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
+   private static final FrameVector zeroVector = new FrameVector();
+   
    private final List<CoPPointName> copPointsList = new ArrayList<>(CoPPointName.values.length); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
    private final EnumMap<CoPPointName, CoPTrajectoryPoint> copLocations = new EnumMap<>(CoPPointName.class); // Location of CoP points defined 
    private final EnumMap<CoPPointName, YoFramePoint> copLocationsInWorldFrameReadOnly = new EnumMap<>(CoPPointName.class); // YoFramePoints for visualization
@@ -61,37 +63,37 @@ public class CoPPointsInFoot
       this.copPointsList.add(copPointName);
    }
 
-   public void setIncludingFrame(CoPPointName copPointName, FramePoint location)
+   public void setIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
    {
-      copLocations.get(copPointName).setIncludingFrame(location);
+      copLocations.get(copPointName).set(time, location, zeroVector);
    }
 
-   public void setIncludingFrame(CoPPointName copPointName, YoFramePoint location)
+   public void setIncludingFrame(CoPPointName copPointName, double time, YoFramePoint location)
    {
-      copLocations.get(copPointName).setIncludingFrame(location.getFrameTuple());
+      copLocations.get(copPointName).set(time, location.getFrameTuple(), zeroVector);
    }
 
-   public void setIncludingFrame(CoPPointName copPointName, CoPTrajectoryPoint location)
+   public void setIncludingFrame(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
    {
-      copLocations.get(copPointName).setIncludingFrame(location);
+      copLocations.get(copPointName).set(time, location.getPosition().getFrameTuple(), zeroVector);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, FramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
    {
       addWayPoint(copPointName);
-      setIncludingFrame(copPointName, location);
+      setIncludingFrame(copPointName, time, location);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, YoFramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, YoFramePoint location)
    {
       addWayPoint(copPointName);
-      setIncludingFrame(copPointName, location);
+      setIncludingFrame(copPointName, time, location);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, CoPTrajectoryPoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
    {
       addWayPoint(copPointName);
-      setIncludingFrame(copPointName, location);
+      setIncludingFrame(copPointName, time, location);
    }
 
    public void setToNaN(CoPPointName copPointName)
@@ -144,6 +146,13 @@ public class CoPPointsInFoot
          copLocations.get(CoPPointName.values[i]).changeFrame(desiredFrame);
    }
 
+   public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
+   {
+      footStepCentroid.registerReferenceFrame(newReferenceFrame);
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         copLocations.get(CoPPointName.values[i]).registerReferenceFrame(newReferenceFrame);      
+   }
+   
    public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
    {
       footStepCentroid.switchCurrentReferenceFrame(desiredFrame);
