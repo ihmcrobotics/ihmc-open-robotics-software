@@ -583,13 +583,16 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       framePolygonToPack.update();
       framePolygonToPack.changeFrame(worldFrame);
    }
-
+   
    private void generateTrajectoriesFromWaypoints()
    {
       for(int i = 0; i < copLocationWaypoints.size(); i++)
       {
-         List<CoPPointName> copPointNameList = copLocationWaypoints.get(0).getCoPPointList();
-         
+         List<CoPPointName> copPointNameList = copLocationWaypoints.get(i).getCoPPointList();
+         for(int j = 0; j < copPointNameList.size(); j++)
+         {
+            
+         }
       }
    }
    

@@ -37,11 +37,11 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      pointToPack.setIncludingFrame(getPosition().getReferenceFrame(), getPosition().getX(), getPosition().getY());
 //   }
 //   
-   public void set(Point3DReadOnly position)
-   {
-      getPosition().set(position.getX(), position.getY(), position.getZ());
-      putYoValuesIntoFrameWaypoint();
-   }
+//   public void set(Point3DReadOnly position)
+//   {
+//      getPosition().set(position.getX(), position.getY(), position.getZ());
+//      putYoValuesIntoFrameWaypoint();
+//   }
 //   
 //   public void set(YoFramePoint position)
 //   {
@@ -55,13 +55,13 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      putYoValuesIntoFrameWaypoint();
 //   }
 //   
-   public void setIncludingFrame(FramePoint position)
-   {
-      registerReferenceFrame(position.getReferenceFrame());
-      switchCurrentReferenceFrame(position.getReferenceFrame());
-      setPosition(position);
-      putYoValuesIntoFrameWaypoint();
-   }
+//   public void setIncludingFrame(FramePoint position)
+//   {
+//      registerReferenceFrame(position.getReferenceFrame());
+//      switchCurrentReferenceFrame(position.getReferenceFrame());
+//      setPosition(position);
+//      putYoValuesIntoFrameWaypoint();
+//   }
 //   
 //   public void setIncludingFrame(YoFramePoint position)
 //   {
@@ -70,11 +70,13 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      putYoValuesIntoFrameWaypoint();
 //   }
 //   
-   public void setIncludingFrame(CoPTrajectoryPoint position)
+   public void setIncludingFrame(CoPTrajectoryPoint other)
    {
-      registerReferenceFrame(position.getReferenceFrame());
-      switchCurrentReferenceFrame(position.getReferenceFrame());
-      setPosition(position.getPosition().getFrameTuple());
+      setTime(other.getTime());
+      registerReferenceFrame(other.getReferenceFrame());
+      switchCurrentReferenceFrame(other.getReferenceFrame());
+      setPosition(other.getPosition().getFrameTuple());
+      setLinearVelocity(other.getLinearVelocity().getFrameTuple());
       putYoValuesIntoFrameWaypoint();
    }
       
@@ -83,6 +85,9 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       return getPosition().epsilonEquals(point, threshold);
    }
    
+   /**
+    * Just a cleaner print than parent class 
+    */
    @Override
    public String toString()
    {
