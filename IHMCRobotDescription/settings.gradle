@@ -1,8 +1,11 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-robot-description'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCRobotDescription settings.gradle'
 
 def includes = [
+'../IHMCRoboticsToolkit',
+'../IHMCGeometry',
+'../IHMCGraphicsDescription',
 '../IHMCJavaExtensions',
 ]
 
