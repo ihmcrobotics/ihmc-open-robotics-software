@@ -17,7 +17,7 @@ public class MomentumTrajectoryHandler
 
    private final YoPolynomial polynomial = new YoPolynomial("CubicPolynomial", 4, new YoVariableRegistry("Temp"));
    private final Point3D tempPosition = new Point3D();
-   private final Vector3D tempVelocity= new Vector3D();
+   private final Vector3D tempVelocity = new Vector3D();
 
    private final RuntimeException table = new RuntimeException("This can not be happening.");
 
