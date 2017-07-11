@@ -1,9 +1,10 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-java-toolkit'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCJavaToolkit settings.gradle'
 
 def includes = [
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
 ]
 
 if (startParameter.searchUpwards)
