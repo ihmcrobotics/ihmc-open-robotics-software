@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryPackage;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajectoryCommand, MomentumTrajectoryPackage>
+public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajectoryCommand, MomentumTrajectoryMessage>
 {
    private final RecyclingArrayList<TrajectoryPoint3D> angularMomentumTrajectory = new RecyclingArrayList<>(10, TrajectoryPoint3D.class);
 
@@ -14,8 +14,13 @@ public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajecto
       angularMomentumTrajectory.clear();
    }
 
+   public MomentumTrajectoryCommand(MomentumTrajectoryCommand other)
+   {
+      set(other);
+   }
+
    @Override
-   public void set(MomentumTrajectoryPackage message)
+   public void set(MomentumTrajectoryMessage message)
    {
       clear();
       for (int i = 0; i < message.getNumberOfAngularMomentumTrajectoryPoints(); i++)
@@ -71,9 +76,9 @@ public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajecto
    }
 
    @Override
-   public Class<MomentumTrajectoryPackage> getMessageClass()
+   public Class<MomentumTrajectoryMessage> getMessageClass()
    {
-      return MomentumTrajectoryPackage.class;
+      return MomentumTrajectoryMessage.class;
    }
 
    @Override
