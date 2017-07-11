@@ -1,9 +1,23 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-quadruped-robotics'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCQuadrupedRobotics settings.gradle'
 
 def includes = [
+'../IHMCRobotDataLogger',
+'../CommonWalkingControlModules',
+'../ConvexOptimizationAdapter',
+'../IHMCHumanoidRobotics',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCCommunication',
+'../IHMCRobotModels',
+'../SensorProcessing',
+'../IHMCStateEstimation',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDescription',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
 ]
 
 if (startParameter.searchUpwards)
