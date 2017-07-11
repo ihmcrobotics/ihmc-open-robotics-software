@@ -1,9 +1,13 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-jmonkey-engine-toolkit'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCJMonkeyEngineToolkit settings.gradle'
 
 def includes = [
 '../IHMCJavaExtensions',
+'../IHMCJavaToolkit',
+'../IHMCGraphicsDescription',
+'../IHMCRoboticsToolkit',
+'../IHMCCommunication',
 ]
 
 if (startParameter.searchUpwards)
