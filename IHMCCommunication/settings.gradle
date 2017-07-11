@@ -1,9 +1,11 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-communication'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCCommunication settings.gradle'
 
 def includes = [
-'../IHMCJavaExtensions',
+'../IHMCJavaToolkit',
+'../IHMCRoboticsToolkit',
+'../IHMCCommonsStaging',
 ]
 
 if (startParameter.searchUpwards)
