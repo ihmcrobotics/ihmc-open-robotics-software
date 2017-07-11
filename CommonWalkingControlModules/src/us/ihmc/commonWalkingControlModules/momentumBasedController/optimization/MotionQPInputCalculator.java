@@ -31,7 +31,7 @@ public class MotionQPInputCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoDouble nullspaceProjectionAlpha = new YoDouble("nullspaceProjectionAlpha", registry);
+   private final YoDouble nullspaceProjectionAlpha;
    private final YoDouble secondaryTaskJointsWeight = new YoDouble("secondaryTaskJointsWeight", registry);
 
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
@@ -74,17 +74,24 @@ public class MotionQPInputCalculator
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       this.centroidalMomentumHandler = centroidalMomentumHandler;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
       if (jointPrivilegedConfigurationParameters != null)
+      {
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
+         nullspaceProjectionAlpha = new YoDouble("nullspaceProjectionAlpha", registry);
+         nullspaceProjectionAlpha.set(jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha());
+         nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
+      }
       else
+      {
          privilegedConfigurationHandler = null;
+         nullspaceProjectionAlpha = null;
+         nullspaceCalculator = null;
+      }
 
-      numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
-      nullspaceProjectionAlpha.set(0.005);
-      nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
 
       parentRegistry.addChild(registry);
    }
