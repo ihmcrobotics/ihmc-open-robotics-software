@@ -1,6 +1,6 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-geometry'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCGeometry settings.gradle'
 
 def includes = [
 '../IHMCJavaExtensions',
