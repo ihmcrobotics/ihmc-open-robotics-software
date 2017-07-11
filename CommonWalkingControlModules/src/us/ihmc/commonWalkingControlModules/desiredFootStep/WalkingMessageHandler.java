@@ -15,9 +15,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -83,6 +85,8 @@ public class WalkingMessageHandler
    private final YoBoolean executingFootstep = new YoBoolean("ExecutingFootstep", registry);
    private final FootstepTiming lastTimingExecuted = new FootstepTiming();
 
+   private final MomentumTrajectoryHandler momentumTrajectoryHandler;
+
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -119,6 +123,8 @@ public class WalkingMessageHandler
 
       footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
+
+      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
 
       parentRegistry.addChild(registry);
    }
@@ -211,6 +217,28 @@ public class WalkingMessageHandler
          FootTrajectoryCommand command = commands.get(i);
          upcomingFootTrajectoryCommandListForFlamingoStance.get(command.getRobotSide()).addLast(command);
       }
+   }
+
+   public void handleMomentumTrajectoryCommand(MomentumTrajectoryCommand command)
+   {
+      momentumTrajectoryHandler.handleMomentumTrajectory(command);
+   }
+
+   /**
+    * This method will pack the angular momentum trajectory for planning the ICP trajectory. The parameters {@code startTime} and {@code endTime} refer
+    * to absolute controller time. To get the angular momentum trajectory from the current time to 1.0 seconds in the future the start time must
+    * be the value of yoTime and the end time must be the value of yoTime + 1.0. The {@code numberOfPoints} parameter defines in how many points the
+    * trajectory will be sampled. The packed trajectory will include the end points of the interval, therefore, the number of points must be equal
+    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty.
+    *
+    * @param startTime is the controller time for the start of the interval for which the trajectory is packed
+    * @param endTime is the controller time for the end of the interval for which the trajectory is packed
+    * @param numberOfPoints the number of sampling points of the trajectory
+    * @param trajectoryToPack the trajectory will be packed in here
+    */
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<TrajectoryPoint3D> trajectoryToPack)
+   {
+      momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
 
    public FootstepTiming peekTiming(int i)
