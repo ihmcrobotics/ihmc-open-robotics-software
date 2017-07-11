@@ -1,9 +1,25 @@
-rootProject.name = ''
+rootProject.name = 'example-simulations'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating ExampleSimulations settings.gradle'
 
 def includes = [
+'../ModelFileLoader',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCQuadrupedRobotics',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
+'../CommonWalkingControlModules',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotDescription',
+'../IHMCGraphicsDescription',
+'../ModelFileLoader',
+'../IHMCRobotDataLogger',
+'../IHMCHumanoidRobotics',
+'../SensorProcessing',
+'../IHMCRobotModels',
+'../IHMCSimulationToolkit',
 ]
 
 if (startParameter.searchUpwards)
