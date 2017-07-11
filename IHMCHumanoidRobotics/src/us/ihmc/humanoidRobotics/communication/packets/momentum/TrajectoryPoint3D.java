@@ -1,11 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.momentum;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
-public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.robotics.lists.Settable<TrajectoryPoint3D>
+public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.robotics.lists.Settable<TrajectoryPoint3D>, EpsilonComparable<TrajectoryPoint3D>
 {
    /** Position of trajectory point */
    public final Point3D position;
@@ -66,6 +68,24 @@ public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.r
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());
       setTime(other.getTime());
+   }
+
+   @Override
+   public boolean epsilonEquals(TrajectoryPoint3D other, double epsilon)
+   {
+      if (!getPosition().epsilonEquals(other.getPosition(), epsilon))
+      {
+         return false;
+      }
+      if (!getVelocity().epsilonEquals(other.getVelocity(), epsilon))
+      {
+         return false;
+      }
+      if (!EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+      {
+         return false;
+      }
+      return true;
    }
 
 }
