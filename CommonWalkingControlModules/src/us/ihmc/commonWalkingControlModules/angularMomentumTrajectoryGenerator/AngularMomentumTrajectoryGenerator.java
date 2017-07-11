@@ -130,7 +130,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations)
    {
       for (int i = 0; i < copLocations.size(); i++)
-         upcomingCoPsInFootsteps.get(i).set(copLocations.get(i));
+         upcomingCoPsInFootsteps.get(i).setIncludingFrame(copLocations.get(i));
    }
 
    @Override

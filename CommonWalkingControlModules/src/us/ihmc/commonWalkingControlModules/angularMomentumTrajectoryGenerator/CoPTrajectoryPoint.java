@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -36,11 +37,11 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      pointToPack.setIncludingFrame(getPosition().getReferenceFrame(), getPosition().getX(), getPosition().getY());
 //   }
 //   
-//   public void set(FramePoint position)
-//   {
-//      getPosition().set(position);
-//      putYoValuesIntoFrameWaypoint();
-//   }
+   public void set(Point3DReadOnly position)
+   {
+      getPosition().set(position.getX(), position.getY(), position.getZ());
+      putYoValuesIntoFrameWaypoint();
+   }
 //   
 //   public void set(YoFramePoint position)
 //   {
@@ -54,12 +55,13 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      putYoValuesIntoFrameWaypoint();
 //   }
 //   
-//   public void setIncludingFrame(FramePoint position)
-//   {      
-//      switchCurrentReferenceFrame(position.getReferenceFrame());
-//      getPosition().set(position);
-//      putYoValuesIntoFrameWaypoint();
-//   }
+   public void setIncludingFrame(FramePoint position)
+   {
+      registerReferenceFrame(position.getReferenceFrame());
+      switchCurrentReferenceFrame(position.getReferenceFrame());
+      setPosition(position);
+      putYoValuesIntoFrameWaypoint();
+   }
 //   
 //   public void setIncludingFrame(YoFramePoint position)
 //   {
@@ -68,12 +70,13 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 //      putYoValuesIntoFrameWaypoint();
 //   }
 //   
-//   public void setIncludingFrame(CoPTrajectoryPoint position)
-//   {
-//      switchCurrentReferenceFrame(position.getReferenceFrame());
-//      getPosition().set(position.getFrameTuple());
-//      putYoValuesIntoFrameWaypoint();
-//   }
+   public void setIncludingFrame(CoPTrajectoryPoint position)
+   {
+      registerReferenceFrame(position.getReferenceFrame());
+      switchCurrentReferenceFrame(position.getReferenceFrame());
+      setPosition(position.getPosition().getFrameTuple());
+      putYoValuesIntoFrameWaypoint();
+   }
       
    public boolean epsilonEquals(FramePoint2d point, double threshold)
    {
