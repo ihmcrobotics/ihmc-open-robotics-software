@@ -1,9 +1,15 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-robot-builder'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCRobotBuilder settings.gradle'
 
 def includes = [
+'../IHMCJavaFXToolkit',
+'../IHMCRobotDescription',
+'../ModelFileLoader',
+'../IHMCGraphicsDescription',
+'../IHMCJMonkeyEngineToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
 ]
 
 if (startParameter.searchUpwards)
