@@ -117,6 +117,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryPackage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -283,6 +284,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ChestHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(HeadHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(ClearDelayQueueMessage.class);
+      registerPacketClass(MomentumTrajectoryPackage.class);
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);
