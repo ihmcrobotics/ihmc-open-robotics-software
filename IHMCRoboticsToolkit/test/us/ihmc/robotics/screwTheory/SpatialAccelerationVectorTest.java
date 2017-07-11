@@ -13,9 +13,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -170,7 +170,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       crossPart.cross(omega, v);
       expected.add(crossPart);
       expected.changeFrame(accelerationOfPointFixedInFrameB.getReferenceFrame());
-      FrameVector3DTest.assertFrameVectorEquals(expected, accelerationOfPointFixedInFrameB, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(expected, accelerationOfPointFixedInFrameB, 1e-12);
    }
 
 

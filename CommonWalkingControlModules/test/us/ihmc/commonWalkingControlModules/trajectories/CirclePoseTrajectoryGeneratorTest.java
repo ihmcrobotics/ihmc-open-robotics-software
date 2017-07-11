@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -16,9 +13,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientationTest;
 import us.ihmc.robotics.geometry.FramePose;
@@ -26,6 +22,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * @author twan
@@ -363,6 +360,6 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameVector3D vCheck = new FrameVector3D(frame);
       vCheck.cross(omega, r);
 
-      FrameVector3DTest.assertFrameVectorEquals(vCheck, v, 1e-8);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(vCheck, v, 1e-8);
    }
 }
