@@ -1,9 +1,13 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-footstep-planning'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCFootstepPlanning settings.gradle'
 
 def includes = [
-'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+'../ConvexOptimizationAdapter',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
 ]
 
 if (startParameter.searchUpwards)
