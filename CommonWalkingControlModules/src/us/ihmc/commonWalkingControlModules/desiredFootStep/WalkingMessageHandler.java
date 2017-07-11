@@ -229,7 +229,8 @@ public class WalkingMessageHandler
     * to absolute controller time. To get the angular momentum trajectory from the current time to 1.0 seconds in the future the start time must
     * be the value of yoTime and the end time must be the value of yoTime + 1.0. The {@code numberOfPoints} parameter defines in how many points the
     * trajectory will be sampled. The packed trajectory will include the end points of the interval, therefore, the number of points must be equal
-    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty.
+    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty. The times of the packed trajectory points
+    * will be relative to the start time of the interval.
     *
     * @param startTime is the controller time for the start of the interval for which the trajectory is packed
     * @param endTime is the controller time for the end of the interval for which the trajectory is packed
