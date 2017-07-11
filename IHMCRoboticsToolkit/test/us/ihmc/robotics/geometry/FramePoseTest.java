@@ -12,9 +12,9 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -425,8 +425,8 @@ public class FramePoseTest
 
          shouldEqualTotalTranslation.add(translationDueToRotation, translationNOTfromRotation);
 
-         FrameVector3DTest.assertFrameVectorEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
-         FrameVector3DTest.assertFrameVectorEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
       }
    }
 

@@ -13,10 +13,9 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3DTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -131,7 +130,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassCalculator.compute();
       FramePoint3D centerOfMassBack = new FramePoint3D(ReferenceFrame.getWorldFrame());
       centerOfMassCalculator.getCenterOfMass(centerOfMassBack);
-      FramePoint3DTest.assertFramePointEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
    }
 
    private void compareOrientation(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameOrientation> orientationPort, double epsilon)
@@ -151,7 +150,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityBack);
       FrameVector3D centerOfMassVelocity = centerOfMassVelocityPort.getData();
       centerOfMassVelocityBack.changeFrame(centerOfMassVelocity.getReferenceFrame());
-      FrameVector3DTest.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
    }
 
    private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator,
@@ -162,7 +161,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       centerOfMassAccelerationCalculator.getCoMAcceleration(centerOfMassAccelerationBack);
       centerOfMassAccelerationBack.changeFrame(ReferenceFrame.getWorldFrame());
       FrameVector3D centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
-      FrameVector3DTest.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
    }
 
    private void compareAngularVelocity(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
@@ -173,7 +172,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       estimationLinkTwist.changeFrame(estimationFrame);
       FrameVector3D angularVelocityBack = new FrameVector3D(estimationFrame);
       estimationLinkTwist.getAngularPart(angularVelocityBack);
-      FrameVector3DTest.assertFrameVectorEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
    }
 
    private void compareAngularAcceleration(RigidBody estimationLink, ReferenceFrame estimationFrame,
@@ -184,6 +183,6 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       estimationLinkAcceleration.changeFrameNoRelativeMotion(estimationFrame);
       FrameVector3D angularAccelerationBack = new FrameVector3D(estimationFrame);
       estimationLinkAcceleration.getAngularPart(angularAccelerationBack);
-      FrameVector3DTest.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
    }
 }

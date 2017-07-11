@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,17 +11,17 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3DTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CapturePointToolsTest
 {
@@ -366,7 +366,8 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0), icpToCheck);
 
-         FramePoint3DTest.assertFramePointEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
+         
+         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
          {
