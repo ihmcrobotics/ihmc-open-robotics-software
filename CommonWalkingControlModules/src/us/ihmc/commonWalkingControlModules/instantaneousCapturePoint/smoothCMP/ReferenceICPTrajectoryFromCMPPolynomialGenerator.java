@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointMatrixTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -43,9 +43,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private FramePoint icpPositionDesiredTerminal = new FramePoint();
 
    double [] icpQuantityDesiredCurrent = new double[3];
-   
-   private DenseMatrix64F icpPositionDesiredInitialMatrix = new DenseMatrix64F(defaultSize, 3);
-   private DenseMatrix64F icpPositionDesiredFinalMatrix = new DenseMatrix64F(defaultSize, 3);
 
    private final YoBoolean isStanding;
 
@@ -54,10 +51,12 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
 
    private int numberOfFootstepsRegistered;
    
-   private double timeInCurrentSegment;
+   private YoDouble startTimeOfCurrentPhase;
+   private YoDouble localTimeInCurrentPhase;
+   private YoDouble durationOfPreviousPhase;
    
-   private YoDouble timeCurrentPhase;
-
+   private boolean isPaused = false;
+   
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
 
    public ReferenceICPTrajectoryFromCMPPolynomialGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
@@ -68,11 +67,15 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.useDecoupled = useDecoupled;
-
+      
       totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
-      timeCurrentPhase = new YoDouble(namePrefix + "RelativeTimeCurrentPhase", registry);
-      timeCurrentPhase.set(0.0);
+      startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
+      startTimeOfCurrentPhase.set(0.0);
+      localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
+      localTimeInCurrentPhase.set(0.0);
+      durationOfPreviousPhase = new YoDouble(namePrefix + "DurationPreviousPhase", registry);
+      durationOfPreviousPhase.set(0.0);
       
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
@@ -91,12 +94,13 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       cmpTrajectories.clear();
       totalNumberOfSegments.set(0);
-      timeCurrentPhase.set(0.0);
+      localTimeInCurrentPhase.set(0.0);
    }
 
    public void initializeForTransfer(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
+      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -108,6 +112,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
             cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
             totalNumberOfSegments.increment();
          }
+         
+         durationOfPreviousPhase.set(transferCMPTrajectories.get(0).getPolynomials().get(cmpSegments-1).getFinalTime());
 
          CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -125,14 +131,13 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-
-      icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
-      icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
+      Arrays.toString(Thread.currentThread().getStackTrace());
    }
 
    public void initializeForSwing(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
+      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -141,7 +146,9 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-
+      
+      durationOfPreviousPhase.set(swingCMPTrajectories.get(0).getPolynomials().get(cmpSegments-1).getFinalTime());
+      
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
@@ -169,9 +176,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-
-      icpPositionDesiredInitialMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
-      icpPositionDesiredFinalMatrix.reshape(totalNumberOfSegments.getIntegerValue(), 3);
    }
 
    @Override
@@ -199,37 +203,34 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       {
          initialize();
          
-         timeInCurrentSegment = time; //TODO: use relative NOT absolute time
+         localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue()); //TODO: use relative NOT absolute time
          
          YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(FIRST_SEGMENT);
 
          if(useDecoupled.getBooleanValue() == true)
          {
-            CapturePointMatrixTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpPositionDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointVelocityDecoupled(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointVelocityDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpVelocityDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointAccelerationDecoupled(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointAccelerationDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                     icpAccelerationDesiredCurrent);
          }
          else
          {
-            CapturePointMatrixTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpPositionDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpVelocityDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            CapturePointMatrixTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpAccelerationDesiredCurrent);
          }
-
-         timeCurrentPhase.set(timeCurrentPhase.getDoubleValue() + 0.001);
       }
    }
    
    public void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
    {
-      icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment)); // for new boundary value calculation (wrong)
-//      icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(cmpTrajectories.size()-1-segment)); // for existing boundary value calculation
+      icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment));
    }
 
    public void getDesiredICP(YoFramePoint desiredICPToPack) //TODO: not sure whether this one is needed
@@ -324,5 +325,15 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    public int getTotalNumberOfSegments()
    {
       return totalNumberOfSegments.getIntegerValue();
+   }
+   
+   public void pause()
+   {
+      isPaused = true;
+   }
+   
+   public void resume()
+   {
+      isPaused = false;
    }
 }
