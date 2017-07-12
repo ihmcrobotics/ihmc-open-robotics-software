@@ -1,9 +1,16 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-state-estimation'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCStateEstimation settings.gradle'
 
 def includes = [
+'../IHMCHumanoidRobotics',
+'../CommonWalkingControlModules',
+'../SensorProcessing',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+'../SimulationConstructionSet',
 ]
 
 if (startParameter.searchUpwards)
