@@ -17,6 +17,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
@@ -787,7 +788,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSolutionMethodsAreAllConsistent()
+   public void testSolutionMethodsAreAllConsistent() throws NoConvergenceException
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
 
