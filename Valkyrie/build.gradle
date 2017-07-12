@@ -1,54 +1,11 @@
-buildscript {
-   repositories {
-      maven {
-         url "https://plugins.gradle.org/m2/"
-      }
-   }
-   dependencies {
-      classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
-      classpath "org.ajoberstar:gradle-git:1.4.0-rc.1"
-      classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
-   }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.1.24'
+   id 'org.hidetake.ssh' version '2.9.0'
+   id 'org.ajoberstar.grgit' version '1.7.2'
+   id 'application'
 }
-
-apply plugin: "us.ihmc.gradle.ihmc-build"
-apply plugin: "org.hidetake.ssh"
-import org.ajoberstar.grgit.Grgit
-
-if (!rootProject.name.equals('IHMCOpenRoboticsSoftware'))
-{
-   evaluationDependsOn(':IHMCOpenRoboticsSoftware')
-}
-
-sourceCompatibility = 1.8
-version = "${getOpenRoboticsSoftwareProject().version}"
-project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
-project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-project.ext.licenseName = "Apache License, Version 2.0"
-project.ext.bintrayLicenseName = "Apache-2.0"
-
-repositories ihmc.ihmcDefaultArtifactProxies()
-
-repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
-   maven {
-      url "http://artifactory.ihmc.us/artifactory/thirdparty/"
-   }
-   maven {
-      url "http://artifactory.ihmc.us/artifactory/releases/"
-   }
-}
-
-def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
@@ -64,38 +21,38 @@ dependencies {
    compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.5.0', changing: true
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-system-identification", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-state-estimation", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-avatar-interfaces", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-jmonkey-engine-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-ros-tools", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-logger", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "model-file-loader", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "sensor-processing", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "simulation-contruction-set", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-perception", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-whole-body-controller", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-description", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-models", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-visualizer", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-simulation-toolkit", dependencyMode)
 
-   compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
-   compile ihmc.getProjectDependency(":IHMCSystemIdentification")
-   compile ihmc.getProjectDependency(":IHMCStateEstimation")
-   compile ihmc.getProjectDependency(":CommonWalkingControlModules")
-   compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
-   compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
-   compile ihmc.getProjectDependency(":IHMCROSTools")
-   compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
-   compile ihmc.getProjectDependency(":ModelFileLoader")
-   compile ihmc.getProjectDependency(":SensorProcessing")
-   compile ihmc.getProjectDependency(":SimulationConstructionSet")
-   compile ihmc.getProjectDependency(":IHMCPerception")
-   compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-   compile ihmc.getProjectDependency(":IHMCRobotDescription")
-   compile ihmc.getProjectDependency(":IHMCRobotModels")
-   compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
-   compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
-
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-avatar-interfaces", dependencyMode)
 }
 
-apply plugin: 'application'
 applicationName = "IHMCValkyrieAPI"
 mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
 applicationDefaultJvmArgs = ["-Xmx4g"]
@@ -147,16 +104,16 @@ jar {
 
    manifest {
       attributes(
-              "Created-By": "IHMC Gradle Build Script",
-              "Implementation-Title": project.name,
-              "Implementation-Version": project.version,
-              "Implementation-Vendor": "IHMC",
+            "Created-By": "IHMC Gradle Build Script",
+            "Implementation-Title": project.name,
+            "Implementation-Version": project.version,
+            "Implementation-Vendor": "IHMC",
 
-              "Bundle-Name": project.name,
-              "Bundle-Version": project.version,
-              "Bundle-License": "${project.ext.licenseURL}",
-              "Bundle-Vendor": "IHMC",
-              'Class-Path': depend.join(' '))
+            "Bundle-Name": project.name,
+            "Bundle-Version": project.version,
+            "Bundle-License": "${project.ext.licenseURL}",
+            "Bundle-Vendor": "IHMC",
+            'Class-Path': depend.join(' '))
    }
 }
 
@@ -252,16 +209,15 @@ task createRosJar(type: Jar) {
    if (!project.parent.hasProperty("repo"))
    {
       gitRepo = Grgit.open(projectDir.canonicalFile.parent)
-   }
-   else
+   } else
    {
       gitRepo = project.parent.repo
    }
    version = gitRepo.head().abbreviatedId;
    manifest {
       attributes 'Implementation-Title': 'ROSAPI',
-              'Implementation-Version': version,
-              'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
+            'Implementation-Version': version,
+            'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
    }
 
    baseName = 'OpenHumanoidsSimulator'

@@ -1,9 +1,30 @@
-rootProject.name = ''
+rootProject.name = 'valkyrie'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating Valkyrie settings.gradle'
 
 def includes = [
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../IHMCSystemIdentification',
+'../IHMCStateEstimation',
+'../CommonWalkingControlModules',
+'../IHMCAvatarInterfaces',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCROSTools',
+'../IHMCRobotDataLogger',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../IHMCPerception',
+'../IHMCWholeBodyController',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCRobotDataVisualizer',
+'../IHMCSimulationToolkit',
 ]
 
 if (startParameter.searchUpwards)
