@@ -283,7 +283,7 @@ public class RobotDescriptionFromSDFLoader
       case REVOLUTE:
          PinJointDescription pinJoint = new PinJointDescription(sanitizedJointName, offset, jointAxis);
 
-         if (joint.hasLimits())
+         if (joint.hasLimits() && jointNameMap != null)
          {
             if (isJointInNeedOfReducedGains(joint))
             {
