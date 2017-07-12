@@ -151,13 +151,17 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
          YoOneDoFTrajectoryPoint firstWaypoint = waypoints.get(0);
+         initialPositionProvider.setValue(firstWaypoint.getPosition());
+         initialVelocityProvider.setValue(firstWaypoint.getVelocity());
          finalPositionProvider.setValue(firstWaypoint.getPosition());
          finalVelocityProvider.setValue(firstWaypoint.getVelocity());
          trajectoryTimeProvider.setValue(0.0);
          subTrajectory.initialize();
       }
       else
+      {
          initializeSubTrajectory(0);
+      }
    }
 
    private void initializeSubTrajectory(int waypointIndex)
