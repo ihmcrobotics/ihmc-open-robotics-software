@@ -1,9 +1,10 @@
-rootProject.name = ''
+rootProject.name = 'image-processing'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating ImageProcessing settings.gradle'
 
 def includes = [
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
 ]
 
 if (startParameter.searchUpwards)
