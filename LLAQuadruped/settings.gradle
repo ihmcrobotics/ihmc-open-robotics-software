@@ -1,9 +1,19 @@
-rootProject.name = ''
+rootProject.name = 'lla-quadruped'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating LLAQuadruped settings.gradle'
 
 def includes = [
+'../IHMCQuadrupedRobotics',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../SensorProcessing',
+'../IHMCRobotModels',
+'../IHMCSimulationToolkit',
+'../LLAQuadrupedController',
 ]
 
 if (startParameter.searchUpwards)
