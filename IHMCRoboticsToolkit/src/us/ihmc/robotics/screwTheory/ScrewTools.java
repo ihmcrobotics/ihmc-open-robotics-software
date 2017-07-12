@@ -539,6 +539,7 @@ public class ScrewTools
 
       clone.setJointLimitLower(original.getJointLimitLower());
       clone.setJointLimitUpper(original.getJointLimitUpper());
+      clone.setVelocityLimit(original.getVelocityLimitLower(), original.getVelocityLimitUpper());
       return clone;
    }
 

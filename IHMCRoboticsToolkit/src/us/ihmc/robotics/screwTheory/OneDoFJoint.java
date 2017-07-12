@@ -27,6 +27,8 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double effortLimitUpper = Double.POSITIVE_INFINITY;
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
+   private double velocityLimitLower = Double.NEGATIVE_INFINITY;
+   private double velocityLimitUpper = Double.POSITIVE_INFINITY;
 
    //   private double tauDamping;
 
@@ -323,6 +325,22 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
+   }
+   
+   public double getVelocityLimitUpper()
+   {
+      return velocityLimitUpper;
+   }
+   
+   public double getVelocityLimitLower()
+   {
+      return velocityLimitLower;
+   }
+   
+   public void setVelocityLimit(double velocityLimitLower, double velocityLimitUpper)
+   {
+      this.velocityLimitLower = velocityLimitLower;
+      this.velocityLimitUpper = velocityLimitUpper;
    }
 
    public double getJointLimitUpper()
