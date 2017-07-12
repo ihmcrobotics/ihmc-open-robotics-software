@@ -97,7 +97,7 @@ public class ReferenceCMPTrajectoryGenerator
       this.numberOfRegisteredSteps = numberOfRegisteredSteps;
    }
 
-   public void initializeForTransfer(double currentTime, List<? extends CoPTrajectory> transferCoPTrajectories, List<? extends CoPTrajectory> swingCoPTrajectories)
+   public void initializeForTransfer(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories, List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
    {
       initialTime = currentTime;
 
@@ -107,7 +107,7 @@ public class ReferenceCMPTrajectoryGenerator
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
          CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
-         CoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
+         CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
 
          for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
@@ -118,7 +118,7 @@ public class ReferenceCMPTrajectoryGenerator
          }
 
          CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
-         CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
+         CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
          for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
             YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
@@ -130,7 +130,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       // handle final transfer
       CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
-      CoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
+      CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
@@ -141,7 +141,7 @@ public class ReferenceCMPTrajectoryGenerator
       activeTrajectory = transferCMPTrajectories.get(0);
    }
 
-   public void initializeForSwing(double currentTime, List<? extends CoPTrajectory> transferCoPTrajectories, List<? extends CoPTrajectory> swingCoPTrajectories)
+   public void initializeForSwing(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories, List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
    {
       initialTime = currentTime;
 
@@ -149,7 +149,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       // handle current swing
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
-      CoPTrajectory swingCoPTrajectory = swingCoPTrajectories.get(0);
+      CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(0);
       for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
          YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
@@ -162,7 +162,7 @@ public class ReferenceCMPTrajectoryGenerator
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
          CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
-         CoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
+         CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
 
          for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
@@ -185,7 +185,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       // handle final transfer
       CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
-      CoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
+      CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
