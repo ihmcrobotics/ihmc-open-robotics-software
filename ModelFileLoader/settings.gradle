@@ -1,9 +1,14 @@
-rootProject.name = ''
+rootProject.name = 'model-file-loader'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating ModelFileLoader settings.gradle'
 
 def includes = [
+'../IHMCRobotDescription',
+'../IHMCGraphicsDescription',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCJavaToolkit',
+'../SimulationConstructionSet',
 ]
 
 if (startParameter.searchUpwards)
