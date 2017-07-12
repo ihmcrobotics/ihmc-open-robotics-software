@@ -1,8 +1,9 @@
-rootProject.name = ''
+rootProject.name = 'parameter-optimization'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating ParameterOptimization settings.gradle'
 
 def includes = [
+'../IHMCRoboticsToolkit',
 '../IHMCJavaExtensions',
 ]
 
