@@ -80,7 +80,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    List<CoPPointsInFoot> getWaypoints();
 
-   List<? extends CoPTrajectory> getTransferCoPTrajectories();
+   List<? extends CoPTrajectoryInterface> getTransferCoPTrajectories();
 
-   List<? extends CoPTrajectory> getSwingCoPTrajectories();
+   List<? extends CoPTrajectoryInterface> getSwingCoPTrajectories();
 }
