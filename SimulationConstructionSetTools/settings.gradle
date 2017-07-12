@@ -1,9 +1,9 @@
-rootProject.name = ''
+rootProject.name = 'simulation-construction-set-tools'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating SimulationConstructionSetTools settings.gradle'
 
 def includes = [
-'../IHMCJavaExtensions',
+'../SimulationConstructionSet',
 ]
 
 if (startParameter.searchUpwards)
