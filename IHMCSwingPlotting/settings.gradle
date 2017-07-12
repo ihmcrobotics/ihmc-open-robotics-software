@@ -1,9 +1,12 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-swing-plotting'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCSwingPlotting settings.gradle'
 
 def includes = [
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
 ]
 
 if (startParameter.searchUpwards)
