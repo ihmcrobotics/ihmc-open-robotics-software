@@ -330,6 +330,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
+      pointFeedbackCommand.setGainsFrame(baseFrame);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
       

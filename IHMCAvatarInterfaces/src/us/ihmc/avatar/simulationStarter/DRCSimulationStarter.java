@@ -40,6 +40,7 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -113,17 +114,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
-   public DRCSimulationStarter(DRCRobotModel robotModel, DRCSCSInitialSetup scsInitialSetup)
+   public DRCSimulationStarter(DRCRobotModel robotModel, GroundProfile3D groundProfile3D)
    {
-      this(robotModel, null, scsInitialSetup);
+      this(robotModel, null, groundProfile3D);
    }
 
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      this(robotModel, environment, null);
+      this(robotModel, environment, environment.getTerrainObject3D());
    }
 
-   public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
+   private DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, GroundProfile3D groundProfile3D)
    {
       this.robotModel = robotModel;
       this.environment = environment;
@@ -133,17 +134,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      if (scsInitialSetup == null)
-      {
-         this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-         this.scsInitialSetup.setInitializeEstimatorToActual(false);
-         this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
-         this.scsInitialSetup.setRunMultiThreaded(true);
-      }
-      else
-      {
-         this.scsInitialSetup = scsInitialSetup;
-      }
+      this.scsInitialSetup = new DRCSCSInitialSetup(groundProfile3D, robotModel.getSimulateDT());
+      this.scsInitialSetup.setDrawGroundProfile(environment == null);
+      this.scsInitialSetup.setInitializeEstimatorToActual(false);
+      this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+      this.scsInitialSetup.setRunMultiThreaded(true);
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
