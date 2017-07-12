@@ -1,9 +1,17 @@
-rootProject.name = ''
+rootProject.name = 'robotiq-hand-drivers'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating RobotiqHandDrivers settings.gradle'
 
 def includes = [
+'../IHMCHumanoidRobotics',
+'../IHMCAvatarInterfaces',
+'../IHMCCommunication',
+'../SimulationConstructionSet',
+'../IHMCWholeBodyController',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
 ]
 
 if (startParameter.searchUpwards)
