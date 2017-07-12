@@ -1,9 +1,13 @@
-rootProject.name = ''
+rootProject.name = 'vicon'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating Vicon settings.gradle'
 
 def includes = [
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCCommunication',
+'../IHMCRoboticsToolkit',
+'../SimulationConstructionSet',
 ]
 
 if (startParameter.searchUpwards)
