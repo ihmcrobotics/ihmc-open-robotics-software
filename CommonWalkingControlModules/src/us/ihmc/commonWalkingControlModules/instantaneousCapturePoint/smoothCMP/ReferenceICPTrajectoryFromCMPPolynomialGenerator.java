@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
@@ -131,7 +130,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-      Arrays.toString(Thread.currentThread().getStackTrace());
+      
+      initialize();
    }
 
    public void initializeForSwing(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
@@ -176,6 +176,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
+      
+      initialize();
    }
 
    @Override
@@ -201,8 +203,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       if (!isStanding.getBooleanValue())
       {
-         initialize();
-         
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue()); //TODO: use relative NOT absolute time
          
          YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(FIRST_SEGMENT);
