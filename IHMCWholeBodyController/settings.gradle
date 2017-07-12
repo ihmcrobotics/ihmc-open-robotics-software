@@ -1,9 +1,20 @@
-rootProject.name = ''
+rootProject.name = 'ihmc-whole-body-controller'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating IHMCWholeBodyController settings.gradle'
 
 def includes = [
+'../CommonWalkingControlModules',
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../SimulationConstructionSet',
+'../SensorProcessing',
+'../SimulationConstructionSetTools',
+'../IHMCJavaToolkit',
 '../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotModels',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDataLogger',
 ]
 
 if (startParameter.searchUpwards)
