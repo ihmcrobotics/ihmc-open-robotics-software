@@ -50,6 +50,7 @@ public class CoPPointsInFoot
 
    public void reset()
    {
+      footStepCentroid.setToNaN();
       copPointsList.clear();
       for (int i = 0; i < CoPPointName.values.length; i++)
       {
