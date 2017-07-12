@@ -3,16 +3,16 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseDynamicsQPSolver
 {
@@ -26,7 +26,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final ActiveSetQPSolver qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -65,8 +65,9 @@ public class InverseDynamicsQPSolver
    private final boolean hasFloatingBase;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-   public InverseDynamicsQPSolver(int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   public InverseDynamicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
+      this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
       this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
