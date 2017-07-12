@@ -26,6 +26,21 @@ public interface ControllerCoreOptimizationSettings
    double getJointAccelerationWeight();
 
    /**
+    * Gets the maximum value for the absolute joint accelerations in the optimization problem.
+    * <p>
+    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is
+    * used when running the {@link WholeBodyControllerCore} in the
+    * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
+    * </p>
+    * 
+    * @return the maximum joint acceleration, the returned value has to be in [0, {@link Double#POSITIVE_INFINITY}].
+    */
+   default double getMaximumJointAcceleration()
+   {
+      return 200.0;
+   }
+
+   /**
     * Gets the weight specifying how much high joint jerk values should be penalized in the
     * optimization problem.
     * <p>
