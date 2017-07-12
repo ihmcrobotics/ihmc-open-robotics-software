@@ -1,8 +1,11 @@
-rootProject.name = ''
+rootProject.name = 'kalman-project'
 
-println 'Evaluating  settings.gradle'
+println 'Evaluating KalmanProject settings.gradle'
 
 def includes = [
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
+'../IHMCRoboticsToolkit',
 '../IHMCJavaExtensions',
 ]
 
