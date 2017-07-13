@@ -37,5 +37,5 @@ dependencies {
    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   testCompile ihmc.getBuildVersion("us.ihmc", "simulation-contruction-set", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
 }

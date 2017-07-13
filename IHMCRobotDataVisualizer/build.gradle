@@ -15,7 +15,7 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
    compile ihmc.getBuildVersion("us.ihmc", "model-file-loader", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-contruction-set", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-javafx-toolkit", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
