@@ -538,6 +538,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
             TransferCoPTrajectory transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
             transferCoPTrajectory.compute(orderOfSplineInterpolation.getEnumValue(), previousCoP, currentHeelCoP);
+            PrintTools.debug("I'm the last CoP at i=" + i);
          }
          else
          {
