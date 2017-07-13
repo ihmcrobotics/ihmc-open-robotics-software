@@ -40,6 +40,10 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    
    private FramePoint cmpPositionDesiredInitial = new FramePoint();
    private FramePoint icpPositionDesiredTerminal = new FramePoint();
+   
+   private YoFramePoint icpTerminalTest;
+   private YoInteger cmpTrajectoryLength;
+   private YoInteger icpTerminalLength;
 
    double [] icpQuantityDesiredCurrent = new double[3];
 
@@ -75,6 +79,10 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       localTimeInCurrentPhase.set(0.0);
       durationOfPreviousPhase = new YoDouble(namePrefix + "DurationPreviousPhase", registry);
       durationOfPreviousPhase.set(0.0);
+      
+      icpTerminalTest = new YoFramePoint("ICPTerminalTest", ReferenceFrame.getWorldFrame(), registry);
+      cmpTrajectoryLength = new YoInteger("CMPTrajectoryLength", registry);
+      icpTerminalLength = new YoInteger("ICPTerminalLength", registry);
       
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
@@ -185,7 +193,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       if (!isStanding.getBooleanValue())
       {
-         if(useDecoupled.getBooleanValue() == true)
+         if(useDecoupled.getBooleanValue())
          {
             CapturePointMatrixTools.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
@@ -195,6 +203,10 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
          }
          icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
          getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
+         
+         icpTerminalTest.set(icpPositionDesiredTerminal);
+         cmpTrajectoryLength.set(cmpTrajectories.size());
+         icpTerminalLength.set(icpDesiredFinalPositions.size());
       }
    }
 
@@ -203,11 +215,11 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       if (!isStanding.getBooleanValue())
       {
-         localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue()); //TODO: use relative NOT absolute time
+         localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
          
          YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(FIRST_SEGMENT);
 
-         if(useDecoupled.getBooleanValue() == true)
+         if(useDecoupled.getBooleanValue())
          {
             CapturePointMatrixTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpPositionDesiredCurrent);
