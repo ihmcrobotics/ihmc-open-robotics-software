@@ -193,14 +193,4 @@ public class CoPPointsInFoot
    {
       return copPointsList;
    }
-
-   public CoPPointName getEntryCoPName()
-   {
-      return copPointsList.get(0);
-   }
-
-   public CoPPointName getExitCoPName()
-   {
-      return copPointsList.get(copPointsList.size() - 1);
-   }
 }

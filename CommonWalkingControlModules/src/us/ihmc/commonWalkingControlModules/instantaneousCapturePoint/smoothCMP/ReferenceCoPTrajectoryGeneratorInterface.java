@@ -56,24 +56,6 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide);
 
-   /**
-    * Remove first footstep in the upcoming footstep queue from planner
-    */
-   void removeFootstepQueueFront();
-
-   /**
-    * Removes the specified number of footsteps from the queue front
-    * @param numberOfFootstepsToRemove number of steps to remove
-    */
-
-   void removeFootstepQueueFront(int numberOfFootstepsToRemove);
-
-   /**
-    * Removes specified footstep from upcoming footstep queue
-    * @param index
-    */
-   void removeFootstep(int index);
-
    boolean isDoneWalking();
 
    void setSafeDistanceFromSupportEdges(double distance);
