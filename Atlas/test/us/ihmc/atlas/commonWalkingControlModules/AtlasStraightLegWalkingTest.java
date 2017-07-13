@@ -18,7 +18,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
@@ -330,7 +330,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   public double getJointAccelerationWeight()
                   {
                      //return 0.005;
-                     return 0.01;
+                     return 0.02;
                   }
                };
             }
@@ -370,7 +370,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             @Override
             public double getMinTimeToSpendOnExitCMPInSingleSupport()
             {
-               return 0.1;
+               return 0.15;
             }
 
             @Override

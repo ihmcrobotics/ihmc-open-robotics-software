@@ -33,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBear
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
@@ -150,15 +151,18 @@ public class WalkingCommandConsumer
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
-         headManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class));
+         HeadTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class);
+         headManager.handleTaskspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckTrajectoryCommand.class))
       {
-         headManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckTrajectoryCommand.class));
+         NeckTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(NeckTrajectoryCommand.class);
+         headManager.handleJointspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
       {
-         headManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
+         NeckDesiredAccelerationsCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class);
+         headManager.handleDesiredAccelerationsCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -171,15 +175,18 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
-         chestManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class));
+         ChestTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class);
+         chestManager.handleTaskspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
-         chestManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class));
+         SpineTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class);
+         chestManager.handleJointspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
       {
-         chestManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class));
+         SpineDesiredAccelerationCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class);
+         chestManager.handleDesiredAccelerationsCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -192,7 +199,8 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
       {
-         comHeightManager.handlePelvisHeightTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
+         PelvisHeightTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
+         comHeightManager.handlePelvisHeightTrajectoryCommand(command);
       }
    }
 
@@ -402,10 +410,14 @@ public class WalkingCommandConsumer
    public void consumeFootCommands()
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootTrajectoryCommand.class))
+      {
          walkingMessageHandler.handleFootTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(FootTrajectoryCommand.class));
+      }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+      {
          walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
+      }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class))
       {
@@ -413,7 +425,14 @@ public class WalkingCommandConsumer
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AdjustFootstepCommand.class))
+      {
          walkingMessageHandler.handleAdjustFootstepCommand(commandConsumerWithDelayBuffers.pollNewestCommand(AdjustFootstepCommand.class));
+      }
+
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(MomentumTrajectoryCommand.class))
+      {
+         walkingMessageHandler.handleMomentumTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(MomentumTrajectoryCommand.class));
+      }
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)

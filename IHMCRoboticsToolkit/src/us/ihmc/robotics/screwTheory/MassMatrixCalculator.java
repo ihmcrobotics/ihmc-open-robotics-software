@@ -9,5 +9,7 @@ public interface MassMatrixCalculator
 
    public abstract DenseMatrix64F getMassMatrix();
 
+   public abstract void getMassMatrix(DenseMatrix64F massMatrixToPack);
+
    public abstract InverseDynamicsJoint[] getJointsInOrder();
 }
