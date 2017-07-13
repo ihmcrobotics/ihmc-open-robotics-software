@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointMatrixTools;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements PositionTrajectoryGenerator
+public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoDouble omega0;
    private ReferenceFrame trajectoryFrame;
@@ -62,8 +62,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
 
-   public ReferenceICPTrajectoryFromCMPPolynomialGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                                           YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
+                                          YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.trajectoryFrame = trajectoryFrame;
@@ -195,11 +195,11 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       {
          if(useDecoupled.getBooleanValue())
          {
-            CapturePointMatrixTools.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+            SmoothCapturePointTools.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
          else
          {
-            CapturePointMatrixTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+            SmoothCapturePointTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
          icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
          getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
@@ -221,20 +221,20 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
 
          if(useDecoupled.getBooleanValue())
          {
-            CapturePointMatrixTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpPositionDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointVelocityDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointVelocityDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpVelocityDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointAccelerationDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointAccelerationDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                     icpAccelerationDesiredCurrent);
          }
          else
          {
-            CapturePointMatrixTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpPositionDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpVelocityDesiredCurrent);
-            CapturePointMatrixTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+            SmoothCapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpAccelerationDesiredCurrent);
          }
       }
