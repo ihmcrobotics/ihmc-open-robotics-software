@@ -448,7 +448,7 @@ public class CapturePointToolsTest
          {
             double time = 0.0;
             FramePoint newEntryICP = new FramePoint(ReferenceFrame.getWorldFrame());
-            CapturePointMatrixToolsTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
+            SmoothCapturePointToolsTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
             entryCornerPointsByHandToPack.set(i, newEntryICP);
             if(i > 0)
             {

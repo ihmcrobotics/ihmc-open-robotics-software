@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class CapturePointMatrixToolsTest
+public class SmoothCapturePointToolsTest
 {
    private static final int nTests = 20;
    private static final double omega0 = 3.4;
@@ -27,9 +27,9 @@ public class CapturePointMatrixToolsTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random();
    
-   String namePrefix = "ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest";
+   String namePrefix = "SmoothCapturePointToolsTest";
    
-   CapturePointMatrixTools icpM = new CapturePointMatrixTools();
+   SmoothCapturePointTools icpM = new SmoothCapturePointTools();
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -55,7 +55,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, linear3D);
+         SmoothCapturePointTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, linear3D);
          calculateAlphaPrime3DByHandLinear(omega0 , time, tFinal, alphaPrimeManual);
          
 //         PrintTools.debug("A linear calc: " + alphaPrimeAutomatic.toString());
@@ -72,7 +72,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, linear3D);
+         SmoothCapturePointTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, linear3D);
          calculateBetaPrime3DByHandLinear(omega0 , time, tFinal, betaPrimeManual);
          
 //         PrintTools.debug("B linear calc: " + betaPrimeAutomatic.toString());
@@ -89,7 +89,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, linear3D);
+         SmoothCapturePointTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, linear3D);
          calculateGammaPrime3DByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
          
 //         PrintTools.debug("C linear calc: " + gammaPrimeAutomatic.toString());
@@ -126,7 +126,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
+         SmoothCapturePointTools.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
          calculateAlphaPrime3DByHandCubic(omega0 , time, tFinal, alphaPrimeManual);
          
 //         PrintTools.debug("A cubic calc: " + alphaPrimeAutomatic.toString());
@@ -143,7 +143,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         CapturePointMatrixTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, cubic3D);
+         SmoothCapturePointTools.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, cubic3D);
          calculateBetaPrime3DByHandCubic(omega0 , time, tFinal, betaPrimeManual);
          
 //         PrintTools.debug("B cubic calc: " + betaPrimeAutomatic.toString());
@@ -160,7 +160,7 @@ public class CapturePointMatrixToolsTest
          DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         CapturePointMatrixTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
+         SmoothCapturePointTools.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
          calculateGammaPrime3DByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
          
 //         PrintTools.debug("C cubic calc: " + gammaPrimeAutomatic.toString());
@@ -197,7 +197,7 @@ public class CapturePointMatrixToolsTest
          FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
          FramePoint icpPositionDesiredCurrentByHand = new FramePoint(worldFrame);
          
-         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
+         SmoothCapturePointTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          calculateICPPositionByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrentByHand);
          
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
@@ -209,7 +209,7 @@ public class CapturePointMatrixToolsTest
          FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
          FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
          
-         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
+         SmoothCapturePointTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
          calculateICPVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
          
 //         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());
@@ -259,7 +259,7 @@ public class CapturePointMatrixToolsTest
          FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
          FramePoint icpPositionDesiredCurrentByHand = new FramePoint(worldFrame);
          
-         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cubic3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
+         SmoothCapturePointTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cubic3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          calculateICPPositionByHand3DCubic(omega0, time, cubic3D, icpPositionDesiredFinal, icpPositionDesiredCurrentByHand);
          
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
@@ -271,7 +271,7 @@ public class CapturePointMatrixToolsTest
          FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
          FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
          
-         CapturePointMatrixTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
+         SmoothCapturePointTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
          calculateICPVelocityByHand3DCubic(omega0, time, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
          
 //         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());

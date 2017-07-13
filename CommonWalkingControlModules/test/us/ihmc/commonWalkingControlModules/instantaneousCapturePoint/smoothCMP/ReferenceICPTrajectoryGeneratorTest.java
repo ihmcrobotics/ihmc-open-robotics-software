@@ -13,12 +13,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest
+public class ReferenceICPTrajectoryGeneratorTest
 {
    private static double EPSILON = 1e-6;
    double omega0 = 3.4;
    
-   String namePrefix = "ReferenceICPTrajectoryFromCMPPolynomialGeneratorTest";
+   String namePrefix = "ReferenceICPTrajectoryGeneratorTest";
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
