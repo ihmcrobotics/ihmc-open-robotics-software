@@ -114,7 +114,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       @Override
       public boolean shouldAddToDisplay(Announcement description)
       {
-         return description.getHostNameAsString().startsWith("cpu");
+         return description.getHostNameAsString().startsWith("cpu") || description.getHostNameAsString().equals("kiwi-test-server");
       }
    }
 }
