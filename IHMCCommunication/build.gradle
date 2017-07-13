@@ -18,11 +18,11 @@ dependencies {
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-commons-staging", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
 
    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-commons-staging", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
 }

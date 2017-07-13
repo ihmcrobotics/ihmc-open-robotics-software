@@ -5,7 +5,7 @@ println 'Evaluating IHMCCommunication settings.gradle'
 def includes = [
 '../IHMCJavaToolkit',
 '../IHMCRoboticsToolkit',
-'../IHMCCommonsStaging',
+'../IHMCJavaExtensions',
 ]
 
 if (startParameter.searchUpwards)
