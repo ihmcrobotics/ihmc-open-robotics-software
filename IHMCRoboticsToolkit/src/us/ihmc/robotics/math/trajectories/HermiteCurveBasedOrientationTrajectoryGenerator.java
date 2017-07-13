@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.MathTools.*;
+import static us.ihmc.robotics.MathTools.square;
 
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -303,16 +303,11 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    @Override
    public void initialize()
    {
-      currentTime.set(0.0);
-
       if (initialOrientation.dot(finalOrientation) < 0.0)
          finalOrientation.negate();
 
       updateControlQuaternions();
-
-      currentOrientation.set(initialOrientation);
-      currentAngularVelocity.set(initialAngularVelocity);
-      currentAngularAcceleration.setToZero();
+      compute(0.0);
    }
 
    private final Quaternion tempQuaternion = new Quaternion();
@@ -365,21 +360,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    public void compute(double time)
    {
       currentTime.set(time);
-
-      if (isDone())
-      {
-         currentOrientation.set(finalOrientation);
-         currentAngularVelocity.set(finalAngularVelocity);
-         currentAngularAcceleration.setToZero();
-         return;
-      }
-      else if (currentTime.getDoubleValue() <= 0.0)
-      {
-         currentOrientation.set(initialOrientation);
-         currentAngularVelocity.set(initialAngularVelocity);
-         currentAngularAcceleration.setToZero();
-         return;
-      }
 
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       computeBezierBasedCurve(time, qInterpolated, angularVelocityInterpolated, angularAccelerationInterpolated);
