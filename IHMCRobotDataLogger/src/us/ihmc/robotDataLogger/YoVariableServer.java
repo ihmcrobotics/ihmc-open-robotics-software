@@ -16,14 +16,14 @@ import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataPubisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
+import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
@@ -41,8 +41,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    // State
    private boolean started = false;
+   private boolean stopped = false;
 
-   private final PeriodicThreadScheduler scheduler;
+   private final PeriodicThreadSchedulerFactory schedulerFactory;
 
    // Servers
    private final DataProducerParticipant dataProducerParticipant;
@@ -54,12 +55,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    
    private final SummaryProvider summaryProvider = new SummaryProvider();
 
-   public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
-      this(mainClazz.getSimpleName(), scheduler, logModelProvider, logSettings, dt);
+      this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
    }
 
-   public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       LoggerConfigurationLoader config;
       try
@@ -72,7 +73,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
 
       this.dt = dt;
-      this.scheduler = scheduler;
+      this.schedulerFactory = schedulerFactory;
 
       try
       {
@@ -110,6 +111,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
 
       handshakeBuilder = new YoVariableHandShakeBuilder(dt);
+      int maxVariables = 0;
+      int maxStates = 0;
       for (int i = 0; i < registeredBuffers.size(); i++)
       {
          RegistrySendBufferBuilder builder = registeredBuffers.get(i);
@@ -117,10 +120,29 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          handshakeBuilder.addRegistryBuffer(builder);
 
          variableChangeData.put(registry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
+            
+         if(builder.getNumberOfVariables() > maxVariables)
+         {
+            maxVariables = builder.getNumberOfVariables();
+         }
+         if(builder.getNumberOfJointStates() > maxStates)
+         {
+            maxStates = builder.getNumberOfJointStates();
+         }
+         
+      }
+      
+      
+      CustomLogDataPubisherType type = new CustomLogDataPubisherType(maxVariables, maxStates);
 
+      for (int i = 0; i < registeredBuffers.size(); i++)
+      {
+         RegistrySendBufferBuilder builder = registeredBuffers.get(i);
+         YoVariableRegistry registry = builder.getYoVariableRegistry();
+         
          try
          {
-            publishers.put(registry, dataProducerParticipant.createRegistryPublisher(scheduler, builder));
+            publishers.put(registry, dataProducerParticipant.createRegistryPublisher(type, schedulerFactory, builder));
          }
          catch (IOException e)
          {
@@ -156,8 +178,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    public synchronized void close()
    {
-      if (started)
+      if (started && !stopped)
       {
+         stopped = false;
          for (int i = 0; i < registeredBuffers.size(); i++)
          {
             RegistrySendBufferBuilder builder = registeredBuffers.get(i);
@@ -165,6 +188,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
             publishers.get(registry).stop();
          }
          dataProducerParticipant.remove();
+         
       }
    }
 
@@ -198,7 +222,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
     */
    public void update(long timestamp, YoVariableRegistry registry)
    {
-      if (!started)
+      if (!started && !stopped)
       {
          return;
       }

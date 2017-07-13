@@ -176,10 +176,14 @@ public class RegistryConsumer extends Thread implements SubscriberListener
          setAndNotify(variables.get(i + offset), longData.get());
       }
       
-      DoubleBuffer jointStateBuffer = DoubleBuffer.wrap(buffer.getJointStates());
-      for(int i = 0; i < jointStates.size(); i++)
+      double[] jointStateArray = buffer.getJointStates();
+      if(jointStateArray.length > 0)
       {
-         jointStates.get(i).update(jointStateBuffer);
+         DoubleBuffer jointStateBuffer = DoubleBuffer.wrap(jointStateArray);
+         for(int i = 0; i < jointStates.size(); i++)
+         {
+            jointStates.get(i).update(jointStateBuffer);
+         }         
       }
       
    }

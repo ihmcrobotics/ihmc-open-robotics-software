@@ -37,6 +37,7 @@ import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -302,17 +303,14 @@ public class DataProducerParticipant
    }
    
    
-   public RegistryPublisher createRegistryPublisher(PeriodicThreadScheduler scheduler, RegistrySendBufferBuilder builder) throws IOException
+   public RegistryPublisher createRegistryPublisher(CustomLogDataPubisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
    {
-
-      
-      CustomLogDataPubisherType type = new CustomLogDataPubisherType(builder.getNumberOfVariables(), builder.getNumberOfJointStates());
       PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, partition);
       Publisher publisher = domain.createPublisher(participant, attr);
 
       
       
-      return new RegistryPublisher(scheduler, builder, publisher);
+      return new RegistryPublisher(schedulerFactory, builder, publisher);
    }
 
 
