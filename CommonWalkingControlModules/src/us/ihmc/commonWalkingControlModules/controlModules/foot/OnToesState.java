@@ -172,12 +172,10 @@ public class OnToesState extends AbstractFootControlState
       if (usePointContact.getBooleanValue())
       {
          setupSingleContactPoint();
-         setControlPointPositionFromContactPoint();
       }
       else
       {
          setupContactLine();
-         setControlPointPositionFromContactLine();
       }
    }
 

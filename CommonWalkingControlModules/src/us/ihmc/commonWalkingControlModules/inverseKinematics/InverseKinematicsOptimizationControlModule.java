@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -68,7 +69,8 @@ public class InverseKinematicsOptimizationControlModule
          jointMinimumVelocities.put(joint, new YoDouble("qd_min_qp_" + joint.getName(), registry));
       }
 
-      qpSolver = new InverseKinematicsQPSolver(numberOfDoFs, registry);
+      ActiveSetQPSolver activeSetQPSolver = toolbox.getOptimizationSettings().getActiveSetQPSolver();
+      qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, registry);
 
       parentRegistry.addChild(registry);
    }
