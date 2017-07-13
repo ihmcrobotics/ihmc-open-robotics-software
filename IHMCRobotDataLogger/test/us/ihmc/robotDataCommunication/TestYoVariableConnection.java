@@ -4,13 +4,13 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotDataLogger.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 public class TestYoVariableConnection
 {
@@ -36,7 +36,7 @@ public class TestYoVariableConnection
    
    
    
-   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.TEST_LOGGER, 0.001);
+   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.TEST_LOGGER, 0.001);
    private final JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(server);
    
    
