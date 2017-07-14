@@ -304,7 +304,7 @@ public class DataProducerParticipant
    
    public RegistryPublisher createRegistryPublisher(CustomLogDataPubisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
    {
-      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, partition);     
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);     
       Publisher publisher = domain.createPublisher(participant, attr);
 
       

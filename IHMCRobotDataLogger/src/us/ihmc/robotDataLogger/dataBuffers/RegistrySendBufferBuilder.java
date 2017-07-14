@@ -20,6 +20,8 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
    private final List<YoVariable<?>> variables = new ArrayList<>();
    private final List<JointHolder> jointHolders = new ArrayList<>();
    
+   private final LoggerDebugRegistry loggerDebugRegistry;
+   
    private final YoGraphicsListRegistry graphics;
    
    private int registryID = -1;
@@ -29,6 +31,8 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
       this.registry = registry;
       this.rootBody = rootBody;
       this.graphics = graphics;
+      
+      this.loggerDebugRegistry = new LoggerDebugRegistry(registry);
    }
    
    public YoVariableRegistry getYoVariableRegistry()
@@ -107,5 +111,10 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
          numberOfJointStates += jointHolders.get(i).getNumberOfStateVariables();
       }
       return numberOfJointStates;
+   }
+
+   public LoggerDebugRegistry getLoggerDebugRegistry()
+   {
+      return loggerDebugRegistry;
    }
 }
