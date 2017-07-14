@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -277,11 +276,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private void computeInitialConstraintOffset(double time)
    {
       double startTime = initialBlendStartTime.getDoubleValue();
-      double endTime = initialBlendEndTime.getDoubleValue();
-      double blendDuration = endTime - startTime;
-      time = MathTools.clamp(time - startTime, 0.0, blendDuration);
-
-      initialConstraintTrajectory.compute(time);
+      initialConstraintTrajectory.compute(time - startTime);
       initialConstraintTrajectory.getOrientation(initialConstraintOrientationOffset);
       initialConstraintTrajectory.getAngularVelocity(initialConstraintAngularVelocityOffset);
       initialConstraintTrajectory.getAngularAcceleration(initialConstraintAngularAccelerationOffset);
@@ -290,11 +285,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private void computeFinalConstraintOffset(double time)
    {
       double startTime = finalBlendStartTime.getDoubleValue();
-      double endTime = finalBlendEndTime.getDoubleValue();
-      double blendDuration = endTime - startTime;
-      time = MathTools.clamp(time - startTime, 0.0, blendDuration);
-
-      finalConstraintTrajectory.compute(time);
+      finalConstraintTrajectory.compute(time - startTime);
       finalConstraintTrajectory.getOrientation(finalConstraintOrientationOffset);
       finalConstraintTrajectory.getAngularVelocity(finalConstraintAngularVelocityOffset);
       finalConstraintTrajectory.getAngularAcceleration(finalConstraintAngularAccelerationOffset);
