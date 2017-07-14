@@ -222,14 +222,6 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
       this.currentTime.set(time);
 
-      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
-      {
-         currentPosition.set(initialPosition);
-         currentVelocity.set(initialVelocity);
-         currentAcceleration.setToZero();
-         return;
-      }
-
       if (time < 0.0)
       {
          currentPosition.set(initialPosition);
@@ -241,6 +233,14 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       {
          currentPosition.set(finalPosition);
          currentVelocity.setToZero();
+         currentAcceleration.setToZero();
+         return;
+      }
+
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         currentPosition.set(initialPosition);
+         currentVelocity.set(initialVelocity);
          currentAcceleration.setToZero();
          return;
       }
