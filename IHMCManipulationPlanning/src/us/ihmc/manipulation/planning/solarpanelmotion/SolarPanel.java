@@ -1,44 +1,44 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SolarPanel
 {
-   private double sizeU;
-   private double sizeV;
+   private double sizeX;
+   private double sizeY;
    private double sizeZ = 0.05;
-   private Pose centerPose;
+   private Pose3D centerPose;
     
    public SolarPanel()
    {
-      this.centerPose = new Pose();
-      this.sizeU = 0;
-      this.sizeV = 0;      
+      this.centerPose = new Pose3D();
+      this.sizeX = 0;
+      this.sizeY = 0;      
    }
    
-   public SolarPanel(Pose pose, double sizeU, double sizeV)
+   public SolarPanel(Pose3D pose, double sizeX, double sizeY)
    {
-      this.sizeU = sizeU;
-      this.sizeV = sizeV;
+      this.sizeX = sizeX;
+      this.sizeY = sizeY;
       this.centerPose = pose;      
    }
    
-   public Pose getCenterPose()
+   public Pose3D getCenterPose()
    {
       return centerPose;
    }
    
-   public double getSizeU()
+   public double getSizeX()
    {
-      return sizeU;
+      return sizeX;
    }
    
-   public double getSizeV()
+   public double getSizeY()
    {
-      return sizeV;
+      return sizeY;
    }
    
    public double getSizeZ()
