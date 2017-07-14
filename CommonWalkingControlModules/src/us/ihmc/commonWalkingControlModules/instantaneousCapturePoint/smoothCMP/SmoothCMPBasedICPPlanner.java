@@ -51,15 +51,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
 
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, plannerParameters, bipedSupportPolygons, contactableFeet,
-                                                                    this.numberOfFootstepsToConsider, swingDurations, transferDurations,
-                                                                    swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
-                                                                    registry);
+                                                                  this.numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas,
+                                                                  registry);
 
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, this.numberOfFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, transferDurationAlphas, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, this.numberOfFootstepsToConsider, isStanding, useDecoupled, worldFrame,
-                                                                                   registry);
+                                                                  registry);
 
       parentRegistry.addChild(registry);
 
