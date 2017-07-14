@@ -1,12 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import org.apache.commons.lang3.Conversion;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -19,21 +16,17 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PushAndWalkBehavior extends AbstractBehavior
 {
@@ -46,56 +39,29 @@ public class PushAndWalkBehavior extends AbstractBehavior
    private final YoGraphicPosition desiredCapturePointViz;
    private final YoGraphicPosition capturePointViz;
 
-   private final BooleanYoVariable walking = new BooleanYoVariable("Walking", registry);
-   private final DoubleYoVariable errorThreshold = new DoubleYoVariable("ErrorThreshold", registry);
-   private final DoubleYoVariable errorFilterAlpha = new DoubleYoVariable("ErrorFilterAlpha", registry);
+   private final YoBoolean walking = new YoBoolean("Walking", registry);
+   private final YoDouble errorThreshold = new YoDouble("ErrorThreshold", registry);
+   private final YoDouble errorFilterAlpha = new YoDouble("ErrorFilterAlpha", registry);
    private final AlphaFilteredYoVariable filteredError = new AlphaFilteredYoVariable("FilteredError", registry, errorFilterAlpha);
-   
-   private final DoubleYoVariable yawErrorThreshold = new DoubleYoVariable("YawErrorThreshold", registry);
-   private final DoubleYoVariable yawErrorFilterAlpha = new DoubleYoVariable("YawErrorFilterAlpha", registry);
-   private final AlphaFilteredYoVariable yawFilteredError = new AlphaFilteredYoVariable("YawFilteredError", registry, yawErrorFilterAlpha);
-   private final DoubleYoVariable yawMaxAnglePerStep = new DoubleYoVariable("YawMaxAnglePerStep", registry);
-   
-   private final DoubleYoVariable[] footWorkSpaceVertex = new DoubleYoVariable[8];
+
    private final HumanoidReferenceFrames referenceFrames;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final FullHumanoidRobotModel fullRobotModel;
 
    public PushAndWalkBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames,
-		   FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
+                              WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(communicationBridge);
       this.referenceFrames = referenceFrames;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.fullRobotModel = fullRobotModel;
-      
+
       statusQueue = new ConcurrentListeningQueue<>(1);
       walkingStatusQueue = new ConcurrentListeningQueue<>(1);
       attachNetworkListeningQueue(statusQueue, CapturabilityBasedStatus.class);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
-      
-      
-      footWorkSpaceVertex[0] = new DoubleYoVariable("FootWorkSpaceVertex1X", registry);
-      footWorkSpaceVertex[1] = new DoubleYoVariable("FootWorkSpaceVertex1Y", registry);
-      footWorkSpaceVertex[2] = new DoubleYoVariable("FootWorkSpaceVertex2X", registry);
-      footWorkSpaceVertex[3] = new DoubleYoVariable("FootWorkSpaceVertex2Y", registry);
-      footWorkSpaceVertex[4] = new DoubleYoVariable("FootWorkSpaceVertex3X", registry);
-      footWorkSpaceVertex[5] = new DoubleYoVariable("FootWorkSpaceVertex3Y", registry);
-      footWorkSpaceVertex[6] = new DoubleYoVariable("FootWorkSpaceVertex4X", registry);
-      footWorkSpaceVertex[7] = new DoubleYoVariable("FootWorkSpaceVertex4Y", registry);
-      
-      footWorkSpaceVertex[0].set(0.25); footWorkSpaceVertex[1].set(0.18);
-      footWorkSpaceVertex[2].set(0.15); footWorkSpaceVertex[3].set(0.35);
-      footWorkSpaceVertex[4].set(-0.25); footWorkSpaceVertex[5].set(0.18);
-      footWorkSpaceVertex[6].set(-0.15); footWorkSpaceVertex[7].set(0.35);
-      
+
       errorThreshold.set(0.02);
       errorFilterAlpha.set(0.95);
-      
-      yawMaxAnglePerStep.set(Math.toRadians(10));
-      yawErrorThreshold.set(Math.toRadians(2));
-      yawErrorFilterAlpha.set(0.95);
-      
+
       if (graphicsListRegistry != null)
       {
          desiredCapturePointViz = new YoGraphicPosition("DesiredICP", yoDesiredCapturePoint, 0.05, YoAppearance.Yellow());
@@ -109,7 +75,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
          capturePointViz = null;
       }
    }
-   
+
    @Override
    public void doControl()
    {
@@ -135,8 +101,6 @@ public class PushAndWalkBehavior extends AbstractBehavior
 
          double error = desiredCapturePoint.distance(capturePoint);
          filteredError.update(error);
-         yawFilteredError.update(getSpineYawJointPositionError());
-         
          boolean shouldWalk = filteredError.getDoubleValue() > errorThreshold.getDoubleValue();
 
          if (doubleSupport && shouldWalk && !walking.getBooleanValue())
@@ -155,40 +119,9 @@ public class PushAndWalkBehavior extends AbstractBehavior
             capturePointViz.update();
          }
          statusQueue.clear();
-      }      
+      }
    }
 
-   private double getSpineYawJointPositionError()
-   {
-	   return getSpineYawJointDesiredPosition() - getSpineYawJointCurrentPosition();
-   }
-   
-   private double getSpineYawJointDesiredPosition()
-   {
-	   OneDoFJoint spineYaw = getSpineYawJoint();
-	   return spineYaw.getqDesired();
-   }
-   
-   private double getSpineYawJointCurrentPosition()
-   {
-	   OneDoFJoint spineYaw = getSpineYawJoint();
-	   return spineYaw.getQ();
-   }
-   
-   private OneDoFJoint getSpineYawJoint()
-   {
-	   SpineJointName[] spineJointName = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
-       int spineYawIndex = -1;
-       for (int i = 0; i < spineJointName.length; i++) {
-    	   if(spineJointName[i].getCamelCaseNameForStartOfExpression() == "spineYaw")
-    	   {
-    		   spineYawIndex = i;
-    		   break;
-    	   }
-       }
-       return fullRobotModel.getSpineJoint(spineJointName[spineYawIndex]);       
-   }
-   
    private void takeSteps(Vector2D direction2dInWorld)
    {
       referenceFrames.updateFrames();
@@ -201,14 +134,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       FramePoint location = computeSteppingLocation(direction, swingSide);
 
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleFrame(swingSide.getOppositeSide());
-      FrameVector directionStanceFootFrame = new FrameVector(direction);
-      directionStanceFootFrame.changeFrame(stanceSoleFrame);
-      
-      double yawAngleChange = Math.atan(directionStanceFootFrame.getY()/directionStanceFootFrame.getX());
-      if(Math.abs(yawAngleChange) > yawMaxAnglePerStep.getDoubleValue())
-    	  yawAngleChange = yawMaxAnglePerStep.getDoubleValue()*Math.signum(yawAngleChange);
-      
-      FrameOrientation orientation = new FrameOrientation(stanceSoleFrame, yawAngleChange, 0.0, 0.0);
+      FrameOrientation orientation = new FrameOrientation(stanceSoleFrame);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -227,7 +153,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       {
          FramePoint stepLocation = computeSteppingLocation(direction, stepSide);
          FramePoint stanceLocation = new FramePoint(referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide()));
-         
+
          stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
          stanceLocation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -246,6 +172,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
             ret = stepSide;
          }
       }
+
       return ret;
    }
 
@@ -253,45 +180,21 @@ public class PushAndWalkBehavior extends AbstractBehavior
    {
       // reachable region in stance frame
       ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
-      reachableRegion.addVertex(footWorkSpaceVertex[0].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[1].getDoubleValue()));
-      reachableRegion.addVertex(footWorkSpaceVertex[2].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[3].getDoubleValue()));
-      reachableRegion.addVertex(footWorkSpaceVertex[4].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[5].getDoubleValue()));
-      reachableRegion.addVertex(footWorkSpaceVertex[6].getDoubleValue(), stepSide.negateIfRightSide(footWorkSpaceVertex[7].getDoubleValue()));
+      reachableRegion.addVertex(0.25, stepSide.negateIfRightSide(0.18));
+      reachableRegion.addVertex(0.15, stepSide.negateIfRightSide(0.35));
+      reachableRegion.addVertex(-0.25, stepSide.negateIfRightSide(0.18));
+      reachableRegion.addVertex(-0.15, stepSide.negateIfRightSide(0.35));
       reachableRegion.update();
-      
+
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
-      //MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
       FrameVector localDirection = new FrameVector(direction);
       localDirection.changeFrame(stanceSoleFrame);
-      FramePoint stanceLocation = new FramePoint(stanceSoleFrame);
-      FramePoint swingLocation = new FramePoint(referenceFrames.getFootFrame(stepSide));
-      
-      //System.out.println(swingLocation.toString());
-      swingLocation.changeFrame(stanceSoleFrame);
-      
-      //Point2D desiredLocation = new Point2D(localDirection.getX(), localDirection.getY());
-      //Point2D location2d = reachableRegion.orthogonalProjectionCopy(desiredLocation);
-      
-      //System.out.println(swingLocation.toString());      
-      //System.out.println(localDirection.getX() + " " + localDirection.getY());
-      //System.out.println(reachableRegion.toString());
-      Line2D ray = new Line2D(swingLocation.getX(), swingLocation.getY(), localDirection.getX(), localDirection.getY());
-      Point2D[] location2d = reachableRegion.intersectionWithRay(ray);
-      
-      int index = 0;
-      if(location2d == null)
-      {
-    	  location2d = new Point2D[1];
-    	  location2d[0] = new Point2D(swingLocation.getX(), swingLocation.getY());    	  
-      }
-      else if (location2d.length == 2)
-      {
-    	  Point2D swingLoc = new Point2D(swingLocation.getX(), swingLocation.getY());
-    	  index = location2d[0].distance(swingLoc) > location2d[1].distance(swingLoc) ? 0:1;
-      }
-      
+
+      Point2D desiredLocation = new Point2D(localDirection.getX(), localDirection.getY());
+      Point2D location2d = reachableRegion.orthogonalProjectionCopy(desiredLocation);
+
       FramePoint location = new FramePoint(stanceSoleFrame);
-      location.setXY(location2d[index]);
+      location.setXY(location2d);
       location.changeFrame(ReferenceFrame.getWorldFrame());
 
       return location;
@@ -338,4 +241,5 @@ public class PushAndWalkBehavior extends AbstractBehavior
       // TODO Auto-generated method stub
       return false;
    }
+
 }
