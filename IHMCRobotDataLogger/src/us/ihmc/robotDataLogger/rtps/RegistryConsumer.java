@@ -10,7 +10,9 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import us.ihmc.commons.Conversions;
+import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -48,7 +50,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoVariableClient listener;
    
    private final TIntIntHashMap registrySizes = new TIntIntHashMap();
-   private final TIntLongHashMap uniqueRegistries = new TIntLongHashMap();
+   private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
+   private final TObjectLongHashMap<Guid> sampleIdentities = new TObjectLongHashMap<>();
    
    // Standard deviation calculation
    private long previousTransmitTime = - 1;
@@ -61,10 +64,12 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private long previousTimestamp = -1;
    private final YoInteger skippedPackets;
+   private final YoInteger skippedIncomingPackets;
    private final YoInteger nonIncreasingTimestamps;
    private final YoInteger packetsOutOfOrder;
    private final YoInteger mergedPackets;
    private final YoInteger totalPackets;
+   private final YoInteger skippedPacketDueToFullBuffer;
 
    private final CompressionImplementation compressionImplementation;
    
@@ -79,10 +84,12 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.listener = yoVariableClient;
       
       this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);
+      this.skippedIncomingPackets = new YoInteger("skippedIncomingPackets", loggerDebugRegistry);
       this.nonIncreasingTimestamps = new YoInteger("nonIncreasingTimestamps", loggerDebugRegistry);
       this.packetsOutOfOrder = new YoInteger("packetsOutOfOrder", loggerDebugRegistry);
       this.mergedPackets = new YoInteger("mergedPackets", loggerDebugRegistry);
       this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
+      this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
       
       this.compressionImplementation = CompressionImplementationFactory.instance();
       
@@ -107,7 +114,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          ThreadTools.sleep(1);
          
-         while(orderedBuffers.size() > (jitterBufferSamples + uniqueRegistries.size() + 1))
+         while(orderedBuffers.size() > (jitterBufferSamples + lastRegistryUid.size() + 1))
          {
             try
             {
@@ -170,7 +177,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private void decompressBuffer(RegistryReceiveBuffer buffer)
    {
-      long previousUid = uniqueRegistries.put(buffer.getRegistryID(), buffer.getUid());
+      long previousUid = lastRegistryUid.put(buffer.getRegistryID(), buffer.getUid());
       
       updateDebugVariables(buffer, previousUid);
       
@@ -200,7 +207,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
 
    void updateDebugVariables(RegistryReceiveBuffer buffer, long previousUid)
    {
-      if(previousUid != uniqueRegistries.getNoEntryValue() && buffer.getUid() != previousUid + 1)
+      if(previousUid != lastRegistryUid.getNoEntryValue() && buffer.getUid() != previousUid + 1)
       {
          if(buffer.getUid() < previousUid)
          {
@@ -277,9 +284,20 @@ public class RegistryConsumer extends Thread implements SubscriberListener
             previousTransmitTime = buffer.getTransmitTime();
             previousReceiveTime = buffer.getReceivedTimestamp();
             
+            if(sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) != sampleIdentities.getNoEntryValue() && sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) + 1 != sampleInfo.getSampleIdentity().getSequenceNumber().get())
+            {
+               skippedIncomingPackets.increment();
+            }
+            sampleIdentities.put(sampleInfo.getSampleIdentity().getGuid(), sampleInfo.getSampleIdentity().getSequenceNumber().get());
+            
+            
             if(orderedBuffers.size() < MAXIMUM_ELEMENTS)
             {
                orderedBuffers.add(buffer);
+            }
+            else
+            {
+               skippedPacketDueToFullBuffer.increment();
             }
          }
       }
