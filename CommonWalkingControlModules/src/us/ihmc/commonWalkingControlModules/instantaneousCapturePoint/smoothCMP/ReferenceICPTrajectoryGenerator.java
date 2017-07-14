@@ -44,6 +44,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private YoFramePoint icpTerminalTest;
    private YoInteger cmpTrajectoryLength;
    private YoInteger icpTerminalLength;
+   private YoInteger currentSegmentIndex;
 
    double [] icpQuantityDesiredCurrent = new double[3];
 
@@ -80,6 +81,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpTerminalTest = new YoFramePoint("ICPTerminalTest", ReferenceFrame.getWorldFrame(), registry);
       cmpTrajectoryLength = new YoInteger("CMPTrajectoryLength", registry);
       icpTerminalLength = new YoInteger("ICPTerminalLength", registry);
+      currentSegmentIndex = new YoInteger("CurrentSegment", registry);
       
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
@@ -195,7 +197,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             SmoothCapturePointTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
          icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
-         getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
+//         getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
          
          icpTerminalTest.set(icpPositionDesiredTerminal);
          cmpTrajectoryLength.set(cmpTrajectories.size());
@@ -210,7 +212,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
          
-         YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(FIRST_SEGMENT);
+         currentSegmentIndex.set(getCurrentSegmentIndex(localTimeInCurrentPhase.getDoubleValue(), cmpTrajectories));
+         YoFrameTrajectory3D cmpPolynomial3D = cmpTrajectories.get(currentSegmentIndex.getIntegerValue());
+         getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, currentSegmentIndex.getIntegerValue());
 
          if(useDecoupled.getBooleanValue())
          {
@@ -233,7 +237,17 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
    
-   private void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
+   private int getCurrentSegmentIndex(double timeInCurrentPhase, List<YoFrameTrajectory3D> cmpTrajectories)
+   {
+      int currentSegmentIndex = FIRST_SEGMENT;
+      while(timeInCurrentPhase > cmpTrajectories.get(currentSegmentIndex).getFinalTime() && Math.abs(cmpTrajectories.get(currentSegmentIndex).getFinalTime() - cmpTrajectories.get(currentSegmentIndex+1).getInitialTime()) < 1.0e-5)
+      {
+         currentSegmentIndex++;
+      }
+      return currentSegmentIndex;
+   }
+   
+   public void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
    {
       icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment));
    }
