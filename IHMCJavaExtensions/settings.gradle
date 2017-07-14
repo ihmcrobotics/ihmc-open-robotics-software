@@ -1,4 +1,9 @@
-rootProject.name = 'ihmc-java-extensions'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCJavaExtensions settings.gradle'
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
+if (startParameter.searchUpwards)
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
+   }

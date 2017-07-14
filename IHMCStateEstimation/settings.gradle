@@ -1,20 +1,9 @@
-rootProject.name = 'ihmc-state-estimation'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCStateEstimation settings.gradle'
-
-def includes = [
-'../IHMCHumanoidRobotics',
-'../CommonWalkingControlModules',
-'../SensorProcessing',
-'../IHMCJavaToolkit',
-'../IHMCJavaExtensions',
-'../IHMCRoboticsToolkit',
-'../IHMCGraphicsDescription',
-'../SimulationConstructionSet',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }
