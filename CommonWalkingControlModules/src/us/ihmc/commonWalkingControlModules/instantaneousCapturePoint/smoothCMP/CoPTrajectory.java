@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,24 +20,31 @@ public class CoPTrajectory implements CoPTrajectoryInterface
 
    private final YoInteger numberOfSegments;
    private final YoInteger currentSegmentIndex;
-
+   private final CoPSplineType splineType;
+   private final WalkingTrajectoryType trajectoryType;
+   private final int stepNumber;
+   
    private YoFrameTrajectory3D currentSegment;
    private final FramePoint copToThrowAway = new FramePoint();
    private final FrameVector copVelocityToThrowAway = new FrameVector();
    private final FrameVector copAccelerationToThrowAway = new FrameVector();
    private final String name;
 
-   public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type, YoVariableRegistry registry)
+   public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type,
+                        YoVariableRegistry registry)
    {
       name = namePrefix + stepNumber + type.toString();
       numberOfSegments = new YoInteger(namePrefix + stepNumber + type.toString() + "NumberOfSegments", registry);
       currentSegmentIndex = new YoInteger(namePrefix + stepNumber + type.toString() + "CurrentSegment", registry);
       for (int i = 0; i < maxNumberOfSegments; i++)
       {
-         YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(type.toString() + "Trajectory" + stepNumber + "Segment" + i, splineType.getNumberOfCoefficients(),
-                                                                         worldFrame, registry);
+         YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(type.toString() + "Trajectory" + stepNumber + "Segment" + i,
+                                                                         splineType.getNumberOfCoefficients(), worldFrame, registry);
          segments.add(segmentTrajectory);
       }
+      this.splineType = splineType;
+      this.trajectoryType = type;
+      this.stepNumber = stepNumber;
       reset();
    }
 
@@ -103,9 +111,10 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    }
 
    @Override
-   public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition,
-                          FramePoint finalPosition)
+   public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition)
    {
+      PrintTools.debug("Step:" + stepNumber + " " + trajectoryType.toString() + " Trajectory " + numberOfSegments.getIntegerValue() + " , InitialTime: " + initialTime + " FinalTime: " + finalTime + " InitialPosition: "
+            + initialPosition.toString() + " FinalPosition: " + finalPosition.toString());
       switch (segmentOrder)
       {
       case CUBIC:
@@ -118,7 +127,7 @@ public class CoPTrajectory implements CoPTrajectoryInterface
       }
       numberOfSegments.increment();
    }
-   
+
    public YoFrameTrajectory3D getCurrentSegment(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);

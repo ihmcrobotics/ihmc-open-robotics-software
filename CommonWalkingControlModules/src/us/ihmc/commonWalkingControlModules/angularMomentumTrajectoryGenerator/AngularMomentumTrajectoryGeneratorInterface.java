@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,7 +42,7 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide);
 
-   List<FrameVector> getWaypoints();
+   List<TrajectoryPoint3D> getWaypoints();
 
    List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories();
 

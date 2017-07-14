@@ -189,6 +189,14 @@ public class CoPPointsInFoot
       return output;
    }
 
+   public String toString2()
+   {
+      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      for (int i = 0; i < copPointsList.size(); i++)
+         output += copPointsList.get(i).toString() + " : " + copLocations.get(copPointsList.get(i)) + "\n";
+      return output;
+   }
+
    public List<CoPPointName> getCoPPointList()
    {
       return copPointsList;
