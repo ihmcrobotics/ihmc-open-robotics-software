@@ -19,13 +19,13 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
-   
+
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
    }
-   
+
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
@@ -38,22 +38,22 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    public void initialize()
    {
    }
-   
+
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       revoluteJoints.clear();
       OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
-      
+
       for (OneDoFJoint revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
-         
+
          ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
-      
+
       rootJointPair = new ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
@@ -89,11 +89,12 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
+         pinJoint.setQd(revoluteJoint.getQd());
       }
-      
+
       FloatingJoint floatingJoint = rootJointPair.getLeft();
       FloatingInverseDynamicsJoint sixDoFJoint = rootJointPair.getRight();
-      
+
       RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
       floatingJoint.setRotationAndTranslation(transform);
    }
