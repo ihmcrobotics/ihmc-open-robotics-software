@@ -1,5 +1,6 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.pushDoor;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,6 +21,7 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
    private PushDoor pushDoor;   
    private double openingAngle = 0;   
    private double pitchAngle = 0;
+   private static double firstTime = 5.0;
    
    public PushDoorTrajectory(PushDoor pushDoor, double trajectoryTime, double openingAngle)
    {
@@ -31,8 +33,22 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
    public void setPitchAngle(double pitchAngle)
    {
       this.pitchAngle = pitchAngle;
-   }   
+   } 
+   
+   public double getFirstTime()
+   {
+      return firstTime;
+   }
 
+   public Pose getEndEffectorPose(double time, double pitchAngle)
+   {
+      double rotationAngle = time/trajectoryTime * openingAngle;
+      
+      PushDoorPose pushDoorPose = new PushDoorPose(pushDoor, getRobotSide(), rotationAngle, pitchAngle);
+      
+      return pushDoorPose.getEndEffectorPose();
+   }
+   
    @Override
    public Pose getEndEffectorPose(double time)
    {
@@ -46,8 +62,8 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
    @Override
    public HandTrajectoryMessage getEndEffectorTrajectoryMessage(ReferenceFrame midFeetFrame)
    {
-      double firstTime = 5.0;
-      int numberOfViaPoints = 10;
+      double firstTime = getFirstTime();
+      int numberOfViaPoints = 11;
       HandTrajectoryMessage endEffectorTrajectoryMessage = new HandTrajectoryMessage(getRobotSide(), numberOfViaPoints);
       
       endEffectorTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
@@ -59,7 +75,7 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
       {
          double time = trajectoryTime*((double)(i)/((double)(numberOfViaPoints)-1) );
          Pose pose = getEndEffectorPose(time);
-         FramePoint framePoint = new FramePoint(midFeetFrame, pose.getPoint());
+         FramePoint framePoint = new FramePoint(worldFrame, pose.getPoint());
          framePoint.changeFrame(midFeetFrame);
          
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(framePoint.getPoint());
@@ -76,6 +92,19 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
          Vector3D desiredLinearVelocity = new Vector3D();
          trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
          Pose pose = getEndEffectorPose(time);
+            
+//         if(i<5)
+//         {
+//            pose = getEndEffectorPose(time, Math.PI*30/180 * i / 4);
+//         }
+//         else
+//         {
+//            pose = getEndEffectorPose(time, -Math.PI*30/180 * (i-4) / 6 + Math.PI*30/180);
+//         }
+            
+         
+            
+         
          FramePoint framePoint = new FramePoint(worldFrame, pose.getPoint());
          framePoint.changeFrame(midFeetFrame);
          
@@ -92,7 +121,7 @@ public class PushDoorTrajectory extends EndEffectorTrajectory
          }
          
          time = time + firstTime;
-         endEffectorTrajectoryMessage.setTrajectoryPoint(i, time, point, orientation, desiredLinearVelocity, new Vector3D(), worldFrame);
+         endEffectorTrajectoryMessage.setTrajectoryPoint(i, time, point, orientation, desiredLinearVelocity, new Vector3D(0, 0, 0), worldFrame);
       }      
       
       return endEffectorTrajectoryMessage;
