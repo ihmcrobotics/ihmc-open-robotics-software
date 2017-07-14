@@ -17,8 +17,6 @@ public class CoPTrajectory implements CoPTrajectoryInterface
 
    private final List<YoFrameTrajectory3D> segments = new ArrayList<>();
 
-   private final int maxNumberOfCoefficients = 3;
-
    private final YoInteger numberOfSegments;
    private final YoInteger currentSegmentIndex;
 
@@ -28,14 +26,14 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    private final FrameVector copAccelerationToThrowAway = new FrameVector();
    private final String name;
 
-   public CoPTrajectory(String namePrefix, int stepNumber, int maxNumberOfSegments, CoPTrajectoryType type, YoVariableRegistry registry)
+   public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, CoPTrajectoryType type, YoVariableRegistry registry)
    {
       name = namePrefix + stepNumber + type.toString();
       numberOfSegments = new YoInteger(namePrefix + stepNumber + type.toString() + "NumberOfSegments", registry);
       currentSegmentIndex = new YoInteger(namePrefix + stepNumber + type.toString() + "CurrentSegment", registry);
       for (int i = 0; i < maxNumberOfSegments; i++)
       {
-         YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(type.toString() + "Trajectory" + stepNumber + "Segment" + i, maxNumberOfCoefficients,
+         YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(type.toString() + "Trajectory" + stepNumber + "Segment" + i, splineType.getNumberOfCoefficients(),
                                                                          worldFrame, registry);
          segments.add(segmentTrajectory);
       }
@@ -49,6 +47,7 @@ public class CoPTrajectory implements CoPTrajectoryInterface
          segments.get(i).reset();
       currentSegmentIndex.set(-1);
       currentSegment = null;
+      numberOfSegments.set(0);
    }
 
    @Override
@@ -104,18 +103,19 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    }
 
    @Override
-   public void setSegment(int segmentIndex, CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition,
+   public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition,
                           FramePoint finalPosition)
    {
       switch (segmentOrder)
       {
       case CUBIC:
-         segments.get(segmentIndex).setCubic(initialTime, finalTime, initialPosition, finalPosition);
+         segments.get(numberOfSegments.getIntegerValue()).setCubic(initialTime, finalTime, initialPosition, finalPosition);
          break;
 
       default:
-         segments.get(segmentIndex).setLinear(initialTime, finalTime, initialPosition, finalPosition);
+         segments.get(numberOfSegments.getIntegerValue()).setLinear(initialTime, finalTime, initialPosition, finalPosition);
          break;
       }
+      numberOfSegments.increment();
    }
 }

@@ -31,41 +31,41 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /**
     * Ordered list of CoP points to plan for each footstep
     */
-   private final CoPPointName[] copPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP, CoPPointName.BALL_COP};
+   private final CoPPointName[] copPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP};
    /**
     * Ordered list of transition time to a particular CoP point from the previous CoP point
     */
-   private final double[] segmentDurations = {0.05, 0.05, 1.0}; // {from MIDFEET to HEEL, from HEEL to BALL, from BALL to MIDFEET}
+   private final double[] segmentDurations = {0.05, 0.05, 0.8, 0.2}; // {to MIDFEET , to HEEL , to BALL}
    /**
     * Vector offsets relative to centroid of support polygon defined copOffsetFrames 
     */
-   private final Vector2D[] copOffsets = {new Vector2D(0.0, 0.0), new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025)};
+   private final Vector2D[] copOffsets = {new Vector2D(0.0, 0.0), new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.025)};
    private final CoPSupportPolygonNames[] copOffsetFrames = {CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON,
-         CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON};
+         CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON};
 
    /**
     * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
     */
-   private final boolean[] constrainMinMaxFlags = {false, true, true};
+   private final boolean[] constrainMinMaxFlags = {false, true, true, true};
    /**
     * Define the bounding box in sole frame
     */
-   private final BoundingBox2D[] copOffsetLimits = {null, new BoundingBox2D(-0.04, -1, 0.03, 1), new BoundingBox2D(0.0, -1, 0.08, -1)};
+   private final BoundingBox2D[] copOffsetLimits = {null, new BoundingBox2D(-0.04, -1, 0.03, 1), new BoundingBox2D(0.0, -1, 0.08, -1), new BoundingBox2D(0.0, -1, 0.08, -1) };
 
    /**
     * Order list of flags indicating whether CoP should reside within the support polygon specified in copOffsetFrames
     */
-   private final boolean[] constrainSupportPolygonFlags = {false, true, true};
+   private final boolean[] constrainSupportPolygonFlags = {false, true, true, true};
 
    /**
     * Ordered list of fractions indicating whether CoP offset changes with step length
     */
-   private final double[] stepLengthToCoPOffsetFactorValues = {0.0, 1.0 / 3.0, 1.0 / 3.0};
+   private final double[] stepLengthToCoPOffsetFactorValues = {0.0, 1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
    /**
     * Defines the manner in which the step length is calculated
     */
    private final CoPSupportPolygonNames[] stepLengthOffsetPolygonValues = {CoPSupportPolygonNames.NULL, CoPSupportPolygonNames.INITIAL_SWING_POLYGON,
-         CoPSupportPolygonNames.FINAL_SWING_POLYGON};
+         CoPSupportPolygonNames.FINAL_SWING_POLYGON, CoPSupportPolygonNames.FINAL_SWING_POLYGON};
 
    /**
     * Final CoP name (chicken support will be used only for this point). In case 
@@ -84,7 +84,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /**
     * Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible
     */
-   private final CoPPointName exitCoPName = CoPPointName.BALL_COP;
+   private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
    
    public SmoothCMPPlannerParameters()
    {
