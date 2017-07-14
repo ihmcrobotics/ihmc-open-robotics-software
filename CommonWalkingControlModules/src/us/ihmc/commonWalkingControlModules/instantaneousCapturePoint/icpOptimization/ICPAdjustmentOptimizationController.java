@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class ICPAdjustmentOptimizationController extends ICPOptimizationController
+public class ICPAdjustmentOptimizationController extends AbstractICPOptimizationController
 {
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
