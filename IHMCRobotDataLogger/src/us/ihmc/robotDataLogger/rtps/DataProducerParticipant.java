@@ -39,6 +39,7 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
+import us.ihmc.tools.compression.CompressionImplementationFactory;
 
 /**
  * This class implements all communication for a data producer inside a DDS logging network
@@ -304,7 +305,21 @@ public class DataProducerParticipant
    
    public RegistryPublisher createRegistryPublisher(CustomLogDataPubisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
    {
-      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);     
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      
+      int maxSize = CustomLogDataPubisherType.getTypeSize(CompressionImplementationFactory.instance().maxCompressedLength(builder.getNumberOfVariables() * 8), builder.getNumberOfJointStates());
+      
+      if(maxSize > 65000)
+      {
+         System.err.println("Warning: Using asynchronous publish mode, except higher packet losses");
+         attr.getThroughputController().setPeriodMillisecs(1);
+         attr.getThroughputController().setBytesPerPeriod((maxSize * 12) / 10);
+      }
+      else
+      {
+         attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
+      }
+      
       Publisher publisher = domain.createPublisher(participant, attr);
 
       
