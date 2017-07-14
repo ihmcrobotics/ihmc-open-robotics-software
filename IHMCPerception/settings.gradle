@@ -1,25 +1,9 @@
-rootProject.name = 'ihmc-perception'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCPerception settings.gradle'
-
-def includes = [
-'../SimulationConstructionSet',
-'../IHMCJMonkeyEngineToolkit',
-'../IHMCHumanoidRobotics',
-'../IHMCCommunication',
-'../IHMCROSTools',
-'../IHMCWholeBodyController',
-'../SensorProcessing',
-'../IHMCRobotModels',
-'../IHMCJavaToolkit',
-'../IHMCJavaExtensions',
-'../IHMCRoboticsToolkit',
-'../IHMCGraphicsDescription',
-'../SimulationConstructionSetTools',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }

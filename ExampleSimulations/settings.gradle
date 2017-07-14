@@ -1,29 +1,9 @@
-rootProject.name = 'example-simulations'
+rootProject.name = hyphenatedName
 
-println 'Evaluating ExampleSimulations settings.gradle'
-
-def includes = [
-'../ModelFileLoader',
-'../IHMCJavaToolkit',
-'../IHMCJavaExtensions',
-'../IHMCQuadrupedRobotics',
-'../SimulationConstructionSet',
-'../SimulationConstructionSetTools',
-'../CommonWalkingControlModules',
-'../IHMCJMonkeyEngineToolkit',
-'../IHMCRoboticsToolkit',
-'../IHMCRobotDescription',
-'../IHMCGraphicsDescription',
-'../ModelFileLoader',
-'../IHMCRobotDataLogger',
-'../IHMCHumanoidRobotics',
-'../SensorProcessing',
-'../IHMCRobotModels',
-'../IHMCSimulationToolkit',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }

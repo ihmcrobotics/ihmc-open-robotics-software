@@ -1,24 +1,9 @@
-rootProject.name = 'ihmc-whole-body-controller'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCWholeBodyController settings.gradle'
-
-def includes = [
-'../CommonWalkingControlModules',
-'../IHMCCommunication',
-'../IHMCHumanoidRobotics',
-'../SimulationConstructionSet',
-'../SensorProcessing',
-'../SimulationConstructionSetTools',
-'../IHMCJavaToolkit',
-'../IHMCJavaExtensions',
-'../IHMCRoboticsToolkit',
-'../IHMCRobotModels',
-'../IHMCGraphicsDescription',
-'../IHMCRobotDataLogger',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }
