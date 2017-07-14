@@ -9,6 +9,8 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
+import us.ihmc.tools.compression.CompressionImplementation;
+import us.ihmc.tools.compression.CompressionImplementationFactory;
 
 /**
 * 
@@ -24,13 +26,14 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    private final int numberOfVariables;
    private final int numberOfStates;
 
+   private final CompressionImplementation compressor;
 
    public CustomLogDataSubscriberType(int maxNumberOfVariables, int maxNumberOfStates)
    {
       this.numberOfVariables = maxNumberOfVariables;
       this.numberOfStates = maxNumberOfStates;
 
-
+      compressor = CompressionImplementationFactory.instance();
    }
 
    private final CDR deserializeCDR = new CDR();
@@ -98,7 +101,7 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    @Override
    public int getTypeSize()
    {
-      return CustomLogDataPubisherType.getTypeSize(numberOfVariables, numberOfStates);
+      return CustomLogDataPubisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
    }
 
    @Override

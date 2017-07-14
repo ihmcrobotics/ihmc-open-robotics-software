@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import us.ihmc.commons.Conversions;
 import us.ihmc.pubsub.common.MatchingInfo;
@@ -18,7 +19,8 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.tools.compression.SnappyUtils;
+import us.ihmc.tools.compression.CompressionImplementation;
+import us.ihmc.tools.compression.CompressionImplementationFactory;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -45,7 +47,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final ByteBuffer decompressBuffer;
    private final YoVariableClient listener;
    
-   
+   private final TIntIntHashMap registrySizes = new TIntIntHashMap();
    private final TIntLongHashMap uniqueRegistries = new TIntLongHashMap();
    
    // Standard deviation calculation
@@ -64,6 +66,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoInteger mergedPackets;
    private final YoInteger totalPackets;
 
+   private final CompressionImplementation compressionImplementation;
+   
    private long lastPacketReceived;
    
    public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerDebugRegistry)
@@ -79,6 +83,19 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.packetsOutOfOrder = new YoInteger("packetsOutOfOrder", loggerDebugRegistry);
       this.mergedPackets = new YoInteger("mergedPackets", loggerDebugRegistry);
       this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
+      
+      this.compressionImplementation = CompressionImplementationFactory.instance();
+      
+      List<YoVariableRegistry> registries = parser.getRegistries();
+      for(int i = 1; i < registries.size(); i++)
+      {
+         YoVariableRegistry registry = registries.get(i);
+         if(registry.getParent() == registries.get(0))
+         {
+            registrySizes.put(i, registry.getAllVariablesIncludingDescendants().size());
+         }
+      }
+      
       start();
    }
    
@@ -158,16 +175,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       updateDebugVariables(buffer, previousUid);
       
       decompressBuffer.clear();
-      try
-      {
-         SnappyUtils.uncompress(buffer.getData(), decompressBuffer);
-      }
-      catch (IllegalArgumentException | IOException e)
-      {
-         e.printStackTrace();
-         return;
-      }
-      
+      compressionImplementation.decompress(buffer.getData(), decompressBuffer, registrySizes.get(buffer.getRegistryID()) * 8);      
       decompressBuffer.flip();
       LongBuffer longData = decompressBuffer.asLongBuffer();
       int numberOfVariables = longData.remaining();
