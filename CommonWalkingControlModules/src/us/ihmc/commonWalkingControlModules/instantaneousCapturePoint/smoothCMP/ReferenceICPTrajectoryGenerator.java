@@ -240,19 +240,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
    
-   public void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
+   private void getICPPositionDesiredFinalFromSegment(FramePoint icpPositionDesiredFinal, int segment)
    {
       icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment));
-   }
-
-   public void getDesiredICP(YoFramePoint desiredICPToPack) //TODO: not sure whether this one is needed
-   {
-      desiredICPToPack.set(icpPositionDesiredCurrent);
-   }
-   
-   public void getDesiredICPFinalFirstSegment(YoFramePoint desiredICPFinalToPack) //TODO: not sure whether this one is needed
-   {
-      desiredICPFinalToPack.set(icpPositionDesiredFinalFirstSegment);
    }
 
    @Override
@@ -261,6 +251,11 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       positionToPack.set(icpPositionDesiredCurrent);
    }
 
+   public void getPosition(YoFramePoint positionToPack)
+   {
+      positionToPack.set(icpPositionDesiredCurrent);
+   }
+   
    @Override
    public void getVelocity(FrameVector velocityToPack)
    {
