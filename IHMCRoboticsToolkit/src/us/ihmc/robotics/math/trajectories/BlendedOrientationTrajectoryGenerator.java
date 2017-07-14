@@ -4,11 +4,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
@@ -76,22 +76,26 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
    public void clearInitialConstraint()
    {
-      for (int i = 0; i < 3; i++)
-      {
-         initialConstraintOrientationError.setToZero();
-         initialConstraintAngularVelocityError.setToZero();
-         computeInitialConstraintTrajectory(0.0, 0.5);
-      }
+      initialConstraintOrientationError.setToZero();
+      initialConstraintAngularVelocityError.setToZero();
+      tempOrientation.set(initialConstraintOrientationError);
+      tempAngularVelocity.set(initialConstraintAngularVelocityError);
+      initialConstraintTrajectory.setTrajectoryTime(0.0);
+      initialConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
+      initialConstraintTrajectory.setFinalConditions(tempOrientation, tempAngularVelocity);
+      initialConstraintTrajectory.initialize();
    }
 
    public void clearFinalConstraint()
    {
-      for (int i = 0; i < 3; i++)
-      {
-         finalConstraintOrientationError.setToZero();
-         finalConstraintAngularVelocityError.setToZero();
-         computeFinalConstraintTrajectory(1.0, 0.5);
-      }
+      finalConstraintOrientationError.setToZero();
+      finalConstraintAngularVelocityError.setToZero();
+      tempOrientation.set(finalConstraintOrientationError);
+      tempAngularVelocity.set(finalConstraintAngularVelocityError);
+      finalConstraintTrajectory.setTrajectoryTime(0.0);
+      finalConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
+      finalConstraintTrajectory.setFinalConditions(tempOrientation, tempAngularVelocity);
+      finalConstraintTrajectory.initialize();
    }
 
    public void blendInitialConstraint(FrameOrientation initialPose, double initialTime, double blendDuration)
