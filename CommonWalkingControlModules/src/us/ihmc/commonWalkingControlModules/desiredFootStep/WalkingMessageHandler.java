@@ -628,7 +628,6 @@ public class WalkingMessageHandler
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
       footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
-      footstep.setExpectedInitialPose(footstepData.getExpectedInitialPosition(), footstepData.getExpectedInitialOrientation());
       return footstep;
    }
 
