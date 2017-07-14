@@ -5,33 +5,33 @@ plugins {
 ihmc.configureProjectForOpenRobotics(project)
 
 dependencies {
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-ogre', version: '1.0.0-internal2'
-    compile(group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3') {
-        //Exclude incompatible version of jinput
-        exclude group: 'net.java.jinput', module: 'jinput'
-    }
-    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-    compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-	compile ihmc.getProjectDependency(":IHMCCommunication")
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-ogre', version: '1.0.0-internal2'
+   compile(group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3') {
+      //Exclude incompatible version of jinput
+      exclude group: 'net.java.jinput', module: 'jinput'
+   }
+   compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+   compile group: 'com.google.guava', name: 'guava', version: '18.0'
+   compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
 
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-	testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
+   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
 }

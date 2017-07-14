@@ -29,7 +29,4 @@ dependencies {
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
    testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
-   testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-   testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
