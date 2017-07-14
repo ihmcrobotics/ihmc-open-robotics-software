@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -149,7 +149,7 @@ public class DynamicReachabilityCalculator
    private final TimeAdjustmentSolver solver;
 
    private final ICPPlanner icpPlanner;
-   private final ICPOptimizationController icpOptimizationController;
+   private final AbstractICPOptimizationController icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final TDoubleArrayList originalTransferDurations = new TDoubleArrayList();
@@ -157,9 +157,9 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
-         ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, AbstractICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
+                                        ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.dynamicReachabilityParameters = dynamicReachabilityParameters;
       this.icpPlanner = icpPlanner;
