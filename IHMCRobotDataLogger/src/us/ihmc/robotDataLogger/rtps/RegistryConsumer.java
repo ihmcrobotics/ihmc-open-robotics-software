@@ -29,6 +29,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
 {
    private final static long TIMEOUT = Conversions.secondsToNanoseconds(10);
    
+   private final static int MAXIMUM_ELEMENTS = 4096;
+   
   
 //   private final ConcurrentSkipListSet<RegistryReceiveBuffer> orderedBuffers = new ConcurrentSkipListSet<>();
    private final PriorityBlockingQueue<RegistryReceiveBuffer> orderedBuffers = new PriorityBlockingQueue<>();
@@ -258,11 +260,19 @@ public class RegistryConsumer extends Thread implements SubscriberListener
                averageTimeBetweenPackets += ((buffer.getTransmitTime() - previousTransmitTime) - averageTimeBetweenPackets) / samples;
                
                jitterBufferSamples = (int) (Math.ceil(jitterEstimate / averageTimeBetweenPackets) + 1);
+               
+               if(jitterBufferSamples > MAXIMUM_ELEMENTS / 2)
+               {
+                  jitterBufferSamples = MAXIMUM_ELEMENTS / 2;
+               }
             }
             previousTransmitTime = buffer.getTransmitTime();
             previousReceiveTime = buffer.getReceivedTimestamp();
             
-            orderedBuffers.add(buffer);
+            if(orderedBuffers.size() < MAXIMUM_ELEMENTS)
+            {
+               orderedBuffers.add(buffer);
+            }
          }
       }
       catch (IOException e)

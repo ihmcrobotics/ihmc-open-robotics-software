@@ -24,7 +24,6 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
 
    private final int numberOfVariables;
    private final int numberOfStates;
-   private final int maximumCompressedSize;
 
    private final ByteBuffer compressBuffer;
 
@@ -33,9 +32,8 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       this.numberOfVariables = numberOfVariables;
       this.numberOfStates = numberOfStates;
 
-      maximumCompressedSize = SnappyUtils.maxCompressedLength(numberOfVariables * 8);
 
-      compressBuffer = ByteBuffer.allocate(maximumCompressedSize);
+      compressBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(numberOfVariables * 8));
    }
 
    private final CDR serializeCDR = new CDR();
@@ -105,11 +103,13 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    @Override
    public int getTypeSize()
    {
-      return getTypeSize(maximumCompressedSize, numberOfStates);
+      return getTypeSize(numberOfVariables, numberOfStates);
    }
 
-   static int getTypeSize(int maximumCompressedSize, int numberOfStates)
+   static int getTypeSize(int numberOfVariables, int numberOfStates)
    {
+       
+       
       int current_alignment = 0;
 
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
@@ -123,7 +123,7 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
-      current_alignment += (maximumCompressedSize * 1) + CDR.alignment(current_alignment, 1);
+      current_alignment += (SnappyUtils.maxCompressedLength(numberOfVariables * 8)) + CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       current_alignment += (numberOfStates * 8) + CDR.alignment(current_alignment, 8);
