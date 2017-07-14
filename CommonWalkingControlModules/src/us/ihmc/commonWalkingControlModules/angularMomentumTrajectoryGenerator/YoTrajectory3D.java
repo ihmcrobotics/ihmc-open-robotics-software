@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -71,6 +73,12 @@ public class YoTrajectory3D
       public double getZ()
       {
          return zTrajectory.getPosition();
+      }
+      
+      @Override
+      public String toString()
+      {
+         return "X: " + getX() + " Y: " + getY() + " Z: " + getZ();
       }
    };
 
@@ -354,7 +362,7 @@ public class YoTrajectory3D
 
    public boolean timeIntervalContains(double timeToCheck)
    {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime());
+      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
    }
    
    public int getNumberOfCoefficients()

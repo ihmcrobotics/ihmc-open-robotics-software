@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -97,11 +98,13 @@ public class ReferenceCMPTrajectoryGenerator
       this.numberOfRegisteredSteps = numberOfRegisteredSteps;
    }
 
-   public void initializeForTransfer(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories, List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
+   public void initializeForTransfer(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories,
+                                     List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
    {
+
       initialTime = currentTime;
 
-      // todo this needs to combine the angular momentum trajectory with the cop trajectory
+      // TODO this needs to combine the angular momentum trajectory with the cop trajectory
 
       int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -123,7 +126,6 @@ public class ReferenceCMPTrajectoryGenerator
          {
             YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
             YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-
             cmpSegment.set(copSegment);
          }
       }
@@ -141,22 +143,22 @@ public class ReferenceCMPTrajectoryGenerator
       activeTrajectory = transferCMPTrajectories.get(0);
    }
 
-   public void initializeForSwing(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories, List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
+   public void initializeForSwing(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories,
+                                  List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
    {
       initialTime = currentTime;
-
-      // todo this needs to combine the angular momentum trajectory with the cop trajectory
+      // TODO this needs to combine the angular momentum trajectory with the cop trajectory
 
       // handle current swing
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(0);
-      for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-      {
-         YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
-         YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-
-         cmpSegment.set(copSegment);
-      }
+      //      for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
+      //      {
+      //         YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
+      //         YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
+      //
+      //         cmpSegment.set(copSegment);
+      //      }
 
       int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
