@@ -93,12 +93,12 @@ public class RegistryPublisher
                   
                   if(previousUid != -1)
                   {
-                     if(buffer.getUid() + 1 != previousUid)
+                     if(buffer.getUid() != previousUid + 1)
                      {
                         loggerDebugRegistry.lostTickInCircularBuffer();
                      }
-                     previousUid = buffer.getUid();
                   }
+                  previousUid = buffer.getUid();
                }
                ringBuffer.flush();
             }
