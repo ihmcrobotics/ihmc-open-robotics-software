@@ -22,6 +22,8 @@ public class DRCSCSInitialSetup
    private int recordFrequency = 50;
    private boolean drawGroundProfile = false;
    private boolean enableGroundSlipping = false;
+   private double groundAlphaStick = Double.NaN;
+   private double groundAlphaSlip = Double.NaN;
 
    private int simulationDataBufferSize = 16000;
    private Vector3D gravity = new Vector3D(0.0, 0.0, -9.81);
@@ -66,6 +68,8 @@ public class DRCSCSInitialSetup
       robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel);
       if (enableGroundSlipping)
          groundContactModel.enableSlipping();
+      if (Double.isFinite(groundAlphaStick) && Double.isFinite(groundAlphaSlip))
+         groundContactModel.setAlphaStickSlip(groundAlphaStick, groundAlphaSlip);
 
       if (groundProfile3D != null)
          groundContactModel.setGroundProfile3D(groundProfile3D);
@@ -92,9 +96,18 @@ public class DRCSCSInitialSetup
       return simulationDataBufferSize;
    }
 
-   public void setEnableGroundSlipping(boolean enableGroundSlipping)
+   public void disableGroundSlipping()
    {
-      this.enableGroundSlipping = enableGroundSlipping;
+      enableGroundSlipping = false;
+      groundAlphaStick = Double.NaN;
+      groundAlphaSlip = Double.NaN;
+   }
+
+   public void enableGroundSlipping(double alphaStick, double alphaSlip)
+   {
+      enableGroundSlipping = true;
+      groundAlphaStick = alphaStick;
+      groundAlphaSlip = alphaSlip;
    }
 
    private Graphics3DObject createGroundLinkGraphicsFromGroundProfile(GroundProfile3D groundProfile)
