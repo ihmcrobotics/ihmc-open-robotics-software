@@ -89,7 +89,6 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
-         pinJoint.setQd(revoluteJoint.getQd());
       }
 
       FloatingJoint floatingJoint = rootJointPair.getLeft();
