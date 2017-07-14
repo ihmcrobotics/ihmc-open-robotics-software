@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
@@ -213,7 +215,36 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void compute(double time)
    {
+      if (Double.isNaN(time))
+      {
+         throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
+      }
+
       this.currentTime.set(time);
+
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         currentPosition.set(initialPosition);
+         currentVelocity.set(initialVelocity);
+         currentAcceleration.setToZero();
+         return;
+      }
+
+      if (time < 0.0)
+      {
+         currentPosition.set(initialPosition);
+         currentVelocity.setToZero();
+         currentAcceleration.setToZero();
+         return;
+      }
+      if (time > trajectoryTime.getDoubleValue())
+      {
+         currentPosition.set(finalPosition);
+         currentVelocity.setToZero();
+         currentAcceleration.setToZero();
+         return;
+      }
+
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       xPolynomial.compute(time);
       yPolynomial.compute(time);

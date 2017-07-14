@@ -2,6 +2,8 @@ package us.ihmc.robotics.math.trajectories;
 
 import static us.ihmc.robotics.MathTools.square;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -359,7 +361,35 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    @Override
    public void compute(double time)
    {
+      if (Double.isNaN(time))
+      {
+         throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
+      }
+
       currentTime.set(time);
+
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         currentOrientation.set(initialOrientation);
+         currentAngularVelocity.set(initialAngularVelocity);
+         currentAngularAcceleration.setToZero();
+         return;
+      }
+
+      if (time < 0.0)
+      {
+         currentOrientation.set(initialOrientation);
+         currentAngularVelocity.setToZero();
+         currentAngularAcceleration.setToZero();
+         return;
+      }
+      if (time > trajectoryTime.getDoubleValue())
+      {
+         currentOrientation.set(finalOrientation);
+         currentAngularVelocity.setToZero();
+         currentAngularAcceleration.setToZero();
+         return;
+      }
 
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       computeBezierBasedCurve(time, qInterpolated, angularVelocityInterpolated, angularAccelerationInterpolated);
