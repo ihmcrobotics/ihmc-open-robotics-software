@@ -435,7 +435,7 @@ public class TaskNodeTree
           */
          if(getPath().size() > 1)
          {
-            for(int i=0;i<getFailNodes().size();i++)
+            for(int i=0;i<getPath().size();i++)
             {
                String convertedNodeData = "";            
                
