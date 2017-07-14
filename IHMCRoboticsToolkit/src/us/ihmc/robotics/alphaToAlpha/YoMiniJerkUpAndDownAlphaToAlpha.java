@@ -1,15 +1,15 @@
 package us.ihmc.robotics.alphaToAlpha;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
 public class YoMiniJerkUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
 {
-   private final DoubleYoVariable startOfRampUp;
-   private final DoubleYoVariable endOfRamp;
-   private final DoubleYoVariable startOfRampDown;
-   private final DoubleYoVariable endOfRampDown;
+   private final YoDouble startOfRampUp;
+   private final YoDouble endOfRamp;
+   private final YoDouble startOfRampDown;
+   private final YoDouble endOfRampDown;
 
    private final MinimumJerkTrajectory minimumJerkTrajectory;
 
@@ -27,7 +27,7 @@ public class YoMiniJerkUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
       alphaPrime will alway be ZERO!
 
     */
-   public YoMiniJerkUpAndDownAlphaToAlpha(DoubleYoVariable startOfRampUp, DoubleYoVariable endOfRamp, DoubleYoVariable startOfRampDown, DoubleYoVariable endOfRampDown)
+   public YoMiniJerkUpAndDownAlphaToAlpha(YoDouble startOfRampUp, YoDouble endOfRamp, YoDouble startOfRampDown, YoDouble endOfRampDown)
    {
       this.startOfRampUp = startOfRampUp;
       this.endOfRamp = endOfRamp;
@@ -105,10 +105,10 @@ public class YoMiniJerkUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
    public static void main(String[] args)
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");
-      DoubleYoVariable startOfRampUp = new DoubleYoVariable("startOfRampUp", registry);
-      DoubleYoVariable endOfRamp = new DoubleYoVariable("endOfRamp", registry);
-      DoubleYoVariable startOfRampDown = new DoubleYoVariable("startOfRampDown", registry);
-      DoubleYoVariable endOfRampDown = new DoubleYoVariable("endOfRampDown", registry);
+      YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
+      YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
+      YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);
+      YoDouble endOfRampDown = new YoDouble("endOfRampDown", registry);
 
       YoMiniJerkUpAndDownAlphaToAlpha yoMiniJerkUpAndDownAlphaToAlpha = new YoMiniJerkUpAndDownAlphaToAlpha(startOfRampUp, endOfRamp, startOfRampDown, endOfRampDown);
 

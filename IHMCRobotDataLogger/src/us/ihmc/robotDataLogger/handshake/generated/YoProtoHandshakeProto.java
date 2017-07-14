@@ -1062,45 +1062,45 @@ public final class YoProtoHandshakeProto {
       public enum YoProtoType
           implements com.google.protobuf.ProtocolMessageEnum {
         /**
-         * <code>DoubleYoVariable = 1;</code>
+         * <code>YoDouble = 1;</code>
          */
         DoubleYoVariable(0, 1),
         /**
-         * <code>BooleanYoVariable = 2;</code>
+         * <code>YoBoolean = 2;</code>
          */
         BooleanYoVariable(1, 2),
         /**
-         * <code>IntegerYoVariable = 3;</code>
+         * <code>YoInteger = 3;</code>
          */
         IntegerYoVariable(2, 3),
         /**
-         * <code>LongYoVariable = 4;</code>
+         * <code>YoLong = 4;</code>
          */
         LongYoVariable(3, 4),
         /**
-         * <code>EnumYoVariable = 5;</code>
+         * <code>YoEnum = 5;</code>
          */
         EnumYoVariable(4, 5),
         ;
 
         /**
-         * <code>DoubleYoVariable = 1;</code>
+         * <code>YoDouble = 1;</code>
          */
         public static final int DoubleYoVariable_VALUE = 1;
         /**
-         * <code>BooleanYoVariable = 2;</code>
+         * <code>YoBoolean = 2;</code>
          */
         public static final int BooleanYoVariable_VALUE = 2;
         /**
-         * <code>IntegerYoVariable = 3;</code>
+         * <code>YoInteger = 3;</code>
          */
         public static final int IntegerYoVariable_VALUE = 3;
         /**
-         * <code>LongYoVariable = 4;</code>
+         * <code>YoLong = 4;</code>
          */
         public static final int LongYoVariable_VALUE = 4;
         /**
-         * <code>EnumYoVariable = 5;</code>
+         * <code>YoEnum = 5;</code>
          */
         public static final int EnumYoVariable_VALUE = 5;
 
@@ -6484,7 +6484,7 @@ public final class YoProtoHandshakeProto {
       "YoProtoType\022\022\n\nenumValues\030\004 \003(\t\022\027\n\017allow" +
       "NullValues\030\005 \001(\010\"y\n\013YoProtoType\022\024\n\020Doubl" +
       "eYoVariable\020\001\022\025\n\021BooleanYoVariable\020\002\022\025\n\021" +
-      "IntegerYoVariable\020\003\022\022\n\016LongYoVariable\020\004\022" +
+      "YoInteger\020\003\022\022\n\016LongYoVariable\020\004\022" +
       "\022\n\016EnumYoVariable\020\005\032\211\001\n\017JointDefinition\022" +
       "\014\n\004name\030\001 \002(\t\0229\n\004type\030\002 \002(\0162+.YoProtoHan" +
       "dshake.JointDefinition.JointType\"-\n\tJoin",

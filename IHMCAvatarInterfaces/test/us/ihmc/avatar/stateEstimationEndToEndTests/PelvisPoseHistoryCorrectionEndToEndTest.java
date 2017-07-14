@@ -36,11 +36,11 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -127,98 +127,98 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private SimulationConstructionSet simulationConstructionSet;
    private ExternalPelvisPoseCreator externalPelvisPosePublisher;
 
-   private DoubleYoVariable confidenceFactor; // target for alpha filter
-   private DoubleYoVariable interpolationTranslationAlphaFilterBreakFrequency;
-   private DoubleYoVariable interpolationTranslationAlphaFilterAlphaValue;
-   private DoubleYoVariable interpolationTranslationAlphaFilter;
-   private DoubleYoVariable interpolationRotationAlphaFilterBreakFrequency;
-   private DoubleYoVariable interpolationRotationAlphaFilterAlphaValue;
-   private DoubleYoVariable interpolationRotationAlphaFilter;
-   private LongYoVariable seNonProcessedPelvisTimeStamp;
-   private DoubleYoVariable maxTranslationVelocityClip;
-   private DoubleYoVariable maxRotationVelocityClip;
-   private DoubleYoVariable translationClippedAlphaValue;
-   private DoubleYoVariable rotationClippedAlphaValue;
-   private DoubleYoVariable previousTranslationClippedAlphaValue;
-   private DoubleYoVariable previousRotationClippedAlphaValue;
+   private YoDouble confidenceFactor; // target for alpha filter
+   private YoDouble interpolationTranslationAlphaFilterBreakFrequency;
+   private YoDouble interpolationTranslationAlphaFilterAlphaValue;
+   private YoDouble interpolationTranslationAlphaFilter;
+   private YoDouble interpolationRotationAlphaFilterBreakFrequency;
+   private YoDouble interpolationRotationAlphaFilterAlphaValue;
+   private YoDouble interpolationRotationAlphaFilter;
+   private YoLong seNonProcessedPelvisTimeStamp;
+   private YoDouble maxTranslationVelocityClip;
+   private YoDouble maxRotationVelocityClip;
+   private YoDouble translationClippedAlphaValue;
+   private YoDouble rotationClippedAlphaValue;
+   private YoDouble previousTranslationClippedAlphaValue;
+   private YoDouble previousRotationClippedAlphaValue;
    private final double previousTranslationAlphaValue = Double.POSITIVE_INFINITY;
    private final double previousRotationAlphaValue = Double.POSITIVE_INFINITY;
 
-   private DoubleYoVariable pelvisX;
-   private DoubleYoVariable pelvisY;
-   private DoubleYoVariable pelvisZ;
-   private DoubleYoVariable pelvisPitch;
-   private DoubleYoVariable pelvisRoll;
-   private DoubleYoVariable pelvisYaw;
+   private YoDouble pelvisX;
+   private YoDouble pelvisY;
+   private YoDouble pelvisZ;
+   private YoDouble pelvisPitch;
+   private YoDouble pelvisRoll;
+   private YoDouble pelvisYaw;
 
-   private DoubleYoVariable nonCorrectedPelvis_x;
-   private DoubleYoVariable nonCorrectedPelvis_y;
-   private DoubleYoVariable nonCorrectedPelvis_z;
-   private DoubleYoVariable nonCorrectedPelvis_yaw;
-   private DoubleYoVariable nonCorrectedPelvis_pitch;
-   private DoubleYoVariable nonCorrectedPelvis_roll;
-   private DoubleYoVariable correctedPelvis_x;
-   private DoubleYoVariable correctedPelvis_y;
-   private DoubleYoVariable correctedPelvis_z;
-   private DoubleYoVariable correctedPelvis_yaw;
-   private DoubleYoVariable correctedPelvis_pitch;
-   private DoubleYoVariable correctedPelvis_roll;
-   private DoubleYoVariable seBackInTimeFrame_x;
-   private DoubleYoVariable seBackInTimeFrame_y;
-   private DoubleYoVariable seBackInTimeFrame_z;
-   private DoubleYoVariable seBackInTimeFrame_yaw;
-   private DoubleYoVariable seBackInTimeFrame_pitch;
-   private DoubleYoVariable seBackInTimeFrame_roll;
-   private DoubleYoVariable localizationBackInTimeFrame_x;
-   private DoubleYoVariable localizationBackInTimeFrame_y;
-   private DoubleYoVariable localizationBackInTimeFrame_z;
-   private DoubleYoVariable localizationBackInTimeFrame_yaw;
-   private DoubleYoVariable localizationBackInTimeFrame_pitch;
-   private DoubleYoVariable localizationBackInTimeFrame_roll;
+   private YoDouble nonCorrectedPelvis_x;
+   private YoDouble nonCorrectedPelvis_y;
+   private YoDouble nonCorrectedPelvis_z;
+   private YoDouble nonCorrectedPelvis_yaw;
+   private YoDouble nonCorrectedPelvis_pitch;
+   private YoDouble nonCorrectedPelvis_roll;
+   private YoDouble correctedPelvis_x;
+   private YoDouble correctedPelvis_y;
+   private YoDouble correctedPelvis_z;
+   private YoDouble correctedPelvis_yaw;
+   private YoDouble correctedPelvis_pitch;
+   private YoDouble correctedPelvis_roll;
+   private YoDouble seBackInTimeFrame_x;
+   private YoDouble seBackInTimeFrame_y;
+   private YoDouble seBackInTimeFrame_z;
+   private YoDouble seBackInTimeFrame_yaw;
+   private YoDouble seBackInTimeFrame_pitch;
+   private YoDouble seBackInTimeFrame_roll;
+   private YoDouble localizationBackInTimeFrame_x;
+   private YoDouble localizationBackInTimeFrame_y;
+   private YoDouble localizationBackInTimeFrame_z;
+   private YoDouble localizationBackInTimeFrame_yaw;
+   private YoDouble localizationBackInTimeFrame_pitch;
+   private YoDouble localizationBackInTimeFrame_roll;
 
-   private DoubleYoVariable totalTranslationErrorFrame_x;
-   private DoubleYoVariable totalTranslationErrorFrame_y;
-   private DoubleYoVariable totalTranslationErrorFrame_z;
-   private DoubleYoVariable totalTranslationErrorFrame_yaw;
-   private DoubleYoVariable totalTranslationErrorFrame_pitch;
-   private DoubleYoVariable totalTranslationErrorFrame_roll;
+   private YoDouble totalTranslationErrorFrame_x;
+   private YoDouble totalTranslationErrorFrame_y;
+   private YoDouble totalTranslationErrorFrame_z;
+   private YoDouble totalTranslationErrorFrame_yaw;
+   private YoDouble totalTranslationErrorFrame_pitch;
+   private YoDouble totalTranslationErrorFrame_roll;
 
-   private DoubleYoVariable totalRotationErrorFrame_x;
-   private DoubleYoVariable totalRotationErrorFrame_y;
-   private DoubleYoVariable totalRotationErrorFrame_z;
-   private DoubleYoVariable totalRotationErrorFrame_yaw;
-   private DoubleYoVariable totalRotationErrorFrame_pitch;
-   private DoubleYoVariable totalRotationErrorFrame_roll;
+   private YoDouble totalRotationErrorFrame_x;
+   private YoDouble totalRotationErrorFrame_y;
+   private YoDouble totalRotationErrorFrame_z;
+   private YoDouble totalRotationErrorFrame_yaw;
+   private YoDouble totalRotationErrorFrame_pitch;
+   private YoDouble totalRotationErrorFrame_roll;
 
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_x;
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_y;
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_z;
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_yaw;
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_pitch;
-   private DoubleYoVariable interpolatedTranslationCorrectionFrame_roll;
-   private DoubleYoVariable interpolationTranslationStartFrame_x;
-   private DoubleYoVariable interpolationTranslationStartFrame_y;
-   private DoubleYoVariable interpolationTranslationStartFrame_z;
-   private DoubleYoVariable interpolationTranslationStartFrame_yaw;
-   private DoubleYoVariable interpolationTranslationStartFrame_pitch;
-   private DoubleYoVariable interpolationTranslationStartFrame_roll;
+   private YoDouble interpolatedTranslationCorrectionFrame_x;
+   private YoDouble interpolatedTranslationCorrectionFrame_y;
+   private YoDouble interpolatedTranslationCorrectionFrame_z;
+   private YoDouble interpolatedTranslationCorrectionFrame_yaw;
+   private YoDouble interpolatedTranslationCorrectionFrame_pitch;
+   private YoDouble interpolatedTranslationCorrectionFrame_roll;
+   private YoDouble interpolationTranslationStartFrame_x;
+   private YoDouble interpolationTranslationStartFrame_y;
+   private YoDouble interpolationTranslationStartFrame_z;
+   private YoDouble interpolationTranslationStartFrame_yaw;
+   private YoDouble interpolationTranslationStartFrame_pitch;
+   private YoDouble interpolationTranslationStartFrame_roll;
 
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_x;
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_y;
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_z;
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_yaw;
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_pitch;
-   private DoubleYoVariable interpolatedRotationCorrectionFrame_roll;
-   private DoubleYoVariable interpolationRotationStartFrame_x;
-   private DoubleYoVariable interpolationRotationStartFrame_y;
-   private DoubleYoVariable interpolationRotationStartFrame_z;
-   private DoubleYoVariable interpolationRotationStartFrame_yaw;
-   private DoubleYoVariable interpolationRotationStartFrame_pitch;
-   private DoubleYoVariable interpolationRotationStartFrame_roll;
+   private YoDouble interpolatedRotationCorrectionFrame_x;
+   private YoDouble interpolatedRotationCorrectionFrame_y;
+   private YoDouble interpolatedRotationCorrectionFrame_z;
+   private YoDouble interpolatedRotationCorrectionFrame_yaw;
+   private YoDouble interpolatedRotationCorrectionFrame_pitch;
+   private YoDouble interpolatedRotationCorrectionFrame_roll;
+   private YoDouble interpolationRotationStartFrame_x;
+   private YoDouble interpolationRotationStartFrame_y;
+   private YoDouble interpolationRotationStartFrame_z;
+   private YoDouble interpolationRotationStartFrame_yaw;
+   private YoDouble interpolationRotationStartFrame_pitch;
+   private YoDouble interpolationRotationStartFrame_roll;
 
-   private DoubleYoVariable manualTranslationOffsetX;
-   private DoubleYoVariable manualTranslationOffsetY;
-   private BooleanYoVariable manuallyTriggerLocalizationUpdate;
+   private YoDouble manualTranslationOffsetX;
+   private YoDouble manualTranslationOffsetY;
+   private YoBoolean manuallyTriggerLocalizationUpdate;
 
 //   private BlockingSimulationRunner blockingSimulationRunner;
 
@@ -230,96 +230,96 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private void setupYoVariables(YoVariableRegistry registry, String nameSpace)
    {
-      interpolationTranslationAlphaFilter = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisTranslationErrorCorrectionAlphaFilter");
-      interpolationTranslationAlphaFilterAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterAlphaValue");
-      interpolationTranslationAlphaFilterBreakFrequency = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterBreakFrequency");
-      interpolationRotationAlphaFilter = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisRotationErrorCorrectionAlphaFilter");
-      interpolationRotationAlphaFilterAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterAlphaValue");
-      interpolationRotationAlphaFilterBreakFrequency = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterBreakFrequency");
-      confidenceFactor = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
-      seNonProcessedPelvisTimeStamp = (LongYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
-      maxTranslationVelocityClip = (DoubleYoVariable)registry.getVariable(nameSpace, "maxTranslationVelocityClip");
-      maxRotationVelocityClip = (DoubleYoVariable)registry.getVariable(nameSpace, "maxRotationVelocityClip");
-      translationClippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "translationClippedAlphaValue");
-      rotationClippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "rotationClippedAlphaValue");
-      previousTranslationClippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "previousTranslationClippedAlphaValue");
-      previousRotationClippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "previousRotationClippedAlphaValue");
+      interpolationTranslationAlphaFilter = (YoDouble) registry.getVariable(nameSpace, "PelvisTranslationErrorCorrectionAlphaFilter");
+      interpolationTranslationAlphaFilterAlphaValue = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterAlphaValue");
+      interpolationTranslationAlphaFilterBreakFrequency = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterBreakFrequency");
+      interpolationRotationAlphaFilter = (YoDouble) registry.getVariable(nameSpace, "PelvisRotationErrorCorrectionAlphaFilter");
+      interpolationRotationAlphaFilterAlphaValue = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterAlphaValue");
+      interpolationRotationAlphaFilterBreakFrequency = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationAlphaFilterBreakFrequency");
+      confidenceFactor = (YoDouble) registry.getVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
+      seNonProcessedPelvisTimeStamp = (YoLong) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
+      maxTranslationVelocityClip = (YoDouble)registry.getVariable(nameSpace, "maxTranslationVelocityClip");
+      maxRotationVelocityClip = (YoDouble)registry.getVariable(nameSpace, "maxRotationVelocityClip");
+      translationClippedAlphaValue = (YoDouble) registry.getVariable(nameSpace, "translationClippedAlphaValue");
+      rotationClippedAlphaValue = (YoDouble) registry.getVariable(nameSpace, "rotationClippedAlphaValue");
+      previousTranslationClippedAlphaValue = (YoDouble) registry.getVariable(nameSpace, "previousTranslationClippedAlphaValue");
+      previousRotationClippedAlphaValue = (YoDouble) registry.getVariable(nameSpace, "previousRotationClippedAlphaValue");
 
-      pelvisX = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisX");
-      pelvisY = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisY");
-      pelvisZ = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisZ");
-      pelvisPitch = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisPitch");
-      pelvisRoll = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisRoll");
-      pelvisYaw = (DoubleYoVariable) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisYaw");
+      pelvisX = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisX");
+      pelvisY = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisY");
+      pelvisZ = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisZ");
+      pelvisPitch = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisPitch");
+      pelvisRoll = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisRoll");
+      pelvisYaw = (YoDouble) registry.getVariable("CommonHumanoidReferenceFramesVisualizer", "pelvisYaw");
 
-      nonCorrectedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_x");
-      nonCorrectedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_y");
-      nonCorrectedPelvis_z = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_z");
-      nonCorrectedPelvis_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_yaw");
-      nonCorrectedPelvis_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_pitch");
-      nonCorrectedPelvis_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_roll");
-      correctedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_x");
-      correctedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_y");
-      correctedPelvis_z = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_z");
-      correctedPelvis_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_yaw");
-      correctedPelvis_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_pitch");
-      correctedPelvis_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "correctedPelvis_roll");
-      seBackInTimeFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_x");
-      seBackInTimeFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_y");
-      seBackInTimeFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_z");
-      seBackInTimeFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_yaw");
-      seBackInTimeFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_pitch");
-      seBackInTimeFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "seBackInTimeFrame_roll");
-      localizationBackInTimeFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_x");
-      localizationBackInTimeFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_y");
-      localizationBackInTimeFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_z");
-      localizationBackInTimeFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_yaw");
-      localizationBackInTimeFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_pitch");
-      localizationBackInTimeFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_roll");
+      nonCorrectedPelvis_x = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_x");
+      nonCorrectedPelvis_y = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_y");
+      nonCorrectedPelvis_z = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_z");
+      nonCorrectedPelvis_yaw = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_yaw");
+      nonCorrectedPelvis_pitch = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_pitch");
+      nonCorrectedPelvis_roll = (YoDouble) registry.getVariable(nameSpace, "nonCorrectedPelvis_roll");
+      correctedPelvis_x = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_x");
+      correctedPelvis_y = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_y");
+      correctedPelvis_z = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_z");
+      correctedPelvis_yaw = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_yaw");
+      correctedPelvis_pitch = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_pitch");
+      correctedPelvis_roll = (YoDouble) registry.getVariable(nameSpace, "correctedPelvis_roll");
+      seBackInTimeFrame_x = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_x");
+      seBackInTimeFrame_y = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_y");
+      seBackInTimeFrame_z = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_z");
+      seBackInTimeFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_yaw");
+      seBackInTimeFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_pitch");
+      seBackInTimeFrame_roll = (YoDouble) registry.getVariable(nameSpace, "seBackInTimeFrame_roll");
+      localizationBackInTimeFrame_x = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_x");
+      localizationBackInTimeFrame_y = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_y");
+      localizationBackInTimeFrame_z = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_z");
+      localizationBackInTimeFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_yaw");
+      localizationBackInTimeFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_pitch");
+      localizationBackInTimeFrame_roll = (YoDouble) registry.getVariable(nameSpace, "localizationBackInTimeFrame_roll");
 
-      totalTranslationErrorFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_x");
-      totalTranslationErrorFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_y");
-      totalTranslationErrorFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_z");
-      totalTranslationErrorFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_yaw");
-      totalTranslationErrorFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_pitch");
-      totalTranslationErrorFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_roll");
+      totalTranslationErrorFrame_x = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_x");
+      totalTranslationErrorFrame_y = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_y");
+      totalTranslationErrorFrame_z = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_z");
+      totalTranslationErrorFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_yaw");
+      totalTranslationErrorFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_pitch");
+      totalTranslationErrorFrame_roll = (YoDouble) registry.getVariable(nameSpace, "totalTranslationErrorFrame_roll");
 
-      totalRotationErrorFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_x");
-      totalRotationErrorFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_y");
-      totalRotationErrorFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_z");
-      totalRotationErrorFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_yaw");
-      totalRotationErrorFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_pitch");
-      totalRotationErrorFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_roll");
+      totalRotationErrorFrame_x = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_x");
+      totalRotationErrorFrame_y = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_y");
+      totalRotationErrorFrame_z = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_z");
+      totalRotationErrorFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_yaw");
+      totalRotationErrorFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_pitch");
+      totalRotationErrorFrame_roll = (YoDouble) registry.getVariable(nameSpace, "totalRotationErrorFrame_roll");
 
-      interpolatedTranslationCorrectionFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_x");
-      interpolatedTranslationCorrectionFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_y");
-      interpolatedTranslationCorrectionFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_z");
-      interpolatedTranslationCorrectionFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_yaw");
-      interpolatedTranslationCorrectionFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_pitch");
-      interpolatedTranslationCorrectionFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_roll");
-      interpolationTranslationStartFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_x");
-      interpolationTranslationStartFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_y");
-      interpolationTranslationStartFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_z");
-      interpolationTranslationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_yaw");
-      interpolationTranslationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_pitch");
-      interpolationTranslationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_roll");
+      interpolatedTranslationCorrectionFrame_x = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_x");
+      interpolatedTranslationCorrectionFrame_y = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_y");
+      interpolatedTranslationCorrectionFrame_z = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_z");
+      interpolatedTranslationCorrectionFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_yaw");
+      interpolatedTranslationCorrectionFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_pitch");
+      interpolatedTranslationCorrectionFrame_roll = (YoDouble) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_roll");
+      interpolationTranslationStartFrame_x = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_x");
+      interpolationTranslationStartFrame_y = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_y");
+      interpolationTranslationStartFrame_z = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_z");
+      interpolationTranslationStartFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_yaw");
+      interpolationTranslationStartFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_pitch");
+      interpolationTranslationStartFrame_roll = (YoDouble) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_roll");
 
-      interpolatedRotationCorrectionFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_x");
-      interpolatedRotationCorrectionFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_y");
-      interpolatedRotationCorrectionFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_z");
-      interpolatedRotationCorrectionFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_yaw");
-      interpolatedRotationCorrectionFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_pitch");
-      interpolatedRotationCorrectionFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_roll");
-      interpolationRotationStartFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_x");
-      interpolationRotationStartFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_y");
-      interpolationRotationStartFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_z");
-      interpolationRotationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_yaw");
-      interpolationRotationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_pitch");
-      interpolationRotationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_roll");
+      interpolatedRotationCorrectionFrame_x = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_x");
+      interpolatedRotationCorrectionFrame_y = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_y");
+      interpolatedRotationCorrectionFrame_z = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_z");
+      interpolatedRotationCorrectionFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_yaw");
+      interpolatedRotationCorrectionFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_pitch");
+      interpolatedRotationCorrectionFrame_roll = (YoDouble) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_roll");
+      interpolationRotationStartFrame_x = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_x");
+      interpolationRotationStartFrame_y = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_y");
+      interpolationRotationStartFrame_z = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_z");
+      interpolationRotationStartFrame_yaw = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_yaw");
+      interpolationRotationStartFrame_pitch = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_pitch");
+      interpolationRotationStartFrame_roll = (YoDouble) registry.getVariable(nameSpace, "interpolationRotationStartFrame_roll");
 
-      manualTranslationOffsetX = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_X");
-      manualTranslationOffsetY = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_Y");
-      manuallyTriggerLocalizationUpdate = (BooleanYoVariable) registry.getVariable(nameSpace, "manuallyTriggerLocalizationUpdate");
+      manualTranslationOffsetX = (YoDouble) registry.getVariable(nameSpace, "manualTranslationOffset_X");
+      manualTranslationOffsetY = (YoDouble) registry.getVariable(nameSpace, "manualTranslationOffset_Y");
+      manuallyTriggerLocalizationUpdate = (YoBoolean) registry.getVariable(nameSpace, "manuallyTriggerLocalizationUpdate");
 
    }
 
@@ -538,8 +538,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
       boolean success = true;
 
-      DoubleYoVariable transferTime = (DoubleYoVariable) registry.getVariable("swingTime");
-      DoubleYoVariable swingTime = (DoubleYoVariable) registry.getVariable("transferTime");
+      YoDouble transferTime = (YoDouble) registry.getVariable("swingTime");
+      YoDouble swingTime = (YoDouble) registry.getVariable("transferTime");
 
       try
       {
@@ -806,27 +806,27 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private void setPelvisPoseHistoryCorrectorAlphaBreakFreq(YoVariableRegistry registry, double breakFrequencyTranslation, double breakFrequencyRotation)
    {
-      DoubleYoVariable pelvisTranslationCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
+      YoDouble pelvisTranslationCorrectorAlphaFilterBF = (YoDouble) registry.getVariable("PelvisPoseHistoryCorrection",
             "interpolationTranslationAlphaFilterBreakFrequency");
       pelvisTranslationCorrectorAlphaFilterBF.set(breakFrequencyTranslation);
 
-      DoubleYoVariable pelvisRotationCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
+      YoDouble pelvisRotationCorrectorAlphaFilterBF = (YoDouble) registry.getVariable("PelvisPoseHistoryCorrection",
             "interpolationRotationAlphaFilterBreakFrequency");
       pelvisRotationCorrectorAlphaFilterBF.set(breakFrequencyRotation);
    }
 
    private void setPelvisPoseHistoryCorrectorMaxVelocity(YoVariableRegistry registry, double maxVelocityTranslation, double maxVelocityRotation)
    {
-      DoubleYoVariable maxTranslationVelocityCap = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection", "maxTranslationVelocityClip");
+      YoDouble maxTranslationVelocityCap = (YoDouble) registry.getVariable("PelvisPoseHistoryCorrection", "maxTranslationVelocityClip");
       maxTranslationVelocityCap.set(maxVelocityTranslation);
 
-      DoubleYoVariable maxRotationVelocityCap = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection", "maxRotationVelocityClip");
+      YoDouble maxRotationVelocityCap = (YoDouble) registry.getVariable("PelvisPoseHistoryCorrection", "maxRotationVelocityClip");
       maxRotationVelocityCap.set(maxVelocityRotation);
    }
 
    private void activatePelvisPoseHistoryCorrector(YoVariableRegistry registry, boolean activate)
    {
-      BooleanYoVariable useExternalPelvisCorrector = (BooleanYoVariable) registry.getVariable("DRCKinematicsBasedStateEstimator", "useExternalPelvisCorrector");
+      YoBoolean useExternalPelvisCorrector = (YoBoolean) registry.getVariable("DRCKinematicsBasedStateEstimator", "useExternalPelvisCorrector");
       useExternalPelvisCorrector.set(activate);
    }
 
@@ -872,7 +872,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       AvatarSimulation avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
       avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
-      BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
+      YoBoolean walk = (YoBoolean) simulationConstructionSet.getVariable("walk");
       walk.set(true);
       return drcFlatGroundWalkingTrack;
    }
@@ -948,12 +948,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       private final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds;
       private final ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints;
 
-      private final EnumYoVariable<HighLevelState> requestedHighLevelState;
+      private final YoEnum<HighLevelState> requestedHighLevelState;
 
 
       public StandStillDoNothingPelvisPoseHistoryCorrectorController()
       {
-         requestedHighLevelState = (EnumYoVariable<HighLevelState>) simulationConstructionSet.getVariable(
+         requestedHighLevelState = (YoEnum<HighLevelState>) simulationConstructionSet.getVariable(
                HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
          requestedHighLevelState.set(HighLevelState.DO_NOTHING_BEHAVIOR);
 

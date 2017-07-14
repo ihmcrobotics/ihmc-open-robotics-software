@@ -17,10 +17,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -48,7 +48,7 @@ public class LogDataProcessorHelper
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
    private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
-   private final SideDependentList<EnumYoVariable<?>> footStates = new SideDependentList<>();
+   private final SideDependentList<YoEnum<?>> footStates = new SideDependentList<>();
 
    private final double controllerDT;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -59,7 +59,7 @@ public class LogDataProcessorHelper
 
    private final UpdatableHighLevelHumanoidControllerToolbox controllerToolbox;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
 
    public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, FloatingRootJointRobot sdfRobot)
    {
@@ -86,8 +86,8 @@ public class LogDataProcessorHelper
          String copNamePrefix = bodyName + "StateEstimator";
          String copNameSpace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          String copName = copNamePrefix + "ResolvedCoP";
-         DoubleYoVariable copx = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "X");
-         DoubleYoVariable copy = (DoubleYoVariable) scs.getVariable(copNameSpace, copName + "Y");
+         YoDouble copx = (YoDouble) scs.getVariable(copNameSpace, copName + "X");
+         YoDouble copy = (YoDouble) scs.getVariable(copNameSpace, copName + "Y");
          if (copx != null && copy != null)
          {
             YoFramePoint2d cop = new YoFramePoint2d(copx, copy, soleFrame);
@@ -96,8 +96,8 @@ public class LogDataProcessorHelper
 
          String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
-         DoubleYoVariable desiredCoPx = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
-         DoubleYoVariable desiredCoPy = (DoubleYoVariable) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
+         YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
          YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPs.put(robotSide, desiredCoP);
 
@@ -106,7 +106,7 @@ public class LogDataProcessorHelper
          String footStateNameSpace = sidePrefix + FootControlModule.class.getSimpleName();
          String footStateName = namePrefix + "State";
          @SuppressWarnings("unchecked")
-         EnumYoVariable<?> footState = (EnumYoVariable<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
+         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
          footStates.put(robotSide, footState);
       }
 
@@ -115,7 +115,7 @@ public class LogDataProcessorHelper
       double omega0 = walkingControllerParameters.getOmega0();
       double gravityZ = 9.81;
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
-      yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
+      yoTime = (YoDouble) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches,
             null, null, yoTime, gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
@@ -130,9 +130,9 @@ public class LogDataProcessorHelper
       {
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
          String nameSpaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
-         final BooleanYoVariable hasFootHitGround = (BooleanYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
-         final BooleanYoVariable forceMagnitudePastThreshhold = (BooleanYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
-         final DoubleYoVariable footLoadPercentage = (DoubleYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
+         final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
+         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
+         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
          {
@@ -278,9 +278,9 @@ public class LogDataProcessorHelper
 
    public YoFramePoint findYoFramePoint(String pointPrefix, String pointSuffix, ReferenceFrame pointFrame)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(pointPrefix, pointSuffix));
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(pointPrefix, pointSuffix));
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(pointPrefix, pointSuffix));
+      YoDouble x = (YoDouble) scs.getVariable(createXName(pointPrefix, pointSuffix));
+      YoDouble y = (YoDouble) scs.getVariable(createYName(pointPrefix, pointSuffix));
+      YoDouble z = (YoDouble) scs.getVariable(createZName(pointPrefix, pointSuffix));
       if (x == null || y == null || z == null)
          return null;
       else
@@ -294,9 +294,9 @@ public class LogDataProcessorHelper
 
    public YoFrameVector findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
    {
-      DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
-      DoubleYoVariable y = (DoubleYoVariable) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
-      DoubleYoVariable z = (DoubleYoVariable) scs.getVariable(createZName(vectorPrefix, vectorSuffix));
+      YoDouble x = (YoDouble) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
+      YoDouble y = (YoDouble) scs.getVariable(createYName(vectorPrefix, vectorSuffix));
+      YoDouble z = (YoDouble) scs.getVariable(createZName(vectorPrefix, vectorSuffix));
       if (x == null || y == null || z == null)
          return null;
       else
@@ -310,10 +310,10 @@ public class LogDataProcessorHelper
 
    public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, String quaternionSuffix, ReferenceFrame quaternionFrame)
    {
-      DoubleYoVariable qx = (DoubleYoVariable) scs.getVariable(createQxName(quaternionPrefix, quaternionSuffix));
-      DoubleYoVariable qy = (DoubleYoVariable) scs.getVariable(createQyName(quaternionPrefix, quaternionSuffix));
-      DoubleYoVariable qz = (DoubleYoVariable) scs.getVariable(createQzName(quaternionPrefix, quaternionSuffix));
-      DoubleYoVariable qs = (DoubleYoVariable) scs.getVariable(createQsName(quaternionPrefix, quaternionSuffix));
+      YoDouble qx = (YoDouble) scs.getVariable(createQxName(quaternionPrefix, quaternionSuffix));
+      YoDouble qy = (YoDouble) scs.getVariable(createQyName(quaternionPrefix, quaternionSuffix));
+      YoDouble qz = (YoDouble) scs.getVariable(createQzName(quaternionPrefix, quaternionSuffix));
+      YoDouble qs = (YoDouble) scs.getVariable(createQsName(quaternionPrefix, quaternionSuffix));
 
       if (qx == null || qy == null || qz == null || qs == null)
          return null;

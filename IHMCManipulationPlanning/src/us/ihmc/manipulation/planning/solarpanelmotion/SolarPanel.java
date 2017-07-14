@@ -31,17 +31,17 @@ public class SolarPanel
       return centerPose;
    }
    
-   public double getSizeX()
+   public double getSizeU()
    {
       return sizeX;
    }
    
-   public double getSizeY()
+   public double getSizeV()
    {
       return sizeY;
    }
    
-   public double getSizeZ()
+   public double getSizeW()
    {
       return sizeZ;
    }

@@ -16,7 +16,6 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -36,10 +35,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -48,11 +49,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.SCSPlaybackListener;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -113,17 +114,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
-   public DRCSimulationStarter(DRCRobotModel robotModel, DRCSCSInitialSetup scsInitialSetup)
+   public DRCSimulationStarter(DRCRobotModel robotModel, GroundProfile3D groundProfile3D)
    {
-      this(robotModel, null, scsInitialSetup);
+      this(robotModel, null, groundProfile3D);
    }
 
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      this(robotModel, environment, null);
+      this(robotModel, environment, environment.getTerrainObject3D());
    }
 
-   public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
+   private DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, GroundProfile3D groundProfile3D)
    {
       this.robotModel = robotModel;
       this.environment = environment;
@@ -133,17 +134,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      if (scsInitialSetup == null)
-      {
-         this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-         this.scsInitialSetup.setInitializeEstimatorToActual(false);
-         this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
-         this.scsInitialSetup.setRunMultiThreaded(true);
-      }
-      else
-      {
-         this.scsInitialSetup = scsInitialSetup;
-      }
+      this.scsInitialSetup = new DRCSCSInitialSetup(groundProfile3D, robotModel.getSimulateDT());
+      this.scsInitialSetup.setDrawGroundProfile(environment == null);
+      this.scsInitialSetup.setInitializeEstimatorToActual(false);
+      this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+      this.scsInitialSetup.setRunMultiThreaded(true);
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
@@ -493,7 +488,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
             cameraConfiguration.setCameraMount(cameraName);
 
             int framesPerSecond = 25;
-            DRCRenderedSceneVideoHandler drcRenderedSceneVideoHandler = new DRCRenderedSceneVideoHandler(scsSensorOutputPacketCommunicator);
+            RawVideoDataServer drcRenderedSceneVideoHandler = new RawVideoDataServer(scsSensorOutputPacketCommunicator);
             simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider,
                                                               framesPerSecond);
          }
@@ -564,7 +559,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       if (controllerPacketCommunicator != null)
       {
-         controllerPacketCommunicator.close();
+         controllerPacketCommunicator.disconnect();
       }
    }
 

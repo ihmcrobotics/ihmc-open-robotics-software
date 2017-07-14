@@ -19,7 +19,9 @@ import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLStructure;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileWriter

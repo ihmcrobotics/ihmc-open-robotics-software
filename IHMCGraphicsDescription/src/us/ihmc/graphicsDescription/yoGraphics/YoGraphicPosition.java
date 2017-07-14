@@ -13,9 +13,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -30,7 +30,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       BALL, SOLID_BALL, CROSS, BALL_WITH_CROSS, ROTATED_CROSS, BALL_WITH_ROTATED_CROSS, DIAMOND, DIAMOND_WITH_CROSS, SQUARE, SQUARE_WITH_CROSS, ELLIPSOID
    };
 
-   protected final DoubleYoVariable x, y, z;
+   protected final YoDouble x, y, z;
    private final double scale;
 
    private final GraphicType type;
@@ -49,17 +49,17 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance, type);
    }
 
-   public YoGraphicPosition(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scale, AppearanceDefinition appearance)
+   public YoGraphicPosition(String name, YoDouble x, YoDouble y, YoDouble z, double scale, AppearanceDefinition appearance)
    {
       this(name, x, y, z, scale, appearance, GraphicType.BALL);
    }
 
-   public YoGraphicPosition(String name, DoubleYoVariable x, DoubleYoVariable y, double scale, AppearanceDefinition appearance, GraphicType type)
+   public YoGraphicPosition(String name, YoDouble x, YoDouble y, double scale, AppearanceDefinition appearance, GraphicType type)
    {
       this(name, x, y, null, scale, appearance, type);
    }
 
-   public YoGraphicPosition(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scale, AppearanceDefinition appearance, GraphicType type)
+   public YoGraphicPosition(String name, YoDouble x, YoDouble y, YoDouble z, double scale, AppearanceDefinition appearance, GraphicType type)
    {
       super(name);
 
@@ -346,11 +346,11 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
    {
       if (z != null)
       {
-         return new DoubleYoVariable[] { x, y, z };
+         return new YoDouble[] { x, y, z };
       }
       else
       {
-         return new DoubleYoVariable[] { x, y };
+         return new YoDouble[] { x, y };
       }
    }
 

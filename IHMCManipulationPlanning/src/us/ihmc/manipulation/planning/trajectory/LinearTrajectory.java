@@ -1,23 +1,23 @@
 package us.ihmc.manipulation.planning.trajectory;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class LinearTrajectory
 {
-   private Pose initialPose;
-   private Pose finalPose;
+   private Pose3D initialPose;
+   private Pose3D finalPose;
    private double trajectoryTime;
    
-   public LinearTrajectory(Pose initialPose, Pose finalPose, double trajectoryTime)
+   public LinearTrajectory(Pose3D initialPose, Pose3D finalPose, double trajectoryTime)
    {
       this.initialPose = initialPose;
       this.finalPose = finalPose;
       this.trajectoryTime = trajectoryTime;
    }
    
-   public Pose getPose(double time)
+   public Pose3D getPose(double time)
    {        
       if(time < 0)
          time = 0;
@@ -26,8 +26,8 @@ public class LinearTrajectory
       
       double interpolatedScale = time/getTrajectoryTime();
       
-      Point3D initialPoint = new Point3D(initialPose.getPoint());
-      Point3D finalPoint = new Point3D(finalPose.getPoint());
+      Point3D initialPoint = new Point3D(initialPose.getPosition());
+      Point3D finalPoint = new Point3D(finalPose.getPosition());
       
       Quaternion startOrientation = new Quaternion(initialPose.getOrientation());
       Quaternion endOrientation = new Quaternion(finalPose.getOrientation());
@@ -41,7 +41,7 @@ public class LinearTrajectory
       
       interpolatedOrientation.interpolate(startOrientation, endOrientation, interpolatedScale);
       
-      Pose interpolatedPose = new Pose(interpolatedPoint, interpolatedOrientation);
+      Pose3D interpolatedPose = new Pose3D(interpolatedPoint, interpolatedOrientation);
       
       return interpolatedPose;
    }

@@ -10,7 +10,7 @@ public class DynamicReachabilityParameters
     */
    public double getThresholdForStepUp()
    {
-      return 0.05;
+      return 0.10;
    }
 
    /**
@@ -21,7 +21,7 @@ public class DynamicReachabilityParameters
     */
    public double getThresholdForStepDown()
    {
-      return -0.05;
+      return -0.10;
    }
 
    /**
@@ -94,7 +94,7 @@ public class DynamicReachabilityParameters
     */
    public double getRequiredAdjustmentFeedbackGain()
    {
-      return 0.4;
+      return 0.1;
    }
 
    /**
@@ -102,7 +102,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumTransferDuration()
    {
-      return 0.15;
+      return 0.20;
    }
 
    /**
@@ -134,7 +134,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumInitialTransferDuration()
    {
-      return 0.01;
+      return 0.4 * getMinimumTransferDuration();
    }
 
    /**
@@ -142,7 +142,7 @@ public class DynamicReachabilityParameters
     */
    public double getMinimumEndTransferDuration()
    {
-      return 0.05;
+      return 0.08;
    }
 
    /**
@@ -179,18 +179,44 @@ public class DynamicReachabilityParameters
    }
 
    /**
-    * This is the weight penalizing adjusting the swing duration in the solver.
+    * This is the weight penalizing adjusting the swing entry and exit duration in the solver.
     */
    public double getSwingAdjustmentWeight()
    {
-      return 10.0;
+      return 20.0;
+   }
+
+   /**
+    * This is the weight penalizing adjusting the transfer entry and exit duration in the solver.
+    */
+   public double getTransferAdjustmentWeight()
+   {
+      return 1.0;
+   }
+
+   /**
+    * This is the weight penalizing adjusting the swing duration in the solver.
+    */
+   public double getTotalSwingAdjustmentWeight()
+   {
+      return 0.1;
    }
 
    /**
     * This is the weight penalizing adjusting the transfer duration in the solver.
     */
-   public double getTransferAdjustmentWeight()
+   public double getTotalTransferAdjustmentWeight()
    {
-      return 1.0;
+      return 0.01;
+   }
+
+   public double getTransferEqualAdjustmentWeight()
+   {
+      return 50.0;
+   }
+
+   public double getSwingEqualAdjustmentWeight()
+   {
+      return 5.0;
    }
 }

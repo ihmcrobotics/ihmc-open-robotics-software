@@ -24,13 +24,13 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HeatmapWindow
 {
@@ -126,7 +126,7 @@ public class HeatmapWindow
       }
    }
 
-   public JavaFXHeatmapGraph addHeatmapGraph(String name, DoubleYoVariable x, DoubleYoVariable y)
+   public JavaFXHeatmapGraph addHeatmapGraph(String name, YoDouble x, YoDouble y)
    {
       JavaFXHeatmapGraph heatmapGraph = new JavaFXHeatmapGraph(registry, graphIndicesHolder, selectedVariableHolder, dataEntryHolder, dataBuffer);
       heatmapGraph.setXVariable(x);

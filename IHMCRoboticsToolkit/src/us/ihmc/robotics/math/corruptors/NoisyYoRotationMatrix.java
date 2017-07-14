@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.corruptors;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NoisyYoRotationMatrix
 {
@@ -27,25 +27,25 @@ public class NoisyYoRotationMatrix
    private final RotationMatrix noisyRotationMatrix = new RotationMatrix();
    private final RotationMatrix biasMatrix = new RotationMatrix();
    private final RotationMatrix noiseMatrix = new RotationMatrix();
-   private final NoisyDoubleYoVariable noiseRotationAngle, noiseDirectionHeight, noiseDirectionAngle;
-   private final NoisyDoubleYoVariable biasRotationAngle, biasDirectionHeight, biasDirectionAngle;
-   private final DoubleYoVariable noiseDirectionX, noiseDirectionY, noiseDirectionZ;
-   private final DoubleYoVariable biasDirectionX, biasDirectionY, biasDirectionZ;
+   private final NoisyYoDouble noiseRotationAngle, noiseDirectionHeight, noiseDirectionAngle;
+   private final NoisyYoDouble biasRotationAngle, biasDirectionHeight, biasDirectionAngle;
+   private final YoDouble noiseDirectionX, noiseDirectionY, noiseDirectionZ;
+   private final YoDouble biasDirectionX, biasDirectionY, biasDirectionZ;
 
    public NoisyYoRotationMatrix(String name, YoVariableRegistry registry)
    {
-      noiseRotationAngle = new NoisyDoubleYoVariable(name + "_noise_rot_ang", registry);
-      noiseDirectionHeight = new NoisyDoubleYoVariable(name + "_noise_dir_height", registry);
-      noiseDirectionAngle = new NoisyDoubleYoVariable(name + "_noise_dir_ang", registry);
-      biasRotationAngle = new NoisyDoubleYoVariable(name + "_bias_rot_ang", registry);
-      biasDirectionHeight = new NoisyDoubleYoVariable(name + "_bias_dir_height", registry);
-      biasDirectionAngle = new NoisyDoubleYoVariable(name + "_bias_dir_ang", registry);
-      noiseDirectionX = new DoubleYoVariable(name + "_noise_dir_x", registry);
-      noiseDirectionY = new DoubleYoVariable(name + "_noise_dir_y", registry);
-      noiseDirectionZ = new DoubleYoVariable(name + "_noise_dir_z", registry);
-      biasDirectionX = new DoubleYoVariable(name + "_bias_dir_x", registry);
-      biasDirectionY = new DoubleYoVariable(name + "_bias_dir_y", registry);
-      biasDirectionZ = new DoubleYoVariable(name + "_bias_dir_z", registry);
+      noiseRotationAngle = new NoisyYoDouble(name + "_noise_rot_ang", registry);
+      noiseDirectionHeight = new NoisyYoDouble(name + "_noise_dir_height", registry);
+      noiseDirectionAngle = new NoisyYoDouble(name + "_noise_dir_ang", registry);
+      biasRotationAngle = new NoisyYoDouble(name + "_bias_rot_ang", registry);
+      biasDirectionHeight = new NoisyYoDouble(name + "_bias_dir_height", registry);
+      biasDirectionAngle = new NoisyYoDouble(name + "_bias_dir_ang", registry);
+      noiseDirectionX = new YoDouble(name + "_noise_dir_x", registry);
+      noiseDirectionY = new YoDouble(name + "_noise_dir_y", registry);
+      noiseDirectionZ = new YoDouble(name + "_noise_dir_z", registry);
+      biasDirectionX = new YoDouble(name + "_bias_dir_x", registry);
+      biasDirectionY = new YoDouble(name + "_bias_dir_y", registry);
+      biasDirectionZ = new YoDouble(name + "_bias_dir_z", registry);
       
       noiseRotationAngle.setGaussianNoise(DEFAULT_NOISE_ROTATION_ANGLE_STANDARD_DEVIATION);
       noiseDirectionHeight.setRandomBound(DEFAULT_NOISE_DIRECTION_HEIGHT_BOUND);

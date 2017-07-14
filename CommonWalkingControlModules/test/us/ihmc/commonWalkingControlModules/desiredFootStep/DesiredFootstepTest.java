@@ -94,8 +94,8 @@ public class DesiredFootstepTest
 
       ThreadTools.sleep(SLEEP_TIME);
 
-      tcpClient.close();
-      tcpServer.close();
+      tcpClient.disconnect();
+      tcpServer.disconnect();
 
       // verify received correctly
       ArrayList<Footstep> receivedFootsteps = footstepDataConsumer.getReconstructedFootsteps();
@@ -125,8 +125,8 @@ public class DesiredFootstepTest
       tcpServer.send(footstepsData);
       ThreadTools.sleep(SLEEP_TIME);
 
-      tcpClient.close();
-      tcpServer.close();
+      tcpClient.disconnect();
+      tcpServer.disconnect();
 
       // verify received correctly
       ArrayList<Footstep> receivedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
@@ -161,8 +161,8 @@ public class DesiredFootstepTest
 
       ThreadTools.sleep(SLEEP_TIME);
 
-      tcpServer.close();
-      tcpClient.close();
+      tcpServer.disconnect();
+      tcpClient.disconnect();
 
       // verify received correctly
       ArrayList<Boolean> reconstructedCommands = pauseConsumer.getReconstructedCommands();
@@ -228,8 +228,8 @@ public class DesiredFootstepTest
       sentFootsteps.addAll(sentFootsteps2);
       ThreadTools.sleep(SLEEP_TIME);
 
-      streamingDataTCPClient.close();
-      streamingDataTCPServer.close();
+      streamingDataTCPClient.disconnect();
+      streamingDataTCPServer.disconnect();
 
       // verify footsteps received correctly
       ArrayList<Footstep> receivedFootsteps = footstepPathConsumer.getReconstructedFootsteps();
@@ -277,8 +277,8 @@ public class DesiredFootstepTest
 
       ThreadTools.sleep(SLEEP_TIME);
 
-      tcpServer.close();
-      tcpClient.close();
+      tcpServer.disconnect();
+      tcpClient.disconnect();
 
       // verify received correctly
       ArrayList<FootstepStatus> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();

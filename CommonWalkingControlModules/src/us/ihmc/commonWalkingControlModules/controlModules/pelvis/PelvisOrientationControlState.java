@@ -34,6 +34,8 @@ public abstract class PelvisOrientationControlState extends FinishableState<Pelv
    {
    }
 
+   public abstract void goToHomeFromCurrentDesired(double trajectoryTime);
+
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
    public abstract void getCurrentDesiredOrientation(FrameOrientation orientationToPack);

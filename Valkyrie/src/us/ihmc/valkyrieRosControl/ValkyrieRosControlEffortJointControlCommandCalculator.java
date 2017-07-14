@@ -4,8 +4,8 @@ import java.util.Map;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
@@ -17,10 +17,10 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
    private final YoEffortJointHandleHolder yoEffortJointHandleHolder;
 
    private final PIDController pidController;
-   private final DoubleYoVariable tauOff;
-   private final DoubleYoVariable tauScale;
-   private final DoubleYoVariable standPrepAngle;
-   private final DoubleYoVariable initialAngle;
+   private final YoDouble tauOff;
+   private final YoDouble tauScale;
+   private final YoDouble standPrepAngle;
+   private final YoDouble initialAngle;
 
    private final double controlDT;
 
@@ -34,14 +34,14 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       String pdControllerBaseName = yoEffortJointHandleHolder.getName();
       YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
 
-      this.standPrepAngle = new DoubleYoVariable(pdControllerBaseName + "StandPrepAngle", registry);
-      this.initialAngle = new DoubleYoVariable(pdControllerBaseName + "InitialAngle", registry);
+      this.standPrepAngle = new YoDouble(pdControllerBaseName + "StandPrepAngle", registry);
+      this.initialAngle = new YoDouble(pdControllerBaseName + "InitialAngle", registry);
 
       pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
-      this.tauOff = new DoubleYoVariable("tau_offset_" + pdControllerBaseName, registry);
+      this.tauOff = new YoDouble("tau_offset_" + pdControllerBaseName, registry);
       if (ENABLE_TAU_SCALE)
       {
-         tauScale = new DoubleYoVariable("tau_scale_" + pdControllerBaseName, registry);
+         tauScale = new YoDouble("tau_scale_" + pdControllerBaseName, registry);
          tauScale.set(1.0);
       }
       else

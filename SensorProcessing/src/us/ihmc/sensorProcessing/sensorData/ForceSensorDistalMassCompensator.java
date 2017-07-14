@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -28,7 +28,7 @@ public class ForceSensorDistalMassCompensator
    private final YoFramePoint yoSensorPositionInWorld;
 
    private final CenterOfMassCalculator distalMassCalc;
-   private final DoubleYoVariable distalMass;
+   private final YoDouble distalMass;
    private final AlphaFilteredYoVariable lowPassSensorForceZ;
    private final YoFrameVector distalMassForceInWorld;
    private final YoFramePoint distalCoMInWorld;
@@ -45,7 +45,7 @@ public class ForceSensorDistalMassCompensator
    private final YoFrameVector yoSensorForceMassCompensated;
    private final YoFrameVector yoSensorTorqueMassCompensated;
    
-   private final BooleanYoVariable addSimulatedSensorNoise;
+   private final YoBoolean addSimulatedSensorNoise;
 
    public ForceSensorDistalMassCompensator(ForceSensorDefinition forceSensorDefinition, double dtForLowpassFilter, YoVariableRegistry registry)
    {
@@ -58,7 +58,7 @@ public class ForceSensorDistalMassCompensator
       yoSensorPositionInWorld = new YoFramePoint(sensorName + "Position", world, registry);
 
       distalMassCalc = new CenterOfMassCalculator(ScrewTools.computeRigidBodiesAfterThisJoint(parentJointOfSensorBody), world);
-      distalMass = new DoubleYoVariable(sensorName + "DistalMass", registry);
+      distalMass = new YoDouble(sensorName + "DistalMass", registry);
       lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
       distalMassForceInWorld = new YoFrameVector(sensorName + "DistalWeight", world, registry);
       distalCoMInWorld = new YoFramePoint(sensorName + "DistalCoM", world, registry);
@@ -76,7 +76,7 @@ public class ForceSensorDistalMassCompensator
       yoSensorForceMassCompensated = new YoFrameVector(sensorName + "ForceMassCompensated", world, registry);
       yoSensorTorqueMassCompensated = new YoFrameVector(sensorName + "TorqueMassCompensated", world, registry);
       
-      addSimulatedSensorNoise = new BooleanYoVariable(sensorName + "AddSimulatedNoise", registry);
+      addSimulatedSensorNoise = new YoBoolean(sensorName + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);
    }
 

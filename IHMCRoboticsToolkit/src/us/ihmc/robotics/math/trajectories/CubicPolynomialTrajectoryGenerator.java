@@ -1,8 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator
 {
@@ -27,28 +29,17 @@ public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGene
       this.finalVelocityProvider = finalVelocityProvider;
    }
 
+   @Override
    protected void setPolynomial()
    {
-      polynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(),
-            finalPositionProvider.getValue(), finalVelocityProvider.getValue());
-   }
-
-   @Override
-   public void compute(double time)
-   {
-      super.compute(time);
-
-      if (isDone())
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
       {
-         currentValue.set(finalPositionProvider.getValue());
-         currentVelocity.set(finalVelocityProvider.getValue());
-         currentAcceleration.set(0.0);
+         polynomial.setLinear(0.0, initialPositionProvider.getValue(), initialVelocityProvider.getValue());
       }
-      else if (time <= 0.0)
+      else
       {
-         currentValue.set(initialPositionProvider.getValue());
-         currentVelocity.set(initialVelocityProvider.getValue());
-         currentAcceleration.set(0.0);
+         polynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(),
+                             finalPositionProvider.getValue(), finalVelocityProvider.getValue());
       }
    }
 }

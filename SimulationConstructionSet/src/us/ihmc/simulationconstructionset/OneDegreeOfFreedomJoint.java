@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class OneDegreeOfFreedomJoint extends Joint
 {
@@ -20,15 +20,15 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
       super(jname, offset, rob, 1);
    }
 
-   public abstract DoubleYoVariable getQDDYoVariable();
+   public abstract YoDouble getQDDYoVariable();
 
    public abstract double getQDD();
 
-   public abstract DoubleYoVariable getQDYoVariable();
+   public abstract YoDouble getQDYoVariable();
 
    public abstract double getQD();
 
-   public abstract DoubleYoVariable getQYoVariable();
+   public abstract YoDouble getQYoVariable();
 
    public abstract double getQ();
 
@@ -40,7 +40,7 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
 
    public abstract void setTau(double tau);
 
-   public abstract DoubleYoVariable getTauYoVariable();
+   public abstract YoDouble getTauYoVariable();
 
    public abstract double getTau();
 

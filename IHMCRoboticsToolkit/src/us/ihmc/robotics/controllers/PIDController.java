@@ -1,42 +1,42 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PIDController
 {
    private final PDController pdController;
-   private final DoubleYoVariable integralGain;
-   private final DoubleYoVariable maxIntegralError;
-   private final DoubleYoVariable maxOutput;
-   private final DoubleYoVariable cumulativeError;
-   private final DoubleYoVariable integralLeakRatio;
+   private final YoDouble integralGain;
+   private final YoDouble maxIntegralError;
+   private final YoDouble maxOutput;
+   private final YoDouble cumulativeError;
+   private final YoDouble integralLeakRatio;
    
-   private final DoubleYoVariable actionI;
+   private final YoDouble actionI;
 
    public PIDController(String suffix, YoVariableRegistry registry)
    {
       pdController = new PDController(suffix, registry);
 
-      integralGain = new DoubleYoVariable("ki_" + suffix, registry);
+      integralGain = new YoDouble("ki_" + suffix, registry);
       integralGain.set(0.0);
 
-      maxIntegralError = new DoubleYoVariable("maxIntegralError_" + suffix, registry);
+      maxIntegralError = new YoDouble("maxIntegralError_" + suffix, registry);
       maxIntegralError.set(Double.POSITIVE_INFINITY);
       
-      maxOutput = new DoubleYoVariable("maxOutput_" + suffix, registry);
+      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
       maxOutput.set(Double.POSITIVE_INFINITY);
 
-      cumulativeError = new DoubleYoVariable("cumulativeError_" + suffix, registry);
+      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
       cumulativeError.set(0.0);
       
-      actionI = new DoubleYoVariable("action_I_" + suffix, registry);
+      actionI = new YoDouble("action_I_" + suffix, registry);
       actionI.set(0.0);
       
-      integralLeakRatio = new DoubleYoVariable("leak_" + suffix, registry);     
+      integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
 
       VariableChangedListener leakRatioClipper = new VariableChangedListener()
@@ -50,23 +50,23 @@ public class PIDController
       integralLeakRatio.addVariableChangedListener(leakRatioClipper);
    }
 
-   public PIDController(DoubleYoVariable proportionalGain, DoubleYoVariable integralGain, DoubleYoVariable derivativeGain, DoubleYoVariable maxIntegralError,
+   public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError,
          String suffix, YoVariableRegistry registry)
    {
       pdController = new PDController(proportionalGain, derivativeGain, suffix, registry);
       this.integralGain = integralGain;
       this.maxIntegralError = maxIntegralError;
       
-      maxOutput = new DoubleYoVariable("maxOutput_" + suffix, registry);
+      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
       maxOutput.set(Double.POSITIVE_INFINITY);
 
-      cumulativeError = new DoubleYoVariable("cumulativeError_" + suffix, registry);
+      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
       cumulativeError.set(0.0);
       
-      actionI = new DoubleYoVariable("integralAction_" + suffix, registry);
+      actionI = new YoDouble("integralAction_" + suffix, registry);
       actionI.set(0.0);
       
-      integralLeakRatio = new DoubleYoVariable("leak_" + suffix, registry);     
+      integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
    }
 
@@ -77,10 +77,10 @@ public class PIDController
       this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
       this.maxOutput = yoPIDGains.getYoMaximumOutput();
 
-      cumulativeError = new DoubleYoVariable("cumulativeError_" + suffix, registry);
+      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
       cumulativeError.set(0.0);
 
-      actionI = new DoubleYoVariable("integralAction_" + suffix, registry);
+      actionI = new YoDouble("integralAction_" + suffix, registry);
       actionI.set(0.0);
 
       integralLeakRatio = yoPIDGains.getYoIntegralLeakRatio();

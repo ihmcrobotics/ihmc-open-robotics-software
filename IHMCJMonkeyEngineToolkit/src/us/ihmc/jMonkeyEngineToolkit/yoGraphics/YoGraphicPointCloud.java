@@ -22,7 +22,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoGraphicPointCloud extends YoGraphic
 {
@@ -40,7 +39,7 @@ public class YoGraphicPointCloud extends YoGraphic
    private final FloatBuffer colorBuffer;
    private final FloatBuffer sizeBuffer;
 
-   public YoGraphicPointCloud(String name, int capacity, int spriteSizePixels, ColorRGBA color, YoVariableRegistry registry, JMERenderer jmeRenderer)
+   public YoGraphicPointCloud(String name, int capacity, int spriteSizePixels, ColorRGBA color, JMERenderer jmeRenderer)
    {
       super(name);
 

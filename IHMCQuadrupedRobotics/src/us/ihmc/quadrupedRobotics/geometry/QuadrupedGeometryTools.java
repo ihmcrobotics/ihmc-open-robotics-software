@@ -62,8 +62,8 @@ public class QuadrupedGeometryTools
       RigidBodyTransform ellipsoidTransform = new RigidBodyTransform();
       ellipsoidTransform.setTranslation(0.0, 0.0, -hipPitchHeight);
       ellipsoidToPack.applyTransform(ellipsoidTransform);
-      ellipsoidToPack.getEllipsoid3d().setXRadius(maxStepDistance);
-      ellipsoidToPack.getEllipsoid3d().setYRadius(maxStepDistance);
-      ellipsoidToPack.getEllipsoid3d().setZRadius(0.0);
+      ellipsoidToPack.getEllipsoid3d().setRadiusX(maxStepDistance);
+      ellipsoidToPack.getEllipsoid3d().setRadiusY(maxStepDistance);
+      ellipsoidToPack.getEllipsoid3d().setRadiusZ(0.0);
    }
 }

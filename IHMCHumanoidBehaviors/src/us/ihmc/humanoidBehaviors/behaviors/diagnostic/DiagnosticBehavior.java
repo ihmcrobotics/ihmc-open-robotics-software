@@ -58,12 +58,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -106,13 +103,13 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
    private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>(40);
-   private final BooleanYoVariable diagnosticBehaviorEnabled;
-   private final BooleanYoVariable hasControllerWakenUp;
-   private final BooleanYoVariable automaticDiagnosticRoutineRequested;
-   private final BooleanYoVariable automaticDiagnosticRoutineHasStarted;
-   private final DoubleYoVariable timeWhenControllerWokeUp;
-   private final DoubleYoVariable timeToWaitBeforeEnable;
-   private final BooleanYoVariable enableHandOrientation;
+   private final YoBoolean diagnosticBehaviorEnabled;
+   private final YoBoolean hasControllerWakenUp;
+   private final YoBoolean automaticDiagnosticRoutineRequested;
+   private final YoBoolean automaticDiagnosticRoutineHasStarted;
+   private final YoDouble timeWhenControllerWokeUp;
+   private final YoDouble timeToWaitBeforeEnable;
+   private final YoBoolean enableHandOrientation;
 
    private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
    private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
@@ -130,22 +127,22 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final SleepBehavior sleepBehavior;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
-   private final DoubleYoVariable sleepTimeBetweenPoses;
-   private final BooleanYoVariable doPelvisAndChestYaw;
-   private final IntegerYoVariable numberOfCyclesToRun;
-   private final DoubleYoVariable minCoMHeightOffset, maxCoMHeightOffset;
+   private final YoDouble yoTime;
+   private final YoDouble trajectoryTime, flyingTrajectoryTime;
+   private final YoDouble sleepTimeBetweenPoses;
+   private final YoBoolean doPelvisAndChestYaw;
+   private final YoInteger numberOfCyclesToRun;
+   private final YoDouble minCoMHeightOffset, maxCoMHeightOffset;
    private final int numberOfArmJoints;
    private final FullHumanoidRobotModel fullRobotModel;
 
    //Icp Offset generator variables
-   private final BooleanYoVariable isIcpOffsetSenderEnabled;
-   private final DoubleYoVariable minMaxIcpAngularOffset;
-   private final DoubleYoVariable minMaxIcpTranslationOffset;
-   private final DoubleYoVariable previousIcpPacketSentTime;
+   private final YoBoolean isIcpOffsetSenderEnabled;
+   private final YoDouble minMaxIcpAngularOffset;
+   private final YoDouble minMaxIcpTranslationOffset;
+   private final YoDouble previousIcpPacketSentTime;
    private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
-   private final DoubleYoVariable icpTimeDelay;
+   private final YoDouble icpTimeDelay;
 
    private final YoFrameConvexPolygon2d yoSupportPolygon;
 
@@ -206,28 +203,28 @@ public class DiagnosticBehavior extends AbstractBehavior
       REDO_LAST_TASK // Keep that one at the end.
    };
 
-   private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
+   private final YoEnum<DiagnosticTask> lastDiagnosticTask;
 
-   private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
-   private final EnumYoVariable<HumanoidArmPose> requestedSymmetricArmPose;
-   private final EnumYoVariable<HumanoidArmPose> requestedSingleArmPose;
-   private final EnumYoVariable<RobotSide> activeSideForHandControl;
-   private final EnumYoVariable<RobotSide> activeSideForFootControl;
-   private final EnumYoVariable<RobotSide> supportLeg;
+   private final YoEnum<DiagnosticTask> requestedDiagnostic;
+   private final YoEnum<HumanoidArmPose> requestedSymmetricArmPose;
+   private final YoEnum<HumanoidArmPose> requestedSingleArmPose;
+   private final YoEnum<RobotSide> activeSideForHandControl;
+   private final YoEnum<RobotSide> activeSideForFootControl;
+   private final YoEnum<RobotSide> supportLeg;
 
    private final double maxPitchBackward = Math.toRadians(-5.0);
    private final double maxPitchForward = Math.toRadians(40.0);
    private final double minMaxRoll = Math.toRadians(15.0);
    private final double minMaxYaw = Math.toRadians(30.0);
 
-   private final DoubleYoVariable footstepLength;
-   private final DoubleYoVariable swingTime;
-   private final DoubleYoVariable transferTime;
+   private final YoDouble footstepLength;
+   private final YoDouble swingTime;
+   private final YoDouble transferTime;
 
-   private final DoubleYoVariable maxFootPoseHeight;
-   private final DoubleYoVariable maxFootPoseDisplacement;
+   private final YoDouble maxFootPoseHeight;
+   private final YoDouble maxFootPoseDisplacement;
 
-   private final DoubleYoVariable angleToTurnInDegrees;
+   private final YoDouble angleToTurnInDegrees;
 
    private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
@@ -239,11 +236,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final SideDependentList<RigidBodyTransform> armZeroJointAngleConfigurationOffsets = new SideDependentList<>();
 
-   private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
-   private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
+   private final YoDouble pelvisOrientationScaleFactor = new YoDouble("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
+   private final YoDouble bootyShakeTime = new YoDouble("diagnosticBehaviorButtyShakeTime", registry);
 
-   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
+   public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
+         YoDouble yoTime, YoBoolean yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -253,13 +250,13 @@ public class DiagnosticBehavior extends AbstractBehavior
       this.yoSupportPolygon = yoSupportPolygon;
       this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
-      diagnosticBehaviorEnabled = new BooleanYoVariable("diagnosticBehaviorEnabled", registry);
-      hasControllerWakenUp = new BooleanYoVariable("diagnostBehaviorHasControllerWakenUp", registry);
-      automaticDiagnosticRoutineRequested = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
-      automaticDiagnosticRoutineHasStarted = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
-      timeWhenControllerWokeUp = new DoubleYoVariable("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
-      timeToWaitBeforeEnable = new DoubleYoVariable("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
-      enableHandOrientation = new BooleanYoVariable("diagnosticEnableHandOrientation", registry);
+      diagnosticBehaviorEnabled = new YoBoolean("diagnosticBehaviorEnabled", registry);
+      hasControllerWakenUp = new YoBoolean("diagnostBehaviorHasControllerWakenUp", registry);
+      automaticDiagnosticRoutineRequested = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
+      automaticDiagnosticRoutineHasStarted = new YoBoolean("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
+      timeWhenControllerWokeUp = new YoDouble("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
+      timeToWaitBeforeEnable = new YoDouble("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
+      enableHandOrientation = new YoBoolean("diagnosticEnableHandOrientation", registry);
 
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
@@ -269,7 +266,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       //icp variables
-      isIcpOffsetSenderEnabled = new BooleanYoVariable("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
+      isIcpOffsetSenderEnabled = new YoBoolean("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
       isIcpOffsetSenderEnabled.set(false);
       isIcpOffsetSenderEnabled.addVariableChangedListener(new VariableChangedListener()
       {
@@ -280,43 +277,43 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          }
       });
-      minMaxIcpAngularOffset = new DoubleYoVariable(getName() + "MinMaxIcpAngularOffset", registry);
+      minMaxIcpAngularOffset = new YoDouble(getName() + "MinMaxIcpAngularOffset", registry);
       minMaxIcpAngularOffset.set(0.0);
-      minMaxIcpTranslationOffset = new DoubleYoVariable(getName() + "MinMaxIcpTranslationOffset", registry);
+      minMaxIcpTranslationOffset = new YoDouble(getName() + "MinMaxIcpTranslationOffset", registry);
       minMaxIcpTranslationOffset.set(0.06);
-      previousIcpPacketSentTime = new DoubleYoVariable("DiagnosticBehaviorPreviousIcpPacketSentTime", registry);
+      previousIcpPacketSentTime = new YoDouble("DiagnosticBehaviorPreviousIcpPacketSentTime", registry);
       stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(10000);
-      icpTimeDelay = new DoubleYoVariable(getName() + "IcpTimeDelay", registry);
+      icpTimeDelay = new YoDouble(getName() + "IcpTimeDelay", registry);
       icpTimeDelay.set(0.99);
       ///////////////////
 
       String behaviorNameFirstLowerCase = StringUtils.uncapitalize(getName());
-      trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
-      flyingTrajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
+      trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
+      flyingTrajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "flyingTrajectoryTime", registry);
 
-      swingTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "SwingTime", registry);
+      swingTime = new YoDouble(behaviorNameFirstLowerCase + "SwingTime", registry);
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());
-      transferTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TransferTime", registry);
+      transferTime = new YoDouble(behaviorNameFirstLowerCase + "TransferTime", registry);
       transferTime.set(walkingControllerParameters.getDefaultTransferTime());
 
-      maxFootPoseHeight = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxFootPoseHeight", registry);
+      maxFootPoseHeight = new YoDouble(behaviorNameFirstLowerCase + "MaxFootPoseHeight", registry);
       maxFootPoseHeight.set(0.1);
-      maxFootPoseDisplacement = new DoubleYoVariable(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
+      maxFootPoseDisplacement = new YoDouble(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
       maxFootPoseDisplacement.set(0.2);
-      angleToTurnInDegrees = new DoubleYoVariable(behaviorNameFirstLowerCase + "AngleToTurnInDegrees", registry);
+      angleToTurnInDegrees = new YoDouble(behaviorNameFirstLowerCase + "AngleToTurnInDegrees", registry);
       angleToTurnInDegrees.set(0.0);
 
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
-      sleepTimeBetweenPoses = new DoubleYoVariable(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
+      sleepTimeBetweenPoses = new YoDouble(behaviorNameFirstLowerCase + "SleepTimeBetweenPoses", registry);
       sleepTimeBetweenPoses.set(FAST_MOTION ? 0.0 : 0.5);
 
-      minCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
+      minCoMHeightOffset = new YoDouble(behaviorNameFirstLowerCase + "MinCoMHeightOffset", registry);
       minCoMHeightOffset.set(-0.15);
-      maxCoMHeightOffset = new DoubleYoVariable(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
+      maxCoMHeightOffset = new YoDouble(behaviorNameFirstLowerCase + "MaxCoMHeightOffset", registry);
       maxCoMHeightOffset.set(0.05);
 
-      footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
+      footstepLength = new YoDouble(behaviorNameFirstLowerCase + "FootstepLength", registry);
       footstepLength.set(0.3);
 
       bootyShakeTime.set(1.0);
@@ -367,28 +364,28 @@ public class DiagnosticBehavior extends AbstractBehavior
          armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
 
-      requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
+      requestedDiagnostic = new YoEnum<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
 
-      lastDiagnosticTask = new EnumYoVariable<>("lastDiagnosticTask", registry, DiagnosticTask.class, true);
+      lastDiagnosticTask = new YoEnum<>("lastDiagnosticTask", registry, DiagnosticTask.class, true);
       lastDiagnosticTask.set(null);
 
-      requestedSymmetricArmPose = new EnumYoVariable<>("requestedSymmetricArmPose", registry, HumanoidArmPose.class, true);
+      requestedSymmetricArmPose = new YoEnum<>("requestedSymmetricArmPose", registry, HumanoidArmPose.class, true);
       requestedSymmetricArmPose.set(null);
 
-      requestedSingleArmPose = new EnumYoVariable<>("requestedSingleArmPose", registry, HumanoidArmPose.class, true);
+      requestedSingleArmPose = new YoEnum<>("requestedSingleArmPose", registry, HumanoidArmPose.class, true);
       requestedSingleArmPose.set(null);
 
-      activeSideForFootControl = new EnumYoVariable<>("activeSideForFootControl", registry, RobotSide.class, true);
+      activeSideForFootControl = new YoEnum<>("activeSideForFootControl", registry, RobotSide.class, true);
       activeSideForFootControl.set(RobotSide.LEFT);
 
-      activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class, true);
+      activeSideForHandControl = new YoEnum<>("activeSideForHandControl", registry, RobotSide.class, true);
       activeSideForHandControl.set(RobotSide.LEFT);
 
-      numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);
+      numberOfCyclesToRun = new YoInteger("numberOfDiagnosticCyclesToRun", registry);
       numberOfCyclesToRun.set(1);
 
-      doPelvisAndChestYaw = new BooleanYoVariable("diagnosticDoPelvisAndChestYaw", registry);
+      doPelvisAndChestYaw = new YoBoolean("diagnosticDoPelvisAndChestYaw", registry);
       doPelvisAndChestYaw.set(true);
 
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
@@ -1654,7 +1651,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw, double angleRelativeToPath, double percentOfMaxFootstepLength)
    {
       FramePose2d targetPoseInWorld = new FramePose2d();
-      targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
+      targetPoseInWorld.setIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
 
       WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath,

@@ -11,12 +11,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.DataBuffer;
-import us.ihmc.simulationconstructionset.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class HumanoidDiagnosticsWhenHangingAnalyzer
@@ -25,22 +25,22 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    private final DiagnosticsWhenHangingController controller;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
-   private final DoubleYoVariable q_qx, q_qy, q_qz, q_qs;
-   private final DoubleYoVariable q_x, q_y, q_z;
+   private final YoDouble q_qx, q_qy, q_qz, q_qs;
+   private final YoDouble q_x, q_y, q_z;
 
    private final FullRobotModel fullRobotModel;
 
    private final ArrayList<YoVariable<?>> corruptorVariables;
-   private final ArrayList<DoubleYoVariable> torqueOffsetVariables;
-   private final ArrayList<DoubleYoVariable> torqueScoreVariables;
+   private final ArrayList<YoDouble> torqueOffsetVariables;
+   private final ArrayList<YoDouble> torqueScoreVariables;
 
    private final ArrayList<YoVariable<?>> corruptorVariablesToOptimize= new ArrayList<YoVariable<?>>();
-   private final ArrayList<YoVariable<DoubleYoVariable>>torqueScoresToOptimize= new ArrayList<YoVariable<DoubleYoVariable>>();
+   private final ArrayList<YoVariable<YoDouble>>torqueScoresToOptimize= new ArrayList<YoVariable<YoDouble>>();
 
    private final ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> jointsToJointAngles = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> jointsToTorqueScore = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final DoubleYoVariable totalTorqueScore;
+   private final LinkedHashMap<OneDoFJoint, YoDouble> jointsToJointAngles = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final LinkedHashMap<OneDoFJoint, YoDouble> jointsToTorqueScore = new LinkedHashMap<OneDoFJoint, YoDouble>();
+   private final YoDouble totalTorqueScore;
 
    private boolean stopOptimization;
    private final NumberFormat numberFormat;
@@ -53,14 +53,14 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       this.fullRobotModelCorruptor = fullRobotModelCorruptor;
 
 
-      this.q_x = (DoubleYoVariable) simulationConstructionSet.getVariable("q_x");
-      this.q_y = (DoubleYoVariable) simulationConstructionSet.getVariable("q_y");
-      this.q_z = (DoubleYoVariable) simulationConstructionSet.getVariable("q_z");
+      this.q_x = (YoDouble) simulationConstructionSet.getVariable("q_x");
+      this.q_y = (YoDouble) simulationConstructionSet.getVariable("q_y");
+      this.q_z = (YoDouble) simulationConstructionSet.getVariable("q_z");
 
-      this.q_qx = (DoubleYoVariable) simulationConstructionSet.getVariable("q_qx");
-      this.q_qy = (DoubleYoVariable) simulationConstructionSet.getVariable("q_qy");
-      this.q_qz = (DoubleYoVariable) simulationConstructionSet.getVariable("q_qz");
-      this.q_qs = (DoubleYoVariable) simulationConstructionSet.getVariable("q_qs");
+      this.q_qx = (YoDouble) simulationConstructionSet.getVariable("q_qx");
+      this.q_qy = (YoDouble) simulationConstructionSet.getVariable("q_qy");
+      this.q_qz = (YoDouble) simulationConstructionSet.getVariable("q_qz");
+      this.q_qs = (YoDouble) simulationConstructionSet.getVariable("q_qs");
 
       YoVariableRegistry corruptorRegistry = fullRobotModelCorruptor.getYoVariableRegistry();
       corruptorVariables = corruptorRegistry.getAllVariablesInThisListOnly();
@@ -72,22 +72,22 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       YoVariableRegistry registry = new YoVariableRegistry("TorqueScore");
       simulationConstructionSet.addYoVariableRegistry(registry);
 
-      torqueScoreVariables = new ArrayList<DoubleYoVariable>();
+      torqueScoreVariables = new ArrayList<YoDouble>();
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          String jointAngleVariableName = "q_" + oneDoFJoint.getName();
-         DoubleYoVariable jointAngleDoubleYoVariable = (DoubleYoVariable) simulationConstructionSet.getVariable(jointAngleVariableName);
-         if (jointAngleDoubleYoVariable == null)
+         YoDouble jointAngleYoDouble = (YoDouble) simulationConstructionSet.getVariable(jointAngleVariableName);
+         if (jointAngleYoDouble == null)
             throw new RuntimeException("Couldn't find variable " + jointAngleVariableName);
-         jointsToJointAngles.put(oneDoFJoint, jointAngleDoubleYoVariable);
+         jointsToJointAngles.put(oneDoFJoint, jointAngleYoDouble);
 
-         DoubleYoVariable torqueScoreYoVariable = new DoubleYoVariable("score_" + oneDoFJoint.getName(), registry);
+         YoDouble torqueScoreYoVariable = new YoDouble("score_" + oneDoFJoint.getName(), registry);
 
          jointsToTorqueScore.put(oneDoFJoint, torqueScoreYoVariable);
          torqueScoreVariables.add(torqueScoreYoVariable);
       }
 
-      totalTorqueScore = new DoubleYoVariable("totalTorqueScore", registry);
+      totalTorqueScore = new YoDouble("totalTorqueScore", registry);
       stopOptimization = false;
       
       torqueOffsetVariables = controller.getTorqueOffsetVariables();
@@ -116,7 +116,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
          }
       } 
 
-      for (DoubleYoVariable variable : torqueScoreVariables)
+      for (YoDouble variable : torqueScoreVariables)
       {
          for (String string : containsToOptimizeTorqueScores)
          {
@@ -135,7 +135,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          String measuredTorqueName = "raw_tau_" + oneDoFJoint.getName();
-         DoubleYoVariable measuredTorque = (DoubleYoVariable) simulationConstructionSet.getVariable(measuredTorqueName);
+         YoDouble measuredTorque = (YoDouble) simulationConstructionSet.getVariable(measuredTorqueName);
          controller.setAppliedTorque(oneDoFJoint, measuredTorque.getDoubleValue());
       }
    }
@@ -332,11 +332,11 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       }
    }
    
-   private void getCurrentTorqueOffsetValues(ArrayList<DoubleYoVariable> torqueOffsetVariables, double[] torqueOffsetValues)
+   private void getCurrentTorqueOffsetValues(ArrayList<YoDouble> torqueOffsetVariables, double[] torqueOffsetValues)
    { 
       for (int i = 0; i < torqueOffsetVariables.size(); i++)
       {
-         DoubleYoVariable variable = torqueOffsetVariables.get(i);
+         YoDouble variable = torqueOffsetVariables.get(i);
          torqueOffsetValues[i] = variable.getDoubleValue();
       }
    } 
@@ -359,11 +359,11 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
       }
    }
    
-   private void setTorqueOffsetValues(ArrayList<DoubleYoVariable> torqueOffsetVariables, double[] torqueOffsetValues)
+   private void setTorqueOffsetValues(ArrayList<YoDouble> torqueOffsetVariables, double[] torqueOffsetValues)
    { 
       for (int i = 0; i < torqueOffsetVariables.size(); i++)
       {
-         DoubleYoVariable variable = torqueOffsetVariables.get(i);
+         YoDouble variable = torqueOffsetVariables.get(i);
          variable.set(torqueOffsetValues[i]);
       }
    } 
@@ -393,9 +393,9 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    {
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         DoubleYoVariable appliedTorque = controller.getAppliedTorqueYoVariable(oneDoFJoint);
-         DoubleYoVariable estimatedTorque = controller.getEstimatedTorqueYoVariable(oneDoFJoint);
-         DoubleYoVariable torqueOffset = controller.getTorqueOffsetVariable(oneDoFJoint);
+         YoDouble appliedTorque = controller.getAppliedTorqueYoVariable(oneDoFJoint);
+         YoDouble estimatedTorque = controller.getEstimatedTorqueYoVariable(oneDoFJoint);
+         YoDouble torqueOffset = controller.getTorqueOffsetVariable(oneDoFJoint);
 
          DataBuffer dataBuffer = simulationConstructionSet.getDataBuffer();
          
@@ -438,7 +438,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
             for (OneDoFJoint oneDoFJoint : oneDoFJoints)
             {
-               DoubleYoVariable jointAngleYoVariable = jointsToJointAngles.get(oneDoFJoint);
+               YoDouble jointAngleYoVariable = jointsToJointAngles.get(oneDoFJoint);
                oneDoFJoint.setQ(jointAngleYoVariable.getDoubleValue());
             }
 
@@ -450,7 +450,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
             for (int i = 0; i < torqueOffsetVariables.size(); i++)
             {
-               DoubleYoVariable variable = torqueOffsetVariables.get(i);
+               YoDouble variable = torqueOffsetVariables.get(i);
                variable.set(torqueOffsetValues[i]);
             }
 
@@ -469,7 +469,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
             for (OneDoFJoint oneDoFJoint : oneDoFJoints)
             {
-               DoubleYoVariable torqueScoreYoVariable = jointsToTorqueScore.get(oneDoFJoint);
+               YoDouble torqueScoreYoVariable = jointsToTorqueScore.get(oneDoFJoint);
                Double torqueScoreValue = torqueScoreValues.get(oneDoFJoint);
 
                double appliedTorque = controller.getAppliedTorque(oneDoFJoint);

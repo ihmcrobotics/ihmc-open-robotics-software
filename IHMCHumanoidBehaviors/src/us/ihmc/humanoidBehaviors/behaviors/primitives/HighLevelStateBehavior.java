@@ -3,11 +3,11 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class HighLevelStateBehavior extends AbstractBehavior
 {
-   private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
+   private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private HighLevelStateMessage outgoingHighLevelStatePacket;
 
    public HighLevelStateBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)

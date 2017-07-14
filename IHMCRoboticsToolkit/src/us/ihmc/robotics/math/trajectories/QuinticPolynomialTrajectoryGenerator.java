@@ -1,7 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuinticPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator
 {
@@ -17,9 +19,17 @@ public class QuinticPolynomialTrajectoryGenerator extends PolynomialTrajectoryGe
       this.finalVelocityProvider = finalVelocityProvider;
    }
 
+   @Override
    protected void setPolynomial()
    {
-      this.polynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(), 0.0,
-            finalPositionProvider.getValue(), finalVelocityProvider.getValue(), 0.0);
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         polynomial.setLinear(0.0, initialPositionProvider.getValue(), initialVelocityProvider.getValue());
+      }
+      else
+      {
+         polynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(), 0.0,
+                                    finalPositionProvider.getValue(), finalVelocityProvider.getValue(), 0.0);
+      }
    }
 }

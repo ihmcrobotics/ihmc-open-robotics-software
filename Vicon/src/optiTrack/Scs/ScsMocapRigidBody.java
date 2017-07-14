@@ -7,9 +7,9 @@ import optiTrack.MocapRigidBody;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class ScsMocapRigidBody
@@ -18,18 +18,18 @@ public class ScsMocapRigidBody
 
    private ArrayList<MocapMarker> listOfAssociatedMarkers;
    private YoVariableRegistry registry;
-   private DoubleYoVariable xPos;
-   private DoubleYoVariable yPos;
-   private DoubleYoVariable zPos;
-   private DoubleYoVariable qx;
-   private DoubleYoVariable qy;
-   private DoubleYoVariable qz;
-   private DoubleYoVariable qw;
-   private BooleanYoVariable isTracked;
+   private YoDouble xPos;
+   private YoDouble yPos;
+   private YoDouble zPos;
+   private YoDouble qx;
+   private YoDouble qy;
+   private YoDouble qz;
+   private YoDouble qw;
+   private YoBoolean isTracked;
    
-   private DoubleYoVariable xVel;
-   private DoubleYoVariable yVel;
-   private DoubleYoVariable zVel;
+   private YoDouble xVel;
+   private YoDouble yVel;
+   private YoDouble zVel;
    
    private Vector3D lastPosition = new Vector3D();
    private Vector3D currentPosition = new Vector3D();
@@ -40,19 +40,19 @@ public class ScsMocapRigidBody
    public ScsMocapRigidBody(int id, Vector3D position, Quaternion orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
    {
       registry = new YoVariableRegistry("rb_" + id);
-      xPos = new DoubleYoVariable("xPos", registry);
-      yPos = new DoubleYoVariable("yPos", registry);
-      zPos = new DoubleYoVariable("zPos", registry);
-      qx = new DoubleYoVariable("qx", registry);
-      qy = new DoubleYoVariable("qy", registry);
-      qz = new DoubleYoVariable("qz", registry);
-      qw = new DoubleYoVariable("qw", registry);
-      this.isTracked = new BooleanYoVariable("", registry);
+      xPos = new YoDouble("xPos", registry);
+      yPos = new YoDouble("yPos", registry);
+      zPos = new YoDouble("zPos", registry);
+      qx = new YoDouble("qx", registry);
+      qy = new YoDouble("qy", registry);
+      qz = new YoDouble("qz", registry);
+      qw = new YoDouble("qw", registry);
+      this.isTracked = new YoBoolean("", registry);
       
       
-      xVel = new DoubleYoVariable("xVel", registry);
-      yVel = new DoubleYoVariable("yVel", registry);
-      zVel = new DoubleYoVariable("zVel", registry);
+      xVel = new YoDouble("xVel", registry);
+      yVel = new YoDouble("yVel", registry);
+      zVel = new YoDouble("zVel", registry);
 
       this.id = id;
 

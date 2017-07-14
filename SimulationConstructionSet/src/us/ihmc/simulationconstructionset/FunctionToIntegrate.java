@@ -1,7 +1,7 @@
 
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public interface FunctionToIntegrate
@@ -10,5 +10,5 @@ public interface FunctionToIntegrate
 
    public int getVectorSize();
 
-   public DoubleYoVariable[] getOutputVariables();
+   public YoDouble[] getOutputVariables();
 }

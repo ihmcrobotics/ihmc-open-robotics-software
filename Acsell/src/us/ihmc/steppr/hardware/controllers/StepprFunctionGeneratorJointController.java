@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -11,7 +11,7 @@ import us.ihmc.steppr.hardware.StepprJoint;
 public class StepprFunctionGeneratorJointController extends StepprPDJointController
 {
 
-   private final EnumYoVariable<StepprJoint> funcGenJoint = new EnumYoVariable<>("funcGenJoint", registry, StepprJoint.class);
+   private final YoEnum<StepprJoint> funcGenJoint = new YoEnum<>("funcGenJoint", registry, StepprJoint.class);
 
    YoFunctionGenerator funcGen = new YoFunctionGenerator("FuncGen", registry);
 

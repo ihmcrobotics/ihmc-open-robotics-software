@@ -3,11 +3,10 @@ package us.ihmc.exampleSimulations.collisionExample;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionIntegrator;
-
 
 public class CollisionExampleController implements RobotController
 {
@@ -15,14 +14,14 @@ public class CollisionExampleController implements RobotController
 
    YoVariableRegistry registry = new YoVariableRegistry("CollisionExampleController");
 
-   DoubleYoVariable q_ball1_x, q_ball1_y, q_ball1_z, qd_ball1_x, qd_ball1_y, qd_ball1_z, qd_ball1_wx, qd_ball1_wy, qd_ball1_wz;
-   DoubleYoVariable q_ball2_x, q_ball2_y, q_ball2_z, qd_ball2_x, qd_ball2_y, qd_ball2_z, qd_ball2_wx, qd_ball2_wy, qd_ball2_wz;
+   YoDouble q_ball1_x, q_ball1_y, q_ball1_z, qd_ball1_x, qd_ball1_y, qd_ball1_z, qd_ball1_wx, qd_ball1_wy, qd_ball1_wz;
+   YoDouble q_ball2_x, q_ball2_y, q_ball2_z, qd_ball2_x, qd_ball2_y, qd_ball2_z, qd_ball2_wx, qd_ball2_wy, qd_ball2_wz;
 
    private CollisionExampleRobot rob;
    double mu = 0.9, epsilon = 0.9;
 
-   private final DoubleYoVariable collision = new DoubleYoVariable("collision", registry);
-   private final DoubleYoVariable energy = new DoubleYoVariable("energy", registry);
+   private final YoDouble collision = new YoDouble("collision", registry);
+   private final YoDouble energy = new YoDouble("energy", registry);
 
    public CollisionExampleController(CollisionExampleRobot rob)
    {
@@ -34,25 +33,25 @@ public class CollisionExampleController implements RobotController
 
    public void setupControl()
    {
-      q_ball1_x = (DoubleYoVariable) rob.getVariable("q_ball1_x");
-      q_ball1_y = (DoubleYoVariable) rob.getVariable("q_ball1_y");
-      q_ball1_z = (DoubleYoVariable) rob.getVariable("q_ball1_z");
-      qd_ball1_x = (DoubleYoVariable) rob.getVariable("qd_ball1_x");
-      qd_ball1_y = (DoubleYoVariable) rob.getVariable("qd_ball1_y");
-      qd_ball1_z = (DoubleYoVariable) rob.getVariable("qd_ball1_z");
-      qd_ball1_wx = (DoubleYoVariable) rob.getVariable("qd_ball1_wx");
-      qd_ball1_wy = (DoubleYoVariable) rob.getVariable("qd_ball1_wy");
-      qd_ball1_wz = (DoubleYoVariable) rob.getVariable("qd_ball1_wz");
+      q_ball1_x = (YoDouble) rob.getVariable("q_ball1_x");
+      q_ball1_y = (YoDouble) rob.getVariable("q_ball1_y");
+      q_ball1_z = (YoDouble) rob.getVariable("q_ball1_z");
+      qd_ball1_x = (YoDouble) rob.getVariable("qd_ball1_x");
+      qd_ball1_y = (YoDouble) rob.getVariable("qd_ball1_y");
+      qd_ball1_z = (YoDouble) rob.getVariable("qd_ball1_z");
+      qd_ball1_wx = (YoDouble) rob.getVariable("qd_ball1_wx");
+      qd_ball1_wy = (YoDouble) rob.getVariable("qd_ball1_wy");
+      qd_ball1_wz = (YoDouble) rob.getVariable("qd_ball1_wz");
 
-      q_ball2_x = (DoubleYoVariable) rob.getVariable("q_ball2_x");
-      q_ball2_y = (DoubleYoVariable) rob.getVariable("q_ball2_y");
-      q_ball2_z = (DoubleYoVariable) rob.getVariable("q_ball2_z");
-      qd_ball2_x = (DoubleYoVariable) rob.getVariable("qd_ball2_x");
-      qd_ball2_y = (DoubleYoVariable) rob.getVariable("qd_ball2_y");
-      qd_ball2_z = (DoubleYoVariable) rob.getVariable("qd_ball2_z");
-      qd_ball2_wx = (DoubleYoVariable) rob.getVariable("qd_ball2_wx");
-      qd_ball2_wy = (DoubleYoVariable) rob.getVariable("qd_ball2_wy");
-      qd_ball2_wz = (DoubleYoVariable) rob.getVariable("qd_ball2_wz");
+      q_ball2_x = (YoDouble) rob.getVariable("q_ball2_x");
+      q_ball2_y = (YoDouble) rob.getVariable("q_ball2_y");
+      q_ball2_z = (YoDouble) rob.getVariable("q_ball2_z");
+      qd_ball2_x = (YoDouble) rob.getVariable("qd_ball2_x");
+      qd_ball2_y = (YoDouble) rob.getVariable("qd_ball2_y");
+      qd_ball2_z = (YoDouble) rob.getVariable("qd_ball2_z");
+      qd_ball2_wx = (YoDouble) rob.getVariable("qd_ball2_wx");
+      qd_ball2_wy = (YoDouble) rob.getVariable("qd_ball2_wy");
+      qd_ball2_wz = (YoDouble) rob.getVariable("qd_ball2_wz");
 
 
       I1_world.setM00(CollisionExampleRobot.Ixx1);

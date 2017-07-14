@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
@@ -8,7 +9,6 @@ import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TaskNode3D extends TaskNode
@@ -61,7 +61,7 @@ public class TaskNode3D extends TaskNode
       /*
        * set whole body tasks.
        */            
-      Pose desiredPose = endEffectorTrajectory.getEndEffectorPose(getNodeData(0));
+      Pose3D desiredPose = endEffectorTrajectory.getEndEffectorPose(getNodeData(0));
       FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
             
@@ -69,7 +69,7 @@ public class TaskNode3D extends TaskNode
       
       desiredPoseToWorld.changeFrame(midZUpFrame);
       
-      Pose desiredPoseToMidZUp = new Pose(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
+      Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
       nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(endEffectorTrajectory.getAnotherRobotSide());
       

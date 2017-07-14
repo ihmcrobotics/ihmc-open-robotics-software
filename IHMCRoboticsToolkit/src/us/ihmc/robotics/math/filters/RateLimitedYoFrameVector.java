@@ -1,31 +1,31 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateLimitedYoFrameVector extends YoFrameVector
 {
-   private final DoubleYoVariable maxRateVariable;
+   private final YoDouble maxRateVariable;
 
    private final YoFrameVector rawPosition;
-   private final BooleanYoVariable limited;
-   private final BooleanYoVariable hasBeenCalled;
+   private final YoBoolean limited;
+   private final YoBoolean hasBeenCalled;
    private final double dt;
 
    private final FrameVector differenceVector = new FrameVector();
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    YoFrameVector rawPosition)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPosition, rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
@@ -43,18 +43,18 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       setMaxRate(maxRate);
    }
 
-   private RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable maxRate, double dt,
+   private RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                     YoFrameVector rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
-      this.hasBeenCalled = new BooleanYoVariable(namePrefix + "HasBeenCalled" + nameSuffix, registry);
-      this.limited = new BooleanYoVariable(namePrefix + "Limited" + nameSuffix, registry);
+      this.hasBeenCalled = new YoBoolean(namePrefix + "HasBeenCalled" + nameSuffix, registry);
+      this.limited = new YoBoolean(namePrefix + "Limited" + nameSuffix, registry);
 
       if (maxRate != null)
          this.maxRateVariable = maxRate;
       else
-         this.maxRateVariable = new DoubleYoVariable(namePrefix + "MaxRate" + nameSuffix, registry);
+         this.maxRateVariable = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
 
       this.rawPosition = rawPosition;
 

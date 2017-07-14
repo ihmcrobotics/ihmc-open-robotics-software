@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -41,6 +42,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
+      setQueueableCommandVariables(message);
    }
 
    @Override
@@ -48,6 +50,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHeadTrajectoryMessage());
+      setQueueableCommandVariables(message);
    }
 
    @Override
@@ -61,6 +64,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+      setQueueableCommandVariables(other);
    }
 
    @Override
@@ -78,5 +82,23 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public HeadTrajectoryCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
+   }
+
+   @Override
+   public void setQueueableCommandVariables(QueueableMessage<?> message)
+   {
+      // this override is needed to correctly store queuing information into the sub-messages
+      super.setQueueableCommandVariables(message);
+      jointspaceTrajectoryCommand.setQueueableCommandVariables(message);
+      taskspaceTrajectoryCommand.setQueueableCommandVariables(message);
+   }
+
+   @Override
+   public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
+   {
+      // this override is needed to correctly store queuing information into the sub-messages
+      taskspaceTrajectoryCommand.setQueueableCommandVariables(other);
+      jointspaceTrajectoryCommand.setQueueableCommandVariables(other);
+      super.setQueueableCommandVariables(other);
    }
 }

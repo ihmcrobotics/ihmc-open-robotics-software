@@ -7,6 +7,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -371,6 +372,126 @@ public class RotationTools
       angularVelocityIntegrated.set(angularVelocityToIntegrate);
       angularVelocityIntegrated.scale(integrationTime);
       AxisAngleConversion.convertRotationVectorToAxisAngle(angularVelocityIntegrated, orientationResultToPack);
+   }
+
+   /**
+    * Computes the angular velocity vector from the time derivatives of the yaw-pitch-roll angles.
+    * <p>
+    * The resulting velocity is expressed in the local coordinate system described by the
+    * yaw-pitch-roll angles.
+    * </p>
+    * 
+    * @param yaw the current rotation angle about the z-axis.
+    * @param pitch the current rotation angle about the y-axis.
+    * @param roll the current rotation angle about the x-axis.
+    * @param yawRate the rate of change of the yaw angle.
+    * @param pitchRate the rate of change of the pitch angle.
+    * @param rollRate the rate of change of the roll angle.
+    * @param angularVelocityToPack the angular velocity from the yaw-pitch-roll angles rate.
+    *           Modified.
+    */
+   public static void computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(double yaw, double pitch, double roll, double yawRate, double pitchRate,
+                                                                                  double rollRate, Vector3DBasics angularVelocityToPack)
+   {
+      double sRoll = Math.sin(roll);
+      double cRoll = Math.cos(roll);
+      double sPitch = Math.sin(pitch);
+      double cPitch = Math.cos(pitch);
+
+      angularVelocityToPack.setX(rollRate - yawRate * sPitch);
+      angularVelocityToPack.setY(yawRate * cPitch * sRoll + pitchRate * cRoll);
+      angularVelocityToPack.setZ(yawRate * cPitch * cRoll - pitchRate * sRoll);
+   }
+
+   /**
+    * Computes the angular velocity vector from the time derivatives of the yaw-pitch-roll angles.
+    * <p>
+    * The resulting velocity is expressed in the world coordinate system, i.e. the coordinate system
+    * before the yaw-pitch-roll angles.
+    * </p>
+    * 
+    * @param yaw the current rotation angle about the z-axis.
+    * @param pitch the current rotation angle about the y-axis.
+    * @param roll the current rotation angle about the x-axis.
+    * @param yawRate the rate of change of the yaw angle.
+    * @param pitchRate the rate of change of the pitch angle.
+    * @param rollRate the rate of change of the roll angle.
+    * @param angularVelocityToPack the angular velocity from the yaw-pitch-roll angles rate.
+    *           Modified.
+    */
+   public static void computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(double yaw, double pitch, double roll, double yawRate, double pitchRate,
+                                                                                   double rollRate, Vector3DBasics angularVelocityToPack)
+   {
+      double sYaw = Math.sin(yaw);
+      double cYaw = Math.cos(yaw);
+      double sPitch = Math.sin(pitch);
+      double cPitch = Math.cos(pitch);
+
+      angularVelocityToPack.setX(rollRate * cYaw * cPitch - pitchRate * sYaw);
+      angularVelocityToPack.setY(rollRate * sYaw * cPitch + pitchRate * cYaw);
+      angularVelocityToPack.setZ(yawRate - rollRate * sPitch);
+   }
+
+   /**
+    * Computes the time derivative of the yaw-pitch-roll angles from the angular velocity vector.
+    * <p>
+    * The angular velocity vector is assumed to be expressed in the local coordinate system
+    * described by the yaw-pitch-roll angles.
+    * </p>
+    * 
+    * @param angularVelocityInBody the angular velocity vector. Not modified.
+    * @param yaw the current rotation angle about the z-axis.
+    * @param pitch the current rotation angle about the y-axis.
+    * @param roll the current rotation angle about the x-axis.
+    * @param yawPitchRollRatesToPack the rate of change of, in order, the yaw, pitch, and roll
+    *           angles. Modified.
+    */
+   public static void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame(Vector3DReadOnly angularVelocityInBody, double yaw, double pitch, double roll,
+                                                                                  double[] yawPitchRollRatesToPack)
+   {
+      double sRoll = Math.sin(roll);
+      double cRoll = Math.cos(roll);
+      double sPitch = Math.sin(pitch);
+      double cPitch = Math.cos(pitch);
+
+      double yawRate = (angularVelocityInBody.getY() * sRoll + angularVelocityInBody.getZ() * cRoll) / cPitch;
+      double pitchRate = angularVelocityInBody.getY() * cRoll - angularVelocityInBody.getZ() * sRoll;
+      double rollRate = angularVelocityInBody.getX() + sPitch * yawRate;
+
+      yawPitchRollRatesToPack[0] = yawRate;
+      yawPitchRollRatesToPack[1] = pitchRate;
+      yawPitchRollRatesToPack[2] = rollRate;
+   }
+
+   /**
+    * Computes the time derivative of the yaw-pitch-roll angles from the angular velocity vector.
+    * <p>
+    * The angular velocity vector is assumed to be expressed in the world coordinate system, i.e.
+    * the coordinate system before the yaw-pitch-roll angles.
+    * </p>
+    * 
+    * @param angularVelocityInWorld the angular velocity vector. Not modified.
+    * @param yaw the current rotation angle about the z-axis.
+    * @param pitch the current rotation angle about the y-axis.
+    * @param roll the current rotation angle about the x-axis.
+    * @param yawPitchRollRatesToPack the rate of change of, in order, the yaw, pitch, and roll
+    *           angles. Modified.
+    */
+   public static void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame(Vector3DReadOnly angularVelocityInWorld, double yaw, double pitch,
+                                                                                   double roll, double[] yawPitchRollRatesToPack)
+   {
+      double sYaw = Math.sin(yaw);
+      double cYaw = Math.cos(yaw);
+      double sPitch = Math.sin(pitch);
+      double cPitch = Math.cos(pitch);
+
+      double rollRate = (angularVelocityInWorld.getX() * cYaw + angularVelocityInWorld.getY() * sYaw) / cPitch;
+      double pitchRate = angularVelocityInWorld.getY() * cYaw - angularVelocityInWorld.getX() * sYaw;
+      double yawRate = angularVelocityInWorld.getZ() + rollRate * sPitch;
+
+      yawPitchRollRatesToPack[0] = yawRate;
+      yawPitchRollRatesToPack[1] = pitchRate;
+      yawPitchRollRatesToPack[2] = rollRate;
    }
 
    public static boolean quaternionEpsilonEquals(QuaternionReadOnly original, QuaternionReadOnly result, double epsilon)

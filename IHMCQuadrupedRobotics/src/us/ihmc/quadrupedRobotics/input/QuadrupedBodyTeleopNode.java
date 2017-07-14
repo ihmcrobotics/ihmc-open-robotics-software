@@ -22,7 +22,7 @@ import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
@@ -61,7 +61,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       this.device = device;
 
       this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()), null, LogSettings.BEHAVIOR, DT);
-      this.server.setMainRegistry(registry, fullRobotModel, new YoGraphicsListRegistry());
+      this.server.setMainRegistry(registry, fullRobotModel.getElevator(), new YoGraphicsListRegistry());
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);

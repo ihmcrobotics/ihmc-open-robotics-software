@@ -13,9 +13,9 @@ import us.ihmc.exampleSimulations.beetle.planning.FootStepPlanner;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -57,16 +57,16 @@ public class HexapodStepController
    private final SegmentDependentList<RobotSextant, YoFramePoint> currentPositions = new SegmentDependentList<>(RobotSextant.class);
    
    private int legIndex = 0;
-   private BooleanYoVariable replanTrajectories;
+   private YoBoolean replanTrajectories;
 
    private final FootStepPlanner footStepPlanner;
 
-   private final DoubleYoVariable swingTime;
-   private final BooleanYoVariable inStance;
-   private final DoubleYoVariable timeInStance;
-   private final DoubleYoVariable transferTime;
-   private final DoubleYoVariable groundClearance;
-   private final DoubleYoVariable timeInSwing;
+   private final YoDouble swingTime;
+   private final YoBoolean inStance;
+   private final YoDouble timeInStance;
+   private final YoDouble transferTime;
+   private final YoDouble groundClearance;
+   private final YoDouble timeInSwing;
    private final HexapodReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
 
@@ -80,13 +80,13 @@ public class HexapodStepController
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.referenceFrames = referenceFrames;
 
-      replanTrajectories = new BooleanYoVariable(prefix + "replanTrajectories", registry);
-      swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
-      inStance = new BooleanYoVariable(prefix + "InStance", registry);
-      timeInStance = new DoubleYoVariable(prefix + "TimeInStance", registry);
-      transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
-      groundClearance = new DoubleYoVariable(prefix + "GroundClearance", registry);
-      timeInSwing = new DoubleYoVariable(prefix + "TimeInSwing", registry);
+      replanTrajectories = new YoBoolean(prefix + "replanTrajectories", registry);
+      swingTime = new YoDouble(prefix + "SwingTime", registry);
+      inStance = new YoBoolean(prefix + "InStance", registry);
+      timeInStance = new YoDouble(prefix + "TimeInStance", registry);
+      transferTime = new YoDouble(prefix + "TransferTime", registry);
+      groundClearance = new YoDouble(prefix + "GroundClearance", registry);
+      timeInSwing = new YoDouble(prefix + "TimeInSwing", registry);
 
       footStepPlanner = new FootStepPlanner(prefix, fullRobotModel, referenceFrames, yoGraphicsListRegistry, registry);
       transferTime.set(0.01);

@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class TransferEntryCMPMatrix extends DenseMatrix64F
 {
-   private final List<DoubleYoVariable> swingSplitFractions;
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<YoDouble> swingSplitFractions;
+   private final List<YoDouble> transferSplitFractions;
 
-   public TransferEntryCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions)
+   public TransferEntryCMPMatrix(List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions)
    {
       super(4, 1);
 
@@ -24,7 +24,7 @@ public class TransferEntryCMPMatrix extends DenseMatrix64F
    }
 
    public void compute(int numberOfFootstepsToConsider,
-         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         List<YoDouble> singleSupportDurations, List<YoDouble> doubleSupportDurations,
          boolean useTwoCMPs, double omega0)
    {
       zero();

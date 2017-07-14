@@ -3,37 +3,37 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 import java.util.ArrayDeque;
 import java.util.logging.Logger;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DiagnosticTaskExecutor
 {
    private Logger logger;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final IntegerYoVariable currentTaskIndex;
-   private final IntegerYoVariable numberOfTasksRemaining;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable hasAborted;
-   private final DoubleYoVariable timeInCurrentTask;
-   private final DoubleYoVariable switchTime;
-   private final DoubleYoVariable yoTime;
+   private final YoInteger currentTaskIndex;
+   private final YoInteger numberOfTasksRemaining;
+   private final YoBoolean isDone;
+   private final YoBoolean hasAborted;
+   private final YoDouble timeInCurrentTask;
+   private final YoDouble switchTime;
+   private final YoDouble yoTime;
 
    private DiagnosticTask currentTask;
    private final ArrayDeque<DiagnosticTask> taskQueue = new ArrayDeque<>();
 
-   public DiagnosticTaskExecutor(String namePrefix, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public DiagnosticTaskExecutor(String namePrefix, YoDouble yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
-      currentTaskIndex = new IntegerYoVariable(namePrefix + "CurrentTaskIndex", registry);
-      numberOfTasksRemaining = new IntegerYoVariable(namePrefix + "TasksRemaining", registry);
-      isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
-      hasAborted = new BooleanYoVariable(namePrefix + "HasAborted", registry);
-      timeInCurrentTask = new DoubleYoVariable(namePrefix + "TimeInCurrentTask", registry);
-      switchTime = new DoubleYoVariable(namePrefix + "SwitchTime", registry);
+      currentTaskIndex = new YoInteger(namePrefix + "CurrentTaskIndex", registry);
+      numberOfTasksRemaining = new YoInteger(namePrefix + "TasksRemaining", registry);
+      isDone = new YoBoolean(namePrefix + "IsDone", registry);
+      hasAborted = new YoBoolean(namePrefix + "HasAborted", registry);
+      timeInCurrentTask = new YoDouble(namePrefix + "TimeInCurrentTask", registry);
+      switchTime = new YoDouble(namePrefix + "SwitchTime", registry);
       this.yoTime = yoTime;
 
       clear();

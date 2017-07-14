@@ -6,15 +6,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,21 +34,21 @@ public class PushRecoveryControlModule
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final BooleanYoVariable enablePushRecovery;
+   private final YoBoolean enablePushRecovery;
 
-   private final BooleanYoVariable recovering;
-   private final BooleanYoVariable recoveringFromDoubleSupportFall;
-   private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
+   private final YoBoolean recovering;
+   private final YoBoolean recoveringFromDoubleSupportFall;
+   private final YoBoolean footstepWasProjectedInCaptureRegion;
 
-   private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
-   private final BooleanYoVariable isICPOutside;
-   private final BooleanYoVariable isICPErrorTooLarge;
-   private final DoubleYoVariable icpErrorThreshold;
-   private final EnumYoVariable<RobotSide> closestFootToICP;
-   private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
+   private final SideDependentList<YoDouble> distanceICPToFeet = new SideDependentList<>();
+   private final YoBoolean isICPOutside;
+   private final YoBoolean isICPErrorTooLarge;
+   private final YoDouble icpErrorThreshold;
+   private final YoEnum<RobotSide> closestFootToICP;
+   private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
 
-   private final GlitchFilteredBooleanYoVariable isRobotBackToSafeState;
-   private final BooleanYoVariable isCaptureRegionEmpty;
+   private final GlitchFilteredYoBoolean isRobotBackToSafeState;
+   private final YoBoolean isCaptureRegionEmpty;
 
    private final FootstepAdjustor footstepAdjustor;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -77,32 +77,32 @@ public class PushRecoveryControlModule
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       soleFrames = referenceFrames.getSoleFrames();
 
-      enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
+      enablePushRecovery = new YoBoolean("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
       yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
 
-      footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
-      recovering = new BooleanYoVariable("recovering", registry);
-      recoveringFromDoubleSupportFall = new BooleanYoVariable("recoveringFromDoubleSupportFall", registry);
+      footstepWasProjectedInCaptureRegion = new YoBoolean("footstepWasProjectedInCaptureRegion", registry);
+      recovering = new YoBoolean("recovering", registry);
+      recoveringFromDoubleSupportFall = new YoBoolean("recoveringFromDoubleSupportFall", registry);
 
-      isICPOutside = new BooleanYoVariable("isICPOutside", registry);
-      isICPErrorTooLarge = new BooleanYoVariable("isICPErrorTooLarge", registry);
-      icpErrorThreshold = new DoubleYoVariable("icpErrorThreshold", registry);
+      isICPOutside = new YoBoolean("isICPOutside", registry);
+      isICPErrorTooLarge = new YoBoolean("isICPErrorTooLarge", registry);
+      icpErrorThreshold = new YoDouble("icpErrorThreshold", registry);
       icpErrorThreshold.set(0.05);
-      closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
-      swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
+      closestFootToICP = new YoEnum<>("ClosestFootToICP", registry, RobotSide.class, true);
+      swingSideForDoubleSupportRecovery = new YoEnum<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery.set(null);
 
-      isRobotBackToSafeState = new GlitchFilteredBooleanYoVariable("isRobotBackToSafeState", registry, 100);
-      isCaptureRegionEmpty = new BooleanYoVariable("isCaptureRegionEmpty", registry);
+      isRobotBackToSafeState = new GlitchFilteredYoBoolean("isRobotBackToSafeState", registry, 100);
+      isCaptureRegionEmpty = new YoBoolean("isCaptureRegionEmpty", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         DoubleYoVariable distanceICPToFoot = new DoubleYoVariable("DistanceICPTo" + side + "Foot", registry);
+         YoDouble distanceICPToFoot = new YoDouble("DistanceICPTo" + side + "Foot", registry);
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
 

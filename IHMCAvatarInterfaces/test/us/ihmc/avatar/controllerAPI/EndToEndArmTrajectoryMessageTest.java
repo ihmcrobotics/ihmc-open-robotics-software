@@ -25,10 +25,10 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -690,13 +690,13 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJoint joint, double desiredPosition, double desiredVelocity, double epsilon)
    {
-      DoubleYoVariable scsDesiredPosition = findJointDesiredPosition(scs, joint);
+      YoDouble scsDesiredPosition = findJointDesiredPosition(scs, joint);
       assertEquals(desiredPosition, scsDesiredPosition.getDoubleValue(), epsilon);
-      DoubleYoVariable scsDesiredVelocity = findJointDesiredVelocity(scs, joint);
+      YoDouble scsDesiredVelocity = findJointDesiredVelocity(scs, joint);
       assertEquals(desiredVelocity, scsDesiredVelocity.getDoubleValue(), epsilon);
    }
 
-   private static DoubleYoVariable findJointDesiredPosition(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoDouble findJointDesiredPosition(SimulationConstructionSet scs, OneDoFJoint joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -704,7 +704,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return getDoubleYoVariable(scs, variable, namespace);
    }
 
-   private static DoubleYoVariable findJointDesiredVelocity(SimulationConstructionSet scs, OneDoFJoint joint)
+   private static YoDouble findJointDesiredVelocity(SimulationConstructionSet scs, OneDoFJoint joint)
    {
       String jointName = joint.getName();
       String namespace = jointName + "PDController";
@@ -712,9 +712,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return getDoubleYoVariable(scs, variable, namespace);
    }
 
-   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   private static YoDouble getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+      return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
    private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
@@ -731,7 +731,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
    {
       String managerName = bodyName + "Manager";
-      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
    }
 
    public static double[] findControllerDesiredPositions(OneDoFJoint[] armJoints, SimulationConstructionSet scs)
@@ -743,7 +743,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          String subTrajectory = "SubTrajectory";
          String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentValue";
-         DoubleYoVariable q_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         YoDouble q_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
          controllerDesiredJointPositions[i] = q_d.getDoubleValue();
       }
       return controllerDesiredJointPositions;
@@ -758,7 +758,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          String subTrajectory = "SubTrajectory";
          String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentVelocity";
-         DoubleYoVariable qd_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         YoDouble qd_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
          controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();
       }
       return controllerDesiredJointVelocities;
@@ -768,7 +768,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPoints";
-      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    public static SimpleTrajectoryPoint1D findTrajectoryPoint(OneDoFJoint armJoint, int trajectoryPointIndex, SimulationConstructionSet scs)
@@ -779,9 +779,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       String positionName = jointName + "PositionAtWaypoint" + trajectoryPointIndex;
       String velocityName = jointName + "VelocityAtWaypoint" + trajectoryPointIndex;
 
-      double time = ((DoubleYoVariable) scs.getVariable(trajectoryName, timeName)).getDoubleValue();
-      double position = ((DoubleYoVariable) scs.getVariable(trajectoryName, positionName)).getDoubleValue();
-      double velocity = ((DoubleYoVariable) scs.getVariable(trajectoryName, velocityName)).getDoubleValue();
+      double time = ((YoDouble) scs.getVariable(trajectoryName, timeName)).getDoubleValue();
+      double position = ((YoDouble) scs.getVariable(trajectoryName, positionName)).getDoubleValue();
+      double velocity = ((YoDouble) scs.getVariable(trajectoryName, velocityName)).getDoubleValue();
 
       SimpleTrajectoryPoint1D trajectoryPoint = new SimpleTrajectoryPoint1D();
       trajectoryPoint.set(time, position, velocity);
@@ -798,7 +798,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPointsInQueue";
-      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    private ArmTrajectoryMessage generateRandomArmTrajectoryMessage(Random random, int numberOfTrajectoryPoints, double trajectoryTime, RobotSide robotSide,

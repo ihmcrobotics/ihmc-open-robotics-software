@@ -2,22 +2,22 @@ package us.ihmc.simulationConstructionSetTools.joystick;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
 public class BooleanYoVariableJoystickEventListener implements JoystickEventListener
 {
-   private final BooleanYoVariable variable;
+   private final YoBoolean variable;
    private final Component component;
    private final boolean flip;
    private final boolean toggle;
    
-   public BooleanYoVariableJoystickEventListener(BooleanYoVariable variable, Component component, boolean toggle)
+   public BooleanYoVariableJoystickEventListener(YoBoolean variable, Component component, boolean toggle)
    {
       this(variable, component, toggle, false);
    }
 
-   public BooleanYoVariableJoystickEventListener(BooleanYoVariable variable, Component component, boolean toggle,  boolean flip)
+   public BooleanYoVariableJoystickEventListener(YoBoolean variable, Component component, boolean toggle,  boolean flip)
    {
       if (component.isAnalog())
          throw new RuntimeException("component is analog; should be digital (i.e. an on/off button)");

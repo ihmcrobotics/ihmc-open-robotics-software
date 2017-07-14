@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -39,6 +39,7 @@ public class WholeBodyControlCoreToolbox
    private final double controlDT;
    private final double gravityZ;
    private final FloatingInverseDynamicsJoint rootJoint;
+   private final RigidBody rootBody;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -121,7 +122,7 @@ public class WholeBodyControlCoreToolbox
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      RigidBody rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
+      rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
@@ -309,6 +310,11 @@ public class WholeBodyControlCoreToolbox
    public FloatingInverseDynamicsJoint getRootJoint()
    {
       return rootJoint;
+   }
+
+   public RigidBody getRootBody()
+   {
+      return rootBody;
    }
 
    public RigidBody getVirtualModelControlMainBody()

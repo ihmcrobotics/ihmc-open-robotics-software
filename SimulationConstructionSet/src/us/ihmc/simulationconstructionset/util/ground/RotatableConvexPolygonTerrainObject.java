@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -17,15 +18,14 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
    private final ConvexPolygon2D convexPolygon;
-   private final Plane3d topPlane;
-   private final List<Plane3d> sidePlanes = new ArrayList<Plane3d>();
+   private final Plane3D topPlane;
+   private final List<Plane3D> sidePlanes = new ArrayList<Plane3D>();
 
    private final Graphics3DObject linkGraphics;
    private final AppearanceDefinition appearance;
@@ -44,7 +44,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          throw new RuntimeException("Top surface normal must have a positive z-value. Normal.z = " + normal.getZ());
       this.convexPolygon = new ConvexPolygon2D(convexPolygon);
       Point3D centroid = new Point3D(convexPolygon.getCentroid().getX(), convexPolygon.getCentroid().getY(), centroidHeight);
-      this.topPlane = new Plane3d(centroid, normal);
+      this.topPlane = new Plane3D(centroid, normal);
 
       BoundingBox2D polygonBoundingBox = convexPolygon.getBoundingBoxCopy();
       double highest = Double.NEGATIVE_INFINITY;
@@ -105,14 +105,14 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       {
          visualizeNormalVector(topPlane);
 
-         for (Plane3d sidePlane : sidePlanes)
+         for (Plane3D sidePlane : sidePlanes)
          {
             visualizeNormalVector(sidePlane);
          }
       }
    }
 
-   private void visualizeNormalVector(Plane3d plane)
+   private void visualizeNormalVector(Plane3D plane)
    {
       this.linkGraphics.identity();
       linkGraphics.translate(new Vector3D(plane.getPointCopy()));
@@ -151,7 +151,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             centerPoint.add(checkingPoint);
          }
 
-         Plane3d sidePlane = new Plane3d(centerPoint, normal);
+         Plane3D sidePlane = new Plane3D(centerPoint, normal);
          sidePlanes.add(sidePlane);
       }
    }
@@ -192,7 +192,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 //      closestIntersectionAndNormalAt(x, y, z, intersectionToPack, null);
 //   }
 
-   public boolean isInsideTheFace(Plane3d facePlane, ArrayList<Point3D> faceVertices3d, Point3D PointOnThePlane)
+   public boolean isInsideTheFace(Plane3D facePlane, ArrayList<Point3D> faceVertices3d, Point3D PointOnThePlane)
    {
       // Create 2d frame reference for the plane
       // The Origin of the reference frame is facePlane.point
@@ -253,7 +253,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       ArrayList<Point3D> faceVertices = new ArrayList<Point3D>();
       double height;
       Point3D projectedPoint = new Point3D();
-      Plane3d face;
+      Plane3D face;
       int i;
       ArrayList<Boolean> lateralFacesLookingThePoint = new ArrayList<Boolean>();
       boolean topFaceLookingThePoint = false;
@@ -272,7 +272,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       // Check on the lateral surfaces
       for (i = 0; i < sidePlanes.size(); i++)
       {
-         face = new Plane3d(sidePlanes.get(i));
+         face = new Plane3D(sidePlanes.get(i));
          lateralFacesLookingThePoint.add(face.isOnOrAbove(pointToCheck));
 
             projectedPoint.set(face.orthogonalProjectionCopy(pointToCheck));

@@ -9,8 +9,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.GainCalculator;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -27,9 +27,9 @@ public class LockPelvisController implements RobotController
 
    private final ArrayList<Vector3D> initialPositions = new ArrayList<>();
 
-   private final DoubleYoVariable holdPelvisKp = new DoubleYoVariable("holdPelvisKp", registry);
-   private final DoubleYoVariable holdPelvisKv = new DoubleYoVariable("holdPelvisKv", registry);
-   private final DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
+   private final YoDouble holdPelvisKp = new YoDouble("holdPelvisKp", registry);
+   private final YoDouble holdPelvisKv = new YoDouble("holdPelvisKv", registry);
+   private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
    private final double robotMass, robotWeight;
 
    private final FloatingRootJointRobot robot;

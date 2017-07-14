@@ -20,6 +20,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -41,7 +42,6 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWhole
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -111,7 +111,6 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
@@ -156,7 +155,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       setupKinematicsToolboxModule();
    }
    
-   public ArrayList<Graphics3DObject> getXYZAxis(Pose pose)
+   public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose)
    {      
       double axisHeight = 0.1;
       double axisRadius = 0.01;
@@ -219,7 +218,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
       
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
         
       PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20*Math.PI/180);
@@ -242,15 +241,15 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
          Quaternion orientation = new Quaternion();
          handTrajectoryMessageOpening.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
 //         scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
       
       /*
        * Reaching Motion
        */
-      Pose reachingPose = pushDoorTrajectory.getEndEffectorPose(0.0);
-      Point3D reachingPoint = new Point3D(reachingPose.getPoint());
+      Pose3D reachingPose = pushDoorTrajectory.getEndEffectorPose(0.0);
+      Point3D reachingPoint = new Point3D(reachingPose.getPosition());
       Quaternion reachingOrientation = new Quaternion(reachingPose.getOrientation());
       reachingPoint.add(new Point3D(-0.1, 0.15, 0.0));
       reachingOrientation.appendRollRotation(Math.PI*0.5);
@@ -284,7 +283,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
       
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
@@ -309,7 +308,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
       
@@ -371,7 +370,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
       
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
@@ -424,7 +423,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
          if(i%2 == 0)
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
@@ -453,7 +452,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
       
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
@@ -506,7 +505,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
          if(i%2 == 0)
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }

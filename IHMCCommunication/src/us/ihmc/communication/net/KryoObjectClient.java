@@ -135,6 +135,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
       Thread connectionThread = new Thread(new Runnable()
       {
 
+         @Override
          public void run()
          {
             while (!client.isConnected() && !isClosed)

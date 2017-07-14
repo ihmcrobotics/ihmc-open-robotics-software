@@ -7,10 +7,10 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -44,23 +44,23 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable trajectoryInitialized;
+   private final YoBoolean trajectoryInitialized;
    private final TimeInterval trajectoryTimeInterval;
    private final FramePoint copPositionAtCurrentTime;
    private final YoFramePoint yoCopPositionAtCurrentTime;
    private final QuadrantDependentList<FramePoint> solePositionAtCurrentTime;
    private final QuadrantDependentList<ContactState> contactStateAtCurrentTime;
    private final QuadrantDependentList<MutableDouble> contactPressureAtCurrentTime;
-   private final EndDependentList<IntegerYoVariable> numberOfContactPhasesPerEnd;
-   private final EndDependentList<IntegerYoVariable> numberOfPressurePolynomialsPerEnd;
+   private final EndDependentList<YoInteger> numberOfContactPhasesPerEnd;
+   private final EndDependentList<YoInteger> numberOfPressurePolynomialsPerEnd;
    private final EndDependentList<ArrayList<QuadrupedTimedContactPhase>> contactPhasesPerEnd;
    private final EndDependentList<ArrayList<YoTimedPolynomial>> pressurePolynomialsPerEnd;
-   private final DoubleYoVariable copShiftDuration;
+   private final YoDouble copShiftDuration;
 
    public QuadrupedPiecewisePolynomialCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoVariableRegistry parentRegistry)
    {
       int maximumNumberOfTrajectorySegments = 3 * maximumNumberOfContactPhases;
-      trajectoryInitialized = new BooleanYoVariable("copTrajectoryInitialized", registry);
+      trajectoryInitialized = new YoBoolean("copTrajectoryInitialized", registry);
       trajectoryTimeInterval = new TimeInterval();
       copPositionAtCurrentTime = new FramePoint();
       yoCopPositionAtCurrentTime = new YoFramePoint("copPositionAtCurrentTime", ReferenceFrame.getWorldFrame(), registry);
@@ -81,8 +81,8 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       {
          String robotEndPrefix = robotEnd.getCamelCaseNameForStartOfExpression();
          String robotEndModifier = robotEnd.getCamelCaseNameForMiddleOfExpression();
-         numberOfContactPhasesPerEnd.set(robotEnd, new IntegerYoVariable("numberOf" + robotEndModifier + "ContactPhases", registry));
-         numberOfPressurePolynomialsPerEnd.set(robotEnd, new IntegerYoVariable("numberOf" + robotEndModifier + "PressurePolynomials", registry));
+         numberOfContactPhasesPerEnd.set(robotEnd, new YoInteger("numberOf" + robotEndModifier + "ContactPhases", registry));
+         numberOfPressurePolynomialsPerEnd.set(robotEnd, new YoInteger("numberOf" + robotEndModifier + "PressurePolynomials", registry));
          contactPhasesPerEnd.set(robotEnd, new ArrayList<QuadrupedTimedContactPhase>(maximumNumberOfContactPhases));
          pressurePolynomialsPerEnd.set(robotEnd, new ArrayList<YoTimedPolynomial>(maximumNumberOfTrajectorySegments));
          for (int i = 0; i < maximumNumberOfContactPhases; i++)
@@ -90,7 +90,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
          for (int i = 0; i < maximumNumberOfTrajectorySegments; i++)
             pressurePolynomialsPerEnd.get(robotEnd).add(i, new YoTimedPolynomial(robotEndPrefix + "PressureTrajectoryPolynomial" + i, 4, registry));
       }
-      this.copShiftDuration = new DoubleYoVariable("copShiftDuration", registry);
+      this.copShiftDuration = new YoDouble("copShiftDuration", registry);
       this.copShiftDuration.set(copShiftDuration);
 
       if (parentRegistry != null)

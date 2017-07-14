@@ -4,8 +4,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -27,15 +27,15 @@ public class StateEstimatorErrorCalculator
    private final Robot robot;
    private final Joint estimationJoint;
 
-   private final DoubleYoVariable orientationError = new DoubleYoVariable("orientationError", registry);
-   private final DoubleYoVariable angularVelocityError = new DoubleYoVariable("angularVelocityError", registry);
-   private final DoubleYoVariable comXYPositionError = new DoubleYoVariable("comXYPositionError", registry);
-   private final DoubleYoVariable comZPositionError = new DoubleYoVariable("comZPositionError", registry);
-   private final DoubleYoVariable comVelocityError = new DoubleYoVariable("comVelocityError", registry);
+   private final YoDouble orientationError = new YoDouble("orientationError", registry);
+   private final YoDouble angularVelocityError = new YoDouble("angularVelocityError", registry);
+   private final YoDouble comXYPositionError = new YoDouble("comXYPositionError", registry);
+   private final YoDouble comZPositionError = new YoDouble("comZPositionError", registry);
+   private final YoDouble comVelocityError = new YoDouble("comVelocityError", registry);
 
-   private final DoubleYoVariable pelvisXYPositionError = new DoubleYoVariable("pelvisXYPositionError", registry);
-   private final DoubleYoVariable pelvisZPositionError = new DoubleYoVariable("pelvisZPositionError", registry);
-   private final DoubleYoVariable pelvisLinearVelocityError = new DoubleYoVariable("pelvisLinearVelocityError", registry);
+   private final YoDouble pelvisXYPositionError = new YoDouble("pelvisXYPositionError", registry);
+   private final YoDouble pelvisZPositionError = new YoDouble("pelvisZPositionError", registry);
+   private final YoDouble pelvisLinearVelocityError = new YoDouble("pelvisLinearVelocityError", registry);
 
    private final YoFrameQuaternion perfectOrientation = new YoFrameQuaternion("perfectOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector perfectAngularVelocity = new YoFrameVector("perfectAngularVelocity", ReferenceFrame.getWorldFrame(), registry);

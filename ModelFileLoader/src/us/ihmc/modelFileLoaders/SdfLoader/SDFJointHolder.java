@@ -19,9 +19,9 @@ public class SDFJointHolder
    private final SDFJointType type;
    private final Vector3D axisInModelFrame;
    
-   private final boolean hasLimits;
-   private final double upperLimit;
-   private final double lowerLimit;
+   private boolean hasLimits;
+   private double upperLimit;
+   private double lowerLimit;
    
    private final double effortLimit;
    private final double velocityLimit;
@@ -75,19 +75,7 @@ public class SDFJointHolder
          double sdfUpperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
          double sdfLowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
          
-         if (sdfUpperLimit > sdfLowerLimit)
-         {
-            hasLimits = true;
-            upperLimit = sdfUpperLimit;
-            lowerLimit = sdfLowerLimit;
-         }
-         else
-         {
-            hasLimits = true;
-            upperLimit = Double.POSITIVE_INFINITY;
-            lowerLimit = Double.NEGATIVE_INFINITY;
-            PrintTools.debug(DEBUG, this, sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
-         }
+         setLimits(sdfLowerLimit, sdfUpperLimit);
 
          if(sdfJoint.getAxis().getLimit().getVelocity() != null)
          {
@@ -355,5 +343,23 @@ public class SDFJointHolder
    public void addContactSensor(SDFContactSensor contactSensor)
    {
       contactSensors.add(contactSensor);
+   }
+
+   public void setLimits(double lowerLimit, double upperLimit)
+   {
+      if (upperLimit > lowerLimit)
+      {
+         hasLimits = true;
+         this.upperLimit = upperLimit;
+         this.lowerLimit = lowerLimit;
+      }
+      else
+      {
+         hasLimits = false;
+         this.upperLimit = Double.POSITIVE_INFINITY;
+         this.lowerLimit = Double.NEGATIVE_INFINITY;
+         PrintTools.debug(DEBUG, this, getName() + " has invalid joint limits.  LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit
+               + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
+      }
    }
 }

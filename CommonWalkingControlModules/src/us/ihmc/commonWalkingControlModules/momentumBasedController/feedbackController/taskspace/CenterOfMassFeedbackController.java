@@ -13,15 +13,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
@@ -31,7 +32,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final String shortName = "CenterOfMassFBController";
    private final YoVariableRegistry registry = new YoVariableRegistry(shortName);
 
-   private final BooleanYoVariable isEnabled = new BooleanYoVariable("is" + shortName + "Enabled", registry);
+   private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -65,6 +66,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    private final MomentumRateCommand inverseDynamicsOutput = new MomentumRateCommand();
    private final MomentumCommand inverseKinematicsOutput = new MomentumCommand();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
@@ -87,7 +89,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);
 
@@ -145,6 +147,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       inverseDynamicsOutput.set(command.getMomentumRateCommand());
 
       gains.set(command.getGains());
+      command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
 
       command.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
@@ -270,6 +273,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
@@ -300,6 +304,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
@@ -333,6 +338,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 

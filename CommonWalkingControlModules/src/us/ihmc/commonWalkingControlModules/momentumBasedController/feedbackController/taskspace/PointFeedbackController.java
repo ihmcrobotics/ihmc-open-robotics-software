@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -23,6 +23,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -33,7 +34,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoVariableRegistry registry;
 
-   private final BooleanYoVariable isEnabled;
+   private final YoBoolean isEnabled;
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
@@ -71,6 +72,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
@@ -100,11 +102,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
       kp = gains.createProportionalGainMatrix();
       kd = gains.createDerivativeGainMatrix();
       ki = gains.createIntegralGainMatrix();
-      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+      YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, DESIRED, isEnabled);
@@ -167,6 +169,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
@@ -297,6 +300,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
@@ -334,6 +338,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
@@ -374,6 +379,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.limitLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 

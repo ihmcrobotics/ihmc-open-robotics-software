@@ -45,6 +45,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
+      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
    }
 
    /**

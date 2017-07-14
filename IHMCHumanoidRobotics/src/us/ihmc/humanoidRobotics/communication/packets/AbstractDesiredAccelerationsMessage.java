@@ -13,6 +13,9 @@ public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesi
 {
    @RosExportedField(documentation = "Specifies the desired joint accelerations.")
    public double[] desiredJointAccelerations;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    public AbstractDesiredAccelerationsMessage()
    {
@@ -52,6 +55,24 @@ public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesi
    public double getDesiredJointAcceleration(int jointIndex)
    {
       return desiredJointAccelerations[jointIndex];
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override

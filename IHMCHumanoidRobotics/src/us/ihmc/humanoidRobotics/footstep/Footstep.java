@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -21,7 +22,7 @@ public class Footstep
 {
    public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP}
 
-   public static final int maxNumberOfSwingWaypoints = 10;
+   public static final int maxNumberOfSwingWaypoints = 100;
 
    private static int counter = 0;
    private final String id;
@@ -39,6 +40,7 @@ public class Footstep
 
    private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
+   private double swingTrajectoryBlendDuration = 0.0;
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -72,6 +74,7 @@ public class Footstep
       this(footstep.endEffector, footstep.robotSide, footstep.footstepPose, footstep.trustHeight);
       this.trajectoryType = footstep.trajectoryType;
       this.swingHeight = footstep.swingHeight;
+      this.swingTrajectoryBlendDuration = footstep.swingTrajectoryBlendDuration;
    }
 
    public Footstep(RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
@@ -130,6 +133,16 @@ public class Footstep
       this.swingTrajectory.clear();
       for (int i = 0; i < swingTrajectory.size(); i++)
          this.swingTrajectory.add().set(swingTrajectory.get(i));
+   }
+
+   public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
+   {
+      this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
+   }
+
+   public double getSwingTrajectoryBlendDuration()
+   {
+      return swingTrajectoryBlendDuration;
    }
 
    public double getSwingHeight()
@@ -391,7 +404,9 @@ public class Footstep
          }
       }
 
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints;
+      boolean sameBlendDuration = MathTools.epsilonEquals(swingTrajectoryBlendDuration, otherFootstep.swingTrajectoryBlendDuration, epsilon);
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameBlendDuration;
    }
 
    @Override

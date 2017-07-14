@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -40,7 +40,7 @@ public class SimplePendulumRobot extends Robot
    private double fulcrumInitialVelocity = 0.0;
 
    /* Some joint state variables */
-   private DoubleYoVariable tau_fulcrum, q_fulcrum, qd_fulcrum; // Respectively Torque, Position, Velocity
+   private YoDouble tau_fulcrum, q_fulcrum, qd_fulcrum; // Respectively Torque, Position, Velocity
 
    /*
       Define its constructor

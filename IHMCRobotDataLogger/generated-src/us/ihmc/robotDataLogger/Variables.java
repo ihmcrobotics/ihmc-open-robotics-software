@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit LogProperties.idl instead.
 *
 */
-public class Variables implements IDLStruct<Variables>
+public class Variables
 {
     public Variables()
     {
@@ -24,7 +21,7 @@ public class Variables implements IDLStruct<Variables>
         
         
     }
-    @Override
+
     public void set(Variables other)
     {
         	handshakeFileType_ = other.handshakeFileType_;
@@ -144,148 +141,7 @@ public class Variables implements IDLStruct<Variables>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(Variables data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(Variables data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getHandshake().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getData().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getSummary().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIndex().length() + 1;
-
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_c(handshakeFileType_.ordinal());
-
-
-	    if(handshake_.length() <= 255)
-	    cdr.write_type_d(handshake_);else
-	        throw new RuntimeException("handshake field exceeds the maximum length");
-
-	    if(data_.length() <= 255)
-	    cdr.write_type_d(data_);else
-	        throw new RuntimeException("data field exceeds the maximum length");
-
-	    if(summary_.length() <= 255)
-	    cdr.write_type_d(summary_);else
-	        throw new RuntimeException("summary field exceeds the maximum length");
-
-	    if(index_.length() <= 255)
-	    cdr.write_type_d(index_);else
-	        throw new RuntimeException("index field exceeds the maximum length");
-
-	    cdr.write_type_7(timestamped_);
-
-	    cdr.write_type_7(compressed_);
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	handshakeFileType_ = us.ihmc.robotDataLogger.HandshakeFileType.values[cdr.read_type_c()];
-	    	
-
-	    	cdr.read_type_d(handshake_);	
-
-	    	cdr.read_type_d(data_);	
-
-	    	cdr.read_type_d(summary_);	
-
-	    	cdr.read_type_d(index_);	
-
-	    	timestamped_ = cdr.read_type_7();	
-
-	    	compressed_ = cdr.read_type_7();	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_c("handshakeFileType", handshakeFileType_);
-			    
-			    ser.write_type_d("handshake", handshake_);
-			    
-			    ser.write_type_d("data", data_);
-			    
-			    ser.write_type_d("summary", summary_);
-			    
-			    ser.write_type_d("index", index_);
-			    
-			    ser.write_type_7("timestamped", timestamped_);
-			    
-			    ser.write_type_7("compressed", compressed_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			handshakeFileType_ = (us.ihmc.robotDataLogger.HandshakeFileType)ser.read_type_c("handshakeFileType", us.ihmc.robotDataLogger.HandshakeFileType.class);
-	    	
-	    	    
-	    			ser.read_type_d("handshake", handshake_);	
-	    	    
-	    			ser.read_type_d("data", data_);	
-	    	    
-	    			ser.read_type_d("summary", summary_);	
-	    	    
-	    			ser.read_type_d("index", index_);	
-	    	    
-	    			timestamped_ = ser.read_type_7("timestamped");	
-	    	    
-	    			compressed_ = ser.read_type_7("compressed");	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

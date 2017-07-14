@@ -11,13 +11,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UserPelvisOrientationManager extends PelvisOrientationControlState
 {
@@ -32,6 +32,8 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
+   private final FramePose homePose;
+
    public UserPelvisOrientationManager(YoOrientationPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       super(PelvisOrientationControlMode.USER);
@@ -41,7 +43,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFixedFrame = pelvis.getBodyFixedFrame();
       baseFrame = controllerToolbox.getReferenceFrames().getMidFootZUpGroundFrame();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Orientation", pelvis, elevator, elevator, trajectoryFrames, pelvisFixedFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
@@ -49,6 +51,8 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
 
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setPrimaryBase(elevator);
+
+      homePose = new FramePose(baseFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -74,6 +78,12 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    public ReferenceFrame getControlFrame()
    {
       return taskspaceControlState.getControlFrame();
+   }
+
+   @Override
+   public void goToHomeFromCurrentDesired(double trajectoryTime)
+   {
+      taskspaceControlState.goToPoseFromCurrent(homePose, trajectoryTime);
    }
 
    @Override

@@ -22,7 +22,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +57,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
          + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
    public SE3TrajectoryPointMessage[] swingTrajectory = null;
+   @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory blend duration "
+         + " in seconds. If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning "
+         + " the desired blend duration) will be adjusted to account for the initial error between the actual and expected position and orientation of the "
+         + "swing foot. Note that the expectedInitialLocation and expectedInitialOrientation fields must be defined in order to enable trajectory blending.")
+   public double swingTrajectoryBlendDuration = 0.0;
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default swingDuration.")
@@ -65,6 +69,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -113,6 +120,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
       this.orientation.checkIfUnitary();
+
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
          this.predictedContactPoints = null;
@@ -127,6 +135,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       this.trajectoryType = footstepData.trajectoryType;
       this.swingHeight = footstepData.swingHeight;
+      this.swingTrajectoryBlendDuration = footstepData.swingTrajectoryBlendDuration;
 
       if (footstepData.positionWaypoints != null)
       {
@@ -137,6 +146,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = footstepData.swingDuration;
       this.transferDuration = footstepData.transferDuration;
+      this.executionDelayTime = footstepData.executionDelayTime;
    }
 
    @Override
@@ -178,6 +188,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       trajectoryType = footstep.getTrajectoryType();
       swingHeight = footstep.getSwingHeight();
+      swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
       if (footstep.getCustomPositionWaypoints().size() != 0)
       {
@@ -226,6 +237,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return swingHeight;
    }
 
+   public double getSwingTrajectoryBlendDuration()
+   {
+      return swingTrajectoryBlendDuration;
+   }
+
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;
@@ -248,6 +264,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
+   }
+
+   public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
+   {
+      this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2D> predictedContactPoints)
@@ -309,6 +330,24 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double getTransferDuration()
    {
       return transferDuration;
+   }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
    }
 
    @Override
@@ -409,7 +448,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
       sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
 
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings;
+      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
+
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
+            && swingTrajectoryBlendDurationEquals;
    }
 
    @Override
@@ -417,17 +459,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       FootstepDataMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
       // Waypoints if they exist:
       if (positionWaypoints != null)
       {
          for (int i = 0; i < positionWaypoints.length; i++)
-            ret.positionWaypoints[i] = TransformTools.getTransformedPoint(positionWaypoints[i], transform);
+            ret.positionWaypoints[i].applyTransform(transform);
       }
 
       return ret;

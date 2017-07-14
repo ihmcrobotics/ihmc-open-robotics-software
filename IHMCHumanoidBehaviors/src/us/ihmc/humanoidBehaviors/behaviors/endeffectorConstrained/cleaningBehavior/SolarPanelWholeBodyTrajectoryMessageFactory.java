@@ -195,7 +195,7 @@ public class SolarPanelWholeBodyTrajectoryMessageFactory
             
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-            FramePoint tempPoint = new FramePoint(midFeetFrame, cleaningPose.getPose().getPoint());            
+            FramePoint tempPoint = new FramePoint(midFeetFrame, cleaningPose.getPose().getPosition());            
             tempPoint.changeFrame(midFeetFrame);
             
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());

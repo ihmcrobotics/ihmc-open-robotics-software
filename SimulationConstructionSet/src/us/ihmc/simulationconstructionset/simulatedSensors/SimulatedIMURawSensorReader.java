@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
+import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
@@ -43,47 +43,47 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    private final Twist twistInWorldFrame = new Twist();
    private final SpatialAccelerationVector spatialAcceleration;
 
-   protected final DoubleYoVariable perfM00;
-   protected final DoubleYoVariable perfM01;
-   protected final DoubleYoVariable perfM02;
+   protected final YoDouble perfM00;
+   protected final YoDouble perfM01;
+   protected final YoDouble perfM02;
 
-   protected final DoubleYoVariable perfM10;
-   protected final DoubleYoVariable perfM11;
-   protected final DoubleYoVariable perfM12;
+   protected final YoDouble perfM10;
+   protected final YoDouble perfM11;
+   protected final YoDouble perfM12;
 
-   protected final DoubleYoVariable perfM20;
-   protected final DoubleYoVariable perfM21;
-   protected final DoubleYoVariable perfM22;
+   protected final YoDouble perfM20;
+   protected final YoDouble perfM21;
+   protected final YoDouble perfM22;
 
-   protected final DoubleYoVariable perfAccelX;
-   protected final DoubleYoVariable perfAccelY;
-   protected final DoubleYoVariable perfAccelZ;
+   protected final YoDouble perfAccelX;
+   protected final YoDouble perfAccelY;
+   protected final YoDouble perfAccelZ;
 
-   protected final DoubleYoVariable perfGyroX;
-   protected final DoubleYoVariable perfGyroY;
-   protected final DoubleYoVariable perfGyroZ;
+   protected final YoDouble perfGyroX;
+   protected final YoDouble perfGyroY;
+   protected final YoDouble perfGyroZ;
 
-   protected final DoubleYoVariable perfCompassX;
-   protected final DoubleYoVariable perfCompassY;
-   protected final DoubleYoVariable perfCompassZ;
+   protected final YoDouble perfCompassX;
+   protected final YoDouble perfCompassY;
+   protected final YoDouble perfCompassZ;
    
    protected final NoisyYoRotationMatrix rotationMatrix;
 
-   protected final NoisyDoubleYoVariable accelX;
-   protected final NoisyDoubleYoVariable accelY;
-   protected final NoisyDoubleYoVariable accelZ;
+   protected final NoisyYoDouble accelX;
+   protected final NoisyYoDouble accelY;
+   protected final NoisyYoDouble accelZ;
 
-   protected final NoisyDoubleYoVariable gyroX;
-   protected final NoisyDoubleYoVariable gyroY;
-   protected final NoisyDoubleYoVariable gyroZ;
+   protected final NoisyYoDouble gyroX;
+   protected final NoisyYoDouble gyroY;
+   protected final NoisyYoDouble gyroZ;
 
-   protected final NoisyDoubleYoVariable compassX;
-   protected final NoisyDoubleYoVariable compassY;
-   protected final NoisyDoubleYoVariable compassZ;
+   protected final NoisyYoDouble compassX;
+   protected final NoisyYoDouble compassY;
+   protected final NoisyYoDouble compassZ;
    
-   protected final NoisyDoubleYoVariable[] accelList;
-   protected final NoisyDoubleYoVariable[] gyroList;
-   protected final NoisyDoubleYoVariable[] compassList;
+   protected final NoisyYoDouble[] accelList;
+   protected final NoisyYoDouble[] gyroList;
+   protected final NoisyYoDouble[] compassList;
 
    public SimulatedIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame, RigidBody rootBody, SpatialAccelerationVector rootAcceleration)
    {
@@ -102,47 +102,47 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
       spatialAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
 
-      perfM00 = new DoubleYoVariable("perf_imu_m00", registry);
-      perfM01 = new DoubleYoVariable("perf_imu_m01", registry);
-      perfM02 = new DoubleYoVariable("perf_imu_m02", registry);
+      perfM00 = new YoDouble("perf_imu_m00", registry);
+      perfM01 = new YoDouble("perf_imu_m01", registry);
+      perfM02 = new YoDouble("perf_imu_m02", registry);
 
-      perfM10 = new DoubleYoVariable("perf_imu_m10", registry);
-      perfM11 = new DoubleYoVariable("perf_imu_m11", registry);
-      perfM12 = new DoubleYoVariable("perf_imu_m12", registry);
+      perfM10 = new YoDouble("perf_imu_m10", registry);
+      perfM11 = new YoDouble("perf_imu_m11", registry);
+      perfM12 = new YoDouble("perf_imu_m12", registry);
 
-      perfM20 = new DoubleYoVariable("perf_imu_m20", registry);
-      perfM21 = new DoubleYoVariable("perf_imu_m21", registry);
-      perfM22 = new DoubleYoVariable("perf_imu_m22", registry);
+      perfM20 = new YoDouble("perf_imu_m20", registry);
+      perfM21 = new YoDouble("perf_imu_m21", registry);
+      perfM22 = new YoDouble("perf_imu_m22", registry);
 
-      perfAccelX = new DoubleYoVariable("perf_imu_accel_x", registry);
-      perfAccelY = new DoubleYoVariable("perf_imu_accel_y", registry);
-      perfAccelZ = new DoubleYoVariable("perf_imu_accel_z", registry);
+      perfAccelX = new YoDouble("perf_imu_accel_x", registry);
+      perfAccelY = new YoDouble("perf_imu_accel_y", registry);
+      perfAccelZ = new YoDouble("perf_imu_accel_z", registry);
 
-      perfGyroX = new DoubleYoVariable("perf_imu_gyro_x", registry);
-      perfGyroY = new DoubleYoVariable("perf_imu_gyro_y", registry);
-      perfGyroZ = new DoubleYoVariable("perf_imu_gyro_z", registry);
+      perfGyroX = new YoDouble("perf_imu_gyro_x", registry);
+      perfGyroY = new YoDouble("perf_imu_gyro_y", registry);
+      perfGyroZ = new YoDouble("perf_imu_gyro_z", registry);
 
-      perfCompassX = new DoubleYoVariable("perf_imu_compass_x", registry);
-      perfCompassY = new DoubleYoVariable("perf_imu_compass_y", registry);
-      perfCompassZ = new DoubleYoVariable("perf_imu_compass_z", registry);
+      perfCompassX = new YoDouble("perf_imu_compass_x", registry);
+      perfCompassY = new YoDouble("perf_imu_compass_y", registry);
+      perfCompassZ = new YoDouble("perf_imu_compass_z", registry);
       
       rotationMatrix = new NoisyYoRotationMatrix("r_imu", registry);
       
-      accelX = new NoisyDoubleYoVariable("r_imu_accel_x", registry, perfAccelX);
-      accelY = new NoisyDoubleYoVariable("r_imu_accel_y", registry, perfAccelY);
-      accelZ = new NoisyDoubleYoVariable("r_imu_accel_z", registry, perfAccelZ);
+      accelX = new NoisyYoDouble("r_imu_accel_x", registry, perfAccelX);
+      accelY = new NoisyYoDouble("r_imu_accel_y", registry, perfAccelY);
+      accelZ = new NoisyYoDouble("r_imu_accel_z", registry, perfAccelZ);
 
-      gyroX = new NoisyDoubleYoVariable("r_imu_gyro_x", registry, perfGyroX);
-      gyroY = new NoisyDoubleYoVariable("r_imu_gyro_y", registry, perfGyroY);
-      gyroZ = new NoisyDoubleYoVariable("r_imu_gyro_z", registry, perfGyroZ);
+      gyroX = new NoisyYoDouble("r_imu_gyro_x", registry, perfGyroX);
+      gyroY = new NoisyYoDouble("r_imu_gyro_y", registry, perfGyroY);
+      gyroZ = new NoisyYoDouble("r_imu_gyro_z", registry, perfGyroZ);
 
-      compassX = new NoisyDoubleYoVariable("r_imu_compass_x", registry, perfCompassX);
-      compassY = new NoisyDoubleYoVariable("r_imu_compass_y", registry, perfCompassY);
-      compassZ = new NoisyDoubleYoVariable("r_imu_compass_z", registry, perfCompassZ);
+      compassX = new NoisyYoDouble("r_imu_compass_x", registry, perfCompassX);
+      compassY = new NoisyYoDouble("r_imu_compass_y", registry, perfCompassY);
+      compassZ = new NoisyYoDouble("r_imu_compass_z", registry, perfCompassZ);
       
-      accelList = new NoisyDoubleYoVariable[]{accelX, accelY, accelZ};
-      gyroList = new NoisyDoubleYoVariable[]{gyroX, gyroY, gyroZ};
-      compassList = new NoisyDoubleYoVariable[]{compassX, compassY, compassZ};
+      accelList = new NoisyYoDouble[]{accelX, accelY, accelZ};
+      gyroList = new NoisyYoDouble[]{gyroX, gyroY, gyroZ};
+      compassList = new NoisyYoDouble[]{compassX, compassY, compassZ};
    }
 
    @Override

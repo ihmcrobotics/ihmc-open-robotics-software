@@ -1,31 +1,24 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
-
-public class ExportGraphsToFileAction extends AbstractAction
+@SuppressWarnings("serial")
+public class ExportGraphsToFileAction extends SCSAction
 {
-   /**
-    * 
-    */
-   private static final long serialVersionUID = 7076583053729816960L;
    private ExportGraphsToFileConstructor constructor;
 
    public ExportGraphsToFileAction(ExportGraphsToFileConstructor constructor)
    {
-      super("Export Graphs To File");
-      this.constructor = constructor;
+      super("Export Graphs",
+              "icons/ExportGraphs.png",
+              KeyEvent.VK_UNDEFINED,
+              "Export Graphs To File",
+              "Export Graphs To File "
+      );
 
-      String iconFilename = "icons/exportGraph.png";
-      int shortKey = KeyEvent.VK_UNDEFINED;
-      String longDescription = "Export Graphs To File";
-      String shortDescription = "Export Graphs To File";
-      
-      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
+      this.constructor = constructor;
    }
 
    public void closeAndDispose()
@@ -35,9 +28,9 @@ public class ExportGraphsToFileAction extends AbstractAction
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }
-   
+
 }

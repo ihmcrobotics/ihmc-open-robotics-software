@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -35,7 +35,7 @@ public class SCSCollisionDetectorEvaluator
       double halfZ = heightZ/2.0;
 
       Robot robot = new Robot("robot");
-      IntegerYoVariable numberOfCollisions = new IntegerYoVariable("numberOfCollisions", robot.getRobotsYoVariableRegistry());
+      YoInteger numberOfCollisions = new YoInteger("numberOfCollisions", robot.getRobotsYoVariableRegistry());
 
       ArrayList<YoGraphicPosition> pointsOnA = new ArrayList<>();
       ArrayList<YoGraphicPosition> pointsOnB = new ArrayList<>();

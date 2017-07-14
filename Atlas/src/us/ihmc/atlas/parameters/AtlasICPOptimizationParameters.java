@@ -140,6 +140,13 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
+   public boolean useTimingOptimization()
+   {
+      return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useFootstepRegularization()
    {
       return true;

@@ -11,9 +11,9 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -27,18 +27,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFootstepCalculator
 {
-   private final BooleanYoVariable matchSupportFootPlane = new BooleanYoVariable("matchSupportFootPlane", registry);
+   private final YoBoolean matchSupportFootPlane = new YoBoolean("matchSupportFootPlane", registry);
 
-   private final DoubleYoVariable inPlaceWidth = new DoubleYoVariable("inPlaceWidth", registry);
-   private final DoubleYoVariable maxStepLength = new DoubleYoVariable("maxStepLength", registry);
+   private final YoDouble inPlaceWidth = new YoDouble("inPlaceWidth", registry);
+   private final YoDouble maxStepLength = new YoDouble("maxStepLength", registry);
 
-   private final DoubleYoVariable minStepWidth = new DoubleYoVariable("minStepWidth", registry);
-   private final DoubleYoVariable maxStepWidth = new DoubleYoVariable("maxStepWidth", registry);
+   private final YoDouble minStepWidth = new YoDouble("minStepWidth", registry);
+   private final YoDouble maxStepWidth = new YoDouble("maxStepWidth", registry);
 
-   private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
+   private final YoDouble stepPitch = new YoDouble("stepPitch", registry);
 
-   private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
-   private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
+   private final YoDouble velocityMagnitudeInHeading = new YoDouble("velocityMagnitudeInHeading", registry);
+   private final YoDouble velocityMagnitudeToLeftOfHeading = new YoDouble("velocityMagnitudeToLeftOfHeading", registry);
 
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final ReferenceFrame pelvisZUpFrame;
@@ -77,7 +77,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    {
       if (pelvisZUpFrame != null)
       {
-         pelvisOrientation2d.set(pelvisZUpFrame);
+         pelvisOrientation2d.setToZero(pelvisZUpFrame);
          pelvisOrientation2d.changeFrame(worldFrame);
          desiredHeadingControlModule.resetHeadingAngle(pelvisOrientation2d.getYaw());
       }

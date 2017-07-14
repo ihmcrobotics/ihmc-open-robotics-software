@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarDynamicReachabilityCalculatorTest;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -24,8 +25,34 @@ public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachab
                   {
                      return true;
                   }
+
+                  @Override
+                  public double nominalHeightAboveAnkle()
+                  {
+                     return 0.84; // height for straight leg steps
+                  }
+
+                  @Override
+                  public double maximumHeightAboveAnkle()
+                  {
+                     return 0.92; // height for straight leg steps
+                  }
+
+                  @Override
+                  public DynamicReachabilityParameters getDynamicReachabilityParameters()
+                  {
+                     return new DynamicReachabilityParameters()
+                     {
+                        @Override
+                        public double getMaximumDesiredKneeBend()
+                        {
+                           return 0.4;
+                        }
+                     };
+                  }
                };
             }
+
          };
 
       return atlasRobotModel;
@@ -36,7 +63,7 @@ public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachab
       AtlasDynamicReachabilityCalculatorTest test = new AtlasDynamicReachabilityCalculatorTest();
       try
       {
-         test.testForwardWalking();
+         test.testForwardWalkingMedium();
       }
       catch(SimulationExceededMaximumTimeException e)
       {

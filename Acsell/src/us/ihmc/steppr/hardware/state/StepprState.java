@@ -14,8 +14,8 @@ import us.ihmc.acsell.hardware.state.AcsellState;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.PressureSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprAnkle;
@@ -30,9 +30,9 @@ public class StepprState extends AcsellState<StepprActuator, StepprJoint>
    private static final boolean USE_STRAIN_GAUGES_FOR_Z_FORCE = false;
    
    private final StepprUpperBodyOffsetCalculator stepprUpperBodyOffsetCalculator;
-   private final BooleanYoVariable updateOffsets;
+   private final YoBoolean updateOffsets;
    
-   private final BooleanYoVariable tareSensors;
+   private final YoBoolean tareSensors;
    
    private final StrainSensor leftFootStrainGauge; 
    private final StrainSensor rightFootStrainGauge;
@@ -41,8 +41,8 @@ public class StepprState extends AcsellState<StepprActuator, StepprJoint>
    public StepprState(double dt, YoVariableRegistry parentRegistry)
    {
       super("Steppr", dt, AcsellRobot.STEPPR, parentRegistry);
-      updateOffsets = new BooleanYoVariable("updateOffsets", registry);
-      tareSensors = new BooleanYoVariable("tareSensors", registry);
+      updateOffsets = new YoBoolean("updateOffsets", registry);
+      tareSensors = new YoBoolean("tareSensors", registry);
       
       stepprUpperBodyOffsetCalculator = new StepprUpperBodyOffsetCalculator(actuatorStates.get(StepprActuator.TORSO_Z),
             actuatorStates.get(StepprActuator.TORSO_X), actuatorStates.get(StepprActuator.TORSO_Y), actuatorStates.get(StepprActuator.TORSO_Z), xsens, dt,

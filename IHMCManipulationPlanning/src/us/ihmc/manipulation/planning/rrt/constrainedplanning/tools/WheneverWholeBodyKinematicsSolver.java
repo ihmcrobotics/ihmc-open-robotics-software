@@ -27,6 +27,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,14 +43,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -66,6 +62,10 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /*
  * Make sure this class is for testing whole-body inverse kinematics only.
@@ -105,30 +105,30 @@ public class WheneverWholeBodyKinematicsSolver
    private final FeedbackControllerDataReadOnly feedbackControllerDataHolder;
 
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
-   private final DoubleYoVariable solutionQualityOld = new DoubleYoVariable("solutionQualityOld", registry);
-   private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
-   private final SideDependentList<BooleanYoVariable> isFootInSupport = new SideDependentList<>();
+   private final YoDouble solutionQualityOld = new YoDouble("solutionQualityOld", registry);
+   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
+   private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>();
    private final SideDependentList<YoFramePoseUsingQuaternions> initialFootPoses = new SideDependentList<>();
    private final YoFramePoint initialCenterOfMassPosition = new YoFramePoint("initialCenterOfMass", worldFrame, registry);
-   private final BooleanYoVariable holdSupportFootPose = new BooleanYoVariable("holdSupportFootPose", registry);
-   private final BooleanYoVariable holdCenterOfMassXYPosition = new BooleanYoVariable("holdCenterOfMassXYPosition", registry);
-   private final DoubleYoVariable privilegedWeight = new DoubleYoVariable("privilegedWeight", registry);
-   private final DoubleYoVariable privilegedConfigurationGain = new DoubleYoVariable("privilegedConfigurationGain", registry);
-   private final DoubleYoVariable privilegedMaxVelocity = new DoubleYoVariable("privilegedMaxVelocity", registry);
+   private final YoBoolean holdSupportFootPose = new YoBoolean("holdSupportFootPose", registry);
+   private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
+   private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
+   private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
+   private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<>(null);
 
-   private final DoubleYoVariable footWeight = new DoubleYoVariable("footWeight", registry);
-   private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
+   private final YoDouble footWeight = new YoDouble("footWeight", registry);
+   private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
    private final CommandInputManager commandInputManager;
    private int tickCount = 0;
 
-   private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
+   private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
    private final Map<RigidBody, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
    private final Map<RigidBody, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
-   private final IntegerYoVariable numberOfActiveCommands = new IntegerYoVariable("numberOfActiveCommands", registry);
+   private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
    
    private KinematicsToolboxOutputConverter outputConverter;
    
@@ -190,7 +190,7 @@ public class WheneverWholeBodyKinematicsSolver
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new BooleanYoVariable("is" + side + "FootInSupport", registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
       }
    }
@@ -228,9 +228,9 @@ public class WheneverWholeBodyKinematicsSolver
 
    public void populateJointLimitReductionFactors()
    {
-      DoubleYoVariable hipReductionFactor = new DoubleYoVariable("hipLimitReductionFactor", registry);
-      DoubleYoVariable kneeReductionFactor = new DoubleYoVariable("kneeLimitReductionFactor", registry);
-      DoubleYoVariable ankleReductionFactor = new DoubleYoVariable("ankleLimitReductionFactor", registry);
+      YoDouble hipReductionFactor = new YoDouble("hipLimitReductionFactor", registry);
+      YoDouble kneeReductionFactor = new YoDouble("kneeLimitReductionFactor", registry);
+      YoDouble ankleReductionFactor = new YoDouble("ankleLimitReductionFactor", registry);
       hipReductionFactor.set(0.05);
 
       legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);
@@ -613,7 +613,7 @@ public class WheneverWholeBodyKinematicsSolver
       chestFrameOrientation.set(desiredChestFrameOrientation);
    }
    
-   public void setDesiredHandPose(RobotSide robotSide, Pose desiredPoseToMidZUp)
+   public void setDesiredHandPose(RobotSide robotSide, Pose3D desiredPoseToMidZUp)
    {  
       handSelectionMatrices.get(robotSide).clearSelection();
       handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);

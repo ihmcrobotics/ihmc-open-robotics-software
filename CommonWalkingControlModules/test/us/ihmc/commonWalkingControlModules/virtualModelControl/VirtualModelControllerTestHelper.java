@@ -32,8 +32,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -2361,19 +2361,19 @@ public class VirtualModelControllerTestHelper
 
       private final ExternalForcePoint forcePoint;
 
-      private final DoubleYoVariable desiredLinearX;
-      private final DoubleYoVariable desiredLinearY;
-      private final DoubleYoVariable desiredLinearZ;
-      private final DoubleYoVariable currentLinearX;
-      private final DoubleYoVariable currentLinearY;
-      private final DoubleYoVariable currentLinearZ;
+      private final YoDouble desiredLinearX;
+      private final YoDouble desiredLinearY;
+      private final YoDouble desiredLinearZ;
+      private final YoDouble currentLinearX;
+      private final YoDouble currentLinearY;
+      private final YoDouble currentLinearZ;
 
-      private final DoubleYoVariable desiredAngularX;
-      private final DoubleYoVariable desiredAngularY;
-      private final DoubleYoVariable desiredAngularZ;
-      private final DoubleYoVariable currentAngularX;
-      private final DoubleYoVariable currentAngularY;
-      private final DoubleYoVariable currentAngularZ;
+      private final YoDouble desiredAngularX;
+      private final YoDouble desiredAngularY;
+      private final YoDouble desiredAngularZ;
+      private final YoDouble currentAngularX;
+      private final YoDouble currentAngularY;
+      private final YoDouble currentAngularZ;
 
       private final ReferenceFrame handFrame;
       private final FramePose currentPose = new FramePose();
@@ -2407,19 +2407,19 @@ public class VirtualModelControllerTestHelper
 
          registry = new YoVariableRegistry("forcePointController" + suffix);
 
-         desiredLinearX = new DoubleYoVariable("desiredLinearX" + suffix, registry);
-         desiredLinearY = new DoubleYoVariable("desiredLinearY" + suffix, registry);
-         desiredLinearZ = new DoubleYoVariable("desiredLinearZ" + suffix, registry);
-         currentLinearX = new DoubleYoVariable("currentLinearX" + suffix, registry);
-         currentLinearY = new DoubleYoVariable("currentLinearY" + suffix, registry);
-         currentLinearZ = new DoubleYoVariable("currentLinearZ" + suffix, registry);
+         desiredLinearX = new YoDouble("desiredLinearX" + suffix, registry);
+         desiredLinearY = new YoDouble("desiredLinearY" + suffix, registry);
+         desiredLinearZ = new YoDouble("desiredLinearZ" + suffix, registry);
+         currentLinearX = new YoDouble("currentLinearX" + suffix, registry);
+         currentLinearY = new YoDouble("currentLinearY" + suffix, registry);
+         currentLinearZ = new YoDouble("currentLinearZ" + suffix, registry);
 
-         desiredAngularX = new DoubleYoVariable("desiredAngularX" + suffix, registry);
-         desiredAngularY = new DoubleYoVariable("desiredAngularY" + suffix, registry);
-         desiredAngularZ = new DoubleYoVariable("desiredAngularZ" + suffix, registry);
-         currentAngularX = new DoubleYoVariable("currentAngularX" + suffix, registry);
-         currentAngularY = new DoubleYoVariable("currentAngularY" + suffix, registry);
-         currentAngularZ = new DoubleYoVariable("currentAngularZ" + suffix, registry);
+         desiredAngularX = new YoDouble("desiredAngularX" + suffix, registry);
+         desiredAngularY = new YoDouble("desiredAngularY" + suffix, registry);
+         desiredAngularZ = new YoDouble("desiredAngularZ" + suffix, registry);
+         currentAngularX = new YoDouble("currentAngularX" + suffix, registry);
+         currentAngularY = new YoDouble("currentAngularY" + suffix, registry);
+         currentAngularZ = new YoDouble("currentAngularZ" + suffix, registry);
 
          contactForce = new YoFrameVector("contactForce" + suffix, worldFrame, registry);
          contactTorque = new YoFrameVector("contactTorque" + suffix, worldFrame, registry);
@@ -2611,7 +2611,7 @@ public class VirtualModelControllerTestHelper
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
 
-      private final Map<InverseDynamicsJoint, DoubleYoVariable> yoJointTorques = new HashMap<>();
+      private final Map<InverseDynamicsJoint, YoDouble> yoJointTorques = new HashMap<>();
 
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
       private final FullRobotModel controllerModel;
@@ -2642,7 +2642,7 @@ public class VirtualModelControllerTestHelper
          this.yoDesiredWrenches = yoDesiredWrenches;
 
          for (InverseDynamicsJoint joint : controlledJoints)
-            yoJointTorques.put(joint, new DoubleYoVariable(joint.getName() + "solutionTorque", registry));
+            yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (ForcePointController forcePointController : forcePointControllers)
             registry.addChild(forcePointController.getYoVariableRegistry());

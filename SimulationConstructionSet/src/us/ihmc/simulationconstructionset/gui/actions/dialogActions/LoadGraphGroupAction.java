@@ -1,25 +1,25 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import java.awt.event.ActionEvent;
+import us.ihmc.simulationconstructionset.gui.SCSAction;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogConstructor;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogConstructor;
-
-public class LoadGraphGroupAction extends AbstractAction
+@SuppressWarnings("serial")
+public class LoadGraphGroupAction extends SCSAction
 {
-   private static final long serialVersionUID = 5813345490164040993L;
    private LoadGraphGroupDialogConstructor constructor;
    
    public LoadGraphGroupAction(LoadGraphGroupDialogConstructor constructor)
    {
-      super("Load Graph Group...");
+      super("Load Graph Group...",
+              "",
+              KeyEvent.VK_UNDEFINED,
+              "Load Graphs",
+              "Load Graph Group"
+      );
+
       this.constructor = constructor;
-      
-      this.putValue(Action.LONG_DESCRIPTION, "Load Graph Group");
-      this.putValue(Action.SHORT_DESCRIPTION, "load graphs");
    }
 
    public void setCurrentDirectory(File directory)
@@ -33,14 +33,14 @@ public class LoadGraphGroupAction extends AbstractAction
    }
 
    @Override
-   public void actionPerformed(ActionEvent e)
+   public void doAction()
    {
       constructor.constructDialog();
    }
 
+   // TODO: never used?
    public void loadGUIConfigurationFile(File file)
    {
       constructor.loadGraphGroupFile(file);
-      
    }
 }

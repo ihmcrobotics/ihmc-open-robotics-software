@@ -9,9 +9,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
@@ -26,9 +26,8 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -146,21 +145,21 @@ public class QuadrupedControllerInputProviderTest
       QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(null, registry);
 
-      DoubleYoVariable yoComPositionInputX = (DoubleYoVariable) registry.getVariable("comPositionInputX");
-      DoubleYoVariable yoComPositionInputY = (DoubleYoVariable) registry.getVariable("comPositionInputY");
-      DoubleYoVariable yoComPositionInputZ = (DoubleYoVariable) registry.getVariable("comPositionInputZ");
-      DoubleYoVariable yoComVelocityInputX = (DoubleYoVariable) registry.getVariable("comVelocityInputX");
-      DoubleYoVariable yoComVelocityInputY = (DoubleYoVariable) registry.getVariable("comVelocityInputY");
-      DoubleYoVariable yoComVelocityInputZ = (DoubleYoVariable) registry.getVariable("comVelocityInputZ");
-      DoubleYoVariable yoBodyOrientationInputYaw = (DoubleYoVariable) registry.getVariable("bodyOrientationInputYaw");
-      DoubleYoVariable yoBodyOrientationInputPitch = (DoubleYoVariable) registry.getVariable("bodyOrientationInputPitch");
-      DoubleYoVariable yoBodyOrientationInputRoll = (DoubleYoVariable) registry.getVariable("bodyOrientationInputRoll");
-      DoubleYoVariable yoBodyAngularRateInputX = (DoubleYoVariable) registry.getVariable("bodyAngularRateInputX");
-      DoubleYoVariable yoBodyAngularRateInputY = (DoubleYoVariable) registry.getVariable("bodyAngularRateInputY");
-      DoubleYoVariable yoBodyAngularRateInputZ = (DoubleYoVariable) registry.getVariable("bodyAngularRateInputZ");
-      DoubleYoVariable yoPlanarVelocityInputX = (DoubleYoVariable) registry.getVariable("planarVelocityInputX");
-      DoubleYoVariable yoPlanarVelocityInputY = (DoubleYoVariable) registry.getVariable("planarVelocityInputY");
-      DoubleYoVariable yoPlanarVelocityInputZ = (DoubleYoVariable) registry.getVariable("planarVelocityInputZ");
+      YoDouble yoComPositionInputX = (YoDouble) registry.getVariable("comPositionInputX");
+      YoDouble yoComPositionInputY = (YoDouble) registry.getVariable("comPositionInputY");
+      YoDouble yoComPositionInputZ = (YoDouble) registry.getVariable("comPositionInputZ");
+      YoDouble yoComVelocityInputX = (YoDouble) registry.getVariable("comVelocityInputX");
+      YoDouble yoComVelocityInputY = (YoDouble) registry.getVariable("comVelocityInputY");
+      YoDouble yoComVelocityInputZ = (YoDouble) registry.getVariable("comVelocityInputZ");
+      YoDouble yoBodyOrientationInputYaw = (YoDouble) registry.getVariable("bodyOrientationInputYaw");
+      YoDouble yoBodyOrientationInputPitch = (YoDouble) registry.getVariable("bodyOrientationInputPitch");
+      YoDouble yoBodyOrientationInputRoll = (YoDouble) registry.getVariable("bodyOrientationInputRoll");
+      YoDouble yoBodyAngularRateInputX = (YoDouble) registry.getVariable("bodyAngularRateInputX");
+      YoDouble yoBodyAngularRateInputY = (YoDouble) registry.getVariable("bodyAngularRateInputY");
+      YoDouble yoBodyAngularRateInputZ = (YoDouble) registry.getVariable("bodyAngularRateInputZ");
+      YoDouble yoPlanarVelocityInputX = (YoDouble) registry.getVariable("planarVelocityInputX");
+      YoDouble yoPlanarVelocityInputY = (YoDouble) registry.getVariable("planarVelocityInputY");
+      YoDouble yoPlanarVelocityInputZ = (YoDouble) registry.getVariable("planarVelocityInputZ");
       
       
       yoComPositionInputX.set(randomComPosition.getX());
@@ -281,12 +280,12 @@ public class QuadrupedControllerInputProviderTest
       }
 
       @Override
-      public void close()
+      public void disconnect()
       {
       }
 
       @Override
-      public void attachStateListener(NetStateListener stateListener)
+      public void attachStateListener(ConnectionStateListener stateListener)
       {
       }
 

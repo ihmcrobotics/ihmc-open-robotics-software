@@ -3,24 +3,25 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -28,11 +29,15 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControlState
 {
@@ -49,9 +54,21 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    /** handles the trajectory and the queuing**/
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    
+   private final RigidBody pelvis;
+   private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
-   private final DoubleYoVariable defaultHeightAboveAnkleForHome;
+   private final YoDouble defaultHeightAboveAnkleForHome;
    private final FramePose tempPose = new FramePose();
+   private final Point3D tempPoint = new Point3D();
+   private final RigidBodyTransform controlFrame = new RigidBodyTransform();
+   
+   private final PDController linearMomentumZPDController;
+   private final YoSE3OffsetFrame yoControlFrame;
+   
+   private final YoDouble currentPelvisHeightInWorld;
+   private final YoDouble desiredPelvisHeightInWorld;
+   private final YoDouble desiredPelvisVelocityInWorld;
+   private final YoDouble currentPelvisVelocityInWorld;
    
    public PelvisHeightControlState(YoPositionPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -59,22 +76,32 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       super(PelvisHeightControlMode.USER);
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
+      pelvis = fullRobotModel.getPelvis();
+      pelvisFrame = referenceFrames.getPelvisFrame();
       RigidBody elevator = fullRobotModel.getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
-      baseFrame = referenceFrames.getMidFootZUpGroundFrame();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      baseFrame = elevator.getBodyFixedFrame();//referenceFrames.getMidFootZUpGroundFrame();
+      YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       
+      linearMomentumZPDController = new PDController("pelvisHeightControlState_linearMomentumZPDController", registry);
+      linearMomentumZPDController.setProportionalGain(gains.getProportionalGains()[2]);
+      linearMomentumZPDController.setDerivativeGain(gains.getDerivativeGains()[2]);
+      yoControlFrame =  new YoSE3OffsetFrame(pelvis.getName() + "HeightBodyFixedControlFrame", pelvis.getBodyFixedFrame(), registry);
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
       taskspaceControlState.setGains(null, gains);
       
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
       double soleToAnkleZHeight = computeSoleToAnkleMeanZHeight(controllerToolbox, fullRobotModel);
-      defaultHeightAboveAnkleForHome = new DoubleYoVariable(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
+      defaultHeightAboveAnkleForHome = new YoDouble(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
       defaultHeightAboveAnkleForHome.set(walkingControllerParameters.nominalHeightAboveAnkle() + soleToAnkleZHeight);
+      
+      
+      currentPelvisHeightInWorld = new YoDouble("currentPelvisHeightInWorld", registry);
+      desiredPelvisHeightInWorld = new YoDouble("desiredPelvisHeightInWorld", registry);  
+      desiredPelvisVelocityInWorld = new YoDouble("desiredPelvisVelocityInWorld", registry);
+      currentPelvisVelocityInWorld = new YoDouble("currentPelvisVelocityInWorld", registry);
       
       parentRegistry.addChild(registry);
    }
@@ -116,6 +143,29 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       taskspaceControlState.doAction();
    }
    
+   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose initialPose)
+   {
+      if (command.useCustomControlFrame())
+      {
+         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         taskspaceControlState.setControlFramePose(controlFrame);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+      
+      //convert the initial point to be consistent with the control frame
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(pelvisFrame);
+      tempPose.changeFrame(controlFrame);
+      tempPose.getPosition(tempPoint);
+      
+      initialPose.prependTranslation(tempPoint);
+      
+      return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
+   }
+   
    /**
     * check that the command is valid and queue the trajectory
     * @param command
@@ -124,12 +174,6 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     */
    public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command, FramePose initialPose)
    {
-      if (command.useCustomControlFrame())
-      {
-         PrintTools.warn("Can not use custom control frame with pelvis orientation.");
-         return false;
-      }
-      
       // We have to remove the orientation and xy components of the command, and adjust the selection matrix;
       // We do this to break up the pelvis control, it reduces the complexity of each manager at the expense of these little hacks.
       tempPelvisTrajectoryCommand.set(command);
@@ -178,7 +222,30 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       linearZWeightMatrix.setWeightFrame(ReferenceFrame.getWorldFrame());
       tempPelvisTrajectoryCommand.setWeightMatrix(linearZWeightMatrix);
       
-      return taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose);
+      if (command.useCustomControlFrame())
+      {
+         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         taskspaceControlState.setControlFramePose(controlFrame);
+      }
+      else
+      {
+         taskspaceControlState.setDefaultControlFrame();
+      }
+      
+      //convert the initial point to be consistent with the control frame
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(pelvisFrame);
+      tempPose.changeFrame(controlFrame);
+      tempPose.getPosition(tempPoint);
+      
+      initialPose.prependTranslation(tempPoint);
+      
+      if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose))
+      {
+         taskspaceControlState.clear();
+         return false;
+      }
+      return true;
    }
    
    /**
@@ -194,10 +261,17 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
     */
    @Override
-   public void getCurrentDesiredHeight(FramePoint positionToPack)
+   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getPositionIncludingFrame(positionToPack);
+      
+      ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
+      tempPose.setToZero(controlFrame);
+      tempPose.changeFrame(pelvisFrame);
+      tempPose.getPosition(tempPoint);
+      
+      positionToPack.add(tempPoint);
    }
 
    @Override
@@ -214,6 +288,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       tempPose.setToZero(baseFrame);
       tempPose.setZ(defaultHeightAboveAnkleForHome.getDoubleValue());
+      taskspaceControlState.setDefaultControlFrame();
       taskspaceControlState.goToPoseFromCurrent(tempPose, trajectoryTime);
    }
 
@@ -229,24 +304,14 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       }
    }
 
-   /**
-    * Returns 0.0, we don't compute the acceleration here, we send the command to a feedback controller to do it for us
-    */
-   @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
-         FeetManager feetManager)
-   {
-      //Consider using the previous desired linear momentum z to be more consistent with the CenterOfMassheightManager
-      return 0.0;
-   }
-   
-   
    private final FramePoint controlPosition = new FramePoint();
    private final FrameOrientation controlOrientation = new FrameOrientation();
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredLinearVelocity = new FrameVector();
    private final FrameVector feedForwardLinearAcceleration = new FrameVector();
-   
+   private final FrameVector currentLinearVelocity = new FrameVector();
+   private final Twist twist = new Twist();
+
    /**
     * returns the point feedback command for the z height of the pelvis
     */
@@ -259,15 +324,45 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
 
       SpatialAccelerationCommand spcatialAccelerationCommand = spatialFeedbackControlCommand.getSpatialAccelerationCommand();
       pointFeedbackCommand.getSpatialAccelerationCommand().set(spcatialAccelerationCommand);
-      
+      pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.set(spatialFeedbackControlCommand.getBase(), spatialFeedbackControlCommand.getEndEffector());
       spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
+      pointFeedbackCommand.setGainsFrame(baseFrame);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
       
       return pointFeedbackCommand;
+//      return null;
+   }
+
+   /**
+    * Returns 0.0, we don't compute the acceleration here, we send the command to a feedback controller to do it for us
+    */
+   @Override
+   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+         FeetManager feetManager)
+   {
+      SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
+      controlPosition.changeFrame(pelvis.getBodyFixedFrame());
+      
+      yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
+      yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
+      twist.getLinearPart(currentLinearVelocity);
+      currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      currentPelvisHeightInWorld.set(controlPosition.getZ());  
+      desiredPelvisHeightInWorld.set(desiredPosition.getZ());  
+      desiredPelvisVelocityInWorld.set(desiredLinearVelocity.getZ());
+      currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
+   
+      double acceleration = linearMomentumZPDController.compute(controlPosition.getZ(), desiredPosition.getZ(), currentLinearVelocity.getZ(), desiredLinearVelocity.getZ());
+      return acceleration;
    }
 }

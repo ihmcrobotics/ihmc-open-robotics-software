@@ -19,6 +19,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -43,7 +44,6 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DoorEnvironment;
@@ -70,7 +70,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
    private void setUpSolarPanel()
    {
-      Pose poseSolarPanel = new Pose();
+      Pose3D poseSolarPanel = new Pose3D();
       Quaternion quaternionSolarPanel = new Quaternion();
       poseSolarPanel.setPosition(0.7, -0.2, 1.03);
       quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
@@ -117,7 +117,6 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
@@ -141,7 +140,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       setupKinematicsToolboxModule();
    }
    
-   public ArrayList<Graphics3DObject> getXYZAxis(Pose pose)
+   public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose)
    {      
       double axisHeight = 0.1;
       double axisRadius = 0.01;
@@ -182,10 +181,10 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       return ret;
    }
    
-   private Graphics3DObject getGraphicsSphere(Pose pose)
+   private Graphics3DObject getGraphicsSphere(Pose3D pose)
    {  
       Graphics3DObject graphicsSphere = new Graphics3DObject();
-      Point3D translation1 = new Point3D(pose.getPoint());
+      Point3D translation1 = new Point3D(pose.getPosition());
       graphicsSphere.translate(translation1);
       graphicsSphere.addSphere(0.02, YoAppearance.DarkGray());
       return graphicsSphere;
@@ -224,10 +223,10 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
    
       drcBehaviorTestHelper.updateRobotModel();
        
-      Pose pose1 = new Pose(new Point3D(1.0, 1.0, 1.0), new Quaternion());
-      Pose pose2 = new Pose(new Point3D(1.0, 2.0, 1.0), new Quaternion());
-      Pose pose3 = new Pose(new Point3D(1.0, 2.0, 2.0), new Quaternion());
-      Pose pose4 = new Pose(new Point3D(2.0, 2.0, 2.0), new Quaternion());
+      Pose3D pose1 = new Pose3D(new Point3D(1.0, 1.0, 1.0), new Quaternion());
+      Pose3D pose2 = new Pose3D(new Point3D(1.0, 2.0, 1.0), new Quaternion());
+      Pose3D pose3 = new Pose3D(new Point3D(1.0, 2.0, 2.0), new Quaternion());
+      Pose3D pose4 = new Pose3D(new Point3D(2.0, 2.0, 2.0), new Quaternion());
        
       EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
        
@@ -273,7 +272,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       // Desired
       Quaternion desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose3D(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
       wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
       
       Quaternion desiredChestOrientation = new Quaternion();
@@ -296,7 +295,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       // Desired
       desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.5, -0.6, 1.1), desiredHandOrientation));
+      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose3D(new Point3D(0.5, -0.6, 1.1), desiredHandOrientation));
       wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
       
       desiredChestOrientation = new Quaternion();
@@ -319,7 +318,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       // Desired
       desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+      wbikTester.setDesiredHandPose(RobotSide.RIGHT, new Pose3D(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
       wbikTester.setHandSelectionMatrixFree(RobotSide.LEFT);
       
       desiredChestOrientation = new Quaternion();
@@ -400,10 +399,10 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
        * Define end effector trajectory.  
        */
       
-      Pose pose1 = new Pose(new Point3D(0.6, -0.4, 0.9), new Quaternion());
-      Pose pose2 = new Pose(new Point3D(0.6, -0.5, 0.9), new Quaternion());
-      Pose pose3 = new Pose(new Point3D(0.6, -0.5, 1.1), new Quaternion());
-      Pose pose4 = new Pose(new Point3D(0.6, -0.4, 1.1), new Quaternion());
+      Pose3D pose1 = new Pose3D(new Point3D(0.6, -0.4, 0.9), new Quaternion());
+      Pose3D pose2 = new Pose3D(new Point3D(0.6, -0.5, 0.9), new Quaternion());
+      Pose3D pose3 = new Pose3D(new Point3D(0.6, -0.5, 1.1), new Quaternion());
+      Pose3D pose4 = new Pose3D(new Point3D(0.6, -0.4, 1.1), new Quaternion());
       
       EndEffectorLinearTrajectory constrainedEndEffectorTrajectory = new EndEffectorLinearTrajectory();
       
@@ -465,7 +464,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       Point3D pushDoorLocation = new Point3D(0.5, -0.6, 0.0);
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(Math.PI/180*10);
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose3D(pushDoorLocation, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, 0.8, 0.9);
       PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -30*Math.PI/180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
@@ -501,7 +500,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       wbikTester.holdCurrentTrajectoryMessages();
       
       // Desired
-      Pose desiredPose = pushDoorPose5.getEndEffectorPose();
+      Pose3D desiredPose = pushDoorPose5.getEndEffectorPose();
       FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getWorldFrame(), desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getWorldFrame(), desiredPose.getOrientation());
             
@@ -509,7 +508,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       desiredPoseToWorld.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
       
-      Pose desiredPoseToMidZUp = new Pose(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
+      Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
       
       wbikTester.setDesiredHandPose(RobotSide.LEFT, desiredPoseToMidZUp);
       wbikTester.setHandSelectionMatrixFree(RobotSide.RIGHT);
@@ -541,7 +540,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       
       desiredPoseToWorld.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
       
-      desiredPoseToMidZUp = new Pose(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
+      desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
       wbikTester.setDesiredHandPose(RobotSide.LEFT, desiredPoseToMidZUp);
       wbikTester.setHandSelectionMatrixFree(RobotSide.RIGHT);
                   
@@ -574,7 +573,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       Point3D pushDoorLocation = new Point3D(0.5, -0.6, 0.0);
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(Math.PI/180*0);
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose3D(pushDoorLocation, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, 1.0, 0.9);
       
       PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -30*Math.PI/180);
@@ -607,7 +606,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
             
@@ -661,7 +660,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       Point3D pushDoorLocation = new Point3D(0.5, -0.4, 0.0);
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(Math.PI/180*0);
-      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose(pushDoorLocation, pushDoorOrientation));
+      FramePose pushDoorFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), new Pose3D(pushDoorLocation, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, 0.83, 0.9);
       
       PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20*Math.PI/180);
@@ -684,7 +683,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
          
-         Pose pose = new Pose(point, orientation);
+         Pose3D pose = new Pose3D(point, orientation);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
       

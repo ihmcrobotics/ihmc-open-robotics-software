@@ -17,8 +17,8 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -38,7 +38,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    private static final boolean DEBUG = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DoubleYoVariable yoTime;
+   private final YoDouble yoTime;
    private final ReferenceFrame midZupFrame;
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
@@ -58,7 +58,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(behaviorCommunicationBridge);
@@ -189,7 +189,7 @@ public class KickBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             FramePoint2d ballToKickLocation = new FramePoint2d();
-            getoffsetPoint().getPosition(ballToKickLocation);
+            getoffsetPoint().getPositionIncludingFrame(ballToKickLocation);
             kickBehavior.setObjectToKickPoint(ballToKickLocation);
          }
       };

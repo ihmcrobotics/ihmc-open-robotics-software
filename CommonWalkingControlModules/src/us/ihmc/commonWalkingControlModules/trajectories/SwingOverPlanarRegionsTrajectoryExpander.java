@@ -7,14 +7,15 @@ import java.util.Optional;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -39,13 +39,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
-   private final IntegerYoVariable numberOfCheckpoints;
+   private final YoInteger numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
-   private final DoubleYoVariable minimumClearance;
-   private final DoubleYoVariable incrementalAdjustmentDistance;
-   private final DoubleYoVariable maximumAdjustmentDistance;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
-   private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
+   private final YoDouble minimumClearance;
+   private final YoDouble incrementalAdjustmentDistance;
+   private final YoDouble maximumAdjustmentDistance;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
+   private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
    private final YoFramePoint trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
@@ -62,12 +62,15 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final TransformReferenceFrame planarRegionReferenceFrame;
    private final FramePoint midGroundPoint;
    private final Vector3D waypointAdjustmentVector;
-   private final Plane3d waypointAdjustmentPlane;
-   private final Plane3d swingFloorPlane;
-   private final Plane3d swingStartToeFacingSwingEndPlane;
-   private final Plane3d swingEndHeelFacingSwingStartPlane;
+   private final Plane3D waypointAdjustmentPlane;
+   private final Plane3D swingFloorPlane;
+   private final Plane3D swingStartToeFacingSwingEndPlane;
+   private final Plane3D swingEndHeelFacingSwingStartPlane;
    private final AxisAngle axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
+
+   private final Point3D tempPointOnPlane = new Point3D();
+   private final Vector3D tempPlaneNormal = new Vector3D();
 
    // Boilerplate variables
    private final FrameVector initialVelocity;
@@ -104,14 +107,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;
       System.out.println("soltotoelength: " + soleToToeLength);
 
-      numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
+      numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
-      minimumClearance = new DoubleYoVariable(namePrefix + "MinimumClearance", parentRegistry);
-      incrementalAdjustmentDistance = new DoubleYoVariable(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
-      maximumAdjustmentDistance = new DoubleYoVariable(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
-      status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
+      minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
+      incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
+      maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
+      status = new YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
                                                                                    SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
-      mostSevereCollisionType = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
+      mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
                                                                                                   SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
       trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
@@ -130,10 +133,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       planarRegionReferenceFrame = new TransformReferenceFrame("planarRegionReferenceFrame", WORLD);
       midGroundPoint = new FramePoint();
       waypointAdjustmentVector = new Vector3D();
-      waypointAdjustmentPlane = new Plane3d();
-      swingFloorPlane = new Plane3d();
-      swingStartToeFacingSwingEndPlane = new Plane3d();
-      swingEndHeelFacingSwingStartPlane = new Plane3d();
+      waypointAdjustmentPlane = new Plane3D();
+      swingFloorPlane = new Plane3D();
+      swingStartToeFacingSwingEndPlane = new Plane3D();
+      swingEndHeelFacingSwingStartPlane = new Plane3D();
       axisAngle = new AxisAngle();
       rigidBodyTransform = new RigidBodyTransform();
 
@@ -185,28 +188,24 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       midGroundPoint.scale(0.5);
 
-      waypointAdjustmentPlane.setPoints(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
+      waypointAdjustmentPlane.set(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
       rigidBodyTransform.setRotation(axisAngle);
-      swingFloorPlane.setPoint(swingStartPosition.getPoint());
-      swingFloorPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
-      rigidBodyTransform.transform(swingFloorPlane.getNormal());
-      swingFloorPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      rigidBodyTransform.transform(tempPlaneNormal);
+      tempPlaneNormal.normalize();
+      swingFloorPlane.set(swingStartPosition.getPoint(), tempPlaneNormal);
 
-      swingStartToeFacingSwingEndPlane.setPoint(swingStartPosition.getPoint());
-      swingStartToeFacingSwingEndPlane.getNormal().sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
-      swingStartToeFacingSwingEndPlane.getNormal().normalize();
-      swingStartToeFacingSwingEndPlane.getNormal().scale(soleToToeLength);
-      swingStartToeFacingSwingEndPlane.getPoint().add(swingStartToeFacingSwingEndPlane.getNormal());
-      swingStartToeFacingSwingEndPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
+      tempPlaneNormal.normalize();
+      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingStartPosition.getPoint());
+      swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
 
-      swingEndHeelFacingSwingStartPlane.setPoint(swingEndPosition.getPoint());
-      swingEndHeelFacingSwingStartPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
-      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
-      swingEndHeelFacingSwingStartPlane.getNormal().scale(soleToToeLength);
-      swingEndHeelFacingSwingStartPlane.getPoint().add(swingEndHeelFacingSwingStartPlane.getNormal());
-      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
+      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.normalize();
+      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingEndPosition.getPoint());
+      swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
       numberOfTriesCounter.resetCount();

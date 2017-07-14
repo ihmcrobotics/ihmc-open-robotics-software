@@ -1,7 +1,7 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PressureSensor implements AcsellSlowSensor
 {
@@ -11,8 +11,8 @@ public class PressureSensor implements AcsellSlowSensor
    private final double conversionFactor;
    
    private double rawValue;
-   private final DoubleYoVariable pressureSensorRawVoltage;
-   private final DoubleYoVariable force;
+   private final YoDouble pressureSensorRawVoltage;
+   private final YoDouble force;
    
    public PressureSensor(String name, int sensor, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry registry, double offset)
    {
@@ -25,8 +25,8 @@ public class PressureSensor implements AcsellSlowSensor
       this.offset = slowSensorConstants.getPressureSensorOffset();
       this.scale = slowSensorConstants.getPressureSensorScale();
       this.conversionFactor = slowSensorConstants.getPressureSensorConversion();
-      pressureSensorRawVoltage = new DoubleYoVariable(name + "PressureSensorRawVoltage" + sensor, registry);
-      force = new DoubleYoVariable(name + "Force" + sensor, registry);
+      pressureSensorRawVoltage = new YoDouble(name + "PressureSensorRawVoltage" + sensor, registry);
+      force = new YoDouble(name + "Force" + sensor, registry);
    }
 
    @Override

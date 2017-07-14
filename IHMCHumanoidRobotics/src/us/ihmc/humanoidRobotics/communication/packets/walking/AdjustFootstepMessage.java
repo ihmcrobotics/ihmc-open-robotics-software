@@ -40,6 +40,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public List<Point2D> predictedContactPoints;
+   
+   /** the time to delay this command on the controller side before being executed **/
+   public double executionDelayTime;
 
    /**
     * Empty constructor for serialization.
@@ -83,6 +86,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.robotSide = footstepData.robotSide;
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
+      this.executionDelayTime = footstepData.executionDelayTime;
       orientation.checkIfUnitary();
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
@@ -189,6 +193,24 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       this.predictedContactPoints = predictedContactPoints;
    }
+   
+   /**
+    * returns the amount of time this command is delayed on the controller side before executing
+    * @return the time to delay this command in seconds
+    */
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+   
+   /**
+    * sets the amount of time this command is delayed on the controller side before executing
+    * @param delayTime the time in seconds to delay after receiving the command before executing
+    */
+   public void setExecutionDelayTime(double delayTime)
+   {
+      this.executionDelayTime = delayTime;
+   }
 
    @Override
    public String toString()
@@ -258,11 +280,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       AdjustFootstepMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
       return ret;
    }
 

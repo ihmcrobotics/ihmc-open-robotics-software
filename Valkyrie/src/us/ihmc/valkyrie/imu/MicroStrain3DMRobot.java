@@ -8,8 +8,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -32,17 +32,17 @@ public class MicroStrain3DMRobot extends Robot
 
    private YoVariableRegistry registry = new YoVariableRegistry("MicroStrain3DMData");
 
-   private DoubleYoVariable yaw = new DoubleYoVariable("yaw", registry);
-   private DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
-   private DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+   private YoDouble yaw = new YoDouble("yaw", registry);
+   private YoDouble pitch = new YoDouble("pitch", registry);
+   private YoDouble roll = new YoDouble("roll", registry);
 
-   private DoubleYoVariable wz = new DoubleYoVariable("wz", registry);
-   private DoubleYoVariable wy = new DoubleYoVariable("wy", registry);
-   private DoubleYoVariable wx = new DoubleYoVariable("wx", registry);
+   private YoDouble wz = new YoDouble("wz", registry);
+   private YoDouble wy = new YoDouble("wy", registry);
+   private YoDouble wx = new YoDouble("wx", registry);
 
-   private DoubleYoVariable xdd = new DoubleYoVariable("xdd", registry);
-   private DoubleYoVariable ydd = new DoubleYoVariable("ydd", registry);
-   private DoubleYoVariable zdd = new DoubleYoVariable("zdd", registry);
+   private YoDouble xdd = new YoDouble("xdd", registry);
+   private YoDouble ydd = new YoDouble("ydd", registry);
+   private YoDouble zdd = new YoDouble("zdd", registry);
    
    private final RotationMatrix temporaryMatrix = new RotationMatrix();
    

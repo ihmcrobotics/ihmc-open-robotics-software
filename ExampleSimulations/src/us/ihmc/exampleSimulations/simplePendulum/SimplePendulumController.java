@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simplePendulum;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 /**
@@ -21,10 +21,10 @@ public class SimplePendulumController implements RobotController
    /* Control variables: */
 
    // Target angle
-   private DoubleYoVariable desiredPositionRadians;
+   private YoDouble desiredPositionRadians;
 
    // Controller parameter variables
-   private DoubleYoVariable p_gain, d_gain, i_gain;
+   private YoDouble p_gain, d_gain, i_gain;
 
    // This is the desired torque that we will apply to the fulcrum joint (PinJoint)
    private double torque;
@@ -35,14 +35,14 @@ public class SimplePendulumController implements RobotController
    public SimplePendulumController(SimplePendulumRobot robot)
    {
       this.robot = robot;
-      desiredPositionRadians = new DoubleYoVariable("DesiredPosRad", registry);
+      desiredPositionRadians = new YoDouble("DesiredPosRad", registry);
       desiredPositionRadians.set(-1.5);
 
-      p_gain = new DoubleYoVariable("ProportionalGain", registry);
+      p_gain = new YoDouble("ProportionalGain", registry);
       p_gain.set(250.0);
-      d_gain = new DoubleYoVariable("DerivativeGain", registry);
+      d_gain = new YoDouble("DerivativeGain", registry);
       d_gain.set(100.0);
-      i_gain = new DoubleYoVariable("IntegralGain", registry);
+      i_gain = new YoDouble("IntegralGain", registry);
       i_gain.set(10.0);
    }
 

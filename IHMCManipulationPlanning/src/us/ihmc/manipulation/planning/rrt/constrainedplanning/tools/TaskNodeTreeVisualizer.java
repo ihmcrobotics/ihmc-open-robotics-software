@@ -8,14 +8,14 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNodeTree;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TaskNodeTreeVisualizer
 {
@@ -128,7 +128,7 @@ public class TaskNodeTreeVisualizer
       }
       
       
-      DoubleYoVariable radius = new DoubleYoVariable(""+prefix, registry);
+      YoDouble radius = new YoDouble(""+prefix, registry);
       
       YoArtifactOval artifactOval;
       if(isValid)

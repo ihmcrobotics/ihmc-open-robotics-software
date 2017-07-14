@@ -7,13 +7,12 @@ import java.util.Map;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointVelocityDataObject;
-
 
 /**
  * @author twan
@@ -25,7 +24,7 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
    
    private final YoVariableRegistry registry;
    private final ArrayList<YoPointVelocityDataObject> yoPointVelocityDataObjects = new ArrayList<YoPointVelocityDataObject>();
-   private final Map<YoPointVelocityDataObject, BooleanYoVariable> validMap = new LinkedHashMap<YoPointVelocityDataObject, BooleanYoVariable>();
+   private final Map<YoPointVelocityDataObject, YoBoolean> validMap = new LinkedHashMap<YoPointVelocityDataObject, YoBoolean>();
    private final String namePrefix;
 
    public YoPointVelocityDataObjectListOutputPort(AfterJointReferenceFrameNameMap referenceFrameNameMap,
@@ -84,7 +83,7 @@ public class YoPointVelocityDataObjectListOutputPort extends ControlFlowOutputPo
             int index = yoPointVelocityDataObjects.size();
             yoPointVelocityDataObjectToUse = new YoPointVelocityDataObject(namePrefix + index, referenceFrame, registry);
             yoPointVelocityDataObjects.add(yoPointVelocityDataObjectToUse);
-            validMap.put(yoPointVelocityDataObjectToUse, new BooleanYoVariable(namePrefix + "Valid" + index, registry));
+            validMap.put(yoPointVelocityDataObjectToUse, new YoBoolean(namePrefix + "Valid" + index, registry));
          }
 
          yoPointVelocityDataObjectToUse.set(pointVelocityDataObject);

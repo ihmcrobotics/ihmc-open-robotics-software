@@ -2,14 +2,14 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 
 import java.util.ArrayDeque;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticDataReporter;
 
 public abstract class DiagnosticTask
 {
-   private DoubleYoVariable timeInCurrentTask;
+   private YoDouble timeInCurrentTask;
 
    public abstract void doTransitionIntoAction();
    public abstract void doAction();
@@ -20,7 +20,7 @@ public abstract class DiagnosticTask
    public abstract String getName();
    public abstract void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry);
 
-   void setYoTimeInCurrentTask(DoubleYoVariable timeInCurrentTask)
+   void setYoTimeInCurrentTask(YoDouble timeInCurrentTask)
    {
       this.timeInCurrentTask = timeInCurrentTask;
    }

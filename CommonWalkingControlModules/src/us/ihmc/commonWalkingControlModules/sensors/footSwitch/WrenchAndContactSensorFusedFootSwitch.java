@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -16,7 +16,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    private final WrenchBasedFootSwitch wrenchBasedFootSwitch;
    private final ContactSensor contactSensor;
    private final YoVariableRegistry registry;
-   private final BooleanYoVariable inContact;
+   private final YoBoolean inContact;
 
    public WrenchAndContactSensorFusedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, ContactSensor contactSensor,
          double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
@@ -34,7 +34,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
 
       this.contactSensor = contactSensor;
 
-      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
+      this.inContact = new YoBoolean(namePrefix + "InContact", registry);
 
       parentRegistry.addChild(registry);
    }

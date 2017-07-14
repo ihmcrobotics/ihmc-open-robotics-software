@@ -1,15 +1,15 @@
 package us.ihmc.acsell.hardware.state.slowSensors;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MotorThermistorADTicks implements AcsellSlowSensor
 {
-   private final IntegerYoVariable motorTemperature;
+   private final YoInteger motorTemperature;
    
    public MotorThermistorADTicks(String name, YoVariableRegistry parentRegistry)
    {
-      motorTemperature = new IntegerYoVariable(name + "MotorThermisterADTicks", parentRegistry);
+      motorTemperature = new YoInteger(name + "MotorThermisterADTicks", parentRegistry);
    }
 
    @Override

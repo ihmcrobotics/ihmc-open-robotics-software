@@ -14,8 +14,8 @@ import com.google.common.primitives.Doubles;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -44,17 +44,17 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
    private final ConstrainedCentroidalMomentumMatrixCalculator constrainedCentroidalMomentumMatrixCalculator;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final DoubleYoVariable comJacobianConditionNumber = new DoubleYoVariable("comJacCondition", registry);
-   private final DoubleYoVariable comJacobianSigmaMin = new DoubleYoVariable("comJacobianSigmaMin", registry);
-   private final DoubleYoVariable constrainedComJacobianConditionNumber = new DoubleYoVariable("constrComJacCondition", registry);
-   private final DoubleYoVariable constrainedComJacobianSigmaMin = new DoubleYoVariable("constrComJacobianSigmaMin", registry);
+   private final YoDouble comJacobianConditionNumber = new YoDouble("comJacCondition", registry);
+   private final YoDouble comJacobianSigmaMin = new YoDouble("comJacobianSigmaMin", registry);
+   private final YoDouble constrainedComJacobianConditionNumber = new YoDouble("constrComJacCondition", registry);
+   private final YoDouble constrainedComJacobianSigmaMin = new YoDouble("constrComJacobianSigmaMin", registry);
    private final YoFrameVector comVelocity = new YoFrameVector("comJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector constrainedComVelocity = new YoFrameVector("constrComJacComVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final DoubleYoVariable cmmConditionNumber = new DoubleYoVariable("CMMCondition", registry);
-   private final DoubleYoVariable cmmSigmaMin = new DoubleYoVariable("CMMSigmaMin", registry);
-   private final DoubleYoVariable constrainedCMMConditionNumber = new DoubleYoVariable("constrCMMCondition", registry);
-   private final DoubleYoVariable constrainedCMMSigmaMin = new DoubleYoVariable("constrCMMSigmaMin", registry);
+   private final YoDouble cmmConditionNumber = new YoDouble("CMMCondition", registry);
+   private final YoDouble cmmSigmaMin = new YoDouble("CMMSigmaMin", registry);
+   private final YoDouble constrainedCMMConditionNumber = new YoDouble("constrCMMCondition", registry);
+   private final YoDouble constrainedCMMSigmaMin = new YoDouble("constrCMMSigmaMin", registry);
 
    private final InverseDynamicsJoint[] allJoints;
    private final DenseMatrix64F v;

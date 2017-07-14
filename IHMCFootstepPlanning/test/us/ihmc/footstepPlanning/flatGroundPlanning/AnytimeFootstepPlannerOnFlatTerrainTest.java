@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -51,7 +51,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       for (RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 
@@ -116,7 +116,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       for (RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
-         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         footstepGoalPose.prependTranslation(0.0, robotSide.negateIfRightSide(0.2), 0.0);
          goalPoses.put(robotSide, footstepGoalPose);
       }
 

@@ -1,12 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 
 class FloatingJointRobotSensor implements SensorInterface
 {
-   private DoubleYoVariable q_x, q_y, q_z, qd_x, qd_y, qd_z, q_qs, q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz;
-   private DoubleYoVariable qdd_x, qdd_y, qdd_z, qdd_wx, qdd_wy, qdd_wz;
+   private YoDouble q_x, q_y, q_z, qd_x, qd_y, qd_z, q_qs, q_qx, q_qy, q_qz, qd_wx, qd_wy, qd_wz;
+   private YoDouble qdd_x, qdd_y, qdd_z, qdd_wx, qdd_wy, qdd_wz;
 
    FloatingJointRobotSensor(FloatingJoint joint)
    {

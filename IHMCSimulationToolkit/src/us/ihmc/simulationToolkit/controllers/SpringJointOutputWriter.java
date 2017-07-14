@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
@@ -19,8 +19,8 @@ public class SpringJointOutputWriter implements RobotController
 
    ArrayList<OneDegreeOfFreedomJoint> elasticJoints = new ArrayList<>();
    private final HashMap<OneDegreeOfFreedomJoint, AlphaFilteredYoVariable> filteredDesiredJointAngles = new HashMap<>();
-   private final HashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> jointStiffness = new HashMap<>();
-   private final HashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> maxDeflections = new HashMap<>();
+   private final HashMap<OneDegreeOfFreedomJoint, YoDouble> jointStiffness = new HashMap<>();
+   private final HashMap<OneDegreeOfFreedomJoint, YoDouble> maxDeflections = new HashMap<>();
 
    public SpringJointOutputWriter(FloatingRootJointRobot robot, SimulatedElasticityParameters elasticityParameters, double dt)
    {
@@ -39,11 +39,11 @@ public class SpringJointOutputWriter implements RobotController
             filteredDesired.update(0.0);
             filteredDesiredJointAngles.put(simulatedJoint, filteredDesired);
             
-            DoubleYoVariable stiffness = new DoubleYoVariable(simulatedJoint.getName() + "_stiffness", registry);
+            YoDouble stiffness = new YoDouble(simulatedJoint.getName() + "_stiffness", registry);
             stiffness.set(elasticityParameters.getStiffness(simulatedJoint));
             jointStiffness.put(simulatedJoint, stiffness);
             
-            DoubleYoVariable maxDeflection = new DoubleYoVariable(simulatedJoint.getName() + "_maxDeflection", registry);
+            YoDouble maxDeflection = new YoDouble(simulatedJoint.getName() + "_maxDeflection", registry);
             maxDeflection.set(elasticityParameters.getMaxDeflection(simulatedJoint));
             maxDeflections.put(simulatedJoint, maxDeflection);
          }
@@ -61,8 +61,8 @@ public class SpringJointOutputWriter implements RobotController
       for(OneDegreeOfFreedomJoint simulatedJoint : elasticJoints)
       {
          double tau = simulatedJoint.getTau();
-         DoubleYoVariable stiffness = jointStiffness.get(simulatedJoint);
-         DoubleYoVariable maxDeflection = maxDeflections.get(simulatedJoint);
+         YoDouble stiffness = jointStiffness.get(simulatedJoint);
+         YoDouble maxDeflection = maxDeflections.get(simulatedJoint);
          AlphaFilteredYoVariable filteredDesired = filteredDesiredJointAngles.get(simulatedJoint);
          double qDesired = -MathTools.clamp(tau / stiffness.getDoubleValue(), maxDeflection.getDoubleValue());
          
