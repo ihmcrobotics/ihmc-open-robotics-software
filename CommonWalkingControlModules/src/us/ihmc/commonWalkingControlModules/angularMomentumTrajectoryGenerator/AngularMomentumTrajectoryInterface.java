@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.robotics.geometry.FrameVector;
 
-public interface AngularMomentumTrajectory
+public interface AngularMomentumTrajectoryInterface
 {
    public void reset();
    public void update(double timeInState);

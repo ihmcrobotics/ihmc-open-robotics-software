@@ -6,7 +6,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class AngularMomentumTrajectoryPoint 
+public class AngularMomentumTrajectoryPoint
 {
    protected YoFrameVector angularMomentum;
    private YoFrameVector torque;

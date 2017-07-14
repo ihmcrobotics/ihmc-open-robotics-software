@@ -22,15 +22,9 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
-   private final YoEnum<AngularMomentumTrajectoryInput> trajectoryType;
-   private final YoInteger maxNumberOfFootstepsToConsider;
-   private final YoInteger maxNumberOfWaypointsPerFootstep;
-   private final List<YoDouble> swingDurations;
-   private final List<YoDouble> transferDurations;   
-   private final List<YoDouble> swingSplitFractions;   
-   private final List<YoDouble> swingDurationShiftFractions;
-   private final List<YoDouble> transferSplitDurations;
-   
+   private final YoEnum<AngularMomentumTrajectoryInput> currentTrajectoryType;
+   private final YoInteger numberOfFootstepsToConsider;
+   private final YoInteger maxNumberOfWaypoints;
    private final List<CoPPointsInFoot> upcomingCoPsInFootsteps;
 
    private final List<SwingAngularMomentumTrajectory> swingAngularMomentumTrajectories;
@@ -48,43 +42,32 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    private final YoFrameTrajectory3D swingFootVelocity;
    private final YoFrameTrajectory3D angularMomentumTrajectory;
 
-   private AngularMomentumTrajectory activeTrajectory;
+   private AngularMomentumTrajectoryInterface activeTrajectory;
    private double initialTime;
 
-   public AngularMomentumTrajectoryGenerator(String namePrefix, AngularMomentumTrajectoryInput inputType, YoInteger numberOfFootstepsToConsider, 
-                                             YoInteger numberOfWaypointsPerFootstep, YoInteger maxNumberOfCoPPointsPerFoot, List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                             List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
+   public AngularMomentumTrajectoryGenerator(String namePrefix, AngularMomentumEstimationParameters angularMomentumParameters, YoVariableRegistry parentRegistry)
    {
-      this.maxNumberOfFootstepsToConsider = new YoInteger(namePrefix + "AngularMomentumPlanMaxFootsteps", registry);
-      this.maxNumberOfFootstepsToConsider.set(numberOfFootstepsToConsider.getIntegerValue());
-      this.maxNumberOfWaypointsPerFootstep = new YoInteger(namePrefix + "AngularMomentumPlanMaxMomentumWaypoints", registry);
-      this.maxNumberOfWaypointsPerFootstep.set(numberOfWaypointsPerFootstep.getIntegerValue());
-      this.swingDurations = swingDurations;
-      this.transferDurations = transferDurations;
-      this.swingSplitFractions = swingSplitFractions;
-      this.swingDurationShiftFractions = swingDurationShiftFractions;
-      this.transferSplitDurations = transferSplitFractions;
-            
+      this.numberOfFootstepsToConsider = new YoInteger(namePrefix + "AngularMomentumPlanMaxFootsteps", registry);
+      this.numberOfFootstepsToConsider.set(angularMomentumParameters.getNumberOfFootstepsToConsider());
+      this.maxNumberOfWaypoints = new YoInteger(namePrefix + "", registry);
       
       this.swingAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue());
       this.transferAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue());      
-      this.upcomingCoPsInFootsteps = new RecyclingArrayList<CoPPointsInFoot>(numberOfFootstepsToConsider.getIntegerValue(), CoPPointsInFoot.class);
       ReferenceFrame[] referenceFrames = {worldFrame};
-      for(int i = 0; i < maxNumberOfFootstepsToConsider.getIntegerValue(); i++)
+      for(int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
-         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(namePrefix + "Footstep" + i + "SwingTrajectory", registry, worldFrame, maxNumberOfWaypointsPerFootstep.getIntegerValue());
+         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(namePrefix + "Footstep", i, registry, worldFrame, maxNumberOfWaypoints.getIntegerValue());
          this.swingAngularMomentumTrajectories.add(swingTrajectory);
-         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(namePrefix + "Footstep" + i + "TransferTrajectory", registry, worldFrame, maxNumberOfWaypointsPerFootstep.getIntegerValue());
+         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(namePrefix + "Footstep", i , registry, worldFrame, maxNumberOfWaypoints.getIntegerValue());
          this.transferAngularMomentumTrajectories.add(transferTrajectory);
          CoPPointsInFoot copLocations = new CoPPointsInFoot(i, referenceFrames, registry);
          upcomingCoPsInFootsteps.add(copLocations);
       }
       
-      this.upcomingWaypointList = new RecyclingArrayList<AngularMomentumTrajectoryPoint>(numberOfFootstepsToConsider.getIntegerValue() * numberOfWaypointsPerFootstep.getIntegerValue(), AngularMomentumTrajectoryPoint.class);
       this.angularMomentumWaypointList = new RecyclingArrayList<FrameVector>(numberOfFootstepsToConsider.getIntegerValue() * numberOfWaypointsPerFootstep.getIntegerValue(), FrameVector.class); // this is for computing the way points from the trajectories 
       
-      this.trajectoryType = new YoEnum<>(namePrefix, registry, AngularMomentumTrajectoryInput.class);
-      this.trajectoryType.set(inputType);      
+      this.currentTrajectoryType = new YoEnum<>(namePrefix, registry, AngularMomentumTrajectoryInput.class);
+      this.currentTrajectoryType.set(inputType);      
       
       this.comTrajectory = new YoFrameTrajectory3D("EstimatedCoMTrajectory", 4, worldFrame, registry);
       this.swingFootTrajectory = new YoFrameTrajectory3D("EstimatedCoMTrajectory", 4, worldFrame, registry);
@@ -94,12 +77,12 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
 
    public void setInput(AngularMomentumTrajectoryInput inputType)
    {
-      this.trajectoryType.set(inputType);
+      this.currentTrajectoryType.set(inputType);
    }
 
    public AngularMomentumTrajectoryInput getInputType()
    {
-      return trajectoryType.getEnumValue();
+      return currentTrajectoryType.getEnumValue();
    }
 
    @Override
@@ -117,7 +100,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    @Override
    public void clear()
    {
-      for(int i = 0;  i < maxNumberOfFootstepsToConsider.getIntegerValue(); i++)
+      for(int i = 0;  i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          swingAngularMomentumTrajectories.get(i).reset();
          transferAngularMomentumTrajectories.get(i).reset();
@@ -214,7 +197,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
    {
-      if (trajectoryType.equals(AngularMomentumTrajectoryInput.ANGULAR_MOMENTUM_WAYPOINTS))
+      if (currentTrajectoryType.equals(AngularMomentumTrajectoryInput.ANGULAR_MOMENTUM_WAYPOINTS))
       {
          computeForDoubleSupportFromAngularMomentumWaypoints();
       }
@@ -232,7 +215,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
 
    private void computeForDoubleSupportFromCoPWayPoints()
    {
-      int numberOfFootstepToPlan = Math.min(maxNumberOfFootstepsToConsider.getIntegerValue(), upcomingCoPsInFootsteps.size());
+      int numberOfFootstepToPlan = Math.min(numberOfFootstepsToConsider.getIntegerValue(), upcomingCoPsInFootsteps.size());
       for (int index = 0; index < numberOfFootstepToPlan; index++)
          computeTransferAngularMomentumApproximationForFootstep(index);
    }
@@ -255,7 +238,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide)
    {
-      if (trajectoryType.equals(AngularMomentumTrajectoryInput.ANGULAR_MOMENTUM_WAYPOINTS))
+      if (currentTrajectoryType.equals(AngularMomentumTrajectoryInput.ANGULAR_MOMENTUM_WAYPOINTS))
       {
          computeForSingleSupportFromAngularMomentumWaypoints(supportSide);
       }
@@ -273,7 +256,7 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
 
    private void computeForSingleSupportFromCoPWayPoints()
    {
-      int numberOfFootstepToPlan = Math.min(maxNumberOfFootstepsToConsider.getIntegerValue(), upcomingCoPsInFootsteps.size());
+      int numberOfFootstepToPlan = Math.min(numberOfFootstepsToConsider.getIntegerValue(), upcomingCoPsInFootsteps.size());
       for (int index = 0; index < numberOfFootstepToPlan; index++)
          computeSwingAngularMomentumApproximationForFootstep(index);
    }
@@ -292,11 +275,6 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
       angularMomentumTrajectory.crossProduct(swingFootTrajectory,swingFootVelocity);
    }
 
-   FramePoint p1 = new FramePoint();
-   FramePoint p2 = new FramePoint();
-   FramePoint p3 = new FramePoint();
-   FramePoint p4 = new FramePoint();
-
    @Override
    public List<FrameVector> getWaypoints()
    {
@@ -304,13 +282,13 @@ public class AngularMomentumTrajectoryGenerator implements AngularMomentumTrajec
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectory> getTransferCoPTrajectories()
+   public List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories()
    {
       return transferAngularMomentumTrajectories;
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectory> getSwingCoPTrajectories()
+   public List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories()
    {
       return swingAngularMomentumTrajectories;
    }

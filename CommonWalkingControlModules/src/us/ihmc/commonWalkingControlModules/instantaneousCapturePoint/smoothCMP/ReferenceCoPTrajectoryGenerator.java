@@ -407,7 +407,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
          copLocationWaypoints.get(footstepIndex).addAndSetIncludingFrame(exitCoPName, 0.0, tempFramePoint);
       }
       computeCoPPointsForUpcomingFootsteps(footstepIndex + 1);
-      generateCoPTrajectoriesFromWayPoints(CoPTrajectoryType.TRANSFER);
+      generateCoPTrajectoriesFromWayPoints(WalkingTrajectoryType.TRANSFER);
    }
 
    @Override
@@ -428,7 +428,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
          else
             computeCoPPointsForUpcomingFootsteps(footstepIndex);
       }
-      generateCoPTrajectoriesFromWayPoints(CoPTrajectoryType.SWING);
+      generateCoPTrajectoriesFromWayPoints(WalkingTrajectoryType.SWING);
    }
 
    private void computeMidFeetPointWithChickenSupportForInitialTransfer(FramePoint framePointToPack)
@@ -819,10 +819,10 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
    }
 
    // TODO This function needs aesthetic improvement
-   private void generateCoPTrajectoriesFromWayPoints(CoPTrajectoryType initialTrajectoryType)
+   private void generateCoPTrajectoriesFromWayPoints(WalkingTrajectoryType initialTrajectoryType)
    {
       //It is always guaranteed that the initial state will be transfer the way this code is written. This is needed for the angular momentum approximation to work
-      CoPTrajectoryType trajectoryType = CoPTrajectoryType.TRANSFER;
+      WalkingTrajectoryType trajectoryType = WalkingTrajectoryType.TRANSFER;
       double timeInState = 0.0;
       int transferTrajectoryIndex = -1;
       int swingTrajectoryIndex = -1;
@@ -836,7 +836,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
             CoPTrajectoryPoint currentPoint = copLocationWaypoints.get(waypointIndex).get(copList.get(segmentIndex));
             if (!tempFramePoint.containsNaN())
             {
-               if (trajectoryType == CoPTrajectoryType.SWING)
+               if (trajectoryType == WalkingTrajectoryType.SWING)
                   swingCoPTrajectories.get(swingTrajectoryIndex).setSegment(splineInterpolationOrder, timeInState, timeInState + currentPoint.getTime(),
                                                                             tempFramePoint, currentPoint.getPosition().getFrameTuple());
                else
@@ -853,13 +853,13 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
             if (copList.get(segmentIndex) == entryCoPName)
             {
-               trajectoryType = CoPTrajectoryType.SWING;
+               trajectoryType = WalkingTrajectoryType.SWING;
                timeInState = 0.0;
                swingTrajectoryIndex++;
             }
             else if (copList.get(segmentIndex) == exitCoPName)
             {
-               trajectoryType = CoPTrajectoryType.TRANSFER;
+               trajectoryType = WalkingTrajectoryType.TRANSFER;
                timeInState = 0.0;
                transferTrajectoryIndex++;
             }
