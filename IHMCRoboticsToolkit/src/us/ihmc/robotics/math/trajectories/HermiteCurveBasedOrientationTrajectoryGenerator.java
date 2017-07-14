@@ -368,14 +368,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       currentTime.set(time);
 
-      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
-      {
-         currentOrientation.set(initialOrientation);
-         currentAngularVelocity.set(initialAngularVelocity);
-         currentAngularAcceleration.setToZero();
-         return;
-      }
-
       if (time < 0.0)
       {
          currentOrientation.set(initialOrientation);
@@ -387,6 +379,14 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       {
          currentOrientation.set(finalOrientation);
          currentAngularVelocity.setToZero();
+         currentAngularAcceleration.setToZero();
+         return;
+      }
+
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         currentOrientation.set(initialOrientation);
+         currentAngularVelocity.set(initialAngularVelocity);
          currentAngularAcceleration.setToZero();
          return;
       }
