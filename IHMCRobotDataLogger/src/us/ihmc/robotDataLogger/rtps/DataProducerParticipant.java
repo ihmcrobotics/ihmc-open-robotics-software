@@ -39,8 +39,6 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
-import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.util.PeriodicThreadScheduler;
 
 /**
  * This class implements all communication for a data producer inside a DDS logging network

@@ -65,6 +65,11 @@ public abstract class YoVariableHandshakeParser
    {
       return registries.get(0);
    }
+   
+   public List<YoVariableRegistry> getRegistries()
+   {
+      return Collections.unmodifiableList(registries);
+   }
 
    public List<JointState> getJointStates()
    {

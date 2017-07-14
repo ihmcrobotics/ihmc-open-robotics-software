@@ -9,7 +9,6 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 public class RegistryPublisher

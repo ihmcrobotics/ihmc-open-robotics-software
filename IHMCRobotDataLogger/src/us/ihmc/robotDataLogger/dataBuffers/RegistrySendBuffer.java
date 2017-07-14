@@ -18,6 +18,8 @@ public class RegistrySendBuffer extends RegistryBuffer
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       this.buffer = ByteBuffer.allocate(variables.size() * 8);
+      
+      
       this.data = this.buffer.asLongBuffer();
       this.registryID = registeryID;
       

@@ -9,7 +9,8 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
-import us.ihmc.tools.compression.SnappyUtils;
+import us.ihmc.tools.compression.CompressionImplementation;
+import us.ihmc.tools.compression.CompressionImplementationFactory;
 
 /**
 * 
@@ -26,17 +27,60 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    private final int numberOfStates;
 
    private final ByteBuffer compressBuffer;
+   private final CompressionImplementation compressor;
 
    public CustomLogDataPubisherType(int numberOfVariables, int numberOfStates)
    {
       this.numberOfVariables = numberOfVariables;
       this.numberOfStates = numberOfStates;
 
-
-      compressBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(numberOfVariables * 8));
+      compressor = CompressionImplementationFactory.instance();
+      if (compressor.supportsDirectOutput())
+      {
+         compressBuffer = null;
+      }
+      else
+      {
+         compressBuffer = ByteBuffer.allocate(compressor.maxCompressedLength(numberOfVariables * 8));
+      }
    }
 
    private final CDR serializeCDR = new CDR();
+
+   /**
+    * Directly write the compressed data in the serialized buffer. This skips a copy compared to compressing to a temporary buffer
+    * 
+    * @param databuffer
+    * @param serializedPayload
+    */
+   private void compressDirect(ByteBuffer databuffer, SerializedPayload serializedPayload)
+   {
+      ByteBuffer serializeBuffer = serializedPayload.getData();
+      serializeCDR.write_type_2(0);
+      int sizePosition = serializeBuffer.position() - 4;
+      databuffer.clear();
+      int written = compressor.compress(databuffer, serializeBuffer);
+      serializeBuffer.putInt(sizePosition, written);
+   }
+
+   /**
+    * If the compression algorithm uses indirect buffers, we need to use a temporary buffer and make copy the compressed data in the serialized payload. 
+    * 
+    * @param databuffer
+    * @param serializedPayload
+    * @throws IOException
+    */
+   private void compressJavaBuffer(ByteBuffer databuffer, SerializedPayload serializedPayload) throws IOException
+   {
+      databuffer.clear();
+      compressBuffer.clear();
+      compressor.compress(databuffer, compressBuffer);
+      compressBuffer.flip();
+
+      // Write compressed data length
+      serializeCDR.write_type_2(compressBuffer.remaining());
+      serializedPayload.getData().put(compressBuffer);
+   }
 
    @Override
    public void serialize(RegistrySendBuffer data, SerializedPayload serializedPayload) throws IOException
@@ -45,23 +89,21 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       serializeCDR.write_type_11(data.getUid());
 
       serializeCDR.write_type_11(data.getTimestamp());
-      
-      serializeCDR.write_type_11(data.getTransmitTime());
 
+      serializeCDR.write_type_11(data.getTransmitTime());
 
       serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
 
       serializeCDR.write_type_2(data.getRegistryID());
 
-      ByteBuffer databuffer = data.getBuffer();
-      databuffer.clear();
-      compressBuffer.clear();
-      SnappyUtils.compress(databuffer, compressBuffer);
-      compressBuffer.flip();
-
-      // Write compressed data length
-      serializeCDR.write_type_2(compressBuffer.remaining());
-      serializedPayload.getData().put(compressBuffer);
+      if (compressor.supportsDirectOutput())
+      {
+         compressDirect(data.getBuffer(), serializedPayload);
+      }
+      else
+      {
+         compressJavaBuffer(data.getBuffer(), serializedPayload);
+      }
 
       // Write joint states length
       double[] jointstates = data.getJointStates();
@@ -103,19 +145,18 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    @Override
    public int getTypeSize()
    {
-      return getTypeSize(numberOfVariables, numberOfStates);
+      return getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
    }
 
-   static int getTypeSize(int numberOfVariables, int numberOfStates)
+   static int getTypeSize(int maxCompressedSize, int numberOfStates)
    {
-       
-       
+
       int current_alignment = 0;
 
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
-      
+
       current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -123,12 +164,12 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
-      current_alignment += (SnappyUtils.maxCompressedLength(numberOfVariables * 8)) + CDR.alignment(current_alignment, 1);
+      current_alignment += (maxCompressedSize) + CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
       current_alignment += (numberOfStates * 8) + CDR.alignment(current_alignment, 8);
 
-      return current_alignment;
+      return CDR.getTypeSize(current_alignment);
    }
 
    @Override
