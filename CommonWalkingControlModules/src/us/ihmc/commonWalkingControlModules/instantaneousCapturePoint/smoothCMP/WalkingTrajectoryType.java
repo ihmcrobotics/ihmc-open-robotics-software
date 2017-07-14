@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-public enum CoPTrajectoryType
+public enum WalkingTrajectoryType
 {
    SWING, TRANSFER;
    

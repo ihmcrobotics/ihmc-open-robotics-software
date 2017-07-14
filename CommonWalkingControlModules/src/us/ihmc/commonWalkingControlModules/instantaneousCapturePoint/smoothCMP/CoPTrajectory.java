@@ -26,7 +26,7 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    private final FrameVector copAccelerationToThrowAway = new FrameVector();
    private final String name;
 
-   public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, CoPTrajectoryType type, YoVariableRegistry registry)
+   public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type, YoVariableRegistry registry)
    {
       name = namePrefix + stepNumber + type.toString();
       numberOfSegments = new YoInteger(namePrefix + stepNumber + type.toString() + "NumberOfSegments", registry);
@@ -117,5 +117,11 @@ public class CoPTrajectory implements CoPTrajectoryInterface
          break;
       }
       numberOfSegments.increment();
+   }
+   
+   public YoFrameTrajectory3D getCurrentSegment(double timeInState)
+   {
+      setCurrentSegmentIndexFromStateTime(timeInState);
+      return currentSegment;
    }
 }

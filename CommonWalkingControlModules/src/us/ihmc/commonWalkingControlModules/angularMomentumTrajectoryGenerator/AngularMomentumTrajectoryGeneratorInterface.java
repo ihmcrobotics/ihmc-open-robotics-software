@@ -43,7 +43,7 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    List<FrameVector> getWaypoints();
 
-   List<? extends AngularMomentumTrajectory> getTransferCoPTrajectories();
+   List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories();
 
-   List<? extends AngularMomentumTrajectory> getSwingCoPTrajectories();
+   List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories();
 }
