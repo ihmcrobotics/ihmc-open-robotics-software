@@ -9,11 +9,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrient
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -26,11 +26,11 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable userDoPelvisPose = new BooleanYoVariable("userDoPelvisPose", registry);
-   private final BooleanYoVariable userStreamPelvisPose = new BooleanYoVariable("userStreamPelvisPose", registry);
-   private final BooleanYoVariable userStreamPelvisOrientation = new BooleanYoVariable("userStreamPelvisOrientation", registry);
-   private final BooleanYoVariable userUpdateDesiredPelvisPose = new BooleanYoVariable("userUpdateDesiredPelvisPose", registry);
-   private final DoubleYoVariable userDesiredPelvisPoseTrajectoryTime = new DoubleYoVariable("userDesiredPelvisPoseTrajectoryTime", registry);
+   private final YoBoolean userDoPelvisPose = new YoBoolean("userDoPelvisPose", registry);
+   private final YoBoolean userStreamPelvisPose = new YoBoolean("userStreamPelvisPose", registry);
+   private final YoBoolean userStreamPelvisOrientation = new YoBoolean("userStreamPelvisOrientation", registry);
+   private final YoBoolean userUpdateDesiredPelvisPose = new YoBoolean("userUpdateDesiredPelvisPose", registry);
+   private final YoDouble userDesiredPelvisPoseTrajectoryTime = new YoDouble("userDesiredPelvisPoseTrajectoryTime", registry);
    private final YoFramePose userDesiredPelvisPose;
 
    private final ReferenceFrame midFeetZUpFrame, pelvisFrame;

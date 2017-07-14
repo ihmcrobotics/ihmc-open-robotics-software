@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -35,11 +35,11 @@ public class WrenchMatrixCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable useForceRateHighWeight = new BooleanYoVariable("useForceRateHighWeight", registry);
+   private final YoBoolean useForceRateHighWeight = new YoBoolean("useForceRateHighWeight", registry);
 
-   private final DoubleYoVariable rhoWeight = new DoubleYoVariable("rhoWeight", registry);
-   private final DoubleYoVariable rhoRateDefaultWeight = new DoubleYoVariable("rhoRateDefaultWeight", registry);
-   private final DoubleYoVariable rhoRateHighWeight = new DoubleYoVariable("rhoRateHighWeight", registry);
+   private final YoDouble rhoWeight = new YoDouble("rhoWeight", registry);
+   private final YoDouble rhoRateDefaultWeight = new YoDouble("rhoRateDefaultWeight", registry);
+   private final YoDouble rhoRateHighWeight = new YoDouble("rhoRateHighWeight", registry);
    private final YoFrameVector2d desiredCoPWeight = new YoFrameVector2d("desiredCoPWeight", null, registry);
 
    private final YoFrameVector2d copRateDefaultWeight = new YoFrameVector2d("copRateDefaultWeight", null, registry);
@@ -52,6 +52,7 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F desiredCoPMatrix;
    private final DenseMatrix64F previousCoPMatrix;
    
+   private final DenseMatrix64F rhoMaxMatrix;
    private final DenseMatrix64F rhoWeightMatrix;
    private final DenseMatrix64F rhoRateWeightMatrix;
    private final DenseMatrix64F desiredCoPWeightMatrix;
@@ -88,9 +89,10 @@ public class WrenchMatrixCalculator
       rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);                      
                                                                                
       desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
-      previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                  
-                                                                               
-      rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);                  
+      previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+
+      rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
+      rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);              
       desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);   
       copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);      
@@ -180,6 +182,7 @@ public class WrenchMatrixCalculator
          CommonOps.insert(helper.getRhoJacobian(), rhoJacobianMatrix, 0, rhoStartIndex);
          CommonOps.insert(helper.getCopJacobianMatrix(), copJacobianMatrix, copStartIndex, rhoStartIndex);
 
+         CommonOps.insert(helper.getRhoMax(), rhoMaxMatrix, rhoStartIndex, 0);
          CommonOps.insert(helper.getRhoWeight(), rhoWeightMatrix, rhoStartIndex, rhoStartIndex);
          CommonOps.insert(helper.getRhoRateWeight(), rhoRateWeightMatrix, rhoStartIndex, rhoStartIndex);
          CommonOps.insert(helper.getDesiredCoPWeightMatrix(), desiredCoPWeightMatrix, copStartIndex, copStartIndex);
@@ -247,6 +250,11 @@ public class WrenchMatrixCalculator
    public DenseMatrix64F getPreviousCoPMatrix()
    {
       return previousCoPMatrix;
+   }
+
+   public DenseMatrix64F getRhoMaxMatrix()
+   {
+      return rhoMaxMatrix;
    }
 
    public DenseMatrix64F getRhoWeightMatrix()

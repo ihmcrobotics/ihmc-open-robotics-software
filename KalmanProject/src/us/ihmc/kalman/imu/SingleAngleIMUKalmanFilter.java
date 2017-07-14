@@ -1,9 +1,7 @@
 package us.ihmc.kalman.imu;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SingleAngleIMUKalmanFilter
 {
@@ -44,22 +42,22 @@ public class SingleAngleIMUKalmanFilter
    private double t_0;
    private double t_1;
 
-   private DoubleYoVariable R_angle, Q_angle, Q_gyro;    // K1;
+   private YoDouble R_angle, Q_angle, Q_gyro;    // K1;
 
    public SingleAngleIMUKalmanFilter(YoVariableRegistry reg, YoVariableRegistry holder)
    {
 //    K1 = new YoVariable("K1", reg);
       if (reg != null)
       {
-         R_angle = (DoubleYoVariable)holder.getVariable("R_angle");
-         Q_angle = (DoubleYoVariable)holder.getVariable("Q_angle");
-         Q_gyro = (DoubleYoVariable)holder.getVariable("Q_gyro");
+         R_angle = (YoDouble)holder.getVariable("R_angle");
+         Q_angle = (YoDouble)holder.getVariable("Q_angle");
+         Q_gyro = (YoDouble)holder.getVariable("Q_gyro");
 
          if (R_angle == null)
          {
-            R_angle = new DoubleYoVariable("R_angle", reg);
-            Q_angle = new DoubleYoVariable("Q_angle", reg);
-            Q_gyro = new DoubleYoVariable("Q_gyro", reg);
+            R_angle = new YoDouble("R_angle", reg);
+            Q_angle = new YoDouble("Q_angle", reg);
+            Q_gyro = new YoDouble("Q_gyro", reg);
          }
 
          R_angle.set(R_angle_default);

@@ -1,167 +1,152 @@
 package us.ihmc.simulationconstructionset.gui.dialogs;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
-
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
+import javafx.stage.Stage;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class YoGraphicsPropertiesDialog extends JDialog implements ActionListener
-{
-   private static final long serialVersionUID = -8226475433536336684L;
-   private JButton okButton, applyButton, cancelButton;
-   private YoGraphicsPropertiesPanel yoGraphicsPropertiesPanel;
-   @SuppressWarnings("unused")
-   private JFrame ownerFrame;
-   private Container parentContainer;
+import javax.swing.*;
+import java.awt.*;
 
-   private SimulationConstructionSet sim;
+public class YoGraphicsPropertiesDialog extends Stage implements EventHandler<ActionEvent> {
+    private Button okButton, applyButton, cancelButton;
+    private YoGraphicsPropertiesPanel yoGraphicsPropertiesPanel;
+    private Container parentContainer;
 
-   public YoGraphicsPropertiesDialog(Container parentContainer, JFrame ownerFrame, SimulationConstructionSet sim)
-   {
-      super(ownerFrame, "YoGraphics Properties", false);
-      this.parentContainer = parentContainer;
-      this.ownerFrame = ownerFrame;
-      this.sim = sim;
+    private SimulationConstructionSet sim;
 
-      Container contentPane = this.getContentPane();
-      yoGraphicsPropertiesPanel = new YoGraphicsPropertiesPanel();
+    public YoGraphicsPropertiesDialog(Container parentContainer, JFrame ownerFrame, SimulationConstructionSet sim) {
+        super();
 
-      contentPane.add(yoGraphicsPropertiesPanel);
+        this.setTitle("YoGraphics Properties");
 
-      // Buttons:
+        this.parentContainer = parentContainer;
+        this.sim = sim;
 
-      okButton = new JButton("OK");
-      okButton.addActionListener(this);
-      applyButton = new JButton("Apply");
-      applyButton.addActionListener(this);
-      cancelButton = new JButton("Cancel");
-      cancelButton.addActionListener(this);
-      JPanel buttonPanel = new JPanel();
-      buttonPanel.add(okButton);
-      buttonPanel.add(applyButton);
-      buttonPanel.add(cancelButton);
+        GridPane pane = new GridPane();
 
-      contentPane.add(buttonPanel, BorderLayout.SOUTH);
+        RowConstraints properties = new RowConstraints();
+        properties.setPercentHeight(50.00);
+        RowConstraints buttons = new RowConstraints();
+        buttons.setPercentHeight(50.00);
 
-      Point point = parentContainer.getLocation();
-      Dimension frameSize = parentContainer.getSize();
+        pane.getRowConstraints().addAll(
+                properties,
+                buttons
+        );
 
-      point.translate(frameSize.width / 2, frameSize.height / 4);
-      this.setLocation(point);
+        yoGraphicsPropertiesPanel = new YoGraphicsPropertiesPanel();
+        GridPane.setConstraints(yoGraphicsPropertiesPanel, 0, 0);
+        GridPane.setMargin(yoGraphicsPropertiesPanel, new javafx.geometry.Insets(10, 10, 5, 10));
 
-      this.setResizable(false);
-      this.pack();
+        okButton = new Button("OK");
+        okButton.addEventHandler(ActionEvent.ACTION, this);
 
-      this.pack();
-      this.setVisible(true);
+        applyButton = new Button("Apply");
+        applyButton.addEventHandler(ActionEvent.ACTION, this);
+        HBox.setMargin(applyButton, new javafx.geometry.Insets(0, 5, 0, 5));
 
-      parentContainer.repaint(); // This is a horrible way to get the graphs to repaint...
-   }
+        cancelButton = new Button("Cancel");
+        cancelButton.addEventHandler(ActionEvent.ACTION, this);
 
-   @Override
-   public void actionPerformed(ActionEvent event)
-   {
-      if (event.getSource() == cancelButton)
-         this.setVisible(false);
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(
+                okButton,
+                applyButton,
+                cancelButton
+        );
+        hbox.setPrefSize(200, okButton.getHeight());
+        GridPane.setConstraints(hbox, 0, 1);
 
-      if (event.getSource() == applyButton)
-      {
-         yoGraphicsPropertiesPanel.commitChanges();
-      }
+        pane.getChildren().addAll(
+                yoGraphicsPropertiesPanel,
+                hbox
+        );
 
-      if (event.getSource() == okButton)
-      {
-         yoGraphicsPropertiesPanel.commitChanges();
-         this.setVisible(false);
-      }
+        parentContainer.repaint(); // This is a horrible way to get the graphs to repaint...
 
-      parentContainer.repaint(); // This is a horrible way to get the graphs to repaint...
-   }
+        Dimension frameSize = parentContainer.getSize();
 
-   public class YoGraphicsPropertiesPanel extends JPanel implements ActionListener
-   {
-      private static final long serialVersionUID = -4338288396995414370L;
+        this.setScene(new Scene(pane));
+        this.setX(frameSize.width / 2);
+        this.setY(frameSize.height / 4);
+        this.setResizable(false);
+        this.show();
+    }
 
-      private double newYoGraphicsGlobalScaleVal;
+    @Override
+    public void handle(ActionEvent event) {
+        if (event.getSource() == cancelButton) {
+            this.hide();
+        } else if (event.getSource() == applyButton) {
+            yoGraphicsPropertiesPanel.commitChanges();
+        } else if (event.getSource() == okButton) {
+            yoGraphicsPropertiesPanel.commitChanges();
+            this.hide();
+        }
 
-      private GridBagLayout gridBagLayout = new GridBagLayout();
+        parentContainer.repaint();
+    }
 
-      private JTextField yoGraphicsGlobalScaleTextField = new JTextField();
+    public class YoGraphicsPropertiesPanel extends GridPane implements EventHandler {
+        private double newYoGraphicsGlobalScaleVal;
+        private TextField yoGraphicsGlobalScaleTextField;
+        private Label yoGraphicsGlobalScaleLabel;
 
-      private JLabel yoGraphicsGlobalScaleLabel = new JLabel();
+        public YoGraphicsPropertiesPanel() {
+            yoGraphicsGlobalScaleLabel = new Label("YoGraphics Global Scale:");
 
-      public YoGraphicsPropertiesPanel()
-      {
-         setLayout(gridBagLayout);
-         yoGraphicsGlobalScaleLabel.setText("YoGraphics Global Scale:");
+            yoGraphicsGlobalScaleTextField = new TextField();
+            yoGraphicsGlobalScaleTextField.setPrefSize(60, 21);
 
-         yoGraphicsGlobalScaleTextField.setMinimumSize(new Dimension(60, 21));
-         yoGraphicsGlobalScaleTextField.setPreferredSize(new Dimension(60, 21));
+            GridPane.setConstraints(yoGraphicsGlobalScaleLabel, 0, 0);
+            GridPane.setConstraints(yoGraphicsGlobalScaleTextField, 1, 0);
 
-         add(yoGraphicsGlobalScaleLabel,
-             new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
-         add(yoGraphicsGlobalScaleTextField,
-             new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
-         newYoGraphicsGlobalScaleVal = sim.getGlobalYoGraphicsScale();
-         yoGraphicsGlobalScaleTextField.setText(String.valueOf(newYoGraphicsGlobalScaleVal));
-
-         Border blackLine = BorderFactory.createLineBorder(Color.black);
-
-         // TitledBorder title = BorderFactory.createTitledBorder(blackLine,selectedVariable.getName());
-         // this.setBorder(title);
-         this.setBorder(blackLine);
-      }
-
-      public void commitChanges()
-      {
-         updateYoGraphicsGlobalScaleTextField();
-
-         sim.setYoGraphicsGlobalScale(newYoGraphicsGlobalScaleVal);
-      }
-
-      @Override
-      public void actionPerformed(ActionEvent event)
-      {
-         if (event.getSource() == yoGraphicsGlobalScaleTextField)
-            updateYoGraphicsGlobalScaleTextField();
-      }
-
-      private void updateYoGraphicsGlobalScaleTextField()
-      {
-         String text = yoGraphicsGlobalScaleTextField.getText();
-
-         try
-         {
-            newYoGraphicsGlobalScaleVal = Double.parseDouble(text);
-
-            if (newYoGraphicsGlobalScaleVal < 0.0)
-            {
-               newYoGraphicsGlobalScaleVal = Math.abs(newYoGraphicsGlobalScaleVal);
-               yoGraphicsGlobalScaleTextField.setText(String.valueOf(newYoGraphicsGlobalScaleVal));
-            }
-         }
-         catch (NumberFormatException e)
-         {
+            newYoGraphicsGlobalScaleVal = sim.getGlobalYoGraphicsScale();
             yoGraphicsGlobalScaleTextField.setText(String.valueOf(newYoGraphicsGlobalScaleVal));
-         }
-      }
-   }
+
+            this.getChildren().addAll(
+                    yoGraphicsGlobalScaleLabel,
+                    yoGraphicsGlobalScaleTextField
+            );
+        }
+
+        public void commitChanges() {
+            updateYoGraphicsGlobalScaleTextField();
+
+            sim.setYoGraphicsGlobalScale(newYoGraphicsGlobalScaleVal);
+        }
+
+        private void updateYoGraphicsGlobalScaleTextField() {
+            String text = yoGraphicsGlobalScaleTextField.getText();
+
+            try {
+                newYoGraphicsGlobalScaleVal = Double.parseDouble(text);
+
+                if (newYoGraphicsGlobalScaleVal < 0.0) {
+                    newYoGraphicsGlobalScaleVal = Math.abs(newYoGraphicsGlobalScaleVal);
+                    yoGraphicsGlobalScaleTextField.setText(String.valueOf(newYoGraphicsGlobalScaleVal));
+                }
+            } catch (NumberFormatException e) {
+                yoGraphicsGlobalScaleTextField.setText(String.valueOf(newYoGraphicsGlobalScaleVal));
+            }
+        }
+
+        @Override
+        public void handle(Event event) {
+            if (event.getSource() == yoGraphicsGlobalScaleTextField) {
+                updateYoGraphicsGlobalScaleTextField();
+            }
+        }
+    }
 }

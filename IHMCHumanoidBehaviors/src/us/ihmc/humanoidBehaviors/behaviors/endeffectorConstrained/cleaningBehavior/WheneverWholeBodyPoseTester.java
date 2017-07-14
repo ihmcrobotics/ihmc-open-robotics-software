@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -22,12 +23,9 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -39,6 +37,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WheneverWholeBodyPoseTester extends AbstractBehavior
 {
@@ -49,15 +49,15 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    
    private static boolean DEBUG = true;
    
-   private final DoubleYoVariable solutionQualityThreshold;
-   private final DoubleYoVariable solutionStableThreshold;
-   private final DoubleYoVariable jointLimitThreshold;
-   private final DoubleYoVariable currentSolutionQuality;
-   private final BooleanYoVariable isPaused;
-   private final BooleanYoVariable isStopped;
-   private final BooleanYoVariable isDone;
-   private final BooleanYoVariable hasSolverFailed;
-   private final BooleanYoVariable hasSentMessageToController;
+   private final YoDouble solutionQualityThreshold;
+   private final YoDouble solutionStableThreshold;
+   private final YoDouble jointLimitThreshold;
+   private final YoDouble currentSolutionQuality;
+   private final YoBoolean isPaused;
+   private final YoBoolean isStopped;
+   private final YoBoolean isDone;
+   private final YoBoolean hasSolverFailed;
+   private final YoBoolean hasSentMessageToController;
 
    private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
    private final SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
@@ -109,19 +109,19 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
-      solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
+      solutionQualityThreshold = new YoDouble(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.05);
-      solutionStableThreshold = new DoubleYoVariable(behaviorName + "solutionStableThreshold", registry);
+      solutionStableThreshold = new YoDouble(behaviorName + "solutionStableThreshold", registry);
       solutionStableThreshold.set(0.005);
-      jointLimitThreshold = new DoubleYoVariable(behaviorName + "jointLimitThreshold", registry);
+      jointLimitThreshold = new YoDouble(behaviorName + "jointLimitThreshold", registry);
       jointLimitThreshold.set(Math.PI/180 * 2.5);
-      isPaused = new BooleanYoVariable(behaviorName + "IsPaused", registry);
-      isStopped = new BooleanYoVariable(behaviorName + "IsStopped", registry);
-      isDone = new BooleanYoVariable(behaviorName + "IsDone", registry);
-      hasSolverFailed = new BooleanYoVariable(behaviorName + "HasSolverFailed", registry);
-      hasSentMessageToController = new BooleanYoVariable(behaviorName + "HasSentMessageToController", registry);
+      isPaused = new YoBoolean(behaviorName + "IsPaused", registry);
+      isStopped = new YoBoolean(behaviorName + "IsStopped", registry);
+      isDone = new YoBoolean(behaviorName + "IsDone", registry);
+      hasSolverFailed = new YoBoolean(behaviorName + "HasSolverFailed", registry);
+      hasSentMessageToController = new YoBoolean(behaviorName + "HasSentMessageToController", registry);
 
-      currentSolutionQuality = new DoubleYoVariable(behaviorName + "CurrentSolutionQuality", registry);
+      currentSolutionQuality = new YoDouble(behaviorName + "CurrentSolutionQuality", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -678,7 +678,7 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
       
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(node.getNodeData(0));
       
-      Pose desiredHandPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D desiredHandPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       
       if(node.getDimensionOfNodeData() == 2)
       {
@@ -699,7 +699,7 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    {
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D aPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    
@@ -707,17 +707,17 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    {
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
-      Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
+      Pose3D aPose = new Pose3D(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
       setWholeBodyPose(aPose, pelvisHeight, chestYaw, chestPitch);
    }
    
-   public void setWholeBodyPose(Pose desiredHandPose, double chestYaw)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double chestYaw)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -737,13 +737,13 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
       this.holdCurrentPelvisHeight();
    }
 
-   public void setWholeBodyPose(Pose desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
+   public void setWholeBodyPose(Pose3D desiredHandPose, double pelvisHeight, double chestYaw, double chestPitch)
    {
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPoint());
+      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
             
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -768,7 +768,7 @@ public class WheneverWholeBodyPoseTester extends AbstractBehavior
    {  
       CollisionModelBox solarPanelCollisionModel;
       solarPanelCollisionModel = new CollisionModelBox(getRobotCollisionModel().getCollisionShapeFactory(), solarPanel.getRigidBodyTransform(),
-                                                       solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeZ());
+                                                       solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeW());
       solarPanelCollisionModel.getCollisionShape().setCollisionGroup(0b11111111101111);
       solarPanelCollisionModel.getCollisionShape().setCollisionMask(0b11111111111111);    
    }

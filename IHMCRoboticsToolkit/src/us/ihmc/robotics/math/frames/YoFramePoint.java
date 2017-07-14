@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
@@ -22,7 +22,7 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
       super(namePrefix, nameSuffix, frame, registry);
    }
 
-   public YoFramePoint(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame frame)
+   public YoFramePoint(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame frame)
    {
       super(xVariable, yVariable, zVariable, frame);
    }

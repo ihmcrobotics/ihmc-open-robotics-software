@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 
 //~--- non-JDK imports --------------------------------------------------------
@@ -25,7 +25,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    private final double reflect;
    private final PushRodTransmissionJoint pushRodTransmissionJoint;
 
-   private DoubleYoVariable pitchAngleOffset;
+   private YoDouble pitchAngleOffset;
 
    private boolean USING_A2J_VEL_FOR_ROBOT_CONTROL = true;
 
@@ -255,12 +255,12 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
    public void allowTopJointAngleOffset(String string, double topJointOffset, YoVariableRegistry parentRegistry)
    {
-      pitchAngleOffset = new DoubleYoVariable(string + "pitchAngleOffset", parentRegistry);
+      pitchAngleOffset = new YoDouble(string + "pitchAngleOffset", parentRegistry);
       pitchAngleOffset.set(topJointOffset);
    }
 
-   public void renishawToFutekForce(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData, DoubleYoVariable renishawInFutekSpace0,
-         DoubleYoVariable renishawInFutekSpace1)
+   public void renishawToFutekForce(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData, YoDouble renishawInFutekSpace0,
+         YoDouble renishawInFutekSpace1)
    {
       if (!efficientPushrodTransmissionJacobian.isUsingFuteks())
       {

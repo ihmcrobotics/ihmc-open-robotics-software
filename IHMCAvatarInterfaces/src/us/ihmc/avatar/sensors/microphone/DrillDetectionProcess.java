@@ -2,7 +2,7 @@ package us.ihmc.avatar.sensors.microphone;
 
 import java.io.IOException;
 
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPack
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class DrillDetectionProcess extends DrillDetectionThread implements NetStateListener
+public class DrillDetectionProcess extends DrillDetectionThread implements ConnectionStateListener
 {
    public static final long SEND_PERIOD_MS = 1000;
 
@@ -65,7 +65,7 @@ public class DrillDetectionProcess extends DrillDetectionThread implements NetSt
    public void terminate() throws InterruptedException
    {
       System.out.println("Disconnection from the network manager...");
-      packetCommunicator.close();
+      packetCommunicator.disconnect();
 
       System.out.println("Shutting down the webcam thread...");
       shutdown();

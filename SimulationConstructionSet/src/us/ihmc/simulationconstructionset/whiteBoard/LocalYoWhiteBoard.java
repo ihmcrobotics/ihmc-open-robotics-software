@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LocalYoWhiteBoard extends YoWhiteBoard
 {

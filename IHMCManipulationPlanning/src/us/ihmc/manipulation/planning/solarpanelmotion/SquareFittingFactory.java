@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SquareFittingFactory
 {
@@ -310,7 +310,7 @@ public class SquareFittingFactory
    private void updateSolarPanel()
    {
       Quaternion solarPanelOrientation = new Quaternion(squareRotationMatrix);
-      Pose solarPanelPose = new Pose(squarePosition, solarPanelOrientation);
+      Pose3D solarPanelPose = new Pose3D(squarePosition, solarPanelOrientation);
       PrintTools.info("Fitted panel info ");
       System.out.println(solarPanelPose);
       System.out.println(squareSizeX);

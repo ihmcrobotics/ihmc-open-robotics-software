@@ -1,24 +1,24 @@
 package us.ihmc.exampleSimulations.doubleMassSpring;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class DoubleMassSpringController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final EnumYoVariable<ControlMode> controlMode = new EnumYoVariable<ControlMode>("controlMode", registry, ControlMode.class);
+   private final YoEnum<ControlMode> controlMode = new YoEnum<ControlMode>("controlMode", registry, ControlMode.class);
 
-   private final DoubleYoVariable kSpring = new DoubleYoVariable("kSpring", registry);
-   private final DoubleYoVariable x1Des = new DoubleYoVariable("x1Des", registry);
-   private final DoubleYoVariable x2Des = new DoubleYoVariable("x2Des", registry);
+   private final YoDouble kSpring = new YoDouble("kSpring", registry);
+   private final YoDouble x1Des = new YoDouble("x1Des", registry);
+   private final YoDouble x2Des = new YoDouble("x2Des", registry);
 
-   private final DoubleYoVariable k1 = new DoubleYoVariable("k1", registry);
-   private final DoubleYoVariable k2 = new DoubleYoVariable("k2", registry);
-   private final DoubleYoVariable b1 = new DoubleYoVariable("b1", registry);
-   private final DoubleYoVariable b2 = new DoubleYoVariable("b2", registry);
+   private final YoDouble k1 = new YoDouble("k1", registry);
+   private final YoDouble k2 = new YoDouble("k2", registry);
+   private final YoDouble b1 = new YoDouble("b1", registry);
+   private final YoDouble b2 = new YoDouble("b2", registry);
 
    private final DoubleMassSpringRobot robot;
 

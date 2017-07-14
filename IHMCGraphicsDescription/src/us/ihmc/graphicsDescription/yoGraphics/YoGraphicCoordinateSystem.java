@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -22,7 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGraphic
 {
-   protected final DoubleYoVariable x, y, z, yaw, pitch, roll;
+   protected final YoDouble x, y, z, yaw, pitch, roll;
    protected final double scale;
    protected AppearanceDefinition arrowColor = YoAppearance.Gray();
    private double colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
@@ -30,8 +30,8 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    private final double[] tempYawPitchRoll = new double[3];
 
-   public YoGraphicCoordinateSystem(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, DoubleYoVariable yaw, DoubleYoVariable pitch,
-         DoubleYoVariable roll, double scale)
+   public YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch,
+         YoDouble roll, double scale)
    {
       super(name);
 
@@ -46,8 +46,8 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       this.scale = scale;
    }
 
-   YoGraphicCoordinateSystem(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, DoubleYoVariable yaw, DoubleYoVariable pitch,
-         DoubleYoVariable roll, double[] constants)
+   YoGraphicCoordinateSystem(String name, YoDouble x, YoDouble y, YoDouble z, YoDouble yaw, YoDouble pitch,
+         YoDouble roll, double[] constants)
    {
       super(name);
 
@@ -278,9 +278,9 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       return RemoteGraphicType.COORDINATE_SYSTEM_DGO;
    }
 
-   public DoubleYoVariable[] getVariables()
+   public YoDouble[] getVariables()
    {
-      return new DoubleYoVariable[] { x, y, z, yaw, pitch, roll };
+      return new YoDouble[] { x, y, z, yaw, pitch, roll };
    }
 
    public double[] getConstants()

@@ -7,8 +7,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -38,17 +38,17 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final YoFrameVector linearAcceleration;
 
    // Variables use estimating the IMUs drift around z
-   private final DoubleYoVariable firstIMUYaw;
-   private final DoubleYoVariable secondIMUYaw;
-   private final DoubleYoVariable firstIMUYawPrevValue;
-   private final DoubleYoVariable secondIMUYawPrevValue;
-   private final DoubleYoVariable firstDriftYawRate;
-   private final DoubleYoVariable secondDriftYawRate;
-   private final DoubleYoVariable alphaIMUDriftFilter;
+   private final YoDouble firstIMUYaw;
+   private final YoDouble secondIMUYaw;
+   private final YoDouble firstIMUYawPrevValue;
+   private final YoDouble secondIMUYawPrevValue;
+   private final YoDouble firstDriftYawRate;
+   private final YoDouble secondDriftYawRate;
+   private final YoDouble alphaIMUDriftFilter;
    private final AlphaFilteredYoVariable firstDriftYawRateFiltered;
    private final AlphaFilteredYoVariable secondDriftYawRateFiltered;
-   private final DoubleYoVariable firstDriftYaw;
-   private final DoubleYoVariable secondDriftYaw;
+   private final YoDouble firstDriftYaw;
+   private final YoDouble secondDriftYaw;
 
    private final double updateDT;
 
@@ -95,20 +95,20 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       angularVelocity = new YoFrameVector("qd_w", sensorName, fusedMeasurementFrame, registry);
       linearAcceleration = new YoFrameVector("qdd_", sensorName, fusedMeasurementFrame, registry);
 
-      firstIMUYaw = new DoubleYoVariable(firstIMU.getSensorName() + "Yaw", registry);
-      secondIMUYaw = new DoubleYoVariable(secondIMU.getSensorName() + "Yaw", registry);
-      firstIMUYawPrevValue = new DoubleYoVariable(firstIMU.getSensorName() + "YawPrevValue", registry);
-      secondIMUYawPrevValue = new DoubleYoVariable(secondIMU.getSensorName() + "YawPrevValue", registry);
-      firstDriftYawRate = new DoubleYoVariable(firstIMU.getSensorName() + "EstimatedDriftYawRate", registry);
-      secondDriftYawRate = new DoubleYoVariable(secondIMU.getSensorName() + "EstimatedDriftYawRate", registry);
-      alphaIMUDriftFilter = new DoubleYoVariable("alphaIMUDriftFilter", registry);
+      firstIMUYaw = new YoDouble(firstIMU.getSensorName() + "Yaw", registry);
+      secondIMUYaw = new YoDouble(secondIMU.getSensorName() + "Yaw", registry);
+      firstIMUYawPrevValue = new YoDouble(firstIMU.getSensorName() + "YawPrevValue", registry);
+      secondIMUYawPrevValue = new YoDouble(secondIMU.getSensorName() + "YawPrevValue", registry);
+      firstDriftYawRate = new YoDouble(firstIMU.getSensorName() + "EstimatedDriftYawRate", registry);
+      secondDriftYawRate = new YoDouble(secondIMU.getSensorName() + "EstimatedDriftYawRate", registry);
+      alphaIMUDriftFilter = new YoDouble("alphaIMUDriftFilter", registry);
       alphaIMUDriftFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, updateDT));
       firstDriftYawRateFiltered = new AlphaFilteredYoVariable(firstIMU.getSensorName() + "EstimatedDriftYawRateFiltered", registry, alphaIMUDriftFilter,
                                                               firstDriftYawRate);
       secondDriftYawRateFiltered = new AlphaFilteredYoVariable(secondIMU.getSensorName() + "EstimatedDriftYawRateFiltered", registry, alphaIMUDriftFilter,
                                                                secondDriftYawRate);
-      firstDriftYaw = new DoubleYoVariable(firstIMU.getSensorName() + "EstimatedDriftYaw", registry);
-      secondDriftYaw = new DoubleYoVariable(secondIMU.getSensorName() + "EstimatedDriftYaw", registry);
+      firstDriftYaw = new YoDouble(firstIMU.getSensorName() + "EstimatedDriftYaw", registry);
+      secondDriftYaw = new YoDouble(secondIMU.getSensorName() + "EstimatedDriftYaw", registry);
 
       fusedFrameOrientation.setToZero(fusedMeasurementFrame);
 

@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 

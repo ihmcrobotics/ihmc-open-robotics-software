@@ -40,8 +40,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -62,7 +62,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private CommunicationBridge communicationBridge;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private FullHumanoidRobotModel fullRobotModel;
 
@@ -84,7 +84,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       networkProcessor = new PacketRouter<>(PacketDestination.class);
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      this.yoTime = new DoubleYoVariable("yoTime", registry);
+      this.yoTime = new YoDouble("yoTime", registry);
 
       behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
@@ -151,8 +151,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          ThreadTools.sleepForever();
       }
 
-      behaviorCommunicatorClient.close();
-      behaviorCommunicatorServer.close();
+      behaviorCommunicatorClient.disconnect();
+      behaviorCommunicatorServer.disconnect();
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)

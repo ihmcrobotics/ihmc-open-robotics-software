@@ -6,10 +6,10 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.maps.EnumDoubleMap;
@@ -26,30 +26,30 @@ public class WandererStandPrep implements WandererController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererStandPrep");
 
-   private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
+   private final YoDouble initialTime = new YoDouble("initialTime", registry);
    private final YoPolynomial trajectory = new YoPolynomial("trajectory", 4, registry);
 
    private final EnumMap<WandererJoint, OneDoFJoint> joints = new EnumMap<>(WandererJoint.class);
    private final EnumMap<WandererJoint, PDController> controllers = new EnumMap<>(WandererJoint.class);
 
-   private final EnumMap<WandererStandPrepSetpoints, DoubleYoVariable> desiredPositions = new EnumMap<>(WandererStandPrepSetpoints.class);
-   private final EnumMap<WandererStandPrepSetpoints, DoubleYoVariable> kps = new EnumMap<>(WandererStandPrepSetpoints.class);
-   private final EnumMap<WandererStandPrepSetpoints, DoubleYoVariable> kds = new EnumMap<>(WandererStandPrepSetpoints.class);
-   private final EnumMap<WandererStandPrepSetpoints, DoubleYoVariable> dampingValues = new EnumMap<>(WandererStandPrepSetpoints.class);
+   private final EnumMap<WandererStandPrepSetpoints, YoDouble> desiredPositions = new EnumMap<>(WandererStandPrepSetpoints.class);
+   private final EnumMap<WandererStandPrepSetpoints, YoDouble> kps = new EnumMap<>(WandererStandPrepSetpoints.class);
+   private final EnumMap<WandererStandPrepSetpoints, YoDouble> kds = new EnumMap<>(WandererStandPrepSetpoints.class);
+   private final EnumMap<WandererStandPrepSetpoints, YoDouble> dampingValues = new EnumMap<>(WandererStandPrepSetpoints.class);
 
    private final EnumDoubleMap<WandererJoint> initialPositions = new EnumDoubleMap<>(WandererJoint.class);
 
-   private final BooleanYoVariable startStandprep = new BooleanYoVariable("startStandprep", registry);
-   private final EnumYoVariable<StandPrepState> standPrepState = new EnumYoVariable<>("standPrepState", registry, StandPrepState.class);
+   private final YoBoolean startStandprep = new YoBoolean("startStandprep", registry);
+   private final YoEnum<StandPrepState> standPrepState = new YoEnum<>("standPrepState", registry, StandPrepState.class);
 
-   private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
+   private final YoDouble crouch = new YoDouble("crouch", registry);
 
-   private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
+   private final YoBoolean enableOutput = new YoBoolean("enableStandPrepOutput", registry);
 
    private double springCalibration_t0;
-   private final BooleanYoVariable springCalibration_wasEnabled = new BooleanYoVariable("springCalibrationEnabled",registry);
-   private final BooleanYoVariable springCalibration_isEnabled = new BooleanYoVariable("startSpringCalibration", registry);
-   private final DoubleYoVariable springTime = new DoubleYoVariable("springTime",registry);
+   private final YoBoolean springCalibration_wasEnabled = new YoBoolean("springCalibrationEnabled",registry);
+   private final YoBoolean springCalibration_isEnabled = new YoBoolean("startSpringCalibration", registry);
+   private final YoDouble springTime = new YoDouble("springTime",registry);
 
    @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
@@ -62,10 +62,10 @@ public class WandererStandPrep implements WandererController
 
       for (WandererStandPrepSetpoints setpoint : WandererStandPrepSetpoints.values)
       {
-         DoubleYoVariable desiredPosition = new DoubleYoVariable(setpoint.getName() + "_q_d", registry);
-         DoubleYoVariable kp = new DoubleYoVariable(setpoint.getName() + "_kp", registry);
-         DoubleYoVariable kd = new DoubleYoVariable(setpoint.getName() + "_kd", registry);
-         DoubleYoVariable damping = new DoubleYoVariable(setpoint.getName() + "_damping", registry);
+         YoDouble desiredPosition = new YoDouble(setpoint.getName() + "_q_d", registry);
+         YoDouble kp = new YoDouble(setpoint.getName() + "_kp", registry);
+         YoDouble kd = new YoDouble(setpoint.getName() + "_kd", registry);
+         YoDouble damping = new YoDouble(setpoint.getName() + "_damping", registry);
 
          desiredPosition.set(setpoint.getQ());
          kp.set(setpoint.getKp());

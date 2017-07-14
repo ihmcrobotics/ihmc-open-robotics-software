@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.kinematics;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoValkyrieJointWriter implements ValkyrieJointInterface
 {
@@ -13,17 +13,17 @@ public class YoValkyrieJointWriter implements ValkyrieJointInterface
    private double motorCurrent;
    private double commandedMotorCurrent;
 
-   private final DoubleYoVariable q_d;
-   private final DoubleYoVariable qd_d;
-   private final DoubleYoVariable f_d;
+   private final YoDouble q_d;
+   private final YoDouble qd_d;
+   private final YoDouble f_d;
 
    public YoValkyrieJointWriter(String name, YoVariableRegistry registry)
    {
       this.name = name;
 
-      this.q_d = new DoubleYoVariable(name + "_q_d", registry);
-      this.qd_d = new DoubleYoVariable(name + "_qd_d", registry);
-      this.f_d = new DoubleYoVariable(name + "_tau_d", registry);
+      this.q_d = new YoDouble(name + "_q_d", registry);
+      this.qd_d = new YoDouble(name + "_qd_d", registry);
+      this.f_d = new YoDouble(name + "_tau_d", registry);
 
    }
 

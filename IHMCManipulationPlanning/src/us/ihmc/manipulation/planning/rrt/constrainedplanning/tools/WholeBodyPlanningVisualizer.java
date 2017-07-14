@@ -10,14 +10,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode3D;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNodeTree;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WholeBodyPlanningVisualizer
 {
@@ -52,7 +52,7 @@ public class WholeBodyPlanningVisualizer
       yoGraphicsListRegistry.registerYoGraphic("inho", inhoYoFramePoint);
       
       YoFramePoint firstCircleCenter = new YoFramePoint("firstCircleCenter", ReferenceFrame.getWorldFrame(), registry);   
-      DoubleYoVariable firstCircleRadius = new DoubleYoVariable("firstRadius", registry);
+      YoDouble firstCircleRadius = new YoDouble("firstRadius", registry);
       YoArtifactOval firstCircle = new YoArtifactOval("inscribedCircle", firstCircleCenter, firstCircleRadius, Color.GREEN);
       firstCircleRadius.set(0.05);      
       firstCircleCenter.setX(0.01);
@@ -61,7 +61,7 @@ public class WholeBodyPlanningVisualizer
       
 
       YoFramePoint secondCircleCenter = new YoFramePoint("secondCircleCenter", ReferenceFrame.getWorldFrame(), registry);   
-      DoubleYoVariable secondCircleRadius = new DoubleYoVariable("secondRadius", registry);
+      YoDouble secondCircleRadius = new YoDouble("secondRadius", registry);
       YoArtifactOval secondCircle = new YoArtifactOval("inscribedCircle", secondCircleCenter, secondCircleRadius, Color.BLACK);      
       secondCircleRadius.set(0.1);      
       secondCircleCenter.setX(0.0);
@@ -70,7 +70,7 @@ public class WholeBodyPlanningVisualizer
       
       
       YoFramePoint thirdCircleCenter = new YoFramePoint("thirdCircleCenter", ReferenceFrame.getWorldFrame(), registry);   
-      DoubleYoVariable thirdCircleRadius = new DoubleYoVariable("thirdRadius", registry);
+      YoDouble thirdCircleRadius = new YoDouble("thirdRadius", registry);
       YoArtifactOval thirdCircle = new YoArtifactOval("inscribedCircleaaaa", thirdCircleCenter, thirdCircleRadius, Color.RED);      
       thirdCircleRadius.set(0.1);      
       thirdCircleCenter.setX(0.1);

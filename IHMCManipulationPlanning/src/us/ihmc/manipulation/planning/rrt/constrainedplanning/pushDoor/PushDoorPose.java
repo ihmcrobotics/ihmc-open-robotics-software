@@ -1,11 +1,11 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.pushDoor;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.manipulation.planning.trajectory.EndEffectorPose;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -32,7 +32,7 @@ public class PushDoorPose implements EndEffectorPose
    }
 
    @Override
-   public Pose getEndEffectorPose()
+   public Pose3D getEndEffectorPose()
    {  
       FramePose dummyFramePose = new FramePose(pushDoor.getDoorAxis());      
       dummyFramePose.changeFrame(worldFrame);
@@ -59,6 +59,6 @@ public class PushDoorPose implements EndEffectorPose
          
 
       
-      return new Pose(endEffectorRigidBody);
+      return new Pose3D(endEffectorRigidBody);
    }
 }

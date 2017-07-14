@@ -51,7 +51,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -61,6 +60,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -79,7 +79,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
-   public static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "hand", getRobotSidePrefix(RobotSide.RIGHT) + "hand");
+   public static final SideDependentList<String> handNames = new SideDependentList<>();
    public static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "foot", getRobotSidePrefix(RobotSide.RIGHT) + "foot");
 
    private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
@@ -138,9 +138,15 @@ public class AtlasJointMap implements DRCRobotJointMap
          armJointNames.put(forcedSideJointNames[l_arm_elx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
 
          if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+         {
             limbNames.put(prefix + "hand", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+            handNames.put(robotSide, getRobotSidePrefix(robotSide) + "hand");
+         }
          else
+         {
             limbNames.put(prefix + "larm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+            handNames.put(robotSide, getRobotSidePrefix(robotSide) + "larm");
+         }
 
          if (atlasVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
             continue;

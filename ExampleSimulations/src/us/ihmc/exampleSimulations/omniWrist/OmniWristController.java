@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.omniWrist;
 
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.robotController.RobotController;
@@ -14,11 +14,11 @@ public class OmniWristController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
    private final PDController pdControllerA, pdControllerB;
-   private final DoubleYoVariable q_d_jointOneA = new DoubleYoVariable("q_d_jointOneA", registry);
-   private final DoubleYoVariable q_d_jointOneB = new DoubleYoVariable("q_d_jointOneB", registry);
+   private final YoDouble q_d_jointOneA = new YoDouble("q_d_jointOneA", registry);
+   private final YoDouble q_d_jointOneB = new YoDouble("q_d_jointOneB", registry);
    
-   private final DoubleYoVariable qd_d_jointOneA = new DoubleYoVariable("qd_d_jointOneA", registry);
-   private final DoubleYoVariable qd_d_jointOneB = new DoubleYoVariable("qd_d_jointOneB", registry);
+   private final YoDouble qd_d_jointOneA = new YoDouble("qd_d_jointOneA", registry);
+   private final YoDouble qd_d_jointOneB = new YoDouble("qd_d_jointOneB", registry);
    
    private final YoFunctionGenerator functionGeneratorA, functionGeneratorB;
    

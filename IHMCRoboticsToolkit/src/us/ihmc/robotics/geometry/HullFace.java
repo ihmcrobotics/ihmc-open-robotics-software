@@ -5,18 +5,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 /**
  * @author agrabertilton
  */
 public class HullFace
 {
-   private Plane3d plane = new Plane3d();
+   private Plane3D plane = new Plane3D();
    private List<Point3D> facePoints = new ArrayList<Point3D>();
    private double slopeAngle;
    private double area;
@@ -97,7 +97,7 @@ public class HullFace
       return area;
    }
 
-   public void getPlane(Plane3d planeToPack)
+   public void getPlane(Plane3D planeToPack)
    {
       planeToPack.set(plane);
    }
@@ -145,7 +145,7 @@ public class HullFace
       }
    }
 
-   public void get2DPolygonAndPose(ConvexPolygon2D polygonToPack, Pose polygonPose)
+   public void get2DPolygonAndPose(ConvexPolygon2D polygonToPack, Pose3D polygonPose)
    {
       if (facePoints.isEmpty())
       {

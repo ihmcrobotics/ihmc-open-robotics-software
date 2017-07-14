@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 
 public abstract class ReconnectingTCPConnection
 {
@@ -22,7 +22,7 @@ public abstract class ReconnectingTCPConnection
    private final ReentrantLock writeLock = new ReentrantLock(true);
    private volatile Status status = Status.DISCONNECTED;
    protected final Object connectionStatusSync = new Object();
-   protected final List<NetStateListener> listeners = Collections.synchronizedList(new ArrayList<NetStateListener>());
+   protected final List<ConnectionStateListener> listeners = Collections.synchronizedList(new ArrayList<ConnectionStateListener>());
    protected final byte[] buffer;
    protected DataInputStream inputStream;
    protected OutputStream outputStream;
@@ -116,7 +116,7 @@ public abstract class ReconnectingTCPConnection
       return status == Status.CONNECTED;  // Not synchronized, otherwise potential deadlocks 
    }
 
-   public void attachStateListener(NetStateListener stateListener)
+   public void attachStateListener(ConnectionStateListener stateListener)
    {
       listeners.add(stateListener);
       if(isConnected())
@@ -127,7 +127,7 @@ public abstract class ReconnectingTCPConnection
    
    protected void notifyConnectedListeners()
    {
-      for(NetStateListener listener : listeners)
+      for(ConnectionStateListener listener : listeners)
       {
          listener.connected();
       }
@@ -135,7 +135,7 @@ public abstract class ReconnectingTCPConnection
    
    protected void notifyDisconnectedListeners()
    {
-      for(NetStateListener listener : listeners)
+      for(ConnectionStateListener listener : listeners)
       {
          listener.disconnected();
       }

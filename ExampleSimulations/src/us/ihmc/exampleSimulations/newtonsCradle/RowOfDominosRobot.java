@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -24,9 +24,9 @@ public class RowOfDominosRobot extends Robot
       Random random = new Random(1999L);
 
       final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry());
-      final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
-      final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
-      final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
+      final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoVariableRegistry());
+      final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoVariableRegistry());
+      final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoVariableRegistry());
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
@@ -104,7 +104,7 @@ public class RowOfDominosRobot extends Robot
          }
 
          @Override
-         public DoubleYoVariable[] getOutputVariables()
+         public YoDouble[] getOutputVariables()
          {
             return null;
          }

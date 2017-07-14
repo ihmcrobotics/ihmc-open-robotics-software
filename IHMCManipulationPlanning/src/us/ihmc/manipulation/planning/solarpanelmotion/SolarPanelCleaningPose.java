@@ -1,9 +1,9 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SolarPanelCleaningPose
 {
@@ -12,7 +12,7 @@ public class SolarPanelCleaningPose
    private double vCoordinate;
    private double wCoordinate;
    private double zRotation;
-   private Pose pose;
+   private Pose3D pose;
 
    public SolarPanelCleaningPose(SolarPanel solarPanel)
    {
@@ -91,14 +91,14 @@ public class SolarPanelCleaningPose
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    }
 
-   public Pose getPose()
+   public Pose3D getPose()
    {
       return this.pose;
    }
 
-   private Pose getPose(double u, double v, double w, double zRotation)
+   private Pose3D getPose(double u, double v, double w, double zRotation)
    {
-      Pose pose = new Pose();
+      Pose3D pose = new Pose3D();
 
       RigidBodyTransform poseTransform = solarPanel.getRigidBodyTransform();
 

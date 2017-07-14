@@ -20,9 +20,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 
@@ -283,9 +283,9 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    @SuppressWarnings({"rawtypes"})
    private void setContainerType(YoVariable variable)
    {
-      if ((variable instanceof EnumYoVariable<?>) && USE_NEW_DISPLAY_FOR_ENUMS)
+      if ((variable instanceof YoEnum<?>) && USE_NEW_DISPLAY_FOR_ENUMS)
       {
-         EnumYoVariable<?> enumVariable = (EnumYoVariable<?>) variable;
+         YoEnum<?> enumVariable = (YoEnum<?>) variable;
          switchContainerType(new YoEnumEntryContainer(enumVariable.getEnumValuesAsString()));
       }
       else

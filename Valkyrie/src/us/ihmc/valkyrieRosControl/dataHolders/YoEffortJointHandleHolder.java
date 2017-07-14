@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
@@ -14,13 +14,13 @@ public class YoEffortJointHandleHolder
    private final OneDoFJoint joint;
    private final DesiredJointDataHolder.DesiredJointData desiredJointData;
 
-   private final DoubleYoVariable tauMeasured;
-   private final DoubleYoVariable q;
-   private final DoubleYoVariable qd;
+   private final YoDouble tauMeasured;
+   private final YoDouble q;
+   private final YoDouble qd;
 
-   private final DoubleYoVariable controllerQddDesired;
-   private final DoubleYoVariable controllerTauDesired;
-   private final DoubleYoVariable tauDesired;
+   private final YoDouble controllerQddDesired;
+   private final YoDouble controllerTauDesired;
+   private final YoDouble tauDesired;
 
    public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
    {
@@ -31,12 +31,12 @@ public class YoEffortJointHandleHolder
       this.joint = joint;
       this.desiredJointData = desiredJointData;
 
-      this.tauMeasured = new DoubleYoVariable(name + "TauMeasured", registry);
-      this.q = new DoubleYoVariable(name + "_q", registry);
-      this.qd = new DoubleYoVariable(name + "_qd", registry);
-      this.controllerQddDesired = new DoubleYoVariable(name + "ControllerQddDesired", registry);
-      this.controllerTauDesired = new DoubleYoVariable(name + "ControllerTauDesired", registry);
-      this.tauDesired = new DoubleYoVariable(name + "TauDesired", registry);
+      this.tauMeasured = new YoDouble(name + "TauMeasured", registry);
+      this.q = new YoDouble(name + "_q", registry);
+      this.qd = new YoDouble(name + "_qd", registry);
+      this.controllerQddDesired = new YoDouble(name + "ControllerQddDesired", registry);
+      this.controllerTauDesired = new YoDouble(name + "ControllerTauDesired", registry);
+      this.tauDesired = new YoDouble(name + "TauDesired", registry);
 
       parentRegistry.addChild(registry);
    }

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.m2;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -18,12 +18,12 @@ public class PowerAndEnergyCalculator implements RobotController
 
    private final M2Robot m2Robot;
 
-   private final DoubleYoVariable[] jointTorques;
-   private final DoubleYoVariable[] jointVelocities;
-   private final DoubleYoVariable[] currents;
-   private final DoubleYoVariable[] gearboxEfficiencies;
-   private final DoubleYoVariable[] jointPowers;
-   private final DoubleYoVariable[] jointMechanicalPowers;
+   private final YoDouble[] jointTorques;
+   private final YoDouble[] jointVelocities;
+   private final YoDouble[] currents;
+   private final YoDouble[] gearboxEfficiencies;
+   private final YoDouble[] jointPowers;
+   private final YoDouble[] jointMechanicalPowers;
    private final AlphaFilteredYoVariable[] maximumJointSpeeds;
    private final AlphaFilteredYoVariable[] maximumJointTorques;
 
@@ -34,31 +34,31 @@ public class PowerAndEnergyCalculator implements RobotController
 
 // private final YoVariable[] averageJointSpeeds;
 // private final YoVariable[] averageJointTorques;
-   private final DoubleYoVariable[] peakMechanicalPowers;
-   private final DoubleYoVariable[] averageMechanicalJointPowers;
-   private final DoubleYoVariable[] totalMechanicalJointEnergy;
+   private final YoDouble[] peakMechanicalPowers;
+   private final YoDouble[] averageMechanicalJointPowers;
+   private final YoDouble[] totalMechanicalJointEnergy;
 
-   private final DoubleYoVariable totalMass;
+   private final YoDouble totalMass;
 
-   private final DoubleYoVariable instantaneousMechanicalPower;
-   private final DoubleYoVariable averageMechanicalPower;
-   private final DoubleYoVariable totalMechanicalEnergy;
-   private final DoubleYoVariable mechanicalCostOfTransport;
+   private final YoDouble instantaneousMechanicalPower;
+   private final YoDouble averageMechanicalPower;
+   private final YoDouble totalMechanicalEnergy;
+   private final YoDouble mechanicalCostOfTransport;
    
-   private final DoubleYoVariable totalCurrentMag;
-   private final DoubleYoVariable instantaneousElectricalPower;
-   private final DoubleYoVariable averageElecticalPower;
-   private final DoubleYoVariable totalElectricalEnergy;
-   private final DoubleYoVariable electricalCostOfTransport;
+   private final YoDouble totalCurrentMag;
+   private final YoDouble instantaneousElectricalPower;
+   private final YoDouble averageElecticalPower;
+   private final YoDouble totalElectricalEnergy;
+   private final YoDouble electricalCostOfTransport;
    
-   private final DoubleYoVariable previousTime;
-   private final DoubleYoVariable runningTime;
-   private final DoubleYoVariable totalDistance;
-   private final DoubleYoVariable averageWalkSpeed;
-   private final DoubleYoVariable xPosition;
-   private final DoubleYoVariable yPosition;
-   private final DoubleYoVariable xPositionPrevious;
-   private final DoubleYoVariable yPositionPrevious;
+   private final YoDouble previousTime;
+   private final YoDouble runningTime;
+   private final YoDouble totalDistance;
+   private final YoDouble averageWalkSpeed;
+   private final YoDouble xPosition;
+   private final YoDouble yPosition;
+   private final YoDouble xPositionPrevious;
+   private final YoDouble yPositionPrevious;
    private boolean initializedPosition = false;
 
 
@@ -76,8 +76,8 @@ public class PowerAndEnergyCalculator implements RobotController
       this.m2Robot = m2Robot;
 
 
-      xPosition = (DoubleYoVariable)m2Robot.getVariable("q_x");
-      yPosition = (DoubleYoVariable)m2Robot.getVariable("q_y");
+      xPosition = (YoDouble)m2Robot.getVariable("q_x");
+      yPosition = (YoDouble)m2Robot.getVariable("q_y");
 
       harmonicDriveEfficiencyCalculator = new M2HarmonicDriveEfficiencyCalculator();
 
@@ -88,12 +88,12 @@ public class PowerAndEnergyCalculator implements RobotController
       };
 
       int numberOfJoints = listOfJointNames.length * prefixes.length;
-      jointTorques = new DoubleYoVariable[numberOfJoints];
-      jointVelocities = new DoubleYoVariable[numberOfJoints];
-      currents = new DoubleYoVariable[numberOfJoints];
-      gearboxEfficiencies = new DoubleYoVariable[numberOfJoints];
-      jointPowers = new DoubleYoVariable[numberOfJoints];
-      jointMechanicalPowers = new DoubleYoVariable[numberOfJoints];
+      jointTorques = new YoDouble[numberOfJoints];
+      jointVelocities = new YoDouble[numberOfJoints];
+      currents = new YoDouble[numberOfJoints];
+      gearboxEfficiencies = new YoDouble[numberOfJoints];
+      jointPowers = new YoDouble[numberOfJoints];
+      jointMechanicalPowers = new YoDouble[numberOfJoints];
       maximumJointSpeeds = new AlphaFilteredYoVariable[numberOfJoints];
       maximumJointTorques = new AlphaFilteredYoVariable[numberOfJoints];
 
@@ -104,31 +104,31 @@ public class PowerAndEnergyCalculator implements RobotController
 
 //    averageJointSpeeds = new YoVariable[numberOfJoints];
 //    averageJointTorques = new YoVariable[numberOfJoints];
-      peakMechanicalPowers = new DoubleYoVariable[numberOfJoints];
-      averageMechanicalJointPowers = new DoubleYoVariable[numberOfJoints];
-      totalMechanicalJointEnergy = new DoubleYoVariable[numberOfJoints];
+      peakMechanicalPowers = new YoDouble[numberOfJoints];
+      averageMechanicalJointPowers = new YoDouble[numberOfJoints];
+      totalMechanicalJointEnergy = new YoDouble[numberOfJoints];
 
-      totalMass = new DoubleYoVariable("totalMass", "Total mass of the robot [kg]", registry);
+      totalMass = new YoDouble("totalMass", "Total mass of the robot [kg]", registry);
  
-      instantaneousMechanicalPower = new DoubleYoVariable("instantaneousMechanicalPower", "Instaneous power [W]", registry);
-      averageMechanicalPower = new DoubleYoVariable("averageMechanicalPower", "Time average power [W]", registry);
-      totalMechanicalEnergy = new DoubleYoVariable("totalMechanicalEnergy", "Total energy used [J]", registry);
-      mechanicalCostOfTransport = new DoubleYoVariable("mechanicalCostOfTransport", "Dimensionless cost of transport not considering electrical losses", registry);
+      instantaneousMechanicalPower = new YoDouble("instantaneousMechanicalPower", "Instaneous power [W]", registry);
+      averageMechanicalPower = new YoDouble("averageMechanicalPower", "Time average power [W]", registry);
+      totalMechanicalEnergy = new YoDouble("totalMechanicalEnergy", "Total energy used [J]", registry);
+      mechanicalCostOfTransport = new YoDouble("mechanicalCostOfTransport", "Dimensionless cost of transport not considering electrical losses", registry);
       
-      totalCurrentMag = new DoubleYoVariable("totalCurrentMag", "Magnitude of total instantaneous current to all motors [A]", registry);
-      instantaneousElectricalPower = new DoubleYoVariable("instantaneousElectricalPower", "Instaneous power [W]", registry);
-      averageElecticalPower = new DoubleYoVariable("averageElecticalPower", "Time average power [W]", registry);
-      totalElectricalEnergy = new DoubleYoVariable("totalElectricalEnergy", "Total energy used [J]", registry);
-      electricalCostOfTransport = new DoubleYoVariable("electricalCostOfTransport", "Dimensionless cost of transport including electrical losses", registry);
+      totalCurrentMag = new YoDouble("totalCurrentMag", "Magnitude of total instantaneous current to all motors [A]", registry);
+      instantaneousElectricalPower = new YoDouble("instantaneousElectricalPower", "Instaneous power [W]", registry);
+      averageElecticalPower = new YoDouble("averageElecticalPower", "Time average power [W]", registry);
+      totalElectricalEnergy = new YoDouble("totalElectricalEnergy", "Total energy used [J]", registry);
+      electricalCostOfTransport = new YoDouble("electricalCostOfTransport", "Dimensionless cost of transport including electrical losses", registry);
          
-      previousTime = new DoubleYoVariable("previousTime", registry);
-      runningTime = new DoubleYoVariable("runningTime", registry);
+      previousTime = new YoDouble("previousTime", registry);
+      runningTime = new YoDouble("runningTime", registry);
 
-      totalDistance = new DoubleYoVariable("totalDistance", registry);
-      averageWalkSpeed = new DoubleYoVariable("averageWalkSpeed", registry);
+      totalDistance = new YoDouble("totalDistance", registry);
+      averageWalkSpeed = new YoDouble("averageWalkSpeed", registry);
 
-      xPositionPrevious = new DoubleYoVariable("xPositionPrevious", registry);
-      yPositionPrevious = new DoubleYoVariable("yPositionPrevious", registry);
+      xPositionPrevious = new YoDouble("xPositionPrevious", registry);
+      yPositionPrevious = new YoDouble("yPositionPrevious", registry);
 
 
       previousTime.set(m2Robot.getTime());
@@ -142,16 +142,16 @@ public class PowerAndEnergyCalculator implements RobotController
          for (int j = 0; j < listOfJointNames.length; j++)
          {
             String prefixedJointName = prefixes[i] + listOfJointNames[j];
-            jointTorques[counter] = (DoubleYoVariable)m2Robot.getVariable("tau_" + prefixedJointName);
-            jointVelocities[counter] = (DoubleYoVariable)m2Robot.getVariable("qd_" + prefixedJointName);
-            currents[counter] = new DoubleYoVariable("i_" + prefixedJointName, "Instantaneous current motors [A]", registry);
-            gearboxEfficiencies[counter] = new DoubleYoVariable(prefixedJointName + "_gear_eff", "Gearbox efficiency", registry);
-            jointPowers[counter] = new DoubleYoVariable(prefixedJointName + "_power", "Joint power [W]", registry);
+            jointTorques[counter] = (YoDouble)m2Robot.getVariable("tau_" + prefixedJointName);
+            jointVelocities[counter] = (YoDouble)m2Robot.getVariable("qd_" + prefixedJointName);
+            currents[counter] = new YoDouble("i_" + prefixedJointName, "Instantaneous current motors [A]", registry);
+            gearboxEfficiencies[counter] = new YoDouble(prefixedJointName + "_gear_eff", "Gearbox efficiency", registry);
+            jointPowers[counter] = new YoDouble(prefixedJointName + "_power", "Joint power [W]", registry);
 
-            jointMechanicalPowers[counter] = new DoubleYoVariable(prefixedJointName + "_jointMechPower", "Instantaneous joint mechanical power", registry);
-            peakMechanicalPowers[counter] = new DoubleYoVariable(prefixedJointName + "_peakMechanicalPower", registry);
-            averageMechanicalJointPowers[counter] = new DoubleYoVariable(prefixedJointName + "_averageMechanicalJointPowers", "", registry);
-            totalMechanicalJointEnergy[counter] = new DoubleYoVariable(prefixedJointName + "_totalMechanicalJointEnergy", "", registry);
+            jointMechanicalPowers[counter] = new YoDouble(prefixedJointName + "_jointMechPower", "Instantaneous joint mechanical power", registry);
+            peakMechanicalPowers[counter] = new YoDouble(prefixedJointName + "_peakMechanicalPower", registry);
+            averageMechanicalJointPowers[counter] = new YoDouble(prefixedJointName + "_averageMechanicalJointPowers", "", registry);
+            totalMechanicalJointEnergy[counter] = new YoDouble(prefixedJointName + "_totalMechanicalJointEnergy", "", registry);
 
             maximumJointSpeeds[counter] = new AlphaFilteredYoVariable(prefixedJointName + "_maximumJointSpeed", registry, alpha);
             maximumJointTorques[counter] = new AlphaFilteredYoVariable(prefixedJointName + "_maximumJointTorque", registry, alpha);

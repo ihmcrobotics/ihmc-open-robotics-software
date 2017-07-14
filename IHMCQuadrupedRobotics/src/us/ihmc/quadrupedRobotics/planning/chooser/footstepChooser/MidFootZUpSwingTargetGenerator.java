@@ -5,8 +5,8 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedRefere
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLengths;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -34,15 +34,15 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final CommonQuadrupedReferenceFrames referenceFrames;
-   private final DoubleYoVariable minimumVelocityForFullSkew = new DoubleYoVariable("minimumVelocityForFullSkew", registry);
-   private final DoubleYoVariable strideLength = new DoubleYoVariable("strideLength", registry);
-   private final DoubleYoVariable stanceWidth = new DoubleYoVariable("stanceWidth", registry);
-   private final DoubleYoVariable maxForwardSkew = new DoubleYoVariable("maxForwardSkew", registry);
-   private final DoubleYoVariable maxLateralSkew = new DoubleYoVariable("maxLateralSkew", registry);
-   private final DoubleYoVariable maxYawPerStep = new DoubleYoVariable("maxYawPerStep", registry);
-   private final DoubleYoVariable minimumDistanceFromSameSideFoot = new DoubleYoVariable("minimumDistanceFromSameSideFoot", registry);
-   private final DoubleYoVariable xOffsetFromCenterOfHips = new DoubleYoVariable("xOffsetFromCenterOfHips", registry);
-   private final DoubleYoVariable yOffsetFromCenterOfHips = new DoubleYoVariable("yOffsetFromCenterOfHips", registry);
+   private final YoDouble minimumVelocityForFullSkew = new YoDouble("minimumVelocityForFullSkew", registry);
+   private final YoDouble strideLength = new YoDouble("strideLength", registry);
+   private final YoDouble stanceWidth = new YoDouble("stanceWidth", registry);
+   private final YoDouble maxForwardSkew = new YoDouble("maxForwardSkew", registry);
+   private final YoDouble maxLateralSkew = new YoDouble("maxLateralSkew", registry);
+   private final YoDouble maxYawPerStep = new YoDouble("maxYawPerStep", registry);
+   private final YoDouble minimumDistanceFromSameSideFoot = new YoDouble("minimumDistanceFromSameSideFoot", registry);
+   private final YoDouble xOffsetFromCenterOfHips = new YoDouble("xOffsetFromCenterOfHips", registry);
+   private final YoDouble yOffsetFromCenterOfHips = new YoDouble("yOffsetFromCenterOfHips", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
    

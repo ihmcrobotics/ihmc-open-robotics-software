@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -10,19 +10,19 @@ public class CollidingArmController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("CollidingArmController");
 
-   private final DoubleYoVariable qd_d_base = new DoubleYoVariable("qd_d_base", registry);
+   private final YoDouble qd_d_base = new YoDouble("qd_d_base", registry);
 
-   private final DoubleYoVariable q_d_base = new DoubleYoVariable("q_d_base", registry);
-   private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
-   private final DoubleYoVariable q_d_elbow = new DoubleYoVariable("q_d_elbow", registry);
+   private final YoDouble q_d_base = new YoDouble("q_d_base", registry);
+   private final YoDouble q_d_shoulder = new YoDouble("q_d_shoulder", registry);
+   private final YoDouble q_d_elbow = new YoDouble("q_d_elbow", registry);
 
-   private final DoubleYoVariable kp_base = new DoubleYoVariable("kp_base", registry);
-   private final DoubleYoVariable kp_shoulder = new DoubleYoVariable("kp_shoulder", registry);
-   private final DoubleYoVariable kp_elbow = new DoubleYoVariable("kp_elbow", registry);
+   private final YoDouble kp_base = new YoDouble("kp_base", registry);
+   private final YoDouble kp_shoulder = new YoDouble("kp_shoulder", registry);
+   private final YoDouble kp_elbow = new YoDouble("kp_elbow", registry);
 
-   private final DoubleYoVariable kd_base = new DoubleYoVariable("kd_base", registry);
-   private final DoubleYoVariable kd_shoulder = new DoubleYoVariable("kd_shoulder", registry);
-   private final DoubleYoVariable kd_elbow = new DoubleYoVariable("kd_elbow", registry);
+   private final YoDouble kd_base = new YoDouble("kd_base", registry);
+   private final YoDouble kd_shoulder = new YoDouble("kd_shoulder", registry);
+   private final YoDouble kd_elbow = new YoDouble("kd_elbow", registry);
 
    private final Robot robot;
 

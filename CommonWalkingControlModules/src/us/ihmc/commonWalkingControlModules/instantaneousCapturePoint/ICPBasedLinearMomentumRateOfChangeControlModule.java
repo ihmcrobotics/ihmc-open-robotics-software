@@ -6,7 +6,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -63,27 +64,45 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       }
    }
 
+   @Override
    public void clearPlan(){}
 
+   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing){}
 
+   @Override
    public void setFinalTransferDuration(double finalTransferDuration){}
 
+   @Override
    public void initializeForStanding(){}
 
+   @Override
    public void initializeForSingleSupport(){}
 
+   @Override
    public void initializeForTransfer(){}
 
+   @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeInSwing) {}
 
+   @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       return false;
    }
 
+   @Override
    public ICPOptimizationController getICPOptimizationController()
    {
       return null;
    }
+
+   @Override
+   public double getOptimizedTimeRemaining()
+   {
+      throw new RuntimeException("This method is not implemented in planner based momentum control module.");
+   }
+
+   @Override
+   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity) {}
 }

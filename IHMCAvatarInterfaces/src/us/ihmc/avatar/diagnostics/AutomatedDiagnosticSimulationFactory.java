@@ -16,8 +16,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,7 +62,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private InputStream gainStream;
    private InputStream setpointStream;
    private final YoVariableRegistry simulationRegistry = new YoVariableRegistry("AutomatedDiagnosticSimulation");
-   private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", simulationRegistry);
+   private final YoDouble controllerTime = new YoDouble("controllerTime", simulationRegistry);
    private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99, controllerTime);
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
@@ -103,7 +103,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      DoubleYoVariable yoTime = simulatedRobot.getYoTime();
+      YoDouble yoTime = simulatedRobot.getYoTime();
       double dt = robotModel.getEstimatorDT();
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();

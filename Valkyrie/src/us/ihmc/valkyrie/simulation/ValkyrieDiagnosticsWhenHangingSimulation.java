@@ -12,7 +12,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
@@ -205,78 +205,78 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
    private void setInitialCorruptorArmMassValues(SimulationConstructionSet simulationConstructionSet)
    {
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderPitchMass")).set(2.65);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollMass")).set(2.87);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawMass")).set(2.575);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchMass")).set(2.367);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawMass")).set(2.903);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightWristPitchMass")).set(0.1);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightWristRollMass")).set(0.928);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderPitchMass")).set(2.65);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderRollMass")).set(2.87);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderYawMass")).set(2.575);
+      ((YoDouble) simulationConstructionSet.getVariable("rightElbowPitchMass")).set(2.367);
+      ((YoDouble) simulationConstructionSet.getVariable("rightForearmYawMass")).set(2.903);
+      ((YoDouble) simulationConstructionSet.getVariable("rightWristPitchMass")).set(0.1);
+      ((YoDouble) simulationConstructionSet.getVariable("rightWristRollMass")).set(0.928);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderPitchMass")).set(2.65);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderRollMass")).set(2.87);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShoulderYawMass")).set(2.575);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftElbowPitchMass")).set(2.367);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftForearmYawMass")).set(2.903);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftWristPitchMass")).set(0.1);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftWristRollMass")).set(0.928);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShoulderPitchMass")).set(2.65);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShoulderRollMass")).set(2.87);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShoulderYawMass")).set(2.575);
+      ((YoDouble) simulationConstructionSet.getVariable("leftElbowPitchMass")).set(2.367);
+      ((YoDouble) simulationConstructionSet.getVariable("leftForearmYawMass")).set(2.903);
+      ((YoDouble) simulationConstructionSet.getVariable("leftWristPitchMass")).set(0.1);
+      ((YoDouble) simulationConstructionSet.getVariable("leftWristRollMass")).set(0.928);
    }
    
    private void setInitialCorruptorArmCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetX")).set(-0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetY")).set(0.005);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetZ")).set(-0.04);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetX")).set(0.004);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetY")).set(0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetZ")).set(-0.273);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetX")).set(-0.02);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetY")).set(0.005);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderRollCoMOffsetZ")).set(-0.04);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetX")).set(0.004);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetY")).set(0.02);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShoulderYawCoMOffsetZ")).set(-0.273);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetX")).set(-0.027);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetY")).set(0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetZ")).set(-0.08);
+      ((YoDouble) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetX")).set(-0.027);
+      ((YoDouble) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetY")).set(0.0);
+      ((YoDouble) simulationConstructionSet.getVariable("rightElbowPitchCoMOffsetZ")).set(-0.08);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetX")).set(0.015);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetY")).set(-0.02);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetZ")).set(-0.11);
+      ((YoDouble) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetX")).set(0.015);
+      ((YoDouble) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetY")).set(-0.02);
+      ((YoDouble) simulationConstructionSet.getVariable("rightForearmYawCoMOffsetZ")).set(-0.11);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderPitxh")).set(-1.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderPitxh")).set(-1.0);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
    }
    
    private void setInitialCorruptorArmTorqueOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Start from Sylvain's Numbers:
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderPitch")).set(-1.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderPitch")).set(-1.0);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderRoll")).set(0.7);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightShoulderYaw")).set(0.3);
+      ((YoDouble) simulationConstructionSet.getVariable("tau_off_rightElbowPitch")).set(-0.1);
    }
    
    private void setInitialCorruptorLegCoMOffsetValues(SimulationConstructionSet simulationConstructionSet)
    {
       // Tuned by Jerry on December 8, 2014.
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetX")).set(-0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetY")).set(0.05);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftThighCoMOffsetZ")).set(-0.220);
+      ((YoDouble) simulationConstructionSet.getVariable("leftThighCoMOffsetX")).set(-0.0);
+      ((YoDouble) simulationConstructionSet.getVariable("leftThighCoMOffsetY")).set(0.05);
+      ((YoDouble) simulationConstructionSet.getVariable("leftThighCoMOffsetZ")).set(-0.220);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetX")).set(0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetY")).set(0.045);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("leftShinCoMOffsetZ")).set(-0.185);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShinCoMOffsetX")).set(0.0);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShinCoMOffsetY")).set(0.045);
+      ((YoDouble) simulationConstructionSet.getVariable("leftShinCoMOffsetZ")).set(-0.185);
       
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetX")).set(0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetY")).set(-0.05);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightThighCoMOffsetZ")).set(-0.220);
+      ((YoDouble) simulationConstructionSet.getVariable("rightThighCoMOffsetX")).set(0.0);
+      ((YoDouble) simulationConstructionSet.getVariable("rightThighCoMOffsetY")).set(-0.05);
+      ((YoDouble) simulationConstructionSet.getVariable("rightThighCoMOffsetZ")).set(-0.220);
       
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetX")).set(0.0);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetY")).set(-0.045);
-      ((DoubleYoVariable) simulationConstructionSet.getVariable("rightShinCoMOffsetZ")).set(-0.185);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShinCoMOffsetX")).set(0.0);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShinCoMOffsetY")).set(-0.045);
+      ((YoDouble) simulationConstructionSet.getVariable("rightShinCoMOffsetZ")).set(-0.185);
       
 
    }

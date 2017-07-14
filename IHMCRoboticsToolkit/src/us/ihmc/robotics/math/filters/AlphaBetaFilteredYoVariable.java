@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: </p>
@@ -40,19 +40,19 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  *
  *         </pre>
  */
-public class AlphaBetaFilteredYoVariable extends DoubleYoVariable
+public class AlphaBetaFilteredYoVariable extends YoDouble
 {
    private double alpha = 0.0, beta = 0.0;
 
    private final double DT;
-   private DoubleYoVariable alphaVariable = null;
-   private DoubleYoVariable betaVariable = null;
+   private YoDouble alphaVariable = null;
+   private YoDouble betaVariable = null;
 
-   private final DoubleYoVariable positionState;
-   private final DoubleYoVariable xMeasuredVariable;
+   private final YoDouble positionState;
+   private final YoDouble xMeasuredVariable;
 
-   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, double beta, DoubleYoVariable positionVariable,
-         DoubleYoVariable xMeasuredVariable, double DT)
+   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, double beta, YoDouble positionVariable,
+         YoDouble xMeasuredVariable, double DT)
    {
       super(name, registry);
       this.alpha = alpha;
@@ -64,8 +64,8 @@ public class AlphaBetaFilteredYoVariable extends DoubleYoVariable
       reset();
    }
 
-   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable betaVariable,
-         DoubleYoVariable positionVariable, DoubleYoVariable xMeasuredVariable, double DT)
+   public AlphaBetaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble betaVariable,
+         YoDouble positionVariable, YoDouble xMeasuredVariable, double DT)
    {
       super(name, registry);
       this.alphaVariable = alphaVariable;
@@ -81,12 +81,12 @@ public class AlphaBetaFilteredYoVariable extends DoubleYoVariable
    {
    }
 
-   public DoubleYoVariable getPositionEstimation()
+   public YoDouble getPositionEstimation()
    {
       return positionState;
    }
 
-   public DoubleYoVariable getVelocityEstimation()
+   public YoDouble getVelocityEstimation()
    {
       return this;
    }

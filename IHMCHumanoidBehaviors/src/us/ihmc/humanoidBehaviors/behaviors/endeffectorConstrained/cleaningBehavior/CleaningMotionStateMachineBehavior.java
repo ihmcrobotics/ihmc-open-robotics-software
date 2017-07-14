@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -36,16 +37,15 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SquareFittingFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<CleaningMotionState>
 {   
@@ -62,7 +62,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private SolarPanelWholeBodyTrajectoryMessageFactory motionFactory;
    
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
    private FullHumanoidRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
    
@@ -79,7 +79,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, BACK_MOTION, BACKHOME_MOTION, DONE
    }
    
-   public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,  
+   public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime,  
                                          WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("CleaningMotionStateMachineBehavior", CleaningMotionState.class, yoTime, communicationBridge);
@@ -527,7 +527,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    
    private class GetSolarPanelBehavior extends AbstractBehavior
    {
-      private final BooleanYoVariable receivedPlanarRegionsList = new BooleanYoVariable("ReceivedPlanarRegionsList", registry);
+      private final YoBoolean receivedPlanarRegionsList = new YoBoolean("ReceivedPlanarRegionsList", registry);
       private PlanarRegionsList planarRegionsList;
 
       public GetSolarPanelBehavior(CommunicationBridgeInterface communicationBridge)
@@ -583,7 +583,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       {           
          // ********************************** get SolarPanel Info ********************************** //  
          
-         Pose poseSolarPanel = new Pose();
+         Pose3D poseSolarPanel = new Pose3D();
          Quaternion quaternionSolarPanel = new Quaternion();
          poseSolarPanel.setPosition(0.75, -0.1, 0.9);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.05);
@@ -669,7 +669,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
       public void onBehaviorExited()
       {
          // ********************************** get SolarPanel Info ********************************** //  
-         Pose poseSolarPanel = new Pose();
+         Pose3D poseSolarPanel = new Pose3D();
          Quaternion quaternionSolarPanel = new Quaternion();
          poseSolarPanel.setPosition(0.71, -0.2, 1.03);
          quaternionSolarPanel.appendYawRotation(Math.PI*0.00);

@@ -1,8 +1,8 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -13,8 +13,8 @@ public class PIDLidarTorqueController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final PIDController lidarJointController = new PIDController("lidar", registry);
    
-   private final DoubleYoVariable desiredLidarAngle = new DoubleYoVariable("desiredLidarAngle", registry);
-   private final DoubleYoVariable desiredLidarVelocity = new DoubleYoVariable("desiredLidarVelocity", registry);
+   private final YoDouble desiredLidarAngle = new YoDouble("desiredLidarAngle", registry);
+   private final YoDouble desiredLidarVelocity = new YoDouble("desiredLidarVelocity", registry);
 
    private final double controlDT;
    private final OneDegreeOfFreedomJoint  lidarJoint;

@@ -3,32 +3,27 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.dataStructures.registry.NameSpace;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class YoWhiteBoard
 {
    private static final boolean VERBOSE = false;
    
    private final String name;
-   private final BooleanYoVariable variablesToReadHaveBeenSet, variablesToWriteHaveBeenSet;
+   private final YoBoolean variablesToReadHaveBeenSet, variablesToWriteHaveBeenSet;
 
-   private DoubleYoVariable[] doubleVariablesToRead;
-   private IntegerYoVariable[] intVariablesToRead;
-   private BooleanYoVariable[] booleanVariablesToRead;
-   private EnumYoVariable<?>[] enumVariablesToRead;
+   private YoDouble[] doubleVariablesToRead;
+   private YoInteger[] intVariablesToRead;
+   private YoBoolean[] booleanVariablesToRead;
+   private YoEnum<?>[] enumVariablesToRead;
 
-   private DoubleYoVariable[] doubleVariablesToWrite;
-   private IntegerYoVariable[] intVariablesToWrite;
-   private BooleanYoVariable[] booleanVariablesToWrite;
-   private EnumYoVariable<?>[] enumVariablesToWrite;
+   private YoDouble[] doubleVariablesToWrite;
+   private YoInteger[] intVariablesToWrite;
+   private YoBoolean[] booleanVariablesToWrite;
+   private YoEnum<?>[] enumVariablesToWrite;
 
    private double[] doubleVariablesToReadBuffer;
    private int[] intVariablesToReadBuffer;
@@ -41,8 +36,8 @@ public abstract class YoWhiteBoard
    private int[] enumVariablesToWriteBuffer;
 
    
-   private final IntegerYoVariable writeIndex, readIndex;
-   private final IntegerYoVariable numberOfNewDataSinceLastRead;
+   private final YoInteger writeIndex, readIndex;
+   private final YoInteger numberOfNewDataSinceLastRead;
    
    private ArrayList<YoWhiteBoardListener> yoWhiteBoardListeners;
 
@@ -59,18 +54,18 @@ public abstract class YoWhiteBoard
    public YoWhiteBoard(String name, YoVariableRegistry registry)
    {      
       this.name = name;
-      this.variablesToReadHaveBeenSet = new BooleanYoVariable(name + "VariablesToReadHaveBeenSet", registry);
-      this.variablesToWriteHaveBeenSet = new BooleanYoVariable(name + "VariableToWriteHaveBeenSet", registry);
+      this.variablesToReadHaveBeenSet = new YoBoolean(name + "VariablesToReadHaveBeenSet", registry);
+      this.variablesToWriteHaveBeenSet = new YoBoolean(name + "VariableToWriteHaveBeenSet", registry);
       
       variablesToReadHaveBeenSet.set(false);
       variablesToWriteHaveBeenSet.set(false);
       
-      writeIndex = new IntegerYoVariable(name + "WriteIndex", registry);
-      readIndex = new IntegerYoVariable(name + "ReadIndex", registry);
+      writeIndex = new YoInteger(name + "WriteIndex", registry);
+      readIndex = new YoInteger(name + "ReadIndex", registry);
       writeIndex.set(0);
       readIndex.set(0);
       
-      numberOfNewDataSinceLastRead = new IntegerYoVariable(name + "NumberOfNewDataSinceLastRead", registry);
+      numberOfNewDataSinceLastRead = new YoInteger(name + "NumberOfNewDataSinceLastRead", registry);
       numberOfNewDataSinceLastRead.set(0);
    }
    
@@ -314,10 +309,10 @@ public abstract class YoWhiteBoard
 
    public void setVariablesToWrite(ArrayList<YoVariable<?>> variablesToWrite)
    {
-      ArrayList<DoubleYoVariable> doubleVariablesToWrite = new ArrayList<DoubleYoVariable>();
-      ArrayList<IntegerYoVariable> intVariablesToWrite = new ArrayList<IntegerYoVariable>();
-      ArrayList<BooleanYoVariable> booleanVariablesToWrite = new ArrayList<BooleanYoVariable>();
-      ArrayList<EnumYoVariable<?>> enumVariablesToWrite = new ArrayList<EnumYoVariable<?>>();
+      ArrayList<YoDouble> doubleVariablesToWrite = new ArrayList<YoDouble>();
+      ArrayList<YoInteger> intVariablesToWrite = new ArrayList<YoInteger>();
+      ArrayList<YoBoolean> booleanVariablesToWrite = new ArrayList<YoBoolean>();
+      ArrayList<YoEnum<?>> enumVariablesToWrite = new ArrayList<YoEnum<?>>();
 
       for (YoVariable<?> variableToWrite : variablesToWrite)
       {
@@ -327,28 +322,28 @@ public abstract class YoWhiteBoard
          {
             case DOUBLE :
             {
-               doubleVariablesToWrite.add((DoubleYoVariable) variableToWrite);
+               doubleVariablesToWrite.add((YoDouble) variableToWrite);
 
                break;
             }
 
             case INTEGER :
             {
-               intVariablesToWrite.add((IntegerYoVariable) variableToWrite);
+               intVariablesToWrite.add((YoInteger) variableToWrite);
 
                break;
             }
 
             case BOOLEAN :
             {
-               booleanVariablesToWrite.add((BooleanYoVariable) variableToWrite);
+               booleanVariablesToWrite.add((YoBoolean) variableToWrite);
 
                break;
             }
 
             case ENUM :
             {
-               enumVariablesToWrite.add((EnumYoVariable<?>) variableToWrite);
+               enumVariablesToWrite.add((YoEnum<?>) variableToWrite);
 
                break;
             }
@@ -360,10 +355,10 @@ public abstract class YoWhiteBoard
          }
       }
 
-      this.doubleVariablesToWrite = new DoubleYoVariable[doubleVariablesToWrite.size()];
-      this.intVariablesToWrite = new IntegerYoVariable[intVariablesToWrite.size()];
-      this.booleanVariablesToWrite = new BooleanYoVariable[booleanVariablesToWrite.size()];
-      this.enumVariablesToWrite = new EnumYoVariable[enumVariablesToWrite.size()];
+      this.doubleVariablesToWrite = new YoDouble[doubleVariablesToWrite.size()];
+      this.intVariablesToWrite = new YoInteger[intVariablesToWrite.size()];
+      this.booleanVariablesToWrite = new YoBoolean[booleanVariablesToWrite.size()];
+      this.enumVariablesToWrite = new YoEnum[enumVariablesToWrite.size()];
 
       doubleVariablesToWrite.toArray(this.doubleVariablesToWrite);
       intVariablesToWrite.toArray(this.intVariablesToWrite);
@@ -383,10 +378,10 @@ public abstract class YoWhiteBoard
 
    public void setVariablesToRead(ArrayList<YoVariable<?>> variablesToRead)
    {
-      ArrayList<DoubleYoVariable> doubleVariablesToRead = new ArrayList<DoubleYoVariable>();
-      ArrayList<IntegerYoVariable> intVariablesToRead = new ArrayList<IntegerYoVariable>();
-      ArrayList<BooleanYoVariable> booleanVariablesToRead = new ArrayList<BooleanYoVariable>();
-      ArrayList<EnumYoVariable<?>> enumVariablesToRead = new ArrayList<EnumYoVariable<?>>();
+      ArrayList<YoDouble> doubleVariablesToRead = new ArrayList<YoDouble>();
+      ArrayList<YoInteger> intVariablesToRead = new ArrayList<YoInteger>();
+      ArrayList<YoBoolean> booleanVariablesToRead = new ArrayList<YoBoolean>();
+      ArrayList<YoEnum<?>> enumVariablesToRead = new ArrayList<YoEnum<?>>();
 
       for (YoVariable<?> variableToRead : variablesToRead)
       {
@@ -396,28 +391,28 @@ public abstract class YoWhiteBoard
          {
             case DOUBLE :
             {
-               doubleVariablesToRead.add((DoubleYoVariable) variableToRead);
+               doubleVariablesToRead.add((YoDouble) variableToRead);
 
                break;
             }
 
             case INTEGER :
             {
-               intVariablesToRead.add((IntegerYoVariable) variableToRead);
+               intVariablesToRead.add((YoInteger) variableToRead);
 
                break;
             }
 
             case BOOLEAN :
             {
-               booleanVariablesToRead.add((BooleanYoVariable) variableToRead);
+               booleanVariablesToRead.add((YoBoolean) variableToRead);
 
                break;
             }
 
             case ENUM :
             {
-               enumVariablesToRead.add((EnumYoVariable<?>) variableToRead);
+               enumVariablesToRead.add((YoEnum<?>) variableToRead);
 
                break;
             }
@@ -430,10 +425,10 @@ public abstract class YoWhiteBoard
 
       }
 
-      this.doubleVariablesToRead = new DoubleYoVariable[doubleVariablesToRead.size()];
-      this.intVariablesToRead = new IntegerYoVariable[intVariablesToRead.size()];
-      this.booleanVariablesToRead = new BooleanYoVariable[booleanVariablesToRead.size()];
-      this.enumVariablesToRead = new EnumYoVariable[enumVariablesToRead.size()];
+      this.doubleVariablesToRead = new YoDouble[doubleVariablesToRead.size()];
+      this.intVariablesToRead = new YoInteger[intVariablesToRead.size()];
+      this.booleanVariablesToRead = new YoBoolean[booleanVariablesToRead.size()];
+      this.enumVariablesToRead = new YoEnum[enumVariablesToRead.size()];
 
       doubleVariablesToRead.toArray(this.doubleVariablesToRead);
       intVariablesToRead.toArray(this.intVariablesToRead);

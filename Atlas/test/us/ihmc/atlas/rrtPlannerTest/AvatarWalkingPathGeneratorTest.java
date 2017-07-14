@@ -32,7 +32,6 @@ import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPl
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -48,6 +47,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestInterface
 {
@@ -57,7 +57,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    private CommunicationBridge communicationBridge;
-   private DoubleYoVariable yoTime;
+   private YoDouble yoTime;
 
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidRobotDataReceiver robotDataReceiver;

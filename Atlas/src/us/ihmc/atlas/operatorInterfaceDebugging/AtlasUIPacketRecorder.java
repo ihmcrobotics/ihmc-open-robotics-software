@@ -16,7 +16,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoStreamSerializer;
-import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
@@ -45,7 +45,7 @@ public class AtlasUIPacketRecorder
       kryoStreamSerializer.registerClasses(netClassList);
       
       PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManager), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
-      packetClient.attachStateListener(new NetStateListener()
+      packetClient.attachStateListener(new ConnectionStateListener()
       {
          @Override
          public void disconnected()
@@ -111,7 +111,7 @@ public class AtlasUIPacketRecorder
       scanner.nextLine();
       scanner.close();
       
-      packetClient.close();
+      packetClient.disconnect();
    }
    
    public static Path getPacketRecordingFilePath()

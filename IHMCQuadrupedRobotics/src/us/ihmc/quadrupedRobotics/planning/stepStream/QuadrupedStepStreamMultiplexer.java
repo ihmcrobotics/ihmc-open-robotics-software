@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 import java.util.HashMap;
@@ -12,11 +12,11 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final HashMap<E, QuadrupedStepStream> stepStreams = new HashMap<>();
-   private EnumYoVariable<E> selectedStepStream;
+   private YoEnum<E> selectedStepStream;
 
    public QuadrupedStepStreamMultiplexer(Class<E> enumClass, YoVariableRegistry parentRegistry)
    {
-      selectedStepStream = new EnumYoVariable<>("selectedStepStream", registry, enumClass);
+      selectedStepStream = new YoEnum<>("selectedStepStream", registry, enumClass);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);

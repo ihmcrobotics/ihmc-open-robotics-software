@@ -9,9 +9,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.kalman.imu.QuaternionBasedFullIMUKalmanFilter;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController
@@ -40,108 +39,108 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    private DenseMatrix64F theta = new DenseMatrix64F(3, 1);
    private DenseMatrix64F pqr = new DenseMatrix64F(3, 1);
 
-   private DoubleYoVariable wx_amp = new DoubleYoVariable("wx_amp", registry);
-   private DoubleYoVariable wy_amp = new DoubleYoVariable("wy_amp", registry);
-   private DoubleYoVariable wz_amp = new DoubleYoVariable("wz_amp", registry);
+   private YoDouble wx_amp = new YoDouble("wx_amp", registry);
+   private YoDouble wy_amp = new YoDouble("wy_amp", registry);
+   private YoDouble wz_amp = new YoDouble("wz_amp", registry);
 
-   private DoubleYoVariable wx_freq = new DoubleYoVariable("wx_freq", registry);
-   private DoubleYoVariable wy_freq = new DoubleYoVariable("wy_freq", registry);
-   private DoubleYoVariable wz_freq = new DoubleYoVariable("wz_freq", registry);
+   private YoDouble wx_freq = new YoDouble("wx_freq", registry);
+   private YoDouble wy_freq = new YoDouble("wy_freq", registry);
+   private YoDouble wz_freq = new YoDouble("wz_freq", registry);
 
-   private DoubleYoVariable q_noise = new DoubleYoVariable("q_noise", registry);
-   private DoubleYoVariable r_noise = new DoubleYoVariable("r_noise", registry);
+   private YoDouble q_noise = new YoDouble("q_noise", registry);
+   private YoDouble r_noise = new YoDouble("r_noise", registry);
 
-   private DoubleYoVariable fx_amp = new DoubleYoVariable("fx_amp", registry);
-   private DoubleYoVariable fy_amp = new DoubleYoVariable("fy_amp", registry);
+   private YoDouble fx_amp = new YoDouble("fx_amp", registry);
+   private YoDouble fy_amp = new YoDouble("fy_amp", registry);
    @SuppressWarnings("unused")
-   private DoubleYoVariable fz_amp = new DoubleYoVariable("fz_amp", registry);
+   private YoDouble fz_amp = new YoDouble("fz_amp", registry);
 
-   private DoubleYoVariable fx_freq = new DoubleYoVariable("fx_freq", registry);
-   private DoubleYoVariable fy_freq = new DoubleYoVariable("fy_freq", registry);
+   private YoDouble fx_freq = new YoDouble("fx_freq", registry);
+   private YoDouble fy_freq = new YoDouble("fy_freq", registry);
    @SuppressWarnings("unused")
-   private DoubleYoVariable fz_freq = new DoubleYoVariable("fz_freq", registry);
+   private YoDouble fz_freq = new YoDouble("fz_freq", registry);
 
 
 // private YoVariable yaw_from_accel = new YoVariable("yaw_from_accel", registry);
 // private YoVariable pitch_from_accel = new YoVariable("pitch_from_accel", registry);
 // private YoVariable roll_from_accel = new YoVariable("roll_from_accel", registry);
 
-   private DoubleYoVariable q0_from_accel = new DoubleYoVariable("q0_from_accel", registry);
-   private DoubleYoVariable q1_from_accel = new DoubleYoVariable("q1_from_accel", registry);
-   private DoubleYoVariable q2_from_accel = new DoubleYoVariable("q2_from_accel", registry);
-   private DoubleYoVariable q3_from_accel = new DoubleYoVariable("q3_from_accel", registry);
+   private YoDouble q0_from_accel = new YoDouble("q0_from_accel", registry);
+   private YoDouble q1_from_accel = new YoDouble("q1_from_accel", registry);
+   private YoDouble q2_from_accel = new YoDouble("q2_from_accel", registry);
+   private YoDouble q3_from_accel = new YoDouble("q3_from_accel", registry);
 
-   private DoubleYoVariable yaw_from_quat = new DoubleYoVariable("yaw_from_quat", registry);
-   private DoubleYoVariable pitch_from_quat = new DoubleYoVariable("pitch_from_quat", registry);
-   private DoubleYoVariable roll_from_quat = new DoubleYoVariable("roll_from_quat", registry);
+   private YoDouble yaw_from_quat = new YoDouble("yaw_from_quat", registry);
+   private YoDouble pitch_from_quat = new YoDouble("pitch_from_quat", registry);
+   private YoDouble roll_from_quat = new YoDouble("roll_from_quat", registry);
 
-   private DoubleYoVariable estimated_yaw = new DoubleYoVariable("estimated_yaw", registry);
-   private DoubleYoVariable estimated_pitch = new DoubleYoVariable("estimated_pitch", registry);
-   private DoubleYoVariable estimated_roll = new DoubleYoVariable("estimated_roll", registry);
+   private YoDouble estimated_yaw = new YoDouble("estimated_yaw", registry);
+   private YoDouble estimated_pitch = new YoDouble("estimated_pitch", registry);
+   private YoDouble estimated_roll = new YoDouble("estimated_roll", registry);
 
-   private DoubleYoVariable estimated_yaw_2 = new DoubleYoVariable("estimated_yaw_2", registry);
-   private DoubleYoVariable estimated_pitch_2 = new DoubleYoVariable("estimated_pitch_2", registry);
-   private DoubleYoVariable estimated_roll_2 = new DoubleYoVariable("estimated_roll_2", registry);
+   private YoDouble estimated_yaw_2 = new YoDouble("estimated_yaw_2", registry);
+   private YoDouble estimated_pitch_2 = new YoDouble("estimated_pitch_2", registry);
+   private YoDouble estimated_roll_2 = new YoDouble("estimated_roll_2", registry);
 
-   private DoubleYoVariable x_accel = new DoubleYoVariable("x_accel", registry);
-   private DoubleYoVariable y_accel = new DoubleYoVariable("y_accel", registry);
-   private DoubleYoVariable z_accel = new DoubleYoVariable("z_accel", registry);
+   private YoDouble x_accel = new YoDouble("x_accel", registry);
+   private YoDouble y_accel = new YoDouble("y_accel", registry);
+   private YoDouble z_accel = new YoDouble("z_accel", registry);
 
-   private DoubleYoVariable compass_noise = new DoubleYoVariable("compass_noise", registry);
+   private YoDouble compass_noise = new YoDouble("compass_noise", registry);
    @SuppressWarnings("unused")
-   private DoubleYoVariable alpha_compass_noise = new DoubleYoVariable("alpha_compass_noise", registry);
-   private DoubleYoVariable compass_offset = new DoubleYoVariable("heading_offset", registry);
-   private DoubleYoVariable heading_noise = new DoubleYoVariable("heading_noise", registry);
-   private DoubleYoVariable heading_sensor = new DoubleYoVariable("heading_sensor", registry);
+   private YoDouble alpha_compass_noise = new YoDouble("alpha_compass_noise", registry);
+   private YoDouble compass_offset = new YoDouble("heading_offset", registry);
+   private YoDouble heading_noise = new YoDouble("heading_noise", registry);
+   private YoDouble heading_sensor = new YoDouble("heading_sensor", registry);
 
-   private DoubleYoVariable accel_noise = new DoubleYoVariable("accel_noise", registry);
-   private DoubleYoVariable alpha_accel_noise = new DoubleYoVariable("alpha_accel_noise", registry);
+   private YoDouble accel_noise = new YoDouble("accel_noise", registry);
+   private YoDouble alpha_accel_noise = new YoDouble("alpha_accel_noise", registry);
 
-   private DoubleYoVariable x_accel_noise = new DoubleYoVariable("x_accel_noise", registry);
-   private DoubleYoVariable y_accel_noise = new DoubleYoVariable("y_accel_noise", registry);
-   private DoubleYoVariable z_accel_noise = new DoubleYoVariable("z_accel_noise", registry);
+   private YoDouble x_accel_noise = new YoDouble("x_accel_noise", registry);
+   private YoDouble y_accel_noise = new YoDouble("y_accel_noise", registry);
+   private YoDouble z_accel_noise = new YoDouble("z_accel_noise", registry);
 
-   private DoubleYoVariable x_accel_sensor = new DoubleYoVariable("x_accel_sensor", registry);
-   private DoubleYoVariable y_accel_sensor = new DoubleYoVariable("y_accel_sensor", registry);
-   private DoubleYoVariable z_accel_sensor = new DoubleYoVariable("z_accel_sensor", registry);
+   private YoDouble x_accel_sensor = new YoDouble("x_accel_sensor", registry);
+   private YoDouble y_accel_sensor = new YoDouble("y_accel_sensor", registry);
+   private YoDouble z_accel_sensor = new YoDouble("z_accel_sensor", registry);
 
-   private DoubleYoVariable x_gyro = new DoubleYoVariable("x_gyro", registry);
-   private DoubleYoVariable y_gyro = new DoubleYoVariable("y_gyro", registry);
-   private DoubleYoVariable z_gyro = new DoubleYoVariable("z_gyro", registry);
+   private YoDouble x_gyro = new YoDouble("x_gyro", registry);
+   private YoDouble y_gyro = new YoDouble("y_gyro", registry);
+   private YoDouble z_gyro = new YoDouble("z_gyro", registry);
 
-   private DoubleYoVariable x_gyro_bias = new DoubleYoVariable("x_gyro_bias", registry);
-   private DoubleYoVariable y_gyro_bias = new DoubleYoVariable("y_gyro_bias", registry);
-   private DoubleYoVariable z_gyro_bias = new DoubleYoVariable("z_gyro_bias", registry);
+   private YoDouble x_gyro_bias = new YoDouble("x_gyro_bias", registry);
+   private YoDouble y_gyro_bias = new YoDouble("y_gyro_bias", registry);
+   private YoDouble z_gyro_bias = new YoDouble("z_gyro_bias", registry);
 
-   private DoubleYoVariable gyro_noise = new DoubleYoVariable("gyro_noise", registry);
-   private DoubleYoVariable alpha_gyro_noise = new DoubleYoVariable("alpha_gyro_noise", registry);
+   private YoDouble gyro_noise = new YoDouble("gyro_noise", registry);
+   private YoDouble alpha_gyro_noise = new YoDouble("alpha_gyro_noise", registry);
 
-   private DoubleYoVariable x_gyro_noise = new DoubleYoVariable("x_gyro_noise", registry);
-   private DoubleYoVariable y_gyro_noise = new DoubleYoVariable("y_gyro_noise", registry);
-   private DoubleYoVariable z_gyro_noise = new DoubleYoVariable("z_gyro_noise", registry);
+   private YoDouble x_gyro_noise = new YoDouble("x_gyro_noise", registry);
+   private YoDouble y_gyro_noise = new YoDouble("y_gyro_noise", registry);
+   private YoDouble z_gyro_noise = new YoDouble("z_gyro_noise", registry);
 
-   private DoubleYoVariable x_gyro_sensor = new DoubleYoVariable("x_gyro_sensor", registry);
-   private DoubleYoVariable y_gyro_sensor = new DoubleYoVariable("y_gyro_sensor", registry);
-   private DoubleYoVariable z_gyro_sensor = new DoubleYoVariable("z_gyro_sensor", registry);
+   private YoDouble x_gyro_sensor = new YoDouble("x_gyro_sensor", registry);
+   private YoDouble y_gyro_sensor = new YoDouble("y_gyro_sensor", registry);
+   private YoDouble z_gyro_sensor = new YoDouble("z_gyro_sensor", registry);
 
-   private DoubleYoVariable estimated_qd_wx_bias = new DoubleYoVariable("estimated_qd_wx_bias", registry);
-   private DoubleYoVariable estimated_qd_wy_bias = new DoubleYoVariable("estimated_qd_wy_bias", registry);
-   private DoubleYoVariable estimated_qd_wz_bias = new DoubleYoVariable("estimated_qd_wz_bias", registry);
+   private YoDouble estimated_qd_wx_bias = new YoDouble("estimated_qd_wx_bias", registry);
+   private YoDouble estimated_qd_wy_bias = new YoDouble("estimated_qd_wy_bias", registry);
+   private YoDouble estimated_qd_wz_bias = new YoDouble("estimated_qd_wz_bias", registry);
 
-   private DoubleYoVariable estimated_q0 = new DoubleYoVariable("estimated_q0", registry);
-   private DoubleYoVariable estimated_q1 = new DoubleYoVariable("estimated_q1", registry);
-   private DoubleYoVariable estimated_q2 = new DoubleYoVariable("estimated_q2", registry);
-   private DoubleYoVariable estimated_q3 = new DoubleYoVariable("estimated_q3", registry);
+   private YoDouble estimated_q0 = new YoDouble("estimated_q0", registry);
+   private YoDouble estimated_q1 = new YoDouble("estimated_q1", registry);
+   private YoDouble estimated_q2 = new YoDouble("estimated_q2", registry);
+   private YoDouble estimated_q3 = new YoDouble("estimated_q3", registry);
 
-   private DoubleYoVariable estimated_q0_2 = new DoubleYoVariable("estimated_q0_2", registry);
-   private DoubleYoVariable estimated_q1_2 = new DoubleYoVariable("estimated_q1_2", registry);
-   private DoubleYoVariable estimated_q2_2 = new DoubleYoVariable("estimated_q2_2", registry);
-   private DoubleYoVariable estimated_q3_2 = new DoubleYoVariable("estimated_q3_2", registry);
+   private YoDouble estimated_q0_2 = new YoDouble("estimated_q0_2", registry);
+   private YoDouble estimated_q1_2 = new YoDouble("estimated_q1_2", registry);
+   private YoDouble estimated_q2_2 = new YoDouble("estimated_q2_2", registry);
+   private YoDouble estimated_q3_2 = new YoDouble("estimated_q3_2", registry);
 
 
    // Simulation variables
 // private YoVariable dt = new YoVariable("dt", this);
-   private DoubleYoVariable t;
+   private YoDouble t;
 
    @SuppressWarnings("unused")
    private java.text.DecimalFormat fmt = new java.text.DecimalFormat();
@@ -151,7 +150,7 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    private boolean profiling;
 
    @SuppressWarnings("unused")
-   private final DoubleYoVariable ef_body_fx, ef_body_fy, ef_body_fz;
+   private final YoDouble ef_body_fx, ef_body_fy, ef_body_fz;
    private String name;
 
    public TestIMUKalmanFilterControllerJerryOne(TestIMUKalmanFilterRobot robot,
@@ -176,13 +175,13 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 //    this.fastQuaternionBasedFullIMUKalmanFilter = quaternionBasedFullIMUKalmanFilterTwo;
 
 //    this.dt.val = dt;
-      t = (DoubleYoVariable)robot.getVariable("t");
+      t = (YoDouble)robot.getVariable("t");
 
       this.robot = robot;
 
-      ef_body_fx =(DoubleYoVariable) robot.getVariable("ef_body_fx");
-      ef_body_fy = (DoubleYoVariable)robot.getVariable("ef_body_fy");
-      ef_body_fz = (DoubleYoVariable)robot.getVariable("ef_body_fz");
+      ef_body_fx =(YoDouble) robot.getVariable("ef_body_fx");
+      ef_body_fy = (YoDouble)robot.getVariable("ef_body_fy");
+      ef_body_fz = (YoDouble)robot.getVariable("ef_body_fz");
 
 
       initControl();

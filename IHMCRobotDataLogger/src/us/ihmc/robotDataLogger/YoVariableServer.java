@@ -10,13 +10,11 @@ import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
@@ -24,15 +22,13 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.TickAndUpdatable;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
@@ -56,8 +52,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    // Change data
    private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new LinkedHashMap<>();
       
-   private IntegerYoVariable skippedMainRegistryTicksDueFullBuffer;
-   private HashMap<YoVariableRegistry, IntegerYoVariable> skippedRegistryTicksDueFullBuffer = new HashMap<>();
+   private YoInteger skippedMainRegistryTicksDueFullBuffer;
+   private HashMap<YoVariableRegistry, YoInteger> skippedRegistryTicksDueFullBuffer = new HashMap<>();
    
    // State
    private boolean started = false;
@@ -83,9 +79,19 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    
    public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
+      LoggerConfigurationLoader config;
+      try
+      {
+         config = new LoggerConfigurationLoader();
+      }
+      catch (IOException e1)
+      {
+        throw new RuntimeException("Cannot load configuration to start logger, aborting", e1);
+      }
+      
       this.dt = dt;
       this.scheduler = scheduler;
-      this.bindAddress = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
+      this.bindAddress = config.getMyNetworkAddress();
       
       try
       {
@@ -93,7 +99,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          dataProducerParticipant.setDataAddress(bindAddress);
          dataProducerParticipant.setPort(getRandomPort());
          dataProducerParticipant.setLog(logSettings.isLog());
-         addCameras(logSettings);
+         addCameras(config, logSettings);
          
       }
       catch (IOException e)
@@ -104,40 +110,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    }
    
    
-   public void addCameras(LogSettings logSettings)
+   public void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
    {
-      String cameraString;
-      if(NetworkParameters.hasKey(NetworkParameterKeys.loggedCameras))
+      TByteArrayList cameras = config.getCameras();
+      for(int i = 0; i < cameras.size(); i++)
       {
-         cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
-      }
-      else
-      {
-         cameraString = null;
-      }
-         
-      if(cameraString != null && !cameraString.trim().isEmpty())
-      {
-         String[] split = cameraString.split(",");
-         for(int i = 0; i < split.length; i++)
-         {
-            try
-            {
-               byte camera = Byte.parseByte(split[i].trim());
-               if(camera >= 0 && camera <= 127)
-               {
-                  dataProducerParticipant.addCamera(CameraType.CAPTURE_CARD, "Camera-" + camera, String.valueOf(camera));
-               }
-               else
-               {
-                  throw new NumberFormatException();
-               }
-            }
-            catch(NumberFormatException e)
-            {
-               throw new RuntimeException("Invalid camera id: " + split[i] +". Valid camera ids are 0-127");
-            }
-         }
+         dataProducerParticipant.addCamera(CameraType.CAPTURE_CARD, "Camera-" + cameras.get(i), String.valueOf(cameras.get(i)));
       }
       
       if(logSettings.getVideoStream() != null)
@@ -158,10 +136,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          throw new RuntimeException("Server already started");
       }
       
-      skippedMainRegistryTicksDueFullBuffer = new IntegerYoVariable("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
+      skippedMainRegistryTicksDueFullBuffer = new YoInteger("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
       for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> registry : variableData)
       {
-         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new IntegerYoVariable("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
+         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new YoInteger("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
       }
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
@@ -333,11 +311,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      if(fullRobotModel != null)
+      if(rootBody != null)
       {
-         mainBodies.add(fullRobotModel.getElevator());
+         mainBodies.add(rootBody);
       }
       mainRegistry = registry;
       mainYoGraphicsListRegistry = yoGraphicsListRegistry;

@@ -26,8 +26,8 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -43,7 +43,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public class ICPAdjustmentOptimizationControllerTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("robert");
-   private final DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
+   private final YoDouble omega = new YoDouble("omega", registry);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = 0.0001;
@@ -259,6 +259,11 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override public boolean useStepAdjustment()
       {
          return true;
+      }
+
+      @Override public boolean useTimingOptimization()
+      {
+         return false;
       }
 
       @Override public boolean useAngularMomentum()

@@ -5,12 +5,10 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,9 +35,9 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable toeOffContactInterpolation;
-   private final BooleanYoVariable hasComputedToeOffContactPoint;
-   private final BooleanYoVariable hasComputedToeOffContactLine;
+   private final YoDouble toeOffContactInterpolation;
+   private final YoBoolean hasComputedToeOffContactPoint;
+   private final YoBoolean hasComputedToeOffContactLine;
 
    private final FramePoint2d[] intersectionWithRay = new FramePoint2d[] {new FramePoint2d(), new FramePoint2d()};
 
@@ -54,11 +52,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
       }
 
-      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
+      toeOffContactInterpolation = new YoDouble(namePrefix + "ToeOffContactInterpolation", registry);
       toeOffContactInterpolation.set(walkingControllerParameters.getToeOffContactInterpolation());
 
-      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
-      hasComputedToeOffContactLine = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactLine", registry);
+      hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactLine = new YoBoolean(namePrefix + "HasComputedToeOffContactLine", registry);
 
       parentRegistry.addChild(registry);
    }

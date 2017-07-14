@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -58,16 +58,16 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelJointDesiredData;
 
-   private final DoubleYoVariable percentOfTrajectoryWithOrientationBeingControlled;
-   private final DoubleYoVariable startTimeInStateToIgnoreOrientation;
-   private final DoubleYoVariable endTimeInStateToIgnoreOrientation;
-   private final DoubleYoVariable currentOrientationControlFactor;
-   private final DoubleYoVariable activeTrajectoryTime;
+   private final YoDouble percentOfTrajectoryWithOrientationBeingControlled;
+   private final YoDouble startTimeInStateToIgnoreOrientation;
+   private final YoDouble endTimeInStateToIgnoreOrientation;
+   private final YoDouble currentOrientationControlFactor;
+   private final YoDouble activeTrajectoryTime;
 
-   private final DoubleYoVariable doneTrajectoryTime;
-   private final DoubleYoVariable holdPositionDuration;
+   private final YoDouble doneTrajectoryTime;
+   private final YoDouble holdPositionDuration;
 
-   private final BooleanYoVariable enableCompliantControl;
+   private final YoBoolean enableCompliantControl;
    private final HandCompliantControlHelper handCompliantControlHelper;
 
    private final boolean doPositionControl;
@@ -77,9 +77,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
 
    private final OneDoFJoint[] oneDoFJoints;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable initialTime;
-   private final DoubleYoVariable currentTimeInState;
+   private final YoDouble yoTime;
+   private final YoDouble initialTime;
+   private final YoDouble currentTimeInState;
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix, RobotSide robotSide,
          HighLevelHumanoidControllerToolbox controllerToolbox, RigidBody base, RigidBody endEffector, YoPIDGains gains, YoVariableRegistry parentRegistry)
@@ -105,27 +105,27 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
 
       yoTime = controllerToolbox.getYoTime();
 
-      initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
-      currentTimeInState = new DoubleYoVariable(namePrefix + "CurrentTimeInState", registry);
+      initialTime = new YoDouble(namePrefix + "InitialTime", registry);
+      currentTimeInState = new YoDouble(namePrefix + "CurrentTimeInState", registry);
 
-      doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
-      holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
+      doneTrajectoryTime = new YoDouble(namePrefix + "DoneTrajectoryTime", registry);
+      holdPositionDuration = new YoDouble(namePrefix + "HoldPositionDuration", registry);
 
       this.doPositionControl = doPositionControl;
 
-      percentOfTrajectoryWithOrientationBeingControlled = new DoubleYoVariable(namePrefix + "PercentOfTrajectoryWithOrientationBeingControlled", registry);
+      percentOfTrajectoryWithOrientationBeingControlled = new YoDouble(namePrefix + "PercentOfTrajectoryWithOrientationBeingControlled", registry);
       percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
 
-      activeTrajectoryTime = new DoubleYoVariable(namePrefix + "ActiveTrajectoryTime", registry);
+      activeTrajectoryTime = new YoDouble(namePrefix + "ActiveTrajectoryTime", registry);
       activeTrajectoryTime.set(Double.NaN);
 
-      startTimeInStateToIgnoreOrientation = new DoubleYoVariable(namePrefix + "StartTimeInStateToIgnoreOrientation", registry);
+      startTimeInStateToIgnoreOrientation = new YoDouble(namePrefix + "StartTimeInStateToIgnoreOrientation", registry);
       startTimeInStateToIgnoreOrientation.set(Double.NaN);
 
-      endTimeInStateToIgnoreOrientation = new DoubleYoVariable(namePrefix + "EndTimeInStateToIgnoreOrientation", registry);
+      endTimeInStateToIgnoreOrientation = new YoDouble(namePrefix + "EndTimeInStateToIgnoreOrientation", registry);
       endTimeInStateToIgnoreOrientation.set(Double.NaN);
 
-      currentOrientationControlFactor = new DoubleYoVariable(namePrefix + "CurrentOrientationControlFactor", registry);
+      currentOrientationControlFactor = new YoDouble(namePrefix + "CurrentOrientationControlFactor", registry);
       currentOrientationControlFactor.set(Double.NaN);
 
       oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
@@ -161,7 +161,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
          }
       }
 
-      enableCompliantControl = new BooleanYoVariable(namePrefix + "EnableCompliantControl", registry);
+      enableCompliantControl = new YoBoolean(namePrefix + "EnableCompliantControl", registry);
       if (controllerToolbox.getWristForceSensor(robotSide) != null)
       {
          handCompliantControlHelper = new HandCompliantControlHelper(namePrefix, robotSide, controllerToolbox, registry);

@@ -12,15 +12,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -38,13 +41,13 @@ public class InverseKinematicsOptimizationControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
 
-   private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumVelocities = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointMaximumVelocities = new HashMap<>();
+   private final Map<OneDoFJoint, YoDouble> jointMinimumVelocities = new HashMap<>();
    private final DenseMatrix64F qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
 
-   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
-   private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
+   private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
+   private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -64,11 +67,17 @@ public class InverseKinematicsOptimizationControlModule
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         jointMaximumVelocities.put(joint, new DoubleYoVariable("qd_max_qp_" + joint.getName(), registry));
-         jointMinimumVelocities.put(joint, new DoubleYoVariable("qd_min_qp_" + joint.getName(), registry));
+         jointMaximumVelocities.put(joint, new YoDouble("qd_max_qp_" + joint.getName(), registry));
+         jointMinimumVelocities.put(joint, new YoDouble("qd_min_qp_" + joint.getName(), registry));
       }
 
-      qpSolver = new InverseKinematicsQPSolver(numberOfDoFs, registry);
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      ActiveSetQPSolver activeSetQPSolver;
+      if (optimizationSettings == null)
+         activeSetQPSolver = new SimpleEfficientActiveSetQPSolver();
+      else
+         activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, registry);
 
       parentRegistry.addChild(registry);
    }

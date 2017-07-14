@@ -3,29 +3,28 @@ package us.ihmc.manipulation.planning.trajectory;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class EndEffectorLinearTrajectory extends EndEffectorTrajectory
 {
    private ArrayList<LinearTrajectory> trajectories = new ArrayList<LinearTrajectory>();   
-   private Pose initialPose;   
+   private Pose3D initialPose;   
    
    public EndEffectorLinearTrajectory()
    {
       
    }
        
-   public void setInitialPose(Pose pose)
+   public void setInitialPose(Pose3D pose)
    {
       trajectories.clear();
       initialPose = pose;
       trajectoryTime = 0;
    }
    
-   public void addLinearTrajectory(Pose pose, double trajectoryTime)
+   public void addLinearTrajectory(Pose3D pose, double trajectoryTime)
    {
       if(trajectories.size() == 0)
       {
@@ -35,7 +34,7 @@ public class EndEffectorLinearTrajectory extends EndEffectorTrajectory
       else
       {
          LinearTrajectory lastTrajectory = trajectories.get(trajectories.size()-1);
-         Pose localInitialPose = lastTrajectory.getPose(lastTrajectory.getTrajectoryTime());
+         Pose3D localInitialPose = lastTrajectory.getPose(lastTrajectory.getTrajectoryTime());
          LinearTrajectory appendTrajectory = new LinearTrajectory(localInitialPose, pose, trajectoryTime);
          addLinearTrajectory(appendTrajectory);
       }
@@ -51,7 +50,7 @@ public class EndEffectorLinearTrajectory extends EndEffectorTrajectory
 
 
    @Override
-   public Pose getEndEffectorPose(double time)
+   public Pose3D getEndEffectorPose(double time)
    {
       double integratedTime = 0;
       double localTime = 0;

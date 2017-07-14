@@ -1,13 +1,12 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 
 public class AlphaFilteredYoFrameVector2d extends YoFrameVector2d
 {
@@ -32,12 +31,12 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2d
       return ret;
    }
 
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable alpha, ReferenceFrame referenceFrame)
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble alpha, ReferenceFrame referenceFrame)
    {
       return createAlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, "", registry, alpha, referenceFrame);
    }
 
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, DoubleYoVariable alpha, ReferenceFrame referenceFrame)
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, YoDouble alpha, ReferenceFrame referenceFrame)
    {
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry, alpha);
       AlphaFilteredYoVariable y = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), description, registry, alpha);
@@ -59,12 +58,12 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2d
    }
 
 
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable alpha, YoFrameVector2d unfilteredVector)
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble alpha, YoFrameVector2d unfilteredVector)
    {
       return createAlphaFilteredYoFrameVector2d(namePrefix, nameSuffix, "", registry, alpha, unfilteredVector);
    }
 
-   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, DoubleYoVariable alpha, YoFrameVector2d unfilteredVector)
+   public static AlphaFilteredYoFrameVector2d createAlphaFilteredYoFrameVector2d(String namePrefix, String nameSuffix, String description, YoVariableRegistry registry, YoDouble alpha, YoFrameVector2d unfilteredVector)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), description, registry, alpha, unfilteredVector.getYoX());

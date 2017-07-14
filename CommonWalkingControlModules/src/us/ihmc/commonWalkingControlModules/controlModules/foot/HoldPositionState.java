@@ -14,8 +14,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -60,11 +60,11 @@ public class HoldPositionState extends AbstractFootControlState
    private final AxisAngle desiredAxisAngle = new AxisAngle();
    private final Vector3D desiredRotationVector = new Vector3D();
 
-   private final BooleanYoVariable doSmartHoldPosition;
+   private final YoBoolean doSmartHoldPosition;
    private final YoFrameOrientation desiredHoldOrientation;
    private final YoFramePoint desiredHoldPosition;
 
-   private final BooleanYoVariable doHoldFootFlatOrientation;
+   private final YoBoolean doHoldFootFlatOrientation;
 
    private final YoSE3PIDGainsInterface gains;
    private final YoFrameVector yoAngularWeight;
@@ -81,7 +81,7 @@ public class HoldPositionState extends AbstractFootControlState
     * Determined whether the state is allowed to change the support polygon based on the exploration
     * done in the PartialFootholdControlModule.
     */
-   private BooleanYoVariable doFootholdAdjustments;
+   private YoBoolean doFootholdAdjustments;
    private final static boolean defaultDoFootholdAsjustments = true;
 
    public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -103,11 +103,11 @@ public class HoldPositionState extends AbstractFootControlState
       String namePrefix = contactableFoot.getName();
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
       desiredHoldPosition = new YoFramePoint(namePrefix + "DesiredHoldPosition", worldFrame, registry);
-      doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
+      doSmartHoldPosition = new YoBoolean(namePrefix + "DoSmartHoldPosition", registry);
 
-      doHoldFootFlatOrientation = new BooleanYoVariable(namePrefix + "DoHoldFootFlatOrientation", registry);
+      doHoldFootFlatOrientation = new YoBoolean(namePrefix + "DoHoldFootFlatOrientation", registry);
 
-      doFootholdAdjustments = new BooleanYoVariable(namePrefix + "DoFootholdAdjustments", registry);
+      doFootholdAdjustments = new YoBoolean(namePrefix + "DoFootholdAdjustments", registry);
       doFootholdAdjustments.set(defaultDoFootholdAsjustments);
 
       yoAngularWeight = new YoFrameVector(namePrefix + "HoldAngularWeight", null, registry);

@@ -4,8 +4,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -22,16 +22,16 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
     private final YoVariableRegistry registry = new YoVariableRegistry("RobotRegistry");
     
     private final YoVariableRegistry paramsReg  = new YoVariableRegistry("RobotParameters");
-    private final DoubleYoVariable thighLength  = new DoubleYoVariable("thighLength" , paramsReg);
-    private final DoubleYoVariable shinLength   = new DoubleYoVariable("shinLength"  , paramsReg);
-    private final DoubleYoVariable bodyToWheel  = new DoubleYoVariable("bodyToWheel" , paramsReg);
-    private final DoubleYoVariable wheelR       = new DoubleYoVariable("wheelR"      , paramsReg);
-    private final DoubleYoVariable pendulumComZ = new DoubleYoVariable("pendulumComZ", paramsReg);
-    private final DoubleYoVariable pendulumMass = new DoubleYoVariable("pendulumMass", paramsReg);
-    private final DoubleYoVariable bodyMass     = new DoubleYoVariable("bodyMass"    , paramsReg);
-    private final DoubleYoVariable wheelMass    = new DoubleYoVariable("wheelMass"   , paramsReg);
-    private final DoubleYoVariable thighMass    = new DoubleYoVariable("thighMass"   , paramsReg);
-    private final DoubleYoVariable shinMass     = new DoubleYoVariable("shinMass"    , paramsReg);
+    private final YoDouble thighLength  = new YoDouble("thighLength" , paramsReg);
+    private final YoDouble shinLength   = new YoDouble("shinLength"  , paramsReg);
+    private final YoDouble bodyToWheel  = new YoDouble("bodyToWheel" , paramsReg);
+    private final YoDouble wheelR       = new YoDouble("wheelR"      , paramsReg);
+    private final YoDouble pendulumComZ = new YoDouble("pendulumComZ", paramsReg);
+    private final YoDouble pendulumMass = new YoDouble("pendulumMass", paramsReg);
+    private final YoDouble bodyMass     = new YoDouble("bodyMass"    , paramsReg);
+    private final YoDouble wheelMass    = new YoDouble("wheelMass"   , paramsReg);
+    private final YoDouble thighMass    = new YoDouble("thighMass"   , paramsReg);
+    private final YoDouble shinMass     = new YoDouble("shinMass"    , paramsReg);
     
     private SliderJoint bodyJoint_T1, bodyJoint_T2;
     private PinJoint bodyJoint_R;
@@ -45,8 +45,8 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
     private GroundContactPoint leftGC, rightGC;
 
-    private DoubleYoVariable[][] footForces;
-    private DoubleYoVariable[] bodyVelocityInWorld;
+    private YoDouble[][] footForces;
+    private YoDouble[] bodyVelocityInWorld;
     
     public SelfStablePlanarRunner_Robot(String name, double pendulumComZ, double q_y0) {
 	super(name);
@@ -123,9 +123,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
 	leftKnee.addGroundContactPoint(leftGC);		rightKnee.addGroundContactPoint(rightGC);
 	
-	footForces = new DoubleYoVariable[][]{{leftGC.getYoForce().getYoX(), leftGC.getYoForce().getYoY(), leftGC.getYoForce().getYoZ()}, 
+	footForces = new YoDouble[][]{{leftGC.getYoForce().getYoX(), leftGC.getYoForce().getYoY(), leftGC.getYoForce().getYoZ()},
 	      {rightGC.getYoForce().getYoX(), rightGC.getYoForce().getYoY(), rightGC.getYoForce().getYoZ()}};
-	bodyVelocityInWorld = new DoubleYoVariable[]{bodyJoint_T1.getQDYoVariable(), bodyJoint_R.getQDYoVariable(), bodyJoint_T2.getQDYoVariable()};
+	bodyVelocityInWorld = new YoDouble[]{bodyJoint_T1.getQDYoVariable(), bodyJoint_R.getQDYoVariable(), bodyJoint_T2.getQDYoVariable()};
 	
 	this.setController(this);
 	initControl();

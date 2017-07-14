@@ -10,9 +10,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -38,18 +38,18 @@ public class ICPOptimizationSolutionHandler
    private final YoFrameVector2d nominalReferenceICPVelocity;
    private final YoFramePoint2d nominalReferenceCMP;
 
-   private final DoubleYoVariable footstepDeadband;
-   private final DoubleYoVariable footstepSolutionResolution;
+   private final YoDouble footstepDeadband;
+   private final YoDouble footstepSolutionResolution;
 
-   private final BooleanYoVariable footstepWasAdjusted;
+   private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2d footstepAdjustment;
 
-   private final DoubleYoVariable residualCostToGo;
-   private final DoubleYoVariable costToGo;
-   private final DoubleYoVariable footstepCostToGo;
-   private final DoubleYoVariable feedbackCostToGo;
-   private final DoubleYoVariable dynamicRelaxationCostToGo;
-   private final DoubleYoVariable angularMomentumMinimizationCostToGo;
+   private final YoDouble residualCostToGo;
+   private final YoDouble costToGo;
+   private final YoDouble footstepCostToGo;
+   private final YoDouble feedbackCostToGo;
+   private final YoDouble dynamicRelaxationCostToGo;
+   private final YoDouble angularMomentumMinimizationCostToGo;
 
    private final boolean debug;
    private final String yoNamePrefix;
@@ -92,12 +92,12 @@ public class ICPOptimizationSolutionHandler
          nominalReferenceICPVelocity = new YoFrameVector2d(yoNamePrefix + "NominalReferenceICPVelocity", worldFrame, registry);
          nominalReferenceCMP = new YoFramePoint2d(yoNamePrefix + "NominalReferenceCMP", worldFrame, registry);
 
-         residualCostToGo = new DoubleYoVariable(yoNamePrefix + "ResidualCostToGo", registry);
-         costToGo = new DoubleYoVariable(yoNamePrefix + "CostToGo", registry);
-         footstepCostToGo = new DoubleYoVariable(yoNamePrefix + "FootstepCostToGo", registry);
-         feedbackCostToGo = new DoubleYoVariable(yoNamePrefix + "FeedbackCostToGo", registry);
-         dynamicRelaxationCostToGo = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
-         angularMomentumMinimizationCostToGo = new DoubleYoVariable(yoNamePrefix + "AngularMomentumMinimizationCostToGo", registry);
+         residualCostToGo = new YoDouble(yoNamePrefix + "ResidualCostToGo", registry);
+         costToGo = new YoDouble(yoNamePrefix + "CostToGo", registry);
+         footstepCostToGo = new YoDouble(yoNamePrefix + "FootstepCostToGo", registry);
+         feedbackCostToGo = new YoDouble(yoNamePrefix + "FeedbackCostToGo", registry);
+         dynamicRelaxationCostToGo = new YoDouble(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
+         angularMomentumMinimizationCostToGo = new YoDouble(yoNamePrefix + "AngularMomentumMinimizationCostToGo", registry);
       }
       else
       {
@@ -114,10 +114,10 @@ public class ICPOptimizationSolutionHandler
          angularMomentumMinimizationCostToGo = null;
       }
 
-      footstepDeadband = new DoubleYoVariable(yoNamePrefix + "FootstepDeadband", registry);
-      footstepSolutionResolution = new DoubleYoVariable(yoNamePrefix + "FootstepSolutionResolution", registry);
+      footstepDeadband = new YoDouble(yoNamePrefix + "FootstepDeadband", registry);
+      footstepSolutionResolution = new YoDouble(yoNamePrefix + "FootstepSolutionResolution", registry);
 
-      footstepWasAdjusted = new BooleanYoVariable(yoNamePrefix + "FootstepWasAdjusted", registry);
+      footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2d(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
@@ -308,6 +308,11 @@ public class ICPOptimizationSolutionHandler
          nominalReferenceICPVelocity.set(tempVector2d);
          nominalReferenceCMP.set(tempPoint2d);
       }
+   }
+
+   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   {
+      referenceICPVelocity.set(desiredICPVelocity);
    }
 
    public void setReferenceValues(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, double omega0)

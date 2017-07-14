@@ -15,19 +15,16 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -40,6 +37,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WalkingMessageHandler
 {
@@ -51,7 +53,7 @@ public class WalkingMessageHandler
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final List<FootstepTiming> upcomingFootstepTimings = new ArrayList<>();
 
-   private final BooleanYoVariable hasNewFootstepAdjustment = new BooleanYoVariable("hasNewFootstepAdjustement", registry);
+   private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
@@ -62,24 +64,28 @@ public class WalkingMessageHandler
 
    private final StatusMessageOutputManager statusOutputManager;
 
-   private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
-   private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
-   private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
-   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
-   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
-   private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable("defaultInitialTransferTime", registry);
+   private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
+   private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
+   private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
+   private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
+   private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
+   private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
+   private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
-   private final BooleanYoVariable isWalking = new BooleanYoVariable("isWalking", registry);
+   private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
-   private final EnumYoVariable<RobotSide>[] upcomingFoostepSide = new EnumYoVariable[numberOfFootstepsToVisualize];
+   private final YoEnum<RobotSide>[] upcomingFoostepSide = new YoEnum[numberOfFootstepsToVisualize];
 
    private final FootstepListVisualizer footstepListVisualizer;
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable footstepDataListRecievedTime = new DoubleYoVariable("footstepDataListRecievedTime", registry);
+   private final YoDouble yoTime;
+   private final YoDouble footstepDataListRecievedTime = new YoDouble("footstepDataListRecievedTime", registry);
+   private final YoBoolean executingFootstep = new YoBoolean("ExecutingFootstep", registry);
+   private final FootstepTiming lastTimingExecuted = new FootstepTiming();
+
+   private final MomentumTrajectoryHandler momentumTrajectoryHandler;
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -88,7 +94,7 @@ public class WalkingMessageHandler
    }
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         StatusMessageOutputManager statusOutputManager, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
@@ -113,10 +119,12 @@ public class WalkingMessageHandler
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
-         upcomingFoostepSide[i] = new EnumYoVariable<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
+         upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
 
       footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
+
+      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
 
       parentRegistry.addChild(registry);
    }
@@ -137,6 +145,11 @@ public class WalkingMessageHandler
                footstepDataListRecievedTime.set(yoTime.getDoubleValue());
             break;
          case QUEUE:
+            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
+            {
+               PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+               return;
+            }
             currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
             break;
          default:
@@ -155,16 +168,19 @@ public class WalkingMessageHandler
       }
 
       double commandFinalTransferTime = command.getFinalTransferDuration();
+
       if (commandFinalTransferTime >= 0.0)
          finalTransferTime.set(commandFinalTransferTime);
       else
          finalTransferTime.set(defaultTransferTime.getDoubleValue());
 
+      boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
+
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
          FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
-         Footstep newFootstep = createFootstep(command.getFootstep(i), newFootstepTiming.getSwingTime());
+         Footstep newFootstep = createFootstep(command.getFootstep(i), trustHeightOfFootsteps, newFootstepTiming.getSwingTime());
          upcomingFootsteps.add(newFootstep);
       }
 
@@ -203,6 +219,29 @@ public class WalkingMessageHandler
       }
    }
 
+   public void handleMomentumTrajectoryCommand(MomentumTrajectoryCommand command)
+   {
+      momentumTrajectoryHandler.handleMomentumTrajectory(command);
+   }
+
+   /**
+    * This method will pack the angular momentum trajectory for planning the ICP trajectory. The parameters {@code startTime} and {@code endTime} refer
+    * to absolute controller time. To get the angular momentum trajectory from the current time to 1.0 seconds in the future the start time must
+    * be the value of yoTime and the end time must be the value of yoTime + 1.0. The {@code numberOfPoints} parameter defines in how many points the
+    * trajectory will be sampled. The packed trajectory will include the end points of the interval, therefore, the number of points must be equal
+    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty. The times of the packed trajectory points
+    * will be relative to the start time of the interval.
+    *
+    * @param startTime is the controller time for the start of the interval for which the trajectory is packed
+    * @param endTime is the controller time for the end of the interval for which the trajectory is packed
+    * @param numberOfPoints the number of sampling points of the trajectory
+    * @param trajectoryToPack the trajectory will be packed in here
+    */
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<TrajectoryPoint3D> trajectoryToPack)
+   {
+      momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
+   }
+
    public FootstepTiming peekTiming(int i)
    {
       if (i >= upcomingFootstepTimings.size())
@@ -228,7 +267,7 @@ public class WalkingMessageHandler
          updateVisualization();
          currentNumberOfFootsteps.decrement();
          currentFootstepIndex.increment();
-         upcomingFootstepTimings.remove(0);
+         lastTimingExecuted.set(upcomingFootstepTimings.remove(0));
          return upcomingFootsteps.remove(0);
       }
    }
@@ -352,6 +391,7 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue(),
             desiredFootPositionInWorld, desiredFootOrientationInWorld,
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
+      executingFootstep.set(true);
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
@@ -361,6 +401,7 @@ public class WalkingMessageHandler
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+      executingFootstep.set(false);
    }
 
    public void reportWalkingStarted()
@@ -530,7 +571,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataCommand footstepData, double swingTime)
+   private Footstep createFootstep(FootstepDataCommand footstepData, boolean trustHeight, double swingTime)
    {
       FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
 
@@ -550,7 +591,8 @@ public class WalkingMessageHandler
       ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, true, contactPoints);
+      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, trustHeight, contactPoints);
+
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          if (footstepData.getCustomPositionWaypoints() == null)
@@ -572,7 +614,7 @@ public class WalkingMessageHandler
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
-         if (swingTrajectory.getLast().getTime() >= swingTime)
+         if (swingTrajectory.getLast().getTime() > swingTime)
          {
             PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
@@ -585,6 +627,7 @@ public class WalkingMessageHandler
 
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
+      footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
       return footstep;
    }
 
@@ -613,9 +656,14 @@ public class WalkingMessageHandler
          break;
       case CONTROL_ABSOLUTE_TIMINGS:
          int stepsInQueue = upcomingFootstepTimings.size();
-         if (stepsInQueue == 0)
+         if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
          {
             timing.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
+         }
+         else if (stepsInQueue == 0)
+         {
+            double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
+            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
          }
          else
          {

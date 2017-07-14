@@ -12,10 +12,10 @@ import com.jme3.scene.shape.Sphere;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGraphics3DWorldTest
@@ -51,7 +51,7 @@ public class JMEGraphics3DWorldTest
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d())));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D())));
       world.startWithoutGui();
 
       world.keepAlive(1);
@@ -65,7 +65,7 @@ public class JMEGraphics3DWorldTest
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       
       world.startWithoutGui();
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d())));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D())));
 
       world.keepAlive(1);
       world.stop();
@@ -100,7 +100,7 @@ public class JMEGraphics3DWorldTest
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d())));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D())));
       world.startWithGui();
       world.setCameraPosition(5, 5, 5);
 
@@ -114,7 +114,7 @@ public class JMEGraphics3DWorldTest
    {
       JMEGraphics3DWorld world = new JMEGraphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       
-      Graphics3DNode sphereNode = new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d()));
+      Graphics3DNode sphereNode = new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D()));
       world.addChild(sphereNode);
       world.startWithGui();
       world.setCameraPosition(5, 5, 5);

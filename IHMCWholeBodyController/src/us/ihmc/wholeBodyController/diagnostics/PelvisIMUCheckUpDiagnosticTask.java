@@ -15,8 +15,8 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -53,43 +53,43 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
 
    private final YoFunctionGenerator functionGenerator;
-   private final DoubleYoVariable checkUpDuration;
+   private final YoDouble checkUpDuration;
 
    private final YoFrameVector imuAngularVelocityInPelvis;
-   private final EnumMap<Direction, DoubleYoVariable> meanOfJointVelocities = new EnumMap<>(Direction.class);
+   private final EnumMap<Direction, YoDouble> meanOfJointVelocities = new EnumMap<>(Direction.class);
 
-   private final DoubleYoVariable rampDuration;
-   private final EnumMap<Direction, DoubleYoVariable> ramps = new EnumMap<>(Direction.class);
+   private final YoDouble rampDuration;
+   private final EnumMap<Direction, YoDouble> ramps = new EnumMap<>(Direction.class);
 
    private final DiagnosticParameters diagnosticParameters;
 
    private final EnumMap<Direction, List<OneDoFJoint>> jointsToWiggleLists = new EnumMap<>(Direction.class);
    private final EnumMap<Direction, Set<OneDoFJoint>> jointsToWiggle = new EnumMap<>(Direction.class);
-   private final EnumMap<Direction, DoubleYoVariable> desiredJointPositionOffsets = new EnumMap<>(Direction.class);
-   private final EnumMap<Direction, DoubleYoVariable> desiredJointVelocityOffsets = new EnumMap<>(Direction.class);
+   private final EnumMap<Direction, YoDouble> desiredJointPositionOffsets = new EnumMap<>(Direction.class);
+   private final EnumMap<Direction, YoDouble> desiredJointVelocityOffsets = new EnumMap<>(Direction.class);
 
-   private final EnumMap<Direction, DoubleYoVariable> axisEvaluationStartTime = new EnumMap<>(Direction.class);
-   private final EnumMap<Direction, DoubleYoVariable> axisEvaluationEndTime = new EnumMap<>(Direction.class);
+   private final EnumMap<Direction, YoDouble> axisEvaluationStartTime = new EnumMap<>(Direction.class);
+   private final EnumMap<Direction, YoDouble> axisEvaluationEndTime = new EnumMap<>(Direction.class);
 
    private final Mean velocityToOrientationQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityToOrientationQualityMean;
+   private final YoDouble velocityToOrientationQualityMean;
    private final StandardDeviation velocityToOrientationQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityToOrientationQualityStandardDeviation;
+   private final YoDouble velocityToOrientationQualityStandardDeviation;
 
    private final Mean velocityToOrientationDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityToOrientationDelayMean;
+   private final YoDouble velocityToOrientationDelayMean;
    private final StandardDeviation velocityToOrientationDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityToOrientationDelayStandardDeviation;
+   private final YoDouble velocityToOrientationDelayStandardDeviation;
 
    private final Mean velocityIMUVsJointQualityMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityIMUVsJointQualityMean;
+   private final YoDouble velocityIMUVsJointQualityMean;
    private final StandardDeviation velocityIMUVsJointQualityStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityIMUVsJointQualityStandardDeviation;
+   private final YoDouble velocityIMUVsJointQualityStandardDeviation;
 
    private final Mean velocityIMUVsJointDelayMeanCalculator = new Mean();
-   private final DoubleYoVariable velocityIMUVsJointDelayMean;
+   private final YoDouble velocityIMUVsJointDelayMean;
    private final StandardDeviation velocityIMUVsJointDelayStandardDeviationCalculator = new StandardDeviation();
-   private final DoubleYoVariable velocityIMUVsJointDelayStandardDeviation;
+   private final YoDouble velocityIMUVsJointDelayStandardDeviation;
 
    public PelvisIMUCheckUpDiagnosticTask(String imuToCheck, DiagnosticControllerToolbox toolbox)
    {
@@ -114,22 +114,22 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       for (Direction direction : Direction.values)
       {
-         DoubleYoVariable desiredJointPositionOffset = new DoubleYoVariable("q_off_d_pelvis" + direction + nameSuffix, registry);
-         DoubleYoVariable desiredJointVelocityOffset = new DoubleYoVariable("qd_off_d_pelvis" + direction + nameSuffix, registry);
+         YoDouble desiredJointPositionOffset = new YoDouble("q_off_d_pelvis" + direction + nameSuffix, registry);
+         YoDouble desiredJointVelocityOffset = new YoDouble("qd_off_d_pelvis" + direction + nameSuffix, registry);
          desiredJointPositionOffsets.put(direction, desiredJointPositionOffset);
          desiredJointVelocityOffsets.put(direction, desiredJointVelocityOffset);
 
-         DoubleYoVariable sumOfQd = new DoubleYoVariable("qd_w" + direction + "_fromJoints", registry);
+         YoDouble sumOfQd = new YoDouble("qd_w" + direction + "_fromJoints", registry);
          meanOfJointVelocities.put(direction, sumOfQd);
       }
 
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
       imuAngularVelocityInPelvis = new YoFrameVector("qd_w", imuName + "PelvisFrame", pelvisFrame, registry);
 
-      checkUpDuration = new DoubleYoVariable(imuName + nameSuffix + "Duration", registry);
+      checkUpDuration = new YoDouble(imuName + nameSuffix + "Duration", registry);
       checkUpDuration.set(diagnosticParameters.getJointCheckUpDuration());
 
-      rampDuration = new DoubleYoVariable(imuName + nameSuffix + "SignalRampDuration", registry);
+      rampDuration = new YoDouble(imuName + nameSuffix + "SignalRampDuration", registry);
       rampDuration.set(0.2 * checkUpDuration.getDoubleValue());
 
       double startTime = 0.0;
@@ -137,10 +137,10 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       for (Direction direction : Direction.values)
       {
-         ramps.put(direction, new DoubleYoVariable(imuName + nameSuffix + "SignalRamp" + direction, registry));
+         ramps.put(direction, new YoDouble(imuName + nameSuffix + "SignalRamp" + direction, registry));
 
-         DoubleYoVariable yoStartTime = new DoubleYoVariable(imuName + nameSuffix + "EvalutionStartTimeAxis" + direction, registry);
-         DoubleYoVariable yoEndTime = new DoubleYoVariable(imuName + nameSuffix + "EvalutionEndTimeAxis" + direction, registry);
+         YoDouble yoStartTime = new YoDouble(imuName + nameSuffix + "EvalutionStartTimeAxis" + direction, registry);
+         YoDouble yoEndTime = new YoDouble(imuName + nameSuffix + "EvalutionEndTimeAxis" + direction, registry);
 
          yoStartTime.set(startTime);
          yoEndTime.set(endTime);
@@ -161,19 +161,19 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       double observationWindow = diagnosticParameters.getDelayEstimatorObservationWindow();
       delayEstimator.setEstimationParameters(maxAbsoluteLead, maxAbsoluteLag, observationWindow);
 
-      velocityToOrientationQualityMean = new DoubleYoVariable(imuName + nameSuffix + "VelocityToOrientationQualityMean", registry);
-      velocityToOrientationQualityStandardDeviation = new DoubleYoVariable(imuName + nameSuffix + "VelocityToOrientationQualityStandardDeviation", registry);
+      velocityToOrientationQualityMean = new YoDouble(imuName + nameSuffix + "VelocityToOrientationQualityMean", registry);
+      velocityToOrientationQualityStandardDeviation = new YoDouble(imuName + nameSuffix + "VelocityToOrientationQualityStandardDeviation", registry);
 
-      velocityToOrientationDelayMean = new DoubleYoVariable(imuName + nameSuffix + "VelocityToOrientationDelayMean", registry);
-      velocityToOrientationDelayStandardDeviation = new DoubleYoVariable(imuName + nameSuffix + "VelocityToOrientationDelayStandardDeviation", registry);
+      velocityToOrientationDelayMean = new YoDouble(imuName + nameSuffix + "VelocityToOrientationDelayMean", registry);
+      velocityToOrientationDelayStandardDeviation = new YoDouble(imuName + nameSuffix + "VelocityToOrientationDelayStandardDeviation", registry);
       
-      velocityIMUVsJointQualityMean = new DoubleYoVariable(imuName + nameSuffix + "VelocityIMUVsJointQualityMean", registry);
-      velocityIMUVsJointQualityStandardDeviation = new DoubleYoVariable(imuName + nameSuffix + "VelocityIMUVsJointQualityStandardDeviation", registry);
+      velocityIMUVsJointQualityMean = new YoDouble(imuName + nameSuffix + "VelocityIMUVsJointQualityMean", registry);
+      velocityIMUVsJointQualityStandardDeviation = new YoDouble(imuName + nameSuffix + "VelocityIMUVsJointQualityStandardDeviation", registry);
       
-      velocityIMUVsJointDelayMean = new DoubleYoVariable(imuName + nameSuffix + "VelocityIMUVsJointDelayMean", registry);
-      velocityIMUVsJointDelayStandardDeviation = new DoubleYoVariable(imuName + nameSuffix + "VelocityIMUVsJointDelayStandardDeviation", registry);
+      velocityIMUVsJointDelayMean = new YoDouble(imuName + nameSuffix + "VelocityIMUVsJointDelayMean", registry);
+      velocityIMUVsJointDelayStandardDeviation = new YoDouble(imuName + nameSuffix + "VelocityIMUVsJointDelayStandardDeviation", registry);
 
-      DoubleYoVariable yoTime = toolbox.getYoTime();
+      YoDouble yoTime = toolbox.getYoTime();
       functionGenerator = new YoFunctionGenerator(imuName + nameSuffix, yoTime, registry);
       functionGenerator.setAmplitude(diagnosticParameters.getCheckUpOscillationPositionAmplitude());
       functionGenerator.setFrequency(diagnosticParameters.getCheckUpOscillationPositionFrequency());

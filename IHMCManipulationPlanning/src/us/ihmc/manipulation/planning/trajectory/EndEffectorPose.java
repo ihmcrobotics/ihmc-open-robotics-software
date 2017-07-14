@@ -1,8 +1,8 @@
 package us.ihmc.manipulation.planning.trajectory;
 
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.euclid.geometry.Pose3D;
 
 public interface EndEffectorPose
 {
-   public Pose getEndEffectorPose();
+   public Pose3D getEndEffectorPose();
 }

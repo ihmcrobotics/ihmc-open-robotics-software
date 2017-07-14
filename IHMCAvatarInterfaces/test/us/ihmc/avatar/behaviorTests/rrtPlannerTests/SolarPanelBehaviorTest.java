@@ -26,8 +26,8 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -37,14 +37,14 @@ import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavi
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.RRTTreeTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelCleaningInfo;
+import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelCleaningInfo.DegreesOfRedundancy;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelMotionPlanner;
+import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelWholeBodyTrajectoryMessageFactory;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.TimeDomain1DNode;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.TimeDomain3DNode;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.ValidNodesStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelCleaningInfo.DegreesOfRedundancy;
-import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -60,7 +60,6 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -104,7 +103,7 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
          
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
                   
-         EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeZ(), YoAppearance.Aqua());
+         EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeW(), YoAppearance.Aqua());
       }
       
       @Override
@@ -171,7 +170,6 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
 
       if (toolboxCommunicator != null)
       {
-         toolboxCommunicator.close();
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
@@ -211,8 +209,7 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       {
          OneDoFJoint aJoint = sdfFullRobotModel.getOneDoFJoints()[i];
          PrintTools.info(""+aJoint.getName()+" "+aJoint.getJointLimitLower()+" "+aJoint.getJointLimitUpper());
-      }
-            
+      }            
             
       setUpSolarPanel();
             
@@ -637,7 +634,7 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
    
    private void setUpSolarPanel()
    {
-      Pose poseSolarPanel = new Pose();
+      Pose3D poseSolarPanel = new Pose3D();
       Quaternion quaternionSolarPanel = new Quaternion();
       poseSolarPanel.setPosition(0.71, -0.2, 1.03);
       quaternionSolarPanel.appendYawRotation(Math.PI*0.00);

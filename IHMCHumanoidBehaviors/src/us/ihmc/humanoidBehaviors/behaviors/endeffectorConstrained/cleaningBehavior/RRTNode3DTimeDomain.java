@@ -1,19 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.ThreadTools;
 
 public class RRTNode3DTimeDomain extends RRTNode
 {
@@ -45,7 +39,7 @@ public class RRTNode3DTimeDomain extends RRTNode
       // Hand
       Quaternion desiredHandOrientation = new Quaternion();
       desiredHandOrientation.appendPitchRotation(Math.PI*30/180);
-      nodeValidityTester.setDesiredHandPose(RobotSide.RIGHT, new Pose(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
+      nodeValidityTester.setDesiredHandPose(RobotSide.RIGHT, new Pose3D(new Point3D(0.6, -0.4, 1.0), desiredHandOrientation));
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendPitchRotation(Math.PI*10/180);

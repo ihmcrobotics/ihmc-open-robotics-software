@@ -19,14 +19,14 @@ import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabili
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -153,6 +153,26 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getECMPProximityForToeOff()
    {
       return 0.0;
+   }
+
+   /**
+    * Whether or not the location of the CoP in the trailing foot must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the CoP location.
+    */
+   public boolean checkCoPLocationToTriggerToeOff()
+   {
+      return false;
+   }
+
+   /**
+    * Maximum distance of the CoP in the trailing foot to the toe off support polygon before allowing toe off.
+    *
+    * @return CoP distance (m).
+    */
+   public double getCoPProximityForToeOff()
+   {
+      return 0.03;
    }
 
    /**
@@ -383,9 +403,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * 
     * @return map containing home pose in base frame by body name
     */
-   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
-      return new HashMap<String, Pose>();
+      return new HashMap<String, Pose3D>();
    }
 
    /**
@@ -484,6 +504,38 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Ramps up the maximum loading of the normal force of the toe contact points over time, if returns true. If returns false, it simply
+    * immediately sets the normal force maximum to infinity.
+    *
+    * @return whether or not to ramp up.
+    */
+   public boolean rampUpAllowableToeLoadAfterContact()
+   {
+      return false;
+   }
+
+   /**
+    * Defines the duration spent ramping up the allowable normal toe contact force if {@link #rampUpAllowableToeLoadAfterContact()} is true.
+    *
+    * @return duration (s)
+    */
+   public double getToeLoadingDuration()
+   {
+      return 0.2;
+   }
+
+   /**
+    * The maximum normal force allowed in the toe if {@link #rampUpAllowableToeLoadAfterContact()} is true at the time returned by
+    * {@link #getToeLoadingDuration()}. After this time, the maximum normal force goes to infinity.
+    * @return
+    */
+   public double getFullyLoadedToeForce()
+   {
+      return 1.0e3;
+   }
+
+
+   /**
     * This is the default transfer time used in the walking controller to shift the weight to the initial stance foot
     * when starting to execute a footstep plan.
     */
@@ -528,6 +580,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownAcceleration();
+
+   /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
+   public double getBlindFootstepsHeightOffset()
+   {
+      return 0.03;
+   }
 
    public abstract double getContactThresholdForce();
 

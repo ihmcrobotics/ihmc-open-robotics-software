@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -21,11 +21,11 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    // private static final boolean DEBUG = false;
    private FramePoint2d endPoint;
    private StraightLineOverheadPath footstepPath;
-   protected final DoubleYoVariable forwardWalkingStepLength = new DoubleYoVariable("translationalForwardWalkingStepLength", registry);
-   protected final DoubleYoVariable backwardWalkingStepLength = new DoubleYoVariable("translationalBackwardStepLength", registry);
-   protected final DoubleYoVariable sidewardWalkingStepLength = new DoubleYoVariable("translationalSidewardStepLength", registry);
-   protected final DoubleYoVariable nominalWalkingStepWidth = new DoubleYoVariable("translationalForwardWalkingStepWidth", registry);
-   protected final DoubleYoVariable minimumWalkingStepWidth = new DoubleYoVariable("translationalMinimumStepWidth", registry);
+   protected final YoDouble forwardWalkingStepLength = new YoDouble("translationalForwardWalkingStepLength", registry);
+   protected final YoDouble backwardWalkingStepLength = new YoDouble("translationalBackwardStepLength", registry);
+   protected final YoDouble sidewardWalkingStepLength = new YoDouble("translationalSidewardStepLength", registry);
+   protected final YoDouble nominalWalkingStepWidth = new YoDouble("translationalForwardWalkingStepWidth", registry);
+   protected final YoDouble minimumWalkingStepWidth = new YoDouble("translationalMinimumStepWidth", registry);
    private boolean isRightwardPath;
    private boolean isForwardPath;
 
@@ -76,9 +76,9 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 
       FramePose2d poseAtS0 = footstepPath.getPoseAtS(0);
       FramePoint2d position = new FramePoint2d();
-      poseAtS0.getPosition(position);
+      poseAtS0.getPositionIncludingFrame(position);
       FramePoint2d position2 = new FramePoint2d();
-      footstepPath.getPoseAtS(1).getPosition(position2);
+      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position2);
       position2.sub(position);
       double pathAngle = Math.atan2(position2.getY(), position2.getX());
       double yaw = poseAtS0.getYaw();
@@ -194,7 +194,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       // Do two square up steps
       //    stepWidth = nominalStepWidth;//Changing to nominal at end can cause overstep if stepWidth is smaller than stepWidth for the rest of the path.
       FramePoint2d position3 = new FramePoint2d();
-      footstepPath.getPoseAtS(1).getPosition(position3);
+      footstepPath.getPoseAtS(1).getPositionIncludingFrame(position3);
       addFootstep(ret, position3, stepWidth, yaw);
       addFootstep(ret, position3, stepWidth, yaw);
    }

@@ -5,7 +5,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -17,7 +17,7 @@ public class ICPOptimizationControllerHelper
    private static final Matrix3D matrix = new Matrix3D();
    private static final Matrix3D matrixTransformed = new Matrix3D();
 
-   public static void transformFeedbackGains(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, DoubleYoVariable parallelGain, DoubleYoVariable orthogonalGain)
+   public static void transformFeedbackGains(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -54,7 +54,7 @@ public class ICPOptimizationControllerHelper
    private static final RotationMatrix rotation = new RotationMatrix();
    private static final RotationMatrix rotationTranspose = new RotationMatrix();
 
-   public static void transformWeightsToWorldFrame(FrameVector2d weightsToPack, DoubleYoVariable xWeight, DoubleYoVariable yWeight, ReferenceFrame frame)
+   public static void transformWeightsToWorldFrame(FrameVector2d weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
    {
       RigidBodyTransform transformToWorldFrame = frame.getTransformToWorldFrame();
 

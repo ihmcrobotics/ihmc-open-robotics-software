@@ -140,7 +140,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       ratio = limitToPlusMinusOne(ratio);
 
-      // kneeAngle will always be positive, between 0.0 and PI here since using acos. If you want the other solution, use a negative here.
+      // legConfiguration will always be positive, between 0.0 and PI here since using acos. If you want the other solution, use a negative here.
       double kneeAngle = Math.acos(ratio);
 
       if (bendKneesIn)

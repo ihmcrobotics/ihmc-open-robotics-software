@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -11,16 +11,16 @@ public class BacklashProcessingYoFrameVector extends YoFrameVector implements Pr
 {
    private final BacklashProcessingYoVariable xDot, yDot, zDot;
 
-   public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, DoubleYoVariable slopTime,
+   public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, YoDouble slopTime,
            YoVariableRegistry registry, YoFrameTuple<?, ?> yoFrameTupleToProcess)
    {
       String xName = YoFrameVariableNameTools.createXName(namePrefix, nameSuffix);
       String yName = YoFrameVariableNameTools.createYName(namePrefix, nameSuffix);
       String zName = YoFrameVariableNameTools.createZName(namePrefix, nameSuffix);
 
-      DoubleYoVariable xRaw = yoFrameTupleToProcess.getYoX();
-      DoubleYoVariable yRaw = yoFrameTupleToProcess.getYoY();
-      DoubleYoVariable zRaw = yoFrameTupleToProcess.getYoZ();
+      YoDouble xRaw = yoFrameTupleToProcess.getYoX();
+      YoDouble yRaw = yoFrameTupleToProcess.getYoY();
+      YoDouble zRaw = yoFrameTupleToProcess.getYoZ();
 
       BacklashProcessingYoVariable x = new BacklashProcessingYoVariable(xName, "", xRaw, dt, slopTime, registry);
       BacklashProcessingYoVariable y = new BacklashProcessingYoVariable(yName, "", yRaw, dt, slopTime, registry);

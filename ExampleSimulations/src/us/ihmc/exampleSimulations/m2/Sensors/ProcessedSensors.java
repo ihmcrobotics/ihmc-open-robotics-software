@@ -7,9 +7,9 @@ import us.ihmc.exampleSimulations.m2.ContactPointName;
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -29,153 +29,153 @@ public class ProcessedSensors
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("ProcessedSensors");
 
-   public final DoubleYoVariable time = new DoubleYoVariable("time", registry);
+   public final YoDouble time = new YoDouble("time", registry);
 
-   private final DoubleYoVariable p_x_world = new DoubleYoVariable("p_x_world", registry);
-   private final DoubleYoVariable p_y_world = new DoubleYoVariable("p_y_world", registry);
-   private final DoubleYoVariable p_z_world = new DoubleYoVariable("p_z_world", registry);
+   private final YoDouble p_x_world = new YoDouble("p_x_world", registry);
+   private final YoDouble p_y_world = new YoDouble("p_y_world", registry);
+   private final YoDouble p_z_world = new YoDouble("p_z_world", registry);
 
-   private final DoubleYoVariable[] robotBodyPositionInWorldcoordinates = new DoubleYoVariable[] {p_x_world, p_y_world, p_z_world};
+   private final YoDouble[] robotBodyPositionInWorldcoordinates = new YoDouble[] {p_x_world, p_y_world, p_z_world};
 
-   private final DoubleYoVariable pd_x_world = new DoubleYoVariable("pd_x_world", registry);
-   private final DoubleYoVariable pd_y_world = new DoubleYoVariable("pd_y_world", registry);
-   private final DoubleYoVariable pd_z_world = new DoubleYoVariable("pd_z_world", registry);
+   private final YoDouble pd_x_world = new YoDouble("pd_x_world", registry);
+   private final YoDouble pd_y_world = new YoDouble("pd_y_world", registry);
+   private final YoDouble pd_z_world = new YoDouble("pd_z_world", registry);
 
-   private final DoubleYoVariable[] robotBodyVelocityInWorldcoordinates = new DoubleYoVariable[] {pd_x_world, pd_y_world, pd_z_world};
+   private final YoDouble[] robotBodyVelocityInWorldcoordinates = new YoDouble[] {pd_x_world, pd_y_world, pd_z_world};
 
-   private final DoubleYoVariable pdd_x_world = new DoubleYoVariable("pdd_x_world", registry);
-   private final DoubleYoVariable pdd_y_world = new DoubleYoVariable("pdd_y_world", registry);
-   private final DoubleYoVariable pdd_z_world = new DoubleYoVariable("pdd_z_world", registry);
+   private final YoDouble pdd_x_world = new YoDouble("pdd_x_world", registry);
+   private final YoDouble pdd_y_world = new YoDouble("pdd_y_world", registry);
+   private final YoDouble pdd_z_world = new YoDouble("pdd_z_world", registry);
 
-   private final DoubleYoVariable[] robotBodyAccelerationInWorldcoordinates = new DoubleYoVariable[] {pdd_x_world, pdd_y_world, pdd_z_world};
+   private final YoDouble[] robotBodyAccelerationInWorldcoordinates = new YoDouble[] {pdd_x_world, pdd_y_world, pdd_z_world};
 
-   private final DoubleYoVariable p_yaw = new DoubleYoVariable("p_yaw", registry);
-   private final DoubleYoVariable p_roll = new DoubleYoVariable("p_roll", registry);
-   private final DoubleYoVariable p_pitch = new DoubleYoVariable("p_pitch", registry);
+   private final YoDouble p_yaw = new YoDouble("p_yaw", registry);
+   private final YoDouble p_roll = new YoDouble("p_roll", registry);
+   private final YoDouble p_pitch = new YoDouble("p_pitch", registry);
 
-   private final DoubleYoVariable pd_yaw = new DoubleYoVariable("pd_yaw", registry);
-   private final DoubleYoVariable pd_roll = new DoubleYoVariable("pd_roll", registry);
-   private final DoubleYoVariable pd_pitch = new DoubleYoVariable("pd_pitch", registry);
+   private final YoDouble pd_yaw = new YoDouble("pd_yaw", registry);
+   private final YoDouble pd_roll = new YoDouble("pd_roll", registry);
+   private final YoDouble pd_pitch = new YoDouble("pd_pitch", registry);
 
-   private final DoubleYoVariable pdd_yaw = new DoubleYoVariable("pdd_yaw", registry);
-   private final DoubleYoVariable pdd_roll = new DoubleYoVariable("pdd_roll", registry);
-   private final DoubleYoVariable pdd_pitch = new DoubleYoVariable("pdd_pitch", registry);
+   private final YoDouble pdd_yaw = new YoDouble("pdd_yaw", registry);
+   private final YoDouble pdd_roll = new YoDouble("pdd_roll", registry);
+   private final YoDouble pdd_pitch = new YoDouble("pdd_pitch", registry);
 
    // p Joint positions in Units of Radians:
-   private final DoubleYoVariable p_left_hip_yaw = new DoubleYoVariable("p_left_hip_yaw", registry);
-   private final DoubleYoVariable p_left_hip_roll = new DoubleYoVariable("p_left_hip_roll", registry);
-   private final DoubleYoVariable p_left_hip_pitch = new DoubleYoVariable("p_left_hip_pitch", registry);
-   private final DoubleYoVariable p_left_knee = new DoubleYoVariable("p_left_knee", registry);
-   private final DoubleYoVariable p_left_ankle_pitch = new DoubleYoVariable("p_left_ankle_pitch", registry);
-   private final DoubleYoVariable p_left_ankle_roll = new DoubleYoVariable("p_left_ankle_roll", registry);
+   private final YoDouble p_left_hip_yaw = new YoDouble("p_left_hip_yaw", registry);
+   private final YoDouble p_left_hip_roll = new YoDouble("p_left_hip_roll", registry);
+   private final YoDouble p_left_hip_pitch = new YoDouble("p_left_hip_pitch", registry);
+   private final YoDouble p_left_knee = new YoDouble("p_left_knee", registry);
+   private final YoDouble p_left_ankle_pitch = new YoDouble("p_left_ankle_pitch", registry);
+   private final YoDouble p_left_ankle_roll = new YoDouble("p_left_ankle_roll", registry);
 
-   private final DoubleYoVariable p_right_hip_yaw = new DoubleYoVariable("p_right_hip_yaw", registry);
-   private final DoubleYoVariable p_right_hip_roll = new DoubleYoVariable("p_right_hip_roll", registry);
-   private final DoubleYoVariable p_right_hip_pitch = new DoubleYoVariable("p_right_hip_pitch", registry);
-   private final DoubleYoVariable p_right_knee = new DoubleYoVariable("p_right_knee", registry);
-   private final DoubleYoVariable p_right_ankle_pitch = new DoubleYoVariable("p_right_ankle_pitch", registry);
-   private final DoubleYoVariable p_right_ankle_roll = new DoubleYoVariable("p_right_ankle_roll", registry);
+   private final YoDouble p_right_hip_yaw = new YoDouble("p_right_hip_yaw", registry);
+   private final YoDouble p_right_hip_roll = new YoDouble("p_right_hip_roll", registry);
+   private final YoDouble p_right_hip_pitch = new YoDouble("p_right_hip_pitch", registry);
+   private final YoDouble p_right_knee = new YoDouble("p_right_knee", registry);
+   private final YoDouble p_right_ankle_pitch = new YoDouble("p_right_ankle_pitch", registry);
+   private final YoDouble p_right_ankle_roll = new YoDouble("p_right_ankle_roll", registry);
 
    // **pd
 
-   private final DoubleYoVariable pd_left_hip_yaw = new DoubleYoVariable("pd_left_hip_yaw", registry);
-   private final DoubleYoVariable pd_left_hip_roll = new DoubleYoVariable("pd_left_hip_roll", registry);
-   private final DoubleYoVariable pd_left_hip_pitch = new DoubleYoVariable("pd_left_hip_pitch", registry);
-   private final DoubleYoVariable pd_left_knee = new DoubleYoVariable("pd_left_knee", registry);
-   private final DoubleYoVariable pd_left_ankle_pitch = new DoubleYoVariable("pd_left_ankle_pitch", registry);
-   private final DoubleYoVariable pd_left_ankle_roll = new DoubleYoVariable("pd_left_ankle_roll", registry);
+   private final YoDouble pd_left_hip_yaw = new YoDouble("pd_left_hip_yaw", registry);
+   private final YoDouble pd_left_hip_roll = new YoDouble("pd_left_hip_roll", registry);
+   private final YoDouble pd_left_hip_pitch = new YoDouble("pd_left_hip_pitch", registry);
+   private final YoDouble pd_left_knee = new YoDouble("pd_left_knee", registry);
+   private final YoDouble pd_left_ankle_pitch = new YoDouble("pd_left_ankle_pitch", registry);
+   private final YoDouble pd_left_ankle_roll = new YoDouble("pd_left_ankle_roll", registry);
 
-   private final DoubleYoVariable pd_right_hip_yaw = new DoubleYoVariable("pd_right_hip_yaw", registry);
-   private final DoubleYoVariable pd_right_hip_roll = new DoubleYoVariable("pd_right_hip_roll", registry);
-   private final DoubleYoVariable pd_right_hip_pitch = new DoubleYoVariable("pd_right_hip_pitch", registry);
-   private final DoubleYoVariable pd_right_knee = new DoubleYoVariable("pd_right_knee", registry);
-   private final DoubleYoVariable pd_right_ankle_pitch = new DoubleYoVariable("pd_right_ankle_pitch", registry);
-   private final DoubleYoVariable pd_right_ankle_roll = new DoubleYoVariable("pd_right_ankle_roll", registry);
+   private final YoDouble pd_right_hip_yaw = new YoDouble("pd_right_hip_yaw", registry);
+   private final YoDouble pd_right_hip_roll = new YoDouble("pd_right_hip_roll", registry);
+   private final YoDouble pd_right_hip_pitch = new YoDouble("pd_right_hip_pitch", registry);
+   private final YoDouble pd_right_knee = new YoDouble("pd_right_knee", registry);
+   private final YoDouble pd_right_ankle_pitch = new YoDouble("pd_right_ankle_pitch", registry);
+   private final YoDouble pd_right_ankle_roll = new YoDouble("pd_right_ankle_roll", registry);
 
    // pdd
 
-   private final DoubleYoVariable pdd_left_hip_yaw = new DoubleYoVariable("pdd_left_hip_yaw", registry);
-   private final DoubleYoVariable pdd_left_hip_roll = new DoubleYoVariable("pdd_left_hip_roll", registry);
-   private final DoubleYoVariable pdd_left_hip_pitch = new DoubleYoVariable("pdd_left_hip_pitch", registry);
-   private final DoubleYoVariable pdd_left_knee = new DoubleYoVariable("pdd_left_knee", registry);
-   private final DoubleYoVariable pdd_left_ankle_pitch = new DoubleYoVariable("pdd_left_ankle_pitch", registry);
-   private final DoubleYoVariable pdd_left_ankle_roll = new DoubleYoVariable("pdd_left_ankle_roll", registry);
+   private final YoDouble pdd_left_hip_yaw = new YoDouble("pdd_left_hip_yaw", registry);
+   private final YoDouble pdd_left_hip_roll = new YoDouble("pdd_left_hip_roll", registry);
+   private final YoDouble pdd_left_hip_pitch = new YoDouble("pdd_left_hip_pitch", registry);
+   private final YoDouble pdd_left_knee = new YoDouble("pdd_left_knee", registry);
+   private final YoDouble pdd_left_ankle_pitch = new YoDouble("pdd_left_ankle_pitch", registry);
+   private final YoDouble pdd_left_ankle_roll = new YoDouble("pdd_left_ankle_roll", registry);
 
-   private final DoubleYoVariable pdd_right_hip_yaw = new DoubleYoVariable("pdd_right_hip_yaw", registry);
-   private final DoubleYoVariable pdd_right_hip_roll = new DoubleYoVariable("pdd_right_hip_roll", registry);
-   private final DoubleYoVariable pdd_right_hip_pitch = new DoubleYoVariable("pdd_right_hip_pitch", registry);
-   private final DoubleYoVariable pdd_right_knee = new DoubleYoVariable("pdd_right_knee", registry);
-   private final DoubleYoVariable pdd_right_ankle_pitch = new DoubleYoVariable("pdd_right_ankle_pitch", registry);
-   private final DoubleYoVariable pdd_right_ankle_roll = new DoubleYoVariable("pdd_right_ankle_roll", registry);
+   private final YoDouble pdd_right_hip_yaw = new YoDouble("pdd_right_hip_yaw", registry);
+   private final YoDouble pdd_right_hip_roll = new YoDouble("pdd_right_hip_roll", registry);
+   private final YoDouble pdd_right_hip_pitch = new YoDouble("pdd_right_hip_pitch", registry);
+   private final YoDouble pdd_right_knee = new YoDouble("pdd_right_knee", registry);
+   private final YoDouble pdd_right_ankle_pitch = new YoDouble("pdd_right_ankle_pitch", registry);
+   private final YoDouble pdd_right_ankle_roll = new YoDouble("pdd_right_ankle_roll", registry);
 
    // ground contact points
-   private final DoubleYoVariable p_right_toe_in_x = new DoubleYoVariable("p_right_toe_in_x", registry);
-   private final DoubleYoVariable p_right_toe_in_y = new DoubleYoVariable("p_right_toe_in_y", registry);
-   private final DoubleYoVariable p_right_toe_in_z = new DoubleYoVariable("p_right_toe_in_z", registry);
-   private final DoubleYoVariable p_right_toe_out_x = new DoubleYoVariable("p_right_toe_out_x", registry);
-   private final DoubleYoVariable p_right_toe_out_y = new DoubleYoVariable("p_right_toe_out_y", registry);
-   private final DoubleYoVariable p_right_toe_out_z = new DoubleYoVariable("p_right_toe_out_z", registry);
+   private final YoDouble p_right_toe_in_x = new YoDouble("p_right_toe_in_x", registry);
+   private final YoDouble p_right_toe_in_y = new YoDouble("p_right_toe_in_y", registry);
+   private final YoDouble p_right_toe_in_z = new YoDouble("p_right_toe_in_z", registry);
+   private final YoDouble p_right_toe_out_x = new YoDouble("p_right_toe_out_x", registry);
+   private final YoDouble p_right_toe_out_y = new YoDouble("p_right_toe_out_y", registry);
+   private final YoDouble p_right_toe_out_z = new YoDouble("p_right_toe_out_z", registry);
 
-   private final DoubleYoVariable p_right_heel_in_x = new DoubleYoVariable("p_right_heel_in_x", registry);
-   private final DoubleYoVariable p_right_heel_in_y = new DoubleYoVariable("p_right_heel_in_y", registry);
-   private final DoubleYoVariable p_right_heel_in_z = new DoubleYoVariable("p_right_heel_in_z", registry);
-   private final DoubleYoVariable p_right_heel_out_x = new DoubleYoVariable("p_right_heel_out_x", registry);
-   private final DoubleYoVariable p_right_heel_out_y = new DoubleYoVariable("p_right_heel_out_y", registry);
-   private final DoubleYoVariable p_right_heel_out_z = new DoubleYoVariable("p_right_heel_out_z", registry);
+   private final YoDouble p_right_heel_in_x = new YoDouble("p_right_heel_in_x", registry);
+   private final YoDouble p_right_heel_in_y = new YoDouble("p_right_heel_in_y", registry);
+   private final YoDouble p_right_heel_in_z = new YoDouble("p_right_heel_in_z", registry);
+   private final YoDouble p_right_heel_out_x = new YoDouble("p_right_heel_out_x", registry);
+   private final YoDouble p_right_heel_out_y = new YoDouble("p_right_heel_out_y", registry);
+   private final YoDouble p_right_heel_out_z = new YoDouble("p_right_heel_out_z", registry);
 
-   private final DoubleYoVariable p_left_toe_in_x = new DoubleYoVariable("p_left_toe_in_x", registry);
-   private final DoubleYoVariable p_left_toe_in_y = new DoubleYoVariable("p_left_toe_in_y", registry);
-   private final DoubleYoVariable p_left_toe_in_z = new DoubleYoVariable("p_left_toe_in_z", registry);
-   private final DoubleYoVariable p_left_toe_out_x = new DoubleYoVariable("p_left_toe_out_x", registry);
-   private final DoubleYoVariable p_left_toe_out_y = new DoubleYoVariable("p_left_toe_out_y", registry);
-   private final DoubleYoVariable p_left_toe_out_z = new DoubleYoVariable("p_left_toe_out_z", registry);
+   private final YoDouble p_left_toe_in_x = new YoDouble("p_left_toe_in_x", registry);
+   private final YoDouble p_left_toe_in_y = new YoDouble("p_left_toe_in_y", registry);
+   private final YoDouble p_left_toe_in_z = new YoDouble("p_left_toe_in_z", registry);
+   private final YoDouble p_left_toe_out_x = new YoDouble("p_left_toe_out_x", registry);
+   private final YoDouble p_left_toe_out_y = new YoDouble("p_left_toe_out_y", registry);
+   private final YoDouble p_left_toe_out_z = new YoDouble("p_left_toe_out_z", registry);
 
-   private final DoubleYoVariable p_left_heel_in_x = new DoubleYoVariable("p_left_heel_in_x", registry);
-   private final DoubleYoVariable p_left_heel_in_y = new DoubleYoVariable("p_left_heel_in_y", registry);
-   private final DoubleYoVariable p_left_heel_in_z = new DoubleYoVariable("p_left_heel_in_z", registry);
-   private final DoubleYoVariable p_left_heel_out_x = new DoubleYoVariable("p_left_heel_out_x", registry);
-   private final DoubleYoVariable p_left_heel_out_y = new DoubleYoVariable("p_left_heel_out_y", registry);
-   private final DoubleYoVariable p_left_heel_out_z = new DoubleYoVariable("p_left_heel_out_z", registry);
+   private final YoDouble p_left_heel_in_x = new YoDouble("p_left_heel_in_x", registry);
+   private final YoDouble p_left_heel_in_y = new YoDouble("p_left_heel_in_y", registry);
+   private final YoDouble p_left_heel_in_z = new YoDouble("p_left_heel_in_z", registry);
+   private final YoDouble p_left_heel_out_x = new YoDouble("p_left_heel_out_x", registry);
+   private final YoDouble p_left_heel_out_y = new YoDouble("p_left_heel_out_y", registry);
+   private final YoDouble p_left_heel_out_z = new YoDouble("p_left_heel_out_z", registry);
 
-   private final DoubleYoVariable p_right_toe_in_fx = new DoubleYoVariable("p_right_toe_in_fx", registry);
-   private final DoubleYoVariable p_right_toe_in_fy = new DoubleYoVariable("p_right_toe_in_fy", registry);
-   private final DoubleYoVariable p_right_toe_in_fz = new DoubleYoVariable("p_right_toe_in_fz", registry);
-   private final DoubleYoVariable p_right_toe_out_fx = new DoubleYoVariable("p_right_toe_out_fx", registry);
-   private final DoubleYoVariable p_right_toe_out_fy = new DoubleYoVariable("p_right_toe_out_fy", registry);
-   private final DoubleYoVariable p_right_toe_out_fz = new DoubleYoVariable("p_right_toe_out_fz", registry);
+   private final YoDouble p_right_toe_in_fx = new YoDouble("p_right_toe_in_fx", registry);
+   private final YoDouble p_right_toe_in_fy = new YoDouble("p_right_toe_in_fy", registry);
+   private final YoDouble p_right_toe_in_fz = new YoDouble("p_right_toe_in_fz", registry);
+   private final YoDouble p_right_toe_out_fx = new YoDouble("p_right_toe_out_fx", registry);
+   private final YoDouble p_right_toe_out_fy = new YoDouble("p_right_toe_out_fy", registry);
+   private final YoDouble p_right_toe_out_fz = new YoDouble("p_right_toe_out_fz", registry);
 
-   private final DoubleYoVariable p_right_heel_in_fx = new DoubleYoVariable("p_right_heel_in_fx", registry);
-   private final DoubleYoVariable p_right_heel_in_fy = new DoubleYoVariable("p_right_heel_in_fy", registry);
-   private final DoubleYoVariable p_right_heel_in_fz = new DoubleYoVariable("p_right_heel_in_fz", registry);
-   private final DoubleYoVariable p_right_heel_out_fx = new DoubleYoVariable("p_right_heel_out_fx", registry);
-   private final DoubleYoVariable p_right_heel_out_fy = new DoubleYoVariable("p_right_heel_out_fy", registry);
-   private final DoubleYoVariable p_right_heel_out_fz = new DoubleYoVariable("p_right_heel_out_fz", registry);
+   private final YoDouble p_right_heel_in_fx = new YoDouble("p_right_heel_in_fx", registry);
+   private final YoDouble p_right_heel_in_fy = new YoDouble("p_right_heel_in_fy", registry);
+   private final YoDouble p_right_heel_in_fz = new YoDouble("p_right_heel_in_fz", registry);
+   private final YoDouble p_right_heel_out_fx = new YoDouble("p_right_heel_out_fx", registry);
+   private final YoDouble p_right_heel_out_fy = new YoDouble("p_right_heel_out_fy", registry);
+   private final YoDouble p_right_heel_out_fz = new YoDouble("p_right_heel_out_fz", registry);
 
-   private final DoubleYoVariable p_left_toe_in_fx = new DoubleYoVariable("p_left_toe_in_fx", registry);
-   private final DoubleYoVariable p_left_toe_in_fy = new DoubleYoVariable("p_left_toe_in_fy", registry);
-   private final DoubleYoVariable p_left_toe_in_fz = new DoubleYoVariable("p_left_toe_in_fz", registry);
-   private final DoubleYoVariable p_left_toe_out_fx = new DoubleYoVariable("p_left_toe_out_fx", registry);
-   private final DoubleYoVariable p_left_toe_out_fy = new DoubleYoVariable("p_left_toe_out_fy", registry);
-   private final DoubleYoVariable p_left_toe_out_fz = new DoubleYoVariable("p_left_toe_out_fz", registry);
+   private final YoDouble p_left_toe_in_fx = new YoDouble("p_left_toe_in_fx", registry);
+   private final YoDouble p_left_toe_in_fy = new YoDouble("p_left_toe_in_fy", registry);
+   private final YoDouble p_left_toe_in_fz = new YoDouble("p_left_toe_in_fz", registry);
+   private final YoDouble p_left_toe_out_fx = new YoDouble("p_left_toe_out_fx", registry);
+   private final YoDouble p_left_toe_out_fy = new YoDouble("p_left_toe_out_fy", registry);
+   private final YoDouble p_left_toe_out_fz = new YoDouble("p_left_toe_out_fz", registry);
 
-   private final DoubleYoVariable p_left_heel_in_fx = new DoubleYoVariable("p_left_heel_in_fx", registry);
-   private final DoubleYoVariable p_left_heel_in_fy = new DoubleYoVariable("p_left_heel_in_fy", registry);
-   private final DoubleYoVariable p_left_heel_in_fz = new DoubleYoVariable("p_left_heel_in_fz", registry);
-   private final DoubleYoVariable p_left_heel_out_fx = new DoubleYoVariable("p_left_heel_out_fx", registry);
-   private final DoubleYoVariable p_left_heel_out_fy = new DoubleYoVariable("p_left_heel_out_fy", registry);
-   private final DoubleYoVariable p_left_heel_out_fz = new DoubleYoVariable("p_left_heel_out_fz", registry);
+   private final YoDouble p_left_heel_in_fx = new YoDouble("p_left_heel_in_fx", registry);
+   private final YoDouble p_left_heel_in_fy = new YoDouble("p_left_heel_in_fy", registry);
+   private final YoDouble p_left_heel_in_fz = new YoDouble("p_left_heel_in_fz", registry);
+   private final YoDouble p_left_heel_out_fx = new YoDouble("p_left_heel_out_fx", registry);
+   private final YoDouble p_left_heel_out_fy = new YoDouble("p_left_heel_out_fy", registry);
+   private final YoDouble p_left_heel_out_fz = new YoDouble("p_left_heel_out_fz", registry);
 
-   private final DoubleYoVariable p_left_toe_in_fs = new DoubleYoVariable("p_left_toe_in_fs", registry);
-   private final DoubleYoVariable p_left_toe_out_fs = new DoubleYoVariable("p_left_toe_out_fs", registry);
-   private final DoubleYoVariable p_left_heel_in_fs = new DoubleYoVariable("p_left_heel_in_fs", registry);
-   private final DoubleYoVariable p_left_heel_out_fs = new DoubleYoVariable("p_left_heel_out_fs", registry);
+   private final YoDouble p_left_toe_in_fs = new YoDouble("p_left_toe_in_fs", registry);
+   private final YoDouble p_left_toe_out_fs = new YoDouble("p_left_toe_out_fs", registry);
+   private final YoDouble p_left_heel_in_fs = new YoDouble("p_left_heel_in_fs", registry);
+   private final YoDouble p_left_heel_out_fs = new YoDouble("p_left_heel_out_fs", registry);
 
-   private final DoubleYoVariable p_right_toe_in_fs = new DoubleYoVariable("p_right_toe_in_fs", registry);
-   private final DoubleYoVariable p_right_toe_out_fs = new DoubleYoVariable("p_right_toe_out_fs", registry);
-   private final DoubleYoVariable p_right_heel_in_fs = new DoubleYoVariable("p_right_heel_in_fs", registry);
-   private final DoubleYoVariable p_right_heel_out_fs = new DoubleYoVariable("p_right_heel_out_fs", registry);
+   private final YoDouble p_right_toe_in_fs = new YoDouble("p_right_toe_in_fs", registry);
+   private final YoDouble p_right_toe_out_fs = new YoDouble("p_right_toe_out_fs", registry);
+   private final YoDouble p_right_heel_in_fs = new YoDouble("p_right_heel_in_fs", registry);
+   private final YoDouble p_right_heel_out_fs = new YoDouble("p_right_heel_out_fs", registry);
 
-   private final DoubleYoVariable[][] groundContactPointsPositions = new DoubleYoVariable[][]
+   private final YoDouble[][] groundContactPointsPositions = new YoDouble[][]
    {
       {
          p_left_toe_in_x, p_left_toe_in_y, p_left_toe_in_z, p_left_toe_out_x, p_left_toe_out_y, p_left_toe_out_z, p_left_heel_in_x, p_left_heel_in_y,
@@ -187,7 +187,7 @@ public class ProcessedSensors
       }
    };
 
-   private final DoubleYoVariable[][] groundContactPointsForces = new DoubleYoVariable[][]
+   private final YoDouble[][] groundContactPointsForces = new YoDouble[][]
    {
       {
          p_left_toe_in_fx, p_left_toe_in_fy, p_left_toe_in_fz, p_left_toe_out_fx, p_left_toe_out_fy, p_left_toe_out_fz, p_left_heel_in_fx, p_left_heel_in_fy,
@@ -199,7 +199,7 @@ public class ProcessedSensors
       }
    };
 
-   private final DoubleYoVariable[][] groundContactPointsFootSwitch = new DoubleYoVariable[][]
+   private final YoDouble[][] groundContactPointsFootSwitch = new YoDouble[][]
    {
       {p_left_toe_in_fs, p_left_toe_out_fs, p_left_heel_in_fs, p_left_heel_out_fs},
       {p_right_toe_in_fs, p_right_toe_out_fs, p_right_heel_in_fs, p_right_heel_out_fs}
@@ -207,11 +207,11 @@ public class ProcessedSensors
 
    private boolean leftFootOnGround, rightFootOnGround;
 
-   private final DoubleYoVariable[] robotYawPitchOrRoll = new DoubleYoVariable[] {p_yaw, p_pitch, p_roll};
-   private final DoubleYoVariable[] robotYawPitchOrRollVelocity = new DoubleYoVariable[] {pd_yaw, pd_pitch, pd_roll};
-   private final DoubleYoVariable[] robotYawPitchOrRollAcceleration = new DoubleYoVariable[] {pdd_yaw, pdd_pitch, pdd_roll};
+   private final YoDouble[] robotYawPitchOrRoll = new YoDouble[] {p_yaw, p_pitch, p_roll};
+   private final YoDouble[] robotYawPitchOrRollVelocity = new YoDouble[] {pd_yaw, pd_pitch, pd_roll};
+   private final YoDouble[] robotYawPitchOrRollAcceleration = new YoDouble[] {pdd_yaw, pdd_pitch, pdd_roll};
 
-   private final DoubleYoVariable[][] limbJointPositions = new DoubleYoVariable[][]
+   private final YoDouble[][] limbJointPositions = new YoDouble[][]
    {
       {
          p_left_hip_yaw, p_left_hip_roll, p_left_hip_pitch, p_left_knee, p_left_ankle_pitch, p_left_ankle_roll
@@ -221,7 +221,7 @@ public class ProcessedSensors
       }
    };
 
-   private final DoubleYoVariable[][] limbJointVelocities = new DoubleYoVariable[][]
+   private final YoDouble[][] limbJointVelocities = new YoDouble[][]
    {
       {
          pd_left_hip_yaw, pd_left_hip_roll, pd_left_hip_pitch, pd_left_knee, pd_left_ankle_pitch, pd_left_ankle_roll
@@ -231,7 +231,7 @@ public class ProcessedSensors
       }
    };
 
-   private final DoubleYoVariable[][] limbJointAccelerations = new DoubleYoVariable[][]
+   private final YoDouble[][] limbJointAccelerations = new YoDouble[][]
    {
       {
          pdd_left_hip_yaw, pdd_left_hip_roll, pdd_left_hip_pitch, pdd_left_knee, pdd_left_ankle_pitch, pdd_left_ankle_roll
@@ -241,7 +241,7 @@ public class ProcessedSensors
       }
    };
 
-   private final DoubleYoVariable[] allVariables;
+   private final YoDouble[] allVariables;
 
    public void setGroundContactPointsPositions(Point3D[][] groundContactFramePointsPositions)
    {
@@ -314,7 +314,7 @@ public class ProcessedSensors
 
    public void setLimbJointAngles(RobotSide robotSide, double[] jointAngles)
    {
-      DoubleYoVariable[] jointAngleYoVariables = limbJointPositions[robotSide.ordinal()];
+      YoDouble[] jointAngleYoVariables = limbJointPositions[robotSide.ordinal()];
 
       copyValuesIntoYoVariableArray(jointAngleYoVariables, jointAngles);
 
@@ -322,7 +322,7 @@ public class ProcessedSensors
 
    public void setLimbJointVelocities(RobotSide robotSide, double[] jointVelocities)
    {
-      DoubleYoVariable[] jointVelocityYoVariables = limbJointVelocities[robotSide.ordinal()];
+      YoDouble[] jointVelocityYoVariables = limbJointVelocities[robotSide.ordinal()];
 
       copyValuesIntoYoVariableArray(jointVelocityYoVariables, jointVelocities);
 
@@ -330,7 +330,7 @@ public class ProcessedSensors
 
    public void setLimbJointAccelerations(RobotSide robotSide, double[] jointAcceleration)
    {
-      DoubleYoVariable[] jointVelocityYoVariables = limbJointAccelerations[robotSide.ordinal()];
+      YoDouble[] jointVelocityYoVariables = limbJointAccelerations[robotSide.ordinal()];
 
 
       copyValuesIntoYoVariableArray(jointVelocityYoVariables, jointAcceleration);
@@ -376,7 +376,7 @@ public class ProcessedSensors
       return time.getDoubleValue();
    }
 
-   public DoubleYoVariable getTimeYoVariable()
+   public YoDouble getTimeYoVariable()
    {
       return time;
    }
@@ -412,17 +412,17 @@ public class ProcessedSensors
       return groundContactPointsFootSwitch[robotSide.ordinal()][contactPointName.ordinal()].getDoubleValue();
    }
 
-   public DoubleYoVariable getLimbJointPositionYoVariable(RobotSide robotSide, JointName jointName)
+   public YoDouble getLimbJointPositionYoVariable(RobotSide robotSide, JointName jointName)
    {
       return limbJointPositions[robotSide.ordinal()][jointName.ordinal()];
    }
 
-   public DoubleYoVariable getLimbJointVelocityYoVariable(RobotSide robotSide, JointName jointName)
+   public YoDouble getLimbJointVelocityYoVariable(RobotSide robotSide, JointName jointName)
    {
       return limbJointVelocities[robotSide.ordinal()][jointName.ordinal()];
    }
 
-   public DoubleYoVariable getLimbJointAccelerationYoVariable(RobotSide robotSide, JointName jointName)
+   public YoDouble getLimbJointAccelerationYoVariable(RobotSide robotSide, JointName jointName)
    {
       return limbJointAccelerations[robotSide.ordinal()][jointName.ordinal()];
    }
@@ -488,7 +488,7 @@ public class ProcessedSensors
       {
          for (JointName jointName : JointName.values())
          {
-            DoubleYoVariable jointPosition = limbJointPositions[robotSide.ordinal()][jointName.ordinal()];
+            YoDouble jointPosition = limbJointPositions[robotSide.ordinal()][jointName.ordinal()];
 
             ret = ret + jointPosition.toString() + " = " + jointPosition.getDoubleValue() + "\n";
          }
@@ -497,7 +497,7 @@ public class ProcessedSensors
       return ret;
    }
 
-   private void copyValuesIntoYoVariableArray(DoubleYoVariable[] yoVariablesTarget, double[] valuesSource)
+   private void copyValuesIntoYoVariableArray(YoDouble[] yoVariablesTarget, double[] valuesSource)
    {
       if (yoVariablesTarget.length != valuesSource.length)
       {
@@ -514,7 +514,7 @@ public class ProcessedSensors
    public ProcessedSensors()
    {
       ArrayList<YoVariable<?>> variables = registry.getAllVariablesIncludingDescendants();
-      allVariables = new DoubleYoVariable[variables.size()];
+      allVariables = new YoDouble[variables.size()];
       variables.toArray(allVariables);
    }
 

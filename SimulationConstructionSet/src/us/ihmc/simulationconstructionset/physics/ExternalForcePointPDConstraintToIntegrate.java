@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -16,8 +16,8 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
    protected final YoVariableRegistry registry;
 
-   private final DoubleYoVariable stiffness;
-   private final DoubleYoVariable damping;
+   private final YoDouble stiffness;
+   private final YoDouble damping;
 
    protected final ExternalForcePoint connectionPointA;
    protected final ExternalForcePoint connectionPointB;
@@ -25,12 +25,12 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
    private final YoFramePoint yoConnectionAPosition;
    private final YoFramePoint yoConnectionBPosition;
    protected final YoFrameVector yoConnectionPositionError;
-   private final DoubleYoVariable yoConnectionPositionErrorMagnitude;
+   private final YoDouble yoConnectionPositionErrorMagnitude;
 
    private final YoFrameVector yoConnectionAVelocity;
    private final YoFrameVector yoConnectionBVelocity;
    private final YoFrameVector yoConnectionVelocityError;
-   private final DoubleYoVariable yoConnectionVelocityErrorMagnitude;
+   private final YoDouble yoConnectionVelocityErrorMagnitude;
 
    // Temporary variables:
    private final FramePoint connectionAPosition = new FramePoint(worldFrame);
@@ -47,8 +47,8 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
-      stiffness = new DoubleYoVariable(name + "_Stiffness", registry);
-      damping = new DoubleYoVariable(name + "_Damping", registry);
+      stiffness = new YoDouble(name + "_Stiffness", registry);
+      damping = new YoDouble(name + "_Damping", registry);
 
       this.connectionPointA = connectionPointA;
       this.connectionPointB = connectionPointB;
@@ -56,12 +56,12 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
       yoConnectionAPosition = connectionPointA.getYoPosition();
       yoConnectionBPosition = connectionPointB.getYoPosition();
       yoConnectionPositionError = new YoFrameVector(name + "_ConnectionPositionError", worldFrame, registry);
-      yoConnectionPositionErrorMagnitude = new DoubleYoVariable(name + "_ConnectionPositionErrorMagnitude", registry);
+      yoConnectionPositionErrorMagnitude = new YoDouble(name + "_ConnectionPositionErrorMagnitude", registry);
 
       yoConnectionAVelocity = connectionPointA.getYoVelocity();
       yoConnectionBVelocity = connectionPointB.getYoVelocity();
       yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityError", worldFrame, registry);
-      yoConnectionVelocityErrorMagnitude = new DoubleYoVariable(name + "_ConnectionVelocityErrorMagnitude", registry);
+      yoConnectionVelocityErrorMagnitude = new YoDouble(name + "_ConnectionVelocityErrorMagnitude", registry);
 
       parentRegistry.addChild(registry);
 
@@ -135,7 +135,7 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
    }
 
    @Override
-   public DoubleYoVariable[] getOutputVariables()
+   public YoDouble[] getOutputVariables()
    {
       return null;
    }

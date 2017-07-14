@@ -1,7 +1,7 @@
 package us.ihmc.manipulation.planning.trajectory;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -15,7 +15,7 @@ public abstract class EndEffectorTrajectory
    protected RobotSide robotSideOfEndEffector;
    protected HandTrajectoryMessage endEffectorTrajectoryMessage;
    
-   public abstract Pose getEndEffectorPose(double time);
+   public abstract Pose3D getEndEffectorPose(double time);
    public abstract HandTrajectoryMessage getEndEffectorTrajectoryMessage(ReferenceFrame midFeetFrame);
    
    public double getTrajectoryTime()

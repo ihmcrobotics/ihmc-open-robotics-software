@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalki
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -24,15 +24,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -47,7 +47,7 @@ public class HighLevelControlManagerFactory
    private HeadOrientationManager headOrientationManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
-   private KneeAngleManager kneeAngleManager;
+   private LegConfigurationManager legConfigurationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -152,11 +152,11 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
-      Pose homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
+      Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
       Map<String, JointAccelerationIntegrationSettings> integrationSettings = walkingControllerParameters.getOrCreateIntegrationSettings();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
-      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoDouble yoTime = controllerToolbox.getYoTime();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -193,20 +193,20 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
-   public KneeAngleManager getOrCreateKneeAngleManager()
+   public LegConfigurationManager getOrCreateKneeAngleManager()
    {
-      if (kneeAngleManager != null)
-         return kneeAngleManager;
+      if (legConfigurationManager != null)
+         return legConfigurationManager;
 
-      if (!hasHighLevelHumanoidControllerToolbox(KneeAngleManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(LegConfigurationManager.class))
          return null;
-      if (!hasWalkingControllerParameters(KneeAngleManager.class))
+      if (!hasWalkingControllerParameters(LegConfigurationManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(KneeAngleManager.class))
+      if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
          return null;
 
-      kneeAngleManager = new KneeAngleManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
-      return kneeAngleManager;
+      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
+      return legConfigurationManager;
    }
 
    public PelvisOrientationManager getOrCreatePelvisOrientationManager()

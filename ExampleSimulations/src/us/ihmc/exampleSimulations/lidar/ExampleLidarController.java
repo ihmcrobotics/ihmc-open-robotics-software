@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
@@ -28,18 +28,18 @@ public class ExampleLidarController implements RobotController
    private final LidarScanParameters lidarScanParameters;
    private GPULidar gpuLidar;
    private GPULidarScanBuffer gpuLidarScanBuffer;
-   private DoubleYoVariable tauLidarZ;
-   private DoubleYoVariable tauLidarX;
-   private DoubleYoVariable qLidarZ;
-   private DoubleYoVariable qLidarX;
+   private YoDouble tauLidarZ;
+   private YoDouble tauLidarX;
+   private YoDouble qLidarZ;
+   private YoDouble qLidarX;
 
    private final YoFramePoint point = new YoFramePoint("point", ReferenceFrame.getWorldFrame(), registry);
    private final BagOfBalls bagOfBalls;
 
    private PDController pdControllerZ;
    private PDController pdControllerX;
-   private final DoubleYoVariable proportionalGain;
-   private final DoubleYoVariable derivativeGain;
+   private final YoDouble proportionalGain;
+   private final YoDouble derivativeGain;
    private double lastPositionZ;
    private double lastPositionX;
    private double lastTime;
@@ -57,14 +57,14 @@ public class ExampleLidarController implements RobotController
 
       bagOfBalls = new BagOfBalls(lidarScanParameters.getPointsPerSweep(), 0.005, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 
-      tauLidarZ = (DoubleYoVariable) robot.getVariable("tau_gimbalZ");
-      tauLidarX = (DoubleYoVariable) robot.getVariable("tau_gimbalX");
+      tauLidarZ = (YoDouble) robot.getVariable("tau_gimbalZ");
+      tauLidarX = (YoDouble) robot.getVariable("tau_gimbalX");
 
-      qLidarZ = (DoubleYoVariable) robot.getVariable("q_gimbalZ");
-      qLidarX = (DoubleYoVariable) robot.getVariable("q_gimbalX");
+      qLidarZ = (YoDouble) robot.getVariable("q_gimbalZ");
+      qLidarX = (YoDouble) robot.getVariable("q_gimbalX");
 
-      proportionalGain = new DoubleYoVariable("lidarPGain", registry);
-      derivativeGain = new DoubleYoVariable("lidarDGain", registry);
+      proportionalGain = new YoDouble("lidarPGain", registry);
+      derivativeGain = new YoDouble("lidarDGain", registry);
 
       pdControllerX = new PDController(proportionalGain, derivativeGain, "LidarControllerX", registry);
       pdControllerZ = new PDController(proportionalGain, derivativeGain, "LidarControllerZ", registry);
