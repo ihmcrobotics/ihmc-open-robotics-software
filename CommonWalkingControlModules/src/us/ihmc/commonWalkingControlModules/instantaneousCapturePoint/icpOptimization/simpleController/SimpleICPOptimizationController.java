@@ -125,7 +125,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    public SimpleICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
@@ -184,6 +184,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
+
+      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -223,6 +225,12 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    }
 
    @Override
+   public void setTransferSplitFraction(int stepNumber, double splitFraction)
+   {
+
+   }
+
+   @Override
    public void setSwingDuration(int stepNumber, double duration)
    {
       int numberOfFootstepsRegistered = upcomingFootsteps.size();
@@ -231,9 +239,21 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    }
 
    @Override
+   public void setSwingSplitFraction(int stepNumber, double splitFraction)
+   {
+
+   }
+
+   @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       this.finalTransferDuration.set(finalTransferDuration);
+   }
+
+   @Override
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+
    }
 
    @Override
@@ -403,6 +423,28 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       extractSolutionsFromSolver(numberOfFootstepsToConsider, noConvergenceException);
 
       controllerTimer.stopMeasurement();
+
+   }
+
+   @Override
+   public void setFinalTransferSplitFractionToDefault()
+   {
+   }
+
+   @Override
+   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity)
+   {
+   }
+
+   @Override
+   public double getOptimizedTimeRemaining()
+   {
+      return 0;
+   }
+
+   @Override
+   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   {
 
    }
 

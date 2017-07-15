@@ -111,7 +111,7 @@ public class SimpleICPQPIndexHandler
     */
    public int getFootstepStartIndex()
    {
-      return 0;
+      return footstepStartingIndex;
    }
 
    /**

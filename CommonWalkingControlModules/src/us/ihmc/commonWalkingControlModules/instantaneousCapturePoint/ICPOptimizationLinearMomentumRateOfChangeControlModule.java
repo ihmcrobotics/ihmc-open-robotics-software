@@ -3,10 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationController;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -25,7 +23,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
-   private final AbstractICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationController icpOptimizationController;
    private final YoDouble yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
    
@@ -70,8 +68,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
       else
       {
+         /*
          icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
                bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+               */
+         icpOptimizationController = new SimpleICPOptimizationController(icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, registry,
+                                                                         yoGraphicsListRegistry);
       }
    }
 
@@ -161,7 +163,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    }
 
    @Override
-   public AbstractICPOptimizationController getICPOptimizationController()
+   public ICPOptimizationController getICPOptimizationController()
    {
       return icpOptimizationController;
    }
