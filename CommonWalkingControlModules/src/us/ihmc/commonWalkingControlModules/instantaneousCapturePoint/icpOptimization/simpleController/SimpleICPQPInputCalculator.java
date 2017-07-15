@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPEqualityConstraintInput;
@@ -100,13 +101,14 @@ public class SimpleICPQPInputCalculator
     */
    public void computeFootstepTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F footstepWeight, DenseMatrix64F objective)
    {
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, 2 * footstepNumber, 2 * footstepNumber, footstepWeight, 0, 0, 2, 2, 1.0);
+      int footstepIndex = 2 * footstepNumber;
+      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, footstepIndex, footstepIndex, footstepWeight, 0, 0, 2, 2, 1.0);
 
       tmpObjective.zero();
       tmpObjective.set(objective);
       CommonOps.mult(footstepWeight, tmpObjective, tmpObjective);
 
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 2 * footstepNumber, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, footstepIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
       CommonOps.scale(0.5, icpQPInputToPack.residualCost);
@@ -126,35 +128,19 @@ public class SimpleICPQPInputCalculator
     */
    public void computeFootstepRegularizationTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F regularizationWeight, DenseMatrix64F objective)
    {
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, 2 * footstepNumber, 2 * footstepNumber, regularizationWeight, 0, 0, 2, 2, 1.0);
+      int footstepIndex = 2 * footstepNumber;
+      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, footstepIndex, footstepIndex, regularizationWeight, 0, 0, 2, 2, 1.0);
 
       tmpObjective.zero();
       tmpObjective.set(objective);
       CommonOps.mult(regularizationWeight, tmpObjective, tmpObjective);
 
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 2 * footstepNumber, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, footstepIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
       CommonOps.scale(0.5, icpQPInputToPack.residualCost);
    }
 
-   /**
-    * Computes the recursive dynamics constraint for the ICP Optimization solver. The observers that the reference ICP location is a linear
-    * function of the upcoming footstep locations. This defines the relationship between the CMP feedback and the upcoming footstep locations.
-    * Has the form<br>
-    *    &delta; = k<sub>p</sub> ( &xi; - &Phi;<sub>f</sub> - &Phi;<sub>const</sub> - sum &gamma;<sub>i</sub> r<sub>f,i</sub>) + &epsilon;,<br>
-    * where
-    * <li>&delta; is the CMP feedback action.</li>
-    * <li>k<sub>p</sub> is the ICP proportional feedback gain.</li>
-    * <li>&xi; is the current ICP location.</li>
-    * <li>&Phi;<sub>f</sub> is the value of the final ICP recursion.</li>
-    * <li>&Phi;<sub>const</sub> is the value of the recursive effects of the CMP offsets in the upcoming footsteps and the stance CMP values.</li>
-    * <li>&gamma;<sub>i</sub> is the recursion multiplier of the i<sup>th</sup> footstep.</li>
-    * <li>r<sub>f,i</sub> is the i<sup>th</sup> footstep.</li>
-    * <li>&epsilon; is the dynamic relaxation slack variable that prevents over constraining the problem.</li>
-    *
-    * @param feedbackGain proportional ICP feedback gain, k<sub>p</sub>.
-    */
    public void computeDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F currentICPError, DenseMatrix64F referenceFootstepLocation,
          DenseMatrix64F feedbackGain, DenseMatrix64F weight, double footstepRecursionMultiplier, double footstepAdjustmentSafetyFactor)
    {
@@ -181,18 +167,19 @@ public class SimpleICPQPInputCalculator
       {
          CommonOps.scale(-1.0 / footstepAdjustmentSafetyFactor, feedbackGain);
          MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFootstepStartIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+
+         CommonOps.addEquals(currentICPError, footstepRecursionMultiplier, referenceFootstepLocation);
       }
 
-      CommonOps.addEquals(currentICPError, footstepRecursionMultiplier, referenceFootstepLocation);
       MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(tmpJacobian, weight, tmpJtW);
 
       CommonOps.mult(tmpJtW, tmpJacobian, icpQPInput.quadraticTerm);
       CommonOps.mult(tmpJtW, tmpObjective, icpQPInput.linearTerm);
+      CommonOps.scale(-1.0, icpQPInput.linearTerm);
 
-      CommonOps.mult(weight, tmpObjective, icpQPInput.residualCost);
-      CommonOps.multTransA(tmpObjective, icpQPInput.residualCost, icpQPInput.residualCost);
+      // todo residual cost
    }
 
    /**
@@ -259,8 +246,8 @@ public class SimpleICPQPInputCalculator
       int numberOfFootstepVariables = indexHandler.getNumberOfFootstepVariables();
 
       int footstepStartIndex = indexHandler.getFootstepStartIndex();
-      MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, footstepStartIndex, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h_ToPack, 0, 0, icpQPInput.linearTerm, footstepStartIndex, 0, numberOfFootstepVariables, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H_ToPack, footstepStartIndex, footstepStartIndex, icpQPInput.quadraticTerm, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h_ToPack, footstepStartIndex, 0, icpQPInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 }

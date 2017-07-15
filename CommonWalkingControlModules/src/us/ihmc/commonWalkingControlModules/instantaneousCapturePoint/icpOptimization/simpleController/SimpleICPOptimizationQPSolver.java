@@ -84,7 +84,7 @@ public class SimpleICPOptimizationQPSolver
    private final DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
 
    /** List of weights for tracking the different footsteps. */
-   private final DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
    /** Weight for the footstep regularization task. */
    private final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CMP feedback action. */
@@ -187,7 +187,7 @@ public class SimpleICPOptimizationQPSolver
       feedbackTaskInput = new ICPQPInput(2);
       footstepTaskInput = new ICPQPInput(2);
       angularMomentumMinimizationTask = new ICPQPInput(2);
-      dynamicsTaskInput = new ICPQPInput(2);
+      dynamicsTaskInput = new ICPQPInput(6);
 
       dynamicsConstraintInput = new ICPEqualityConstraintInput(maximumNumberOfFreeVariables);
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
@@ -243,6 +243,7 @@ public class SimpleICPOptimizationQPSolver
    public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
    {
       polygon.changeFrame(worldFrame);
+      polygon.update();
       reachabilityConstraint.addPolygon(polygon);
    }
 
@@ -293,7 +294,7 @@ public class SimpleICPOptimizationQPSolver
       solverInput_h.reshape(problemSize, 1);
 
       feedbackTaskInput.reshape(2);
-      dynamicsTaskInput.reshape(2);
+      dynamicsTaskInput.reshape(problemSize);
       angularMomentumMinimizationTask.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
@@ -534,6 +535,13 @@ public class SimpleICPOptimizationQPSolver
       this.perfectCMP.set(1, 0, perfectCMP.getY());
 
       addFeedbackTask();
+
+      if (indexHandler.useStepAdjustment())
+         addStepAdjustmentTask();
+
+      if (indexHandler.useAngularMomentum())
+         addAngularMomentumMinimizationTask();
+
       addDynamicConstraintTask();
 
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
@@ -541,12 +549,6 @@ public class SimpleICPOptimizationQPSolver
 
       if (reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
-
-      if (indexHandler.useStepAdjustment())
-         addStepAdjustmentTask();
-
-      if (indexHandler.useAngularMomentum())
-         addAngularMomentumMinimizationTask();
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -638,9 +640,6 @@ public class SimpleICPOptimizationQPSolver
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
-      if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, -1.0);
-
       currentInequalityConstraintIndex += constraintSize;
    }
 
@@ -711,7 +710,6 @@ public class SimpleICPOptimizationQPSolver
 
       numberOfIterations = solver.solve(solutionToPack);
 
-
       if (MatrixTools.containsNaN(solutionToPack))
          throw new NoConvergenceException(numberOfIterations);
    }
@@ -723,7 +721,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void extractFootstepSolutions(DenseMatrix64F footstepLocationSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, 0, 0, indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
+      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, indexHandler.getFootstepStartIndex(), 0, indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
    }
 
    /**
