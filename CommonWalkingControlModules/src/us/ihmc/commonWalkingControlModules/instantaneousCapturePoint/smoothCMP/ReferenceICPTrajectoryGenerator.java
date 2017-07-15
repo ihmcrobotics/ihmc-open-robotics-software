@@ -106,7 +106,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void initializeForTransfer(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.set(initialTime);
+      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
+      durationOfPreviousPhase.set(transferCMPTrajectories.get(0).getPolynomials().get(transferCMPTrajectories.get(0).getNumberOfSegments()-1).getFinalTime());
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -119,7 +120,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             totalNumberOfSegments.increment();
          }
 
-         durationOfPreviousPhase.set(transferCMPTrajectories.get(stepIndex).getPolynomials().get(cmpSegments-1).getFinalTime());
 
          CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -144,7 +144,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void initializeForSwing(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.set(initialTime);
+      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
+      durationOfPreviousPhase.set(swingCMPTrajectories.get(0).getPolynomials().get(swingCMPTrajectories.get(0).getNumberOfSegments()-1).getFinalTime());
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -153,7 +154,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-            
+
+      
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
