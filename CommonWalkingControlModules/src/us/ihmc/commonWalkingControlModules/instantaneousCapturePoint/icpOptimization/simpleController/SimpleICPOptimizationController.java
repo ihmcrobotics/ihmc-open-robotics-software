@@ -326,7 +326,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
-
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -548,7 +547,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       {
          numberOfIterations.set(solver.getNumberOfIterations());
 
-         if (localUseStepAdjustment)
+         if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
             solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps,
                                                      numberOfFootstepsToConsider, solver);
 

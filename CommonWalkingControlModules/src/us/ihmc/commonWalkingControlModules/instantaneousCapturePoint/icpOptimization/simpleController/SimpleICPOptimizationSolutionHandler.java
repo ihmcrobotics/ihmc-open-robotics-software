@@ -37,8 +37,8 @@ public class SimpleICPOptimizationSolutionHandler
    private final boolean debug;
 
    private final FramePoint2d locationSolution = new FramePoint2d();
+   private final FramePoint2d previousLocationSolution = new FramePoint2d();
    private final FramePoint2d clippedLocationSolution = new FramePoint2d();
-   private final FramePoint2d upcomingFootstepLocation = new FramePoint2d();
 
    private final FramePoint solutionLocation = new FramePoint();
    private final FramePoint referenceLocation = new FramePoint();
@@ -115,12 +115,12 @@ public class SimpleICPOptimizationSolutionHandler
       {
          solver.getFootstepSolutionLocation(i, locationSolution);
 
-         upcomingFootsteps.get(i).getPosition2d(upcomingFootstepLocation);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
          FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
+         footstepSolutionsToPack.get(i).getFrameTuple2d(previousLocationSolution);
          clippedLocationSolution.set(locationSolution);
-         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(),
+         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocations.get(i).getFrameTuple2d(),
                deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)

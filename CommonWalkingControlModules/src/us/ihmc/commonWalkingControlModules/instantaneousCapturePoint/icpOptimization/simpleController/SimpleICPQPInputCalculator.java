@@ -165,8 +165,9 @@ public class SimpleICPQPInputCalculator
 
       if (indexHandler.useStepAdjustment())
       {
-         CommonOps.scale(-1.0 / footstepAdjustmentSafetyFactor, feedbackGain);
-         MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFootstepStartIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+         CommonOps.setIdentity(identity);
+         CommonOps.scale(-footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+         MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
          CommonOps.addEquals(currentICPError, footstepRecursionMultiplier, referenceFootstepLocation);
       }
