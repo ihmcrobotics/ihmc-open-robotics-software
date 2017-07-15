@@ -113,8 +113,8 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    @Override
    public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition)
    {
-      PrintTools.debug("Step:" + stepNumber + " " + trajectoryType.toString() + " Trajectory " + numberOfSegments.getIntegerValue() + " , InitialTime: " + initialTime + " FinalTime: " + finalTime + " InitialPosition: "
-            + initialPosition.toString() + " FinalPosition: " + finalPosition.toString());
+//      PrintTools.debug("Step:" + stepNumber + " " + trajectoryType.toString() + " Trajectory " + numberOfSegments.getIntegerValue() + " , InitialTime: " + initialTime + " FinalTime: " + finalTime + " InitialPosition: "
+//            + initialPosition.toString() + " FinalPosition: " + finalPosition.toString());
       switch (segmentOrder)
       {
       case CUBIC:
