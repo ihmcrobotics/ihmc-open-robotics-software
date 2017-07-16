@@ -18,12 +18,6 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void clear();
 
-   void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations);
-   
-   void addAngularMomentumWaypointsToPlan(List<AngularMomentumTrajectoryPoint> waypointList);
-
-   void addAngularMomentumWaypointToPlan(AngularMomentumTrajectoryPoint waypoint);
-   
    void update(double currentTime);
 
    void getDesiredAngularMomentum(FrameVector desiredAngMomToPack);
@@ -41,8 +35,6 @@ public interface AngularMomentumTrajectoryGeneratorInterface
    void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
 
    void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide);
-
-   List<TrajectoryPoint3D> getWaypoints();
 
    List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories();
 

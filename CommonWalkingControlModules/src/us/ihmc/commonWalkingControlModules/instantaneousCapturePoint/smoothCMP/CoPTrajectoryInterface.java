@@ -15,7 +15,8 @@ public interface CoPTrajectoryInterface
    public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
    public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack, FrameVector desiredCoPAccelerationToPack);
    
-   public void setSegment(CoPSplineType segmentInterpolationOrder, double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition);
+   public void setSegment(double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition);
+   //TODO get rid of this direct access to segments 
    public List<YoFrameTrajectory3D> getPolynomials();
    public int getNumberOfSegments();
 }

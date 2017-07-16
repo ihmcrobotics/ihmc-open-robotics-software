@@ -78,3 +78,4 @@ public class CoPPlanningTools
       return tempDouble;
    }
 }
+

@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
+
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -416,10 +421,22 @@ public class TrajectoryMathTools
       return tempTimeArrayLength - 1;
    }
 
-   private static void checkZeroTimeTrajectory(YoTrajectory trajectory, double TIME_EPSILON)
+   public static void checkZeroTimeTrajectory(YoTrajectory trajectory, double TIME_EPSILON)
    {
       if (Math.abs(trajectory.getFinalTime() - trajectory.getInitialTime()) < TIME_EPSILON)
          throw new RuntimeException("Cannot operate with null trajectory, start time: " + trajectory.getInitialTime() + " end time: "
                + trajectory.getFinalTime() + " epsilon: " + TIME_EPSILON);
    }
+   
+   public static void addTimeOffset(YoTrajectory trajectory, double timeOffset)
+   {
+      //TODO implement this method with FFT 
+      for(int i = 1; i < trajectory.getNumberOfCoefficients(); i++)
+      {
+         for(int j = i-1; j >=0; j--)
+         {
+            
+         }
+      }
+   }  
 }

@@ -317,7 +317,17 @@ public class YoTrajectory3D
 
    public YoTrajectory getYoTrajectory(Direction direction)
    {
-      return getYoTrajectory(direction.ordinal());
+      switch (direction)
+      {
+      case X:
+         return getYoTrajectoryX();
+      case Y:
+         return getYoTrajectoryY();
+      case Z:
+         return getYoTrajectoryZ();
+      default:
+         throw new IndexOutOfBoundsException(direction.toString());
+      }
    }
 
    public YoTrajectory getYoTrajectory(int index)
@@ -349,22 +359,70 @@ public class YoTrajectory3D
    {
       return zTrajectory;
    }
+   
+   public void setTime(double tInital, double tFinal)
+   {
+      setInitialTime(tInital);
+      setFinalTime(tFinal);
+   }
+
+   public void setInitialTime(double tInitial)
+   {
+      for(int i = 0; i < 3; i++)
+         getYoTrajectory(i).setInitialTime(tInitial);
+   }
+
+   public void setFinalTime(double tFinal)
+   {
+      for(int i = 0; i < 3; i++)
+         getYoTrajectory(i).setFinalTime(tFinal);
+   }
 
    public double getInitialTime()
    {
-      return xTrajectory.getInitialTime();
+      if(xTrajectory.getInitialTime() == yTrajectory.getInitialTime() && xTrajectory.getInitialTime() == zTrajectory.getInitialTime())
+         return xTrajectory.getInitialTime();
+      else
+         return xTrajectory.getInitialTime();
    }
 
    public double getFinalTime()
    {
-      return xTrajectory.getFinalTime();
+      if(xTrajectory.getFinalTime() == yTrajectory.getFinalTime() && xTrajectory.getFinalTime() == zTrajectory.getFinalTime())
+         return xTrajectory.getFinalTime();
+      else
+         return xTrajectory.getFinalTime();
    }
 
-   public boolean timeIntervalContains(double timeToCheck)
+   public double getInitialTime(Direction dir)
    {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
+      return getYoTrajectory(dir).getInitialTime();
    }
    
+   public double getInitialTime(int index)
+   {
+      return getYoTrajectory(index).getInitialTime();
+   }
+   
+   public double getFinalTime(Direction dir)
+   {
+      return getYoTrajectory(dir).getFinalTime();
+   }
+   
+   public double getFinalTime(int index)
+   {
+      return getYoTrajectory(index).getFinalTime();
+   }
+   
+   public boolean timeIntervalContains(double timeToCheck)
+   {
+      return (xTrajectory.timeIntervalContains(timeToCheck) && yTrajectory.timeIntervalContains(timeToCheck) && zTrajectory.timeIntervalContains(timeToCheck));
+   }
+   
+   /**
+    * Returns the number of coefficients for the trajectory if it is the same for all axes. If not then returns -1
+    * @return
+    */
    public int getNumberOfCoefficients()
    {
       if(xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients() && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
@@ -372,7 +430,17 @@ public class YoTrajectory3D
       else
          return -1;
    }
+   
+   public int getNumberOfCoefficients(Direction dir)
+   {
+      return getYoTrajectory(dir).getNumberOfCoefficients();
+   }
 
+   public int getNumberOfCoefficients(int index)
+   {
+      return getYoTrajectory(index).getNumberOfCoefficients();
+   }
+   
    public void reset()
    {
       for (int index = 0; index < 3; index++)
@@ -386,18 +454,10 @@ public class YoTrajectory3D
       zTrajectory.set(other.getYoTrajectoryZ());
    }
 
-   @Deprecated
-   public void setConstant(Point3DReadOnly z)
-   {
-      xTrajectory.setConstant(z.getX());
-      yTrajectory.setConstant(z.getY());
-      zTrajectory.setConstant(z.getZ());
-   }
-
-   public void setConstant(double t0, double tFinal, Point3DReadOnly z0)
+   public void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
       for(int index = 0; index < 3; index ++)
-         getYoTrajectory(index).setConstant(t0, tFinal, z0.getElement(index));
+         getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
    }
    
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
@@ -682,5 +742,17 @@ public class YoTrajectory3D
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
+   }
+   
+   public void addTimeOffset(double deltaT)
+   {
+      for(int index = 0; index < 3; index++)
+         getYoTrajectory(index).addTimeOffset(deltaT);
+   }
+   
+   public void addTimeOffset(YoTrajectory3D trajToCopy, double deltaT)
+   {
+      set(trajToCopy);
+      addTimeOffset(deltaT);
    }
 }
