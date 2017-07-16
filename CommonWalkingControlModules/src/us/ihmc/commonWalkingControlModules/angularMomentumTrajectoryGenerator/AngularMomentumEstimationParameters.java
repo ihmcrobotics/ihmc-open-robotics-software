@@ -44,22 +44,22 @@ public class AngularMomentumEstimationParameters
       return 0.5;
    }
    
-   public CoPPointName getInitialCoPPoint()
+   public CoPPointName getInitialCoPPointName()
    {
       return getEndCoPName();
    }
 
-   public CoPPointName getEndCoPPoint()
+   public CoPPointName getEndCoPPointName()
    {
       return getEndCoPName();
    }
 
-   public CoPPointName getInitialReferencePoint()
+   public CoPPointName getInitialDepartureReferenceName()
    {
       return getEntryCoPName();
    }
    
-   public CoPPointName getFinalReferencePoint()
+   public CoPPointName getFinalApproachReferenceName()
    {
       return getExitCoPName();
    }

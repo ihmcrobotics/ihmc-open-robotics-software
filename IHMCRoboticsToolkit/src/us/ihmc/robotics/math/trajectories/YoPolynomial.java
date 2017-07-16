@@ -85,6 +85,9 @@ public class YoPolynomial
       return a[i].getDoubleValue();
    }
 
+   /**
+    * To be used only for testing. Garbage creating function
+    */
    public double[] getCoefficients()
    {
       double[] ret = new double[numberOfCoefficients.getIntegerValue()];
