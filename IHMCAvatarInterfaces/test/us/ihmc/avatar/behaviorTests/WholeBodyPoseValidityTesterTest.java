@@ -497,7 +497,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          for(int j =0;j<planner.getNumberOfPlanners();j++)
          {
             RRTTreeTimeDomain tree = planner.getPlanner(j).getTree();
-            ArrayList<RRTNode> wholeNode = tree.getWholeNode();
+            ArrayList<RRTNode> wholeNode = tree.getWholeNodes();
             g.setColor(Color.BLACK);
             for(int i =1;i<wholeNode.size();i++)
             {
@@ -508,7 +508,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
             
             
             g.setColor(Color.BLUE);
-            ArrayList<RRTNode> nodePath = tree.getPathNode();
+            ArrayList<RRTNode> nodePath = tree.getPathNodes();
             for(int i =1;i<nodePath.size();i++)
             {
                RRTNode rrtNode1 = nodePath.get(i);
