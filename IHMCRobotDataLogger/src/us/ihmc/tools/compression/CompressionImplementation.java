@@ -36,4 +36,15 @@ public interface CompressionImplementation
     * @return Maximum size of the compressed data
     */
    public int maxCompressedLength(int uncompressedLength);
+   
+   
+   /**
+    * Get the minimum size of the decompressed data
+    * 
+    * Due to integer rounding, the following relation holds
+    * length - 1 >= minimumDeCompressedLength(maxCompressedLength(int length)) <= length
+    * 
+    * @return Minimum size of decompressed data
+    */
+   public int minimumDecompressedLength(int compressedLength);
 }

@@ -33,5 +33,11 @@ public class CopyCompressionImplementation implements CompressionImplementation
    {
       return uncompressedLength;
    }
+
+   @Override
+   public int minimumDecompressedLength(int compressedLength)
+   {
+      return compressedLength;
+   }
    
 }
