@@ -356,14 +356,14 @@ public class YoTrajectory
 
    public void compute(double x)
    {
-      if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
+      //if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
          polynomial.compute(x);
    }
 
    public double getIntegral(double from, double to)
    {
-      if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
-         return Double.NaN;
+      //if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
+      //   return Double.NaN;
       return polynomial.getIntegral(from, to);
    }
 
@@ -375,10 +375,10 @@ public class YoTrajectory
     */
    public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
    {
-      if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
+      //if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
          return polynomial.getXPowersDerivativeVector(order, x);
-      else
-         return null;
+      //else
+      //   return null;
    }
 
    public String toString()
