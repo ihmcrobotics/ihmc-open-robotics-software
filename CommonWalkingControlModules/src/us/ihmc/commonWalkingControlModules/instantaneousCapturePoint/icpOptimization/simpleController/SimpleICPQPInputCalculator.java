@@ -17,6 +17,9 @@ import java.util.ArrayList;
  */
 public class SimpleICPQPInputCalculator
 {
+   private static final boolean consider_angular_momentum_in_adjustment = true;
+   private static final boolean consider_feedback_in_adjustment = true;
+
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
    public SimpleICPQPIndexHandler indexHandler;
 
@@ -145,7 +148,6 @@ public class SimpleICPQPInputCalculator
          DenseMatrix64F feedbackGain, DenseMatrix64F weight, double footstepRecursionMultiplier, double footstepAdjustmentSafetyFactor)
    {
       DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain);
-      CommonOps.scale(-1.0, feedbackGain);
 
       int size = 2;
       if (indexHandler.useAngularMomentum())
@@ -166,19 +168,18 @@ public class SimpleICPQPInputCalculator
       if (indexHandler.useStepAdjustment())
       {
          CommonOps.setIdentity(identity);
-         CommonOps.scale(-footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+         CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
          MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
-         CommonOps.addEquals(currentICPError, footstepRecursionMultiplier, referenceFootstepLocation);
+         MatrixTools.addMatrixBlock(tmpObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
       }
 
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(tmpJacobian, weight, tmpJtW);
 
       CommonOps.mult(tmpJtW, tmpJacobian, icpQPInput.quadraticTerm);
       CommonOps.mult(tmpJtW, tmpObjective, icpQPInput.linearTerm);
-      CommonOps.scale(-1.0, icpQPInput.linearTerm);
 
       // todo residual cost
    }
@@ -211,8 +212,9 @@ public class SimpleICPQPInputCalculator
    public void submitDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
          DenseMatrix64F solverInputResidualCost)
    {
-      MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h_ToPack, 0, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      int size = icpQPInput.linearTerm.getNumRows();
+      MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, 0, 0, size, size, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h_ToPack, 0, 0, icpQPInput.linearTerm, 0, 0, size, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 

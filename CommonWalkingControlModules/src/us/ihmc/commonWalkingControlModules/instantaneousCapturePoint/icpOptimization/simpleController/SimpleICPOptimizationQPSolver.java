@@ -66,8 +66,6 @@ public class SimpleICPOptimizationQPSolver
    /** QP Objective to minimize the difference between the dynamics */
    private final ICPQPInput dynamicsTaskInput;
 
-   /** Constraint that encodes the recursive ICP dynamics. */
-   private final ICPEqualityConstraintInput dynamicsConstraintInput;
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
@@ -189,7 +187,6 @@ public class SimpleICPOptimizationQPSolver
       angularMomentumMinimizationTask = new ICPQPInput(2);
       dynamicsTaskInput = new ICPQPInput(6);
 
-      dynamicsConstraintInput = new ICPEqualityConstraintInput(maximumNumberOfFreeVariables);
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
@@ -259,13 +256,10 @@ public class SimpleICPOptimizationQPSolver
       solverInput_Aineq.zero();
       solverInput_bineq.zero();
 
-      dynamicsConstraintInput.reset();
-
       angularMomentumMinimizationTask.reset();
       footstepTaskInput.reset();
       feedbackTaskInput.reset();
       dynamicsTaskInput.reset();
-
 
       solution.zero();
       footstepLocationSolution.zero();
@@ -300,8 +294,6 @@ public class SimpleICPOptimizationQPSolver
 
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
-
-      dynamicsConstraintInput.reshape(problemSize);
 
       solution.reshape(problemSize, 1);
       footstepLocationSolution.reshape(2 * numberOfFootstepsToConsider, 1);
