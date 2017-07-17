@@ -86,4 +86,12 @@ public class LZ4CompressionImplementation implements CompressionImplementation
       return compressor.maxCompressedLength(uncompressedLength);
    }
 
+   @Override
+   public int minimumDecompressedLength(int compressedLength)
+   {
+      double y = ((long) (compressedLength - 16)) * 255;
+      return (int) Math.round(y / 256);
+   }
+   
+
 }

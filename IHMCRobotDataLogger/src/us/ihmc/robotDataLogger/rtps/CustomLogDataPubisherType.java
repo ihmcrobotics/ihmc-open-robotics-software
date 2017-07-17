@@ -9,6 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferSegment;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 
@@ -95,6 +96,9 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
 
       serializeCDR.write_type_2(data.getRegistryID());
+      
+
+      serializeCDR.write_type_2(data.getOffset());
 
       if (compressor.supportsDirectOutput())
       {
@@ -148,7 +152,7 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       return getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
    }
 
-   static int getTypeSize(int maxCompressedSize, int numberOfStates)
+   public static int getTypeSize(int maxCompressedSize, int numberOfStates)
    {
 
       int current_alignment = 0;
@@ -161,6 +165,8 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
+      
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);

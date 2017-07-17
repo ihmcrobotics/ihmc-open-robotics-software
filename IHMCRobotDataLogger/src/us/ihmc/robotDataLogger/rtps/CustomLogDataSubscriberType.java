@@ -63,6 +63,8 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
       
       data.setRegistryID(deserializeCDR.read_type_2());
       
+      data.setOffset(deserializeCDR.read_type_2());
+      
       int dataLength = deserializeCDR.read_type_2();
       ByteBuffer buffer = data.allocateBuffer(dataLength);
       serializedPayload.getData().get(buffer.array(), 0, dataLength);

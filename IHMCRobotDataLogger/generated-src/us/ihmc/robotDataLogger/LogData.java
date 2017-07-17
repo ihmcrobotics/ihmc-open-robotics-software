@@ -27,6 +27,7 @@ public class LogData
         	transmitTime_ = other.transmitTime_;
         	type_ = other.type_;
         	registry_ = other.registry_;
+        	offset_ = other.offset_;
             data_.set(other.data_);	jointStates_.set(other.jointStates_);	
     }
 
@@ -85,6 +86,17 @@ public class LogData
     }
 
         
+    public void setOffset(int offset)
+    {
+        offset_ = offset;
+    }
+
+    public int getOffset()
+    {
+        return offset_;
+    }
+
+        
 
     public IDLSequence.Byte  getData()
     {
@@ -127,6 +139,9 @@ public class LogData
         returnedValue &= this.registry_ == otherMyClass.registry_;
 
                 
+        returnedValue &= this.offset_ == otherMyClass.offset_;
+
+                
         returnedValue &= this.data_.equals(otherMyClass.data_);
                 
         returnedValue &= this.jointStates_.equals(otherMyClass.jointStates_);
@@ -161,6 +176,10 @@ public class LogData
         builder.append(this.registry_);
 
                 builder.append(", ");
+        builder.append("offset=");
+        builder.append(this.offset_);
+
+                builder.append(", ");
         builder.append("data=");
         builder.append(this.data_);
 
@@ -178,6 +197,7 @@ public class LogData
     private long transmitTime_; 
     private us.ihmc.robotDataLogger.LogDataType type_; 
     private int registry_; 
+    private int offset_; 
     private IDLSequence.Byte  data_; 
     private IDLSequence.Double  jointStates_; 
 

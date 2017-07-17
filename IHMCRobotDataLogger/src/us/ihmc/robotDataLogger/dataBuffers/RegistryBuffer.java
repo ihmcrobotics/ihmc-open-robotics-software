@@ -7,6 +7,8 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    protected double[] jointStates;
    protected long timestamp;
    protected long transmitTime;
+   protected int offset;
+   
    public long getTransmitTime()
    {
       return transmitTime;
@@ -18,6 +20,18 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    }
 
    protected long uid = 0;
+
+   
+   
+   public int getOffset()
+   {
+      return offset;
+   }
+
+   public void setOffset(int offset)
+   {
+      this.offset = offset;
+   }
 
    public long getTimestamp()
    {

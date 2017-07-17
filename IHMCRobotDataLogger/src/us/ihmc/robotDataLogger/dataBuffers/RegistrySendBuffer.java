@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class RegistrySendBuffer extends RegistryBuffer 
+public class RegistrySendBuffer extends RegistryBuffer
 {
 
    private final ByteBuffer buffer;
@@ -15,14 +15,14 @@ public class RegistrySendBuffer extends RegistryBuffer
    private final YoVariable<?>[] variables;
 
    private final List<JointHolder> jointHolders;
+
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       this.buffer = ByteBuffer.allocate(variables.size() * 8);
-      
-      
+
       this.data = this.buffer.asLongBuffer();
       this.registryID = registeryID;
-      
+
       this.variables = variables.toArray(new YoVariable[variables.size()]);
 
       this.jointHolders = jointHolders;
@@ -56,7 +56,6 @@ public class RegistrySendBuffer extends RegistryBuffer
       }
 
    }
-
 
    public ByteBuffer getBuffer()
    {

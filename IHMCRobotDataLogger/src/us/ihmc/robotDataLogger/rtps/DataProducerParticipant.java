@@ -327,5 +327,9 @@ public class DataProducerParticipant
       return new RegistryPublisher(schedulerFactory, builder, publisher);
    }
 
+   public static int getMaximumSynchronousPacketSize()
+   {
+      return 65000;
+   }
 
 }
