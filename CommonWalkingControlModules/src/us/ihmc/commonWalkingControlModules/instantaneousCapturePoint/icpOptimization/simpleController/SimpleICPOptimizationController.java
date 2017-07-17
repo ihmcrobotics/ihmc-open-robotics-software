@@ -93,6 +93,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
+   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
+
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final SimpleICPOptimizationSolutionHandler solutionHandler;
@@ -481,7 +483,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.resetFeedbackConditions();
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
+      //solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), 1e7);
 
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
@@ -506,7 +509,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          if (localScaleUpcomingStepWeights)
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-         double footstepMultiplier = Math.exp(omega0 * timeRemainingInState.getDoubleValue());
+         double footstepMultiplier = Math.exp(-omega0 * timeRemainingInState.getDoubleValue());
+         this.footstepMultiplier.set(footstepMultiplier);
 
          solver.setFootstepAdjustmentConditions(footstepMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
