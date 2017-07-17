@@ -12,7 +12,7 @@ import us.ihmc.tools.ArrayTools;
 public class RootsOfUnity
 {
    private static final ComplexNumber unity = new ComplexNumber(1.0, 0.0);
-   private List<ComplexNumber> rootsOfUnity = new ArrayList<>(2048);
+   private List<ComplexNumber> rootsOfUnity = new ArrayList<>();
 
    public RootsOfUnity(int n)
    {
