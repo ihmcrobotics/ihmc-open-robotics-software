@@ -57,7 +57,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    private YoDouble startTimeOfCurrentPhase;
    private YoDouble localTimeInCurrentPhase;
-   private YoDouble durationOfPreviousPhase;
    
    private boolean isPaused = false;
    
@@ -76,8 +75,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
-      durationOfPreviousPhase = new YoDouble(namePrefix + "DurationPreviousPhase", registry);
-
+      localTimeInCurrentPhase.set(0.0);
+      
       icpTerminalTest = new YoFramePoint("ICPTerminalTest", ReferenceFrame.getWorldFrame(), registry);
       cmpTrajectoryLength = new YoInteger("CMPTrajectoryLength", registry);
       icpTerminalLength = new YoInteger("ICPTerminalLength", registry);
@@ -106,8 +105,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void initializeForTransfer(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
-      durationOfPreviousPhase.set(transferCMPTrajectories.get(0).getPolynomials().get(transferCMPTrajectories.get(0).getNumberOfSegments()-1).getFinalTime());
+      startTimeOfCurrentPhase.set(initialTime);
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -144,8 +142,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void initializeForSwing(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
-      durationOfPreviousPhase.set(swingCMPTrajectories.get(0).getPolynomials().get(swingCMPTrajectories.get(0).getNumberOfSegments()-1).getFinalTime());
+      startTimeOfCurrentPhase.set(initialTime);
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -201,7 +198,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             SmoothCapturePointTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
          }
          icpPositionDesiredTerminal.set(icpDesiredFinalPositions.get(cmpTrajectories.size() - 1));
-//         getICPPositionDesiredFinalFromSegment(icpPositionDesiredFinalFirstSegment, FIRST_SEGMENT);
          
          icpTerminalTest.set(icpPositionDesiredTerminal);
          cmpTrajectoryLength.set(cmpTrajectories.size());
