@@ -4,31 +4,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+
 
 
 public class StickRobotVisualizer
@@ -123,26 +110,6 @@ public class StickRobotVisualizer
    public static void main(String[] args)
    {
       new StickRobotVisualizer();
-//      DRCRobotModel robotModel = new StickRobotModel(DRCRobotModel.RobotTarget.SCS, false);
-//      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);      
-//
-//      final double groundHeight = 0.0;
-//      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
-//
-//      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-//      scsInitialSetup.setDrawGroundProfile(true);
-//      scsInitialSetup.setInitializeEstimatorToActual(true);
-//      
-//      double initialYaw = 0.0;
-//      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
-//
-//      boolean useVelocityAndHeadingScript = true;
-//      boolean cheatWithGroundHeightAtForFootstep = false;
-//      
-//      HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-//      DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-//            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-//            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
    }
 
 }
