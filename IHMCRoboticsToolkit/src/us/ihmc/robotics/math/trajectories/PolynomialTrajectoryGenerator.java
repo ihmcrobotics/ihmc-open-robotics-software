@@ -48,7 +48,28 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
    @Override
    public void compute(double time)
    {
+      if (Double.isNaN(time))
+      {
+         throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
+      }
+
       this.currentTime.set(time);
+
+      if (time < 0.0)
+      {
+         currentValue.set(initialPositionProvider.getValue());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+      if (time > trajectoryTime.getDoubleValue())
+      {
+         currentValue.set(finalPositionProvider.getValue());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
       currentValue.set(polynomial.getPosition());
