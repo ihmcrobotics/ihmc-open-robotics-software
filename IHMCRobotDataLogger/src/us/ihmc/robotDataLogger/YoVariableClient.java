@@ -206,7 +206,7 @@ public class YoVariableClient
       return debugRegistry;
    }
 
-   public void receivedTimestampAndData(long timestamp, ByteBuffer decompressBuffer)
+   public void receivedTimestampAndData(long timestamp)
    {
       yoVariablesUpdatedListener.receivedTimestampAndData(timestamp);
    }

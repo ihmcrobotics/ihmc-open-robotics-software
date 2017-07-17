@@ -1,4 +1,4 @@
-package us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger.rtps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
