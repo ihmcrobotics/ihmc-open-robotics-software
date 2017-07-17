@@ -1,0 +1,2043 @@
+<sdf version='1.6'>
+  <model name='stickRobot'>
+    <link name='pelvis'>
+      <pose frame=''>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.05 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.008667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.008667</iyy>
+          <iyz>0</iyz>
+          <izz>0.01667</izz>
+        </inertia>
+      </inertial>
+      <collision name='pelvis_collision'>
+        <pose frame=''>0 -0 0.05 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.4 0.1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='pelvis_visual'>
+        <pose frame=''>0 -0 0.05 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.4 0.1</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <link name='leftHipYawLink'>
+      <pose frame=''>0 0.2 0 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftHipYawLink_collision'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftHipYawLink_visual'>
+        <pose frame=''>0 0 -0.015 0 1.507 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftHipYaw' type='revolute'>
+      <child>leftHipYawLink</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftHipRollLink'>
+      <pose frame=''>0 0.2 -0.03 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftHipRollLink_collision'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftHipRollLink_visual'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftHipRoll' type='revolute'>
+      <child>leftHipRollLink</child>
+      <parent>leftHipYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftHipPitchLink'>
+      <pose frame=''>0 0.2 -0.06 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0 0 -0.15 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.01545</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.01545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0009</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftHipPitchLink_collision'>
+        <pose frame=''>0 0 -0.3 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftHipPitchLink_visual'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftHipPitch' type='revolute'>
+      <child>leftHipPitchLink</child>
+      <parent>leftHipRollLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftKneePitchLink'>
+      <pose frame=''>0 0.2 -0.36 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0 0 -0.15 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.01545</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.01545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0009</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftKneePitchLink_collision'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftKneePitchLink_visual'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftKneePitch' type='revolute'>
+      <child>leftKneePitchLink</child>
+      <parent>leftHipPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftAnklePitchLink'>
+      <pose frame=''>0 0.2 -0.66 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>3</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftAnklePitchLink_collision'>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftAnklePitchLink_visual'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftAnklePitch' type='revolute'>
+      <child>leftAnklePitchLink</child>
+      <parent>leftKneePitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftFoot'>
+      <pose frame=''>0.025 0.2 -0.69 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.03 0 -0.01 0 -0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.008667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.008667</iyy>
+          <iyz>0</iyz>
+          <izz>0.01667</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftFoot_collision'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.5 0.3 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='leftFoot_visual'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.5 0.3 0.04</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftAnkleRoll' type='revolute'>
+      <child>leftFoot</child>
+      <parent>leftAnklePitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightHipYawLink'>
+      <pose frame=''>0 -0.2 0 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightHipYawLink_collision'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightHipYawLink_visual'>
+        <pose frame=''>0 0 -0.015 0 1.507 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightHipYaw' type='revolute'>
+      <child>rightHipYawLink</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightHipRollLink'>
+      <pose frame=''>0 -0.2 -0.03 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightHipRollLink_collision'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightHipRollLink_visual'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightHipRoll' type='revolute'>
+      <child>rightHipRollLink</child>
+      <parent>rightHipYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightHipPitchLink'>
+      <pose frame=''>0 -0.2 -0.06 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0 0 -0.15 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.01545</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.01545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0009</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightHipPitchLink_collision'>
+        <pose frame=''>0 0 -0.3 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightHipPitchLink_visual'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightHipPitch' type='revolute'>
+      <child>rightHipPitchLink</child>
+      <parent>rightHipRollLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightKneePitchLink'>
+      <pose frame=''>0 -0.2 -0.36 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>-0 0 -0.15 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.01545</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.01545</iyy>
+          <iyz>0</iyz>
+          <izz>0.0009</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightKneePitchLink_collision'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightKneePitchLink_visual'>
+        <pose frame=''>0 0 -0.15 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.3</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightKneePitch' type='revolute'>
+      <child>rightKneePitchLink</child>
+      <parent>rightHipPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightAnklePitchLink'>
+      <pose frame=''>0 -0.2 -0.66 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.015 0 -0 0</pose>
+        <mass>3</mass>
+        <inertia>
+          <ixx>0.00015</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00015</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightAnklePitchLink_collision'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightAnklePitchLink_visual'>
+        <pose frame=''>0 0 -0.015 1.507 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightAnklePitch' type='revolute'>
+      <child>rightAnklePitchLink</child>
+      <parent>rightKneePitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightFoot'>
+      <pose frame=''>0.025 -0.2 -0.69 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0.03 0 -0.02 0 -0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.008667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.008667</iyy>
+          <iyz>0</iyz>
+          <izz>0.01667</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightFoot_collision'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.5 0.3 0.04</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='rightFoot_visual'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.5 0.3 0.04</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightAnkleRoll' type='revolute'>
+      <child>rightFoot</child>
+      <parent>rightAnklePitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='torsoYawLink'>
+      <pose frame=''>0 0 0.1 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='torsoYawLink_collision'>
+        <pose frame=''>0 0 0.015 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.1</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='torsoYawLink_visual'>
+        <pose frame=''>0 0 0.015 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.03</length>
+            <radius>0.1</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='torsoYaw' type='revolute'>
+      <child>torsoYawLink</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='torsoPitchLink'>
+      <pose frame=''>0 0 0.13 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='torsoPitchLink_collision'>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.25 0.25</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='torsoPitchLink_visual'>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.25 0.25</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='torsoPitch' type='revolute'>
+      <child>torsoPitchLink</child>
+      <parent>torsoYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='chest'>
+      <pose frame=''>0 0 0.38 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='chest_collision'>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.25 0.25</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='chest_visual'>
+        <pose frame=''>0 0 0.125 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.12 0.25 0.25</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='torsoRoll' type='revolute'>
+      <child>chest</child>
+      <parent>torsoPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftShoulderPitchLink'>
+      <pose frame=''>0 0.125 0.6 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0.01 0 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftShoulderPitchLink_collision'>
+        <pose frame=''>0 0.01 0 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.06</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftShoulderPitchLink_visual'>
+        <pose frame=''>0 0.01 0 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.06</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftShoulderPitch' type='revolute'>
+      <child>leftShoulderPitchLink</child>
+      <parent>chest</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftShoulderRollLink'>
+      <pose frame=''>0 0.165 0.6 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0.02 0 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftShoulderRollLink_collision'>
+        <pose frame=''>0 0.02 0 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.04</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftShoulderRollLink_visual'>
+        <pose frame=''>0 0.02 0 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.04</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftShoulderRoll' type='revolute'>
+      <child>leftShoulderRollLink</child>
+      <parent>leftShoulderPitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftShoulderYawLink'>
+      <pose frame=''>0 0.185 0.58 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftShoulderYawLink_collision'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftShoulderYawLink_visual'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftShoulderYaw' type='revolute'>
+      <child>leftShoulderYawLink</child>
+      <parent>leftShoulderRollLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftElbowPitchLink'>
+      <pose frame=''>0 0.185 0.38 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftElbowPitchLink_collision'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftElbowPitchLink_visual'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftElbowPitch' type='revolute'>
+      <child>leftElbowPitchLink</child>
+      <parent>leftShoulderYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftForearmYawLink'>
+      <pose frame=''>0 0.185 0.18 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftForearmYawLink_collision'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftForearmYawLink_visual'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftForearmYaw' type='revolute'>
+      <child>leftForearmYawLink</child>
+      <parent>leftElbowPitchLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftWristRollLink'>
+      <pose frame=''>0 0.185 0.16 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftWristRollLink_collision'>
+        <pose frame=''>0 0 -0.02 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='leftWristRollLink_visual'>
+        <pose frame=''>0 0 -0.02 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftWristRoll' type='revolute'>
+      <child>leftWristRollLink</child>
+      <parent>leftForearmYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='leftPalm'>
+      <pose frame=''>0 0.185 0.14 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='leftPalm_collision'>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.02 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='leftPalm_visual'>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.02 0.12</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='leftWristPitch' type='revolute'>
+      <child>leftPalm</child>
+      <parent>leftWristRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='neckYawLink'>
+      <pose frame=''>0 0 0.63 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.01 0 -0 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0045</iyy>
+          <iyz>0</iyz>
+          <izz>0.0028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='neckYawLink_collision'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='neckYawLink_visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='neckYaw' type='revolute'>
+      <child>neckYawLink</child>
+      <parent>chest</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='neckRollLink'>
+      <pose frame=''>0 0 0.65 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.01 0 -0 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0045</iyy>
+          <iyz>0</iyz>
+          <izz>0.0028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='neckRollLink_collision'>
+        <pose frame=''>0 0 0.01 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='neckRollLink_visual'>
+        <pose frame=''>0 0 0.01 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='neckRoll' type='revolute'>
+      <child>neckRollLink</child>
+      <parent>neckYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='neckPitchLink'>
+      <pose frame=''>0 0 0.67 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 0.01 0 -0 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.0028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0045</iyy>
+          <iyz>0</iyz>
+          <izz>0.0028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='neckPitchLink_collision'>
+        <pose frame=''>0 0 0.01 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='neckPitchLink_visual'>
+        <pose frame=''>0 0 0.01 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='neckPitch' type='revolute'>
+      <child>neckPitchLink</child>
+      <parent>neckRollLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightShoulderPitchLink'>
+      <pose frame=''>0 -0.125 0.6 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 -0.01 0 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightShoulderPitchLink_collision'>
+        <pose frame=''>0 -0.01 0 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.06</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightShoulderPitchLink_visual'>
+        <pose frame=''>0 -0.01 0 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.06</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightShoulderPitch' type='revolute'>
+      <child>rightShoulderPitchLink</child>
+      <parent>chest</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightShoulderRollLink'>
+      <pose frame=''>0 -0.165 0.6 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 -0.02 0 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightShoulderRollLink_collision'>
+        <pose frame=''>0 -0.02 0 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.04</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightShoulderRollLink_visual'>
+        <pose frame=''>0 -0.02 0 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.04</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightShoulderRoll' type='revolute'>
+      <child>rightShoulderRollLink</child>
+      <parent>rightShoulderPitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightShoulderYawLink'>
+      <pose frame=''>0 -0.185 0.58 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightShoulderYawLink_collision'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightShoulderYawLink_visual'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightShoulderYaw' type='revolute'>
+      <child>rightShoulderYawLink</child>
+      <parent>rightShoulderRollLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightElbowPitchLink'>
+      <pose frame=''>0 -0.185 0.38 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightElbowPitchLink_collision'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightElbowPitchLink_visual'>
+        <pose frame=''>0 0 -0.1 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.2</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightElbowPitch' type='revolute'>
+      <child>rightElbowPitchLink</child>
+      <parent>rightShoulderYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightForearmYawLink'>
+      <pose frame=''>0 -0.185 0.18 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <mass>2</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightForearmYawLink_collision'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightForearmYawLink_visual'>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightForearmYaw' type='revolute'>
+      <child>rightForearmYawLink</child>
+      <parent>rightElbowPitchLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightWristRollLink'>
+      <pose frame=''>0 -0.185 0.16 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.02 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightWristRollLink_collision'>
+        <pose frame=''>0 0 -0.02 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='rightWristRollLink_visual'>
+        <pose frame=''>0 0 -0.02 1.57 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.03</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightWristRoll' type='revolute'>
+      <child>rightWristRollLink</child>
+      <parent>rightForearmYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='rightPalm'>
+      <pose frame=''>0 -0.185 0.14 0 -0 0</pose>
+      <inertial>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.028125</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.045</iyy>
+          <iyz>0</iyz>
+          <izz>0.028125</izz>
+        </inertia>
+      </inertial>
+      <collision name='rightPalm_collision'>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.02 0.12</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name='rightPalm_visual'>
+        <pose frame=''>0 0 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.02 0.12</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='rightWristPitch' type='revolute'>
+      <child>rightPalm</child>
+      <parent>rightWristRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <static>0</static>
+    <plugin name='SMControlPlugin' filename='libSMControlPlugin.so'>
+      <node>/sm_control_plugin</node>
+    </plugin>
+  </model>
+</sdf>

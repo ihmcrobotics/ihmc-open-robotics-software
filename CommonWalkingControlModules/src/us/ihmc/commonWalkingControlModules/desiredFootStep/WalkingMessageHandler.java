@@ -614,7 +614,7 @@ public class WalkingMessageHandler
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
-         if (swingTrajectory.getLast().getTime() >= swingTime)
+         if (swingTrajectory.getLast().getTime() > swingTime)
          {
             PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
@@ -628,7 +628,6 @@ public class WalkingMessageHandler
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
       footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
-      footstep.setExpectedInitialPose(footstepData.getExpectedInitialPosition(), footstepData.getExpectedInitialOrientation());
       return footstep;
    }
 

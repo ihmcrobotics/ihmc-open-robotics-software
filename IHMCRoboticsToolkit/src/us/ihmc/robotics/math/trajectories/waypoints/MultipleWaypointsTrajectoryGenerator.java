@@ -181,6 +181,11 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    @Override
    public void compute(double time)
    {
+      if (isEmpty())
+      {
+         throw new RuntimeException("Can not call compute on an empty trajectory.");
+      }
+
       currentTrajectoryTime.set(time);
       boolean changedSubTrajectory = false;
 
