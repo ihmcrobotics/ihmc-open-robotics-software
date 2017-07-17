@@ -47,7 +47,7 @@ public class RRTPlanner
             {
                rrtTree.newNode.addChildNode(goalNode);
                rrtTree.updatePathNode(goalNode);
-               optimalPath = rrtTree.pathNode;
+               optimalPath = rrtTree.pathNodes;
 
                return true;
             }

@@ -2,8 +2,10 @@ package us.ihmc.manipulation.planning.rrt.generalrrt;
 
 import us.ihmc.commons.PrintTools;
 
-public class RRTTestProject
+public class BiRRTTest
 {
+
+   
    public static void main(String[] args)
    {
       PrintTools.info("Start");
@@ -42,5 +44,3 @@ public class RRTTestProject
       PrintTools.info("End");
    }
 }
-
-

@@ -41,7 +41,7 @@ public class RRTPlannerTimeDomain
             {
                PrintTools.info("Reach "+i);
                rrtTree.updatePathNode(rrtTree.getNewNode());
-               optimalPath = rrtTree.getPathNode();
+               optimalPath = rrtTree.getPathNodes();
                return true;
             }
          }

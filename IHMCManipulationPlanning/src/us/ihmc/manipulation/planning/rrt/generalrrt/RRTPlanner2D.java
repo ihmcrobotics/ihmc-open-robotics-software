@@ -28,7 +28,7 @@ public class RRTPlanner2D extends RRTPlanner
          {
             getRRTTree().newNode.addChildNode(getGoalNode());
             getRRTTree().updatePathNode(getGoalNode());
-            setOptimalPath(getRRTTree().pathNode);
+            setOptimalPath(getRRTTree().pathNodes);
 
             return true;
          }
