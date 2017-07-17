@@ -2,8 +2,8 @@ package us.ihmc.manipulation.planning.rrt.generalrrt;
 
 public class RRTNode2D extends RRTNode
 {
-   static double boxCenterX = 2.0;
-   static double boxCenterY = 1.0;
+   static double boxCenterX = 1.5;
+   static double boxCenterY = 1.5;
    static double boxSizeX = 1.0;
    static double boxSizeY = 1.0;
    
