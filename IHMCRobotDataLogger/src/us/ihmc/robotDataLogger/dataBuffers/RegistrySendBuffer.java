@@ -5,6 +5,7 @@ import java.nio.LongBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataLogger.jointState.JointHolder;
+import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBuffer extends RegistryBuffer
@@ -18,7 +19,9 @@ public class RegistrySendBuffer extends RegistryBuffer
 
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
-      this.buffer = ByteBuffer.allocate(variables.size() * 8);
+      int numberOfJointStates = RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
+      int maximumNumberOfVariables = LogParticipantTools.calculateMaximumNumberOfVariables(variables.size(), numberOfJointStates);
+      this.buffer = ByteBuffer.allocate(maximumNumberOfVariables * 8);
 
       this.data = this.buffer.asLongBuffer();
       this.registryID = registeryID;
@@ -26,8 +29,8 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.variables = variables.toArray(new YoVariable[variables.size()]);
 
       this.jointHolders = jointHolders;
-      this.jointStates = new double[RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders)];
-
+      this.jointStates = new double[numberOfJointStates];
+      
    }
 
    /**
@@ -36,23 +39,31 @@ public class RegistrySendBuffer extends RegistryBuffer
     * @param timestamp
     * @param uid
     */
-   public void updateBufferFromVariables(long timestamp, long uid)
+   public void updateBufferFromVariables(long timestamp, long uid, int offset, int numberOfVariables)
    {
       this.uid = uid;
       this.timestamp = timestamp;
       this.transmitTime = System.nanoTime();
-      data.clear();
-      for (int i = 0; i < variables.length; i++)
+      this.offset = offset;
+      this.numberOfVariables = numberOfVariables;
+      this.data.clear();
+      for (int i = offset; i < offset + numberOfVariables; i++)
       {
-         data.put(variables[i].getValueAsLongBits());
+         this.data.put(variables[i].getValueAsLongBits());
       }
+      this.data.flip();
+      this.buffer.clear();
+      this.buffer.limit(this.data.limit() * 8);
 
-      int offset = 0;
-      for (int i = 0; i < jointHolders.size(); i++)
+      if(offset == 0)
       {
-         JointHolder jointHolder = jointHolders.get(i);
-         jointHolder.get(jointStates, offset);
-         offset += jointHolder.getNumberOfStateVariables();
+         int jointOffset = 0;
+         for (int i = 0; i < jointHolders.size(); i++)
+         {
+            JointHolder jointHolder = jointHolders.get(i);
+            jointHolder.get(jointStates, jointOffset);
+            jointOffset += jointHolder.getNumberOfStateVariables();
+         }         
       }
 
    }

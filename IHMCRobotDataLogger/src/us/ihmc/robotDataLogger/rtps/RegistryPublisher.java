@@ -25,10 +25,18 @@ public class RegistryPublisher
    private final VariableUpdateThread variableUpdateThread = new VariableUpdateThread();
    
    private final LoggerDebugRegistry loggerDebugRegistry;
+   
+   
+   private final int[] segmentSizes;
+   private final int[] segmentOffsets;
+
 
    public RegistryPublisher(PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder, Publisher publisher) throws IOException
    {
-      this.ringBuffer = new ConcurrentRingBuffer<>(builder, BUFFER_CAPACITY);
+      this.segmentSizes = LogParticipantTools.calculateLogSegmentSizes(builder.getNumberOfVariables(), builder.getNumberOfJointStates());
+      this.segmentOffsets = LogParticipantTools.calculateOffsets(this.segmentSizes);
+
+      this.ringBuffer = new ConcurrentRingBuffer<>(builder, BUFFER_CAPACITY * segmentSizes.length);
       this.scheduler = schedulerFactory.createPeriodicThreadScheduler("Registry-" + builder.getRegistryID() + "-Publisher");
       this.publisher = publisher;
       
@@ -47,18 +55,22 @@ public class RegistryPublisher
 
    public void update(long timestamp)
    {
-      RegistrySendBuffer buffer = ringBuffer.next();
-      if (buffer != null)
+      for(int segment = 0; segment < segmentSizes.length; segment++)
       {
-         buffer.updateBufferFromVariables(timestamp, uid);
-         ringBuffer.commit();
+         RegistrySendBuffer buffer = ringBuffer.next();
+         if (buffer != null)
+         {
+            buffer.updateBufferFromVariables(timestamp, uid, segmentOffsets[segment], segmentSizes[segment]);
+            ringBuffer.commit();
+         }
+         else
+         {
+            this.loggerDebugRegistry.circularBufferFull();
+         }
+         
+         uid++;
+         
       }
-      else
-      {
-         this.loggerDebugRegistry.circularBufferFull();
-      }
-
-      uid++;
    }
 
    private class VariableUpdateThread implements Runnable

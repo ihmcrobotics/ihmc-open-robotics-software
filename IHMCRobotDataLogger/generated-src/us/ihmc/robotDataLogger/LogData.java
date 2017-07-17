@@ -28,6 +28,7 @@ public class LogData
         	type_ = other.type_;
         	registry_ = other.registry_;
         	offset_ = other.offset_;
+        	numberOfVariables_ = other.numberOfVariables_;
             data_.set(other.data_);	jointStates_.set(other.jointStates_);	
     }
 
@@ -97,6 +98,17 @@ public class LogData
     }
 
         
+    public void setNumberOfVariables(int numberOfVariables)
+    {
+        numberOfVariables_ = numberOfVariables;
+    }
+
+    public int getNumberOfVariables()
+    {
+        return numberOfVariables_;
+    }
+
+        
 
     public IDLSequence.Byte  getData()
     {
@@ -142,6 +154,9 @@ public class LogData
         returnedValue &= this.offset_ == otherMyClass.offset_;
 
                 
+        returnedValue &= this.numberOfVariables_ == otherMyClass.numberOfVariables_;
+
+                
         returnedValue &= this.data_.equals(otherMyClass.data_);
                 
         returnedValue &= this.jointStates_.equals(otherMyClass.jointStates_);
@@ -180,6 +195,10 @@ public class LogData
         builder.append(this.offset_);
 
                 builder.append(", ");
+        builder.append("numberOfVariables=");
+        builder.append(this.numberOfVariables_);
+
+                builder.append(", ");
         builder.append("data=");
         builder.append(this.data_);
 
@@ -198,6 +217,7 @@ public class LogData
     private us.ihmc.robotDataLogger.LogDataType type_; 
     private int registry_; 
     private int offset_; 
+    private int numberOfVariables_; 
     private IDLSequence.Byte  data_; 
     private IDLSequence.Double  jointStates_; 
 

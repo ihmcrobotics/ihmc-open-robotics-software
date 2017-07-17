@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import us.ihmc.commons.Conversions;
@@ -49,7 +48,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final ByteBuffer decompressBuffer;
    private final YoVariableClient listener;
    
-   private final TIntIntHashMap registrySizes = new TIntIntHashMap();
    private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
    private final TObjectLongHashMap<Guid> sampleIdentities = new TObjectLongHashMap<>();
    
@@ -92,16 +90,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
       
       this.compressionImplementation = CompressionImplementationFactory.instance();
-      
-      List<YoVariableRegistry> registries = parser.getRegistries();
-      for(int i = 1; i < registries.size(); i++)
-      {
-         YoVariableRegistry registry = registries.get(i);
-         if(registry.getParent() == registries.get(0))
-         {
-            registrySizes.put(i, registry.getAllVariablesIncludingDescendants().size());
-         }
-      }
+
       
       start();
    }
@@ -182,12 +171,19 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       updateDebugVariables(buffer, previousUid);
       
       decompressBuffer.clear();
-      compressionImplementation.decompress(buffer.getData(), decompressBuffer, registrySizes.get(buffer.getRegistryID()) * 8);      
+      compressionImplementation.decompress(buffer.getData(), decompressBuffer, buffer.getNumberOfVariables() * 8);      
       decompressBuffer.flip();
       LongBuffer longData = decompressBuffer.asLongBuffer();
-      int numberOfVariables = longData.remaining();
       
-      int offset = parser.getVariableOffset(buffer.getRegistryID());
+      // Sanity check
+      if(longData.remaining() != buffer.getNumberOfVariables())
+      {
+         System.err.println("Number of variables in incoming message does not match stated number of variables. Skipping packet.");
+         return;
+      }
+      int numberOfVariables = buffer.getNumberOfVariables();
+      
+      int offset = parser.getVariableOffset(buffer.getRegistryID()) + buffer.getOffset();
       for(int i = 0; i < numberOfVariables; i++)
       {
          setAndNotify(variables.get(i + offset), longData.get());

@@ -18,6 +18,7 @@ module robotDataLogger{
 	   	LogDataType type;
 	   	long registry;
 		long offset;
+		long numberOfVariables;
 		sequence<octet> data;
 		sequence<double> jointStates;
 	};
