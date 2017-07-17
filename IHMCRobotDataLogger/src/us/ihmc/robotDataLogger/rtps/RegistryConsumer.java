@@ -1,11 +1,6 @@
 package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import gnu.trove.map.hash.TIntLongHashMap;
@@ -17,16 +12,12 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.dataBuffers.RegistryDecompressor;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.tools.compression.CompressionImplementation;
-import us.ihmc.tools.compression.CompressionImplementationFactory;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
@@ -42,10 +33,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
 
    private final IDLYoVariableHandshakeParser parser;
-   private final List<YoVariable<?>> variables;
-   private final List<JointState> jointStates;
-   
-   private final ByteBuffer decompressBuffer;
+   private final RegistryDecompressor registryDecompressor;
    private final YoVariableClient listener;
    
    private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
@@ -69,16 +57,13 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoInteger totalPackets;
    private final YoInteger skippedPacketDueToFullBuffer;
 
-   private final CompressionImplementation compressionImplementation;
    
    private long lastPacketReceived;
    
    public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerDebugRegistry)
    {
       this.parser = parser;
-      this.variables = parser.getYoVariablesList();
-      this.jointStates = parser.getJointStates();
-      this.decompressBuffer = ByteBuffer.allocate(variables.size() * 8);
+      this.registryDecompressor = new RegistryDecompressor(parser.getYoVariablesList(), parser.getJointStates());
       this.listener = yoVariableClient;
       
       this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);
@@ -89,7 +74,6 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
       this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
       
-      this.compressionImplementation = CompressionImplementationFactory.instance();
 
       
       start();
@@ -143,26 +127,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       running = false;
    }
    
-   private void setAndNotify(YoVariable<?> variable, long newValue)
-   {
-      long previousValue = variable.getValueAsLongBits();
-      variable.setValueFromLongBits(newValue, false);
-      if (previousValue != newValue)
-      {
-         ArrayList<VariableChangedListener> changedListeners = variable.getVariableChangedListeners();
-         if (changedListeners != null)
-         {
-            for (int listener = 0; listener < changedListeners.size(); listener++)
-            {
-               VariableChangedListener changedListener = changedListeners.get(listener);
-               if (!(changedListener instanceof VariableChangedProducer.VariableListener))
-               {
-                  changedListener.variableChanged(variable);
-               }
-            }
-         }
-      }
-   }
+
    
    private void decompressBuffer(RegistryReceiveBuffer buffer)
    {
@@ -170,34 +135,8 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       
       updateDebugVariables(buffer, previousUid);
       
-      decompressBuffer.clear();
-      compressionImplementation.decompress(buffer.getData(), decompressBuffer, buffer.getNumberOfVariables() * 8);      
-      decompressBuffer.flip();
-      LongBuffer longData = decompressBuffer.asLongBuffer();
+      registryDecompressor.decompressSegment(buffer, parser.getVariableOffset(buffer.getRegistryID()));
       
-      // Sanity check
-      if(longData.remaining() != buffer.getNumberOfVariables())
-      {
-         System.err.println("Number of variables in incoming message does not match stated number of variables. Skipping packet.");
-         return;
-      }
-      int numberOfVariables = buffer.getNumberOfVariables();
-      
-      int offset = parser.getVariableOffset(buffer.getRegistryID()) + buffer.getOffset();
-      for(int i = 0; i < numberOfVariables; i++)
-      {
-         setAndNotify(variables.get(i + offset), longData.get());
-      }
-      
-      double[] jointStateArray = buffer.getJointStates();
-      if(jointStateArray.length > 0)
-      {
-         DoubleBuffer jointStateBuffer = DoubleBuffer.wrap(jointStateArray);
-         for(int i = 0; i < jointStates.size(); i++)
-         {
-            jointStates.get(i).update(jointStateBuffer);
-         }         
-      }
       
    }
 
@@ -241,7 +180,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       }
       previousTimestamp = buffer.getTimestamp();
       
-      listener.receivedTimestampAndData(timestamp, decompressBuffer);
+      listener.receivedTimestampAndData(timestamp);
       
       
    }
