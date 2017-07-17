@@ -8,6 +8,7 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    protected long timestamp;
    protected long transmitTime;
    protected int offset;
+   protected int numberOfVariables;
    
    public long getTransmitTime()
    {
@@ -31,6 +32,18 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    public void setOffset(int offset)
    {
       this.offset = offset;
+   }
+   
+   
+
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables;
+   }
+
+   public void setNumberOfVariables(int numberOfVariables)
+   {
+      this.numberOfVariables = numberOfVariables;
    }
 
    public long getTimestamp()

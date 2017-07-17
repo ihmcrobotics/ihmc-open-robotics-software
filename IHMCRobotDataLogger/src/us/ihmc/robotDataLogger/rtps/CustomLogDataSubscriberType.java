@@ -58,12 +58,14 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
 
       if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
       {
-         throw new IOException("Invalid type for DATA_PACKET receive");
+         throw new IOException("Invalid type for subscriber, expected DATA_PACKET");
       }
       
       data.setRegistryID(deserializeCDR.read_type_2());
       
       data.setOffset(deserializeCDR.read_type_2());
+      
+      data.setNumberOfVariables(deserializeCDR.read_type_2());
       
       int dataLength = deserializeCDR.read_type_2();
       ByteBuffer buffer = data.allocateBuffer(dataLength);
@@ -103,8 +105,17 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
    @Override
    public int getTypeSize()
    {
-      return CustomLogDataPubisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+      int rawSize = CustomLogDataPublisherType.getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+      if(rawSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
+      {
+         return DataProducerParticipant.getMaximumSynchronousPacketSize();
+      }
+      else
+      {
+         return rawSize;
+      }
    }
+
 
    @Override
    public String getName()

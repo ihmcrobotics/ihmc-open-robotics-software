@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPubisherType;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -61,9 +61,9 @@ public class RegistrySendBufferBuilder implements us.ihmc.concurrent.Builder<Reg
          }
 
          int numberOfJointStates = getNumberOfJointStates();
-         if (CustomLogDataPubisherType.getTypeSize(0, numberOfJointStates) > DataProducerParticipant.getMaximumSynchronousPacketSize())
+         if (CustomLogDataPublisherType.getTypeSize(0, numberOfJointStates) > DataProducerParticipant.getMaximumSynchronousPacketSize())
          {
-            throw new RuntimeException("Exceeded maximum number of joint states (Approx. " + ((DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPubisherType.getTypeSize(0, 0)) / 8 - 1) + ")");
+            throw new RuntimeException("Exceeded maximum number of joint states (Approx. " + ((DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0)) / 8 - 1) + ")");
          }
       }
 

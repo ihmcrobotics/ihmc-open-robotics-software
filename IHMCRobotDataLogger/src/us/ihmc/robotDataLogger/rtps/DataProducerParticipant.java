@@ -303,17 +303,15 @@ public class DataProducerParticipant
    }
    
    
-   public RegistryPublisher createRegistryPublisher(CustomLogDataPubisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
+   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
    {
       PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
       
-      int maxSize = CustomLogDataPubisherType.getTypeSize(CompressionImplementationFactory.instance().maxCompressedLength(builder.getNumberOfVariables() * 8), builder.getNumberOfJointStates());
+      int maxSize = CustomLogDataPublisherType.getTypeSize(CompressionImplementationFactory.instance().maxCompressedLength(builder.getNumberOfVariables() * 8), builder.getNumberOfJointStates());
       
-      if(maxSize > 65000)
+      if(maxSize > getMaximumSynchronousPacketSize())
       {
-         System.err.println("Warning: Using asynchronous publish mode, except higher packet losses");
-         attr.getThroughputController().setPeriodMillisecs(1);
-         attr.getThroughputController().setBytesPerPeriod((maxSize * 12) / 10);
+         throw new RuntimeException("Error in segmenting packets. Logger should not use packets larger than 65000 bytes");
       }
       else
       {

@@ -16,7 +16,7 @@ import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotDataLogger.rtps.CustomLogDataPubisherType;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
 import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
@@ -133,7 +133,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
       
       
-      CustomLogDataPubisherType type = new CustomLogDataPubisherType(maxVariables, maxStates);
+      CustomLogDataPublisherType type = new CustomLogDataPublisherType(maxVariables, maxStates);
 
       for (int i = 0; i < registeredBuffers.size(); i++)
       {

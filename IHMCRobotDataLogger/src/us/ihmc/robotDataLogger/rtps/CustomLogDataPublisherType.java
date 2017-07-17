@@ -9,7 +9,6 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
-import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferSegment;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 
@@ -20,7 +19,7 @@ import us.ihmc.tools.compression.CompressionImplementationFactory;
 * This file has been modified from the generated version to provide higher performance.
 *
 */
-public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuffer>
+public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuffer>
 {
    public static final String name = "us::ihmc::robotDataLogger::LogData";
 
@@ -30,7 +29,7 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    private final ByteBuffer compressBuffer;
    private final CompressionImplementation compressor;
 
-   public CustomLogDataPubisherType(int numberOfVariables, int numberOfStates)
+   public CustomLogDataPublisherType(int numberOfVariables, int numberOfStates)
    {
       this.numberOfVariables = numberOfVariables;
       this.numberOfStates = numberOfStates;
@@ -59,9 +58,9 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       ByteBuffer serializeBuffer = serializedPayload.getData();
       serializeCDR.write_type_2(0);
       int sizePosition = serializeBuffer.position() - 4;
-      databuffer.clear();
       int written = compressor.compress(databuffer, serializeBuffer);
       serializeBuffer.putInt(sizePosition, written);
+      
    }
 
    /**
@@ -73,7 +72,6 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
     */
    private void compressJavaBuffer(ByteBuffer databuffer, SerializedPayload serializedPayload) throws IOException
    {
-      databuffer.clear();
       compressBuffer.clear();
       compressor.compress(databuffer, compressBuffer);
       compressBuffer.flip();
@@ -99,6 +97,9 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       
 
       serializeCDR.write_type_2(data.getOffset());
+      
+      serializeCDR.write_type_2(data.getNumberOfVariables());
+
 
       if (compressor.supportsDirectOutput())
       {
@@ -149,7 +150,15 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    @Override
    public int getTypeSize()
    {
-      return getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+      int rawSize = getTypeSize(compressor.maxCompressedLength(numberOfVariables * 8), numberOfStates);
+      if(rawSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
+      {
+         return DataProducerParticipant.getMaximumSynchronousPacketSize();
+      }
+      else
+      {
+         return rawSize;
+      }
    }
 
    public static int getTypeSize(int maxCompressedSize, int numberOfStates)
@@ -170,6 +179,8 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
+      
+      current_alignment += 4 + CDR.alignment(current_alignment, 4);
       current_alignment += (maxCompressedSize) + CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -185,9 +196,9 @@ public class CustomLogDataPubisherType implements TopicDataType<RegistrySendBuff
    }
 
    @Override
-   public CustomLogDataPubisherType newInstance()
+   public CustomLogDataPublisherType newInstance()
    {
-      return new CustomLogDataPubisherType(numberOfVariables, numberOfStates);
+      return new CustomLogDataPublisherType(numberOfVariables, numberOfStates);
    }
 
    @Override

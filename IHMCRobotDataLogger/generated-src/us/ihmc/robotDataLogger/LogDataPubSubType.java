@@ -68,6 +68,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    current_alignment += (100 * 1) + CDR.alignment(current_alignment, 1);
 
 
@@ -94,6 +96,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
 	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
@@ -129,6 +133,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 
 	    cdr.write_type_2(data.getOffset());
 
+	    cdr.write_type_2(data.getNumberOfVariables());
+
 	    if(data.getData().size() <= 100)
 	    cdr.write_type_e(data.getData());else
 	        throw new RuntimeException("data field exceeds the maximum length");
@@ -159,6 +165,9 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    	data.setOffset(cdr.read_type_2());
 	    	
 
+	    	data.setNumberOfVariables(cdr.read_type_2());
+	    	
+
 	    	cdr.read_type_e(data.getData());	
 
 	    	cdr.read_type_e(data.getJointStates());	
@@ -178,6 +187,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 			    ser.write_type_2("registry", data.getRegistry());
 			    
 			    ser.write_type_2("offset", data.getOffset());
+			    
+			    ser.write_type_2("numberOfVariables", data.getNumberOfVariables());
 			    
 			    ser.write_type_e("data", data.getData());
 			    
@@ -200,6 +211,8 @@ public class LogDataPubSubType implements TopicDataType<us.ihmc.robotDataLogger.
 	    			data.setRegistry(ser.read_type_2("registry"));	
 	    	    
 	    			data.setOffset(ser.read_type_2("offset"));	
+	    	    
+	    			data.setNumberOfVariables(ser.read_type_2("numberOfVariables"));	
 	    	    
 	    			ser.read_type_e("data", data.getData());	
 	    	    

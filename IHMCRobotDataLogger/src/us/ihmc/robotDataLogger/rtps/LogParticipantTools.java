@@ -25,7 +25,21 @@ public class LogParticipantTools
       return guidBuilder.toString();
 
    }
-
+   
+   public static int calculateMaximumNumberOfVariables(int variables, int jointStates)
+   {
+      int[] segmentSizes = calculateLogSegmentSizes(variables, jointStates);
+      int max = 0;
+      for(int size : segmentSizes)
+      {
+         if(size > max)
+         {
+            max = size;
+         }
+      }
+      return max;
+   }
+   
    /**
     * Calculate the number of variables in each segment
     * 
@@ -37,12 +51,12 @@ public class LogParticipantTools
    {
       CompressionImplementation compressor = CompressionImplementationFactory.instance();
       int maxCompressedSize = compressor.maxCompressedLength(variables * 8);
-      int maxSize = CustomLogDataPubisherType.getTypeSize(maxCompressedSize, jointStates);
+      int maxSize = CustomLogDataPublisherType.getTypeSize(maxCompressedSize, jointStates);
 
       if (maxSize > DataProducerParticipant.getMaximumSynchronousPacketSize())
       {
          // Space available in bytes for variables
-         int remaining = DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPubisherType.getTypeSize(0, 0);
+         int remaining = DataProducerParticipant.getMaximumSynchronousPacketSize() - CustomLogDataPublisherType.getTypeSize(0, 0);
 
          // Total variables in packet. Adding the number of uncompressed joint states gives us a slightly larger estimate of how much space we need.
          int totalVariables = variables + jointStates;
@@ -85,6 +99,20 @@ public class LogParticipantTools
       {
          return new int[] {variables};
       }
+   }
+   
+   public static int[] calculateOffsets(int[] segmentSizes)
+   {
+      int[] offsets = new int[segmentSizes.length];
+      int currentOffset = 0;
+      for(int i = 0; i < segmentSizes.length; i++)
+      {
+         offsets[i] = currentOffset;
+         currentOffset += segmentSizes[i];
+      }
+      
+      return offsets;
+      
    }
 
 }
