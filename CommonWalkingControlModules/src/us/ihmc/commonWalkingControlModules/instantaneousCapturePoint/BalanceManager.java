@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
@@ -61,6 +62,7 @@ public class BalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithAngularMomentumOffset icpPlanner;
+   private final PrecomputedICPPlanner precomputedICPPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
@@ -97,6 +99,13 @@ public class BalanceManager
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
    /** CMP position according to the ICP planner */
    private final FramePoint2d perfectCMP = new FramePoint2d();
+   
+   private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
+   private final YoBoolean currentlyBlendingICPTrajectories = new YoBoolean("currentlyBlendingICPTrajectories", registry);
+   private final YoDouble blendingStartTime = new YoDouble("blendingStartTime", registry);
+   private final YoDouble blendingDuration = new YoDouble("blendingDuration", registry);
+   private final FramePoint2d precomputedDesiredCapturePoint2d = new FramePoint2d();
+   private final FrameVector2d precomputedDesiredCapturePointVelocity2d = new FrameVector2d();
 
    private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
    private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
@@ -147,7 +156,7 @@ public class BalanceManager
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-
+      
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
@@ -179,7 +188,10 @@ public class BalanceManager
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-
+      precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
+      precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      blendingDuration.set(0.1);
+      blendICPTrajectories.set(true);
 
       if (ENABLE_DYN_REACHABILITY)
       {
@@ -355,7 +367,7 @@ public class BalanceManager
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-
+      
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
 
@@ -375,6 +387,33 @@ public class BalanceManager
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
+      
+      if(precomputedICPPlanner.isWithinInterval(yoTime.getDoubleValue()))
+      {
+         precomputedICPPlanner.compute(yoTime.getDoubleValue());
+         precomputedICPPlanner.getDesiredCapturePointPosition(precomputedDesiredCapturePoint2d);
+         precomputedICPPlanner.getDesiredCapturePointVelocity(precomputedDesiredCapturePointVelocity2d);
+         
+         double alpha = 1.0;
+         if(!currentlyBlendingICPTrajectories.getBooleanValue())
+         {
+            blendingStartTime.set(yoTime.getDoubleValue());
+            currentlyBlendingICPTrajectories.set(true);
+         }
+         
+         if(blendICPTrajectories.getBooleanValue())
+         {
+            alpha = (yoTime.getDoubleValue() - blendingStartTime.getDoubleValue()) / blendingDuration.getDoubleValue();
+         }
+            
+         desiredCapturePoint2d.interpolate(desiredCapturePoint2d, precomputedDesiredCapturePoint2d, alpha);
+         desiredCapturePointVelocity2d.interpolate(desiredCapturePointVelocity2d, precomputedDesiredCapturePointVelocity2d, alpha);
+         computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
+      }
+      else
+      {
+         currentlyBlendingICPTrajectories.set(false);
+      }
 
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
