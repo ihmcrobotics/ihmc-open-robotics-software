@@ -35,7 +35,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private static final boolean useAngularMomentumIntegrator = true;
    private static final double angularMomentumIntegratorGain = 100.0;
-   private static final double angularMomentumIntegratorLeakRatio = 0.9;
+   private static final double angularMomentumIntegratorLeakRatio = 0.92;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
