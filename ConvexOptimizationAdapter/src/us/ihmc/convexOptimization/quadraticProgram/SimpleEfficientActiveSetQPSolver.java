@@ -6,7 +6,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
  * Solves a Quadratic Program using a simple active set method.
@@ -132,27 +131,21 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    }
 
    @Override
-   public void setVariableBounds(DenseMatrix64F variableLowerBounds, DenseMatrix64F variableUpperBounds)
+   public void setLowerBounds(DenseMatrix64F variableLowerBounds)
    {
       if (variableLowerBounds.getNumRows() != quadraticCostQMatrix.getNumRows())
          throw new RuntimeException("variableLowerBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
+
+      this.variableLowerBounds.set(variableLowerBounds);
+   }
+
+   @Override
+   public void setUpperBounds(DenseMatrix64F variableUpperBounds)
+   {
       if (variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows())
          throw new RuntimeException("variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
-      this.variableLowerBounds.set(variableLowerBounds);
       this.variableUpperBounds.set(variableUpperBounds);
-   }
-
-   @Override
-   public void setVariableBounds(double[] variableLowerBounds, double[] variableUpperBounds)
-   {
-      setVariableBounds(MatrixTools.createVector(variableLowerBounds), MatrixTools.createVector(variableUpperBounds));
-   }
-
-   @Override
-   public void setQuadraticCostFunction(double[][] quadraticCostFunctionQMatrix, double[] quadraticCostFunctionQVector, double quadraticCostScalar)
-   {
-      setQuadraticCostFunction(new DenseMatrix64F(quadraticCostFunctionQMatrix), MatrixTools.createVector(quadraticCostFunctionQVector), quadraticCostScalar);
    }
 
    @Override
@@ -194,12 +187,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    }
 
    @Override
-   public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
-   {
-      setLinearEqualityConstraints(new DenseMatrix64F(linearEqualityConstraintsAMatrix), MatrixTools.createVector(linearEqualityConstraintsBVector));
-   }
-
-   @Override
    public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
    {
       if (linearEqualityConstraintsBVector.getNumCols() != 1)
@@ -211,12 +198,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
       this.linearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
-   }
-
-   @Override
-   public void setLinearInequalityConstraints(double[][] linearInequalityConstraintsCMatrix, double[] linearInqualityConstraintsDVector)
-   {
-      setLinearInequalityConstraints(new DenseMatrix64F(linearInequalityConstraintsCMatrix), MatrixTools.createVector(linearInqualityConstraintsDVector));
    }
 
    @Override

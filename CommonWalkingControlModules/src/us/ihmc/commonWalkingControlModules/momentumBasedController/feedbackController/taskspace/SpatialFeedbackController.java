@@ -28,6 +28,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -93,6 +94,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoSE3PIDGainsInterface gains;
    private final YoPositionPIDGainsInterface positionGains;
@@ -208,6 +210,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
@@ -376,6 +379,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredPose.getPositionIncludingFrame(linearFeedbackTermToPack);
       desiredPose.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
 
+      selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
+      selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
+
       linearFeedbackTermToPack.limitLength(positionGains.getMaximumProportionalError());
       angularFeedbackTermToPack.limitLength(orientationGains.getMaximumProportionalError());
 
@@ -433,6 +439,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.setToZero(worldFrame);
       linearFeedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
       angularFeedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
+
+      selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
+      selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
+
       linearFeedbackTermToPack.limitLength(positionGains.getMaximumDerivativeError());
       angularFeedbackTermToPack.limitLength(orientationGains.getMaximumDerivativeError());
       yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
@@ -488,6 +498,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorVector.getLinearPartIncludingFrame(linearFeedbackTermToPack);
          linearFeedbackTermToPack.scale(dt);
          linearFeedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+         selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
          linearFeedbackTermToPack.limitLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
 
@@ -518,6 +529,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          errorOrientationCumulated.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(dt);
+         selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
          angularFeedbackTermToPack.limitLength(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.set(angularFeedbackTermToPack);
 

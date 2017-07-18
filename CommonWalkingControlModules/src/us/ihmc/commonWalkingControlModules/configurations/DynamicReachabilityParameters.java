@@ -183,7 +183,7 @@ public class DynamicReachabilityParameters
     */
    public double getSwingAdjustmentWeight()
    {
-      return 10.0;
+      return 20.0;
    }
 
    /**

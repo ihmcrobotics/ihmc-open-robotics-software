@@ -1,73 +1,39 @@
 package us.ihmc.multicastLogDataProtocol;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
 
 public class LogUtils
 {
-   
-   public static InetAddress getByName(String address)
+
+   public static InetAddress getByName(String address) throws UnknownHostException
    {
-      try
-      {
-         return InetAddress.getByName(address);
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-   public static InetAddress getByAddress(byte[] address)
-   {
-      try
-      {
-         return InetAddress.getByAddress(address);
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-   
-   public static NetworkInterface getMyInterface(String hostOnNetwork)
-   {
-      try
-      {
-         return NetworkInterface.getByInetAddress(LogUtils.getMyIP(hostOnNetwork));
-      }
-      catch (SocketException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return InetAddress.getByName(address);
    }
 
-   public static InetAddress getMyIP(String host)
+   public static InetAddress getByAddress(byte[] address) throws UnknownHostException
    {
-      try
-      {
-         return getMyIP(InetAddress.getByName(host));
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return InetAddress.getByAddress(address);
    }
 
-   public static InetAddress getMyIP(byte[] address)
+   public static NetworkInterface getMyInterface(String hostOnNetwork) throws IOException
    {
-      try
-      {
-         return getMyIP(InetAddress.getByAddress(address));
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return NetworkInterface.getByInetAddress(LogUtils.getMyIP(hostOnNetwork));
+   }
+
+   public static InetAddress getMyIP(String host) throws IOException
+   {
+      return getMyIP(InetAddress.getByName(host));
+   }
+
+   public static InetAddress getMyIP(byte[] address) throws IOException
+   {
+      return getMyIP(InetAddress.getByAddress(address));
 
    }
 
@@ -77,52 +43,45 @@ public class LogUtils
     * @param ipOnNetwork
     * @return my IP address
     */
-   public static InetAddress getMyIP(InetAddress ipOnNetwork)
+   public static InetAddress getMyIP(InetAddress ipOnNetwork) throws IOException
    {
-      try
+      Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+
+      InetAddress myIp = null;
+      int networkPrefixLength = 0;
+
+      while (ifaces.hasMoreElements())
       {
-         Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-
-         InetAddress myIp = null;
-         int networkPrefixLength = 0;
-
-         while (ifaces.hasMoreElements())
+         for (InterfaceAddress address : ifaces.nextElement().getInterfaceAddresses())
          {
-            for (InterfaceAddress address : ifaces.nextElement().getInterfaceAddresses())
+            if (address.getAddress().getAddress().length == 4)
             {
-               if (address.getAddress().getAddress().length == 4)
+               if (addressToInt(address.getAddress()) == addressToInt(ipOnNetwork))
                {
-                  if (addressToInt(address.getAddress()) == addressToInt(ipOnNetwork))
-                  {
-                     networkPrefixLength = 32;
-                     myIp = address.getAddress();
-                  }
+                  networkPrefixLength = 32;
+                  myIp = address.getAddress();
+               }
 
-                  int netmask = ~(address.getNetworkPrefixLength() != 0 ? (0xFFFFFFFF >>> address.getNetworkPrefixLength()) : 0);
-                  if ((addressToInt(address.getAddress()) & netmask) == (addressToInt(ipOnNetwork) & netmask))
+               int netmask = ~(address.getNetworkPrefixLength() != 0 ? (0xFFFFFFFF >>> address.getNetworkPrefixLength()) : 0);
+               if ((addressToInt(address.getAddress()) & netmask) == (addressToInt(ipOnNetwork) & netmask))
+               {
+                  if (address.getNetworkPrefixLength() > networkPrefixLength)
                   {
-                     if (address.getNetworkPrefixLength() > networkPrefixLength)
-                     {
-                        networkPrefixLength = address.getNetworkPrefixLength();
-                        myIp = address.getAddress();
-                     }
+                     networkPrefixLength = address.getNetworkPrefixLength();
+                     myIp = address.getAddress();
                   }
                }
             }
          }
-
-         if (myIp != null)
-         {
-            return myIp;
-         }
-         else
-         {
-            throw new RuntimeException("Cannot reach IP " + ipOnNetwork);
-         }
       }
-      catch (SocketException e)
+
+      if (myIp != null)
       {
-         throw new RuntimeException(e);
+         return myIp;
+      }
+      else
+      {
+         throw new RuntimeException("Cannot reach IP " + ipOnNetwork);
       }
    }
 
@@ -131,7 +90,4 @@ public class LogUtils
       return ByteBuffer.wrap(address.getAddress()).getInt();
    }
 
-   public static void main(String[] args) throws UnknownHostException
-   {
-   }
 }

@@ -38,6 +38,9 @@ public class ICPAdjustmentOptimizationController extends ICPOptimizationControll
       transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
 
+      useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
+      minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
+
       parentRegistry.addChild(registry);
    }
 
@@ -113,6 +116,11 @@ public class ICPAdjustmentOptimizationController extends ICPOptimizationControll
       extractSolutionsFromSolver(numberOfFootstepsToConsider, omega0, noConvergenceException);
 
       controllerTimer.stopMeasurement();
+   }
+
+   public double getOptimizedTimeRemaining()
+   {
+      throw new RuntimeException("This is not implemented in this solver.");
    }
 }
 

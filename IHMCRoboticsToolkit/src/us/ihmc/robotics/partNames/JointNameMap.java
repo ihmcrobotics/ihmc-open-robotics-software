@@ -17,6 +17,16 @@ public interface JointNameMap extends RobotSpecificJointNames
       return 3.0;
    }
 
+   default double getDefaultKLimit()
+   {
+      return 100.0;
+   }
+
+   default double getDefaultBLimit()
+   {
+      return 20.0;
+   }
+
    /**
     * @return list of joints that will not be inertia scaled for simulation stability
     */

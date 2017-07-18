@@ -72,6 +72,12 @@ public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      geometryObject.applyInverseTransform(transform);
+   }
+
+   @Override
    public void setToZero()
    {
       geometryObject.setToZero();

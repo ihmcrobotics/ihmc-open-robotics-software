@@ -185,7 +185,7 @@ public class RobotDescriptionFromSDFLoader
          {
             lastSimulatedJoints = new HashSet<>();
          }
-         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false);
+         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false, jointNameMap);
       }
 
       // Ground contact points from model
@@ -265,7 +265,7 @@ public class RobotDescriptionFromSDFLoader
    }
 
    protected void addJointsRecursively(SDFJointHolder joint, JointDescription scsParentJoint, boolean useCollisionMeshes, Set<String> lastSimulatedJoints,
-         boolean doNotSimulateJoint)
+         boolean doNotSimulateJoint, JointNameMap jointNameMap)
    {
       Vector3D jointAxis = new Vector3D(joint.getAxisInModelFrame());
       Vector3D offset = new Vector3D(joint.getOffsetFromParentJoint());
@@ -283,7 +283,7 @@ public class RobotDescriptionFromSDFLoader
       case REVOLUTE:
          PinJointDescription pinJoint = new PinJointDescription(sanitizedJointName, offset, jointAxis);
 
-         if (joint.hasLimits())
+         if (joint.hasLimits() && jointNameMap != null)
          {
             if (isJointInNeedOfReducedGains(joint))
             {
@@ -293,8 +293,9 @@ public class RobotDescriptionFromSDFLoader
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
-                  //                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 1000.0, 200.0);
+                  double kLimit = jointNameMap.getDefaultKLimit();
+                  double bLimit = jointNameMap.getDefaultBLimit();
+                  pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), kLimit, bLimit);
                }
                else
                {
@@ -374,7 +375,7 @@ public class RobotDescriptionFromSDFLoader
 
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {
-         addJointsRecursively(child, scsJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint);
+         addJointsRecursively(child, scsJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint, jointNameMap);
       }
 
    }

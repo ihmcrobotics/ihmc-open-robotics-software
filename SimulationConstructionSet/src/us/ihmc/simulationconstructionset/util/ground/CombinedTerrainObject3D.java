@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,7 +11,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals
 {
@@ -60,12 +60,12 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    public void addRotatableBox(RigidBodyTransform configuration, double xLength, double yWidth, double zLength, AppearanceDefinition appearanceDefinition)
    {
-      Box3d box3d = new Box3d(configuration, xLength, yWidth, zLength);
+      Box3D box3d = new Box3D(configuration, xLength, yWidth, zLength);
       RotatableBoxTerrainObject box = new RotatableBoxTerrainObject(box3d, appearanceDefinition);
       addTerrainObject(box);
    }
 
-   public void addRotatableBox(Box3d box, AppearanceDefinition appearanceDefinition)
+   public void addRotatableBox(Box3D box, AppearanceDefinition appearanceDefinition)
    {
       RotatableBoxTerrainObject terrainObject = new RotatableBoxTerrainObject(box, appearanceDefinition);
       addTerrainObject(terrainObject);
