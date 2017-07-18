@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RRTPlanningToolboxController extends ToolboxController
 {
-   private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
+   private final AtomicReference<RRTPlanningRequestPacket> latestRequestReference = new AtomicReference<RRTPlanningRequestPacket>(null);
    
    public RRTPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -32,7 +32,7 @@ public class RRTPlanningToolboxController extends ToolboxController
    protected boolean initialize()
    {
       PrintTools.info("dd");
-      FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      RRTPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       PrintTools.info("dd");
       if (request == null)
       {
@@ -51,15 +51,15 @@ public class RRTPlanningToolboxController extends ToolboxController
       return false;
    }
 
-   public PacketConsumer<FootstepPlanningRequestPacket> createRequestConsumer()
+   public PacketConsumer<RRTPlanningRequestPacket> createRequestConsumer()
    {
       PrintTools.info("cc");
       
-      return new PacketConsumer<FootstepPlanningRequestPacket>()
+      return new PacketConsumer<RRTPlanningRequestPacket>()
       {
          
          @Override
-         public void receivedPacket(FootstepPlanningRequestPacket packet)
+         public void receivedPacket(RRTPlanningRequestPacket packet)
          {
             PrintTools.info("cc");
             if (packet == null)

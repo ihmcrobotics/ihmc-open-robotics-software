@@ -115,6 +115,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
@@ -555,5 +556,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BoundingBoxesPacket.class);
 
       registerPacketClass(ObjectDetectorResultPacket.class);
+      registerPacketClass(RRTPlanningRequestPacket.class);
    }
 }
