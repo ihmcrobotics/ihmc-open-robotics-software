@@ -330,7 +330,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   public double getJointAccelerationWeight()
                   {
                      //return 0.005;
-                     return 0.02;
+                     return 0.05;
                   }
                };
             }
@@ -345,17 +345,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   {
                      return true;
                   }
-
-                  public double getPelvisPitchRatioOfLegAngle()
-                  {
-                     return 0.3;
-                  }
-
-                  public double getPelvisYawRatioOfStepAngle()
-                  {
-                     return 0.25;
-                  }
-
                };
             }
 
