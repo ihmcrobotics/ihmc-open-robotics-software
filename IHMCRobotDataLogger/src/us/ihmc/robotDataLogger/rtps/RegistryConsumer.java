@@ -47,6 +47,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private double averageTimeBetweenPackets = 0;
    
    private volatile int jitterBufferSamples = 1;
+   private final int segmentsForAllVariables;
    
    private long previousTimestamp = -1;
    private final YoInteger skippedPackets;
@@ -75,6 +76,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
       
 
+      this.segmentsForAllVariables = LogParticipantTools.calculateLogSegmentSizes(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables()).length;
       
       start();
    }
@@ -87,7 +89,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          ThreadTools.sleep(1);
          
-         while(orderedBuffers.size() > (jitterBufferSamples + lastRegistryUid.size() + 1))
+         while(orderedBuffers.size() > (jitterBufferSamples + lastRegistryUid.size() + segmentsForAllVariables + 1))
          {
             try
             {
