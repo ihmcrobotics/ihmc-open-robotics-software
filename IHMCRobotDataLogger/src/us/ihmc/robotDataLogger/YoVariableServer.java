@@ -32,6 +32,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    private final double dt;
 
+   private String rootRegistryName = "main";
+   
    private YoVariableRegistry mainRegistry = null;
    private final ArrayList<RegistrySendBufferBuilder> registeredBuffers = new ArrayList<>();
    private final HashMap<YoVariableRegistry, RegistryPublisher> publishers = new HashMap<>();
@@ -88,6 +90,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
 
    }
+   
+   public void setRootRegistryName(String name)
+   {
+      this.rootRegistryName = name;
+   }
 
    private void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
    {
@@ -110,7 +117,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          throw new RuntimeException("Server already started");
       }
 
-      handshakeBuilder = new YoVariableHandShakeBuilder(dt);
+      handshakeBuilder = new YoVariableHandShakeBuilder(rootRegistryName, dt);
       int maxVariables = 0;
       int maxStates = 0;
       for (int i = 0; i < registeredBuffers.size(); i++)

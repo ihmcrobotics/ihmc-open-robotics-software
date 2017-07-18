@@ -39,9 +39,9 @@ public class YoVariableHandShakeBuilder
    private int registryID = 1;
    private int enumID = 0;
 
-   public YoVariableHandShakeBuilder(double dt)
+   public YoVariableHandShakeBuilder(String rootRegistryName, double dt)
    {
-      createRootRegistry();
+      createRootRegistry(rootRegistryName);
 
       handshake.setDt(dt);
 
@@ -121,11 +121,11 @@ public class YoVariableHandShakeBuilder
       return RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
    }
 
-   private void createRootRegistry()
+   private void createRootRegistry(String rootRegistryName)
    {
 
       YoRegistryDefinition yoRegistryDescription = handshake.getRegistries().add();
-      yoRegistryDescription.setName("main");
+      yoRegistryDescription.setName(rootRegistryName);
       yoRegistryDescription.setParent((short) 0);
    }
 
@@ -142,8 +142,13 @@ public class YoVariableHandShakeBuilder
 
       builder.build(registryID);
       List<JointHolder> jointHolders = builder.getJointHolders();
-      if (jointHolders != null)
+      if (jointHolders != null && !jointHolders.isEmpty())
       {
+         if(!this.jointHolders.isEmpty())
+         {
+            throw new RuntimeException("Cannot register multiple registries with joint holders");
+         }
+         
          addJointHolders(jointHolders);
       }
    }

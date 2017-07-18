@@ -42,7 +42,7 @@ public class YoVariableLogger
       }
 
       YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
-      client = new YoVariableClient(participant, request, logger, "");
+      client = new YoVariableClient(participant, request, logger);
 
       try
       {
