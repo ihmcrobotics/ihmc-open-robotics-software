@@ -12,6 +12,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
@@ -83,6 +84,7 @@ public abstract class ControllerAPIDefinition
       commands.add(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
+      commands.add(CenterOfMassTrajectoryCommand.class);
 
       supportedCommands = Collections.unmodifiableList(commands);
 
