@@ -718,6 +718,12 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       super.getDerivative(dervTraj, order);
    }
    
+   public void getIntegral(YoFrameTrajectory3D integralTraj)
+   {
+      checkReferenceFrameMatch(integralTraj);
+      super.getIntegral(integralTraj);
+   }
+   
    public void addTimeOffset(YoFrameTrajectory3D trajToCopy, double deltaT)
    {
       set(trajToCopy);

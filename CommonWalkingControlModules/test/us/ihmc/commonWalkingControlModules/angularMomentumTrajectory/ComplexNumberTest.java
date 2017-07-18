@@ -8,6 +8,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.ComplexNumber;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.MathTools;
 
 public class ComplexNumberTest
 {
@@ -64,7 +65,9 @@ public class ComplexNumberTest
          roots.add(new ComplexNumber());
       c1.getRoots(roots, 8);
       for(int i = 0; i < roots.size(); i++)
-         PrintTools.debug(roots.get(i).toString());
-      
+      {
+         assert (MathTools.epsilonCompare(roots.get(i).getRealPart(), Math.cos(i*2.0*Math.PI/8.0), Epsilons.ONE_BILLIONTH));
+         assert (MathTools.epsilonCompare(roots.get(i).getImaginaryPart(), Math.sin(i*2.0*Math.PI/8.0), Epsilons.ONE_BILLIONTH));
+      }
    }
 }

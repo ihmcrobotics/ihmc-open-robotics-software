@@ -133,6 +133,11 @@ public class YoTrajectory
       tFinal.setToNaN();
    }
 
+   public void setDirectlyFast(int power, double coefficient)
+   {
+      this.polynomial.setDirectlyFast(power, coefficient);
+   }
+   
    /**
     * Sets the coefficients to zero. Initial and final time are retained.
     */
@@ -458,15 +463,7 @@ public class YoTrajectory
 
    public void getDerivative(YoTrajectory dervTraj)
    {
-      if (dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - 1)
-         return;
-      dervTraj.polynomial.reshape(this.getNumberOfCoefficients() - 1);
-      for (int i = 1; i < this.getNumberOfCoefficients(); i++)
-      {
-         dervTraj.polynomial.setDirectlyFast(i - 1, i * this.polynomial.getCoefficient(i));
-      }
-      dervTraj.setInitialTime(this.getInitialTime());
-      dervTraj.setFinalTime(this.getFinalTime());
+      TrajectoryMathTools.getDerivative(dervTraj, this);
    }
 
    public void getDerivative(YoTrajectory dervTraj, int order)
@@ -492,4 +489,11 @@ public class YoTrajectory
       set(trajToCopy);
       addTimeOffset(deltaT);
    }   
+   
+   public void getIntegral(YoTrajectory trajToPack)
+   {
+      TrajectoryMathTools.getIntergal(trajToPack, this);
+   }
+   
+   
 }

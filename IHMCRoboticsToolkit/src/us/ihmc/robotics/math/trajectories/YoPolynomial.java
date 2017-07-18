@@ -775,7 +775,6 @@ public class YoPolynomial
          if (a[i].getDoubleValue() >= 0)
             inString += "+";
          inString += a[i].getDoubleValue() + " x^" + i;
-
       }
       return inString;
    }
