@@ -101,11 +101,6 @@ public class BalanceManager
    private final FramePoint2d perfectCMP = new FramePoint2d();
    
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
-   private final YoBoolean currentlyBlendingICPTrajectories = new YoBoolean("currentlyBlendingICPTrajectories", registry);
-   private final YoDouble blendingStartTime = new YoDouble("blendingStartTime", registry);
-   private final YoDouble blendingDuration = new YoDouble("blendingDuration", registry);
-   private final FramePoint2d precomputedDesiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d precomputedDesiredCapturePointVelocity2d = new FrameVector2d();
 
    private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
    private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
@@ -190,7 +185,6 @@ public class BalanceManager
       CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
       precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
       precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
-      blendingDuration.set(0.1);
       blendICPTrajectories.set(true);
 
       if (ENABLE_DYN_REACHABILITY)
@@ -388,31 +382,13 @@ public class BalanceManager
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
       
-      if(precomputedICPPlanner.isWithinInterval(yoTime.getDoubleValue()))
+      if(blendICPTrajectories.getBooleanValue())
       {
-         precomputedICPPlanner.compute(yoTime.getDoubleValue());
-         precomputedICPPlanner.getDesiredCapturePointPosition(precomputedDesiredCapturePoint2d);
-         precomputedICPPlanner.getDesiredCapturePointVelocity(precomputedDesiredCapturePointVelocity2d);
-         
-         double alpha = 1.0;
-         if(!currentlyBlendingICPTrajectories.getBooleanValue())
-         {
-            blendingStartTime.set(yoTime.getDoubleValue());
-            currentlyBlendingICPTrajectories.set(true);
-         }
-         
-         if(blendICPTrajectories.getBooleanValue())
-         {
-            alpha = (yoTime.getDoubleValue() - blendingStartTime.getDoubleValue()) / blendingDuration.getDoubleValue();
-         }
-            
-         desiredCapturePoint2d.interpolate(desiredCapturePoint2d, precomputedDesiredCapturePoint2d, alpha);
-         desiredCapturePointVelocity2d.interpolate(desiredCapturePointVelocity2d, precomputedDesiredCapturePointVelocity2d, alpha);
-         computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
+         precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
       }
       else
       {
-         currentlyBlendingICPTrajectories.set(false);
+         precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
       }
 
       getICPError(icpError2d);
