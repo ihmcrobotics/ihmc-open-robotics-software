@@ -1,7 +1,6 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;

@@ -51,7 +51,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final DataProducerParticipant dataProducerParticipant;
    private YoVariableHandShakeBuilder handshakeBuilder;
 
-   private boolean sendKeepAlive = false;
+//   private boolean sendKeepAlive = false;
 
    private volatile long latestTimestamp;
    
@@ -180,7 +180,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    public void setSendKeepAlive(boolean sendKeepAlive)
    {
-      this.sendKeepAlive = sendKeepAlive;
+      System.err.println("TODO: Implement keep alive functionality");
+//      this.sendKeepAlive = sendKeepAlive;
    }
 
    public synchronized void close()

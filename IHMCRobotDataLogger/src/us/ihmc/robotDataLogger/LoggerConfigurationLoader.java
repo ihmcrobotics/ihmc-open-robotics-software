@@ -2,11 +2,9 @@ package us.ihmc.robotDataLogger;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 
 import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.idl.serializers.extra.PropertiesSerializer;
-import us.ihmc.robotDataLogger.util.LogUtils;
 
 public class LoggerConfigurationLoader
 {
