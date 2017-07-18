@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
+
 /**
  * Garbage free implementation of the FFT algorithm
  */
@@ -22,11 +24,13 @@ public class FastFourierTransform
    private List<ComplexNumber> rootsOfUnity;
    private ComplexNumber[] coefficients;
    private ComplexNumber[] transformedCoeffs;
-   private ComplexNumber[][] tempValue;
+
    public FastFourierTransform()
    {
       this(2048);
    }
+
+   private int temp;
 
    public FastFourierTransform(int maxNumberOfCoefficients)
    {
@@ -35,15 +39,23 @@ public class FastFourierTransform
       this.rootsOfUnity = RootsOfUnity.getRootsOfUnity(this.maxNumberOfCoefficients);
       this.coefficients = new ComplexNumber[this.maxNumberOfCoefficients];
       this.transformedCoeffs = new ComplexNumber[this.maxNumberOfCoefficients];
-      this.tempValue = new ComplexNumber[this.logMaxNumberOfCoefficients][this.maxNumberOfCoefficients/2];
       for (int i = 0; i < this.maxNumberOfCoefficients; i++)
       {
          coefficients[i] = new ComplexNumber();
          transformedCoeffs[i] = new ComplexNumber();
       }
-      for (int i = 0; i < this.maxNumberOfCoefficients; i++)
-         for(int j = 0; j < this.maxNumberOfCoefficients/2; j++)
-            tempValue[i][j] = new ComplexNumber();
+   }
+   
+   public void setCoefficients(ComplexNumber[] coefficients)
+   {
+      if (coefficients.length > maxNumberOfCoefficients)
+         throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
+               + coefficients.length);
+      int index = 0;
+      for (; index < coefficients.length; index++)
+         this.coefficients[index].set(coefficients[index]);
+      for (; index < maxNumberOfCoefficients; index++)
+         this.coefficients[index].setToPurelyReal(0.0);
    }
 
    public void setCoefficients(double[] coefficients)
@@ -51,7 +63,6 @@ public class FastFourierTransform
       if (coefficients.length > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
                + coefficients.length);
-
       int index = 0;
       for (; index < coefficients.length; index++)
          this.coefficients[index].setToPurelyReal(coefficients[index]);
@@ -59,48 +70,62 @@ public class FastFourierTransform
          this.coefficients[index].setToPurelyReal(0.0);
    }
 
-   public ComplexNumber getTransform(ComplexNumber[] coeffs, int N, int k, int Ntotal)
+   private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2= new ComplexNumber(), tempComplex = new ComplexNumber();
+
+   public ComplexNumber[] getForwardTransform()
    {
-      if(N == 1)
-         return coeffs[0];
-      else 
-      {
-         ComplexNumber[] set1 = new ComplexNumber[N/2];
-         ComplexNumber[] set2 = new ComplexNumber[N/2]; 
-         for(int i = 0 ; i < N; i++)
-         {
-            if(i%2 == 0)
-               set1[i/2] = coeffs[i];
-            else
-               set2[(i-1)/2] = coeffs[i];
-         }
-         ComplexNumber a = new ComplexNumber();
-         a.multiply(rootsOfUnity.get(k * Ntotal/N), getTransform(coeffs, N/2, k, Ntotal));
-         a.add(getTransform(coeffs, N/2, k, Ntotal));
-         return a;
-      }
+      transform(false);
+      return transformedCoeffs;
    }
    
-   public ComplexNumber[] getTransform()
+   public ComplexNumber[] getInverseTransform()
+   {
+      transform(true);
+      return transformedCoeffs;
+   }
+   
+   private void transform(boolean inverse)
    {
       clearTransformed();
-      // Setup the lowest order 
-      for(int i = 0; i < this.maxNumberOfCoefficients; i++)
+      bitReverseCopy(transformedCoeffs, coefficients);
+      int m = 0;
+      for (int i = 1; i <= logMaxNumberOfCoefficients; i++)
       {
-         for(int j=0; j < this.maxNumberOfCoefficients/2; j++)
+         m = (int) Math.pow(2.0, i);
+         tempComplex.setToPurelyReal(1.0);
+         for (int j = 0; j < m / 2; j++)
          {
-            tempValue[i][j].multiply(rootsOfUnity.get(index));
+            for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
+            {
+               tempComplex1.multiply(tempComplex, transformedCoeffs[k + m/2]);
+               tempComplex2.set(transformedCoeffs[k]);
+               transformedCoeffs[k].add(tempComplex1, tempComplex2);
+               transformedCoeffs[k+m/2].subtract(tempComplex2, tempComplex1);
+            }
+            if(!inverse)
+               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients/m));
+            else
+               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients/m));
          }
       }
-      
-      for(int i = maxNumberOfCoefficients/2; i!=1; i>>=1)
-      {
-         for(int j = 0; j < maxNumberOfCoefficients - i; i++)
-         {
-            
-         }
-      }
-      return transformedCoeffs;
+      if(inverse)
+         for (int i = 0; i < transformedCoeffs.length; i++)
+            transformedCoeffs[i].scale(1.0/maxNumberOfCoefficients);
+   }
+
+   private void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
+   {
+      temp = (int) (Math.log(arrayToCopy.length) / Math.log(2.0));
+      for (int i = 0; i < arrayToCopy.length; i++)
+         arrayToPack[i].set(arrayToCopy[bitReverse(i, temp)]);
+   }
+
+   public int bitReverse(int a, int numberOfBits)
+   {
+      int temp = 0;
+      for (; numberOfBits > 0; numberOfBits--, temp += a % 2, a /= 2)
+         temp <<= 1;
+      return temp;
    }
 
    private void clearTransformed()
@@ -114,13 +139,13 @@ public class FastFourierTransform
       for (int i = 0; i < transformedCoeffs.length; i++)
          coefficients[i].set(0.0, 0.0);
    }
-   
+
    public void clear()
    {
       clearTransformed();
       clearInput();
    }
-   
+
    public int getMaxNumberOfCoefficients()
    {
       return maxNumberOfCoefficients;
