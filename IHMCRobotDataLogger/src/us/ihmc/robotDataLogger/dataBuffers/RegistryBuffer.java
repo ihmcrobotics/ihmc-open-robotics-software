@@ -69,7 +69,7 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
    @Override
    public int compareTo(RegistryBuffer o)
    {
-      return Long.compare(this.timestamp, o.timestamp);
+      return (this.timestamp < o.timestamp) ? -1 : ((this.timestamp == o.timestamp) ? Long.compare(this.uid, o.uid) : 1);
    }
    
    public int getRegistryID()
