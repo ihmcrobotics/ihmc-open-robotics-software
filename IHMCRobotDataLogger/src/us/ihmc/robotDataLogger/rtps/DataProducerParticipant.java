@@ -322,6 +322,14 @@ public class DataProducerParticipant
       
       return new RegistryPublisher(schedulerFactory, builder, publisher);
    }
+   public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
+   {
+      CustomLogDataPublisherType type = new CustomLogDataPublisherType(0, 0);
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
+      Publisher publisher = domain.createPublisher(participant, attr);
+      new KeepAlivePublisher(schedulerFactory, publisher).start();
+   }
 
    public static int getMaximumSynchronousPacketSize()
    {

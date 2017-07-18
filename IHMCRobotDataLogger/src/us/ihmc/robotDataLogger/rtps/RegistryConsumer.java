@@ -11,6 +11,7 @@ import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
+import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryDecompressor;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
@@ -166,31 +167,38 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private void handlePackets() throws InterruptedException
    {
       RegistryReceiveBuffer buffer = orderedBuffers.take();
-      long timestamp = buffer.getTimestamp();
-      
-      decompressBuffer(buffer);
-      
-      if(buffer.getOffset() > 0)
+      if(buffer.getType() == LogDataType.DATA_PACKET)
       {
-         firstSegmentsMissing.increment();
-      }
       
-      while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
+         long timestamp = buffer.getTimestamp();
+         
+         decompressBuffer(buffer);
+         
+         if(buffer.getOffset() > 0)
+         {
+            firstSegmentsMissing.increment();
+         }
+         
+         while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
+         {
+            RegistryReceiveBuffer next = orderedBuffers.take();
+            decompressBuffer(next);
+            mergedPackets.increment();
+         }
+         
+         if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
+         {
+            nonIncreasingTimestamps.increment();         
+         }
+         previousTimestamp = buffer.getTimestamp();
+         
+         listener.receivedTimestampAndData(timestamp);
+      
+      }
+      else
       {
-         RegistryReceiveBuffer next = orderedBuffers.take();
-         decompressBuffer(next);
-         mergedPackets.increment();
+         //Received keep alive, ignore
       }
-      
-      if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
-      {
-         nonIncreasingTimestamps.increment();         
-      }
-      previousTimestamp = buffer.getTimestamp();
-      
-      listener.receivedTimestampAndData(timestamp);
-      
-      
    }
    
    @Override

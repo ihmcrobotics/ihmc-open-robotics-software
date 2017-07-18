@@ -91,7 +91,7 @@ public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuf
 
       serializeCDR.write_type_11(data.getTransmitTime());
 
-      serializeCDR.write_type_c(LogDataType.DATA_PACKET.ordinal());
+      serializeCDR.write_type_c(data.getType().ordinal());
 
       serializeCDR.write_type_2(data.getRegistryID());
       
@@ -101,21 +101,29 @@ public class CustomLogDataPublisherType implements TopicDataType<RegistrySendBuf
       serializeCDR.write_type_2(data.getNumberOfVariables());
 
 
-      if (compressor.supportsDirectOutput())
+      if(data.getType() == LogDataType.DATA_PACKET)
       {
-         compressDirect(data.getBuffer(), serializedPayload);
+         if (compressor.supportsDirectOutput())
+         {
+            compressDirect(data.getBuffer(), serializedPayload);
+         }
+         else
+         {
+            compressJavaBuffer(data.getBuffer(), serializedPayload);
+         }
+   
+         // Write joint states length
+         double[] jointstates = data.getJointStates();
+         serializeCDR.write_type_2(jointstates.length);
+         for (int i = 0; i < jointstates.length; i++)
+         {
+            serializeCDR.write_type_6(jointstates[i]);
+         }
       }
       else
       {
-         compressJavaBuffer(data.getBuffer(), serializedPayload);
-      }
-
-      // Write joint states length
-      double[] jointstates = data.getJointStates();
-      serializeCDR.write_type_2(jointstates.length);
-      for (int i = 0; i < jointstates.length; i++)
-      {
-         serializeCDR.write_type_6(jointstates[i]);
+         serializeCDR.write_type_2(0);
+         serializeCDR.write_type_2(0);
       }
 
       serializeCDR.finishSerialize();

@@ -56,10 +56,7 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
       data.setTransmitTime(deserializeCDR.read_type_11());
 
 
-      if (us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()] != LogDataType.DATA_PACKET)
-      {
-         throw new IOException("Invalid type for subscriber, expected DATA_PACKET");
-      }
+      data.setType(us.ihmc.robotDataLogger.LogDataType.values[deserializeCDR.read_type_c()]);
       
       data.setRegistryID(deserializeCDR.read_type_2());
       
@@ -67,16 +64,19 @@ public class CustomLogDataSubscriberType implements TopicDataType<RegistryReceiv
       
       data.setNumberOfVariables(deserializeCDR.read_type_2());
       
-      int dataLength = deserializeCDR.read_type_2();
-      ByteBuffer buffer = data.allocateBuffer(dataLength);
-      serializedPayload.getData().get(buffer.array(), 0, dataLength);
-      buffer.limit(dataLength);
-
-      int stateLength = deserializeCDR.read_type_2();
-      double[] states = data.allocateStates(stateLength);
-      for (int i = 0; i < stateLength; i++)
+      if(data.getType() == LogDataType.DATA_PACKET)
       {
-         states[i] = deserializeCDR.read_type_6();
+         int dataLength = deserializeCDR.read_type_2();
+         ByteBuffer buffer = data.allocateBuffer(dataLength);
+         serializedPayload.getData().get(buffer.array(), 0, dataLength);
+         buffer.limit(dataLength);
+      
+         int stateLength = deserializeCDR.read_type_2();
+         double[] states = data.allocateStates(stateLength);
+         for (int i = 0; i < stateLength; i++)
+         {
+            states[i] = deserializeCDR.read_type_6();
+         }
       }
 
       deserializeCDR.finishDeserialize();
