@@ -233,6 +233,7 @@ public class TrajectoryMathTools
       multiply(tempTraj1, traj1Y, traj2Z);
       multiply(tempTraj2, traj1Z, traj2Y);
       subtract(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
+      
 
       multiply(tempTraj1, traj1X, traj2Z);
       multiply(tempTraj2, traj1Z, traj2X);
@@ -433,5 +434,30 @@ public class TrajectoryMathTools
             
          }
       }
-   }  
+   } 
+   
+   public static void getIntergal(YoTrajectory trajToPack, YoTrajectory trajToIntegrate)
+   {
+      if(trajToPack.getMaximumNumberOfCoefficients() < trajToIntegrate.getNumberOfCoefficients() + 1)
+         throw new InvalidParameterException("Not enough coefficients to store result of trajectory integration");
+      trajToPack.reshape(trajToIntegrate.getNumberOfCoefficients() + 1);
+      for(int i = trajToIntegrate.getNumberOfCoefficients(); i > 0; i--)
+         trajToPack.polynomial.setDirectlyFast(i, trajToIntegrate.getCoefficient(i - 1)/(i));
+      trajToIntegrate.compute(trajToIntegrate.getInitialTime());
+      tempVal = trajToIntegrate.getPosition();
+      trajToPack.polynomial.setDirectly(0, -tempVal);
+      trajToPack.setTime(trajToIntegrate.getInitialTime(), trajToIntegrate.getFinalTime());
+   }
+
+   public static void getDerivative(YoTrajectory trajToPack, YoTrajectory trajToDifferentiate)
+   {
+      if (trajToPack.getMaximumNumberOfCoefficients() < trajToDifferentiate.getNumberOfCoefficients() - 1)
+         throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
+ 
+      trajToPack.polynomial.reshape(trajToDifferentiate.getNumberOfCoefficients() - 1);
+      for (int i = trajToDifferentiate.getNumberOfCoefficients() - 1; i > 0 ; i--)
+         trajToPack.polynomial.setDirectlyFast(i - 1, i * trajToDifferentiate.polynomial.getCoefficient(i));
+      
+      trajToPack.setTime(trajToDifferentiate.getInitialTime(), trajToDifferentiate.getFinalTime());
+   }
 }

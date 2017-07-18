@@ -192,7 +192,6 @@ public class ComplexNumber
    
    public void getRoots(List<ComplexNumber> rootsToPack, int n)
    {
-      PrintTools.debug(rootsToPack.size() + " " + n);
       tempVal1 = Math.pow(getMagnitude(), 1.0/n);
       tempVal2 = getArgument()/n;
       for(int i = 0; i < n; i++)

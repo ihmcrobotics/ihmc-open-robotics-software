@@ -74,7 +74,7 @@ public class YoTrajectory3D
       {
          return zTrajectory.getPosition();
       }
-      
+
       @Override
       public String toString()
       {
@@ -221,7 +221,7 @@ public class YoTrajectory3D
    {
       add(this, addTraj);
    }
-   
+
    public void addByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.addByTrimming(this, traj1, traj2);
@@ -231,17 +231,17 @@ public class YoTrajectory3D
    {
       addByTrimming(this, addTraj);
    }
-   
+
    public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.subtract(this, traj1, traj2);
    }
-   
+
    public void subtract(YoTrajectory3D subTraj)
    {
       subtract(this, subTraj);
    }
-   
+
    public void subtractByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
@@ -251,22 +251,22 @@ public class YoTrajectory3D
    {
       subtractByTrimming(this, subTraj);
    }
-   
+
    public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.dotProduct(this, traj1, traj2);
    }
-   
+
    public void dotProduct(YoTrajectory3D dotPTraj)
    {
       dotProduct(this, dotPTraj);
    }
-   
+
    public void dotProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.dotProductByTrimming(this, traj1, traj2);
    }
-   
+
    public void dotProductByTrimming(YoTrajectory3D dotPTraj)
    {
       dotProductByTrimming(this, dotPTraj);
@@ -276,22 +276,22 @@ public class YoTrajectory3D
    {
       TrajectoryMathTools.crossProduct(this, traj1, traj2);
    }
-   
+
    public void crossProduct(YoTrajectory3D crossPTraj)
    {
       crossProduct(this, crossPTraj);
    }
-   
+
    public void crossProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.crossProductByTrimming(this, traj1, traj2);
    }
-   
+
    public void crossProductByTrimming(YoFrameTrajectory3D crossPTraj)
    {
       crossProduct(this, crossPTraj);
    }
-   
+
    public Point3DReadOnly getPosition()
    {
       return position;
@@ -359,7 +359,7 @@ public class YoTrajectory3D
    {
       return zTrajectory;
    }
-   
+
    public void setTime(double tInital, double tFinal)
    {
       setInitialTime(tInital);
@@ -368,19 +368,19 @@ public class YoTrajectory3D
 
    public void setInitialTime(double tInitial)
    {
-      for(int i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
          getYoTrajectory(i).setInitialTime(tInitial);
    }
 
    public void setFinalTime(double tFinal)
    {
-      for(int i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
          getYoTrajectory(i).setFinalTime(tFinal);
    }
 
    public double getInitialTime()
    {
-      if(xTrajectory.getInitialTime() == yTrajectory.getInitialTime() && xTrajectory.getInitialTime() == zTrajectory.getInitialTime())
+      if (xTrajectory.getInitialTime() == yTrajectory.getInitialTime() && xTrajectory.getInitialTime() == zTrajectory.getInitialTime())
          return xTrajectory.getInitialTime();
       else
          return xTrajectory.getInitialTime();
@@ -388,7 +388,7 @@ public class YoTrajectory3D
 
    public double getFinalTime()
    {
-      if(xTrajectory.getFinalTime() == yTrajectory.getFinalTime() && xTrajectory.getFinalTime() == zTrajectory.getFinalTime())
+      if (xTrajectory.getFinalTime() == yTrajectory.getFinalTime() && xTrajectory.getFinalTime() == zTrajectory.getFinalTime())
          return xTrajectory.getFinalTime();
       else
          return xTrajectory.getFinalTime();
@@ -398,39 +398,40 @@ public class YoTrajectory3D
    {
       return getYoTrajectory(dir).getInitialTime();
    }
-   
+
    public double getInitialTime(int index)
    {
       return getYoTrajectory(index).getInitialTime();
    }
-   
+
    public double getFinalTime(Direction dir)
    {
       return getYoTrajectory(dir).getFinalTime();
    }
-   
+
    public double getFinalTime(int index)
    {
       return getYoTrajectory(index).getFinalTime();
    }
-   
+
    public boolean timeIntervalContains(double timeToCheck)
    {
       return (xTrajectory.timeIntervalContains(timeToCheck) && yTrajectory.timeIntervalContains(timeToCheck) && zTrajectory.timeIntervalContains(timeToCheck));
    }
-   
+
    /**
     * Returns the number of coefficients for the trajectory if it is the same for all axes. If not then returns -1
     * @return
     */
    public int getNumberOfCoefficients()
    {
-      if(xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients() && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
+      if (xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients()
+            && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
          return xTrajectory.getNumberOfCoefficients();
       else
          return -1;
    }
-   
+
    public int getNumberOfCoefficients(Direction dir)
    {
       return getYoTrajectory(dir).getNumberOfCoefficients();
@@ -440,7 +441,7 @@ public class YoTrajectory3D
    {
       return getYoTrajectory(index).getNumberOfCoefficients();
    }
-   
+
    public void reset()
    {
       for (int index = 0; index < 3; index++)
@@ -459,7 +460,7 @@ public class YoTrajectory3D
       for(int index = 0; index < 3; index ++)
          getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
    }
-   
+
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
@@ -731,25 +732,31 @@ public class YoTrajectory3D
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
    }
-   
+
    public void getDerivative(YoTrajectory3D dervTraj)
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index));
    }
-   
+
    public void getDerivative(YoTrajectory3D dervTraj, int order)
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
    }
-   
-   public void addTimeOffset(double deltaT)
+
+   public void getIntegral(YoTrajectory3D integralTraj)
    {
       for(int index = 0; index < 3; index++)
+         getYoTrajectory(index).getIntegral(integralTraj.getYoTrajectory(index));
+   }
+
+   public void addTimeOffset(double deltaT)
+   {
+      for (int index = 0; index < 3; index++)
          getYoTrajectory(index).addTimeOffset(deltaT);
    }
-   
+
    public void addTimeOffset(YoTrajectory3D trajToCopy, double deltaT)
    {
       set(trajToCopy);

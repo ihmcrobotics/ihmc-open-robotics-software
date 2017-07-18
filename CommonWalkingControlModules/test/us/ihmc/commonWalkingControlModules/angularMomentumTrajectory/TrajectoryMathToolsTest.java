@@ -530,4 +530,28 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj.getCoefficient(1), 8, Epsilons.ONE_THOUSANDTH));      
       assert (MathTools.epsilonCompare(traj.getCoefficient(2),-8, Epsilons.ONE_THOUSANDTH));      
    }
+   
+   @Test
+   public void testIntegration()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 2, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 3, registry);
+      traj1.setLinear(1, 11, 4, 5);
+      TrajectoryMathTools.getIntergal(traj2, traj1);
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(0),-4.00, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(1), 3.90, Epsilons.ONE_THOUSANDTH));      
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(2), 0.05, Epsilons.ONE_THOUSANDTH));      
+   }
+   
+   @Test 
+   public void testDifferentiation()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 2, registry);
+      traj1.setQuadratic(1, 11, 4, 0, 5);
+      TrajectoryMathTools.getDerivative(traj2, traj1);
+      PrintTools.debug(traj1.toString());
+      PrintTools.debug(traj2.toString());
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(0),-4.00, Epsilons.ONE_THOUSANDTH));
+   }
 }
