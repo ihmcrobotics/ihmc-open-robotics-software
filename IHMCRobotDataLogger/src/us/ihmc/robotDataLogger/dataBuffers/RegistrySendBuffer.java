@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.List;
 
+import us.ihmc.robotDataLogger.LogDataType;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -20,6 +21,25 @@ public class RegistrySendBuffer extends RegistryBuffer
    private double[] jointStates;
    private final double[] allocatedJointStates;
    private final double[] emptyJointStates = new double[0];
+   
+   /**
+    * Keep alive variant of buffer
+    * 
+    */
+   protected RegistrySendBuffer()
+   {
+      this.buffer = null;
+      this.data = null;
+      this.variables = null;
+      this.jointHolders = null;
+      this.allocatedJointStates = null;
+      
+      setTimestamp(-1);
+      setRegistryID(-1);
+      setOffset(-1);
+      setNumberOfVariables(0);
+      setType(LogDataType.KEEP_ALIVE_PACKET);
+   }
    
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {

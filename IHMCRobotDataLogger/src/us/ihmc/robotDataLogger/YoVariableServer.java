@@ -51,7 +51,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private final DataProducerParticipant dataProducerParticipant;
    private YoVariableHandShakeBuilder handshakeBuilder;
 
-//   private boolean sendKeepAlive = false;
+   private boolean sendKeepAlive = false;
 
    private volatile long latestTimestamp;
    
@@ -168,6 +168,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
             publishers.get(registry).start();
          }
 
+         if(sendKeepAlive)
+         {
+            dataProducerParticipant.sendKeepAlive(schedulerFactory);
+         }
+         
          dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
          dataProducerParticipant.announce();
       }
@@ -180,8 +185,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    public void setSendKeepAlive(boolean sendKeepAlive)
    {
-      System.err.println("TODO: Implement keep alive functionality");
-//      this.sendKeepAlive = sendKeepAlive;
+      this.sendKeepAlive = sendKeepAlive;
    }
 
    public synchronized void close()
