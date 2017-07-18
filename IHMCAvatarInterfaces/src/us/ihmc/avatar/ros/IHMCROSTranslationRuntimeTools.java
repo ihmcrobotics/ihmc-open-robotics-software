@@ -86,11 +86,11 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      footsteps.defaultSwingDuration = message.getDefaultSwingTime();
-      footsteps.defaultTransferDuration = message.getDefaultTransferTime();
+      footsteps.defaultSwingDuration = message.getDefaultSwingDuration();
+      footsteps.defaultTransferDuration = message.getDefaultTransferDuration();
       footsteps.setUniqueId(message.getUniqueId());
       footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
-      footsteps.finalTransferDuration = message.getFinalTransferTime();
+      footsteps.finalTransferDuration = message.getFinalTransferDuration();
 //      footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
@@ -123,10 +123,10 @@ public class IHMCROSTranslationRuntimeTools
          predictedContactPoints.add(GenericROSTranslationTools.convertPoint2DRos(point2dRosMessage));
       }
 
-      Point3D[] trajectoryWaypoints = new Point3D[message.getTrajectoryWaypoints().size()];
-      for (int i = 0; i < message.getTrajectoryWaypoints().size(); i++)
+      Point3D[] trajectoryWaypoints = new Point3D[message.getPositionWaypoints().size()];
+      for (int i = 0; i < message.getPositionWaypoints().size(); i++)
       {
-         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertVector3(message.getTrajectoryWaypoints().get(i)));
+         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertVector3(message.getPositionWaypoints().get(i)));
       }
 
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
@@ -268,7 +268,7 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       message.setPredictedContactPoints(predictedContatcPointsRos);
-      message.setTrajectoryWaypoints(trajectoryWaypoints);
+      message.setPositionWaypoints(trajectoryWaypoints);
 
       return message;
    }
@@ -281,11 +281,11 @@ public class IHMCROSTranslationRuntimeTools
 
       FootstepDataListRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-      message.setDefaultSwingTime(footstepList.defaultSwingDuration);
-      message.setDefaultTransferTime(footstepList.defaultTransferDuration);
+      message.setDefaultSwingDuration(footstepList.defaultSwingDuration);
+      message.setDefaultTransferDuration(footstepList.defaultTransferDuration);
       message.setUniqueId(footstepList.getUniqueId());
       message.setExecutionMode((byte) footstepList.executionMode.ordinal());
-      message.setFinalTransferTime(footstepList.finalTransferDuration);
+      message.setFinalTransferDuration(footstepList.finalTransferDuration);
 //      message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
