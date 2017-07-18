@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
@@ -329,6 +330,12 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
             createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
+      
+      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
+      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       
