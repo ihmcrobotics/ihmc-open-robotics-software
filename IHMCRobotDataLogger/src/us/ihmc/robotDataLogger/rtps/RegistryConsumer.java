@@ -57,6 +57,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final YoInteger mergedPackets;
    private final YoInteger totalPackets;
    private final YoInteger skippedPacketDueToFullBuffer;
+   private final YoInteger firstSegmentsMissing;
 
    
    private long lastPacketReceived;
@@ -74,6 +75,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       this.mergedPackets = new YoInteger("mergedPackets", loggerDebugRegistry);
       this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
       this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
+      this.firstSegmentsMissing = new YoInteger("firstSegmentsMissing", loggerDebugRegistry);
       
 
       this.segmentsForAllVariables = LogParticipantTools.calculateLogSegmentSizes(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables()).length;
@@ -168,12 +170,16 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       
       decompressBuffer(buffer);
       
+      if(buffer.getOffset() > 0)
+      {
+         firstSegmentsMissing.increment();
+      }
+      
       while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
       {
          RegistryReceiveBuffer next = orderedBuffers.take();
          decompressBuffer(next);
          mergedPackets.increment();
-         
       }
       
       if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
