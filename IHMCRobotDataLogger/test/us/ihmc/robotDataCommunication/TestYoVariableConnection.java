@@ -4,7 +4,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.robotDataLogger.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

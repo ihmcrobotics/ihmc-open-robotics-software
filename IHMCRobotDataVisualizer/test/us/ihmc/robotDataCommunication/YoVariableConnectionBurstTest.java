@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotDataLogger.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;

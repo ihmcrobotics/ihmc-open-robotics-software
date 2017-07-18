@@ -37,8 +37,8 @@ import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
-import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 /**
  * This class implements all communication for a data producer inside a DDS logging network
@@ -295,10 +295,20 @@ public class DataProducerParticipant
     * @param timestamp
     * @throws IOException 
     */
-   public void publishTimestamp(long timestamp) throws IOException
+   public void publishTimestamp(long timestamp)
    {
-      this.timestamp.setTimestamp(timestamp);
-      timestampPublisher.write(this.timestamp);
+      try
+      {
+         this.timestamp.setTimestamp(timestamp);
+         timestampPublisher.write(this.timestamp);
+      }
+      catch(IOException e)
+      {
+         if(timestampPublisher.isAvailable())
+         {
+            e.printStackTrace();
+         }
+      }
    }
    
    

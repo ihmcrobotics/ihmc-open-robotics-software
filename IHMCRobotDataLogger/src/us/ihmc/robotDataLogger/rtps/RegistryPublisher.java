@@ -9,8 +9,8 @@ import us.ihmc.robotDataLogger.dataBuffers.LoggerDebugRegistry;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBuffer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataLogger.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class RegistryPublisher
 {
@@ -51,6 +51,14 @@ public class RegistryPublisher
    public void stop()
    {
       scheduler.shutdown();
+      try
+      {
+         scheduler.awaitTermination(5, TimeUnit.SECONDS);
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    public void update(long timestamp)
@@ -100,7 +108,15 @@ public class RegistryPublisher
                   }
                   catch (IOException e)
                   {
-                     e.printStackTrace();
+                     if(publisher.isAvailable())
+                     {
+                        e.printStackTrace();
+                     }
+                     else
+                     {
+                        // Shutting down
+                        return;
+                     }
                   }
                   
                   if(previousUid != -1)

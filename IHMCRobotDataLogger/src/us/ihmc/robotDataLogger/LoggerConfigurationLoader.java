@@ -47,7 +47,7 @@ public class LoggerConfigurationLoader
       
       if(!publicBroadcast)
       {
-         System.err.println("Public broadcasting of logger data is OFF. The logger will only connect to your local computer. Please add \"publicBroadcast=true\" to " + location + " or pass in -Dihmc.publicBroadcast=true");
+         System.err.println("Public broadcasting of logger data is OFF. The logger will only connect to your local computer. To enable public broadcasting, add \"publicBroadcast=true\" to " + location + " or pass in -Dihmc.publicBroadcast=true");
       }
       
       this.publicBroadcast = publicBroadcast;
