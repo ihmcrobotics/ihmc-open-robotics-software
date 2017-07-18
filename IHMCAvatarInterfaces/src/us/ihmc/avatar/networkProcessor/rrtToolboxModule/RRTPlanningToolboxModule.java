@@ -12,8 +12,8 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
@@ -38,7 +38,7 @@ public class RRTPlanningToolboxModule extends ToolboxModule
       rrtToolboxController = new RRTPlanningToolboxController(statusOutputManager, registry);
       PrintTools.info("bb");
       
-      packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
+      packetCommunicator.attachListener(RRTPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
       PrintTools.info("bb");
       startYoVariableServer();
       PrintTools.info("bb");
