@@ -1,43 +1,33 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import geometry_msgs.Vector3;
+import ihmc_msgs.Point2dRosMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import ihmc_msgs.Point2dRosMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
+
+import java.lang.reflect.*;
+import java.util.*;
 
 public class GenericROSTranslationTools
 {
@@ -89,6 +79,8 @@ public class GenericROSTranslationTools
       javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3D.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3D32.class, "geometry_msgs/Vector3");
+
+      javaClassToRosMessageTypeMap.put(QuaternionBasedTransform.class, "geometry_msgs/Transform");
    }
 
    public static MessageFactory getMessageFactory()
@@ -195,10 +187,10 @@ public class GenericROSTranslationTools
       }
       else
       {
-         if(rosGetter.getReturnType().equals(Quaternion.class))
+         if(rosGetter.getReturnType().equals(geometry_msgs.Quaternion.class))
          {
             Tuple4DBasics newTuple = (Tuple4DBasics) ihmcField.getType().newInstance();
-            newTuple.set(convertQuaternion((Quaternion) rosGetter.invoke(rosMessage)));
+            newTuple.set(convertQuaternion((geometry_msgs.Quaternion) rosGetter.invoke(rosMessage)));
             ihmcField.set(ihmcMessage, newTuple);
          }
          else if(rosGetter.getReturnType().equals(Vector3.class))
@@ -552,13 +544,13 @@ public class GenericROSTranslationTools
       return point;
    }
 
-   public static Tuple4DBasics convertQuaternion(Quaternion quaternion)
+   public static Tuple4DBasics convertQuaternion(geometry_msgs.Quaternion quaternion)
    {
       if(quaternion == null)
          return null;
 //         return new Quat4d(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
-      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
+      Quaternion quat = new Quaternion(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
 
       return quat;
    }
@@ -566,7 +558,7 @@ public class GenericROSTranslationTools
    /*
     * Do not delete, used by reflection!
     */
-   public static Vector3 convertTuple3d(Tuple3DBasics tuple)
+   public static Vector3 convertTuple3d(Tuple3DReadOnly tuple)
    {
       Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
       if(tuple == null)
@@ -588,7 +580,7 @@ public class GenericROSTranslationTools
    /*
     * Do not delete, used by reflection!
     */
-   public static Vector3 convertTuple3f(Tuple3DBasics tuple)
+   public static Vector3 convertTuple3f(Tuple3DReadOnly tuple)
    {
       Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
 
@@ -611,9 +603,9 @@ public class GenericROSTranslationTools
    /*
     * Do not delete, used by reflection!
     */
-   public static Quaternion convertTuple4d(Tuple4DBasics tuple)
+   public static geometry_msgs.Quaternion convertTuple4d(Tuple4DReadOnly tuple)
    {
-      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
+      geometry_msgs.Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
       if(tuple == null)
       {
          quaternion.setX(Double.NaN);
@@ -635,9 +627,9 @@ public class GenericROSTranslationTools
    /*
     * Do not delete, used by reflection!
     */
-   public static Quaternion convertTuple4f(Tuple4DBasics tuple)
+   public static geometry_msgs.Quaternion convertTuple4f(Tuple4DReadOnly tuple)
    {
-      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
+      geometry_msgs.Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
       if(tuple == null)
       {
          quaternion.setX(Double.NaN);
