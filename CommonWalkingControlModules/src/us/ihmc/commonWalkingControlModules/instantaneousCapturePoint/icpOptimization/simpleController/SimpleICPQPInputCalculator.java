@@ -205,9 +205,7 @@ public class SimpleICPQPInputCalculator
       MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(feedbackJacobian, weight, feedbackJtW);
-
-      CommonOps.scale(5.0, weight);
-      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
+      CommonOps.multTransA(5.0, adjustmentJacobian, weight, adjustmentJtW);
 
       CommonOps.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
       CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
