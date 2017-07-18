@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.robotics.geometry.FrameObject;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -10,12 +12,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * This is a holder for frame related information that is passed through packages that implement
  * {@link FrameBasedMessage}.
  */
+@RosMessagePacket(documentation = "This is a holder for frame related information", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class FrameInformation implements EpsilonComparable<FrameInformation>
 {
    /**
     * The ID of the reference frame that a trajectory is executed in.
     */
-   private long trajectoryReferenceFrameId;
+   @RosExportedField(documentation = "The ID of the reference frame that a trajectory is executed in.")
+   public long trajectoryReferenceFrameId;
 
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
@@ -25,7 +29,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * </p>
     * It is recommended that this should be the same frame as the {@link #trajectoryReferenceFrameId} to
     * avoid unexpected behavior. Setting this frame to something different then the trajectory execution
-    * frame is equivalent to calling {@link FrameObject#changeFrame(trajectoryFrame)} on all trajectory
+    * frame is equivalent to calling {@link FrameObject#changeFrame(ReferenceFrame)} on all trajectory
     * data right before it is received by the controller.
     * </p>
     * The data frame is only useful if the user is unable to change the frame the data is expressed in
@@ -39,7 +43,10 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * this will cause the resulting trajectory to be wrong since the transformation to trajectory frame
     * happens at the start of execution rather than every controller tick.
     */
-   private long dataReferenceFrameId = NameBasedHashCodeTools.DEFAULT_HASHCODE;
+   @RosExportedField(documentation = "The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the\n"
+                                   + "trajectory data will be switched to the trajectory frame immediately when the message is received\n"
+                                   + "by the controller.")
+   public long dataReferenceFrameId = NameBasedHashCodeTools.DEFAULT_HASHCODE;
 
    public FrameInformation()
    {
