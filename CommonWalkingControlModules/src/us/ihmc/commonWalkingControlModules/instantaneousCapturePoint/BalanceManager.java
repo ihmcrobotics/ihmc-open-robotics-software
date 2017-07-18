@@ -174,7 +174,11 @@ public class BalanceManager
                                                            yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+      
+      WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
+      CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
 
+      
       if (ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, icpOptimizationController, fullRobotModel, centerOfMassFrame,
