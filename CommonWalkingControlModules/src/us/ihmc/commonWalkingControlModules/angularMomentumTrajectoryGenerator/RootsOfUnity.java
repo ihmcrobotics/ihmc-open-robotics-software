@@ -13,7 +13,6 @@ public class RootsOfUnity
 {
    private static final ComplexNumber unity = new ComplexNumber(1.0, 0.0);
    private static List<ComplexNumber> rootsOfUnity = new ArrayList<>();
-
    public static List<ComplexNumber> getRootsOfUnity(int orderOfRoots)
    {      
       for(int i = 0; i < orderOfRoots; i++)
