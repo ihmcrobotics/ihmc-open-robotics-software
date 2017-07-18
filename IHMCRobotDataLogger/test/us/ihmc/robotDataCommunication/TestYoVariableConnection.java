@@ -23,7 +23,6 @@ public class TestYoVariableConnection
    private final YoDouble var1 = new YoDouble("var1", registry);
    private final YoDouble var2 = new YoDouble("var2", registry);
    private final YoInteger var4 = new YoInteger("var4", registry);
-   private final YoInteger var5 = new YoInteger("var5", registry);
    private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
    
    private final YoInteger echoIn = new YoInteger("echoIn", registry);
@@ -44,6 +43,7 @@ public class TestYoVariableConnection
    
    public TestYoVariableConnection()
    {
+      new YoInteger("var5", registry);
       server.setSendKeepAlive(true);
       server.setMainRegistry(registry, null, null);
       
