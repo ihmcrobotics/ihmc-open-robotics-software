@@ -5,9 +5,9 @@ import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoo
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -17,6 +17,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PrecomputedICPPlanner
@@ -28,6 +29,13 @@ public class PrecomputedICPPlanner
    private final YoFramePoint yoDesiredCoMPosition = new YoFramePoint(name + "DesiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoDesiredICPPosition = new YoFramePoint(name + "DesiredICPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector yoDesiredICPVelocity = new YoFrameVector(name + "DesiredICPVelocity", ReferenceFrame.getWorldFrame(), registry);
+   
+   private final YoBoolean currentlyBlendingICPTrajectories = new YoBoolean("currentlyBlendingICPTrajectories", registry);
+   private final YoDouble blendingStartTime = new YoDouble("blendingStartTime", registry);
+   private final YoDouble blendingDuration = new YoDouble("blendingDuration", registry);
+   private final FramePoint2d precomputedDesiredCapturePoint2d = new FramePoint2d();
+   private final FrameVector2d precomputedDesiredCapturePointVelocity2d = new FrameVector2d();
+   
    private final YoDouble omega0 = new YoDouble(name + "Omega0", registry);
    
    private final FramePoint desiredICPPosition = new FramePoint();
@@ -38,6 +46,8 @@ public class PrecomputedICPPlanner
    public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
+      blendingDuration.set(0.1);
+      
       parentRegistry.addChild(registry);
       
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
@@ -61,7 +71,7 @@ public class PrecomputedICPPlanner
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
    
-   public void compute(double time)
+   private void compute(double time)
    {
       double omega0 = this.omega0.getDoubleValue();
       centerOfMassTrajectoryHandler.packDesiredICPAtTime(time, omega0, desiredICPPosition, desiredICPVelocity);
@@ -69,6 +79,41 @@ public class PrecomputedICPPlanner
       
       yoDesiredICPPosition.set(desiredICPPosition);
       yoDesiredICPVelocity.set(desiredICPVelocity);
+   }
+   
+   public void compute(double time, FramePoint2d desiredCapturePoint2dToPack, FrameVector2d desiredCapturePointVelocity2dToPack, FramePoint2d desiredCMPToPack)
+   {
+      if(isWithinInterval(time))
+      {
+         compute(time);
+         yoDesiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePoint2dToPack);
+         yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocity2dToPack);
+         yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCMPToPack);
+      }
+      currentlyBlendingICPTrajectories.set(false);
+   }
+   
+   public void computeAndBlend(double time, FramePoint2d desiredCapturePoint2d, FrameVector2d desiredCapturePointVelocity2d, FramePoint2d desiredCMP)
+   {
+      if(isWithinInterval(time))
+      {
+         compute(time);
+         if(!currentlyBlendingICPTrajectories.getBooleanValue())
+         {
+            blendingStartTime.set(time);
+            currentlyBlendingICPTrajectories.set(true);
+         }
+         
+         double alpha = (time - blendingStartTime.getDoubleValue()) / blendingDuration.getDoubleValue();
+            
+         desiredCapturePoint2d.interpolate(desiredCapturePoint2d, precomputedDesiredCapturePoint2d, alpha);
+         desiredCapturePointVelocity2d.interpolate(desiredCapturePointVelocity2d, precomputedDesiredCapturePointVelocity2d, alpha);
+         computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0.getDoubleValue(), desiredCMP);
+      }
+      else
+      {
+         currentlyBlendingICPTrajectories.set(false);
+      }
    }
    
    public boolean isWithinInterval(double time)
@@ -91,7 +136,6 @@ public class PrecomputedICPPlanner
       this.omega0.set(omega0);
    }
    
-
    /**
     * Gets the current ICP position.
     * <p>
@@ -133,5 +177,4 @@ public class PrecomputedICPPlanner
    {
       yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
-   
 }
