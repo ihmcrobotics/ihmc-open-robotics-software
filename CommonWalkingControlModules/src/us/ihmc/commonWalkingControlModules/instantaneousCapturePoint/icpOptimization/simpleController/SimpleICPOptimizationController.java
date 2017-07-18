@@ -33,6 +33,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
 
+   private static final boolean useAngularMomentumIntegrator = true;
+   private static final double angularMomentumIntegratorGain = 100.0;
+   private static final double angularMomentumIntegratorLeakRatio = 0.9;
+
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -63,7 +67,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
-   private final YoFramePoint2d cmpCoPDifferenceSolution = new YoFramePoint2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
+   private final YoFrameVector2d cmpCoPDifferenceSolution = new YoFrameVector2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
@@ -82,7 +86,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final YoDouble feedbackRegularizationWeight = new YoDouble(yoNamePrefix + "FeedbackRegularizationWeight", registry);
    private final YoDouble scaledFootstepRegularizationWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
    private final YoDouble dynamicRelaxationWeight = new YoDouble(yoNamePrefix + "DynamicRelaxationWeight", registry);
+
    private final YoDouble angularMomentumMinimizationWeight = new YoDouble(yoNamePrefix + "AngularMomentumMinimizationWeight", registry);
+   private final YoDouble scaledAngularMomentumMinimizationWeight = new YoDouble(yoNamePrefix + "ScaledAngularMomentumMinimizationWeight", registry);
+
+   private final YoDouble cumulativeAngularMomentum = new YoDouble(yoNamePrefix + "CumulativeAngularMomentum", registry);
 
    private final YoBoolean limitReachabilityFromAdjustment = new YoBoolean(yoNamePrefix + "LimitReachabilityFromAdjustment", registry);
 
@@ -123,7 +131,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final SimpleICPOptimizationQPSolver solver;
 
    private final double controlDT;
-   private final double dynamicRelaxationDoubleSupportWeightModifier;
 
    public SimpleICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
@@ -133,7 +140,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       this.contactableFeet = contactableFeet;
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
-      dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
@@ -155,6 +161,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+      scaledAngularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
 
       limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
 
@@ -423,6 +430,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       extractSolutionsFromSolver(numberOfFootstepsToConsider, noConvergenceException);
 
+      modifyAngularMomentumWeightUsingIntegral();
+
       controllerTimer.stopMeasurement();
 
    }
@@ -479,12 +488,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
-      if (!localUseStepAdjustment)
-         dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.resetFeedbackConditions();
-      //solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), 1e7);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
 
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
@@ -492,7 +498,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void submitAngularMomentumTaskConditionsToSolver()
    {
-      double angularMomentumMinimizationWeight = this.angularMomentumMinimizationWeight.getDoubleValue();
+      double angularMomentumMinimizationWeight = this.scaledAngularMomentumMinimizationWeight.getDoubleValue();
 
       solver.resetAngularMomentumConditions();
       solver.setAngularMomentumConditions(angularMomentumMinimizationWeight, useAngularMomentum.getBooleanValue());
@@ -623,5 +629,25 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
          scaledFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
+   }
+
+   private void modifyAngularMomentumWeightUsingIntegral()
+   {
+      double angularMomentumMinimizationWeight = this.angularMomentumMinimizationWeight.getDoubleValue();
+
+      if (!useAngularMomentumIntegrator)
+      {
+         scaledAngularMomentumMinimizationWeight.set(angularMomentumMinimizationWeight);
+         return;
+      }
+
+      double angularMomentumMagnitude = cmpCoPDifferenceSolution.length();
+
+      double cumulativeAngularMomentumAfterLeak = angularMomentumMagnitude * controlDT + angularMomentumIntegratorLeakRatio * cumulativeAngularMomentum.getDoubleValue();
+      cumulativeAngularMomentum.set(cumulativeAngularMomentumAfterLeak);
+
+      double multiplier = 1.0 + angularMomentumIntegratorGain * cumulativeAngularMomentumAfterLeak;
+
+      scaledAngularMomentumMinimizationWeight.set(multiplier * angularMomentumMinimizationWeight);
    }
 }
