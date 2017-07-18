@@ -3,35 +3,44 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RRTPlanningToolboxController extends ToolboxController
 {
-   private final AtomicReference<RRTPlanningRequestPacket> latestRequestReference = new AtomicReference<RRTPlanningRequestPacket>(null);
+   private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    
    public RRTPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
-      // TODO Auto-generated constructor stub
+      PrintTools.info("ee");
+
    }
 
    @Override
    protected void updateInternal()
    {
-      // TODO Auto-generated method stub
+      PrintTools.info("ff");
       
    }
 
    @Override
    protected boolean initialize()
    {
-      RRTPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      PrintTools.info("dd");
+      FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      PrintTools.info("dd");
       if (request == null)
+      {
+         PrintTools.info("dd");
          return false;
-      
+      }
+         
+      PrintTools.info("dd");
       
       return true;
    }
@@ -42,13 +51,17 @@ public class RRTPlanningToolboxController extends ToolboxController
       return false;
    }
 
-   public PacketConsumer<RRTPlanningRequestPacket> createRequestConsumer()
+   public PacketConsumer<FootstepPlanningRequestPacket> createRequestConsumer()
    {
-      return new PacketConsumer<RRTPlanningRequestPacket>()
+      PrintTools.info("cc");
+      
+      return new PacketConsumer<FootstepPlanningRequestPacket>()
       {
+         
          @Override
-         public void receivedPacket(RRTPlanningRequestPacket packet)
+         public void receivedPacket(FootstepPlanningRequestPacket packet)
          {
+            PrintTools.info("cc");
             if (packet == null)
                return;
             latestRequestReference.set(packet);

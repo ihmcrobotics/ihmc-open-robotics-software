@@ -54,6 +54,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
       tryToStartModule(() -> setupMultisenseManualTestModule(robotModel, params));
       tryToStartModule(() -> setupDrillDetectionModule(params));
+      tryToStartModule(() -> setupRRTPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts()));
