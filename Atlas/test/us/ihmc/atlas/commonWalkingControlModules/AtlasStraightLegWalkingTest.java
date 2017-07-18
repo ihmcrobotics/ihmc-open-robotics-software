@@ -197,7 +197,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   @Override
                   public boolean usePelvisRotation()
                   {
-                     return false;
+                     return true;
                   }
 
                   @Override
@@ -223,16 +223,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   public double getSpeedForSupportKneeStraightening()
                   {
                      return 1.0;
-                  }
-
-                  public boolean blendPrivilegedConfigurationPositionError()
-                  {
-                     return true;
-                  }
-
-                  public boolean blendPrivilegedConfigurationVelocityError()
-                  {
-                     return false;
                   }
 
                   @Override
@@ -363,5 +353,11 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             }
          };
       }
+   }
+
+   public static void main(String[] args) throws Exception
+   {
+      AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
+      test.testForwardWalking();
    }
 }

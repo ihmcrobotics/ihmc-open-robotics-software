@@ -342,7 +342,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
-      pelvisOrientationManager.setTrajectoryFromFootstep();
+      pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));

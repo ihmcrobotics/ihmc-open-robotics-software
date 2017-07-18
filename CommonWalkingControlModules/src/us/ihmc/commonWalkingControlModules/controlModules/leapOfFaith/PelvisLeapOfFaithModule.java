@@ -17,27 +17,28 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class PelvisLeapOfFaithModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final String yoNamePrefix = "leapOfFaith";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFrameOrientation orientationOffset = new YoFrameOrientation("leapOfFaithPelvisOrientationOffset", worldFrame, registry);
+   private final YoFrameOrientation orientationOffset = new YoFrameOrientation(yoNamePrefix + "PelvisOrientationOffset", worldFrame, registry);
+
+   private final YoBoolean isInSwing = new YoBoolean(yoNamePrefix + "IsInSwing", registry);
+   private final YoBoolean usePelvisRotation = new YoBoolean(yoNamePrefix + "UsePelvisRotation", registry);
+   private final YoBoolean relaxPelvis = new YoBoolean(yoNamePrefix + "RelaxPelvis", registry);
+
+   private final YoDouble yawGain = new YoDouble(yoNamePrefix + "PelvisYawGain", registry);
+   private final YoDouble rollGain = new YoDouble(yoNamePrefix + "PelvisRollGain", registry);
+
+   private final YoDouble relaxationRate = new YoDouble(yoNamePrefix + "RelaxationRate", registry);
+   private final YoDouble relaxationFraction = new YoDouble(yoNamePrefix + "RelaxationFraction", registry);
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
-   private boolean isInSwing = true;
    private RobotSide supportSide;
    private Footstep upcomingFootstep;
 
-   private double swingDuration;
-
-   private final YoBoolean usePelvisRotation = new YoBoolean("leapOfFaithUsePelvisRotation", registry);
-   private final YoBoolean relaxPelvis = new YoBoolean("leapOfFaithRelaxPelvis", registry);
-
-   private final YoDouble yawGain = new YoDouble("leapOfFaithPelvisYawGain", registry);
-   private final YoDouble rollGain = new YoDouble("leapOfFaithPelvisRollGain", registry);
-
-   private final YoDouble relaxationRate = new YoDouble("leapOfFaithRelaxationRate", registry);
-   private final YoDouble relaxationFraction = new YoDouble("leapOfFaithRelaxationFraction", registry);
+   private double stateDuration;
 
    public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
                                   YoVariableRegistry parentRegistry)
@@ -63,29 +64,33 @@ public class PelvisLeapOfFaithModule
 
    public void initializeStanding()
    {
-      isInSwing = false;
+      isInSwing.set(false);
    }
 
-   public void initializeTransfer()
+   public void initializeTransfer(double transferDuration)
    {
-      isInSwing = false;
+      stateDuration = transferDuration;
+      isInSwing.set(false);
    }
 
    public void initializeSwing(double swingDuration)
    {
-      this.swingDuration = swingDuration;
+      stateDuration = swingDuration;
 
-      isInSwing = true;
+      isInSwing.set(true);
    }
 
    private final FramePoint tempPoint = new FramePoint();
-   public void update(double currentTimeInState)
+   public void updateAngularOffsets(double currentTimeInState)
    {
       orientationOffset.setToZero();
 
-      if (isInSwing && usePelvisRotation.getBooleanValue())
+      if (isInSwing.getBooleanValue() && usePelvisRotation.getBooleanValue())
       {
-         double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
+         double exceededTime = Math.max(currentTimeInState - stateDuration, 0.0);
+
+         if (exceededTime == 0.0)
+            return;
 
          tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
          tempPoint.changeFrame(soleZUpFrames.get(supportSide));
@@ -104,9 +109,9 @@ public class PelvisLeapOfFaithModule
 
    public void relaxAngularWeight(double currentTimeInState, Vector3D angularWeightToPack)
    {
-      if (isInSwing && relaxPelvis.getBooleanValue())
+      if (isInSwing.getBooleanValue() && relaxPelvis.getBooleanValue())
       {
-         double exceededTime = Math.max(currentTimeInState - swingDuration, 0.0);
+         double exceededTime = Math.max(currentTimeInState - stateDuration, 0.0);
          double relaxationFraction;
          if (exceededTime > 0.0)
             relaxationFraction = MathTools.clamp(relaxationRate.getDoubleValue() * exceededTime + 0.2, 0.0, 1.0);

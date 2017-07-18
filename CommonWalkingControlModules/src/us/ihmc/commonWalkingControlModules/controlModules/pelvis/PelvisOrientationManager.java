@@ -186,6 +186,16 @@ public class PelvisOrientationManager
       walkingManager.initializeTransfer(transferToSide, transferDuration, swingDuration);
    }
 
+   public void initializeTrajectory()
+   {
+      walkingManager.updateTrajectoryFromFootstep();
+   }
+
+   public void updateTrajectoryFromFootstep()
+   {
+      walkingManager.updateTrajectoryFromFootstep();
+   }
+
    public void setTrajectoryFromFootstep()
    {
       walkingManager.setTrajectoryFromFootstep();
