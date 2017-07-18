@@ -15,7 +15,7 @@ public class PelvisOffsetWhileWalkingParameters
     */
    public double getPelvisYawRatioOfStepAngle()
    {
-      return 0.2;
+      return 0.25;
    }
 
    /**
@@ -31,7 +31,7 @@ public class PelvisOffsetWhileWalkingParameters
     */
    public double getPelvisPitchRatioOfLegAngle()
    {
-      return 0.5;
+      return 0.3;
    }
 
    /**
