@@ -30,18 +30,13 @@ public class RRTPlanningToolboxModule extends ToolboxModule
    {
       super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       
-      PrintTools.info("bb");
       
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       
-      PrintTools.info("bb");
       rrtToolboxController = new RRTPlanningToolboxController(statusOutputManager, registry);
-      PrintTools.info("bb");
       
       packetCommunicator.attachListener(RRTPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
-      PrintTools.info("bb");
       startYoVariableServer();
-      PrintTools.info("bb");
    }
 
    @Override

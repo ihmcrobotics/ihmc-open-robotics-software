@@ -7,40 +7,46 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class RRTPlanningToolboxController extends ToolboxController
 {
+   private int cntUpdate = 0;
+   
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);   
+   
    private final AtomicReference<RRTPlanningRequestPacket> latestRequestReference = new AtomicReference<RRTPlanningRequestPacket>(null);
    
    public RRTPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
-      PrintTools.info("ee");
-
+      
+      isDone.set(false);
    }
 
    @Override
    protected void updateInternal()
    {
-      PrintTools.info("ff");
+      PrintTools.info("update toolbox " + cntUpdate);
       
+      if(cntUpdate == 100)
+         isDone.set(true);      
+      cntUpdate++;      
    }
 
    @Override
    protected boolean initialize()
    {
-      PrintTools.info("dd");
+      isDone.set(false);
       RRTPlanningRequestPacket request = latestRequestReference.getAndSet(null);
-      PrintTools.info("dd");
       if (request == null)
       {
-         PrintTools.info("dd");
          return false;
       }
+      
+      PrintTools.info("temp input "+request.tempInputValue);
          
-      PrintTools.info("dd");
       
       return true;
    }
@@ -48,20 +54,16 @@ public class RRTPlanningToolboxController extends ToolboxController
    @Override
    protected boolean isDone()
    {
-      return false;
+      return isDone.getBooleanValue();
    }
 
    public PacketConsumer<RRTPlanningRequestPacket> createRequestConsumer()
    {
-      PrintTools.info("cc");
-      
       return new PacketConsumer<RRTPlanningRequestPacket>()
-      {
-         
+      {         
          @Override
          public void receivedPacket(RRTPlanningRequestPacket packet)
          {
-            PrintTools.info("cc");
             if (packet == null)
                return;
             latestRequestReference.set(packet);

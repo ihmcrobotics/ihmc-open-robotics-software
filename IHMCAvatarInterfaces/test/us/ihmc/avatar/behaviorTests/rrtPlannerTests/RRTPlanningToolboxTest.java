@@ -13,11 +13,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.RRTPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -42,12 +45,9 @@ public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      PrintTools.info("aa");
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
       rrtPlanningToolboxModule = new RRTPlanningToolboxModule(robotModel, fullRobotModel, null, false);
-      
-      
-      PrintTools.info("aa");
+            
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.RRTPLANNING_TOOLBOX_MODULE_PORT, PacketDestination.RRTPLANNING_TOOLBOX_MODULE);
       
@@ -112,15 +112,26 @@ public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-   
+      
+      ToolboxStateMessage toolboxMessage;
+      
       drcBehaviorTestHelper.updateRobotModel();       
       System.out.println("Start");
       
+      System.out.println("Send wake up "+drcBehaviorTestHelper.getYoTime());
       
+      toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+      toolboxMessage.setDestination(PacketDestination.RRTPLANNING_TOOLBOX_MODULE);
+      toolboxCommunicator.send(toolboxMessage);
+            
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      System.out.println("Send input "+drcBehaviorTestHelper.getYoTime());
       
+      RRTPlanningRequestPacket requestPacket = new RRTPlanningRequestPacket();   
+      requestPacket.setTempValue(3.1);
+      toolboxCommunicator.send(requestPacket);
       
-      
-      
+      System.out.println("Send input Done "+drcBehaviorTestHelper.getYoTime());
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
