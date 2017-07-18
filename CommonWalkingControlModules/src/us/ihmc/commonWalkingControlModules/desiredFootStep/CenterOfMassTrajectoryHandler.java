@@ -50,5 +50,17 @@ public class CenterOfMassTrajectoryHandler
    {
       return false;
    }
+   
+   /**
+    * Returns whether or not the supplied time is within the trajectory time interval
+    * @param time
+    * @return
+    */
+   public boolean isWithinInterval(double time)
+   {
+      return false;
+   }
+   
+   
 
 }
