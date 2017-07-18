@@ -60,7 +60,7 @@ public class RegistryPublisher
          RegistrySendBuffer buffer = ringBuffer.next();
          if (buffer != null)
          {
-            buffer.updateBufferFromVariables(timestamp, uid, segmentOffsets[segment], segmentSizes[segment]);
+            buffer.updateBufferFromVariables(timestamp, uid, segment, segmentOffsets[segment], segmentSizes[segment]);
             ringBuffer.commit();
          }
          else

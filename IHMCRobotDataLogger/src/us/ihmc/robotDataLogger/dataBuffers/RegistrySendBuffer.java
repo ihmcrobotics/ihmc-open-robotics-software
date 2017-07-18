@@ -17,6 +17,10 @@ public class RegistrySendBuffer extends RegistryBuffer
 
    private final List<JointHolder> jointHolders;
 
+   private double[] jointStates;
+   private final double[] allocatedJointStates;
+   private final double[] emptyJointStates = new double[0];
+   
    protected RegistrySendBuffer(int registeryID, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       int numberOfJointStates = RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
@@ -29,7 +33,7 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.variables = variables.toArray(new YoVariable[variables.size()]);
 
       this.jointHolders = jointHolders;
-      this.jointStates = new double[numberOfJointStates];
+      this.allocatedJointStates = new double[numberOfJointStates];
       
    }
 
@@ -39,7 +43,7 @@ public class RegistrySendBuffer extends RegistryBuffer
     * @param timestamp
     * @param uid
     */
-   public void updateBufferFromVariables(long timestamp, long uid, int offset, int numberOfVariables)
+   public void updateBufferFromVariables(long timestamp, long uid, int segment, int offset, int numberOfVariables)
    {
       this.uid = uid;
       this.timestamp = timestamp;
@@ -55,19 +59,32 @@ public class RegistrySendBuffer extends RegistryBuffer
       this.buffer.clear();
       this.buffer.limit(this.data.limit() * 8);
 
-      if(offset == 0)
+      if(segment == 0)
       {
          int jointOffset = 0;
          for (int i = 0; i < jointHolders.size(); i++)
          {
             JointHolder jointHolder = jointHolders.get(i);
-            jointHolder.get(jointStates, jointOffset);
+            jointHolder.get(allocatedJointStates, jointOffset);
             jointOffset += jointHolder.getNumberOfStateVariables();
-         }         
+         }
+         
+         jointStates = allocatedJointStates;
       }
+      else
+      {
+         jointStates = emptyJointStates;
+      }
+      
 
    }
 
+
+   public double[] getJointStates()
+   {
+      return jointStates;
+   }
+   
    public ByteBuffer getBuffer()
    {
       return buffer;

@@ -8,6 +8,8 @@ public class RegistryReceiveBuffer extends RegistryBuffer
    
    private final long receivedTimestamp;
    private ByteBuffer compressedVariableDataBuffer;
+   private double[] jointStates;
+
    
    public RegistryReceiveBuffer(long receivedTimestamp)
    {
@@ -29,6 +31,11 @@ public class RegistryReceiveBuffer extends RegistryBuffer
    {
       this.jointStates = new double[stateLength];
       return this.jointStates;
+   }
+
+   public double[] getJointStates()
+   {
+      return jointStates;
    }
 
    public ByteBuffer getData()
