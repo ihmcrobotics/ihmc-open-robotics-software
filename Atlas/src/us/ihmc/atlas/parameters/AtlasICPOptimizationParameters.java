@@ -44,14 +44,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return runningOnRealRobot ? 0.5 : 0.05;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.1;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */

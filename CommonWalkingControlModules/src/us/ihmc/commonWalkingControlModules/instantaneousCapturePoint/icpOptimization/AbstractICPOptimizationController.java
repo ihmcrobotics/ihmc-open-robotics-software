@@ -629,7 +629,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    private void submitFeedbackTaskConditionsToSolver()
    {
-      ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+      ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
       if (!localUseStepAdjustment)
@@ -655,7 +655,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
       {
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-         ICPOptimizationControllerHelper.transformWeightsToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
+         ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
          scaledFootstepWeights.set(tempVector2d);
 
          if (localScaleUpcomingStepWeights)
@@ -778,12 +778,12 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
 
-      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+      ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
       scaledFeedbackWeight.set(tempVector2d);
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         ICPOptimizationControllerHelper.transformFeedbackGains(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+         ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
          scaledFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
    }
