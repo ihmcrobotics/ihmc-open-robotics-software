@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -82,6 +83,61 @@ public class SelectionMatrix3DTest
          selectionMatrix3D.setSelectionFrame(randomFrame);
          selectionMatrix3D.resetSelection();
          assertNull(selectionMatrix3D.getSelectionFrame());
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testApplySelection()
+   {
+      Random random = new Random(2342L);
+
+      SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
+      FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
+
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+
+      List<ReferenceFrame> referenceFrames = new ArrayList<>();
+      referenceFrames.add(null);
+      referenceFrames.add(ReferenceFrame.getWorldFrame());
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
+      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         for (ReferenceFrame selectionFrame : referenceFrames)
+         {
+            for (ReferenceFrame vectorFrame : referenceFrames.subList(1, referenceFrames.size()))
+            {
+               FrameVector originalVector = FrameVector.generateRandomFrameVector(random, vectorFrame);
+               FrameVector expectedVector = new FrameVector(originalVector);
+               FrameVector actualVector = new FrameVector(originalVector);
+
+               boolean xSelected = random.nextBoolean();
+               boolean ySelected = random.nextBoolean();
+               boolean zSelected = random.nextBoolean();
+
+               selectionMatrix3D.setAxisSelection(xSelected, ySelected, zSelected);
+               selectionMatrix3D.setSelectionFrame(selectionFrame);
+
+               if (selectionFrame == null)
+                  frameMatrix3D.setToZero(vectorFrame);
+               else
+                  frameMatrix3D.setToZero(selectionFrame);
+               frameMatrix3D.setM00(xSelected ? 1.0 : 0.0);
+               frameMatrix3D.setM11(ySelected ? 1.0 : 0.0);
+               frameMatrix3D.setM22(zSelected ? 1.0 : 0.0);
+
+               frameMatrix3D.changeFrame(vectorFrame);
+               frameMatrix3D.transform(expectedVector);
+
+               selectionMatrix3D.applySelection(actualVector);
+
+               assertEquals(expectedVector.getReferenceFrame(), actualVector.getReferenceFrame());
+               EuclidCoreTestTools.assertTuple3DEquals(expectedVector.getGeometryObject(), actualVector.getGeometryObject(), 1.0e-12);
+            }
+         }
       }
    }
 

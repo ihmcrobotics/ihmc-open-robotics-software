@@ -9,6 +9,7 @@ import java.util.Random;
 
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -22,7 +23,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -174,7 +174,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
       RigidBodyTransform location = new RigidBodyTransform();
       location.setTranslation(new Vector3D(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), YoAppearance.DarkGray());
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3D(location, 45, 45, 1), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;

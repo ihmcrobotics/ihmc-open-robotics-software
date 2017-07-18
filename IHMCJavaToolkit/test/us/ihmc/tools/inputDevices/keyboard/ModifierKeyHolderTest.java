@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.inputDevices.keyboard.Key;
 
 public class ModifierKeyHolderTest
 {

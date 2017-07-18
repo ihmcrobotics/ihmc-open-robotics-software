@@ -122,6 +122,7 @@ public class BalanceManager
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    private final boolean useICPOptimizationControl;
+   private final boolean useICPTimingOptimization;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry)
@@ -153,6 +154,7 @@ public class BalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
+      useICPTimingOptimization = useICPOptimizationControl && icpOptimizationParameters.useTimingOptimization();
 
       if (useICPOptimizationControl)
       {
@@ -428,9 +430,15 @@ public class BalanceManager
       pushRecoveryControlModule.setIsEnabled(true);
    }
 
+   public double getOptimizedTimeRemaining()
+   {
+      return linearMomentumRateOfChangeControlModule.getOptimizedTimeRemaining();
+   }
+
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
+
       return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
@@ -546,6 +554,8 @@ public class BalanceManager
       }
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
+
+      linearMomentumRateOfChangeControlModule.setReferenceICPVelocity(yoDesiredICPVelocity.getFrameTuple2d());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
@@ -613,6 +623,11 @@ public class BalanceManager
       return useICPOptimizationControl;
    }
 
+   public boolean useICPTimingOptimization()
+   {
+      return useICPTimingOptimization;
+   }
+
    public boolean isRecovering()
    {
       return pushRecoveryControlModule.isRecovering();
@@ -664,7 +679,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   private void setFinalTransferTime(double finalTransferTime)
+   public void setFinalTransferTime(double finalTransferTime)
    {
       icpPlanner.setFinalTransferDuration(finalTransferTime);
       linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);

@@ -73,7 +73,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
-         isInitialContactState.get(robotQuadrant).setTrue();
+         isInitialContactState.get(robotQuadrant).setValue(true);
       }
 
       numberOfIntervals = timedContactSequence.size();
@@ -91,7 +91,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          {
             if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
             {
-               isInitialContactState.get(robotQuadrant).setFalse();
+               isInitialContactState.get(robotQuadrant).setValue(false);
             }
             if (isInitialContactState.get(robotQuadrant).booleanValue())
             {

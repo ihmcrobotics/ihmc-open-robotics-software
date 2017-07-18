@@ -37,7 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;

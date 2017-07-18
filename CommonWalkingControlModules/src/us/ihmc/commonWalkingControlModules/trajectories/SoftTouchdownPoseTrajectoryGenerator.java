@@ -59,9 +59,9 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       this.initialVelocity.setIncludingFrame(initialVelocity);
       this.initialAcceleration.setIncludingFrame(initialAcceleration);
       
-      initialPosition.changeFrame(worldFrame);
-      initialVelocity.changeFrame(worldFrame);
-      initialAcceleration.changeFrame(worldFrame);
+      this.initialPosition.changeFrame(worldFrame);
+      this.initialVelocity.changeFrame(worldFrame);
+      this.initialAcceleration.changeFrame(worldFrame);
    }
 
    @Override
