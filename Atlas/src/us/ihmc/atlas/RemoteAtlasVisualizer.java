@@ -38,7 +38,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", new RemoteAtlasVisualizerLogFilter());
+      YoVariableClient client = new YoVariableClient(scsVisualizer, new RemoteAtlasVisualizerLogFilter());
       client.start();
    }
 

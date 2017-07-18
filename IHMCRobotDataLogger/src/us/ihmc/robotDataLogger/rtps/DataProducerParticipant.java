@@ -306,18 +306,7 @@ public class DataProducerParticipant
    public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
    {
       PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
-      
-      int maxSize = CustomLogDataPublisherType.getTypeSize(CompressionImplementationFactory.instance().maxCompressedLength(builder.getNumberOfVariables() * 8), builder.getNumberOfJointStates());
-      
-      if(maxSize > getMaximumSynchronousPacketSize())
-      {
-         throw new RuntimeException("Error in segmenting packets. Logger should not use packets larger than 65000 bytes");
-      }
-      else
-      {
-         attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
-      }
-      
+      attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
       Publisher publisher = domain.createPublisher(participant, attr);
 
       

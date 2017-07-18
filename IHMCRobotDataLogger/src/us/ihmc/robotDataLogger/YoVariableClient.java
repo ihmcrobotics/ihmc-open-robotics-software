@@ -51,27 +51,24 @@ public class YoVariableClient
     * Start a new client while allowing the user to select a desired logging session
     * 
     * @param listener
-    * @param registryPrefix
     * @param filters
     */
-   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogProducerDisplay.LogSessionFilter... filters)
+   public YoVariableClient(YoVariablesUpdatedListener listener, LogProducerDisplay.LogSessionFilter... filters)
    {
-      this(createParticipant(), null, listener, registryPrefix, filters);
+      this(createParticipant(), null, listener, filters);
    }
 
    /**
     * Connect to an already selected log session
-    * 
     * @param request
     * @param yoVariablesUpdatedListener
-    * @param registryPrefix
     */
-   public YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix)
+   public YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
    {
-      this(participant, request, yoVariablesUpdatedListener, registryPrefix, null);
+      this(participant, request, yoVariablesUpdatedListener, null);
    }
 
-   private YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix, LogProducerDisplay.LogSessionFilter[] filters)
+   private YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, LogProducerDisplay.LogSessionFilter[] filters)
    {
       this.dataConsumerParticipant = participant;
       if (request == null)
@@ -91,7 +88,7 @@ public class YoVariableClient
          this.variableChangedProducer = null;
       }
 
-      this.handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
+      this.handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR);
       this.yoVariablesUpdatedListener.setYoVariableClient(this);
    }
 

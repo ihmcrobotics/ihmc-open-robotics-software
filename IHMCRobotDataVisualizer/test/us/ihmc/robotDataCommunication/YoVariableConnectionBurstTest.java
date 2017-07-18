@@ -46,7 +46,7 @@ public class YoVariableConnectionBurstTest
       scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "");
+      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
       client.start();
       
       

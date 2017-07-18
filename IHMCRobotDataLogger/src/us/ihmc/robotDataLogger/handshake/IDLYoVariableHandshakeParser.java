@@ -45,9 +45,9 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
    
    private TIntIntHashMap variableOffsets = new TIntIntHashMap();
 
-   public IDLYoVariableHandshakeParser(HandshakeFileType type, String registryPrefix)
+   public IDLYoVariableHandshakeParser(HandshakeFileType type)
    {
-      super(registryPrefix);
+      super();
       switch (type)
       {
       case IDL_YAML:
@@ -83,7 +83,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
    public void parseFrom(Handshake handshake)
    {
       this.dt = handshake.getDt();
-      List<YoVariableRegistry> regs = parseRegistries(handshake, registryPrefix);
+      List<YoVariableRegistry> regs = parseRegistries(handshake);
 
       // don't replace those list objects (it's a big code mess), just populate them with received data
       registries.clear();
@@ -103,10 +103,10 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
    }
 
-   private static List<YoVariableRegistry> parseRegistries(Handshake handshake, String registryPrefix)
+   private static List<YoVariableRegistry> parseRegistries(Handshake handshake)
    {
       YoRegistryDefinition rootDefinition = handshake.getRegistries().get(0);
-      YoVariableRegistry rootRegistry = new YoVariableRegistry(registryPrefix + rootDefinition.getName());
+      YoVariableRegistry rootRegistry = new YoVariableRegistry(rootDefinition.getNameAsString());
 
       List<YoVariableRegistry> registryList = new ArrayList<>();
       registryList.add(rootRegistry);
