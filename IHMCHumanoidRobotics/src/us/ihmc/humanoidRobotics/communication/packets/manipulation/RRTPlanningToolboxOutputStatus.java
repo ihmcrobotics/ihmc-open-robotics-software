@@ -1,20 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 
-public class RRTPlanningToolboxOutputStatus extends StatusPacket<FootstepPlanningToolboxOutputStatus>
+public class RRTPlanningToolboxOutputStatus extends StatusPacket<RRTPlanningToolboxOutputStatus>
 {
 
    @Override
-   public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
+   public boolean epsilonEquals(RRTPlanningToolboxOutputStatus other, double epsilon)
    {
       // TODO Auto-generated method stub
-      return false;
+      return true;
    }
 
    @Override
-   public void set(FootstepPlanningToolboxOutputStatus other)
+   public void set(RRTPlanningToolboxOutputStatus other)
    {
       // TODO Auto-generated method stub
       

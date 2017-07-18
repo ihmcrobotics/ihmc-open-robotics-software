@@ -7,12 +7,13 @@ import java.util.List;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
@@ -27,11 +28,20 @@ public class RRTPlanningToolboxModule extends ToolboxModule
                            boolean startYoVariableServer)
          throws IOException
    {
-      super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
+      super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
+      
+      PrintTools.info("bb");
+      
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
+      
+      PrintTools.info("bb");
       rrtToolboxController = new RRTPlanningToolboxController(statusOutputManager, registry);
-      packetCommunicator.attachListener(RRTPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
+      PrintTools.info("bb");
+      
+      packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
+      PrintTools.info("bb");
       startYoVariableServer();
+      PrintTools.info("bb");
    }
 
    @Override
