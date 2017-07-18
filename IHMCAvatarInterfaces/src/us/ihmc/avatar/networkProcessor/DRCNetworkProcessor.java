@@ -14,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.RRTPlanningToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -162,6 +163,23 @@ public class DRCNetworkProcessor
          String methodName = "setupRemoteObjectDetectionFeedbackEndpoint";
          printModuleConnectedDebugStatement(PacketDestination.OBJECT_DETECTOR, methodName);
       }
+   }
+   
+   private void setupRRTPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isRRTPlanningToolboxEnabled())
+         return;
+      
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
+      new RRTPlanningToolboxModule(robotModel, fullRobotModel, null, true);
+
+      PacketCommunicator rrtPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.RRTPLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.RRTPLANNING_TOOLBOX_MODULE, rrtPlanningToolboxCommunicator);
+      rrtPlanningToolboxCommunicator.connect();
+
+      String methodName = "setupRRTPlanningModule";
+      printModuleConnectedDebugStatement(PacketDestination.RRTPLANNING_TOOLBOX_MODULE, methodName);
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
