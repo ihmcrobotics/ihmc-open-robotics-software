@@ -1,23 +1,29 @@
 package us.ihmc.robotDataLogger.dataBuffers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotDataLogger.jointState.OneDoFJointHolder;
+import us.ihmc.robotDataLogger.jointState.OneDoFState;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataSubscriberType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogParticipantTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -30,25 +36,41 @@ public class RegistrySendBufferTest
    {
       Random random = new Random(23589735l);
       
-      ArrayList<JointHolder> sendJointHolders = new ArrayList<>(); 
-      ArrayList<JointState> receiveJointStates = new ArrayList<>();
       
       SerializedPayload payload = new SerializedPayload(DataProducerParticipant.getMaximumSynchronousPacketSize());
       
 //      int numberOfVariables = 10000;
       for(int numberOfVariables = 1000; numberOfVariables <= 33000; numberOfVariables+= 1000)
       {
+         ArrayList<JointHolder> sendJointHolders = new ArrayList<>(); 
+         ArrayList<JointState> receiveJointStates = new ArrayList<>();
+         
+         RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+         
+         int numberOfJoints = random.nextInt(4000);
+         for(int j = 0; j < numberOfJoints; j++)
+         {
+            OneDoFJoint sendJoint = new RevoluteJoint("Joint" + j, elevator, new Vector3D(1, 0, 0));
+            sendJoint.setQ(random.nextDouble() * Math.PI * 2.0);
+            sendJoint.setQd(random.nextDouble() * Math.PI * 2.0);
+            sendJointHolders.add(new OneDoFJointHolder(sendJoint));
+            receiveJointStates.add(new OneDoFState("Joint" + j));
+            
+            
+         }
+         
          int numberOfJointStates = RegistrySendBufferBuilder.getNumberOfJointStates(sendJointHolders);
 
          // Transmit data
          CustomLogDataPublisherType publisherType = new CustomLogDataPublisherType(numberOfVariables, numberOfJointStates);
+
          
          long timestamp = random.nextLong();
          long uid = random.nextLong();
          
          int[] sizes = LogParticipantTools.calculateLogSegmentSizes(numberOfVariables, numberOfJointStates);
          int[] offsets = LogParticipantTools.calculateOffsets(sizes);
-         
+       
          
          YoVariableRegistry sendRegistry = new YoVariableRegistry("sendRegistry");
          for(int v = 0; v < numberOfVariables; v++)
@@ -72,7 +94,7 @@ public class RegistrySendBufferTest
          for(int segment = 0; segment < sizes.length; segment++)
          {
             RegistrySendBuffer sendBuffer = new RegistrySendBuffer(1, sendRegistry.getAllVariables(), sendJointHolders);
-            sendBuffer.updateBufferFromVariables(timestamp, uid, offsets[segment], sizes[segment]);
+            sendBuffer.updateBufferFromVariables(timestamp, uid, segment, offsets[segment], sizes[segment]);
             payload.getData().clear();
             publisherType.serialize(sendBuffer, payload);
             

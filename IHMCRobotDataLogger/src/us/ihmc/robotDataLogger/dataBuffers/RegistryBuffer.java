@@ -4,7 +4,6 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
 {
 
    protected int registryID;
-   protected double[] jointStates;
    protected long timestamp;
    protected long transmitTime;
    protected int offset;
@@ -56,10 +55,6 @@ public class RegistryBuffer implements Comparable<RegistryBuffer>
       return uid;
    }
 
-   public double[] getJointStates()
-   {
-      return jointStates;
-   }
 
    public void setUid(long uid)
    {
