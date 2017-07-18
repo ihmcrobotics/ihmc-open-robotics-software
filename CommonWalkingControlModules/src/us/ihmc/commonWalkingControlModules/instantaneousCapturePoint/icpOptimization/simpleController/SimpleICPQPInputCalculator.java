@@ -25,8 +25,14 @@ public class SimpleICPQPInputCalculator
 
    private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F tmpJacobian = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F tmpJtW = new DenseMatrix64F(6, 1);
+
+   private final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
+   private final DenseMatrix64F feedbackJtW = new DenseMatrix64F(6, 2);
+   private final DenseMatrix64F feedbackObjective = new DenseMatrix64F(2, 1);
+
+   private final DenseMatrix64F adjustmentJacobian = new DenseMatrix64F(2,6);
+   private final DenseMatrix64F adjustmentJtW = new DenseMatrix64F(6,2);
+   private final DenseMatrix64F adjustmentObjective = new DenseMatrix64F(2, 1);
 
    /**
     * Creates the ICP Quadratic Problem Input Calculator. Refer to the class documentation: {@link SimpleICPQPInputCalculator}.
@@ -155,31 +161,59 @@ public class SimpleICPQPInputCalculator
       if (indexHandler.useStepAdjustment())
          size += 2;
 
-      tmpJacobian.reshape(2, size);
-      tmpJtW.reshape(size, 2);
-      tmpJacobian.zero();
-      tmpObjective.zero();
+      feedbackJacobian.reshape(2, size);
+      feedbackJtW.reshape(size, 2);
+      adjustmentJacobian.reshape(2, size);
+      adjustmentJtW.reshape(size, 2);
 
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+      feedbackJacobian.zero();
+      feedbackJtW.zero();
+      feedbackObjective.zero();
+
+      adjustmentJacobian.zero();
+      adjustmentJtW.zero();
+      adjustmentObjective.zero();
+
+      MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getAngularMomentumIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useStepAdjustment())
       {
          CommonOps.setIdentity(identity);
          CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
-         MatrixTools.setMatrixBlock(tmpJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
-         MatrixTools.addMatrixBlock(tmpObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+         if (consider_angular_momentum_in_adjustment)
+         {
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+
+            MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+         }
+         else
+         {
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+
+            if (consider_feedback_in_adjustment)
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+         }
       }
 
-      MatrixTools.addMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
-      CommonOps.multTransA(tmpJacobian, weight, tmpJtW);
+      CommonOps.multTransA(feedbackJacobian, weight, feedbackJtW);
 
-      CommonOps.mult(tmpJtW, tmpJacobian, icpQPInput.quadraticTerm);
-      CommonOps.mult(tmpJtW, tmpObjective, icpQPInput.linearTerm);
+      CommonOps.scale(5.0, weight);
+      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
+
+      CommonOps.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
+      CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
+
+      CommonOps.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
+      CommonOps.multAdd(adjustmentJtW, adjustmentObjective, icpQPInput.linearTerm);
 
       // todo residual cost
    }
