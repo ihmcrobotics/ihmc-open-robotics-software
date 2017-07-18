@@ -53,6 +53,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = 1;
+   private long counter = 0;
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
@@ -93,18 +94,21 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampAndData(long timestamp)
    {
-      long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
-      delayValue.setText(delayFormat.format(delay));
-
-      if (recording)
+      if(++counter % displayOneInNPackets == 0)
       {
-         for (int i = 0; i < jointUpdaters.size(); i++)
+         long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
+         delayValue.setText(delayFormat.format(delay));
+   
+         if (recording)
          {
-            jointUpdaters.get(i).update();
+            for (int i = 0; i < jointUpdaters.size(); i++)
+            {
+               jointUpdaters.get(i).update();
+            }
+            scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+            updateLocalVariables();
+            scs.tickAndUpdate();
          }
-         scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
-         updateLocalVariables();
-         scs.tickAndUpdate();
       }
    }
 
