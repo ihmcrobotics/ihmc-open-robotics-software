@@ -13,6 +13,8 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -32,9 +34,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -49,6 +48,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
@@ -59,6 +61,7 @@ public class BalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithAngularMomentumOffset icpPlanner;
+   private final PrecomputedICPPlanner precomputedICPPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
@@ -95,6 +98,8 @@ public class BalanceManager
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
    /** CMP position according to the ICP planner */
    private final FramePoint2d perfectCMP = new FramePoint2d();
+
+   private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
    private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
    private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
@@ -175,6 +180,12 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
+      WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
+      CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
+      precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
+      precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      blendICPTrajectories.set(true);
+
       if (ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, icpOptimizationController, fullRobotModel, centerOfMassFrame,
@@ -197,9 +208,10 @@ public class BalanceManager
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
+      boolean alwaysAllowMomentum = walkingControllerParameters.alwaysAllowMomentum();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, alwaysAllowMomentum, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
@@ -359,16 +371,25 @@ public class BalanceManager
       else
          pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
-      yoDesiredCapturePoint.set(desiredCapturePoint2d);
-      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
-
-      yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
-
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
+
+      if(blendICPTrajectories.getBooleanValue())
+      {
+         precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+      }
+      else
+      {
+         precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+      }
+
+      yoDesiredCapturePoint.set(desiredCapturePoint2d);
+      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
+
+      yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
@@ -525,7 +546,7 @@ public class BalanceManager
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInSwing();
-         
+
          if (editStepTimingForReachability.getBooleanValue())
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
          else
@@ -561,7 +582,7 @@ public class BalanceManager
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInTransfer();
-         
+
          if (editStepTimingForReachability.getBooleanValue())
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
          else

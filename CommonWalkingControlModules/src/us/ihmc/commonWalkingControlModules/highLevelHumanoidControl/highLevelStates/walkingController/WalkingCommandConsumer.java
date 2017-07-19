@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
@@ -80,10 +81,10 @@ public class WalkingCommandConsumer
    private final RigidBodyControlManager headManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
-      this.walkingMessageHandler = walkingMessageHandler;
+      this.walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       yoTime = controllerToolbox.getYoTime();
 
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
@@ -151,15 +152,18 @@ public class WalkingCommandConsumer
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
-         headManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class));
+         HeadTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class);
+         headManager.handleTaskspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckTrajectoryCommand.class))
       {
-         headManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckTrajectoryCommand.class));
+         NeckTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(NeckTrajectoryCommand.class);
+         headManager.handleJointspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
       {
-         headManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
+         NeckDesiredAccelerationsCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class);
+         headManager.handleDesiredAccelerationsCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -172,15 +176,18 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
-         chestManager.handleTaskspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class));
+         ChestTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class);
+         chestManager.handleTaskspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
-         chestManager.handleJointspaceTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class));
+         SpineTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class);
+         chestManager.handleJointspaceTrajectoryCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
       {
-         chestManager.handleDesiredAccelerationsCommand(commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class));
+         SpineDesiredAccelerationCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class);
+         chestManager.handleDesiredAccelerationsCommand(command);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -193,7 +200,8 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
       {
-         comHeightManager.handlePelvisHeightTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
+         PelvisHeightTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
+         comHeightManager.handlePelvisHeightTrajectoryCommand(command);
       }
    }
 
@@ -425,6 +433,11 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(MomentumTrajectoryCommand.class))
       {
          walkingMessageHandler.handleMomentumTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(MomentumTrajectoryCommand.class));
+      }
+
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(CenterOfMassTrajectoryCommand.class))
+      {
+         walkingMessageHandler.handleComTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(CenterOfMassTrajectoryCommand.class));
       }
    }
 

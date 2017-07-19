@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,7 +32,14 @@ public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGene
    @Override
    protected void setPolynomial()
    {
-      polynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(),
-            finalPositionProvider.getValue(), finalVelocityProvider.getValue());
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
+      {
+         polynomial.setLinear(0.0, initialPositionProvider.getValue(), initialVelocityProvider.getValue());
+      }
+      else
+      {
+         polynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), initialPositionProvider.getValue(), initialVelocityProvider.getValue(),
+                             finalPositionProvider.getValue(), finalVelocityProvider.getValue());
+      }
    }
 }
