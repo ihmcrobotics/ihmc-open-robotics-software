@@ -135,18 +135,20 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       stepLengthToCoPOffsetFactor = new YoDouble(namePrefix + "StepLengthToCMPOffsetFactor", registry);
 
-      int numberOfPointsPerFoot = plannerParameters.getNumberOfWayPointsPerFoot();
-      double[] maxCoPOffsets = plannerParameters.getMaxCoPForwardOffsetsFootFrame();
-      double[] minCoPOffsets = plannerParameters.getMinCoPForwardOffsetsFootFrame();
+      int numberOfPointsPerFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
+      List<Vector2D> copForwardOffsetBounds = plannerParameters.getCoPForwardOffsetBounds();
 
       for (int waypointIndex = 0; waypointIndex < numberOfPointsPerFoot; waypointIndex++)
       {
-         YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
          YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + waypointIndex, registry);
-         maxCoPOffset.set(maxCoPOffsets[waypointIndex]);
-         minCoPOffset.set(minCoPOffsets[waypointIndex]);
-         this.maxCoPOffsets.add(maxCoPOffset);
+         YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
+
+         Vector2D bounds = copForwardOffsetBounds.get(waypointIndex);
+         minCoPOffset.set(bounds.getX());
+         maxCoPOffset.set(bounds.getY());
+
          this.minCoPOffsets.add(minCoPOffset);
+         this.maxCoPOffsets.add(maxCoPOffset);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -206,24 +208,25 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       parentRegistry.addChild(registry);
    }
 
+   public void initializeParameters(SmoothCMPPlannerParameters parameters)
+   {
+      safeDistanceFromCoPToSupportEdges.set(parameters.getCoPSafeDistanceAwayFromSupportEdges());
+      stepLengthToCoPOffsetFactor.set(parameters.getStepLengthToBallCoPOffsetFactor());
+
+      List<Vector2D> copOffsets = parameters.getCoPOffsets();
+
+      for (int waypointNumber = 0; waypointNumber < copOffsets.size(); waypointNumber++)
+         setSymmetricCoPConstantOffsets(waypointNumber, copOffsets.get(waypointNumber));
+   }
+
    public void updateListeners()
    {
       for (int i = 0; i < copLocationWaypoints.size(); i++)
          copLocationWaypoints.get(i).notifyVariableChangedListeners();
    }
 
-   public void initializeParameters(SmoothCMPPlannerParameters parameters)
-   {
-      safeDistanceFromCoPToSupportEdges.set(parameters.getCoPSafeDistanceAwayFromSupportEdges());
-      stepLengthToCoPOffsetFactor.set(parameters.getStepLengthToCoPOffsetFactor());
 
-      List<Vector2D> copOffsets = parameters.getCoPOffsetsFootFrame();
-
-      for (int waypointNumber = 0; waypointNumber < copOffsets.size(); waypointNumber++)
-         setSymmetricCoPConstantOffsets(waypointNumber, copOffsets.get(waypointNumber));
-   }
-
-   public void setSymmetricCoPConstantOffsets(int waypointNumber, Vector2D heelOffset)
+   private void setSymmetricCoPConstantOffsets(int waypointNumber, Vector2D heelOffset)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

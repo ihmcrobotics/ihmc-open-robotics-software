@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -69,6 +70,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private final AtlasJointMap jointMap;
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
+   private final ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private final double massScale;
 
    private Map<String, YoPIDGains> jointspaceGains = null;
@@ -89,6 +91,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
+      angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
       min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
       min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
@@ -1242,6 +1245,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
+   }
+
+   @Override
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+   {
+      return angularMomentumModifierParameters;
    }
 
    @Override

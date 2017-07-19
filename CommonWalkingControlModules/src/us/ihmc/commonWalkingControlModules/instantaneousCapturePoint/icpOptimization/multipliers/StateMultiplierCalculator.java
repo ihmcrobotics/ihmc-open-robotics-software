@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers;
 
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.*;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
@@ -48,9 +49,9 @@ public class StateMultiplierCalculator
    private static final double blendingFraction = 0.5;
    private static final double minimumBlendingTime = 0.05;
 
-   public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, List<YoDouble> doubleSupportDurations,
-         List<YoDouble> singleSupportDurations, List<YoDouble> transferSplitFractions,
-         List<YoDouble> swingSplitFractions, int maxNumberOfFootstepsToConsider, String yoNamePrefix, YoVariableRegistry parentRegistry)
+   public StateMultiplierCalculator(ICPTrajectoryPlannerParameters icpPlannerParameters, List<YoDouble> doubleSupportDurations,
+                                    List<YoDouble> singleSupportDurations, List<YoDouble> transferSplitFractions,
+                                    List<YoDouble> swingSplitFractions, int maxNumberOfFootstepsToConsider, String yoNamePrefix, YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
       this.doubleSupportDurations = doubleSupportDurations;
@@ -64,8 +65,8 @@ public class StateMultiplierCalculator
       minimumTimeToSpendOnExitCMP = new YoDouble(yoNamePrefix + "MinimumTimeToSpendOnExitCMP", registry);
 
       minimumSplineDuration.set(0.1);
-      maximumSplineDuration.set(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCMPSwitch());
-      minimumTimeToSpendOnExitCMP.set(icpPlannerParameters.getMinTimeToSpendOnExitCMPInSingleSupport());
+      maximumSplineDuration.set(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
+      minimumTimeToSpendOnExitCMP.set(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
 
       totalTrajectoryTime = new YoDouble(yoNamePrefix + "TotalTrajectoryTime", registry);
       timeSpentOnInitialCMP = new YoDouble(yoNamePrefix + "TimeSpentOnInitialCMP", registry);
