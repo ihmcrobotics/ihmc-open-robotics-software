@@ -6,10 +6,11 @@ import us.ihmc.robotics.geometry.FrameVector;
 
 public interface AngularMomentumTrajectoryInterface
 {
-   public void reset();
-   public void update(double timeInState);
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack);
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack);
-   public List<YoFrameTrajectory3D> getPolynomials();
-   public int getNumberOfSegments();
+   void reset();
+   void update(double timeInState);
+   void update(double timeInState, FrameVector desiredAngularMomentumToPack);
+   void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack);
+   void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack);
+   List<YoFrameTrajectory3D> getPolynomials();
+   int getNumberOfSegments();
 }
