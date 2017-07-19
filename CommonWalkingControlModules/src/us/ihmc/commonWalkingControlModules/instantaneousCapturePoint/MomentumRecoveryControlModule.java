@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.awt.Color;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -92,13 +91,12 @@ public class MomentumRecoveryControlModule
    private final YoFrameConvexPolygon2d yoProjectionArea;
    private final YoFramePoint2d yoCapturePoint;
 
-   public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2d> defaultFootPolygons, WalkingControllerParameters walkingControllerParameters,
-                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+
+   public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2d> defaultFootPolygons, double maxAllowedDistanceCMPSupport,
+                                        boolean alwaysAllowMomentum, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultFootPolygons = defaultFootPolygons;
-
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
-      alwaysAllowMomentum.set(walkingControllerParameters.alwaysAllowMomentum());
+      this.alwaysAllowMomentum.set(alwaysAllowMomentum);
 
       distanceToExtendUpcomingFoothold.set(defaultDistanceToExtendUpcomingFoothold);
       distanceToShrinkSafeAreaSS.set(defaultDistanceToShrinkSafeAreaSS);

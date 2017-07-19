@@ -209,7 +209,9 @@ public class BalanceManager
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
       SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, walkingControllerParameters, registry, yoGraphicsListRegistry);
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
+      boolean alwaysAllowMomentum = walkingControllerParameters.alwaysAllowMomentum();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, alwaysAllowMomentum, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
