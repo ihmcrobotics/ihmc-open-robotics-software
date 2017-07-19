@@ -52,7 +52,7 @@ public class PrecomputedICPPlanner
                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
-      blendingDuration.set(2.0);
+      blendingDuration.set(0.5);
 
       parentRegistry.addChild(registry);
 
