@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.3.28'
+   id "us.ihmc.build.ihmc-build" version "0.3.28"
    id 'org.hidetake.ssh' version '2.9.0'
    id 'org.ajoberstar.grgit' version '1.7.2'
    id 'application'
