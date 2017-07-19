@@ -49,7 +49,7 @@ public class LeapOfFaithParameters
     *
     * @return yaw gain
     */
-   public double getPelvisYawGain()
+   public double getPelvisReachingYawGain()
    {
       return 1.0;
    }
@@ -60,9 +60,24 @@ public class LeapOfFaithParameters
     *
     * @return roll gain
     */
-   public double getPelvisRollGain()
+   public double getPelvisReachingRollGain()
    {
-      return 20.0;
+      return 5.0;
+   }
+
+   public double getPelvisReachingMaxYaw()
+   {
+      return 0.2;
+   }
+
+   public double getPelvisReachingMaxRoll()
+   {
+      return 0.5;
+   }
+
+   public double getPelvisReachingFractionOfSwing()
+   {
+      return 0.97;
    }
 
    public boolean relaxPelvisControl()

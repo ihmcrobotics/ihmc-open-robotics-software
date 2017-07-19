@@ -27,8 +27,11 @@ public class PelvisLeapOfFaithModule
    private final YoBoolean usePelvisRotation = new YoBoolean(yoNamePrefix + "UsePelvisRotation", registry);
    private final YoBoolean relaxPelvis = new YoBoolean(yoNamePrefix + "RelaxPelvis", registry);
 
-   private final YoDouble yawGain = new YoDouble(yoNamePrefix + "PelvisYawGain", registry);
-   private final YoDouble rollGain = new YoDouble(yoNamePrefix + "PelvisRollGain", registry);
+   private final YoDouble reachingYawGain = new YoDouble(yoNamePrefix + "PelvisReachingYawGain", registry);
+   private final YoDouble reachingRollGain = new YoDouble(yoNamePrefix + "PelvisReachingRollGain", registry);
+   private final YoDouble reachingMaxYaw = new YoDouble(yoNamePrefix + "PelvisReachingMaxYaw", registry);
+   private final YoDouble reachingMaxRoll = new YoDouble(yoNamePrefix + "PelvisReachingMaxRoll", registry);
+   private final YoDouble reachingFractionOfSwing = new YoDouble(yoNamePrefix + "PelvisReachingFractionOfSwing", registry);
 
    private final YoDouble relaxationRate = new YoDouble(yoNamePrefix + "RelaxationRate", registry);
    private final YoDouble relaxationFraction = new YoDouble(yoNamePrefix + "RelaxationFraction", registry);
@@ -48,8 +51,11 @@ public class PelvisLeapOfFaithModule
       usePelvisRotation.set(parameters.usePelvisRotation());
       relaxPelvis.set(parameters.relaxPelvisControl());
 
-      yawGain.set(parameters.getPelvisYawGain());
-      rollGain.set(parameters.getPelvisRollGain());
+      reachingYawGain.set(parameters.getPelvisReachingYawGain());
+      reachingRollGain.set(parameters.getPelvisReachingRollGain());
+      reachingMaxYaw.set(parameters.getPelvisReachingMaxYaw());
+      reachingMaxRoll.set(parameters.getPelvisReachingMaxRoll());
+      reachingFractionOfSwing.set(parameters.getPelvisReachingFractionOfSwing());
 
       relaxationRate.set(parameters.getRelaxationRate());
 
@@ -87,7 +93,7 @@ public class PelvisLeapOfFaithModule
 
       if (isInSwing.getBooleanValue() && usePelvisRotation.getBooleanValue())
       {
-         double exceededTime = Math.max(currentTimeInState - stateDuration, 0.0);
+         double exceededTime = Math.max(currentTimeInState - reachingFractionOfSwing.getDoubleValue() * stateDuration, 0.0);
 
          if (exceededTime == 0.0)
             return;
@@ -96,8 +102,11 @@ public class PelvisLeapOfFaithModule
          tempPoint.changeFrame(soleZUpFrames.get(supportSide));
          double stepLength = tempPoint.getX();
 
-         double yawAngleOffset = yawGain.getDoubleValue() * exceededTime * stepLength;
-         double rollAngleOffset = rollGain.getDoubleValue() * exceededTime;
+         double yawAngleOffset = reachingYawGain.getDoubleValue() * exceededTime * stepLength;
+         double rollAngleOffset = reachingRollGain.getDoubleValue() * exceededTime;
+
+         yawAngleOffset = MathTools.clamp(yawAngleOffset, reachingMaxYaw.getDoubleValue());
+         rollAngleOffset = MathTools.clamp(rollAngleOffset, reachingMaxRoll.getDoubleValue());
 
          yawAngleOffset = supportSide.negateIfRightSide(yawAngleOffset);
          rollAngleOffset = supportSide.negateIfRightSide(rollAngleOffset);
