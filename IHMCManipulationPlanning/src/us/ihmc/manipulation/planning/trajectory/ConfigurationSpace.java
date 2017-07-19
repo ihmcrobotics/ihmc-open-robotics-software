@@ -3,6 +3,7 @@ package us.ihmc.manipulation.planning.trajectory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConfigurationSpace
 {
@@ -88,6 +89,35 @@ public class ConfigurationSpace
       return rotationYaw;
    }
    
+   public double getConfigurationSpace(ConfigurationSpaceName configurationName)
+   {
+      double ret =0;
+      
+      switch(configurationName)
+      {
+      case Translation_X:
+         ret = getTranslationX();
+         break;
+      case Translation_Y:
+         ret = getTranslationY();
+         break;
+      case Translation_Z:
+         ret = getTranslationZ();
+         break;
+      case Rotation_Roll:
+         ret = getRotationRoll();
+         break;
+      case Rotation_Pitch:
+         ret = getRotationPitch();
+         break;
+      case Rotation_Yaw:
+         ret = getRotationYaw();
+         break;
+      }
+      
+      return ret;
+   }
+   
    private RigidBodyTransform getLocalRigidBodyTransform(ConfigurationSpaceName configurationName)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -127,5 +157,61 @@ public class ConfigurationSpace
       }
       
       return ret;
+   }
+   
+   public ConfigurationSpace createConfigurationSpaceCopy(SelectionMatrix6D overrideSelectionMatrix, ConfigurationSpace overrideConfigurationSpace)
+   {
+      double translationX = 0;
+      double translationY = 0;
+      double translationZ = 0;
+      
+      double rotationRoll = 0;
+      double rotationPitch = 0;
+      double rotationYaw = 0;
+      
+      for(ConfigurationSpaceName configurationName : ConfigurationSpaceName.values())
+      {
+         switch(configurationName)
+         {
+         case Translation_X:
+            if(overrideSelectionMatrix.isLinearXSelected())
+               translationX = overrideConfigurationSpace.getTranslationX();
+            else
+               translationX = this.getTranslationX();
+            break;
+         case Translation_Y:
+            if(overrideSelectionMatrix.isLinearYSelected())
+               translationY = overrideConfigurationSpace.getTranslationY();
+            else
+               translationY = this.getTranslationY();
+            break;
+         case Translation_Z:
+            if(overrideSelectionMatrix.isLinearZSelected())
+               translationZ = overrideConfigurationSpace.getTranslationZ();
+            else
+               translationZ = this.getTranslationZ();
+            break;
+         case Rotation_Roll:
+            if(overrideSelectionMatrix.isAngularXSelected())
+               rotationRoll = overrideConfigurationSpace.getRotationRoll();
+            else
+               rotationRoll = this.getRotationRoll();
+            break;
+         case Rotation_Pitch:
+            if(overrideSelectionMatrix.isAngularYSelected())
+               rotationPitch = overrideConfigurationSpace.getRotationPitch();
+            else
+               rotationPitch = this.getRotationPitch();
+            break;
+         case Rotation_Yaw:
+            if(overrideSelectionMatrix.isAngularZSelected())
+               rotationYaw = overrideConfigurationSpace.getRotationYaw();
+            else
+               rotationYaw = this.getRotationYaw();
+            break;
+         }
+      }
+      
+      return new ConfigurationSpace(translationX, translationY, translationZ, rotationRoll, rotationPitch, rotationYaw);
    }
 }

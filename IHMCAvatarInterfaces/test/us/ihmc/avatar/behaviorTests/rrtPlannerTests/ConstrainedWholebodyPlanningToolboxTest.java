@@ -207,7 +207,7 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       pose3D = new Pose3D(translation, orientation);
             
       scs.addStaticLinkGraphics(getXYZAxis(pose3D));
-            
+                  
       System.out.println("End");
    }
    
