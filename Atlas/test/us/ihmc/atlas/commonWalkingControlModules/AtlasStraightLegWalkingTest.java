@@ -179,7 +179,17 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                return true;
             }
 
+            @Override
+            public boolean useSingularityAvoidanceInSwing()
+            {
+               return false;
+            }
 
+            @Override
+            public boolean useSingularityAvoidanceInSupport()
+            {
+               return false;
+            }
 
 
 
