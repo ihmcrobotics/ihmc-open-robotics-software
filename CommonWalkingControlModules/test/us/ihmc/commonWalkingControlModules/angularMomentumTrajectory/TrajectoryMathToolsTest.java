@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class TrajectoryMathToolsTest
 {
    private static YoVariableRegistry registry = new YoVariableRegistry("TrajectoryMathTestRegistry");
-   private static final double EPSILON = Epsilons.ONE_THOUSANDTH;
    
    @Before
    public void setupTest()
@@ -346,6 +345,20 @@ public class TrajectoryMathToolsTest
    }
 
    @Test
+   public void testTrajectoryMultiplication2()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 8, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 8, registry);
+      traj1.setLinear(0, 10, 1, 2);
+      traj2.setLinear(0, 10, 2, 3);
+      TrajectoryMathTools.multiply(traj1, traj1, traj2);      
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 2, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), 0.3, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 0.01, Epsilons.ONE_BILLIONTH));
+      
+   }
+   
+   @Test
    public void testTrajectoryMultiplication()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
@@ -550,8 +563,26 @@ public class TrajectoryMathToolsTest
       YoTrajectory traj2 = new YoTrajectory("Trajectory2", 2, registry);
       traj1.setQuadratic(1, 11, 4, 0, 5);
       TrajectoryMathTools.getDerivative(traj2, traj1);
-      PrintTools.debug(traj1.toString());
-      PrintTools.debug(traj2.toString());
-      assert (MathTools.epsilonCompare(traj2.getCoefficient(0),-4.00, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(0), traj1.getCoefficient(1), Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(1), 2* traj1.getCoefficient(2), Epsilons.ONE_THOUSANDTH));
+   }
+   
+   @Test
+   public void testShifting()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
+      traj1.setDirectlyFast(0, 1);
+      traj1.setDirectlyFast(1, 2);
+      traj1.setDirectlyFast(2, 3);
+      traj1.setTime(2, 4);
+      TrajectoryMathTools.addTimeOffset(traj1, 2);
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 9, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), -10, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 3, Epsilons.ONE_BILLIONTH));
+      TrajectoryMathTools.addTimeOffset(traj1, -4);
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 17, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), 14, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 3, Epsilons.ONE_BILLIONTH));
+      
    }
 }
