@@ -330,6 +330,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   public double getJointAccelerationWeight()
                   {
                      //return 0.005;
+<<<<<<< HEAD
                      return 0.02;
                   }
                };
@@ -356,6 +357,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      return 0.25;
                   }
 
+=======
+                     return 0.05;
+                  }
+               };
+            }
+
+            @Override
+            public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+            {
+               return new PelvisOffsetWhileWalkingParameters()
+               {
+                  @Override
+                  public boolean addPelvisOrientationOffsetsFromWalkingMotion()
+                  {
+                     return true;
+                  }
+>>>>>>> refs/heads/develop
                };
             }
 

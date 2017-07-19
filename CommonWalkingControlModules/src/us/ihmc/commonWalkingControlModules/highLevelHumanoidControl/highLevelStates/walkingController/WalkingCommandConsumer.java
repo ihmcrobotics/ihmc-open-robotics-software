@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
@@ -80,10 +81,10 @@ public class WalkingCommandConsumer
    private final RigidBodyControlManager headManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
-      this.walkingMessageHandler = walkingMessageHandler;
+      this.walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       yoTime = controllerToolbox.getYoTime();
 
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
@@ -433,6 +434,14 @@ public class WalkingCommandConsumer
       {
          walkingMessageHandler.handleMomentumTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(MomentumTrajectoryCommand.class));
       }
+<<<<<<< HEAD
+=======
+
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(CenterOfMassTrajectoryCommand.class))
+      {
+         walkingMessageHandler.handleComTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(CenterOfMassTrajectoryCommand.class));
+      }
+>>>>>>> refs/heads/develop
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)

@@ -4,12 +4,19 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+<<<<<<< HEAD
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.endeffectorConstrained.cleaningBehavior.RRTPlannerSolarPanelCleaning;
+=======
+>>>>>>> refs/heads/develop
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
+<<<<<<< HEAD
+=======
+import us.ihmc.tools.thread.ThreadTools;
+>>>>>>> refs/heads/develop
 
 public class SolarPanelMotionPlanner
 {

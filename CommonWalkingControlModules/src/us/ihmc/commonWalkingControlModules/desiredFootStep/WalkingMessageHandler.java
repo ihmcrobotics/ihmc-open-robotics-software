@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -86,6 +87,10 @@ public class WalkingMessageHandler
    private final FootstepTiming lastTimingExecuted = new FootstepTiming();
 
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
+<<<<<<< HEAD
+=======
+   private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
+>>>>>>> refs/heads/develop
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -125,6 +130,10 @@ public class WalkingMessageHandler
       updateVisualization();
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
+<<<<<<< HEAD
+=======
+      comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
+>>>>>>> refs/heads/develop
 
       parentRegistry.addChild(registry);
    }
@@ -242,6 +251,19 @@ public class WalkingMessageHandler
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
 
+<<<<<<< HEAD
+=======
+   public CenterOfMassTrajectoryHandler getComTrajectoryHandler()
+   {
+      return comTrajectoryHandler;
+   }
+
+   public void handleComTrajectoryCommand(CenterOfMassTrajectoryCommand command)
+   {
+      comTrajectoryHandler.handleComTrajectory(command);
+   }
+
+>>>>>>> refs/heads/develop
    public FootstepTiming peekTiming(int i)
    {
       if (i >= upcomingFootstepTimings.size())
