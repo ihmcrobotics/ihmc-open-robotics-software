@@ -76,12 +76,14 @@ public class ICPAdjustmentOptimizationControllerTest
       double omega0 = 0.3;
       omega.set(omega0);
 
-      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
+      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet,
+                                                                                 icpPlannerParameters.getNumberOfFootstepsToConsider(), registry, null);
+      icpPlanner.initializeParameters(icpPlannerParameters);
+      icpPlanner.setOmega0(omega.getDoubleValue());
+      icpPlanner.clearPlan();
+
       ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
             walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.001, registry, null);
-      icpPlanner.setOmega0(omega.getDoubleValue());
-
-      icpPlanner.clearPlan();
       icpOptimizationController.clearPlan();
 
       double stepLength = 0.2;

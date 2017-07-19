@@ -35,10 +35,9 @@ public class ICPPlannerWithTimeFreezer extends ContinuousCMPBasedICPPlanner
    private final FrameVector2d tmpCapturePointVelocity;
 
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                    ICPWithTimeFreezingPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    int numberOfFootstepsToConsider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, contactableFeet, icpPlannerParameters, parentRegistry, yoGraphicsListRegistry);
+      super(bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, parentRegistry, yoGraphicsListRegistry);
 
       this.timeDelay = new YoDouble(namePrefix + "TimeDelayFromFreezer", registry);
       this.capturePointPositionError = new YoDouble(namePrefix + "CapturePointPositionError", registry);
@@ -52,15 +51,23 @@ public class ICPPlannerWithTimeFreezer extends ContinuousCMPBasedICPPlanner
       this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
 
-      this.isTimeBeingFrozen.set(false);
-      this.timeDelay.set(0.0);
-      this.capturePointPositionError.set(0.0);
-      this.distanceToFreezeLine.set(0.0);
-      this.doTimeFreezing.set(icpPlannerParameters.getDoTimeFreezing());
+
+   }
+
+   public void initializeParameters(ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
+   {
+      super.initializeParameters(icpPlannerParameters);
 
       this.maxCapturePointErrorAllowedToBeginSwingPhase.set(icpPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
       this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(icpPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
       this.freezeTimeFactor.set(icpPlannerParameters.getFreezeTimeFactor());
+
+      this.doTimeFreezing.set(icpPlannerParameters.getDoTimeFreezing());
+
+      this.isTimeBeingFrozen.set(false);
+      this.timeDelay.set(0.0);
+      this.capturePointPositionError.set(0.0);
+      this.distanceToFreezeLine.set(0.0);
    }
 
    @Override
