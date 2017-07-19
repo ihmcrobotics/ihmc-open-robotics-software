@@ -13,16 +13,16 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingSingleSupportState extends SingleSupportState
 {
@@ -55,6 +55,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean minimizeAngularMomentumRateZDuringSwing = new YoBoolean("minimizeAngularMomentumRateZDuringSwing", registry);
 
+   private final FrameVector touchdownErrorVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final YoBoolean offsetFootstepPlanOnTouchdown = new YoBoolean("offsetFootstepPlanOnTouchdown", registry);
+
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
@@ -76,6 +79,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+
+      offsetFootstepPlanOnTouchdown.set(walkingControllerParameters.offsetFootstepPlanOnTouchdown());
 
       setYoVariablesToNaN();
    }
@@ -266,8 +271,17 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
-      actualFootPoseInWorld.setToZero(fullRobotModel.getEndEffectorFrame(swingSide, LimbName.LEG)); // changed Here Nicolas
+      actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
+
+      if (offsetFootstepPlanOnTouchdown.getBooleanValue())
+      {
+         actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
+         touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
+         touchdownErrorVector.setZ(0.0);
+         walkingMessageHandler.addOffsetVector(touchdownErrorVector);
+      }
+
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
@@ -311,7 +325,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private double requestSwingSpeedUpIfNeeded()
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
-      
+
       double remainingTime;
       if (balanceManager.useICPTimingOptimization())
       {
