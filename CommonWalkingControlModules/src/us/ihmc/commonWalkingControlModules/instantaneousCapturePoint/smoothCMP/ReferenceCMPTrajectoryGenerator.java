@@ -13,8 +13,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCMPTrajectoryGenerator
 {
-   private static final int maxNumberOfFootstepsToConsider = 4;
-
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> swingSplitFractions;
 
@@ -24,7 +22,7 @@ public class ReferenceCMPTrajectoryGenerator
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
 
-   private final YoInteger numberOfFootstepsToConsider;
+   private final YoInteger numberFootstepsToConsider;
 
    private double initialTime;
    private int numberOfRegisteredSteps;
@@ -33,7 +31,7 @@ public class ReferenceCMPTrajectoryGenerator
    private final FramePoint desiredCMP = new FramePoint();
    private final FrameVector desiredCMPVelocity = new FrameVector();
 
-   public ReferenceCMPTrajectoryGenerator(String namePrefix, YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations,
+   public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations,
                                           List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
                                           YoVariableRegistry registry)
    {
@@ -42,7 +40,7 @@ public class ReferenceCMPTrajectoryGenerator
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
-      this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
+      this.numberFootstepsToConsider = numberFootstepsToConsider;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
@@ -55,7 +53,7 @@ public class ReferenceCMPTrajectoryGenerator
 
    public void reset()
    {
-      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
       {
          transferCMPTrajectories.get(i).reset();
          swingCMPTrajectories.get(i).reset();
@@ -103,7 +101,7 @@ public class ReferenceCMPTrajectoryGenerator
 
       // todo this needs to combine the angular momentum trajectory with the cop trajectory
 
-      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberOfFootstepsToConsider.getIntegerValue());
+      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
          CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
@@ -158,7 +156,7 @@ public class ReferenceCMPTrajectoryGenerator
          cmpSegment.set(copSegment);
       }
 
-      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberOfFootstepsToConsider.getIntegerValue());
+      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
          CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);

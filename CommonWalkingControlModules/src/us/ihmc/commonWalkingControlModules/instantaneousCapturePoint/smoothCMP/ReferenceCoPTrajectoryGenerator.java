@@ -40,7 +40,6 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
    private static final double COP_POINT_SIZE = 0.005;
 
    private static final int maxNumberOfPointsInFoot = 4;
-   private static final int maxNumberOfFootstepsToConsider = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final String namePrefix;
@@ -69,7 +68,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
    private final YoInteger numberOfUpcomingFootsteps;
    private final YoInteger numberOfPointsPerFoot;
-   private final YoInteger numberOfFootstepsToConsider;
+   private final YoInteger numberFootstepsToConsider;
 
    private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
 
@@ -114,14 +113,14 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCoPTrajectoryGenerator(String namePrefix, SmoothCMPPlannerParameters plannerParameters,
+   public ReferenceCoPTrajectoryGenerator(String namePrefix, int numberOfPointsPerFoot, int maxNumberOfFootstepsToConsider,
                                           BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                          YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                          YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions,
                                           List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
-      this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
+      this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
       this.swingSplitFractions = swingSplitFractions;
@@ -135,17 +134,11 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       stepLengthToCoPOffsetFactor = new YoDouble(namePrefix + "StepLengthToCMPOffsetFactor", registry);
 
-      int numberOfPointsPerFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
-      List<Vector2D> copForwardOffsetBounds = plannerParameters.getCoPForwardOffsetBounds();
 
       for (int waypointIndex = 0; waypointIndex < numberOfPointsPerFoot; waypointIndex++)
       {
          YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + waypointIndex, registry);
          YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
-
-         Vector2D bounds = copForwardOffsetBounds.get(waypointIndex);
-         minCoPOffset.set(bounds.getX());
-         maxCoPOffset.set(bounds.getY());
 
          this.minCoPOffsets.add(minCoPOffset);
          this.maxCoPOffsets.add(maxCoPOffset);
@@ -170,26 +163,25 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
          this.copUserOffsets.put(robotSide, copUserOffsets);
       }
 
-      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(namePrefix, i, transferDurations.get(i), transferSplitFractions.get(i), registry);
          SwingCoPTrajectory swingCoPTrajectory = new SwingCoPTrajectory(namePrefix, i, swingDurations.get(i), swingSplitFractions.get(i), swingDurationShiftFractions.get(i), registry);
          transferCoPTrajectories.add(transferCoPTrajectory);
          swingCoPTrajectories.add(swingCoPTrajectory);
       }
-      int index = numberOfFootstepsToConsider.getIntegerValue();
-      TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(namePrefix, index, transferDurations.get(index), transferSplitFractions.get(index), registry);
+
+      TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(namePrefix, maxNumberOfFootstepsToConsider,
+                                                                              transferDurations.get(maxNumberOfFootstepsToConsider),
+                                                                              transferSplitFractions.get(maxNumberOfFootstepsToConsider), registry);
       transferCoPTrajectories.add(transferCoPTrajectory);
 
 
       this.numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
-      this.numberOfUpcomingFootsteps.set(0);
 
       this.numberOfPointsPerFoot = new YoInteger(namePrefix + "NumberOfPointsPerFootstep", registry);
-      this.numberOfPointsPerFoot.set(numberOfPointsPerFoot);
 
       this.orderOfSplineInterpolation = new YoEnum<>(namePrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
-      this.orderOfSplineInterpolation.set(plannerParameters.getOrderOfCoPInterpolation());
 
       ReferenceFrame midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
       soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
@@ -200,9 +192,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       }
 
       percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
-      percentageChickenSupport.set(0.5);
 
-      initializeParameters(plannerParameters);
       clear();
 
       parentRegistry.addChild(registry);
@@ -212,11 +202,22 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
    {
       safeDistanceFromCoPToSupportEdges.set(parameters.getCoPSafeDistanceAwayFromSupportEdges());
       stepLengthToCoPOffsetFactor.set(parameters.getStepLengthToBallCoPOffsetFactor());
+      numberOfPointsPerFoot.set(parameters.getNumberOfCoPWayPointsPerFoot());
+      orderOfSplineInterpolation.set(parameters.getOrderOfCoPInterpolation());
+
+      percentageChickenSupport.set(0.5);
 
       List<Vector2D> copOffsets = parameters.getCoPOffsets();
-
       for (int waypointNumber = 0; waypointNumber < copOffsets.size(); waypointNumber++)
          setSymmetricCoPConstantOffsets(waypointNumber, copOffsets.get(waypointNumber));
+
+      List<Vector2D> copForwardOffsetBounds = parameters.getCoPForwardOffsetBounds();
+      for (int waypointIndex = 0; waypointIndex < copForwardOffsetBounds.size(); waypointIndex++)
+      {
+         Vector2D bounds = copForwardOffsetBounds.get(waypointIndex);
+         minCoPOffsets.get(waypointIndex).set(bounds.getX());
+         maxCoPOffsets.get(waypointIndex).set(bounds.getY());
+      }
    }
 
    public void updateListeners()
@@ -258,7 +259,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       currentCoPPosition.setToNaN();
       currentCoPVelocity.setToNaN();
 
-      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
+      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
       {
          copLocationWaypoints.get(i).reset();
          transferCoPTrajectories.get(i).reset();
@@ -525,7 +526,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
             centroidOfNextFootstep = centroidOfUpcomingFootstep;
          }
 
-         boolean isUpcomingFootstepLast = (indexOfUpcomingFootstep >= Math.min(upcomingFootstepsData.size(), numberOfFootstepsToConsider.getIntegerValue()));
+         boolean isUpcomingFootstepLast = (indexOfUpcomingFootstep >= Math.min(upcomingFootstepsData.size(), numberFootstepsToConsider.getIntegerValue()));
          if (isUpcomingFootstepLast)
          {
             // fixme this is predicting the final heel point as something incorrect
