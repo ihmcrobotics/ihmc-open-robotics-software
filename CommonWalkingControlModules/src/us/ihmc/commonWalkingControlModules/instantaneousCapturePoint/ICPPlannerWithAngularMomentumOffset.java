@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -43,13 +46,13 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
    private final YoDouble angularMomentumRateLateralGain;
 
    public ICPPlannerWithAngularMomentumOffset(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                              CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry,
+                                              ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
+                                              ICPAngularMomentumModifierParameters angularMomentumModifierParameters,  YoVariableRegistry parentRegistry,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
+      super(bipedSupportPolygons, contactableFeet, icpPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
       modifyICPPlanByAngularMomentum = new YoBoolean(namePrefix + "ModifyICPPlanByAngularMomentum", registry);
-      modifyICPPlanByAngularMomentum.set(capturePointPlannerParameters.getModifyICPPlanByAngularMomentumRate());
 
       modifiedICPVelocity = new YoFrameVector(namePrefix + "ModifiedCapturePointVelocity", worldFrame, registry);
       modifiedICPAcceleration = new YoFrameVector(namePrefix + "ModifiedCapturePointAcceleration", worldFrame, registry);
@@ -58,7 +61,11 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
       modifiedCMPVelocity = new YoFrameVector(namePrefix + "ModifiedCMPVelocity", worldFrame, registry);
 
       YoDouble cmpOffsetAlphaFilter = new YoDouble(namePrefix + "CMPOffsetAlphaFilter", registry);
-      cmpOffsetAlphaFilter.set(capturePointPlannerParameters.getCMPOffsetAlphaFilter());
+      if (angularMomentumModifierParameters != null)
+      {
+         modifyICPPlanByAngularMomentum.set(angularMomentumModifierParameters.getModifyICPPlanByAngularMomentumRate());
+         cmpOffsetAlphaFilter.set(angularMomentumModifierParameters.getCMPOffsetAlphaFilter());
+      }
 
       cmpOffset = new YoFrameVector(namePrefix + "CMPOffset", worldFrame, registry);
       filteredCMPOffset = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredCMPOffset", "", registry,
@@ -69,8 +76,8 @@ public class ICPPlannerWithAngularMomentumOffset extends ICPPlannerWithTimeFreez
 
       angularMomentumRateForwardGain = new YoDouble(namePrefix + "AngularMomentumRateForwardGain", registry);
       angularMomentumRateLateralGain = new YoDouble(namePrefix + "AngularMomentumRateLateralGain", registry);
-      angularMomentumRateForwardGain.set(capturePointPlannerParameters.getAngularMomentumRateForwardGain());
-      angularMomentumRateLateralGain.set(capturePointPlannerParameters.getAngularMomentumRateLateralGain());
+      angularMomentumRateForwardGain.set(angularMomentumModifierParameters.getAngularMomentumRateForwardGain());
+      angularMomentumRateLateralGain.set(angularMomentumModifierParameters.getAngularMomentumRateLateralGain());
    }
 
    public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)

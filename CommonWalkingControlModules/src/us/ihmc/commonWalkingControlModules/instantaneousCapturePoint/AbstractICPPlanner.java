@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -129,7 +129,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
     * @param yoGraphicsListRegistry registry to which the visualization for the planner should be
     *           added to.
     */
-   public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, CapturePointPlannerParameters icpPlannerParameters)
+   public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, int numberOfFootstepsToConsider)
    {
       isStanding.set(true);
       useDecoupled.set(false);
@@ -142,10 +142,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
 
-      defaultTransferDurationAlpha.set(icpPlannerParameters.getTransferDurationAlpha());
-      defaultSwingDurationAlpha.set(icpPlannerParameters.getSwingDurationAlpha());
-      finalTransferDurationAlpha.set(icpPlannerParameters.getTransferDurationAlpha());
-
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
       soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
 
@@ -155,7 +151,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
 
-      for (int i = 0; i < icpPlannerParameters.getNumberOfFootstepsToConsider(); i++)
+      for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
@@ -173,6 +169,13 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);
       }
+   }
+
+   protected void setValuesFromParameterClass(ICPTrajectoryPlannerParameters parameters)
+   {
+      defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
+      defaultSwingDurationAlpha.set(parameters.getSwingSplitFraction());
+      finalTransferDurationAlpha.set(parameters.getTransferSplitFraction());
    }
 
 

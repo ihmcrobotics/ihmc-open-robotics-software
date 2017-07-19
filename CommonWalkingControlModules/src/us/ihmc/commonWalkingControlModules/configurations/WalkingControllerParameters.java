@@ -602,6 +602,8 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
+   public abstract ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters();
+
    /**
     * Boolean that determines if the foot state switch to hold position if the desired cop is close
     * to the edge of the support polygon.

@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -32,10 +35,10 @@ public class ICPPlannerWithTimeFreezer extends ContinuousCMPBasedICPPlanner
    private final FrameVector2d tmpCapturePointVelocity;
 
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                    CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry,
+                                    ICPWithTimeFreezingPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
+      super(bipedSupportPolygons, contactableFeet, icpPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
       this.timeDelay = new YoDouble(namePrefix + "TimeDelayFromFreezer", registry);
       this.capturePointPositionError = new YoDouble(namePrefix + "CapturePointPositionError", registry);
@@ -53,11 +56,11 @@ public class ICPPlannerWithTimeFreezer extends ContinuousCMPBasedICPPlanner
       this.timeDelay.set(0.0);
       this.capturePointPositionError.set(0.0);
       this.distanceToFreezeLine.set(0.0);
-      this.doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
+      this.doTimeFreezing.set(icpPlannerParameters.getDoTimeFreezing());
 
-      this.maxCapturePointErrorAllowedToBeginSwingPhase.set(capturePointPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
-      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(capturePointPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
-      this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
+      this.maxCapturePointErrorAllowedToBeginSwingPhase.set(icpPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
+      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(icpPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
+      this.freezeTimeFactor.set(icpPlannerParameters.getFreezeTimeFactor());
    }
 
    @Override
