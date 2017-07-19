@@ -17,6 +17,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * @author Tim Seyde
+ */
+
+
 public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoDouble omega0;
@@ -46,8 +51,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private YoInteger icpTerminalLength;
    private YoInteger currentSegmentIndex;
 
-   double [] icpQuantityDesiredCurrent = new double[3];
-
    private final YoBoolean isStanding;
 
    private final YoInteger totalNumberOfSegments;
@@ -61,6 +64,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private boolean isPaused = false;
    
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
+   private final List<YoFrameTrajectory3D> icpTrajectories = new ArrayList<>();
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
                                           YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
@@ -98,6 +102,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void reset()
    {
       cmpTrajectories.clear();
+      icpTrajectories.clear();
       totalNumberOfSegments.set(0);
       localTimeInCurrentPhase.set(0.0);
    }
@@ -232,7 +237,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             SmoothCapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpVelocityDesiredCurrent);
             SmoothCapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
-                                                                       icpAccelerationDesiredCurrent);
+                                                                           icpAccelerationDesiredCurrent);
          }
       }
    }
