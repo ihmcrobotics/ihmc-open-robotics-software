@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.YoSegmentedFrameTrajectory3D;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -45,9 +46,22 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       desiredTorqueToPack.setIncludingFrame(currentSegment.getFrameVelocity());
    }
 
+   @Override
+   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
+   {
+      update(timeInState, desiredAngularMomentumToPack, desiredTorqueToPack);
+      desiredRotatumToPack.setIncludingFrame(currentSegment.getFrameAcceleration());
+   }
+
    public void set(YoFrameTrajectory3D computedAngularMomentumTrajectory)
    {
       segments.get(getCurrentSegmentIndex()).set(computedAngularMomentumTrajectory);
+      currentSegmentIndex.increment();
+   }
+
+   public void set(double t0, double tFinal, FramePoint z0, FramePoint zf)
+   {
+      segments.get(getCurrentSegmentIndex()).setLinear(t0, tFinal, z0, zf);
       currentSegmentIndex.increment();
    }
 }

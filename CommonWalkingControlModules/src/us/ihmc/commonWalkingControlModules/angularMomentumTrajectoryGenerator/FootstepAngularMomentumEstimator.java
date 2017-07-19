@@ -168,30 +168,28 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    @Override
    public void update(double currentTime)
    {
-      double timeInState = currentTime - initialTime;
-
       if (activeTrajectory != null)
-         activeTrajectory.update(timeInState, desiredAngularMomentum, desiredTorque);
+         activeTrajectory.update(currentTime - initialTime, desiredAngularMomentum, desiredTorque, desiredRotatum);
    }
 
    @Override
    public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack)
    {
-      desiredAngMomToPack.set(desiredAngularMomentum);
+      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
    }
 
    @Override
    public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack)
    {
-      desiredAngMomToPack.set(desiredAngularMomentum);
-      desiredTorqueToPack.set(desiredTorque);
+      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
+      desiredTorqueToPack.setIncludingFrame(desiredTorque);
    }
 
    public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
    {
-      desiredAngMomToPack.set(desiredAngularMomentum);
-      desiredTorqueToPack.set(desiredTorque);
-      desiredRotatumToPack.set(desiredRotatum);
+      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
+      desiredTorqueToPack.setIncludingFrame(desiredTorque);
+      desiredRotatumToPack.setIncludingFrame(desiredRotatum);
    }
 
    @Override

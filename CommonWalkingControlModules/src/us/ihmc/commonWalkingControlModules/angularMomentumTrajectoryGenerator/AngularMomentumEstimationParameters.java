@@ -69,11 +69,6 @@ public class AngularMomentumEstimationParameters
       return this.copPlannerParameters.getNumberOfFootstepsToConsider();
    }
    
-   public int getMaximumNumberOfAngularMomentumPointsToPlan()
-   {
-      return 100;
-   }
-   
    public SmoothCMPPlannerParameters getCoPPlannerParameters()
    {
       return this.copPlannerParameters;
@@ -97,5 +92,25 @@ public class AngularMomentumEstimationParameters
    public double getSwingFootMaxLift()
    {
       return 0.01;
+   }
+   
+   public int getNumberOfPointsToSampleForTransfer()
+   {
+      return 20;
+   }
+
+   public int getNumberOfPointsToSampleForSwing()
+   {
+      return 20;
+   }
+
+   public AngularMomentumSplineType getSplineType()
+   {
+      return AngularMomentumSplineType.LINEAR;
+   }
+   
+   public String getYoTimeVariableName()
+   {
+      return "t";
    }
 }
