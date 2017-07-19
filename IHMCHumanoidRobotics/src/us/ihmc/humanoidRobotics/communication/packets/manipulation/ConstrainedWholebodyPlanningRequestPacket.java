@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
 
-public class RRTPlanningRequestPacket extends Packet<RRTPlanningRequestPacket>
+public class ConstrainedWholebodyPlanningRequestPacket extends Packet<ConstrainedWholebodyPlanningRequestPacket>
 {   
    public double tempInputValue; 
    
-   public RRTPlanningRequestPacket()
+   public ConstrainedWholebodyPlanningRequestPacket()
    {
       
    }
@@ -27,7 +27,7 @@ public class RRTPlanningRequestPacket extends Packet<RRTPlanningRequestPacket>
    }
 
    @Override
-   public boolean epsilonEquals(RRTPlanningRequestPacket other, double epsilon)
+   public boolean epsilonEquals(ConstrainedWholebodyPlanningRequestPacket other, double epsilon)
    {
       return false;
    }
