@@ -10,12 +10,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-<<<<<<< HEAD
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-=======
->>>>>>> refs/heads/develop
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -67,10 +61,7 @@ public class MomentumRecoveryControlModule
    private final YoBoolean allowUpperBodyMomentumInSingleSupport = new YoBoolean("allowUpperBodyMomentumInSingleSupport", registry);
    private final YoBoolean allowUpperBodyMomentumInDoubleSupport = new YoBoolean("allowUpperBodyMomentumInDoubleSupport", registry);
    private final YoBoolean allowUsingHighMomentumWeight = new YoBoolean("allowUsingHighMomentumWeight", registry);
-<<<<<<< HEAD
-=======
    private final YoBoolean alwaysAllowMomentum = new YoBoolean("alwaysAllowMomentum", registry);
->>>>>>> refs/heads/develop
 
    private final YoDouble maxDistanceCMPSupport = new YoDouble("maxDistanceCMPSupport", registry);
 

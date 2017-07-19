@@ -84,10 +84,7 @@ public abstract class ControllerAPIDefinition
       commands.add(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
-<<<<<<< HEAD
-=======
       commands.add(CenterOfMassTrajectoryCommand.class);
->>>>>>> refs/heads/develop
 
       supportedCommands = Collections.unmodifiableList(commands);
 

@@ -434,14 +434,11 @@ public class WalkingCommandConsumer
       {
          walkingMessageHandler.handleMomentumTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(MomentumTrajectoryCommand.class));
       }
-<<<<<<< HEAD
-=======
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(CenterOfMassTrajectoryCommand.class))
       {
          walkingMessageHandler.handleComTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(CenterOfMassTrajectoryCommand.class));
       }
->>>>>>> refs/heads/develop
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)

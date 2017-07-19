@@ -30,11 +30,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
-<<<<<<< HEAD
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-=======
->>>>>>> refs/heads/develop
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -458,11 +453,7 @@ public class MomentumRecoveryControlModuleTest
       }
       elevator.updateFramesRecursively();
 
-<<<<<<< HEAD
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, 0.1, registry, yoGraphicsListRegistry);
-=======
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, 0.1, false, registry, yoGraphicsListRegistry);
->>>>>>> refs/heads/develop
       allowUpperBodyMomentumInSingleSupport = (YoBoolean) registry.getVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (YoBoolean) registry.getVariable("allowUpperBodyMomentumInDoubleSupport");
       allowUsingHighMomentumWeight = (YoBoolean) registry.getVariable("allowUsingHighMomentumWeight");

@@ -177,11 +177,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
 
       float[] newJointAngles = robotConfigurationData.getJointAngles();
       float[] newJointVelocities = robotConfigurationData.getJointVelocities();
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> refs/heads/develop
       for (int i = 0; i < newJointAngles.length; i++)
       {
          fullRobotModelCache.allJoints[i].setQ(newJointAngles[i]);

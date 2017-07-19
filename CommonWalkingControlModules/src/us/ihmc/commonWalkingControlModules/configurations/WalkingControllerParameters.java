@@ -26,10 +26,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-<<<<<<< HEAD
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-=======
->>>>>>> refs/heads/develop
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -584,12 +580,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownAcceleration();
-
-   /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
-   public double getBlindFootstepsHeightOffset()
-   {
-      return 0.03;
-   }
 
    /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
    public double getBlindFootstepsHeightOffset()
