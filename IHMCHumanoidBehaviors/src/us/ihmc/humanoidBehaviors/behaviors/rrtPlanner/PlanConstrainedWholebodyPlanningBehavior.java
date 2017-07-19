@@ -5,32 +5,32 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PlanConstrainedWholebodyMotionBehavior extends AbstractBehavior
+public class PlanConstrainedWholebodyPlanningBehavior extends AbstractBehavior
 {
-   private RRTPlanningToolboxOutputStatus rrtPlanningToolboxOutputStatus;
+   private ConstrainedWholebodyPlanningToolboxOutputStatus cwbPlanningToolboxOutputStatus;
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    
-   protected final ConcurrentListeningQueue<RRTPlanningToolboxOutputStatus> rrtPlanStatusQueue = new ConcurrentListeningQueue<RRTPlanningToolboxOutputStatus>(10);
+   protected final ConcurrentListeningQueue<ConstrainedWholebodyPlanningToolboxOutputStatus> cwbPlanStatusQueue = new ConcurrentListeningQueue<ConstrainedWholebodyPlanningToolboxOutputStatus>(10);
    
-   public PlanConstrainedWholebodyMotionBehavior(CommunicationBridge communicationBridge, YoDouble yoTime)
+   public PlanConstrainedWholebodyPlanningBehavior(CommunicationBridge communicationBridge, YoDouble yoTime)
    {
       super(communicationBridge);
       
       isDone.set(false);
 
-      this.attachNetworkListeningQueue(rrtPlanStatusQueue, RRTPlanningToolboxOutputStatus.class);
+      this.attachNetworkListeningQueue(cwbPlanStatusQueue, ConstrainedWholebodyPlanningToolboxOutputStatus.class);
    }
 
-   public RRTPlanningToolboxOutputStatus getToolboxOutputStatus()
+   public ConstrainedWholebodyPlanningToolboxOutputStatus getToolboxOutputStatus()
    {
-      return rrtPlanningToolboxOutputStatus;
+      return cwbPlanningToolboxOutputStatus;
    }
    
    public WholeBodyTrajectoryMessage getWholebodyTrajectoryMessage()
@@ -45,7 +45,7 @@ public class PlanConstrainedWholebodyMotionBehavior extends AbstractBehavior
    
    private void sendPackageToPlanner(Packet<?> packet)
    {
-      packet.setDestination(PacketDestination.RRTPLANNING_TOOLBOX_MODULE);
+      packet.setDestination(PacketDestination.CWB_PLANNING_TOOLBOX_MODULE);
       communicationBridge.sendPacket(packet);
    }
 

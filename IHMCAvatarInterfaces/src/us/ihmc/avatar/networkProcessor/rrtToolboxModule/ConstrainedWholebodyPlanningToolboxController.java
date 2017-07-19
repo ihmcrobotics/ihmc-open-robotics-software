@@ -6,19 +6,19 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningRequestPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class RRTPlanningToolboxController extends ToolboxController
+public class ConstrainedWholebodyPlanningToolboxController extends ToolboxController
 {
    private int cntUpdate = 0;
    
    private final YoBoolean isDone = new YoBoolean("isDone", registry);   
    
-   private final AtomicReference<RRTPlanningRequestPacket> latestRequestReference = new AtomicReference<RRTPlanningRequestPacket>(null);
+   private final AtomicReference<ConstrainedWholebodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholebodyPlanningRequestPacket>(null);
    
-   public RRTPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public ConstrainedWholebodyPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       
@@ -39,7 +39,7 @@ public class RRTPlanningToolboxController extends ToolboxController
    protected boolean initialize()
    {
       isDone.set(false);
-      RRTPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      ConstrainedWholebodyPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
       {
          return false;
@@ -57,12 +57,12 @@ public class RRTPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
-   public PacketConsumer<RRTPlanningRequestPacket> createRequestConsumer()
+   public PacketConsumer<ConstrainedWholebodyPlanningRequestPacket> createRequestConsumer()
    {
-      return new PacketConsumer<RRTPlanningRequestPacket>()
+      return new PacketConsumer<ConstrainedWholebodyPlanningRequestPacket>()
       {         
          @Override
-         public void receivedPacket(RRTPlanningRequestPacket packet)
+         public void receivedPacket(ConstrainedWholebodyPlanningRequestPacket packet)
          {
             if (packet == null)
                return;

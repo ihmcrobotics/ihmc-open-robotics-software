@@ -27,7 +27,7 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
-   private boolean useRRTPlanningToolbox;
+   private boolean useConstrainedWholebodyPlanningToolbox;
    private boolean useKinematicsToolbox;
    private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
@@ -64,7 +64,7 @@ public class DRCNetworkModuleParameters
       return useBehaviorVisualizer;
    }
    
-   public boolean isRRTPlanningToolboxEnabled()
+   public boolean isConstrainedWholebodyPlanningToolboxEnabled()
    {
       return useKinematicsToolbox;
    }

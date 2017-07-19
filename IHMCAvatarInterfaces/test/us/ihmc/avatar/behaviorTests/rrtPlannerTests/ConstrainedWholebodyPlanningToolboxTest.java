@@ -11,7 +11,7 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.RRTPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholebodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -19,7 +19,7 @@ import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -29,27 +29,27 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
+public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
-   private RRTPlanningToolboxModule rrtPlanningToolboxModule;
+   private ConstrainedWholebodyPlanningToolboxModule cwbPlanningToolboxModule;
    
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
    
-   private void setupRRTPlanningToolboxModule() throws IOException
+   private void setupCWBPlanningToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
-      rrtPlanningToolboxModule = new RRTPlanningToolboxModule(robotModel, fullRobotModel, null, false);
+      cwbPlanningToolboxModule = new ConstrainedWholebodyPlanningToolboxModule(robotModel, fullRobotModel, null, false);
             
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.RRTPLANNING_TOOLBOX_MODULE_PORT, PacketDestination.RRTPLANNING_TOOLBOX_MODULE);
+      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CWB_PLANNING_TOOLBOX_MODULE_PORT, PacketDestination.CWB_PLANNING_TOOLBOX_MODULE);
       
    }
    
@@ -74,10 +74,10 @@ public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
          drcBehaviorTestHelper = null;
       }
 
-      if (rrtPlanningToolboxModule != null)
+      if (cwbPlanningToolboxModule != null)
       {
-         rrtPlanningToolboxModule.destroy();
-         rrtPlanningToolboxModule = null;
+         cwbPlanningToolboxModule.destroy();
+         cwbPlanningToolboxModule = null;
       }
       
       if (kinematicsToolboxModule != null)
@@ -104,7 +104,7 @@ public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
 
-      setupRRTPlanningToolboxModule();
+      setupCWBPlanningToolboxModule();
    }
    
    @Test
@@ -121,13 +121,13 @@ public abstract class RRTPlanningToolboxTest implements MultiRobotTestInterface
       System.out.println("Send wake up "+drcBehaviorTestHelper.getYoTime());
       
       toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-      toolboxMessage.setDestination(PacketDestination.RRTPLANNING_TOOLBOX_MODULE);
+      toolboxMessage.setDestination(PacketDestination.CWB_PLANNING_TOOLBOX_MODULE);
       toolboxCommunicator.send(toolboxMessage);
             
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("Send input "+drcBehaviorTestHelper.getYoTime());
       
-      RRTPlanningRequestPacket requestPacket = new RRTPlanningRequestPacket();   
+      ConstrainedWholebodyPlanningRequestPacket requestPacket = new ConstrainedWholebodyPlanningRequestPacket();   
       requestPacket.setTempValue(3.1);
       toolboxCommunicator.send(requestPacket);
       

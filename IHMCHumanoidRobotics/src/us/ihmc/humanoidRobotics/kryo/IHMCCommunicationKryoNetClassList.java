@@ -115,10 +115,14 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+<<<<<<< atlas-solarpanelcleaning
 <<<<<<< HEAD
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
 =======
 >>>>>>> refs/heads/develop
+=======
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningRequestPacket;
+>>>>>>> 7eaf78b Refactoring.
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 <<<<<<< HEAD
@@ -567,6 +571,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BoundingBoxesPacket.class);
 
       registerPacketClass(ObjectDetectorResultPacket.class);
-      registerPacketClass(RRTPlanningRequestPacket.class);
+      registerPacketClass(ConstrainedWholebodyPlanningRequestPacket.class);
    }
 }
