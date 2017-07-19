@@ -1,7 +1,6 @@
 package us.ihmc.manipulation.planning.walkingpath.rrtplanner;
 
 import us.ihmc.commons.PrintTools;
-<<<<<<< HEAD
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTPlanner;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
@@ -30,36 +29,6 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
             getRRTTree().getNewNode().addChildNode(getGoalNode());
             getRRTTree().updatePathNode(getGoalNode());
             setOptimalPath(getRRTTree().getPathNodes());
-=======
-import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrt.RRTPlanner;
-import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
-
-public class RRT2DPlannerWalkingPath extends RRTPlanner
-{
-   SkeletonPathFootStepPlanner footStepPlanner;
-
-   public RRT2DPlannerWalkingPath(RRTNode root, RRTNode goal, double stepLength)
-   {
-      super(root, goal, stepLength);
-   }
-
-   public boolean expandTreeGoal(RRTNode nodeOne, RRTNode nodeTwo)
-   {
-      if (getRRTTree().expandTree() == true)
-      {
-         for (int i = 0; i < getRRTTree().getNewNode().getDimensionOfNodeData(); i++)
-         {
-            nodeOne.setNodeData(i, getRRTTree().getNewNode().getNodeData(i));
-            nodeTwo.setNodeData(i, getRRTTree().getNearNode().getNodeData(i));
-         }
-
-         if (getRRTTree().getNewNode().getDistance(getGoalNode()) < getRRTTree().getStepLength())
-         {
-            getRRTTree().getNewNode().addChildNode(getGoalNode());
-            getRRTTree().updatePathNode(getGoalNode());
-            setOptimalPath(getRRTTree().getPathNode());
->>>>>>> refs/heads/develop
             
             PrintTools.info("path size is "+getOptimalPath().size());
             return true;
