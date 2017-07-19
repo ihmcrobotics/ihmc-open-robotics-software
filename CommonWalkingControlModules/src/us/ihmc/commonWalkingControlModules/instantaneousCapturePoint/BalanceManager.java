@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
@@ -99,7 +98,7 @@ public class BalanceManager
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
    /** CMP position according to the ICP planner */
    private final FramePoint2d perfectCMP = new FramePoint2d();
-   
+
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
    private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
@@ -151,7 +150,7 @@ public class BalanceManager
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      
+
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
@@ -209,9 +208,8 @@ public class BalanceManager
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, walkingControllerParameters, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
@@ -361,7 +359,7 @@ public class BalanceManager
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      
+
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
 
@@ -371,17 +369,12 @@ public class BalanceManager
       else
          pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
-      yoDesiredCapturePoint.set(desiredCapturePoint2d);
-      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
-
-      yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
-
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
-      
+
       if(blendICPTrajectories.getBooleanValue())
       {
          precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
@@ -390,6 +383,11 @@ public class BalanceManager
       {
          precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
       }
+
+      yoDesiredCapturePoint.set(desiredCapturePoint2d);
+      yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
+
+      yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
