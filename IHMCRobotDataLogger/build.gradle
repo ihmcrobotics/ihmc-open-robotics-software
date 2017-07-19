@@ -9,6 +9,8 @@ buildscript {
    }
 }
 
+buildscript{repositories{maven{url = "https://repo.gradle.org/gradle/libs-snapshots-local"}}}
+
 plugins {
    id "us.ihmc.build.ihmc-build" version "0.3.28"
    id "org.hidetake.ssh" version "2.9.0"
