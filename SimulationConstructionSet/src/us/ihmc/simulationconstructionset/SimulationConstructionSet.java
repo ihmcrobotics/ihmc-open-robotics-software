@@ -1053,6 +1053,23 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
+    * Sets the camera tracking variables for the active viewport.  These variables control what the camera tracks when tracking is enabled.
+    * By default the camera is set to track the Robot's x, y and z position if it exists.
+    *
+    * @param nameSpace the name space of the variables.
+    * @param xName Name of the YoVariable to be referenced for x direction tracking.
+    * @param yName Name of the YoVariable to be referenced for y direction tracking.
+    * @param zName Name of the YoVariable to be referenced for z direction tracking.
+    */
+   public void setCameraTrackingVars(String nameSpace, String xName, String yName, String zName)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setCameraTrackingVars(nameSpace, xName, yName, zName);
+      }
+   }
+
+   /**
     * Sets the camera dolly variables for the active viewport.  These variables control what the camera follows when dolly is enabled.
     * By default the camera is set to follow the Robot's x, y and z position if it exists.
     *
@@ -1065,6 +1082,23 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.setCameraDollyVars(xName, yName, zName);
+      }
+   }
+
+   /**
+    * Sets the camera dolly variables for the active viewport.  These variables control what the camera follows when dolly is enabled.
+    * By default the camera is set to follow the Robot's x, y and z position if it exists.
+    *
+    * @param nameSpace the name space of the variables.
+    * @param xName Name of the YoVariable to be referenced for x direction following.
+    * @param yName Name of the YoVariable to be referenced for y direction following.
+    * @param zName Name of the YoVariable to be referenced for z direction following.
+    */
+   public void setCameraDollyVars(String nameSpace, String xName, String yName, String zName)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setCameraDollyVars(nameSpace, xName, yName, zName);
       }
    }
 

@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface ControllerCoreOptimizationSettings
@@ -33,7 +35,8 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
     * </p>
     * 
-    * @return the maximum joint acceleration, the returned value has to be in [0, {@link Double#POSITIVE_INFINITY}].
+    * @return the maximum joint acceleration, the returned value has to be in [0,
+    *         {@link Double#POSITIVE_INFINITY}].
     */
    default double getMaximumJointAcceleration()
    {
@@ -263,4 +266,17 @@ public interface ControllerCoreOptimizationSettings
     */
    int getRhoSize();
 
+   /**
+    * Gets a new instance of {@code ActiveSetQPSolver} to be used in the controller core.
+    * <p>
+    * A QP solver is needed for any of the three modes of the controller core.
+    * </p>
+    * 
+    * @return a new instance of the QP solver to be used. By default it is the
+    *         {@link SimpleEfficientActiveSetQPSolver}.
+    */
+   default ActiveSetQPSolver getActiveSetQPSolver()
+   {
+      return new SimpleEfficientActiveSetQPSolver();
+   }
 }

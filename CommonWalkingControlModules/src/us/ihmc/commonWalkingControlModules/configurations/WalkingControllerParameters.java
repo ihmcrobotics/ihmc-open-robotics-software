@@ -26,11 +26,11 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
@@ -68,7 +68,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * <p>
     * If a joint is not added to this map, the default parameters will be used.
     * </p>
-    * 
+    *
     * @param registry the controller registry allowing to create {@code YoVariable}s for the
     *           parameters.
     * @return the map from the names of the joints with their specific parameters to use.
@@ -82,7 +82,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
        * jointParameters.put("leftElbow", elbowParameters);
        * jointParameters.put("rightElbow", elbowParameters);
        * return jointParameters;
-       * 
+       *
        * Note that it is better to save the created Map as a field such that the next time this method is called, the same instance of the map is used.
        * @formatter:on
        */
@@ -371,7 +371,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * Returns the default control mode for a rigid body. The modes are defined in {@link RigidBodyControlMode}
     * and by default the mode should be {@link RigidBodyControlMode#JOINTSPACE}. In some cases (e.g. the chest)
     * it makes more sense to use the default mode {@link RigidBodyControlMode#TASKSPACE}.
-    * 
+    *
     * @param bodyName is the name of the {@link RigidBody}
     * @return the default control mode of the body
     */
@@ -400,7 +400,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * The key of the map is the name of the rigid body that can be obtained with {@link RigidBody#getName()}. If a
     * body is not contained in this map but a default control mode of {@link RigidBodyControlMode#TASKSPACE} is not
     * supported for that body.
-    * 
+    *
     * @return map containing home pose in base frame by body name
     */
    public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
@@ -659,6 +659,18 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getMaxAllowedDistanceCMPSupport()
    {
       return Double.NaN;
+   }
+
+   /**
+    * Usually the desired CMP will be projected into the support area to avoid the generation of large amounts of
+    * angular momentum. This method determines whether the desired CMP is allowed to be in area that is larger then
+    * the support. The size of the area is determined by the value {@link WalkingControllerParameters#getMaxAllowedDistanceCMPSupport()}
+    *
+    * @return alwaysAllowMomentum
+    */
+   public boolean alwaysAllowMomentum()
+   {
+      return false;
    }
 
    /**
