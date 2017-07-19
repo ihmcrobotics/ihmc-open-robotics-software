@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,6 +16,7 @@ public class YoTrajectory
    protected YoPolynomial polynomial;
    protected YoDouble tInitial;
    protected YoDouble tFinal;
+   private double[] coefficients;
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
@@ -22,6 +24,7 @@ public class YoTrajectory
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
       polynomial = new YoPolynomial(name + "Poly", maximumNumberOfCoefficients, registry);
+      coefficients = new double[maximumNumberOfCoefficients];
    }
 
    public YoTrajectory(YoDouble[] coefficients, YoInteger numberOfCoefficients, YoDouble tInitial, YoDouble tFinal)
@@ -29,6 +32,7 @@ public class YoTrajectory
       polynomial = new YoPolynomial(coefficients, numberOfCoefficients);
       this.tInitial = tInitial;
       this.tFinal = tFinal;
+      this.coefficients = new double[numberOfCoefficients.getIntegerValue()];
    }
 
    public void setTime(double tInital, double tFinal)
@@ -94,13 +98,16 @@ public class YoTrajectory
       return polynomial.getCoefficient(i);
    }
 
-   /**
-    * Garbage creating function. Use only for unit testing
-    */
-   @Deprecated
    public double[] getCoefficients()
    {
-      return polynomial.getCoefficients();
+      int index = 0;
+      for(; index < polynomial.getNumberOfCoefficients(); index++)
+         coefficients[index] = polynomial.getCoefficient(index);
+      for(; index < coefficients.length; index++)
+         coefficients[index] = 0;
+//      for(index = 0; index < coefficients.length; index++)
+//         PrintTools.debug(coefficients[index] + "");      
+      return coefficients;
    }
 
    public int getNumberOfCoefficients()

@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
-
 public class ComplexNumber
 {
    private static final double TAU = Math.PI * 2.0;
@@ -14,6 +12,38 @@ public class ComplexNumber
    private double real;
    private double imag;
 
+   public static ComplexNumber[] getComplexArray(int n)
+   {
+      ComplexNumber[] tempComplex = new ComplexNumber[n];
+      for (int i = 0; i < tempComplex.length; i++)
+         tempComplex[i] = new ComplexNumber();
+      return tempComplex;
+   }
+
+   public static void copyComplexArray(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
+   {
+      if (arrayToPack.length < arrayToCopy.length)
+         throw new RuntimeException("Insufficient size for copying complex number array");
+      int index = 0;
+      for (; index < arrayToCopy.length; index++)
+         arrayToPack[index].set(arrayToCopy[index]);
+
+      for (; index < arrayToPack.length; index++)
+         arrayToPack[index].set(0.0, 0.0);
+   }
+
+   public static void copyRealNumbersToComplexArray(ComplexNumber[] arrayToPack, double[] arrayToCopy)
+   {
+      if (arrayToPack.length < arrayToCopy.length)
+         throw new RuntimeException("Insufficient size for copying complex number array");
+      int index = 0;
+      for (; index < arrayToCopy.length; index++)
+         arrayToPack[index].setToPurelyReal(arrayToCopy[index]);
+
+      for (; index < arrayToPack.length; index++)
+         arrayToPack[index].set(0.0, 0.0);
+   }
+   
    public ComplexNumber()
    {
       this(0, 0);
@@ -176,7 +206,7 @@ public class ComplexNumber
    {
       return (this.real * this.real + this.imag * this.imag);
    }
-   
+
    public double getMagnitude()
    {
       return Math.sqrt(this.real * this.real + this.imag * this.imag);
@@ -208,42 +238,60 @@ public class ComplexNumber
       this.real = Math.cos(other.real) * Math.cosh(other.imag);
       this.imag = -Math.sin(other.real) * Math.sinh(other.imag);
    }
-   
+
    public void sin(ComplexNumber other)
    {
       this.real = Math.sin(other.real) * Math.cosh(other.imag);
       this.imag = Math.cos(other.real) * Math.sinh(other.imag);
-      
+
    }
-   
+
+   public void power(ComplexNumber other)
+   {
+      tempVal1 = getMagnitude();
+      tempVal2 = getArgument();
+      setFromEuler(Math.pow(tempVal1, other.real - tempVal2 * other.imag), tempVal2 * other.real + other.imag);
+   }
+
+   public void power(double power)
+   {
+      setFromEuler(Math.pow(getMagnitude(), power), getArgument() * power);
+   }
+
    public void exp(ComplexNumber other)
    {
       setFromEuler(Math.exp(other.real), other.imag);
    }
-   
+
    public void log(ComplexNumber other)
    {
       this.real = Math.log(other.real);
       this.imag = other.getArgument();
    }
-   
+
    public void cosh(ComplexNumber other)
    {
       this.real = Math.cosh(other.real) * Math.cos(other.imag);
-      this.imag = Math.sinh(other.real) * Math.sin(other.imag);          
+      this.imag = Math.sinh(other.real) * Math.sin(other.imag);
    }
-   
+
    public void sinh(ComplexNumber other)
    {
       this.real = Math.sinh(other.real) * Math.cos(other.imag);
-      this.imag = Math.cosh(other.real) * Math.sin(other.imag);          
+      this.imag = Math.cosh(other.real) * Math.sin(other.imag);
    }
-   
+
    public String toString()
    {
       if (imag >= 0)
          return format.format(real) + " + " + format.format(imag) + "i";
       else
          return format.format(real) + " - " + format.format(-imag) + "i";
+   }
+
+   public void setToZero()
+   {
+      this.real = 0.0;
+      this.imag = 0.0;
    }
 }
