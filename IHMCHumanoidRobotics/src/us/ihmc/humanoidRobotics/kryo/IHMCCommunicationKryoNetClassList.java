@@ -115,9 +115,16 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+<<<<<<< HEAD
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.RRTPlanningRequestPacket;
+=======
+>>>>>>> refs/heads/develop
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+<<<<<<< HEAD
+=======
+import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
+>>>>>>> refs/heads/develop
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
@@ -287,6 +294,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HeadHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(ClearDelayQueueMessage.class);
       registerPacketClass(MomentumTrajectoryMessage.class);
+<<<<<<< HEAD
+=======
+      registerPacketClass(CenterOfMassTrajectoryMessage.class);
+>>>>>>> refs/heads/develop
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);

@@ -1,5 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
+<<<<<<< HEAD
+=======
+import us.ihmc.commons.PrintTools;
+>>>>>>> refs/heads/develop
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;

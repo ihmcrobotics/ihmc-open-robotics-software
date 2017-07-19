@@ -212,13 +212,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
-      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
-      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
-
-      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
+      walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
+      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters, registry);
 
       String namePrefix = "walking";
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", WalkingStateEnum.class, yoTime, registry); // this is used by name, and it is ugly.

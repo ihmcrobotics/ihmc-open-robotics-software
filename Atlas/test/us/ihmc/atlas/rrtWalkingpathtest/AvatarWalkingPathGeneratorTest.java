@@ -32,6 +32,10 @@ import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPl
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+<<<<<<< HEAD
+=======
+import us.ihmc.yoVariables.variable.YoDouble;
+>>>>>>> refs/heads/develop
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
