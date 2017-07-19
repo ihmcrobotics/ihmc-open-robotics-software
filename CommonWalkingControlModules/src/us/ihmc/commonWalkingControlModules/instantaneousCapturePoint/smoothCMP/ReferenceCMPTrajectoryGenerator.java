@@ -8,6 +8,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -73,14 +74,36 @@ public class ReferenceCMPTrajectoryGenerator
          activeTrajectory.update(timeInState, desiredCMP, desiredCMPVelocity);
    }
 
-   public void getDesiredCMP(FramePoint desiredCMPToPack)
+   public void getPosition(FramePoint desiredCMPToPack)
    {
       desiredCMPToPack.setIncludingFrame(desiredCMP);
    }
 
-   public void getDesiredCMP(YoFramePoint desiredCMPToPack)
+   public void getPosition(YoFramePoint desiredCMPToPack)
    {
       desiredCMPToPack.set(desiredCMP);
+   }
+   
+   public void getVelocity(FrameVector desiredCMPVelocityToPack)
+   {
+      desiredCMPVelocityToPack.setIncludingFrame(desiredCMPVelocity);
+   }
+
+   public void getVelocity(YoFrameVector desiredCMPVelocityToPack)
+   {
+      desiredCMPVelocityToPack.set(desiredCMPVelocity);
+   }
+   
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack)
+   {
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+   }
+   
+   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack)
+   {
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
    }
 
    public List<CMPTrajectory> getTransferCMPTrajectories()
