@@ -171,7 +171,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       }
    }
 
-   protected void setValuesFromParameterClass(ICPTrajectoryPlannerParameters parameters)
+   public void initializeParameters(ICPTrajectoryPlannerParameters parameters)
    {
       defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
       defaultSwingDurationAlpha.set(parameters.getSwingSplitFraction());

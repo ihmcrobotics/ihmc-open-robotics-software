@@ -184,24 +184,16 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
     *           added to.
     */
    public ContinuousCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                       ICPPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       int numberOfFootstepsToConsider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, icpPlannerParameters.getNumberOfFootstepsToConsider());
+      super(bipedSupportPolygons, numberOfFootstepsToConsider);
 
       icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, omega0, registry);
       icpSingleSupportTrajectoryGenerator = new ICPPlannerSegmentedTrajectoryGenerator(namePrefix + "SingleSupport", worldFrame, omega0, registry);
-      icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
-      icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
 
-      numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
-      useTwoConstantCMPsPerSupport.set(icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
-
-      velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
-      velocityReductionFactor.set(Double.NaN);
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
                                                                                         numberFootstepsToConsider.getIntegerValue(), registry);
-      referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
       yoSingleSupportInitialCoM = new YoFramePoint2d(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
       yoSingleSupportFinalCoM = new YoFramePoint2d(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
@@ -223,6 +215,22 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          setupVisualizers(yoGraphicsListRegistry);
       }
+   }
+
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
+   {
+      super.initializeParameters(icpPlannerParameters);
+
+      icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
+      icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
+
+      numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+      useTwoConstantCMPsPerSupport.set(icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
+
+      velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
+      referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
+
+      velocityReductionFactor.set(Double.NaN);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
