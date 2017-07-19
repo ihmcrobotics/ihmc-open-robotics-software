@@ -45,7 +45,7 @@ public class FastFourierTransform
          transformedCoeffs[i] = new ComplexNumber();
       }
    }
-   
+
    public void setCoefficients(ComplexNumber[] coefficients)
    {
       if (coefficients.length > maxNumberOfCoefficients)
@@ -70,23 +70,22 @@ public class FastFourierTransform
          this.coefficients[index].setToPurelyReal(0.0);
    }
 
-   private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2= new ComplexNumber(), tempComplex = new ComplexNumber();
+   private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
 
    public ComplexNumber[] getForwardTransform()
    {
       transform(false);
       return transformedCoeffs;
    }
-   
+
    public ComplexNumber[] getInverseTransform()
    {
       transform(true);
       return transformedCoeffs;
    }
-   
+
    private void transform(boolean inverse)
    {
-      clearTransformed();
       bitReverseCopy(transformedCoeffs, coefficients);
       int m = 0;
       for (int i = 1; i <= logMaxNumberOfCoefficients; i++)
@@ -97,20 +96,22 @@ public class FastFourierTransform
          {
             for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
             {
-               tempComplex1.multiply(tempComplex, transformedCoeffs[k + m/2]);
+               tempComplex1.multiply(tempComplex, transformedCoeffs[k + m / 2]);
                tempComplex2.set(transformedCoeffs[k]);
                transformedCoeffs[k].add(tempComplex1, tempComplex2);
-               transformedCoeffs[k+m/2].subtract(tempComplex2, tempComplex1);
+               transformedCoeffs[k + m / 2].subtract(tempComplex2, tempComplex1);
             }
-            if(!inverse)
-               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients/m));
+            if (!inverse)
+               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
             else
-               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients/m));
+               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients / m));
          }
       }
-      if(inverse)
+      if (inverse)
+      {
          for (int i = 0; i < transformedCoeffs.length; i++)
-            transformedCoeffs[i].scale(1.0/maxNumberOfCoefficients);
+            transformedCoeffs[i].scale(1.0 / maxNumberOfCoefficients);
+      }
    }
 
    private void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
@@ -149,5 +150,10 @@ public class FastFourierTransform
    public int getMaxNumberOfCoefficients()
    {
       return maxNumberOfCoefficients;
+   }
+   
+   public List<ComplexNumber> getRootsOfUnity()
+   {
+      return rootsOfUnity;
    }
 }
