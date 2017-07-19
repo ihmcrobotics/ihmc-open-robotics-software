@@ -49,6 +49,8 @@ public class ReferenceCMPTrajectoryGenerator
          transferCMPTrajectories.add(transferCMPTrajectory);
          swingCMPTrajectories.add(swingCMPTrajectory);
       }
+      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, registry);
+      transferCMPTrajectories.add(transferCMPTrajectory);
    }
 
    public void reset()

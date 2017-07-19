@@ -74,12 +74,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
       startTimeOfCurrentPhase = new YoDouble(namePrefix + "StartTimeCurrentPhase", registry);
-      startTimeOfCurrentPhase.set(0.0);
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
-      localTimeInCurrentPhase.set(0.0);
       durationOfPreviousPhase = new YoDouble(namePrefix + "DurationPreviousPhase", registry);
-      durationOfPreviousPhase.set(0.0);
-      
+
       icpTerminalTest = new YoFramePoint("ICPTerminalTest", ReferenceFrame.getWorldFrame(), registry);
       cmpTrajectoryLength = new YoInteger("CMPTrajectoryLength", registry);
       icpTerminalLength = new YoInteger("ICPTerminalLength", registry);

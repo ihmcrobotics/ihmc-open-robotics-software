@@ -1,7 +1,6 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.ArrayList;
