@@ -149,9 +149,12 @@ public class CenterOfMassTrajectoryHandler
 
       desiredICPPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), icpPosition);
       desiredICPVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), icpVelocity);
+      desiredICPPositionToPack.add(offset);
+
       if (comPositionToPack != null)
       {
          comPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), comPosition);
+         comPositionToPack.add(offset);
       }
       return true;
    }
@@ -222,6 +225,12 @@ public class CenterOfMassTrajectoryHandler
          comVelocity.setElement(i, polynomial.getVelocity());
          comAcceleration.setElement(i, polynomial.getAcceleration());
       }
+   }
+
+   private final FrameVector offset = new FrameVector();
+   public void setPositionOffset(FrameVector offset)
+   {
+      this.offset.setIncludingFrame(offset);
    }
 
 }
