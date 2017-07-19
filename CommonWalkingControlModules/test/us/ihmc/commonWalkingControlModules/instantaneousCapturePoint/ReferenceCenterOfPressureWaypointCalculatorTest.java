@@ -121,9 +121,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          transferSplitFractions.add(transferSplitFraction);
       }
 
-      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanClass", plannerParameters, bipedSupportPolygons,
+      int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
+      int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
+      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanClass", numberOfPointsInFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
                                                              contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
                                                              swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, parentRegistry);
+      testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
 

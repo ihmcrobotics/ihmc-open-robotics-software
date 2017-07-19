@@ -126,18 +126,17 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.008;
 
    private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
-   private final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
 
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state
     * is done.
     * <p>
-    * This reduction in desired ICP velocity is particularly useful to reduce the CIP tracking error
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
     * when the robot is getting stuck at the end of transfer.
     * </p>
     */
@@ -193,14 +192,14 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
-                                                                                        numberFootstepsToConsider.getIntegerValue(), registry);
+                                                                                        numberOfFootstepsToConsider, registry);
 
       yoSingleSupportInitialCoM = new YoFramePoint2d(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
       yoSingleSupportFinalCoM = new YoFramePoint2d(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT),
             soleZUpFrames.get(RobotSide.RIGHT)};
-      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
+      for (int i = 0; i < numberOfFootstepsToConsider - 1; i++)
       {
          YoFramePointInMultipleFrames entryCornerPoint = new YoFramePointInMultipleFrames(namePrefix + "EntryCornerPoints" + i, registry, framesToRegister);
          entryCornerPoints.add(entryCornerPoint);

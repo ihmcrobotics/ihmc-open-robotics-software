@@ -23,6 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AbstractICPPlanner implements ICPPlannerInterface
 {
@@ -31,6 +32,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    protected final String namePrefix = "icpPlanner";
 
+   protected final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
    protected final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
    protected final YoBoolean useDecoupled = new YoBoolean(namePrefix + "useDecoupled", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
