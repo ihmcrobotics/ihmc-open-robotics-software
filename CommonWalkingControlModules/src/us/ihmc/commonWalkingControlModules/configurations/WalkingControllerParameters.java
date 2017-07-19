@@ -854,6 +854,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Limits the swing foot motion according to the motion range.
+    */
+   public boolean useSingularityAvoidanceInSwing()
+   {
+      return true;
+   }
+
+   /**
+    * Progressively limits the CoM height as the support leg(s) are getting straighter.
+    */
+   public boolean useSingularityAvoidanceInSupport()
+   {
+      return true;
+   }
+
+   /**
     * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
     */
    public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
