@@ -88,4 +88,14 @@ public class AngularMomentumEstimationParameters
    {
       return copPlannerParameters.getSegmentTimes();
    }
+   
+   public double getCoMHeight()
+   {
+      return 0.3;
+   }
+
+   public double getSwingFootMaxLift()
+   {
+      return 0.01;
+   }
 }

@@ -48,6 +48,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    private final CoPPointName exitCoP;
    private final CoPPointName entryCoP;
    private final YoDouble swingLegMass;
+   private final YoDouble comHeight;
+   private final YoDouble swingFootMaxHeight;
 
    private final List<CoPPointsInFoot> upcomingCoPsInFootsteps;
 
@@ -98,7 +100,11 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       this.exitCoP = angularMomentumParameters.getExitCoPName();
       this.swingLegMass = new YoDouble("SwingFootMassForAngularMomentumEstimation", registry);
       this.swingLegMass.set(angularMomentumParameters.getSwingLegMass());
-
+      this.comHeight = new YoDouble("CoMHeightForAngularMomentumEstimation", registry);
+      this.comHeight.set(angularMomentumParameters.getCoMHeight());
+      this.swingFootMaxHeight = new YoDouble("SwingFootMaxHeightForAngularMomentumEstimation", registry);
+      this.swingFootMaxHeight.set(angularMomentumParameters.getSwingFootMaxLift());;
+      
       this.swingAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue());
       this.transferAngularMomentumTrajectories = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue() + 1);
       this.upcomingCoPsInFootsteps = new ArrayList<>(numberOfFootstepsToConsider.getIntegerValue() + 2);
@@ -314,7 +320,9 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    {
       upcomingCoPsInFootsteps.get(footstepIndex).getFootLocation(tempFramePoint1);
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getFootLocation(tempFramePoint2);
-      swingFootTrajectory.setLinear(0.0, currentSwingSegmentEndTime, tempFramePoint1, tempFramePoint2);
+      tempFramePoint3.interpolate(tempFramePoint1, tempFramePoint2, 0.5);
+      tempFramePoint3.add(0.0, 0.0, swingFootMaxHeight.getDoubleValue());
+      swingFootTrajectory.setQuadraticUsingIntermediatePoint(0.0, currentSwingSegmentEndTime/2.0, currentFirstTransferSegmentEndTime, tempFramePoint1, tempFramePoint3, tempFramePoint2);
       swingFootTrajectory.getDerivative(swingFootVelocity);
    }
 
@@ -345,10 +353,14 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    private void setCoMTrajectoryForFootstep(int footstepIndex)
    {
       upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryPointStart).getPosition(tempFramePoint1);
+      tempFramePoint1.add(0, 0, comHeight.getDoubleValue());
       upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryInitialDepartureReference).getPosition(tempFramePoint2);
+      tempFramePoint2.add(0, 0, comHeight.getDoubleValue());
       upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryFinalApproachReference).getPosition(tempFramePoint3);
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryPointEnd).getPosition(tempFramePoint4);
-      footstepCoMTrajectory.setCubicBezier(0.0, currentFootstepTime, tempFramePoint1, tempFramePoint2, tempFramePoint3, tempFramePoint4);
+      tempFramePoint3.add(0, 0, comHeight.getDoubleValue());
+      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryPointEnd).getPosition(tempFramePoint4);      
+      tempFramePoint4.add(0, 0, comHeight.getDoubleValue());
+      footstepCoMTrajectory.setCubicBezier(0.0, currentFootstepTime, tempFramePoint1, tempFramePoint2, tempFramePoint3, tempFramePoint4);      
    }
 
    private void updateCurrentSegmentTimes(int footstepIndex)
