@@ -6,6 +6,8 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.robotics.lists.Settable<TrajectoryPoint3D>, EpsilonComparable<TrajectoryPoint3D>
 {
@@ -23,6 +25,16 @@ public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.r
       this.position = new Point3D(position);
       this.velocity = new Vector3D(veclocity);
       this.time = time;
+   }
+
+   public TrajectoryPoint3D(FramePoint centerOfMassPosition, FrameVector centerOfMassVelocity, double time)
+   {
+      this.time = time;
+      this.position = new Point3D();
+      this.velocity = new Vector3D();
+      
+      centerOfMassPosition.get(position);
+      centerOfMassVelocity.get(velocity);
    }
 
    public TrajectoryPoint3D()
