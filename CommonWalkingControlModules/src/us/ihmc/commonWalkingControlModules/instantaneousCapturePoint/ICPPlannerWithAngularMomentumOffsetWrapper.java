@@ -97,6 +97,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    private final FrameVector desiredICPVelocity = new FrameVector();
    private final FrameVector desiredICPAcceleration = new FrameVector();
 
+   // TODO have this guy account for the desired difference between the CMP and CoP.
    public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)
    {
       super.getDesiredCentroidalMomentumPivotPosition(desiredCMPPosition);
