@@ -1,7 +1,7 @@
 buildscript{repositories{maven{url = "https://repo.gradle.org/gradle/libs-snapshots-local"}}}
 
 plugins {
-   id "us.ihmc.build.ihmc-build" version "0.3.29"
+   id "us.ihmc.build.ihmc-build" version "0.3.34"
    id 'application'
 }
 
