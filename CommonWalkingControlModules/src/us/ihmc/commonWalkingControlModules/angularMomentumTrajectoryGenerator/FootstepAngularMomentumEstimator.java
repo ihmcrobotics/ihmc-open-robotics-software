@@ -247,7 +247,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       setCoMTrajectoryForFootstep(footstepIndex);
       computeAngularMomentumApproximationForFootstep(TrajectorySegment.ENTRY_TO_EXIT);
       // Save the EXIT_TO_END trajectory for the next planning cycle
-      previousEstimatedTransferTrajectory.set(transferAngularMomentumTrajectories.get(footstepIndex + 1).getPolynomials().get(0));
+      previousEstimatedTransferTrajectory.set(transferAngularMomentumTrajectories.get(footstepIndex + 1).getSegments().get(0));
       footstepIndex++;
       computeAngularMomentumApproximationForUpcomingFootsteps();
    }

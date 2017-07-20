@@ -869,13 +869,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
    @Override
-   public List<? extends CoPTrajectoryInterface> getTransferCoPTrajectories()
+   public List<? extends CoPTrajectory> getTransferCoPTrajectories()
    {
       return transferCoPTrajectories;
    }
 
    @Override
-   public List<? extends CoPTrajectoryInterface> getSwingCoPTrajectories()
+   public List<? extends CoPTrajectory> getSwingCoPTrajectories()
    {
       return swingCoPTrajectories;
    }

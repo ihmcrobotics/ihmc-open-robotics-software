@@ -13,7 +13,8 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    private YoFrameVector momentum;
    private YoFrameVector torque;
    private YoFrameVector rotatum;
-
+   private YoFrameTrajectory3D torqueTrajectory;
+   
    public AngularMomentumTrajectory(String namePrefix, int stepNumber, WalkingTrajectoryType type, YoVariableRegistry registry, ReferenceFrame referenceFrame,
                                     int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
@@ -21,6 +22,7 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Positon", referenceFrame, registry);
       torque = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Velocity", referenceFrame, registry);
       rotatum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Acceleration", referenceFrame, registry);
+      torqueTrajectory = new YoFrameTrajectory3D("namePrefix" + stepNumber + "TorqueTraj", maxNumberOfCoefficients -1, referenceFrame, registry);
    }
 
    @Override
@@ -52,7 +54,8 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       update(timeInState, desiredAngularMomentumToPack, desiredTorqueToPack);
       desiredRotatumToPack.setIncludingFrame(currentSegment.getFrameAcceleration());
    }
-
+   
+   @Override
    public void set(YoFrameTrajectory3D computedAngularMomentumTrajectory)
    {
       segments.get(getCurrentSegmentIndex()).set(computedAngularMomentumTrajectory);
@@ -63,5 +66,11 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    {
       segments.get(getCurrentSegmentIndex()).setLinear(t0, tFinal, z0, zf);
       currentSegmentIndex.increment();
+   }
+   
+   public YoFrameTrajectory3D getTorqueTrajectory(int segmentIndex)
+   {
+      segments.get(segmentIndex).getDerivative(torqueTrajectory);
+      return torqueTrajectory;
    }
 }

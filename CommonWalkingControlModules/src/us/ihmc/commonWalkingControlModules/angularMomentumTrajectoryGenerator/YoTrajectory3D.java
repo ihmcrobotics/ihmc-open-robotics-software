@@ -455,6 +455,13 @@ public class YoTrajectory3D
       zTrajectory.set(other.getYoTrajectoryZ());
    }
 
+
+   public void setZero()
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setZero();;
+   }
+
    public void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
       for(int index = 0; index < 3; index ++)
