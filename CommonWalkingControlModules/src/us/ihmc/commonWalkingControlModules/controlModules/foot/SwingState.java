@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTraject
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -69,6 +70,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final YoFrameVector yoTouchdownAcceleration;
    private final YoFrameVector yoTouchdownVelocity;
+
+   private final YoFrameVector unscaledLinearWeight;
 
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -235,7 +238,7 @@ public class SwingState extends AbstractUnconstrainedState
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
-      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, footControlHelper.getContactableFoot().getRigidBody(), leapOfFaithParameters, registry);
+      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, leapOfFaithParameters, registry);
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -249,6 +252,8 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+
+      unscaledLinearWeight = new YoFrameVector(namePrefix + "UnscaledLinearWeight", worldFrame, registry);
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -263,6 +268,21 @@ public class SwingState extends AbstractUnconstrainedState
 
       transformFromToeToAnkle.setTranslation(toeContactPoint.getVectorCopy());
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
+   }
+
+   @Override
+   public void setWeight(double weight)
+   {
+      super.setWeight(weight);
+      unscaledLinearWeight.set(1.0, 1.0, 1.0);
+      unscaledLinearWeight.scale(weight);
+   }
+
+   @Override
+   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
+   {
+      super.setWeights(angularWeight, linearWeight);
+      unscaledLinearWeight.set(linearWeight);
    }
 
    @Override
@@ -473,6 +493,7 @@ public class SwingState extends AbstractUnconstrainedState
       activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       leapOfFaithModule.compute(time);
+      leapOfFaithModule.scaleFootWeight(unscaledLinearWeight, linearWeight);
 
       if (footstepWasAdjusted)
       {
@@ -655,12 +676,6 @@ public class SwingState extends AbstractUnconstrainedState
       }
 
       return computeSwingTimeRemaining();
-   }
-
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return leapOfFaithModule.getInverseDynamicsCommand();
    }
 
    @Override
