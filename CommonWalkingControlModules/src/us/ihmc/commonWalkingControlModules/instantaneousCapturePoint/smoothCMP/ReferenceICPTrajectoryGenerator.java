@@ -101,10 +101,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase.set(0.0);
    }
 
-   public void initializeForTransfer(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
+   public void initializeForTransfer(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
+      startTimeOfCurrentPhase.set(initialTime);
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -117,8 +117,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             totalNumberOfSegments.increment();
          }
          
-         durationOfPreviousPhase.set(transferCMPTrajectories.get(0).getPolynomials().get(cmpSegments-1).getFinalTime());
-
          CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
          cmpSegments = swingCMPTrajectory.getNumberOfSegments();
          for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
@@ -139,10 +137,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       initialize();
    }
 
-   public void initializeForSwing(List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
+   public void initializeForSwing(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
-      startTimeOfCurrentPhase.add(durationOfPreviousPhase.getDoubleValue());
+      startTimeOfCurrentPhase.set(initialTime);
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -151,9 +149,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
          totalNumberOfSegments.increment();
       }
-      
-      durationOfPreviousPhase.set(swingCMPTrajectories.get(0).getPolynomials().get(cmpSegments-1).getFinalTime());
-      
+            
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
       {
