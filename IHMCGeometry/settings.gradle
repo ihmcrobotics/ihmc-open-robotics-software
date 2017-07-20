@@ -1,13 +1,9 @@
-rootProject.name = 'ihmc-geometry'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCGeometry settings.gradle'
-
-def includes = [
-'../IHMCJavaExtensions',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }

@@ -1,17 +1,9 @@
-rootProject.name = 'ihmc-jmonkey-engine-toolkit'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCJMonkeyEngineToolkit settings.gradle'
-
-def includes = [
-'../IHMCJavaExtensions',
-'../IHMCJavaToolkit',
-'../IHMCGraphicsDescription',
-'../IHMCRoboticsToolkit',
-'../IHMCCommunication',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }
