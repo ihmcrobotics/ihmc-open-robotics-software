@@ -1,12 +1,3 @@
 rootProject.name = 'ihmc-java-extensions'
 
 println 'Evaluating IHMCJavaExtensions settings.gradle'
-
-<<<<<<< composite-build-2
-//if (startParameter.searchUpwards)
-//   settingsDir.getParentFile().list().each { siblingDir ->
-//      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-//         includeBuild "../" + siblingDir
-//   }
-=======
->>>>>>> 7e72961 Make all the settings gradles the same and put the names in the properties.
