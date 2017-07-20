@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
@@ -148,7 +149,7 @@ public class DynamicReachabilityCalculator
 
    private final TimeAdjustmentSolver solver;
 
-   private final ContinuousCMPBasedICPPlanner icpPlanner;
+   private final ICPPlannerInterface icpPlanner;
    private final ICPOptimizationController icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
@@ -157,7 +158,7 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ContinuousCMPBasedICPPlanner icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
+   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
                                         ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {

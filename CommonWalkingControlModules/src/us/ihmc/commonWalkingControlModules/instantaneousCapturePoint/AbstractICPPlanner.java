@@ -383,6 +383,13 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
+   public void getDesiredCapturePointAcceleration(FrameVector desiredCapturePointAccelerationToPack)
+   {
+      desiredICPAcceleration.getFrameTuple(desiredCapturePointAccelerationToPack);
+   }
+
+   @Override
+   /** {@inheritDoc} */
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
@@ -520,6 +527,21 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
+   public double getOmega0()
+   {
+      return omega0.getDoubleValue();
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public RobotSide getTransferToSide()
+   {
+      return transferToSide.getEnumValue();
+   }
+
+
+   @Override
+   /** {@inheritDoc} */
    public boolean isInDoubleSupport()
    {
       return isDoubleSupport.getBooleanValue();
@@ -534,7 +556,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public boolean isInInitialTranfer()
+   public boolean isInInitialTransfer()
    {
       return isInitialTransfer.getBooleanValue();
    }

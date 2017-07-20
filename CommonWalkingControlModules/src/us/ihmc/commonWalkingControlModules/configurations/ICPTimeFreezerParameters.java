@@ -24,4 +24,5 @@ public interface ICPTimeFreezerParameters
     * plan. In summary, this makes the plan wait for the actual ICP when there is a lag.
     */
    boolean getDoTimeFreezing();
+
 }
