@@ -3,12 +3,13 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumTrajectoryInterface;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -24,7 +25,7 @@ public class ReferenceCMPTrajectoryGenerator
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
 
-   private final YoInteger numberFootstepsToConsider;
+   private final YoInteger numberOfFootstepsToConsider;
 
    private double initialTime;
    private int numberOfRegisteredSteps;
@@ -32,8 +33,11 @@ public class ReferenceCMPTrajectoryGenerator
 
    private final FramePoint desiredCMP = new FramePoint();
    private final FrameVector desiredCMPVelocity = new FrameVector();
-
-   public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations,
+   private CMPTrajectory cmpTrajectoryReference;
+   private CoPTrajectoryInterface copTrajectoryReference;
+   private AngularMomentumTrajectoryInterface angularMomentumTrajectory;
+   
+   public ReferenceCMPTrajectoryGenerator(String namePrefix, YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations,
                                           List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
                                           YoVariableRegistry registry)
    {
@@ -42,27 +46,25 @@ public class ReferenceCMPTrajectoryGenerator
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
-      this.numberFootstepsToConsider = numberFootstepsToConsider;
+      this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
-      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + i, registry);
          CMPTrajectory swingCMPTrajectory = new CMPTrajectory(namePrefix + "Swing" + i, registry);
          transferCMPTrajectories.add(transferCMPTrajectory);
          swingCMPTrajectories.add(swingCMPTrajectory);
       }
-      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, registry);
-      transferCMPTrajectories.add(transferCMPTrajectory);
    }
 
    public void reset()
    {
-      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
+      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          transferCMPTrajectories.get(i).reset();
          swingCMPTrajectories.get(i).reset();
       }
-      transferCMPTrajectories.get(numberFootstepsToConsider.getIntegerValue()).reset();
+      transferCMPTrajectories.get(numberOfFootstepsToConsider.getIntegerValue()).reset();
       activeTrajectory = null;
    }
 
@@ -83,7 +85,7 @@ public class ReferenceCMPTrajectoryGenerator
    {
       desiredCMPToPack.set(desiredCMP);
    }
-   
+
    public void getVelocity(FrameVector desiredCMPVelocityToPack)
    {
       desiredCMPVelocityToPack.setIncludingFrame(desiredCMPVelocity);
@@ -93,13 +95,13 @@ public class ReferenceCMPTrajectoryGenerator
    {
       desiredCMPVelocityToPack.set(desiredCMPVelocity);
    }
-   
+
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
    }
-   
+
    public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack)
    {
       getPosition(positionToPack);
@@ -122,103 +124,65 @@ public class ReferenceCMPTrajectoryGenerator
    }
 
    public void initializeForTransfer(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories,
-                                     List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
+                                     List<? extends CoPTrajectoryInterface> swingCoPTrajectories,
+                                     List<? extends AngularMomentumTrajectoryInterface> transferAngularMomentumTrajectories,
+                                     List<? extends AngularMomentumTrajectoryInterface> swingAngulatMomentumTrajectories)
    {
-
-      initialTime = currentTime;
-
-      // TODO this needs to combine the angular momentum trajectory with the cop trajectory
-
-      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
-      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
-      {
-         CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
-         CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
-
-         for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-         {
-            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-            YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
-
-            cmpSegment.set(copSegment);
-         }
-
-         CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
-         CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
-         for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-         {
-            YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
-            YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-            cmpSegment.set(copSegment);
-         }
-      }
-
-      // handle final transfer
-      CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
-      CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
-
-      for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-      {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-         cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
-      }
-
+      setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngulatMomentumTrajectories);
       activeTrajectory = transferCMPTrajectories.get(0);
    }
 
    public void initializeForSwing(double currentTime, List<? extends CoPTrajectoryInterface> transferCoPTrajectories,
-                                  List<? extends CoPTrajectoryInterface> swingCoPTrajectories)
+                                  List<? extends CoPTrajectoryInterface> swingCoPTrajectories,
+                                  List<? extends AngularMomentumTrajectoryInterface> transferAngularMomentumTrajectories,
+                                  List<? extends AngularMomentumTrajectoryInterface> swingAngulatMomentumTrajectories)
    {
-      initialTime = currentTime;
-      // TODO this needs to combine the angular momentum trajectory with the cop trajectory
-
-      // handle current swing
-      CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
-      CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(0);
-      //      for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-      //      {
-      //         YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
-      //         YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-      //
-      //         cmpSegment.set(copSegment);
-      //      }
-
-      int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
-      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
-      {
-         CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
-         CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
-
-         for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-         {
-            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-            YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
-
-            cmpSegment.set(copSegment);
-         }
-
-         swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
-         swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
-         for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-         {
-            YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
-            YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-
-            cmpSegment.set(copSegment);
-         }
-      }
-
-      // handle final transfer
-      CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
-      CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
-      for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-      {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-         YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
-
-         cmpSegment.set(copSegment);
-      }
-
+      setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngulatMomentumTrajectories);
       activeTrajectory = swingCMPTrajectories.get(0);
+   }
+
+   private void setCMPTrajectories(List<? extends CoPTrajectoryInterface> transferCoPTrajectories, List<? extends CoPTrajectoryInterface> swingCoPTrajectories,
+                                   List<? extends AngularMomentumTrajectoryInterface> transferAngularMomentumTrajectories,
+                                   List<? extends AngularMomentumTrajectoryInterface> swingAngulartMomentumTrajectories)
+   {
+      if (transferAngularMomentumTrajectories == null || swingAngulartMomentumTrajectories == null)
+      {
+         copyCoPTrajectoriesToCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories,
+                                              swingAngulartMomentumTrajectories);
+         return;
+      }
+      
+      int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
+      for (int i = 0; i < numberOfFootstepsToCopy; i++)
+      {
+         cmpTrajectoryReference = transferCMPTrajectories.get(i);
+         copTrajectoryReference = transferCoPTrajectories.get(i);
+         angularMomentumTrajectory = transferAngularMomentumTrajectories.get(i);
+         
+         
+      }
+   }
+
+   private void copyCoPTrajectoriesToCMPTrajectories(List<? extends CoPTrajectoryInterface> transferCoPTrajectories,
+                                                     List<? extends CoPTrajectoryInterface> swingCoPTrajectories,
+                                                     List<? extends AngularMomentumTrajectoryInterface> transferAngularMomentumTrajectories,
+                                                     List<? extends AngularMomentumTrajectoryInterface> swingAngulartMomentumTrajectories)
+   {
+      int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
+      for (int i = 0; i < numberOfFootstepsToCopy; i++)
+      {
+         cmpTrajectoryReference = transferCMPTrajectories.get(i);
+         copTrajectoryReference = transferCoPTrajectories.get(i);
+         for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
+            cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getPolynomials().get(j));
+         cmpTrajectoryReference = swingCMPTrajectories.get(i);
+         copTrajectoryReference = swingCoPTrajectories.get(i);
+         for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
+            cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getPolynomials().get(j));
+      }
+      cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
+      copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
+      for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
+         cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getPolynomials().get(j));
    }
 }
