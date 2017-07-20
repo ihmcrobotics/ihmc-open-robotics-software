@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -289,6 +290,17 @@ public interface ICPPlannerInterface
    void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack);
 
    /**
+    * Gets the current ICP acceleration.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCapturePointAccelerationToPack the current ICP velocity. Modified.
+    */
+   void getDesiredCapturePointAcceleration(FrameVector desiredCapturePointAccelerationToPack);
+
+   /**
     * Gets the current CMP position.
     * <p>
     * The ICP planner has to be updated every control tick using the method
@@ -432,7 +444,7 @@ public interface ICPPlannerInterface
     * 
     * @return whether the ICP plan is in initial transfer state or not.
     */
-   boolean isInInitialTranfer();
+   boolean isInInitialTransfer();
 
    /**
     * Retrieves the desired ICP position at the end of the current state.
@@ -462,9 +474,9 @@ public interface ICPPlannerInterface
     * end of single support.
     * </p>
     * 
-    * @param entryCMPToPack the next exit CMP position. Modified.
+    * @param exitCMPToPack the next exit CMP position. Modified.
     */
-   void getNextExitCMP(FramePoint entryCMPToPack);
+   void getNextExitCMP(FramePoint exitCMPToPack);
 
    /**
     * Tests if the ICP planner is done with the current state.
@@ -487,4 +499,9 @@ public interface ICPPlannerInterface
 
    int getNumberOfFootstepsRegistered();
 
+   RobotSide getTransferToSide();
+
+   double getOmega0();
+
+   void initializeParameters(ICPPlannerParameters plannerParameters);
 }

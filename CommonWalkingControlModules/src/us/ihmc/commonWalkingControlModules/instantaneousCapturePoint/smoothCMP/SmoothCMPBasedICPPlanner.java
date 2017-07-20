@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -33,12 +34,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
 
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                   SmoothCMPPlannerParameters plannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                   int maxNumberOfFootstepsToConsider, int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, plannerParameters.getNumberOfFootstepsToConsider());
-
-      int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
-      int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
+      super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
@@ -46,7 +44,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.add(swingDurationShiftFraction);
       }
 
-      referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, numberOfPointsInFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
+      referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, numberOfPointsPerFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
                                                                   numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
                                                                   swingDurationShiftFractions, transferDurationAlphas,
                                                                   registry);
@@ -65,17 +63,24 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   public void initializeParameters(SmoothCMPPlannerParameters icpPlannerParameters)
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      super.initializeParameters(icpPlannerParameters);
+      super.initializeParameters((ICPTrajectoryPlannerParameters) icpPlannerParameters);
 
-      numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
-
-      referenceCoPGenerator.initializeParameters(icpPlannerParameters);
-
-      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
+      if (icpPlannerParameters instanceof SmoothCMPPlannerParameters)
       {
-         swingDurationShiftFractions.get(i).set(icpPlannerParameters.getSwingDurationShiftFraction());
+         numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+
+         referenceCoPGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters);
+
+         for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
+         {
+            swingDurationShiftFractions.get(i).set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
+         }
+      }
+      else
+      {
+         throw new RuntimeException("Tried to submit the wrong type of parameters.");
       }
    }
 
