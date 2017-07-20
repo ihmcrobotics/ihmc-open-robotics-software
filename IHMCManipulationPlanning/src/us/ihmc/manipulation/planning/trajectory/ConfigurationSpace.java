@@ -1,10 +1,15 @@
 package us.ihmc.manipulation.planning.trajectory;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
+/*
+ * @link ConfigurationSpace has same physical meaning with transform matrix such as RighdBodyTransform, Pose3D, etc.
+ * @link Configurationspace can be converted into other transform matrix according to ConfigurationBuildOrder @link ConfigurationBuildOrder.
+ */
 public class ConfigurationSpace
 {
    private double translationX;
@@ -95,22 +100,22 @@ public class ConfigurationSpace
       
       switch(configurationName)
       {
-      case Translation_X:
+      case X:
          ret = getTranslationX();
          break;
-      case Translation_Y:
+      case Y:
          ret = getTranslationY();
          break;
-      case Translation_Z:
+      case Z:
          ret = getTranslationZ();
          break;
-      case Rotation_Roll:
+      case ROLL:
          ret = getRotationRoll();
          break;
-      case Rotation_Pitch:
+      case PITCH:
          ret = getRotationPitch();
          break;
-      case Rotation_Yaw:
+      case YAW:
          ret = getRotationYaw();
          break;
       }
@@ -124,22 +129,22 @@ public class ConfigurationSpace
       
       switch(configurationName)
       {
-      case Translation_X:
+      case X:
          ret.appendTranslation(getTranslationX(), 0, 0);
          break;
-      case Translation_Y:
+      case Y:
          ret.appendTranslation(0, getTranslationY(), 0);
          break;
-      case Translation_Z:
+      case Z:
          ret.appendTranslation(0, 0, getTranslationZ());
          break;
-      case Rotation_Roll:
+      case ROLL:
          ret.appendRollRotation(getRotationRoll());
          break;
-      case Rotation_Pitch:
+      case PITCH:
          ret.appendPitchRotation(getRotationPitch());
          break;
-      case Rotation_Yaw:
+      case YAW:
          ret.appendYawRotation(getRotationYaw());
          break;
       }
@@ -159,7 +164,7 @@ public class ConfigurationSpace
       return ret;
    }
    
-   public ConfigurationSpace createConfigurationSpaceCopy(SelectionMatrix6D overrideSelectionMatrix, ConfigurationSpace overrideConfigurationSpace)
+   public ConfigurationSpace overrideConfigurationSpaceCopy(SelectionMatrix6D overrideSelectionMatrix, ConfigurationSpace overrideConfigurationSpace)
    {
       double translationX = 0;
       double translationY = 0;
@@ -173,37 +178,37 @@ public class ConfigurationSpace
       {
          switch(configurationName)
          {
-         case Translation_X:
+         case X:
             if(overrideSelectionMatrix.isLinearXSelected())
                translationX = overrideConfigurationSpace.getTranslationX();
             else
                translationX = this.getTranslationX();
             break;
-         case Translation_Y:
+         case Y:
             if(overrideSelectionMatrix.isLinearYSelected())
                translationY = overrideConfigurationSpace.getTranslationY();
             else
                translationY = this.getTranslationY();
             break;
-         case Translation_Z:
+         case Z:
             if(overrideSelectionMatrix.isLinearZSelected())
                translationZ = overrideConfigurationSpace.getTranslationZ();
             else
                translationZ = this.getTranslationZ();
             break;
-         case Rotation_Roll:
+         case ROLL:
             if(overrideSelectionMatrix.isAngularXSelected())
                rotationRoll = overrideConfigurationSpace.getRotationRoll();
             else
                rotationRoll = this.getRotationRoll();
             break;
-         case Rotation_Pitch:
+         case PITCH:
             if(overrideSelectionMatrix.isAngularYSelected())
                rotationPitch = overrideConfigurationSpace.getRotationPitch();
             else
                rotationPitch = this.getRotationPitch();
             break;
-         case Rotation_Yaw:
+         case YAW:
             if(overrideSelectionMatrix.isAngularZSelected())
                rotationYaw = overrideConfigurationSpace.getRotationYaw();
             else

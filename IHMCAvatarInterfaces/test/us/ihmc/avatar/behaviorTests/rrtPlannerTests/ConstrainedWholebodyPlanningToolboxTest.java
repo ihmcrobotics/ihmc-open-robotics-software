@@ -30,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWh
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
+import us.ihmc.manipulation.planning.trajectory.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -158,7 +159,82 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
    
+//   @Test
+   public void testForPoseWithGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();       
+      System.out.println("Start");
+      
+      /*
+       * constrained end effector trajectory
+       */
+      
+      
+      
+      
+      /*
+       * put on generic task node
+       */
+      
+      
+      
+      
+      /*
+       * ik tester
+       */
+      
+      
+      
+      
+      /*
+       * show the ik result
+       */
+      
+      
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      System.out.println("End");
+   }
+   
    @Test
+   public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();       
+      System.out.println("Start");
+      
+      /*
+       * constrained end effector trajectory
+       */
+      
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(0.0, new ConfigurationSpace())));
+      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(3.0, new ConfigurationSpace())));
+      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(6.0, new ConfigurationSpace())));
+      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(9.0, new ConfigurationSpace())));
+      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(10.0, new ConfigurationSpace())));
+      
+      
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      System.out.println("End");
+   }
+   
+//   @Test
    public void testForConfigurationSpace() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -176,7 +252,7 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       ConfigurationBuildOrder configurationBuildOrder;
       ConfigurationSpace configurationSpace;
       
-      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.Translation_X, ConfigurationSpaceName.Translation_Y, ConfigurationSpaceName.Translation_Z, ConfigurationSpaceName.Rotation_Yaw, ConfigurationSpaceName.Rotation_Pitch, ConfigurationSpaceName.Rotation_Roll);
+      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL);
       
       configurationSpace = new ConfigurationSpace();
       configurationSpace.setTranslation(0.5,  0.0,  1.0);
@@ -210,7 +286,7 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
                   
       System.out.println("End");
    }
-   
+      
 //   @Test
    public void testForToolboxMessage() throws SimulationExceededMaximumTimeException, IOException
    {

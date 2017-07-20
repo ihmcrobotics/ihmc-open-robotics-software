@@ -4,29 +4,50 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
-import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
+import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class TaskNode3D extends TaskNode
-{      
-   public TaskNode3D()
+public class GenericTaskNode extends TaskNode
+{
+   public GenericTaskNode()
    {
-      super(4);      
+      super(11);
    }
    
-   public TaskNode3D(double time, double pelvisHeight, double chestYaw, double chestPitch)
+   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, double eeX, double eeY, double eeZ, double eeRoll, double eePitch, double eeYaw)
    {
-      super(4);
+      super(11);
       setNodeData(0, time);
       setNodeData(1, pelvisHeight);
       setNodeData(2, chestYaw);
       setNodeData(3, chestPitch);
+      setNodeData(4, chestRoll);
+      setNodeData(5, eeX);
+      setNodeData(6, eeY);
+      setNodeData(7, eeZ);
+      setNodeData(8, eeRoll);
+      setNodeData(9, eePitch);
+      setNodeData(10, eeYaw);
    }
    
+   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, ConfigurationSpace eeConfigurationSpace)
+   {
+      super(11);
+      setNodeData(0, time);
+      setNodeData(1, pelvisHeight);
+      setNodeData(2, chestYaw);
+      setNodeData(3, chestPitch);
+      setNodeData(4, chestRoll);
+      setNodeData(5, eeConfigurationSpace.getTranslationX());
+      setNodeData(6, eeConfigurationSpace.getTranslationY());
+      setNodeData(7, eeConfigurationSpace.getTranslationZ());
+      setNodeData(8, eeConfigurationSpace.getRotationRoll());
+      setNodeData(9, eeConfigurationSpace.getRotationPitch());
+      setNodeData(10, eeConfigurationSpace.getRotationYaw());
+   }
+
    @Override
    public boolean isValidNode()
    {
@@ -41,8 +62,7 @@ public class TaskNode3D extends TaskNode
          for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
          {         
             double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
-         }
-         
+         }         
       }
       else
       {         
@@ -86,10 +106,7 @@ public class TaskNode3D extends TaskNode
    @Override
    public TaskNode createNode()
    {
-      return new TaskNode3D();
+      return new GenericTaskNode();
    }
 
-   
-
-   
 }

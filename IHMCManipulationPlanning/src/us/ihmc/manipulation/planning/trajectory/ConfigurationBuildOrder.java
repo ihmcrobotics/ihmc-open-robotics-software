@@ -8,7 +8,7 @@ public class ConfigurationBuildOrder
 {
    public enum ConfigurationSpaceName
    {
-      Translation_X, Translation_Y, Translation_Z, Rotation_Roll, Rotation_Pitch, Rotation_Yaw
+      X, Y, Z, ROLL, PITCH, YAW
    }
    
    private ArrayList<ConfigurationSpaceName> sequence = new ArrayList<ConfigurationSpaceName>();
