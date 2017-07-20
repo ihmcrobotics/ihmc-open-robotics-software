@@ -33,12 +33,18 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.utilities.ros.msgToPacket.converter.CustomFieldConversions;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 
 public class IHMCROSTranslationRuntimeTools
 {
    private static final MessageFactory messageFactory = GenericROSTranslationTools.getMessageFactory();
+   private final CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
+   {
+      customFieldConversions.registerROSMessageFieldConverter(FootstepDataListRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
+      customFieldConversions.registerIHMCPacketFieldConverter(FootstepDataListMessage.class, IHMCROSTranslationRuntimeTools::customConvertToRosMessage);
+   }
 
    public static Message convertToRosMessage(Packet<?> ihmcMessage)
          throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException
@@ -82,7 +88,7 @@ public class IHMCROSTranslationRuntimeTools
       }
    }
 
-   private static Packet customConvertToIHMCMessage(FootstepDataListRosMessage message) throws Exception
+   private static Packet customConvertToIHMCMessage(FootstepDataListRosMessage message)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -96,7 +102,14 @@ public class IHMCROSTranslationRuntimeTools
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
       {
-         stepData.add((FootstepDataMessage) convertToIHMCMessage(footstepDataRosMessage));
+         try
+         {
+            stepData.add((FootstepDataMessage) convertToIHMCMessage(footstepDataRosMessage));
+         }
+         catch(ClassNotFoundException | InvocationTargetException | IllegalAccessException | RosEnumConversionException | NoSuchFieldException | InstantiationException e)
+         {
+            e.printStackTrace();
+         }
       }
 
       footsteps.footstepDataList = stepData;
@@ -273,7 +286,7 @@ public class IHMCROSTranslationRuntimeTools
       return message;
    }
 
-   private static Message customConvertToRosMessage(FootstepDataListMessage footstepList) throws Exception
+   private static Message customConvertToRosMessage(FootstepDataListMessage footstepList)
    {
       Class<? extends Packet> ihmcMessageClass = FootstepDataListMessage.class;
       String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
@@ -291,7 +304,14 @@ public class IHMCROSTranslationRuntimeTools
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
       {
-         convertedFootsteps.add((FootstepDataRosMessage) convertToRosMessage(footstepDataMessage));
+         try
+         {
+            convertedFootsteps.add((FootstepDataRosMessage) convertToRosMessage(footstepDataMessage));
+         }
+         catch(InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
+         {
+            e.printStackTrace();
+         }
       }
 
       message.setFootstepDataList(convertedFootsteps);
