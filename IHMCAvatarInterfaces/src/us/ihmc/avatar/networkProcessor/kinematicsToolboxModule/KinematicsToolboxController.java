@@ -42,10 +42,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -61,6 +57,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -383,8 +383,8 @@ public class KinematicsToolboxController extends ToolboxController
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null, null,
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate();
@@ -535,8 +535,9 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
 
       /*
-       * Submitting and requesting the controller core to run the feedback controllers, formulate
-       * and solve the optimization problem for this control tick.
+       * Submitting and requesting the controller core to run the feedback
+       * controllers, formulate and solve the optimization problem for this
+       * control tick.
        */
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -585,9 +586,9 @@ public class KinematicsToolboxController extends ToolboxController
          holdSupportFootPose.set(command.holdSupportFootPositions());
 
          /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside
-          * with the privileged configuration and the initial center of mass position and foot
-          * poses.
+          * If there is a new privileged configuration, the desired robot state
+          * is updated alongside with the privileged configuration and the
+          * initial center of mass position and foot poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
@@ -615,9 +616,10 @@ public class KinematicsToolboxController extends ToolboxController
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
       /*
-       * By using the map, we ensure that there is only one command per end-effector (including the
-       * center of mass). The map is also useful for remembering commands received during the
-       * previous control ticks of the same run.
+       * By using the map, we ensure that there is only one command per
+       * end-effector (including the center of mass). The map is also useful for
+       * remembering commands received during the previous control ticks of the
+       * same run.
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;

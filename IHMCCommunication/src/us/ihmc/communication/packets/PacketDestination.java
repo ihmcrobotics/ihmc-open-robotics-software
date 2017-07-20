@@ -27,7 +27,7 @@ public enum PacketDestination
    HEIGHT_QUADTREE_TOOLBOX_MODULE,
    LIDAR_SCAN_LOGGER,
    OBJECT_DETECTOR,
-   CWB_PLANNING_TOOLBOX_MODULE;   
+   CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE;   
 
    public static final PacketDestination[] values = values();
 

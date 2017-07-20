@@ -244,7 +244,7 @@ public class RRTPiecewisePath
    {
       return piecewisePath;
    }
-   
+
    public ArrayList<RRTNode> getShortCutPath()
    {
       return shortcutPath;

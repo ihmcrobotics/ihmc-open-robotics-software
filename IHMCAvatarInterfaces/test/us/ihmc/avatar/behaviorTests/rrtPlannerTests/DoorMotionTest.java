@@ -60,20 +60,21 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
-   
+
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-   
+
    private static RobotSide SIDE_WITH_HANDLE = RobotSide.LEFT;
    private static Vector3D STARTING_LOCATION = new Vector3D();
    private static double startYaw;
-      
+
    private void setupKinematicsToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
+                                                                                   PacketDestination.KINEMATICS_TOOLBOX_MODULE);
    }
-   
+
    public void setupCamera(SimulationConstructionSet scs)
    {
       Point3D cameraFix = new Point3D(4.0, -0.0, 1.0);
@@ -81,11 +82,11 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
 
       drcBehaviorTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");      
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
    @After
@@ -124,7 +125,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       CommonAvatarEnvironmentInterface environment = new DoorEnvironment();
-            
+
       switch (SIDE_WITH_HANDLE)
       {
       case LEFT:
@@ -140,7 +141,7 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       default:
          break;
       }
-      
+
       DRCStartingLocation startLocation = new DRCStartingLocation()
       {
          @Override
@@ -149,14 +150,14 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
             return new OffsetAndYawRobotInitialSetup(STARTING_LOCATION, startYaw);
          }
       };
-      
+
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), startLocation, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
-   
+
    public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose)
-   {      
+   {
       double axisHeight = 0.1;
       double axisRadius = 0.01;
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
@@ -170,22 +171,21 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       retX.translate(centerPoint);
       retY.translate(centerPoint);
       retZ.translate(centerPoint);
-      
+
       RotationMatrix axisOrientation = new RotationMatrix(pose.getOrientation());
-      
+
       RotationMatrix axisX = new RotationMatrix(axisOrientation);
       RotationMatrix axisY = new RotationMatrix(axisOrientation);
       RotationMatrix axisZ = new RotationMatrix(axisOrientation);
-      
+
       retZ.rotate(axisZ);
       retZ.addCylinder(axisHeight, axisRadius, YoAppearance.Blue());
 
-      axisX.appendPitchRotation(Math.PI*0.5);            
+      axisX.appendPitchRotation(Math.PI * 0.5);
       retX.rotate(axisX);
       retX.addCylinder(axisHeight, axisRadius, YoAppearance.Red());
 
-      
-      axisY.appendRollRotation(-Math.PI*0.5);
+      axisY.appendRollRotation(-Math.PI * 0.5);
       retY.rotate(axisY);
       retY.addCylinder(axisHeight, axisRadius, YoAppearance.Green());
 
@@ -195,56 +195,56 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
 
       return ret;
    }
-   
+
    @Test
    public void testForKnobGraspingPose() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       setupCamera(scs);
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      
+
       drcBehaviorTestHelper.updateRobotModel();
-            
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-      
+
       /*
        * Door define
        */
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
-      
+
       FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
-        
-      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20*Math.PI/180);
+
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20 * Math.PI / 180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
-                  
-      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
-      
+
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;
+
       /*
        * Door kinematics Debug.
-       */      
-      scs.addStaticLinkGraphics(pushDoor.getGraphics());      
+       */
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());
       HandTrajectoryMessage handTrajectoryMessageOpening = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFootZUpGroundFrame());
-      
+
       System.out.println(handTrajectoryMessageOpening.getNumberOfTrajectoryPoints());
-      for(int i=0;i<handTrajectoryMessageOpening.getNumberOfTrajectoryPoints();i++)
+      for (int i = 0; i < handTrajectoryMessageOpening.getNumberOfTrajectoryPoints(); i++)
       {
          Point3D point = new Point3D();
          handTrajectoryMessageOpening.getTrajectoryPoints()[i].getPosition(point);
-         
+
          Quaternion orientation = new Quaternion();
          handTrajectoryMessageOpening.getTrajectoryPoints()[i].getOrientation(orientation);
-         
+
          Pose3D pose = new Pose3D(point, orientation);
-//         scs.addStaticLinkGraphics(getXYZAxis(pose));
+         //         scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
-      
+
       /*
        * Reaching Motion
        */
@@ -252,283 +252,275 @@ public abstract class DoorMotionTest implements MultiRobotTestInterface
       Point3D reachingPoint = new Point3D(reachingPose.getPosition());
       Quaternion reachingOrientation = new Quaternion(reachingPose.getOrientation());
       reachingPoint.add(new Point3D(-0.1, 0.15, 0.0));
-      reachingOrientation.appendRollRotation(Math.PI*0.5);
-      HandTrajectoryMessage handTrajectoryMessageReaching = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, reachingPoint, reachingOrientation, referenceFrames.getWorldFrame()); 
-      
+      reachingOrientation.appendRollRotation(Math.PI * 0.5);
+      HandTrajectoryMessage handTrajectoryMessageReaching = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, reachingPoint, reachingOrientation,
+                                                                                      referenceFrames.getWorldFrame());
+
       drcBehaviorTestHelper.send(handTrajectoryMessageReaching);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(handTrajectoryMessageReaching.getTrajectoryTime());
-      
-      PrintTools.info("END");   
+
+      PrintTools.info("END");
    }
-   
-//   @Test
+
+   //   @Test
    public void testForRRTPlanner() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       setupCamera(scs);
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      
+
       drcBehaviorTestHelper.updateRobotModel();
-            
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-      
+
       /*
        * Door define
        */
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
-      
+
       FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
-        
-      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20*Math.PI/180);
+
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 8.0, -20 * Math.PI / 180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
-                  
-      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
-      
+
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;
+
       /*
        * Door kinematics Debug.
-       */      
-      scs.addStaticLinkGraphics(pushDoor.getGraphics());      
+       */
+      scs.addStaticLinkGraphics(pushDoor.getGraphics());
       HandTrajectoryMessage handTrajectoryMessage = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFootZUpGroundFrame());
-      
+
       System.out.println(handTrajectoryMessage.getNumberOfTrajectoryPoints());
-      for(int i=0;i<handTrajectoryMessage.getNumberOfTrajectoryPoints();i++)
+      for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
          Point3D point = new Point3D();
          handTrajectoryMessage.getTrajectoryPoints()[i].getPosition(point);
-         
+
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
-         
+
          Pose3D pose = new Pose3D(point, orientation);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
-      
+
       /*
        * Initialize tester.
-       */      
+       */
       WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      
+
       wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
-                  
+
       TaskNode3D.nodeTester = wbikTester;
       TaskNode3D.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-      
+
       /*
        * Tree expanding.
        */
-      
+
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      
-      TaskNode3D rootNode = new TaskNode3D(0.0, initialPelvisHeight, 0.0, 0.0);     
+
+      TaskNode3D rootNode = new TaskNode3D(0.0, initialPelvisHeight, 0.0, 0.0);
       rootNode.setConfigurationJoints(sdfFullRobotModel);
-      
+
       TaskNodeTree taskNodeTree = new TaskNodeTree(rootNode, "pelvisHeight", "chestYaw", "chestPitch");
-      
+
       taskNodeTree.getTaskNodeRegion().setRandomRegion(0, 0.0, pushDoorTrajectory.getTrajectoryTime());
       taskNodeTree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.9);
-      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI*(-0.2), Math.PI*(0.2));
-      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI*(-0.2), Math.PI*(0.2));
-      
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(2, Math.PI * (-0.2), Math.PI * (0.2));
+      taskNodeTree.getTaskNodeRegion().setRandomRegion(3, Math.PI * (-0.2), Math.PI * (0.2));
+
       System.out.println(taskNodeTree.getTrajectoryTime());
-            
+
       taskNodeTree.expandTree(2000);
-            
+
       TaskNodeTreeVisualizer taskNodeTreeVisualizer = new TaskNodeTreeVisualizer(scs, taskNodeTree);
       taskNodeTreeVisualizer.visualize();
-   
+
       taskNodeTree.saveNodes();
-      
+
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
-      PrintTools.info("END");     
+
+      PrintTools.info("END");
    }
 
-//   @Test
+   //   @Test
    public void testForBasicPushDoorOpeningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet(); 
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       setupCamera(scs);
-   
+
       drcBehaviorTestHelper.updateRobotModel();
-            
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-             
+
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
-      
+
       FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
-        
-      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 35.0, -35*Math.PI/180);
+
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 35.0, -35 * Math.PI / 180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
-                  
-      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
-            
+
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;
+
       WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       HandTrajectoryMessage handTrajectoryMessage = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFeetZUpFrame());
-      
+
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(3);
       chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
-         
+
       chestTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Quaternion(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
       Quaternion chestOrientation = new Quaternion();
-      chestOrientation.appendYawRotation(-Math.PI*20/180);
-      chestOrientation.appendPitchRotation(Math.PI*10/180);
+      chestOrientation.appendYawRotation(-Math.PI * 20 / 180);
+      chestOrientation.appendPitchRotation(Math.PI * 10 / 180);
       chestTrajectoryMessage.setTrajectoryPoint(1, 20.0, chestOrientation, new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
+
       chestOrientation = new Quaternion();
-      chestOrientation.appendYawRotation(-Math.PI*30/180);
-      chestOrientation.appendPitchRotation(Math.PI*10/180);
+      chestOrientation.appendYawRotation(-Math.PI * 30 / 180);
+      chestOrientation.appendPitchRotation(Math.PI * 10 / 180);
       chestTrajectoryMessage.setTrajectoryPoint(2, 40.0, chestOrientation, new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
+
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(3);
       pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
-             
+
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearSelection();
       selectionMatrix6D.selectLinearZ(true);
       pelvisTrajectoryMessage.setSelectionMatrix(selectionMatrix6D);
-      pelvisTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Point3D(0,0, 0.78), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      pelvisTrajectoryMessage.setTrajectoryPoint(1, 20.0, new Point3D(0,0, 0.90), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      pelvisTrajectoryMessage.setTrajectoryPoint(2, 40.0, new Point3D(0,0, 0.85), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
-      wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);            
+      pelvisTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Point3D(0, 0, 0.78), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+      pelvisTrajectoryMessage.setTrajectoryPoint(1, 20.0, new Point3D(0, 0, 0.90), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+      pelvisTrajectoryMessage.setTrajectoryPoint(2, 40.0, new Point3D(0, 0, 0.85), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+
+      wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
       wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-                       
+
       System.out.println(handTrajectoryMessage.getNumberOfTrajectoryPoints());
-      for(int i=0;i<handTrajectoryMessage.getNumberOfTrajectoryPoints();i++)
+      for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
          Point3D point = new Point3D();
          handTrajectoryMessage.getTrajectoryPoints()[i].getPosition(point);
-         
+
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
-         
+
          Pose3D pose = new Pose3D(point, orientation);
-         if(i%2 == 0)
-         scs.addStaticLinkGraphics(getXYZAxis(pose));
+         if (i % 2 == 0)
+            scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
-            
+
       drcBehaviorTestHelper.send(wholebodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(50.0);
-      
-      PrintTools.info("END");     
-   } 
-   
-//   @Test
+
+      PrintTools.info("END");
+   }
+
+   //   @Test
    public void testForOnlyLeftArmOpeningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet(); 
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       setupCamera(scs);
-   
+
       drcBehaviorTestHelper.updateRobotModel();
-            
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-             
+
       Quaternion pushDoorOrientation = new Quaternion();
       pushDoorOrientation.appendYawRotation(startYaw);
-      
+
       FramePose pushDoorFramePose = new FramePose(referenceFrames.getWorldFrame(), new Pose3D(DoorEnvironment.DEFAULT_DOOR_LOCATION, pushDoorOrientation));
       Vector2D doorHandle = new Vector2D(ContactableDoorRobot.DEFAULT_HANDLE_OFFSET);
       doorHandle.add(new Vector2D(-0.05, 0.0));
       PushDoor pushDoor = new PushDoor(pushDoorFramePose, doorHandle);
-        
-      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 20.0, -35*Math.PI/180);
+
+      PushDoorTrajectory pushDoorTrajectory = new PushDoorTrajectory(pushDoor, 20.0, -35 * Math.PI / 180);
       pushDoorTrajectory.setRobotSideOfEndEffector(RobotSide.LEFT);
-                  
-      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;     
-            
+
+      TaskNode3D.endEffectorTrajectory = pushDoorTrajectory;
+
       WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       HandTrajectoryMessage handTrajectoryMessage = pushDoorTrajectory.getEndEffectorTrajectoryMessage(referenceFrames.getMidFeetZUpFrame());
-      
+
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(3);
       chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
-         
+
       chestTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Quaternion(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
       Quaternion chestOrientation = new Quaternion();
-      chestOrientation.appendYawRotation(-Math.PI*20/180);
-//      chestOrientation.appendPitchRotation(Math.PI*10/180);
+      chestOrientation.appendYawRotation(-Math.PI * 20 / 180);
+      //      chestOrientation.appendPitchRotation(Math.PI*10/180);
       chestTrajectoryMessage.setTrajectoryPoint(1, 20.0, chestOrientation, new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
+
       chestOrientation = new Quaternion();
-      chestOrientation.appendYawRotation(-Math.PI*30/180);
-//      chestOrientation.appendPitchRotation(Math.PI*10/180);
+      chestOrientation.appendYawRotation(-Math.PI * 30 / 180);
+      //      chestOrientation.appendPitchRotation(Math.PI*10/180);
       chestTrajectoryMessage.setTrajectoryPoint(2, 40.0, chestOrientation, new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
+
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(3);
       pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
-             
+
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearSelection();
       selectionMatrix6D.selectLinearZ(true);
       pelvisTrajectoryMessage.setSelectionMatrix(selectionMatrix6D);
-      pelvisTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Point3D(0,0, 0.78), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      pelvisTrajectoryMessage.setTrajectoryPoint(1, 20.0, new Point3D(0,0, 0.90), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      pelvisTrajectoryMessage.setTrajectoryPoint(2, 40.0, new Point3D(0,0, 0.85), new Quaternion(), new Vector3D(), new Vector3D(), referenceFrames.getMidFootZUpGroundFrame());
-      
-//      wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);            
+      pelvisTrajectoryMessage.setTrajectoryPoint(0, 5.0, new Point3D(0, 0, 0.78), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+      pelvisTrajectoryMessage.setTrajectoryPoint(1, 20.0, new Point3D(0, 0, 0.90), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+      pelvisTrajectoryMessage.setTrajectoryPoint(2, 40.0, new Point3D(0, 0, 0.85), new Quaternion(), new Vector3D(), new Vector3D(),
+                                                 referenceFrames.getMidFootZUpGroundFrame());
+
+      //      wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);            
       wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-                       
+
       System.out.println(handTrajectoryMessage.getNumberOfTrajectoryPoints());
-      for(int i=0;i<handTrajectoryMessage.getNumberOfTrajectoryPoints();i++)
+      for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
          Point3D point = new Point3D();
          handTrajectoryMessage.getTrajectoryPoints()[i].getPosition(point);
-         
+
          Quaternion orientation = new Quaternion();
          handTrajectoryMessage.getTrajectoryPoints()[i].getOrientation(orientation);
-         
+
          Pose3D pose = new Pose3D(point, orientation);
-         if(i%2 == 0)
-         scs.addStaticLinkGraphics(getXYZAxis(pose));
+         if (i % 2 == 0)
+            scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
-            
+
       drcBehaviorTestHelper.send(wholebodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(50.0);
-      
-      PrintTools.info("END");     
-   } 
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
+
+      PrintTools.info("END");
+   }
+
 }

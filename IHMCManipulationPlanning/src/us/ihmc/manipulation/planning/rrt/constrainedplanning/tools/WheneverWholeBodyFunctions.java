@@ -39,12 +39,12 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 public class WheneverWholeBodyFunctions
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    public WheneverWholeBodyFunctions()
    {
-      
+
    }
-   
+
    public void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
    {
@@ -64,7 +64,7 @@ public class WheneverWholeBodyFunctions
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
-   
+
    public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       double error = 0.0;
@@ -88,7 +88,7 @@ public class WheneverWholeBodyFunctions
 
       return error;
    }
-   
+
    public double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       FrameVector positionError = new FrameVector();
@@ -102,7 +102,7 @@ public class WheneverWholeBodyFunctions
 
       return computeQualityFromError(error, weightVector, selectionMatrix);
    }
-   
+
    public double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
       SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
@@ -141,7 +141,7 @@ public class WheneverWholeBodyFunctions
 
       return computeQualityFromError(error, weightVector, selectionMatrix);
    }
-   
+
    public void setRobotStateFromControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput, FloatingInverseDynamicsJoint rootJoint,
                                                      OneDoFJoint[] oneDoFJoints)
    {
@@ -163,7 +163,7 @@ public class WheneverWholeBodyFunctions
 
       rootJoint.getPredecessor().updateFramesRecursively();
    }
-   
+
    public double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightVector, DenseMatrix64F selectionMatrix)
    {
       DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
@@ -181,7 +181,7 @@ public class WheneverWholeBodyFunctions
       // Returning the Euclidean norm of the error computed as the command quality
       return NormOps.normP2(errorSubspace);
    }
-   
+
    public void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
                                                             FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
    {
@@ -218,7 +218,7 @@ public class WheneverWholeBodyFunctions
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
-   
+
    public CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PositionPIDGainsInterface gains)
    {
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -228,7 +228,7 @@ public class WheneverWholeBodyFunctions
       feedbackControlCommand.set(command.getDesiredPosition());
       return feedbackControlCommand;
    }
-   
+
    public SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, SE3PIDGainsInterface gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();

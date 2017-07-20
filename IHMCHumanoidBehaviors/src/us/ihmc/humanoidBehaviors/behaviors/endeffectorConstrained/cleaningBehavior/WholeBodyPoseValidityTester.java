@@ -676,9 +676,9 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          if(false)
          {
             if(isCollisionFree == false)
-               PrintTools.warn("col");
+               PrintTools.error("col");
             if(isGoodIKSolution == false)
-               PrintTools.warn("ik");   
+               PrintTools.error("ik");   
          }
          
          isValid = false;

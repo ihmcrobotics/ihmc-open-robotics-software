@@ -14,7 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholebodyPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -168,19 +168,19 @@ public class DRCNetworkProcessor
    
    private void setupConstrainedWholebodyPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isConstrainedWholebodyPlanningToolboxEnabled())
+      if (!params.isConstrainedWholeBodyPlanningToolboxEnabled())
          return;
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      new ConstrainedWholebodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
+      new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
 
-      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CWB_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.CWB_PLANNING_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
+      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
       cwbPlanningToolboxCommunicator.connect();
 
       String methodName = "setupConstrainedWholebodyPlanningModule";
-      printModuleConnectedDebugStatement(PacketDestination.CWB_PLANNING_TOOLBOX_MODULE, methodName);
+      printModuleConnectedDebugStatement(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, methodName);
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

@@ -12,19 +12,19 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-public class ConstrainedWholebodyPlanningToolboxModule extends ToolboxModule
+public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
 {
-   private static final PacketDestination PACKET_DESTINATION = PacketDestination.CWB_PLANNING_TOOLBOX_MODULE;
-   private static final NetworkPorts NETWORK_PORT = NetworkPorts.CWB_PLANNING_TOOLBOX_MODULE_PORT;
+   private static final PacketDestination PACKET_DESTINATION = PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE;
+   private static final NetworkPorts NETWORK_PORT = NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT;
 
-   private final ConstrainedWholebodyPlanningToolboxController rrtToolboxController;
+   private final ConstrainedWholeBodyPlanningToolboxController rrtToolboxController;
    
-   public ConstrainedWholebodyPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
+   public ConstrainedWholeBodyPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
                            boolean startYoVariableServer)
          throws IOException
    {
@@ -33,9 +33,9 @@ public class ConstrainedWholebodyPlanningToolboxModule extends ToolboxModule
       
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       
-      rrtToolboxController = new ConstrainedWholebodyPlanningToolboxController(statusOutputManager, registry);
+      rrtToolboxController = new ConstrainedWholeBodyPlanningToolboxController(statusOutputManager, registry);
       
-      packetCommunicator.attachListener(ConstrainedWholebodyPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
+      packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
 
@@ -56,7 +56,7 @@ public class ConstrainedWholebodyPlanningToolboxModule extends ToolboxModule
    public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
    {
       List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
-      status.add(ConstrainedWholebodyPlanningToolboxOutputStatus.class);
+      status.add(ConstrainedWholeBodyPlanningToolboxOutputStatus.class);
       return status;
    }
 

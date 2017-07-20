@@ -21,6 +21,5 @@ public class AtlasSpecifiedWholeBodyMotionPlanningTest extends SpecifiedWholeBod
    {
       return robotModel.getSimpleRobotName();
    }
-   
-   
+
 }

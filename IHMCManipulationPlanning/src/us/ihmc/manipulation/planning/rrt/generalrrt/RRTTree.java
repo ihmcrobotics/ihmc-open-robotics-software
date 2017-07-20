@@ -36,12 +36,12 @@ public class RRTTree
    protected RRTNode upperBoundNode;
    protected RRTNode lowerBoundNode;
    protected ArrayList<RRTNode> pathNodes = new ArrayList<RRTNode>();
-   
+
    protected ArrayList<RRTNode> wholeNodes = new ArrayList<RRTNode>();
    public ArrayList<RRTNode> failNodes = new ArrayList<RRTNode>();
 
    protected RRTNode nodeCreator;
-   
+
    // numberOfNodes, ArrayList<RRTNode> nodes. every node of the nodes has its parent node.
 
    public RRTTree(RRTNode rootNode)
@@ -114,8 +114,8 @@ public class RRTTree
 
       double optMatric = Double.MAX_VALUE;
       double curMatric;
-      
-      for(int i=0;i<this.wholeNodes.size();i++)
+
+      for (int i = 0; i < this.wholeNodes.size(); i++)
       {
          curNode = this.wholeNodes.get(i);
          curMatric = getMatric(curNode, targetNode);
@@ -123,12 +123,11 @@ public class RRTTree
          {
             optMatric = curMatric;
             optNode = curNode;
-         }         
+         }
       }
-      
+
       this.nearNode = optNode;
    }
-   
 
    public RRTNode getNewNode(RRTNode targetNode)
    {
@@ -222,16 +221,15 @@ public class RRTTree
    {
       return pathNodes;
    }
-   
+
    public ArrayList<RRTNode> getWholeNodes()
    {
       return wholeNodes;
    }
-   
+
    public ArrayList<RRTNode> getFailNodes()
    {
       return failNodes;
    }
-   
-   
+
 }
