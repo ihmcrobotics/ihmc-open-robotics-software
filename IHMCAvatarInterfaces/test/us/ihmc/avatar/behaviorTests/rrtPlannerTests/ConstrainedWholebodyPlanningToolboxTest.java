@@ -195,6 +195,71 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
    }
    
    @Test
+   public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();       
+      System.out.println("Start");
+      
+      /*
+       * constrained end effector trajectory (WorldFrame).
+       */
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+      
+      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+            
+      /*
+       * tester
+       */
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      
+      sdfFullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
+                  
+      GenericTaskNode.nodeTester = wbikTester;      
+      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+      
+      /*
+       * put on generic task node
+       */
+      
+//      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+//      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+//      rootNode.setNodeData(10, -0.4*Math.PI);   // is selected
+//      rootNode.setNodeData(9, -0.25*Math.PI);   // will be ignored.
+//            
+//      GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1*Math.PI, 0.0*Math.PI, 0.0*Math.PI);
+//      node1.setNodeData(10, -0.25*Math.PI);      
+//      node1.setParentNode(rootNode);
+//      
+//      System.out.println(rootNode.isValidNode());
+//      
+//      /*
+//       * show the ik result
+//       */
+//      FullHumanoidRobotModel createdFullRobotModel;
+//      HumanoidReferenceFrames createdReferenceFrames;
+//      
+//      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
+//      createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
+//      
+//      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
+//      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
+//          
+//      scs.addStaticLinkGraphics(getXYZAxis(rootNode.getEndEffectorPose()));
+      
+      System.out.println("End");
+   }
+   
+//   @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -222,9 +287,7 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       
       sdfFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      
-      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
                   
       GenericTaskNode.nodeTester = wbikTester;      
       GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -235,15 +298,14 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      
+      rootNode.setNodeData(10, -0.4*Math.PI);   // is selected
+      rootNode.setNodeData(9, -0.25*Math.PI);   // will be ignored.
+            
       GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1*Math.PI, 0.0*Math.PI, 0.0*Math.PI);
-      node1.setNodeData(10, -0.25*Math.PI);
+      node1.setNodeData(10, -0.25*Math.PI);      
       node1.setParentNode(rootNode);
       
       System.out.println(rootNode.isValidNode());
-      System.out.println(node1.isValidNode());
-      
-      
       
       /*
        * show the ik result
@@ -256,7 +318,8 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       
       wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
-      
+          
+      scs.addStaticLinkGraphics(getXYZAxis(rootNode.getEndEffectorPose()));
       
       System.out.println("End");
    }
