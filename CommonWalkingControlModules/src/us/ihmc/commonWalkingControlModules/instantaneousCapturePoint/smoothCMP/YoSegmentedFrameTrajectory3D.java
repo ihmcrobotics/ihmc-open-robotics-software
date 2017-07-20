@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.convexOptimization.qpOASES.returnValue;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * <li> currentSegmentIndex: YoInteger indicating the segment index that is used for computation 
  * <li> currentSegment: Reference to the current segment used for computation
  */
-public abstract class YoSegmentedFrameTrajectory3D
+public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String name;
@@ -34,8 +33,9 @@ public abstract class YoSegmentedFrameTrajectory3D
 
    protected final YoInteger numberOfSegments;
    protected final YoInteger currentSegmentIndex;
-   
+
    protected YoFrameTrajectory3D currentSegment;
+   protected double[] nodeTime;
 
    public YoSegmentedFrameTrajectory3D(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
    {
@@ -49,6 +49,7 @@ public abstract class YoSegmentedFrameTrajectory3D
          YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(name + "Segment" + i, maxNumberOfCoefficients, worldFrame, registry);
          segments.add(segmentTrajectory);
       }
+      nodeTime = new double[maxNumberOfSegments + 1];
       reset();
    }
 
@@ -60,7 +61,7 @@ public abstract class YoSegmentedFrameTrajectory3D
       currentSegment = null;
       numberOfSegments.set(0);
    }
-   
+
    public void update(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
@@ -98,7 +99,7 @@ public abstract class YoSegmentedFrameTrajectory3D
    }
 
    //TODO convert this access to protected 
-   public List<YoFrameTrajectory3D> getPolynomials()
+   public List<YoFrameTrajectory3D> getSegments()
    {
       return segments;
    }
@@ -112,21 +113,52 @@ public abstract class YoSegmentedFrameTrajectory3D
    {
       return currentSegmentIndex.getIntegerValue();
    }
-   
-   protected int getCurrentSegmentIndex(double timeInState)
+
+   public int getCurrentSegmentIndex(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
       return currentSegmentIndex.getIntegerValue();
    }
-   
-   protected YoFrameTrajectory3D getCurrentSegment(double timeInState)
+
+   public YoFrameTrajectory3D getCurrentSegment(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
       return currentSegment;
    }
-   
-   protected YoFrameTrajectory3D getSegment(int segmentIndex)
+
+   public YoFrameTrajectory3D getSegment(int segmentIndex)
    {
       return segments.get(segmentIndex);
+   }
+
+   public double[] getNodeTimes()
+   {
+      nodeTime[0] = segments.get(0).getInitialTime();
+      int i;
+      for (i = 0; i < getNumberOfSegments(); i++)
+         nodeTime[i + 1] = segments.get(i).getFinalTime();
+      for (; i < maxNumberOfSegments + 1; i++)
+         nodeTime[i + 1] = Double.NaN;
+      return nodeTime;
+   }
+   
+   public int getMaxNumberOfSegments()
+   {
+      return maxNumberOfSegments;
+   }
+   
+   public void setNumberOfSegments(int numberOfSegments)
+   {
+      this.numberOfSegments.set(numberOfSegments);
+   }
+   
+   @Override
+   public String toString()
+   {
+      String ret = "";
+      ret += name;
+      for(int i = 0 ; i < numberOfSegments.getIntegerValue(); i++)
+         ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
+      return ret;
    }
 }

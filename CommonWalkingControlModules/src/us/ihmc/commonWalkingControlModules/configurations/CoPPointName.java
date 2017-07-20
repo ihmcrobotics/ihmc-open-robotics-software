@@ -33,3 +33,4 @@ public enum CoPPointName
       return this == other;
    }
 }
+
