@@ -47,7 +47,7 @@ public class TransferCoPTrajectory implements CoPTrajectory
       transferInitialSegment.reset();
       transferEndSegment.reset();
 
-      transferSegments.clear();
+      //transferSegments.clear();
       currentSegment.set(-1);
    }
 

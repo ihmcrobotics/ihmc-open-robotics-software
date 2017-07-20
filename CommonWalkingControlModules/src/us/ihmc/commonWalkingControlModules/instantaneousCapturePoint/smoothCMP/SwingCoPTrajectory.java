@@ -53,7 +53,7 @@ public class SwingCoPTrajectory implements CoPTrajectory
       swingToeShiftSegment.reset();
       swingConstantSegment.reset();
 
-      swingSegments.clear();
+      //swingSegments.clear();
       currentSegment.set(-1);
    }
 
