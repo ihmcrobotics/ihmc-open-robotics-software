@@ -1,9 +1,16 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'ihmc-swing-plotting'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating IHMCSwingPlotting settings.gradle'
+
+def includes = [
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

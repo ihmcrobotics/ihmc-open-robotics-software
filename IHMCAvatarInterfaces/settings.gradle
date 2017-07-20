@@ -1,9 +1,36 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'ihmc-avatar-interfaces'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating IHMCAvatarInterfaces settings.gradle'
+
+def includes = [
+'../IHMCROSTools',
+'../CommonWalkingControlModules',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCRobotDataLogger',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../IHMCCommunication',
+'../IHMCHumanoidBehaviors',
+'../IHMCHumanoidRobotics',
+'../IHMCPerception',
+'../IHMCWholeBodyController',
+'../IHMCStateEstimation',
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotBehaviors',
+'../Vicon',
+'../IHMCGraphicsDescription',
+'../IHMCRobotModels',
+'../IHMCSimulationToolkit',
+'../IHMCRobotDataVisualizer',
+'../IHMCFootstepPlanning',
+'../SimulationConstructionSetTools',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

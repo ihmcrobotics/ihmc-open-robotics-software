@@ -1,9 +1,14 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'parameter-optimization'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating ParameterOptimization settings.gradle'
+
+def includes = [
+'../IHMCRoboticsToolkit',
+'../IHMCJavaExtensions',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

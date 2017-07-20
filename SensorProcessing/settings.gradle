@@ -1,9 +1,19 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'sensor-processing'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating SensorProcessing settings.gradle'
+
+def includes = [
+'../IHMCCommunication',
+'../KalmanProject',
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+'../IHMCRobotModels',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

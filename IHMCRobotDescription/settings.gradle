@@ -1,9 +1,16 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'ihmc-robot-description'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating IHMCRobotDescription settings.gradle'
+
+def includes = [
+'../IHMCRoboticsToolkit',
+'../IHMCGeometry',
+'../IHMCGraphicsDescription',
+'../IHMCJavaExtensions',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

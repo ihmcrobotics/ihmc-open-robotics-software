@@ -1,9 +1,27 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'ihmc-simulation-toolkit'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating IHMCSimulationToolkit settings.gradle'
+
+def includes = [
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotModels',
+'../SensorProcessing',
+'../SimulationConstructionSetTools',
+'../IHMCHumanoidRobotics',
+'../IHMCQuadrupedRobotics',
+'../IHMCWholeBodyController',
+'../ModelFileLoader',
+'../IHMCGraphicsDescription',
+'../IHMCCommunication',
+'../IHMCJMonkeyEngineToolkit',
+'../CommonWalkingControlModules',
+'../IHMCStateEstimation',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }
