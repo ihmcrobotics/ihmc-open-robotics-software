@@ -1,9 +1,34 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'valkyrie'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating Valkyrie settings.gradle'
+
+def includes = [
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../IHMCSystemIdentification',
+'../IHMCStateEstimation',
+'../CommonWalkingControlModules',
+'../IHMCAvatarInterfaces',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCROSTools',
+'../IHMCRobotDataLogger',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../IHMCPerception',
+'../IHMCWholeBodyController',
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCRobotDataVisualizer',
+'../IHMCSimulationToolkit',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

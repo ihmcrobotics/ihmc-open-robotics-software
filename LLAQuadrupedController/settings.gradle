@@ -1,9 +1,24 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'lla-quadruped-controller'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating LLAQuadrupedController settings.gradle'
+
+def includes = [
+'../IHMCQuadrupedRobotics',
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCRoboticsToolkit',
+'../IHMCCommunication',
+'../ModelFileLoader',
+'../IHMCHumanoidRobotics',
+'../IHMCStateEstimation',
+'../IHMCGraphicsDescription',
+'../SensorProcessing',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

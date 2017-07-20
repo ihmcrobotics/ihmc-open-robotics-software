@@ -1,9 +1,37 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'atlas'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating Atlas settings.gradle'
+
+def includes = [
+'../IHMCHumanoidBehaviors',
+'../Vicon',
+'../CommonWalkingControlModules',
+'../IHMCAvatarInterfaces',
+'../IHMCJMonkeyEngineToolkit',
+'../IHMCHumanoidRobotics',
+'../IHMCCommunication',
+'../IHMCJavaToolkit',
+'../IHMCJavaExtensions',
+'../IHMCPerception',
+'../IHMCRoboticsToolkit',
+'../IHMCROSTools',
+'../IHMCWholeBodyController',
+'../IHMCRobotDataLogger',
+'../RobotiqHandDrivers',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../SimulationConstructionSetTools',
+'../IHMCGraphicsDescription',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCSimulationToolkit',
+'../IHMCRobotDataVisualizer',
+'../IHMCManipulationPlanning',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }

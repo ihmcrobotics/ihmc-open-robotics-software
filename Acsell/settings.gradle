@@ -1,9 +1,31 @@
-rootProject.name = hyphenatedName
+rootProject.name = 'acsell'
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println 'Evaluating Acsell settings.gradle'
+
+def includes = [
+'../IHMCJavaExtensions',
+'../IHMCCommunication',
+'../IHMCHumanoidRobotics',
+'../IHMCAvatarInterfaces',
+'../IHMCStateEstimation',
+'../CommonWalkingControlModules',
+'../IHMCJMonkeyEngineToolkit',
+'../ModelFileLoader',
+'../SensorProcessing',
+'../SimulationConstructionSet',
+'../IHMCRobotDataLogger',
+'../IHMCPerception',
+'../IHMCWholeBodyController',
+'../IHMCJavaToolkit',
+'../IHMCRoboticsToolkit',
+'../IHMCRobotDescription',
+'../IHMCRobotModels',
+'../IHMCRobotDataVisualizer',
+'../IHMCGraphicsDescription',
+]
 
 if (startParameter.searchUpwards)
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
-         includeBuild "../" + siblingDir
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
    }
