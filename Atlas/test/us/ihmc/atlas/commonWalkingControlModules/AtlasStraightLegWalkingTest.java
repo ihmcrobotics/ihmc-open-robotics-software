@@ -6,19 +6,19 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -314,32 +314,40 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public CapturePointPlannerParameters getCapturePointPlannerParameters()
+      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
-         return new AtlasCapturePointPlannerParameters(getPhysicalProperties())
+         return new AtlasContinuousCMPPlannerParameters(getPhysicalProperties())
          {
             @Override
-            public double getMinTimeToSpendOnExitCMPInSingleSupport()
+            public double getMinTimeToSpendOnExitCoPInSingleSupport()
             {
                return 0.15;
             }
 
             @Override
-            public double getExitCMPForwardSafetyMarginOnToes()
+            public double getExitCoPForwardSafetyMarginOnToes()
             {
                return 0.002;
             }
 
             @Override
-            public boolean putExitCMPOnToes()
+            public boolean putExitCoPOnToes()
             {
                return true;
             }
 
+            /** {@inheritDoc} */
             @Override
-            public double getExitCMPInsideOffset()
+            public List<Vector2D> getCoPOffsets()
             {
-               return 0.015;
+               Vector2D entryOffset = new Vector2D(0.0, -0.005);
+               Vector2D exitOffset = new Vector2D(0.0, 0.015);
+
+               List<Vector2D> copOffsets = new ArrayList<>();
+               copOffsets.add(entryOffset);
+               copOffsets.add(exitOffset);
+
+               return copOffsets;
             }
          };
       }
