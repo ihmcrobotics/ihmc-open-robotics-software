@@ -1,17 +1,9 @@
-rootProject.name = 'ihmc-footstep-planning'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCFootstepPlanning settings.gradle'
-
-def includes = [
-'../IHMCRoboticsToolkit',
-'../IHMCGraphicsDescription',
-'../ConvexOptimizationAdapter',
-'../SimulationConstructionSet',
-'../SimulationConstructionSetTools',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }

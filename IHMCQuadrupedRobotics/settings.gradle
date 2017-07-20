@@ -1,27 +1,9 @@
-rootProject.name = 'ihmc-quadruped-robotics'
+rootProject.name = hyphenatedName
 
-println 'Evaluating IHMCQuadrupedRobotics settings.gradle'
-
-def includes = [
-'../IHMCRobotDataLogger',
-'../CommonWalkingControlModules',
-'../ConvexOptimizationAdapter',
-'../IHMCHumanoidRobotics',
-'../IHMCJavaToolkit',
-'../IHMCJavaExtensions',
-'../IHMCRoboticsToolkit',
-'../IHMCCommunication',
-'../IHMCRobotModels',
-'../SensorProcessing',
-'../IHMCStateEstimation',
-'../IHMCGraphicsDescription',
-'../IHMCRobotDescription',
-'../SimulationConstructionSet',
-'../SimulationConstructionSetTools',
-]
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   settingsDir.getParentFile().list().each { siblingDir ->
+      if (siblingDir != pascalCasedName && new File("../" + siblingDir, "build.gradle").exists())
+         includeBuild "../" + siblingDir
    }
