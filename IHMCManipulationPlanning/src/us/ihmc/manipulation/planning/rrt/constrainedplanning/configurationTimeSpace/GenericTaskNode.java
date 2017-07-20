@@ -76,6 +76,11 @@ public class GenericTaskNode extends CTTaskNode
       configurationSpace.setRotation(getNodeData(8), getNodeData(9), getNodeData(10));
       return configurationSpace;
    }
+   
+   public Pose3D getEndEffectorPose()
+   {
+      return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
+   }
 
    @Override
    public boolean isValidNode()
@@ -104,7 +109,7 @@ public class GenericTaskNode extends CTTaskNode
       /*
        * set whole body tasks.
        */
-      Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
+      Pose3D desiredPose = getEndEffectorPose();
       FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
             

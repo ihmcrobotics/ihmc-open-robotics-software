@@ -119,7 +119,6 @@ public class WheneverWholeBodyKinematicsSolver
 
    private final YoDouble footWeight = new YoDouble("footWeight", registry);
    private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
-   private final CommandInputManager commandInputManager;
    private int tickCount = 0;
 
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
@@ -150,13 +149,9 @@ public class WheneverWholeBodyKinematicsSolver
    private static int numberOfTest = 0;
    
    private boolean isSolved = false;
-   
-   
       
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {  
-      commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
-
       this.fullRobotModelFactory = fullRobotModelFactory;
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
       
@@ -195,24 +190,48 @@ public class WheneverWholeBodyKinematicsSolver
       }
    }
    
-   
-   
-   public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
-   {
-      List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(KinematicsToolboxCenterOfMassCommand.class);
-      commands.add(KinematicsToolboxRigidBodyCommand.class);
-      commands.add(KinematicsToolboxConfigurationCommand.class);
-      return commands;
-   }
+   public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, FullHumanoidRobotModel sdfFullRobotModel)
+   {  
+      this.fullRobotModelFactory = fullRobotModelFactory;
+      outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+      
+      this.desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
-   
-   private YoGraphicCoordinateSystem createCoodinateSystem(RigidBody endEffector, Type type, AppearanceDefinition appearanceDefinition)
-   {
-      String namePrefix = endEffector.getName() + type.getName();
-      return new YoGraphicCoordinateSystem(namePrefix, "", registry, 0.2, appearanceDefinition);
+      referenceFrames = new HumanoidReferenceFrames(this.desiredFullRobotModel);
+      rootBody = this.desiredFullRobotModel.getElevator();
+      rootJoint = this.desiredFullRobotModel.getRootJoint();
+
+      populateJointLimitReductionFactors();
+      populateListOfControllableRigidBodies();
+
+      controllerCore = createControllerCore();
+      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
+
+      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(this.desiredFullRobotModel);
+      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+         
+      inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
+      inverseKinematicsSolution.setDestination(-1);
+
+      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+
+      footWeight.set(200.0);
+      momentumWeight.set(1.0);
+      privilegedWeight.set(1.0);
+      privilegedConfigurationGain.set(50.0);
+      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String side = robotSide.getCamelCaseNameForMiddleOfExpression();
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+         initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
+      }
+      
+      updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
    }
-  
+        
    public WholeBodyControllerCore createControllerCore()
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
