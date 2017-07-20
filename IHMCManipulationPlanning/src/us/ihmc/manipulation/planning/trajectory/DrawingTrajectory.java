@@ -24,7 +24,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       
       selectionMatrix6D.selectAngularX(false);
       selectionMatrix6D.selectAngularY(false);
-      selectionMatrix6D.selectAngularZ(false);
+      selectionMatrix6D.selectAngularZ(true);
       
       return selectionMatrix6D;
    }
@@ -33,7 +33,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    public ConfigurationBuildOrder defineConfigurationBuildOrder()
    {
       ConfigurationBuildOrder configurationBuildOrder;
-      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL);
+      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW);
       
       return configurationBuildOrder;
    }

@@ -1,16 +1,20 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
+import us.ihmc.manipulation.planning.trajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 
-public class GenericTaskNode extends TaskNode
+public class GenericTaskNode extends CTTaskNode
 {
+   
+   
    public GenericTaskNode()
    {
       super(11);
@@ -47,6 +51,31 @@ public class GenericTaskNode extends TaskNode
       setNodeData(9, eeConfigurationSpace.getRotationPitch());
       setNodeData(10, eeConfigurationSpace.getRotationYaw());
    }
+   
+   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll)
+   {
+      super(11);
+      setNodeData(0, time);
+      setNodeData(1, pelvisHeight);
+      setNodeData(2, chestYaw);
+      setNodeData(3, chestPitch);
+      setNodeData(4, chestRoll);      
+      ConfigurationSpace eeConfigurationSpace = new ConfigurationSpace();
+      setNodeData(5, eeConfigurationSpace.getTranslationX());
+      setNodeData(6, eeConfigurationSpace.getTranslationY());
+      setNodeData(7, eeConfigurationSpace.getTranslationZ());
+      setNodeData(8, eeConfigurationSpace.getRotationRoll());
+      setNodeData(9, eeConfigurationSpace.getRotationPitch());
+      setNodeData(10, eeConfigurationSpace.getRotationYaw());
+   }
+   
+   private ConfigurationSpace getEndEffectorConfigurationSpace()
+   {
+      ConfigurationSpace configurationSpace = new ConfigurationSpace();
+      configurationSpace.setTranslation(getNodeData(5), getNodeData(6), getNodeData(7));
+      configurationSpace.setRotation(getNodeData(8), getNodeData(9), getNodeData(10));
+      return configurationSpace;
+   }
 
    @Override
    public boolean isValidNode()
@@ -74,8 +103,8 @@ public class GenericTaskNode extends TaskNode
       nodeTester.holdCurrentTrajectoryMessages();
       /*
        * set whole body tasks.
-       */            
-      Pose3D desiredPose = endEffectorTrajectory.getEndEffectorPose(getNodeData(0));
+       */
+      Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
       FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
             
@@ -84,12 +113,13 @@ public class GenericTaskNode extends TaskNode
       desiredPoseToWorld.changeFrame(midZUpFrame);
       
       Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      nodeTester.setDesiredHandPose(endEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
-      nodeTester.setHandSelectionMatrixFree(endEffectorTrajectory.getAnotherRobotSide());
+      nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);      
+      nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
       
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(getNodeData(2));
       desiredChestOrientation.appendPitchRotation(getNodeData(3));
+      desiredChestOrientation.appendRollRotation(getNodeData(4));
       nodeTester.setDesiredChestOrientation(desiredChestOrientation);
             
       nodeTester.setDesiredPelvisHeight(getNodeData(1));
@@ -104,7 +134,7 @@ public class GenericTaskNode extends TaskNode
    }
 
    @Override
-   public TaskNode createNode()
+   public CTTaskNode createNode()
    {
       return new GenericTaskNode();
    }

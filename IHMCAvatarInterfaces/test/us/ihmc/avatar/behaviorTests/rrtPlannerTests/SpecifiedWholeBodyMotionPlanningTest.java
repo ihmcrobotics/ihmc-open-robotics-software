@@ -412,7 +412,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       TaskNode3D.nodeTester = wbikTester;      
       TaskNode3D.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       /*
-       * Define end effector trajectory.  
+       * Define end effector trajectory (WorldFrame).  
        */
       
       Pose3D pose1 = new Pose3D(new Point3D(0.6, -0.4, 0.9), new Quaternion());
