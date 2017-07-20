@@ -133,9 +133,9 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       CommonAvatarEnvironmentInterface environment = new DoorEnvironment();
       
 
-//      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
 //      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, simulationTestingParameters, getRobotModel());
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y, simulationTestingParameters, getRobotModel());
+//      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
@@ -374,27 +374,43 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    } 
    
-//   @Test
+   @Test
    public void testForposeForNode() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
-            
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+      /*
+       * send hand trajectory message for initial posture
+       */
+      double motionTime = 3.0;
+      Point3D point3D = new Point3D(0.6, -0.35, 1.0);
+      Quaternion quaternion = new Quaternion();
+      
+      
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, point3D, quaternion, referenceFrames.getMidFootZUpGroundFrame());
+      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      
+      wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
+//      drcBehaviorTestHelper.send(wholebodyTrajectoryMessage);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+                  
       /*
        * Initialize tester.
        */
-      
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
-      
+      referenceFrames.updateFrames();
       WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
       
       wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
                   
-      TaskNode3D.nodeTester = wbikTester;
-
+      TaskNode3D.nodeTester = wbikTester;      
+      TaskNode3D.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       /*
        * Define end effector trajectory.  
        */
@@ -448,7 +464,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
       PrintTools.info("END");     
    }       
    
-   @Test
+//   @Test
    public void testForPushDoorKinematics() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);

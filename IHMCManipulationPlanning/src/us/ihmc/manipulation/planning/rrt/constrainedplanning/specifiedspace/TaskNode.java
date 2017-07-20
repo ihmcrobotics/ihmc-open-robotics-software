@@ -3,9 +3,12 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
+import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public abstract class TaskNode implements TaskNodeInterface
@@ -18,6 +21,11 @@ public abstract class TaskNode implements TaskNodeInterface
    protected boolean isValid = true;  
    
    protected OneDoFJoint[] configurationJoints;   
+   
+   public static WheneverWholeBodyKinematicsSolver nodeTester;
+   public static EndEffectorTrajectory endEffectorTrajectory;
+   public static ReferenceFrame midZUpFrame;
+   public static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    public TaskNode()
    {
