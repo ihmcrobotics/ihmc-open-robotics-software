@@ -40,7 +40,15 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       return this.robotSide;
    }   
    
-   public Pose3D getEndEffecorPose(double time, ConfigurationSpace controllableConfigurationSpace)
+   public RobotSide getAnotherRobotSide()
+   {
+      if(getRobotSide() == RobotSide.RIGHT)
+         return RobotSide.LEFT;
+      else
+         return RobotSide.RIGHT;
+   }
+   
+   public Pose3D getEndEffectorPose(double time, ConfigurationSpace controllableConfigurationSpace)
    {
       ConfigurationSpace constrainedConfigurationSpace = getConfigurationSpace(time);
 
@@ -59,4 +67,6 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
    protected abstract RobotSide defineRobotSide();
      
    protected abstract ConfigurationSpace getConfigurationSpace(double time);
+
+
 }

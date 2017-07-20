@@ -85,19 +85,6 @@ public class TaskNodeTree
       return trajectoryTime;
    }
       
-//   private void setRandomNodeData(TaskNode node, int index)
-//   {
-//      Random randomManager = new Random();
-//      double value = randomManager.nextDouble() * (nodeRegion.getUpperLimit(index) - nodeRegion.getLowerLimit(index)) + nodeRegion.getLowerLimit(index);
-//      node.setNodeData(index, value);
-//   }
-//    
-//   private void setRandomNodeData(TaskNode node)
-//   {
-//      for(int i=0;i<node.getDimensionOfNodeData();i++)
-//         setRandomNodeData(node, i);
-//   }
-      
    private void setRandomNormalizedNodeData(TaskNode node, int index)
    {
       Random randomManager = new Random();

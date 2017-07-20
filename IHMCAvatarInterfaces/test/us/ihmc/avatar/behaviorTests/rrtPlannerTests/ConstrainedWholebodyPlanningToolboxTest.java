@@ -9,11 +9,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vividsolutions.jts.operation.valid.IsValidOp;
+
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholebodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -27,13 +30,20 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholebodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.GenericTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
 import us.ihmc.manipulation.planning.trajectory.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -62,6 +72,31 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CWB_PLANNING_TOOLBOX_MODULE_PORT, PacketDestination.CWB_PLANNING_TOOLBOX_MODULE);
       
+   }
+   
+   private void showUpFullRobotModelWithConfiguration(FullHumanoidRobotModel createdFullRobotModel) throws SimulationExceededMaximumTimeException
+   {
+      for (int i = 0; i < createdFullRobotModel.getOneDoFJoints().length; i++)
+      {         
+         double jointPosition = createdFullRobotModel.getOneDoFJoints()[i].getQ();
+         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(createdFullRobotModel.getOneDoFJoints()[i].getName());
+         
+         if (scsJoint instanceof PinJoint)
+         {
+            PinJoint pinJoint = (PinJoint) scsJoint;
+            pinJoint.setQ(jointPosition);
+         }
+         else
+         {
+            PrintTools.info(createdFullRobotModel.getOneDoFJoints()[i].getName() + " was not a PinJoint.");
+         }
+      }
+
+      FloatingJoint scsRootJoint = drcBehaviorTestHelper.getRobot().getRootJoint();
+      scsRootJoint.setQuaternion(new Quaternion(createdFullRobotModel.getRootJoint().getRotationForReading()));
+      scsRootJoint.setPosition(new Point3D(createdFullRobotModel.getRootJoint().getTranslationForReading()));
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.005);
    }
    
    public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose)
@@ -159,8 +194,8 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
    
-//   @Test
-   public void testForPoseWithGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
+   @Test
+   public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       
@@ -171,37 +206,62 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       System.out.println("Start");
       
       /*
-       * constrained end effector trajectory
+       * constrained end effector trajectory (WorldFrame).
        */
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
       
+      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+            
+      /*
+       * tester
+       */
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
       
+      sdfFullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel());
       
+      wbikTester.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
+                  
+      GenericTaskNode.nodeTester = wbikTester;      
+      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       /*
        * put on generic task node
        */
       
+      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
       
+      GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1*Math.PI, 0.0*Math.PI, 0.0*Math.PI);
+      node1.setNodeData(10, -0.25*Math.PI);
+      node1.setParentNode(rootNode);
       
-      
-      /*
-       * ik tester
-       */
-      
+      System.out.println(rootNode.isValidNode());
+      System.out.println(node1.isValidNode());
       
       
       
       /*
        * show the ik result
        */
+      FullHumanoidRobotModel createdFullRobotModel;
+      HumanoidReferenceFrames createdReferenceFrames;
+      
+      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
+      createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
+      
+      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
+      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
       
       
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
    
-   @Test
+//   @Test
    public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -218,17 +278,15 @@ public abstract class ConstrainedWholebodyPlanningToolboxTest implements MultiRo
       
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
       
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(0.0, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, new ConfigurationSpace())));
       
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(3.0, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, new ConfigurationSpace())));
       
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(6.0, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, new ConfigurationSpace())));
       
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(9.0, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, new ConfigurationSpace())));
       
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffecorPose(10.0, new ConfigurationSpace())));
-      
-      
+      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, new ConfigurationSpace())));
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
