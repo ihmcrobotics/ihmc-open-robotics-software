@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -102,7 +101,7 @@ public class TimeAdjustmentSolver
 
    /**
     * Sets the number of footsteps to consider, which reflects the number considered in the
-    * {@link ContinuousCMPBasedICPPlanner}. This is used to set whether or not higher steps will be considered.
+    * {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface}. This is used to set whether or not higher steps will be considered.
     *
     * @param numberOfFootstepsToConsider
     */
