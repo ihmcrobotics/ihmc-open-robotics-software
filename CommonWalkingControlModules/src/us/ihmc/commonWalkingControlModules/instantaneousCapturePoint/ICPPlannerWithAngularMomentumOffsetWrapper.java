@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithAngularMomentumOffsetInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final String namePrefix = "icpPlanner";
 
@@ -46,10 +45,9 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
-   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<ReferenceFrame> soleZUpFrames,
-                                                     YoVariableRegistry parentRegistry)
+   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<ReferenceFrame> soleZUpFrames)
    {
-      super(icpPlanner, parentRegistry);
+      super(icpPlanner);
 
       this.soleZUpFrames = soleZUpFrames;
 
@@ -72,9 +70,8 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
       angularMomentumRateForwardGain = new YoDouble(namePrefix + "AngularMomentumRateForwardGain", registry);
       angularMomentumRateLateralGain = new YoDouble(namePrefix + "AngularMomentumRateLateralGain", registry);
-
-      parentRegistry.addChild(registry);
    }
+
 
    @Override
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters)

@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreezerInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final String namePrefix = "icpPlanner";
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -39,7 +39,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    protected final ICPPlannerInterface icpPlanner;
 
-   public ICPPlannerWithTimeFreezerWrapper(ICPPlannerInterface icpPlanner, YoVariableRegistry parentRegistry)
+   public ICPPlannerWithTimeFreezerWrapper(ICPPlannerInterface icpPlanner)
    {
       this.icpPlanner = icpPlanner;
 
@@ -54,8 +54,11 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
       this.isTimeBeingFrozen = new YoBoolean(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
+   }
 
-      parentRegistry.addChild(registry);
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    @Override

@@ -187,7 +187,11 @@ public class BalanceManager
          icpPlanner = new SmoothCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                    icpPlannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, yoGraphicsListRegistry);
       }
-      this.icpPlanner = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, bipedSupportPolygons.getSoleZUpFrames(), registry);
+
+      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, bipedSupportPolygons.getSoleZUpFrames());
+      parentRegistry.addChild(icpWrapper.getYoVariableRegistry());
+
+      this.icpPlanner = icpWrapper;
       this.icpPlanner.initializeParameters(icpPlannerParameters, angularMomentumModifierParameters);
       this.icpPlanner.setOmega0(controllerToolbox.getOmega0());
       this.icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
