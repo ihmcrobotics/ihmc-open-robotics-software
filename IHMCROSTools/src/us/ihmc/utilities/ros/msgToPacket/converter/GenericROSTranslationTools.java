@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
+import geometry_msgs.Transform;
 import geometry_msgs.Vector3;
 import ihmc_msgs.Point2dRosMessage;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,7 @@ public class GenericROSTranslationTools
    private static Set<Class<?>> inputTopics;
 
    private static final HashMap<Class<?>, String> javaClassToRosMessageTypeMap = new HashMap<>();
+   private static CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
 
    /* Initialize the class to message type map */
    static
@@ -81,6 +83,10 @@ public class GenericROSTranslationTools
       javaClassToRosMessageTypeMap.put(Vector3D32.class, "geometry_msgs/Vector3");
 
       javaClassToRosMessageTypeMap.put(QuaternionBasedTransform.class, "geometry_msgs/Transform");
+
+      // QuaternionBasedTransform <-> Transform
+      customFieldConversions.registerIHMCPacketFieldConverter(QuaternionBasedTransform.class, GenericROSTranslationTools::convertQuaternionBasedTransformToTransform);
+      customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
    }
 
    public static MessageFactory getMessageFactory()
@@ -164,6 +170,12 @@ public class GenericROSTranslationTools
             else if(ihmcMessageFieldType.getCanonicalName().contains("javax.vecmath"))
             {
                setVecmathFieldFromRosGeometryMessage(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
+            }
+            else if(customFieldConversions.contains(rosMessageClass))
+            {
+               Message rosMessageField = (Message) rosGetter.invoke(rosMessage);
+               Object ihmcPacketField = customFieldConversions.convert(rosMessageField);
+               ihmcField.set(ihmcMessage, ihmcPacketField);
             }
             else
             {
@@ -373,6 +385,13 @@ public class GenericROSTranslationTools
    {
       for (Field field : fields)
       {
+         if (customFieldConversions.contains(field.getType()))
+         {
+            Object fieldVariableToConvert = field.getType().cast(field.get(ihmcMessage));
+            Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
+            setField(message, field, rosMessageField);
+         }
+         // TODO: remove vecmath stuff
          if (field.getType().getCanonicalName().contains("javax.vecmath"))
          {
             convertVecmathField(ihmcMessage, message, field);
@@ -770,5 +789,25 @@ public class GenericROSTranslationTools
 
       messageName = StringUtils.replace(messageName, "Message", "RosMessage");
       return messageName;
+   }
+
+   private static Transform convertQuaternionBasedTransformToTransform(QuaternionBasedTransform quaternionBasedTransform)
+   {
+      Transform message = messageFactory.newFromType("geometry_msgs/Transform");
+
+      message.setTranslation(convertTuple3d(quaternionBasedTransform.getTranslationVector()));
+      message.setRotation(convertTuple4d(quaternionBasedTransform.getQuaternion()));
+
+      return message;
+   }
+
+   private static QuaternionBasedTransform convertTransformToQuaternionBasedTransform(Transform transform)
+   {
+      QuaternionBasedTransform quaternionBasedTransform = new QuaternionBasedTransform();
+
+      quaternionBasedTransform.setTranslation(convertVector3(transform.getTranslation()));
+      quaternionBasedTransform.setRotation(new Quaternion(convertQuaternion(transform.getRotation())));
+
+      return quaternionBasedTransform;
    }
 }
