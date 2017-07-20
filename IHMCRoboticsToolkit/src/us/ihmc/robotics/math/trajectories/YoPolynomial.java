@@ -13,13 +13,16 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoPolynomial
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc;
+   private double pos, vel, acc, dPos;
    private final YoDouble[] a;
    private final YoInteger numberOfCoefficients;
    private final DenseMatrix64F constraintMatrix;
    private final DenseMatrix64F constraintVector;
    private final DenseMatrix64F coefficientVector;
    private final double[] xPowers;
+   
+   // Stores the (n-th order) derivative of the xPowers vector
+   private final DenseMatrix64F xPowersDerivativeVector;
 
    private final LinearSolver<DenseMatrix64F> solver;
 
@@ -34,6 +37,8 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
+      
+      xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
 
@@ -56,6 +61,8 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
+      
+      xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
    }
 
    public double getPosition()
@@ -87,15 +94,37 @@ public class YoPolynomial
       }
       return ret;
    }
+   
+   public DenseMatrix64F getCoefficientsVector()
+   {
+      return coefficientVector;
+   }
 
    public YoDouble[] getYoCoefficients()
    {
       return a;
    }
 
+   public void reset()
+   {
+      numberOfCoefficients.set(0);
+      for (int i = 0; i < maximumNumberOfCoefficients; i++)
+         a[i].setToNaN();
+   }
+
+   public void set(YoPolynomial other)
+   {
+      reset();
+
+      reshape(other.getNumberOfCoefficients());
+
+      for (int i = 0; i < other.getNumberOfCoefficients(); i++)
+         a[i].set(other.getCoefficient(i));
+   }
+
    public void setConstant(double z)
    {
-      numberOfCoefficients.set(1);
+      reshape(1);
       coefficientVector.set(0, 0, z);
       setYoVariables();
    }
@@ -335,6 +364,17 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setCubic(double t0, double tFinal, double z0, double zFinal)
+   {
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, 0.0);
+      setPositionRow(2, tFinal, zFinal);
+      setVelocityRow(3, tFinal, 0.0);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setCubic(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
       reshape(4);
@@ -366,6 +406,17 @@ public class YoPolynomial
       setPositionRow(1, tIntermediate, zIntermediate);
       setPositionRow(2, tFinal, zFinal);
       setVelocityRow(3, tFinal, zdFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+   
+   public void setCubicBezier(double t0, double tFinal, double z0, double zR1, double zR2, double zFinal)
+   {
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, t0, 3*(zR1 - z0));
+      setVelocityRow(3, tFinal, 3*(zFinal - zR2));
       solveForCoefficients();
       setYoVariables();
    }
@@ -443,8 +494,19 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, double z0, double zIntermediate1, double zFinal)
+   {
+      reshape(4);
+      MathTools.checkIntervalContains(tIntermediate1, t0, tFinal);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate1, zIntermediate1);
+      setPositionRow(2, tFinal, zFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                               double zIntermediate2, double zFinal)
+                                              double zIntermediate2, double zFinal)
    {
       reshape(4);
       MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
@@ -547,6 +609,54 @@ public class YoPolynomial
          xPowers[i] = xPowers[i - 1] * x;
       }
    }
+   
+   // Returns the order-th derivative of the polynomial at x
+   public double getDerivative(int order, double x)
+   {
+      setXPowers(xPowers, x);
+      
+      dPos = 0.0;
+      int derivativeCoefficient = 0;
+      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         derivativeCoefficient = getDerivativeCoefficient(order, i);
+         dPos += derivativeCoefficient * a[i].getDoubleValue() * xPowers[i - order];
+      }
+      return dPos;
+   }
+
+   /**
+    *  Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
+    * @param order
+    * @param x
+    * @return
+    */
+   public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
+   {
+      setXPowers(xPowers, x);
+      xPowersDerivativeVector.zero();
+
+      int derivativeCoefficient = 0;
+      for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         derivativeCoefficient = getDerivativeCoefficient(order, i);
+         xPowersDerivativeVector.set(i, derivativeCoefficient*xPowers[i - order]);
+      }
+      
+      return xPowersDerivativeVector;
+   }
+   
+   // Returns the constant coefficient at the exponent-th entry of the order-th derivative vector
+   // Example: order = 4, exponent = 5 ==> returns 5*4*3*2
+   public int getDerivativeCoefficient(int order, int exponent)
+   {
+      int coeff = 1;
+      for(int i = exponent; i > exponent - order; i--)
+      {
+         coeff *= i;
+      }
+      return coeff;
+   }
 
    public int getNumberOfCoefficients()
    {
@@ -613,9 +723,24 @@ public class YoPolynomial
       this.coefficientVector.reshape(numberOfCoefficientsRequired, 1);
       this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
       this.constraintVector.reshape(numberOfCoefficientsRequired, 1);
+      this.xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
       numberOfCoefficients.set(numberOfCoefficientsRequired);
 
       for (int i = numberOfCoefficientsRequired; i < maximumNumberOfCoefficients; i++)
          a[i].set(Double.NaN);
+   }
+
+   public String toString()
+   {
+      String inString = "Polynomial: " + a[0].getDoubleValue();
+      for (int i = 1; i < a.length; i++)
+      {
+         inString += " ";
+         if (a[i].getDoubleValue() >= 0)
+            inString += "+";
+         inString += a[i].getDoubleValue() + " x^" + i;
+
+      }
+      return inString;
    }
 }

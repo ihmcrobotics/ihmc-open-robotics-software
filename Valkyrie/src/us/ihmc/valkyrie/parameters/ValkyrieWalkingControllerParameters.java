@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -1258,6 +1259,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return new ValkyrieMomentumOptimizationSettings(jointMap);
+   }
+
+   @Override
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+   {
+      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override
