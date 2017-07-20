@@ -197,9 +197,16 @@ public class BalanceManager
       this.icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-      precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
-      precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      if (walkingMessageHandler != null)
+      {
+         CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
+         precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
+         precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      }
+      else
+      {
+         precomputedICPPlanner = null;
+      }
       blendICPTrajectories.set(true);
 
       if (ENABLE_DYN_REACHABILITY)
@@ -395,13 +402,16 @@ public class BalanceManager
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
 
-      if(blendICPTrajectories.getBooleanValue())
+      if (precomputedICPPlanner != null)
       {
-         precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
-      }
-      else
-      {
-         precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         if (blendICPTrajectories.getBooleanValue())
+         {
+            precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         }
+         else
+         {
+            precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         }
       }
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
