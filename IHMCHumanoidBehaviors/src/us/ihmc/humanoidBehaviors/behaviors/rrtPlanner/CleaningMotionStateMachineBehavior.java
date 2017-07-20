@@ -27,97 +27,96 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<CleaningMotionState>
-{   
+{
    private GetSolarPanelBehavior getSolarPanelBehavior;
    private ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior;
-   
+
    private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
-   
+
    private TestDoneBehavior doneBehavior;
-   
+
    private SolarPanelWholeBodyTrajectoryMessageFactory motionFactory;
-   
+
    YoDouble yoTime;
    FullHumanoidRobotModel fullRobotModel;
    WholeBodyControllerParameters wholeBodyControllerParameters;
-      
+
    public enum CleaningMotionState
    {
       GET_SOLARPANEL, CONTROLPOINT_OPTIMIZATION, GOTO_READYPOSE, CLEANING_MOTION, DONE
    }
-   
+
    public CleaningMotionStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime,
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+                                             WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
+                                             HumanoidReferenceFrames referenceFrames)
    {
       super("CleaningMotionStateMachineBehavior", CleaningMotionState.class, yoTime, communicationBridge);
-      
+
       PrintTools.info("CleaningMotionStateMachineBehavior ");
 
       getSolarPanelBehavior = new GetSolarPanelBehavior(communicationBridge);
       wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
-      doneBehavior = new TestDoneBehavior(communicationBridge);      
-      
+      doneBehavior = new TestDoneBehavior(communicationBridge);
+
       motionFactory = new SolarPanelWholeBodyTrajectoryMessageFactory(fullRobotModel);
-      
-    
+
       // ********************************** get SolarPanel Info ********************************** //     
-      
+
       Pose3D poseSolarPanel = new Pose3D();
       Quaternion quaternionSolarPanel = new Quaternion();
       poseSolarPanel.setPosition(0.7, -0.05, 1.0);
       quaternionSolarPanel.appendRollRotation(0.0);
-      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      quaternionSolarPanel.appendPitchRotation(-Math.PI * 0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
-      
+
       SolarPanel solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
-      
+
       // ********************************** get SolarPanel Info ********************************** //
       // *********************************** get Cleaning Path *********************************** //
-      
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.1);
+
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI * 0.1);
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.1), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.1), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.15, -Math.PI*0.1), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI*0.1), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI*0.3), 1.0);
-      
-            
+
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI * 0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI * 0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI * 0.1), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI * 0.1), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI * 0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.15, -Math.PI * 0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.15, -Math.PI * 0.1), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.15, -Math.PI * 0.1), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.15, -Math.PI * 0.3), 1.0);
+
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
-      
-      PrintTools.info("cur Height is "+ fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23() +" "+ yoTime);
+
+      PrintTools.info("cur Height is " + fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23() + " " + yoTime);
       TimeDomain3DNode.defaultPelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       // *********************************** get Cleaning Path *********************************** //
-            
+
       // for re-initializing ControlPointOptimizationStateMachineBehavior after saving solarpanel information.
       // 170512
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyControllerParameters = wholeBodyControllerParameters;
-                  
+
       RRTNode rootNode = SolarPanelCleaningInfo.getNode();
-      
-      controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters, fullRobotModel, referenceFrames);
-      
+
+      controlPointOptimizationBehavior = new ControlPointOptimizationStateMachineBehavior(rootNode, communicationBridge, yoTime, wholeBodyControllerParameters,
+                                                                                          fullRobotModel, referenceFrames);
+
       setUpStateMachine();
    }
-   
+
    private void setUpStateMachine()
-   {    
+   {
       // condition check for the case that no solution is exist in the CONTROLPOINT_OPTIMIZATION state.
       // In that case, the state transition should be to the DONE state.
-      
+
       // In CONTROLPOINT_OPTIMIZATION, manually selected cleaning motion is put for test.
-      
-      
-      BehaviorAction<CleaningMotionState> getSolarPanelAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.GET_SOLARPANEL, getSolarPanelBehavior)
+
+      BehaviorAction<CleaningMotionState> getSolarPanelAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.GET_SOLARPANEL,
+                                                                                                        getSolarPanelBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -126,8 +125,9 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             sendPacket(p1);
          }
       };
-      
-      BehaviorAction<CleaningMotionState> controlPointOptimizationAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.CONTROLPOINT_OPTIMIZATION, controlPointOptimizationBehavior)
+
+      BehaviorAction<CleaningMotionState> controlPointOptimizationAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.CONTROLPOINT_OPTIMIZATION,
+                                                                                                                   controlPointOptimizationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -136,64 +136,65 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             sendPacket(p1);
          }
       };
-      
+
       StateTransitionCondition yesSolutionCondition = new StateTransitionCondition()
       {
          @Override
          public boolean checkCondition()
-         {            
-            boolean b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() == true;         
+         {
+            boolean b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() == true;
             return b;
          }
       };
-      
+
       StateTransitionCondition noSolutionCondition = new StateTransitionCondition()
       {
          @Override
          public boolean checkCondition()
-         {            
+         {
             boolean b = controlPointOptimizationAction.isDone() && controlPointOptimizationBehavior.isSolved() != true;
             return b;
          }
       };
-      
-      BehaviorAction<CleaningMotionState> gotoReadyPoseAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.GOTO_READYPOSE, wholebodyTrajectoryBehavior)
+
+      BehaviorAction<CleaningMotionState> gotoReadyPoseAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.GOTO_READYPOSE,
+                                                                                                        wholebodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("gotoReadyPoseAction");
             sendPacket(p1);
-            
+
             PrintTools.info("gotoReadyPoseAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-            
+
             SolarPanelCleaningPose readyPose = SolarPanelCleaningInfo.getCleaningPath().getStartPose();
-            motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, 3.0);
+            motionFactory.setMessage(readyPose, Math.PI * 0.0, 0.0, 3.0);
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
          }
       };
-      
-      BehaviorAction<CleaningMotionState> cleaningAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.CLEANING_MOTION, wholebodyTrajectoryBehavior)
+
+      BehaviorAction<CleaningMotionState> cleaningAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.CLEANING_MOTION,
+                                                                                                   wholebodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("cleaningAction");
             sendPacket(p1);
-            
+
             PrintTools.info("cleaningAction");
             WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-            motionFactory.setCleaningPath(SolarPanelCleaningInfo.getCleaningPath());         
-            motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());            
+            motionFactory.setCleaningPath(SolarPanelCleaningInfo.getCleaningPath());
+            motionFactory.setMessage(controlPointOptimizationBehavior.getOptimalControlPointNodePath());
             wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
             wholebodyTrajectoryBehavior.setInput(wholebodyMessage);
-            
-            
+
          }
       };
-            
+
       BehaviorAction<CleaningMotionState> doneAction = new BehaviorAction<CleaningMotionState>(CleaningMotionState.DONE, doneBehavior)
       {
          @Override
@@ -203,18 +204,18 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
             sendPacket(p1);
          }
       };
-            
+
       statemachine.addStateWithDoneTransition(getSolarPanelAction, CleaningMotionState.CONTROLPOINT_OPTIMIZATION);
-            
+
       statemachine.addStateWithDoneTransition(gotoReadyPoseAction, CleaningMotionState.CLEANING_MOTION);
       statemachine.addStateWithDoneTransition(cleaningAction, CleaningMotionState.DONE);
-      
-      statemachine.addState(controlPointOptimizationAction);            
+
+      statemachine.addState(controlPointOptimizationAction);
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.GOTO_READYPOSE, yesSolutionCondition);
       controlPointOptimizationAction.addStateTransition(CleaningMotionState.DONE, noSolutionCondition);
-      
+
       statemachine.addState(doneAction);
-      
+
       statemachine.setStartState(CleaningMotionState.GET_SOLARPANEL);
       PrintTools.info("setUpStateMachine done ");
    }
@@ -224,15 +225,15 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    {
       // TODO Auto-generated method stub
    }
-      
+
    private void setUpSolarPanel()
    {
    }
-   
+
    private class GetSolarPanelBehavior extends AbstractBehavior
    {
       private boolean isDone = false;
-      
+
       public GetSolarPanelBehavior(CommunicationBridgeInterface communicationBridge)
       {
          super(communicationBridge);
@@ -240,16 +241,16 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 
       @Override
       public void doControl()
-      {            
+      {
          setUpSolarPanel();
          isDone = true;
       }
 
       @Override
       public void onBehaviorEntered()
-      {   
+      {
          PrintTools.info("GetSolarPanelBehavior");
-         
+
       }
 
       @Override
@@ -269,7 +270,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 
       @Override
       public void onBehaviorExited()
-      {           
+      {
       }
 
       @Override
@@ -278,11 +279,11 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
          return isDone;
       }
    }
-   
+
    private class TestDoneBehavior extends AbstractBehavior
    {
       private boolean isDone = false;
-      
+
       public TestDoneBehavior(CommunicationBridgeInterface communicationBridge)
       {
          super(communicationBridge);
@@ -290,15 +291,15 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 
       @Override
       public void doControl()
-      {            
+      {
          isDone = true;
       }
 
       @Override
       public void onBehaviorEntered()
-      {   
+      {
          PrintTools.info("TestDoneBehavior");
-         
+
       }
 
       @Override
@@ -318,7 +319,7 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
 
       @Override
       public void onBehaviorExited()
-      {         
+      {
       }
 
       @Override

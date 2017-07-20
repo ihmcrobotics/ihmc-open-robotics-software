@@ -8,51 +8,52 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
-{   
+{
    protected ConfigurationBuildOrder configurationBuildOrder;
    protected SelectionMatrix6D controllableSelectionMatrix;
    protected double trajectoryTime;
    protected RobotSide robotSide;
-   
+
    public ConstrainedEndEffectorTrajectory(double trajectoryTime)
    {
       this.trajectoryTime = trajectoryTime;
-      
+
       this.robotSide = defineRobotSide();
       this.controllableSelectionMatrix = defineControllableSelectionMatrix();
-      this.configurationBuildOrder = defineConfigurationBuildOrder();  
+      this.configurationBuildOrder = defineConfigurationBuildOrder();
    }
-   
+
    public void setTrajectoryTime(double trajectoryTime)
    {
       this.trajectoryTime = trajectoryTime;
    }
-   
+
    public double getTrajectoryTime()
    {
       return this.trajectoryTime;
    }
-      
+
    public RobotSide getRobotSide()
    {
-      if(robotSide == null)
+      if (robotSide == null)
          PrintTools.warn("RobotSide of the end effector should be defined.");
       return this.robotSide;
-   }   
-   
+   }
+
    public RobotSide getAnotherRobotSide()
    {
-      if(getRobotSide() == RobotSide.RIGHT)
+      if (getRobotSide() == RobotSide.RIGHT)
          return RobotSide.LEFT;
       else
          return RobotSide.RIGHT;
    }
-   
+
    public Pose3D getEndEffectorPose(double time, ConfigurationSpace controllableConfigurationSpace)
    {
       ConfigurationSpace constrainedConfigurationSpace = getConfigurationSpace(time);
 
-      ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrix, controllableConfigurationSpace);
+      ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrix,
+                                                                                                                controllableConfigurationSpace);
 
       Point3D translation;
       Quaternion orientation;
@@ -65,8 +66,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
    }
 
    protected abstract RobotSide defineRobotSide();
-     
-   protected abstract ConfigurationSpace getConfigurationSpace(double time);
 
+   protected abstract ConfigurationSpace getConfigurationSpace(double time);
 
 }

@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
 
-public class ConstrainedWholebodyPlanningRequestPacket extends Packet<ConstrainedWholebodyPlanningRequestPacket>
+public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
 {   
    public double tempInputValue; 
    
-   public ConstrainedWholebodyPlanningRequestPacket()
+   public ConstrainedWholeBodyPlanningRequestPacket()
    {
       
    }
@@ -27,7 +27,7 @@ public class ConstrainedWholebodyPlanningRequestPacket extends Packet<Constraine
    }
 
    @Override
-   public boolean epsilonEquals(ConstrainedWholebodyPlanningRequestPacket other, double epsilon)
+   public boolean epsilonEquals(ConstrainedWholeBodyPlanningRequestPacket other, double epsilon)
    {
       return false;
    }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * @author InhoLee 170217
  *
  */
-public abstract class RRTNode implements RRTInterface 
+public abstract class RRTNode implements RRTInterface
 {
    private NodeData nodeData;
    private ArrayList<RRTNode> childRRTNode;
@@ -68,10 +68,10 @@ public abstract class RRTNode implements RRTInterface
    {
       nodeData.setQ(index, data);
    }
-   
+
    public final void setNodeData(RRTNode copyNode)
    {
-      for(int i=0;i<copyNode.getDimensionOfNodeData();i++)
+      for (int i = 0; i < copyNode.getDimensionOfNodeData(); i++)
       {
          nodeData.setQ(i, copyNode.getNodeData(i));
       }
@@ -156,7 +156,7 @@ public abstract class RRTNode implements RRTInterface
          return ret;
       }
    }
-   
+
    public abstract void setRandomNodeData();
 
 }

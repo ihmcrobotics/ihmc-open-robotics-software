@@ -52,13 +52,13 @@ public class SolarPanelCleaningPose
       this.wCoordinate = w;
       this.zRotation = zRotation;
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
-   } 
-   
+   }
+
    public SolarPanel getSolarPanel()
    {
       return solarPanel;
    }
-   
+
    public void setUcoordinate(double u)
    {
       this.uCoordinate = u;
@@ -103,11 +103,11 @@ public class SolarPanelCleaningPose
       RigidBodyTransform poseTransform = solarPanel.getRigidBodyTransform();
 
       Point3D translation;
-      translation = new Point3D(solarPanel.getSizeU()/2, solarPanel.getSizeV()/2, 0);
+      translation = new Point3D(solarPanel.getSizeU() / 2, solarPanel.getSizeV() / 2, 0);
       poseTransform.appendTranslation(translation);
 
       poseTransform.appendPitchRotation(Math.PI);
-      poseTransform.appendYawRotation(-Math.PI/2);
+      poseTransform.appendYawRotation(-Math.PI / 2);
 
       Point3D uvwCoordinate;
       uvwCoordinate = new Point3D(u, v, w);
@@ -130,8 +130,8 @@ public class SolarPanelCleaningPose
    {
       RigidBodyTransform handPoseTransform = new RigidBodyTransform(this.pose.getOrientation(), this.pose.getPosition());
 
-      handPoseTransform.appendPitchRotation(-Math.PI/2);
-      handPoseTransform.appendRollRotation(Math.PI/2);
+      handPoseTransform.appendPitchRotation(-Math.PI / 2);
+      handPoseTransform.appendRollRotation(Math.PI / 2);
 
       return new Quaternion(handPoseTransform.getRotationMatrix());
    }

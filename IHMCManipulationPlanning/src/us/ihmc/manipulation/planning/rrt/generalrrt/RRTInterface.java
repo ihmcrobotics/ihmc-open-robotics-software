@@ -1,4 +1,5 @@
 package us.ihmc.manipulation.planning.rrt.generalrrt;
+
 /**
  * @method boolean isValidNode()
  * This method is for testing the node is valid.
@@ -13,5 +14,6 @@ package us.ihmc.manipulation.planning.rrt.generalrrt;
 public interface RRTInterface
 {
    public abstract boolean isValidNode();
+
    public abstract RRTNode createNode();
 }

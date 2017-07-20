@@ -2,8 +2,6 @@ package us.ihmc.manipulation.planning.rrt.generalrrt;
 
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
-
 public class RRTValidConnection
 {
    private RRTNode parentNode;
@@ -32,7 +30,7 @@ public class RRTValidConnection
       }
       else
       {
-         for (int i = 1; i < numberOfPiece-1; i++)
+         for (int i = 1; i < numberOfPiece - 1; i++)
          {
             RRTNode aNode = nodeCreator.createNode();
 
@@ -52,7 +50,7 @@ public class RRTValidConnection
 
    public boolean isValidConnection()
    {
-      for (int i = 1; i < nodes.size()-1; i++)
+      for (int i = 1; i < nodes.size() - 1; i++)
       {
          if (nodes.get(i).isValidNode() == false)
          {
@@ -61,6 +59,7 @@ public class RRTValidConnection
       }
       return true;
    }
+
    /*
     * numberOfPiece should larger than 2
     */
@@ -69,5 +68,5 @@ public class RRTValidConnection
       nodes.clear();
       this.numberOfPiece = numberOfPiece;
       initialize();
-   }   
+   }
 }

@@ -21,11 +21,11 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       selectionMatrix6D.selectLinearX(false);
       selectionMatrix6D.selectLinearY(false);
       selectionMatrix6D.selectLinearZ(false);
-      
+
       selectionMatrix6D.selectAngularX(false);
       selectionMatrix6D.selectAngularY(false);
       selectionMatrix6D.selectAngularZ(true);
-      
+
       return selectionMatrix6D;
    }
 
@@ -33,8 +33,9 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    public ConfigurationBuildOrder defineConfigurationBuildOrder()
    {
       ConfigurationBuildOrder configurationBuildOrder;
-      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW);
-      
+      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                            ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW);
+
       return configurationBuildOrder;
    }
 
@@ -51,24 +52,22 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       /*
        * Draw Circle in clockwise.
        */
-      double arcAngle = time/getTrajectoryTime() * Math.PI * 2;
-            
+      double arcAngle = time / getTrajectoryTime() * Math.PI * 2;
+
       Point3D arcCenterPoint = new Point3D(0.6, 0.0, 1.1);
       Quaternion arcCenterOrientation = new Quaternion();
-      arcCenterOrientation.appendPitchRotation(-Math.PI*0.5);
+      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
-            
+
       arcCenterRigidBodyController.appendYawRotation(-arcAngle);
       arcCenterRigidBodyController.appendTranslation(0, arcRadius, 0);
       arcCenterRigidBodyController.appendYawRotation(arcAngle);
-      
+
       ConfigurationSpace configurationSpace = new ConfigurationSpace();
       configurationSpace.setTranslation(arcCenterRigidBodyController.getTranslationVector());
-      configurationSpace.setRotation(0, -0.5*Math.PI, 0);
-      
+      configurationSpace.setRotation(0, -0.5 * Math.PI, 0);
+
       return configurationSpace;
    }
 
-   
-   
 }
