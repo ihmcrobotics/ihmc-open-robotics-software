@@ -36,12 +36,12 @@ public class FootLeapOfFaithModule
    {
       this.swingDuration = swingDuration;
 
-      scaleFootWeight.set(true);
-      fractionOfSwing.set(0.95);
+      scaleFootWeight.set(parameters.scaleFootWeight());
+      fractionOfSwing.set(parameters.getFractionOfSwingToScaleFootWeight());
 
-      horizontalFootWeightScaleFactor.set(10.0);
-      verticalFootWeightScaleFactor.set(20.0);
-      minimumHorizontalWeight.set(2.5);
+      horizontalFootWeightScaleFactor.set(parameters.getHorizontalFootWeightScaleFactor());
+      verticalFootWeightScaleFactor.set(parameters.getVerticalFootWeightScaleFactor());
+      minimumHorizontalWeight.set(parameters.getMinimumHorizontalFootWeight());
 
       parentRegistry.addChild(registry);
    }
