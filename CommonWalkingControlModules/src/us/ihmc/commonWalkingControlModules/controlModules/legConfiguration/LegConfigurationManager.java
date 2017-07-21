@@ -90,7 +90,13 @@ public class LegConfigurationManager
       {
          //beginStraightening(swingSide);
          setStraight(swingSide);
+         setFullyExtendLeg(swingSide, true);
       }
+   }
+
+   public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)
+   {
+      legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
    }
 
    public void setStraight(RobotSide robotSide)

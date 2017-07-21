@@ -71,6 +71,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       pelvisOrientationManager.initializeTransfer(transferToSide, footstepTiming.getTransferTime(), footstepTiming.getSwingTime());
 
       legConfigurationManager.beginStraightening(transferToSide);
+      legConfigurationManager.setFullyExtendLeg(transferToSide, false);
    }
 
    @Override
