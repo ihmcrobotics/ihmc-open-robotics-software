@@ -31,7 +31,7 @@ public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBui
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 59.1)
-   @Test(timeout = 300000)
+   @Test
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScript();
@@ -39,7 +39,7 @@ public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBui
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 33.1)
-   @Test(timeout = 170000)
+   @Test
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithLongSteps();
