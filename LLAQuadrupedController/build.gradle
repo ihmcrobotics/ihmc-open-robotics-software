@@ -56,7 +56,7 @@ jar {
 
             "Bundle-Name": project.name,
             "Bundle-Version": project.version,
-            "Bundle-License": "${project.ext.licenseURL}",
+            "Bundle-License": ihmc.licenseURL,
             "Bundle-Vendor": "IHMC",
             'Class-Path': depend.join(' '))
    }
