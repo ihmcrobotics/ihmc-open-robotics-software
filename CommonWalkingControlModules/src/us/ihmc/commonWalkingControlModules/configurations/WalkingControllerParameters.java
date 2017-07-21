@@ -897,7 +897,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public LeapOfFaithParameters getLeapOfFaithParameters()
    {
       if (leapOfFaithParameters == null)
-         leapOfFaithParameters = new LeapOfFaithParameters(massScale);
+         leapOfFaithParameters = new LeapOfFaithParameters();
 
       return leapOfFaithParameters;
    }
