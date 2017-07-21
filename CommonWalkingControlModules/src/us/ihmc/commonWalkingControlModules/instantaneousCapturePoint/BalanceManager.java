@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -109,7 +109,7 @@ public class BalanceManager
 
    private final FrameVector2d icpError2d = new FrameVector2d();
 
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
 
    private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
@@ -717,7 +717,7 @@ public class BalanceManager
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
       centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
