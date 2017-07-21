@@ -243,13 +243,18 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void compute(double time)
    {
+      referenceICPGenerator.compute(time);
+      update(time);
+   }
+   
+   private void update(double time)
+   {
       referenceCoPGenerator.update(time);
       referenceCMPGenerator.update(time);
-      referenceICPGenerator.compute(time);
-
+      
       referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
       referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
-      referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);      
+      referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);            
    }
    
    /** {@inheritDoc} */
