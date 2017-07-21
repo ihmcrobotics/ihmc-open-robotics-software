@@ -106,7 +106,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
-      leapOfFaithParameters = new LeapOfFaithParameters(massScale);
+      leapOfFaithParameters = new LeapOfFaithParameters();
 
       for (RobotSide robotSide : RobotSide.values)
       {
