@@ -20,7 +20,6 @@ import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.robotDataLogger.Camera;
-import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataVisualizer.logger.converters.VideoConverter;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 
@@ -221,7 +220,7 @@ public class VideoDataPlayer
       
       try
       {
-         VideoConverter.convert(videoFile, selectedFile, startVideoTimestamp, endVideoTimestamp, 8000, monitor);
+         VideoConverter.convert(videoFile, selectedFile, startVideoTimestamp, endVideoTimestamp, monitor);
       }
       catch (IOException e)
       {
