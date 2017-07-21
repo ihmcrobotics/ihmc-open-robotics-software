@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,13 +45,14 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
       numberOfSegments = new YoInteger(name + "NumberOfSegments", registry);
       currentSegmentIndex = new YoInteger(name + "CurrentSegmentIndex", registry);
+      currentSegmentIndex.set(-1);
       for (int i = 0; i < maxNumberOfSegments; i++)
       {
          YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(name + "Segment" + i, maxNumberOfCoefficients, worldFrame, registry);
+         segmentTrajectory.reset();
          segments.add(segmentTrajectory);
       }
       nodeTime = new double[maxNumberOfSegments + 1];
-      reset();
    }
 
    public void reset()
@@ -90,7 +92,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
    {
       int segmentIndex = 0;
       for (; segmentIndex < segments.size(); segmentIndex++)
-         if (segments.get(segmentIndex).timeIntervalContains(timeInState))
+         if (segments.get(segmentIndex).timeIntervalContains(timeInState, Epsilons.ONE_THOUSANDTH))
             break;
       if (segmentIndex == segments.size())
          throw new RuntimeException(name + ": Unable to locate suitable segment for given time:" + timeInState);

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -19,7 +17,6 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
    }
 
-   @Override
    public void reset()
    {
       super.reset();
@@ -61,10 +58,5 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
       boolean currentIsDone = !currentSegment.timeIntervalContains(timeIntoStep.getDoubleValue());
 
       return currentIsLast && currentIsDone;
-   }
-
-   public List<YoFrameTrajectory3D> getPolynomials()
-   {
-      return segments;
    }
 }

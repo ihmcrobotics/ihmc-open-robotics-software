@@ -32,11 +32,11 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void initializeForSwing(double currentTime);
 
-   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
+   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop);
 
-   void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide);
+   void computeReferenceAngularMomentumStartingFromSingleSupport();
 
-   List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories();
+   List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories();
 
-   List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories();
+   List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories();
 }

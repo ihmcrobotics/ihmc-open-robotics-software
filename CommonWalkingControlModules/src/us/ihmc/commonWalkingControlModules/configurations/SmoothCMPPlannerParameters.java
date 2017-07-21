@@ -35,7 +35,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /**
     * Ordered list of transition time to a particular CoP point from the previous CoP point
     */
-   private final double[] segmentDurations = {1.5, 0.5, 0.1, 1.5}; // {to HEEL , to BALL, to TOE, to MIDFEET}
+   private final double[] segmentDurations = {0.05, 0.8, 0.2, 0.05}; // {to HEEL , to BALL, to TOE, to MIDFEET}
    /**
     * Vector offsets relative to centroid of support polygon defined copOffsetFrames 
     */
@@ -86,8 +86,8 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
     */
    private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
    
-   private final double additionalTimeForFinalTransfer = 1.5;
-   private final double additionalTimeForInitialTransfer = 1.5;
+   private final double additionalTimeForFinalTransfer = 0.05;
+   private final double additionalTimeForInitialTransfer = 0.05;
    
    public SmoothCMPPlannerParameters()
    {

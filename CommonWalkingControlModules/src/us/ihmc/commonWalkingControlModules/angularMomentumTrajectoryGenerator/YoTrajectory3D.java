@@ -414,6 +414,11 @@ public class YoTrajectory3D
       return getYoTrajectory(index).getFinalTime();
    }
 
+   public boolean timeIntervalContains(double timeToCheck, double EPSILON)
+   {
+      return (xTrajectory.timeIntervalContains(timeToCheck, EPSILON) && yTrajectory.timeIntervalContains(timeToCheck, EPSILON) && zTrajectory.timeIntervalContains(timeToCheck, EPSILON));
+   }
+   
    public boolean timeIntervalContains(double timeToCheck)
    {
       return (xTrajectory.timeIntervalContains(timeToCheck) && yTrajectory.timeIntervalContains(timeToCheck) && zTrajectory.timeIntervalContains(timeToCheck));

@@ -190,7 +190,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
+   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
       computeTrajectories();
    }
@@ -237,19 +237,19 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide)
+   public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
       computeTrajectories();
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories()
+   public List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories()
    {
       return transferTrajectories;
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories()
+   public List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories()
    {
       return swingTrajectories;
    }
