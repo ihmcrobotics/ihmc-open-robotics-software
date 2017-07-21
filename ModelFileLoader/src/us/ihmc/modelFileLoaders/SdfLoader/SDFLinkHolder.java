@@ -141,6 +141,7 @@ public class SDFLinkHolder
       this.joint = joint;
    }
 
+   @Override
    public String toString()
    {
       return name;
@@ -204,6 +205,11 @@ public class SDFLinkHolder
    public void setInertialFrameWithRespectToLinkFrame(RigidBodyTransform newTransform)
    {
       this.inertialFrameWithRespectToLinkFrame.set(newTransform);
+   }
+
+   public RigidBodyTransform getInertialFrameWithRespectToLinkFrame()
+   {
+      return inertialFrameWithRespectToLinkFrame;
    }
 
    public void setInertia(Matrix3D inertia)

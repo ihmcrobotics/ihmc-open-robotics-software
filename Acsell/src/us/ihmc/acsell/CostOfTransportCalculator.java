@@ -4,8 +4,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotDataLogger.RobotVisualizer;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -27,7 +27,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
    private final YoDouble averageVelocity;
    private final YoDouble costOfTransport;
    
-   private FullRobotModel fullRobotModel;
+   private RigidBody rootBody;
    private YoDouble totalWorkVariable;
    
    private final int samples;
@@ -84,7 +84,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
       this.robotTime[currentSample] = Conversions.nanosecondsToSeconds(timestamp);
       this.totalWork[currentSample] = totalWorkVariable.getDoubleValue();
       
-      fullRobotModel.getRootJoint().getTranslation(position);
+      rootBody.getChildrenJoints().get(0).getFrameAfterJoint().getInverseTransformToRoot().getTranslation(position);
       this.xPosition[currentSample] = position.getX();
       this.yPosition[currentSample] = position.getY();
       this.zPosition[currentSample] = position.getZ();
@@ -123,13 +123,13 @@ public class CostOfTransportCalculator implements RobotVisualizer
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       PrintTools.info(this, "Initializing cost of transport calculator. Robot mass is " + robotMass + "kg");
       registry.addChild(this.registry);
-      this.fullRobotModel = fullRobotModel;
+      this.rootBody = rootBody;
       
-      superVisualizer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
+      superVisualizer.setMainRegistry(registry, rootBody, yoGraphicsListRegistry);
    }
 
    @Override

@@ -1,8 +1,5 @@
 package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
 /**
@@ -13,7 +10,7 @@ import java.util.Arrays;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class Summary implements IDLStruct<Summary>
+public class Summary
 {
     public Summary()
     {
@@ -21,13 +18,13 @@ public class Summary implements IDLStruct<Summary>
         	summarizedVariables_ = new IDLSequence.StringBuilderHolder (128, "type_d");           
         
     }
-    @Override
+
     public void set(Summary other)
     {
         	createSummary_ = other.createSummary_;
         	summaryTriggerVariable_.setLength(0);
         	summaryTriggerVariable_.append(other.summaryTriggerVariable_);
-        	summarizedVariables_.set(other.summarizedVariables_);
+            summarizedVariables_.set(other.summarizedVariables_);	
     }
 
     public void setCreateSummary(boolean createSummary)
@@ -67,99 +64,7 @@ public class Summary implements IDLStruct<Summary>
         
 
 
-	public static int getMaxCdrSerializedSize()
-	{
-		return getMaxCdrSerializedSize(0);
-	}
 
-	public static int getMaxCdrSerializedSize(int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 1024 + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 128; ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + 1024 + 1;
-	    }
-	
-	    return current_alignment - initial_alignment;
-	}
-
-
-	public final static int getCdrSerializedSize(Summary data)
-	{
-		return getCdrSerializedSize(data, 0);
-	}
-
-	public final static int getCdrSerializedSize(Summary data, int current_alignment)
-	{
-	    int initial_alignment = current_alignment;
-	            
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getSummaryTriggerVariable().length() + 1;
-
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getSummarizedVariables().size(); ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getSummarizedVariables().get(a).length() + 1;
-	    }
-	
-	    return current_alignment - initial_alignment;
-	}
-	
-	@Override
-	public final void serialize(CDR cdr)
-	{
-
-
-	    cdr.write_type_7(createSummary_);
-
-	    if(summaryTriggerVariable_.length() <= 1024)
-	    cdr.write_type_d(summaryTriggerVariable_);else
-	        throw new RuntimeException("summaryTriggerVariable field exceeds the maximum length");
-
-	    if(summarizedVariables_.size() <= 128)
-	    cdr.write_type_e(summarizedVariables_);else
-	        throw new RuntimeException("summarizedVariables field exceeds the maximum length");
-	}
-	
-	@Override
-	public final void deserialize(CDR cdr)
-	{
-
-	    	createSummary_ = cdr.read_type_7();	
-
-	    	cdr.read_type_d(summaryTriggerVariable_);	
-
-	    	cdr.read_type_e(summarizedVariables_);	
-	}
-	
-	@Override
-	public final void serialize(InterchangeSerializer ser)
-	{
-			    ser.write_type_7("createSummary", createSummary_);
-			    
-			    ser.write_type_d("summaryTriggerVariable", summaryTriggerVariable_);
-			    
-			    ser.write_type_e("summarizedVariables", summarizedVariables_);
-			    
-	}
-	
-	@Override
-	public final void deserialize(InterchangeSerializer ser)
-	{
-	    			createSummary_ = ser.read_type_7("createSummary");	
-	    	    
-	    			ser.read_type_d("summaryTriggerVariable", summaryTriggerVariable_);	
-	    	    
-	    			ser.read_type_e("summarizedVariables", summarizedVariables_);	
-	    	    
-	}
 
     @Override
     public boolean equals(Object other)

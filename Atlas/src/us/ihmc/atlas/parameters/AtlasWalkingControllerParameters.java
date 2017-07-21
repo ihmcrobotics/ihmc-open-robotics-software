@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,7 +36,6 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -70,13 +71,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private final AtlasJointMap jointMap;
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
+   private final ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private final double massScale;
 
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
-   private Map<String, Pose> bodyHomeConfiguration = null;
+   private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
@@ -91,6 +93,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
+      angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
       min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
       min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
@@ -103,7 +106,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
-      leapOfFaithParameters = new LeapOfFaithParameters(massScale);
+      leapOfFaithParameters = new LeapOfFaithParameters();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -853,14 +856,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
       if (bodyHomeConfiguration != null)
          return bodyHomeConfiguration;
 
-      bodyHomeConfiguration = new HashMap<String, Pose>();
+      bodyHomeConfiguration = new HashMap<String, Pose3D>();
 
-      Pose homeChestPoseInPelvisZUpFrame = new Pose();
+      Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
@@ -1245,6 +1248,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
+   }
+
+   @Override
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+   {
+      return angularMomentumModifierParameters;
    }
 
    @Override

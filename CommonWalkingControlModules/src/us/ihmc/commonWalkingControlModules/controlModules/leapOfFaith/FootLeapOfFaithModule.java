@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -13,49 +15,69 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootLeapOfFaithModule
 {
+   private static final String yoNamePrefix = "leapOfFaith";
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
-   private final YoWrench footWrench;
-   private final RigidBody footBody;
 
-   private final FrameVector tempVector = new FrameVector();
    private final YoDouble swingDuration;
 
-   private final YoBoolean useFootForce = new YoBoolean("leapOfFaithUseFootForce", registry);
-   private final YoDouble gain = new YoDouble("leapOfFaithFootForceGain", registry);
+   private final YoDouble fractionOfSwing = new YoDouble(yoNamePrefix + "FractionOfSwingToScaleFootWeight", registry);
+   private final YoBoolean scaleFootWeight = new YoBoolean(yoNamePrefix + "ScaleFootWeight", registry);
 
-   public FootLeapOfFaithModule(YoDouble swingDuration, RigidBody footBody, LeapOfFaithParameters parameters, YoVariableRegistry parentRegistry)
+   private final YoDouble verticalFootWeightScaleFactor = new YoDouble(yoNamePrefix + "VerticalFootWeightScaleFactor", registry);
+   private final YoDouble horizontalFootWeightScaleFactor = new YoDouble(yoNamePrefix + "HorizontalFootWeightScaleFactor", registry);
+
+   private final YoDouble verticalFootWeightScaleFraction = new YoDouble(yoNamePrefix + "VerticalFootWeightScaleFraction", registry);
+   private final YoDouble horizontalFootWeightScaleFraction = new YoDouble(yoNamePrefix + "HorizontalFootWeightScaleFraction", registry);
+   private final YoDouble minimumHorizontalWeight = new YoDouble(yoNamePrefix + "MinimumHorizontalFootWeight", registry);
+
+   public FootLeapOfFaithModule(YoDouble swingDuration, LeapOfFaithParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.swingDuration = swingDuration;
-      this.footBody = footBody;
 
-      footWrench = new YoWrench("leapOfFaithFoot", "", footBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), registry);
+      scaleFootWeight.set(parameters.scaleFootWeight());
+      fractionOfSwing.set(parameters.getFractionOfSwingToScaleFootWeight());
 
-      useFootForce.set(parameters.useFootForce());
-      gain.set(parameters.getFootForceGain());
+      horizontalFootWeightScaleFactor.set(parameters.getHorizontalFootWeightScaleFactor());
+      verticalFootWeightScaleFactor.set(parameters.getVerticalFootWeightScaleFactor());
+      minimumHorizontalWeight.set(parameters.getMinimumHorizontalFootWeight());
 
       parentRegistry.addChild(registry);
    }
 
    public void compute(double currentTime)
    {
-      footWrench.setToZero();
+      horizontalFootWeightScaleFraction.set(1.0);
+      verticalFootWeightScaleFraction.set(1.0);
 
-      if (useFootForce.getBooleanValue())
+      double exceededTime = Math.max(currentTime - fractionOfSwing.getDoubleValue() * swingDuration.getDoubleValue(), 0.0);
+
+      if (exceededTime == 0.0)
+         return;
+
+      if (scaleFootWeight.getBooleanValue())
       {
-         double timePastEnd = Math.max(currentTime - swingDuration.getDoubleValue(), 0.0);
+         double horizontalFootWeightScaleFraction = MathTools.clamp(1.0 - horizontalFootWeightScaleFactor.getDoubleValue() * exceededTime, 0.0, 1.0);
+         double verticalFootWeightScaleFraction = Math.max(1.0, 1.0 + exceededTime * verticalFootWeightScaleFactor.getDoubleValue());
 
-         tempVector.setToZero(ReferenceFrame.getWorldFrame());
-         tempVector.setZ(-gain.getDoubleValue() * timePastEnd);
-         footWrench.setLinearPart(tempVector);
+         this.horizontalFootWeightScaleFraction.set(horizontalFootWeightScaleFraction);
+         this.verticalFootWeightScaleFraction.set(verticalFootWeightScaleFraction);
       }
-
-      externalWrenchCommand.set(footBody, footWrench.getWrench());
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   public void scaleFootWeight(YoFrameVector unscaledLinearWeight, YoFrameVector scaledLinearWeight)
    {
-      return externalWrenchCommand;
+      if (!scaleFootWeight.getBooleanValue())
+         return;
+
+      scaledLinearWeight.set(unscaledLinearWeight);
+      scaledLinearWeight.scale(horizontalFootWeightScaleFraction.getDoubleValue());
+
+      scaledLinearWeight.setX(Math.max(minimumHorizontalWeight.getDoubleValue(), scaledLinearWeight.getX()));
+      scaledLinearWeight.setY(Math.max(minimumHorizontalWeight.getDoubleValue(), scaledLinearWeight.getY()));
+
+      double verticalWeight = unscaledLinearWeight.getZ() * verticalFootWeightScaleFraction.getDoubleValue();
+      scaledLinearWeight.setZ(verticalWeight);
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,12 +32,14 @@ import java.util.List;
 
 public abstract class ICPOptimizationController
 {
-   protected static final boolean VISUALIZE = false;
+   protected static final boolean VISUALIZE = true;
    protected static final boolean COMPUTE_COST_TO_GO = false;
    protected static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
 
    protected static final String yoNamePrefix = "controller";
+
+   private static final  double maxICPVelocityAtTransferStart = 0.4;
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -114,6 +116,8 @@ public abstract class ICPOptimizationController
    protected final YoDouble transferSplitFractionUnderDisturbance = new YoDouble(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
    protected final YoDouble magnitudeForBigAdjustment = new YoDouble(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
+   private final YoBoolean limitReachabilityFromAdjustment = new YoBoolean(yoNamePrefix + "LimitReachabilityFromAdjustment", registry);
+
    protected final boolean useTwoCMPs;
    protected final boolean useFootstepRegularization;
    protected final boolean useFeedbackRegularization;
@@ -153,12 +157,12 @@ public abstract class ICPOptimizationController
    protected final double dynamicRelaxationDoubleSupportWeightModifier;
    protected final int maximumNumberOfFootstepsToConsider;
 
-   protected final boolean useDifferentSplitRatioForBigAdjustment;
-   protected final double minimumTimeOnInitialCMPForBigAdjustment;
+   protected boolean useDifferentSplitRatioForBigAdjustment;
+   protected double minimumTimeOnInitialCMPForBigAdjustment;
 
-   public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-         boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
@@ -186,7 +190,8 @@ public abstract class ICPOptimizationController
       solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
+                                                                                       registry, yoGraphicsListRegistry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
             yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
@@ -195,7 +200,7 @@ public abstract class ICPOptimizationController
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      useTwoCMPs = icpPlannerParameters.useTwoCMPsPerSupport();
+      useTwoCMPs = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1;
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
 
@@ -216,6 +221,8 @@ public abstract class ICPOptimizationController
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
+      limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
@@ -414,6 +421,11 @@ public abstract class ICPOptimizationController
       }
    }
 
+   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   {
+      solutionHandler.setReferenceICPVelocity(desiredICPVelocity);
+   }
+
 
    /**
     * Initializes the controller to smoothly re-center the ICP in the support polygon preparing the
@@ -444,7 +456,7 @@ public abstract class ICPOptimizationController
       doingBigAdjustment.set(false);
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
@@ -479,7 +491,7 @@ public abstract class ICPOptimizationController
       inputHandler.initializeForDoubleSupport(stateMultiplierCalculator, numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(),
             useTwoCMPs, transferToSide, omega0);
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
    }
 
    /**
@@ -509,7 +521,7 @@ public abstract class ICPOptimizationController
 
       inputHandler.initializeForSingleSupport(stateMultiplierCalculator, numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
+      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
    }
 
    protected int initializeOnContactChange(double initialTime)
@@ -598,7 +610,10 @@ public abstract class ICPOptimizationController
       solver.resetFootstepConditions();
 
       if (localUseStepAdjustment && (!isInTransfer.getBooleanValue() || ALLOW_ADJUSTMENT_IN_TRANSFER))
+      {
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider);
+         reachabilityConstraintHandler.updateReachabilityConstraint(solver);
+      }
 
       submitFeedbackTaskConditionsToSolver();
       submitAngularMomentumTaskConditionsToSolver();
@@ -733,8 +748,16 @@ public abstract class ICPOptimizationController
       solutionHandler.getControllerReferenceCMP(tempPoint2d);
       controllerFeedbackCMP.set(tempPoint2d);
       controllerFeedbackCMP.add(tempVector2d);
+
+      if (limitReachabilityFromAdjustment.getBooleanValue())
+         updateReachabilityRegionFromAdjustment();
    }
 
+
+   private void updateReachabilityRegionFromAdjustment()
+   {
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+   }
 
 
    protected void scaleStepRegularizationWeightWithTime()
@@ -821,9 +844,9 @@ public abstract class ICPOptimizationController
 
 
 
-
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
    public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
 
+   public abstract double getOptimizedTimeRemaining();
 }

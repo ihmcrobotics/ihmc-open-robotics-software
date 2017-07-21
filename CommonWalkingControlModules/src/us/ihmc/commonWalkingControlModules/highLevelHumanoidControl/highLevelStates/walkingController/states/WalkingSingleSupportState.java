@@ -9,20 +9,19 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingSingleSupportState extends SingleSupportState
 {
@@ -49,10 +48,14 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final YoDouble remainingSwingTimeAccordingToPlan = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
    private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
+   private final YoDouble optimizedRemainingSwingTime = new YoDouble("optimizedRemainingSwingTime", registry);
    private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean minimizeAngularMomentumRateZDuringSwing = new YoBoolean("minimizeAngularMomentumRateZDuringSwing", registry);
+
+   private final FrameVector touchdownErrorVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final YoBoolean offsetFootstepPlanOnTouchdown = new YoBoolean("offsetFootstepPlanOnTouchdown", registry);
 
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -75,6 +78,17 @@ public class WalkingSingleSupportState extends SingleSupportState
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+
+      offsetFootstepPlanOnTouchdown.set(walkingControllerParameters.offsetFootstepPlanOnTouchdown());
+
+      setYoVariablesToNaN();
+   }
+
+   private void setYoVariablesToNaN()
+   {
+      optimizedRemainingSwingTime.setToNaN();
+      estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
+      remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
 
@@ -215,11 +229,14 @@ public class WalkingSingleSupportState extends SingleSupportState
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
          double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
-         double nextSwingDuration = nextFootstepTiming.getSwingTime();
 
          swingTime = currentSwingDuration;
          footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
-         nextFootstepTiming.setTimings(nextSwingDuration, nextTransferDuration);
+
+         if (nextFootstepTiming != null)
+            nextFootstepTiming.setTimings(nextFootstepTiming.getSwingTime(), nextTransferDuration);
+         else
+            balanceManager.setFinalTransferTime(nextTransferDuration);
       }
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
@@ -253,10 +270,21 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
-      actualFootPoseInWorld.setToZero(fullRobotModel.getEndEffectorFrame(swingSide, LimbName.LEG)); // changed Here Nicolas
+      actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
+
+      if (offsetFootstepPlanOnTouchdown.getBooleanValue())
+      {
+         actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
+         touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
+         touchdownErrorVector.setZ(0.0);
+         walkingMessageHandler.addOffsetVector(touchdownErrorVector);
+      }
+
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
+
+      setYoVariablesToNaN();
    }
 
    private final FramePoint2d filteredDesiredCoP = new FramePoint2d(worldFrame);
@@ -289,18 +317,29 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */
    private double requestSwingSpeedUpIfNeeded()
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
-      estimatedRemainingSwingTimeUnderDisturbance.set(balanceManager.estimateTimeRemainingForSwingUnderDisturbance());
 
-      if (estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue() > 1.0e-3)
+      double remainingTime;
+      if (balanceManager.useICPTimingOptimization())
       {
-         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
+         remainingTime = balanceManager.getOptimizedTimeRemaining();
+         optimizedRemainingSwingTime.set(remainingTime);
+      }
+      else
+      {
+         remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
+      }
+
+      if (remainingTime > 1.0e-3)
+      {
+         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / remainingTime;
          return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
       }
       else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
@@ -312,9 +351,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateFootstepParameters()
    {
+      feetManager.adjustHeightIfNeeded(nextFootstep);
+
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
-      pelvisOrientationManager.setTrajectoryFromFootstep();
+      pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));

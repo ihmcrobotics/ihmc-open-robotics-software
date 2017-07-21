@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
@@ -83,7 +83,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private ArrayList<Point3D> keyFrameFixPos = new ArrayList<Point3D>(0);
    private ArrayList<Integer> keyFrameTimes = new ArrayList<Integer>(0);
    
-   private Graphics3DNode fixPointNode = new Graphics3DNode("cameraFixPoint", new Graphics3DObject(new Sphere3d(0.01), YoAppearance.RGBColor(1.0, 0.0, 0.0, 0.5)));
+   private Graphics3DNode fixPointNode = new Graphics3DNode("cameraFixPoint", new Graphics3DObject(new Sphere3D(0.01), YoAppearance.RGBColor(1.0, 0.0, 0.0, 0.5)));
 
    private boolean toggleCameraKeyPoints = false;
    private int cameraKeyPointIndex;

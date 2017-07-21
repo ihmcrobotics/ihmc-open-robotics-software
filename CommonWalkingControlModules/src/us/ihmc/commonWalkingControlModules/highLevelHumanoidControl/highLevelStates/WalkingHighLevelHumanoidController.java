@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -49,7 +49,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
@@ -57,9 +56,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -79,6 +75,9 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedLis
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -154,8 +153,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final Map<OneDoFJoint, JointAccelerationIntegrationParametersReadOnly> jointAccelerationIntegrationParameters;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-         HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
+                                             HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
+                                             ICPTrajectoryPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       super(controllerState);
 
@@ -181,13 +180,16 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
       RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame,trajectoryFrames);
       bodyManagers.add(chestManager);
 
-      RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
-      bodyManagers.add(headManager);
+      if (head != null)
+      {
+         ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
+         RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
+         bodyManagers.add(headManager);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -209,13 +211,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
-      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
-      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
-
-      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
+      walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
+      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters, registry);
 
       String namePrefix = "walking";
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", WalkingStateEnum.class, yoTime, registry); // this is used by name, and it is ugly.
@@ -644,7 +641,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
-      
+
       feetManager.compute();
       legConfigurationManager.compute();
 
@@ -663,7 +660,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
-      
+
       comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
             isRecoveringFromPush, feetManager));
@@ -867,5 +864,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       walkingMessageHandler.clearFootsteps();
 
+   }
+
+   /**
+    * Returns the currently active walking state. This is used for unit testing.
+    * @return WalkingStateEnum
+    */
+   public WalkingStateEnum getWalkingStateEnum()
+   {
+      return stateMachine.getCurrentStateEnum();
    }
 }

@@ -41,7 +41,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    /**
     * Copies the variables associated with command queuing from the given {@link #QueueableCommand} into this one.
     */
-   protected void setQueueqableCommandVariables(QueueableCommand<?, ?> other)
+   public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
    {
       setExecutionDelayTime(other.getExecutionDelayTime());
       commandId = other.getCommandId();
@@ -53,7 +53,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    /**
     * Copies the variables associated with command queuing from the given {@link #QueueableMessage} into this one.
     */
-   protected void setQueueqableCommandVariables(QueueableMessage<?> message)
+   public void setQueueableCommandVariables(QueueableMessage<?> message)
    {
       setExecutionDelayTime(message.getExecutionDelayTime());
       commandId = message.getUniqueId();
@@ -108,7 +108,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       return executionMode;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
     * @return the time to delay this command in seconds
@@ -118,7 +118,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
     * @param delayTime the time in seconds to delay after receiving the command before executing
@@ -141,9 +141,9 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     * Used to offset the trajectory in case it is queued.
     */
    public abstract void addTimeOffset(double timeOffset);
-   
+
    /**
-    * returns the expected execution time of this command. The execution time will be computed when the controller 
+    * returns the expected execution time of this command. The execution time will be computed when the controller
     * receives the command using the controllers time plus the execution delay time.
     * This is used when {@code getExecutionDelayTime} is non-zero
     */
@@ -161,7 +161,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       this.adjustedExecutionTime = adjustedExecutionTime;
    }
-   
+
    /**
     * tells the controller if this command supports delayed execution
     * (Spoiler alert: It does)
@@ -172,7 +172,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       return true;
    }
-   
+
    public boolean epsilonEquals(C other, double epsilon)
    {
       if(commandId != other.getCommandId())

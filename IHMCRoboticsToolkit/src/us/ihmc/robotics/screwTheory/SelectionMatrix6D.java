@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -432,6 +433,34 @@ public class SelectionMatrix6D
    }
 
    /**
+    * Applies the angular part of this selection matrix on the given vector:<br>
+    * v' = A<sub>3x3</sub> * v<br>
+    * where v is the given vector, A<sub>3x3</sub> the angular part of this selection matrix, and v'
+    * the result of the selection.
+    * 
+    * @param vectorToBeModified the vector on which the angular part of this selection matrix to be
+    *           applied. Modified.
+    */
+   public void applyAngularSelection(FrameVector vectorToBeModified)
+   {
+      angularPart.applySelection(vectorToBeModified);
+   }
+
+   /**
+    * Applies this selection matrix on the given vector:<br>
+    * v' = L<sub>3x3</sub> * v<br>
+    * where v is the given vector, L<sub>3x3</sub> the linear part of this selection matrix, and v'
+    * the result of the selection.
+    * 
+    * @param vectorToBeModified the vector on which the linear part of this selection matrix to be
+    *           applied. Modified.
+    */
+   public void applyLinearSelection(FrameVector vectorToBeModified)
+   {
+      linearPart.applySelection(vectorToBeModified);
+   }
+
+   /**
     * Converts this into an actual 6-by-6 selection matrix that is to be used with data expressed in
     * the {@code destinationFrame}.
     * <p>
@@ -587,18 +616,20 @@ public class SelectionMatrix6D
    {
       return linearPart;
    }
-   
+
    /**
     * Returns true if any of the angular axis are enabled
+    * 
     * @return
     */
    public boolean isAngularPartActive()
    {
       return isAngularXSelected() || isAngularYSelected() || isAngularZSelected();
    }
-   
+
    /**
     * Returns true if any of the linear axis are enabled
+    * 
     * @return
     */
    public boolean isLinearPartActive()

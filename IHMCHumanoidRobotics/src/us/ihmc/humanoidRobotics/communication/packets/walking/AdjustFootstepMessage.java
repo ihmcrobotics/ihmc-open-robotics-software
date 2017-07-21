@@ -280,11 +280,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       AdjustFootstepMessage ret = this.clone();
 
-      // Point3D location;
-      ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
+      ret.location.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
       return ret;
    }
 

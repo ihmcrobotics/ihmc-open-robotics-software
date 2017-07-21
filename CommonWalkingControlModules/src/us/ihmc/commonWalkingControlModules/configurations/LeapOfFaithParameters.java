@@ -2,41 +2,49 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 public class LeapOfFaithParameters
 {
-   public final double massScale;
-
-   public LeapOfFaithParameters()
-   {
-      this(1.0);
-   }
-
-   public LeapOfFaithParameters(double massScale)
-   {
-      this.massScale = massScale;
-   }
-
    /**
-    * Specifies whether or not to apply an external force to the end of the swing foot to force it to touchdown.
-    * @return whether or not to push with the foot
+    * Specifies whether or not to scale the weights in the optimization on the swing foot near the end of swing.
     */
-   public boolean useFootForce()
+   public boolean scaleFootWeight()
    {
       return false;
    }
 
    /**
-    * This is the gain used to determine an additional downward force to be applied to the swing foot to force it to contact the ground.
-    * It is multiplied by the time past when we expected touchdown to compute the external force to be exerted by the foot.
-    *
-    * @return force gain
+    * The fraction of the way through the swing phase at which the pelvis starts to rotate down and in the
+    * direction of the step
     */
-   public double getFootForceGain()
+   public double getFractionOfSwingToScaleFootWeight()
    {
-      return 100.0 * massScale;
+      return 0.95;
+   }
+
+   /**
+    * This is the rate factor that the foot weight is scaled by, via reduction, as a function of the time it's being scaled.
+    */
+   public double getHorizontalFootWeightScaleFactor()
+   {
+      return 10.0;
+   }
+
+   /**
+    * This is the rate factor that the foot weight is scaled by, via increase, as a function of the time it's being scaled.
+    */
+   public double getVerticalFootWeightScaleFactor()
+   {
+      return 20.0;
+   }
+
+   /**
+    * This is the minimum horizontal weight that will be used for the swing foot.
+    */
+   public double getMinimumHorizontalFootWeight()
+   {
+      return 2.5;
    }
 
    /**
     * Specifies whether or not to start rotating the pelvis to set the foot down.
-    * @return whether or not to rotate the pelvis
     */
    public boolean usePelvisRotation()
    {
@@ -46,10 +54,8 @@ public class LeapOfFaithParameters
    /**
     * Gain to modify the desired pelvis yaw cause the pelvis to yaw towards the step to help set the foot down.
     * It is multiplied by the time past when we expected touchdown to compute the angle offset of the pelvis yaw.
-    *
-    * @return yaw gain
     */
-   public double getPelvisYawGain()
+   public double getPelvisReachingYawGain()
    {
       return 1.0;
    }
@@ -57,12 +63,35 @@ public class LeapOfFaithParameters
    /**
     * Gain to modify the desired pelvis roll cause the pelvis to roll towards the step to help set the foot down.
     * It is multiplied by the time past when we expected touchdown to compute the angle offset of the pelvis roll.
-    *
-    * @return roll gain
     */
-   public double getPelvisRollGain()
+   public double getPelvisReachingRollGain()
    {
-      return 10.0;
+      return 5.0;
+   }
+
+   /**
+    * The maximum angle that the pelvis will yaw in the direction of the step.
+    */
+   public double getPelvisReachingMaxYaw()
+   {
+      return 0.2;
+   }
+
+   /**
+    * This maximum angle that the pelvis will roll down.
+    */
+   public double getPelvisReachingMaxRoll()
+   {
+      return 0.5;
+   }
+
+   /**
+    * The fraction of the way through the swing phase at which the pelvis starts to rotate down and in the
+    * direction of the step
+    */
+   public double getPelvisReachingFractionOfSwing()
+   {
+      return 0.97;
    }
 
    public boolean relaxPelvisControl()

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
@@ -45,6 +45,9 @@ public class DynamicReachabilityCalculator
    private static final boolean VISUALIZE = false;
    private static final boolean VISUALIZE_REACHABILITY = false;
    private static final double epsilon = 0.005;
+
+
+   private static final double gradientThresholdForConsideration = 0.005;
 
    private final double transferTwiddleSizeDuration;
    private final double swingTwiddleSizeDuration;
@@ -145,7 +148,7 @@ public class DynamicReachabilityCalculator
 
    private final TimeAdjustmentSolver solver;
 
-   private final ICPPlanner icpPlanner;
+   private final ICPPlannerInterface icpPlanner;
    private final ICPOptimizationController icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
@@ -154,9 +157,9 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
-         ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
+                                        ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.dynamicReachabilityParameters = dynamicReachabilityParameters;
       this.icpPlanner = icpPlanner;
@@ -343,8 +346,6 @@ public class DynamicReachabilityCalculator
       RobotSide stanceSide = swingSide.getOppositeSide();
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
-      if (tempFinalCoM.containsNaN())
-         throw new RuntimeException("Final CoM Contains NaN!");
 
       predictedCoMPosition.setToZero(worldFrame);
       predictedCoMPosition.setXY(tempFinalCoM);
@@ -1055,6 +1056,13 @@ public class DynamicReachabilityCalculator
       double nextTransferDuration = originalTransferDurations.get(stepNumber);
       double nextTransferDurationAlpha = originalTransferAlphas.get(stepNumber);
 
+      if (nextTransferDuration == 0.0)
+      {
+         nextEndTransferGradient.setToZero();
+         nextInitialTransferGradient.setToZero();
+         return;
+      }
+
       double nextInitialTransferDuration = nextTransferDurationAlpha * nextTransferDuration;
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
 
@@ -1080,9 +1088,6 @@ public class DynamicReachabilityCalculator
 
       // reset timing
       submitTransferTiming(stepNumber, nextTransferDuration, nextTransferDurationAlpha);
-
-      if (nextInitialTransferGradient.containsNaN() || nextEndTransferGradient.containsNaN())
-         throw new RuntimeException("Next Transfer Gradients Contains NaN.");
    }
 
    private void computeHigherTransferGradient(int stepIndex)
@@ -1208,6 +1213,11 @@ public class DynamicReachabilityCalculator
       gradientToPack.setXY(adjustedPosition);
       gradientToPack.sub(tempPoint);
       gradientToPack.scale(1.0 / variation);
+
+      if (MathTools.intervalContains(gradientToPack.getX(), gradientThresholdForConsideration))
+         gradientToPack.setX(0.0);
+      if (MathTools.intervalContains(gradientToPack.getY(), gradientThresholdForConsideration))
+         gradientToPack.setY(0.0);
    }
 
    private void submitGradientInformationToSolver(int numberOfHigherSteps)

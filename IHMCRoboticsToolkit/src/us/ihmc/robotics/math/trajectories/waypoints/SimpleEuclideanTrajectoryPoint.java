@@ -191,7 +191,7 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
    @Override
    public String toString()
    {
-      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+      NumberFormat doubleFormat = new DecimalFormat(" 0.000;-0.000");
 
       String timeToString = "time = " + doubleFormat.format(getTime());
 
