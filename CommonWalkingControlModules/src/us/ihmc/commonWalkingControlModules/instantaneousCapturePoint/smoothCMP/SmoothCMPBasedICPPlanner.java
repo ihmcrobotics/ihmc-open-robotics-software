@@ -153,7 +153,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);      
       
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
-      if (numberOfFootstepRegistered < numberOfFootstepsToConsider.getIntegerValue())
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
       {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
@@ -183,7 +183,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
-      if (numberOfFootstepRegistered < numberOfFootstepsToConsider.getIntegerValue())
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
       {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
@@ -288,8 +288,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void getNextExitCMP(FramePoint entryCMPToPack)
    {
-      List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
-      plannedCoPWaypoints.get(1).get(this.exitCoPName).getPosition(entryCMPToPack);
+      throw new RuntimeException("to implement"); //TODOLater
    }
 
    @Override
@@ -303,7 +302,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public int getNumberOfFootstepsToConsider()
    {
-      return numberOfFootstepsToConsider.getIntegerValue();
+      return numberFootstepsToConsider.getIntegerValue();
    }
 
    @Override
