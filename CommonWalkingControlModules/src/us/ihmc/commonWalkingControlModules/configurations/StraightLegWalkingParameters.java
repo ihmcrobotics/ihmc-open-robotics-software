@@ -107,9 +107,13 @@ public class StraightLegWalkingParameters
       gains.setJointSpaceKp(40.0);
       gains.setJointSpaceKd(6.0);
       gains.setActuatorSpaceKp(60.0);
-      gains.setActuatorSpaceKd(6.0);
+      gains.setActuatorSpaceKd(20.0);
 
-      gains.setMaxBlendingFactor();
+      gains.setBlendPositionError(true);
+      gains.setMaxPositionBlendingFactor(0.8);
+
+      gains.setBlendVelocityError(true);
+      gains.setMaxVelocityBlendingFactor(2.0);
 
       gains.setBlendPositionError(false);
       gains.setBlendVelocityError(false);
