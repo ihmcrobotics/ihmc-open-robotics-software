@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 import us.ihmc.commonWalkingControlModules.desiredFootStep.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.YoSegmentedFrameTrajectory3D;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
@@ -36,7 +37,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final int maxNumberOfTrajectoryCoefficients = 4;
+   private final int maxNumberOfTrajectoryCoefficients = 7;
    private final int numberOfSwingSegments = 1;
    private final int numberOfTransferSegments = 2;
 
@@ -121,6 +122,10 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          CoPPointsInFoot copLocations = new CoPPointsInFoot(i, referenceFrames, registry);
          upcomingCoPsInFootsteps.add(copLocations);
       }
+      CoPPointsInFoot copLocations = new CoPPointsInFoot(numberOfFootstepsToConsider.getIntegerValue(), referenceFrames, registry);
+      upcomingCoPsInFootsteps.add(copLocations);
+      copLocations = new CoPPointsInFoot(numberOfFootstepsToConsider.getIntegerValue() + 1, referenceFrames, registry);
+      upcomingCoPsInFootsteps.add(copLocations);
       TransferAngMomTrajectory transferTrajectory = new TransferAngMomTrajectory(namePrefix + "Footstep", numberOfFootstepsToConsider.getIntegerValue(),
                                                                                  registry, worldFrame, numberOfTransferSegments,
                                                                                  maxNumberOfTrajectoryCoefficients);
@@ -157,6 +162,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingAngularMomentumTrajectories.get(i).reset();
          transferAngularMomentumTrajectories.get(i).reset();
       }
+      for (int i = 0; i < upcomingCoPsInFootsteps.size(); i++)
+         upcomingCoPsInFootsteps.get(i).reset();
    }
 
    public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations)
@@ -227,7 +234,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
+   public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
       footstepIndex = 0;
       if (atAStop)
@@ -239,7 +246,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    }
 
    @Override
-   public void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide)
+   public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
       footstepIndex = 0;
       previousFirstTransferEndTime = 0.0;
@@ -345,6 +352,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       segmentCoMTrajectory.set(footstepCoMTrajectory);
       segmentCoMTrajectory.setTime(startTime, endTime);
       segmentCoMTrajectory.addTimeOffset(timeOffset);
+      PrintTools.debug("Offset CoM Traj: " + segmentCoMTrajectory.toString());
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
    }
 
@@ -358,14 +366,22 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       tempFramePoint3.add(0, 0, comHeight.getDoubleValue());
       upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryPointEnd).getPosition(tempFramePoint4);      
       tempFramePoint4.add(0, 0, comHeight.getDoubleValue());
-      footstepCoMTrajectory.setCubicBezier(0.0, currentFootstepTime, tempFramePoint1, tempFramePoint2, tempFramePoint3, tempFramePoint4);      
+      PrintTools.debug("Point1: " + tempFramePoint1.toString() + "Point2: " + tempFramePoint2.toString() + "Point3: " + tempFramePoint3.toString() + "Point4: " + tempFramePoint4.toString());
+      PrintTools.debug("Current: " + currentFootstepTime);
+      footstepCoMTrajectory.setCubicBezier(0.0, currentFootstepTime, tempFramePoint1, tempFramePoint2, tempFramePoint3, tempFramePoint4);
+      PrintTools.debug("CoMTrajectory: " + footstepCoMTrajectory.toString());
    }
 
    private void updateCurrentSegmentTimes(int footstepIndex)
    {
       this.currentFootstepTime = 0.0;
-      currentCoPPlanReference = upcomingCoPsInFootsteps.get(footstepIndex);
+      currentCoPPlanReference = upcomingCoPsInFootsteps.get(footstepIndex + 1);
       currentCoPListReference = currentCoPPlanReference.getCoPPointList();
+      if(currentCoPListReference.isEmpty())
+      {
+         PrintTools.debug("CoPList is blank");
+         return;
+      }
       for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != entryCoP; tempInt1++)
          currentFootstepTime += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
       currentSecondTransferSegmentDuration = currentFootstepTime += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
@@ -380,13 +396,13 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories()
+   public List<? extends AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
    {
       return transferAngularMomentumTrajectories;
    }
 
    @Override
-   public List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories()
+   public List<? extends AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
    {
       return swingAngularMomentumTrajectories;
    }

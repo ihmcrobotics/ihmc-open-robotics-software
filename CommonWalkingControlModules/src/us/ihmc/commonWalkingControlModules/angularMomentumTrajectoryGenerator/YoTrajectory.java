@@ -61,6 +61,11 @@ public class YoTrajectory
       return tFinal.getDoubleValue();
    }
 
+   public boolean timeIntervalContains(double timeToCheck, double EPSILON)
+   {
+      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), EPSILON);
+   }
+   
    public boolean timeIntervalContains(double timeToCheck)
    {
       return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);

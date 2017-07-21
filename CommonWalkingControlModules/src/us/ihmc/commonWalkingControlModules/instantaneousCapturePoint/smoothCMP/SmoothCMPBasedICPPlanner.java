@@ -52,7 +52,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                                                   swingDurationShiftFractions, transferDurationAlphas,
                                                                   registry);
 
-      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, numberFootstepsToConsider, swingDurations, transferDurations,
+      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, transferDurationAlphas, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, useDecoupled, worldFrame,

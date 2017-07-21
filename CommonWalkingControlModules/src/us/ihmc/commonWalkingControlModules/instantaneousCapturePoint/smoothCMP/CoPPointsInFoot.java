@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,7 +19,7 @@ public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector zeroVector = new FrameVector();
-   
+
    private final List<CoPPointName> copPointsList = new ArrayList<>(CoPPointName.values.length); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
    private final EnumMap<CoPPointName, CoPTrajectoryPoint> copLocations = new EnumMap<>(CoPPointName.class); // Location of CoP points defined 
    private final EnumMap<CoPPointName, YoFramePoint> copLocationsInWorldFrameReadOnly = new EnumMap<>(CoPPointName.class); // YoFramePoints for visualization
@@ -128,6 +129,8 @@ public class CoPPointsInFoot
       this.footStepCentroid.setIncludingFrame(other.footStepCentroid);
       for (int i = 0; i < CoPPointName.values.length; i++)
          this.copLocations.get(CoPPointName.values[i]).setIncludingFrame(other.get(CoPPointName.values[i]));
+      for(int i = 0; i < other.copPointsList.size(); i++)
+         this.copPointsList.add(other.copPointsList.get(i));
    }
 
    public CoPTrajectoryPoint get(CoPPointName copPointName)
@@ -151,9 +154,9 @@ public class CoPPointsInFoot
    {
       footStepCentroid.registerReferenceFrame(newReferenceFrame);
       for (int i = 0; i < CoPPointName.values.length; i++)
-         copLocations.get(CoPPointName.values[i]).registerReferenceFrame(newReferenceFrame);      
+         copLocations.get(CoPPointName.values[i]).registerReferenceFrame(newReferenceFrame);
    }
-   
+
    public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
    {
       footStepCentroid.switchCurrentReferenceFrame(desiredFrame);
@@ -186,6 +189,9 @@ public class CoPPointsInFoot
       String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
       for (int i = 0; i < CoPPointName.values.length; i++)
          output += CoPPointName.values[i].toString() + " : " + copLocations.get(CoPPointName.values[i]) + "\n";
+      for (int i = 0; i < copPointsList.size(); i++)
+         output += copPointsList.get(i).toString() + "\t";
+      output += "\n";
       return output;
    }
 

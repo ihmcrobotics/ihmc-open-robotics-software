@@ -39,7 +39,7 @@ public class ReferenceCMPTrajectoryGenerator
    private CoPTrajectory copTrajectoryReference;
    private TorqueTrajectory torqueTrajectory; 
 
-   public ReferenceCMPTrajectoryGenerator(String namePrefix, YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations,
+   public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations,
                                           List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
                                           YoVariableRegistry registry)
    {
@@ -50,13 +50,15 @@ public class ReferenceCMPTrajectoryGenerator
 
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
-      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + i, 25, 8, registry);
          CMPTrajectory swingCMPTrajectory = new CMPTrajectory(namePrefix + "Swing" + i, 25, 8, registry);
          transferCMPTrajectories.add(transferCMPTrajectory);
          swingCMPTrajectories.add(swingCMPTrajectory);
       }
+      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, 25, 8, registry);
+      transferCMPTrajectories.add(transferCMPTrajectory);
       this.z = new YoDouble("CMPTorqueOffsetScalingFactor", registry);
       this.z.set(0.5);
    }
@@ -137,8 +139,9 @@ public class ReferenceCMPTrajectoryGenerator
                                      List<? extends AngularMomentumTrajectory> transferAngularMomentumTrajectories,
                                      List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories)
    {
+      this.initialTime = currentTime;
       setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngularMomentumTrajectories);
-      activeTrajectory = transferCMPTrajectories.get(0);
+      activeTrajectory = transferCMPTrajectories.get(0);      
    }
 
    public void initializeForSwing(double currentTime, List<? extends CoPTrajectory> transferCoPTrajectories,
@@ -146,6 +149,7 @@ public class ReferenceCMPTrajectoryGenerator
                                   List<? extends AngularMomentumTrajectory> transferAngularMomentumTrajectories,
                                   List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories)
    {
+      this.initialTime = currentTime;
       setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngularMomentumTrajectories);
       activeTrajectory = swingCMPTrajectories.get(0);
    }
@@ -198,15 +202,18 @@ public class ReferenceCMPTrajectoryGenerator
          cmpTrajectoryReference = transferCMPTrajectories.get(i);
          copTrajectoryReference = transferCoPTrajectories.get(i);
          for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-            cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getSegments().get(j));
+            cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
+         cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
          cmpTrajectoryReference = swingCMPTrajectories.get(i);
          copTrajectoryReference = swingCoPTrajectories.get(i);
          for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-            cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getSegments().get(j));
+            cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
+         cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
       }
       cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
       copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
       for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-         cmpTrajectoryReference.getPolynomials().set(j, copTrajectoryReference.getSegments().get(j));
+         cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
+      cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
    }
 }
