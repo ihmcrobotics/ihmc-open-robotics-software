@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -15,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CoPPolynomialTrajectoryPlannerInterface;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.convexOptimization.qpOASES.returnValue;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -27,11 +24,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -47,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 //TODO 1) Modify initializeParamters() to have only things that should be adjusted on the fly there
 
-public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryPlannerInterface, ReferenceCoPTrajectoryGeneratorInterface
+public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGeneratorInterface
 {
    // Standard declarations
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -78,7 +71,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
    private final YoDouble additionalTimeForFinalTransfer;
 
    // Trajectory planning parameters
-   private EnumMap<CoPPointName, Double> segmentTimes;
+   private EnumMap<CoPPointName, Double> segmentTimes; // fixme change this
 
    // State variables 
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
@@ -149,6 +142,13 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
    {
       this.namePrefix = namePrefix;
       this.numberFootstepsToConsider = numberFootstepsToConsider;
+
+      additionalTimeForFinalTransfer = new YoDouble(namePrefix + "AdditionalTimeForFinalTransfer", registry);
+      additionalTimeForInitialTransfer = new YoDouble(namePrefix + "AdditionalTimeForInitialTransfer", registry);
+      safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
+      percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
+      numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
+
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
       this.swingSplitFractions = swingSplitFractions;
@@ -158,27 +158,20 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       this.defaultSwingTime = swingDurations.get(0).getDoubleValue();
       this.defaultTransferTime = transferDurations.get(0).getDoubleValue();
 
-      this.additionalTimeForFinalTransfer = new YoDouble(namePrefix + "AdditionalTimeForFinalTransfer", registry);
-      this.additionalTimeForInitialTransfer = new YoDouble(namePrefix + "AdditionalTimeForInitialTransfer", registry);
-      safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
 
-      percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
       this.numberOfPointsPerFoot = new YoInteger(namePrefix + "NumberOfPointsPerFootstep", registry);
-      this.numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
       this.orderOfSplineInterpolation = new YoEnum<>(namePrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
       isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
 
-      for (int waypointIndex = 0; waypointIndex < numberOfPointsPerFoot; waypointIndex++)
+      for (CoPPointName pointName : CoPPointName.values)
       {
-         YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + waypointIndex, registry);
-         YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + waypointIndex, registry);
+         YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + pointName.toString(), registry);
+         YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + pointName.toString(), registry);
 
-         this.maxCoPOffsets.add(maxCoPOffset);
-         this.minCoPOffsets.add(minCoPOffset);
+         this.maxCoPOffsets.put(pointName, maxCoPOffset);
+         this.minCoPOffsets.put(pointName, minCoPOffset);
       }
 
-      this.numberOfSwingSegments = CoPPlanningTools.getNumberOfSwingSegments(copPointList, entryCoPName, exitCoPName);
-      this.numberOfTransferSegments = copPointList.length - this.numberOfSwingSegments;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -188,12 +181,12 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
          supportFootPolygonsInSoleZUpFrames.put(robotSide, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(robotSide));
 
          String sidePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         List<YoFrameVector2d> copUserOffsets = new ArrayList<>();
+         EnumMap<CoPPointName, YoFrameVector2d> copUserOffsets = new EnumMap<>(CoPPointName.class);
          
-         for(int i = 0; i < numberOfPointsPerFoot; i++)
+         for (CoPPointName pointName : CoPPointName.values)
          {
-            YoFrameVector2d copUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "CoPConstantOffset" + i, null, registry);
-            copUserOffsets.add(copUserOffset);
+            YoFrameVector2d copUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "CoPConstantOffset" + pointName.toString(), null, registry);
+            copUserOffsets.put(pointName, copUserOffset);
          }
 
          this.copOffsets.put(robotSide, copUserOffsets);
@@ -228,22 +221,6 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
       clear();
    }
 
-   private void processCoPList()
-   {
-      int entryCoPIndex = getCoPIndex(entryCoPName);
-      int exitCoPIndex = getCoPIndex(exitCoPName);
-      this.numberOfSwingSegments = entryCoPIndex < exitCoPIndex ? exitCoPIndex - entryCoPIndex : copPointList.length + exitCoPIndex - entryCoPIndex;
-      this.numberOfTransferSegments = copPointList.length - this.numberOfSwingSegments;
-   }
-
-   private int getCoPIndex(CoPPointName copPointToSearch)
-   {
-      for (int index = 0; index < copPointList.length; index++)
-         if (copPointList[index] == copPointToSearch)
-            return index;
-      return -1;
-   }
-
    @Override
    public void initializeParameters(SmoothCMPPlannerParameters parameters)
    {
@@ -272,6 +249,10 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
       this.additionalTimeForFinalTransfer.set(parameters.getAdditionalTimeForFinalTransfer());
       this.additionalTimeForInitialTransfer.set(parameters.getAdditionalTimeForInitialTransfer());
+
+      this.copPointList = parameters.getCoPPointsToPlan();
+      this.numberOfSwingSegments = CoPPlanningTools.getNumberOfSwingSegments(copPointList, entryCoPName, exitCoPName);
+      this.numberOfTransferSegments = copPointList.length - this.numberOfSwingSegments;
 
       List<Vector2D> copOffsets = parameters.getCoPOffsets();
       for(int waypointNumber = 0; waypointNumber < copOffsets.size(); waypointNumber++)

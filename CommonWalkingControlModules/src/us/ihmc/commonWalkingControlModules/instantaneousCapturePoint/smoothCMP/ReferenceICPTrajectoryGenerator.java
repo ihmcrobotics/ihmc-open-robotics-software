@@ -277,11 +277,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       positionToPack.set(icpPositionDesiredCurrent);
    }
 
-   public void getPosition(YoFramePoint positionToPack)
-   {
-      positionToPack.set(icpPositionDesiredCurrent);
-   }
-   
    @Override
    public void getVelocity(FrameVector velocityToPack)
    {
