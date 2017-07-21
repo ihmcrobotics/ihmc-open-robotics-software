@@ -212,7 +212,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   @Override
                   public double getSpeedForSupportKneeStraightening()
                   {
-                     return 1.0;
+                     return 2.0;
                   }
 
                   @Override
@@ -224,7 +224,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   @Override
                   public double getFractionOfSwingToStraightenLeg()
                   {
-                     return 0.7;
+                     return 0.2;
                   }
 
                   @Override
