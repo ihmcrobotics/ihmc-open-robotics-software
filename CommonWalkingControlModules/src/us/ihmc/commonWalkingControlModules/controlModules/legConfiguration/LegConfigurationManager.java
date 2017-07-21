@@ -85,7 +85,7 @@ public class LegConfigurationManager
 
    public void straightenLegDuringSwing(RobotSide swingSide)
    {
-      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN_TO_STRAIGHT &&
+      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN &&
             legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHT)
       {
          //beginStraightening(swingSide);
@@ -111,7 +111,7 @@ public class LegConfigurationManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN_TO_STRAIGHT);
+         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN);
       }
    }
 

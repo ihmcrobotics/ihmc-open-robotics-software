@@ -27,7 +27,7 @@ public class LegConfigurationControlModule
 {
    public enum LegConfigurationType
    {
-      STRAIGHTEN_TO_STRAIGHT, STRAIGHT, STRAIGHTEN_TO_CONTROLLABLE, COLLAPSE, BENT
+      STRAIGHTEN, STRAIGHT, COLLAPSE, BENT
    }
 
    private static final double minimumDampingScale = 0.2;
@@ -233,16 +233,14 @@ public class LegConfigurationControlModule
    {
       List<FinishableState<LegConfigurationType>> states = new ArrayList<>();
 
-      FinishableState<LegConfigurationType> straighteningToStraightState = new StraightenToStraightControlState(straighteningSpeed);
+      FinishableState<LegConfigurationType> straighteningToStraightState = new StraighteningKneeControlState(straighteningSpeed);
       FinishableState<LegConfigurationType> straightState = new StraightKneeControlState();
       FinishableState<LegConfigurationType> bentState = new BentKneeControlState();
       FinishableState<LegConfigurationType> collapseState = new CollapseKneeControlState();
-      FinishableState<LegConfigurationType> straighteningToControlState = new StraightenToControllableControlState(straighteningSpeed);
       states.add(straighteningToStraightState);
       states.add(straightState);
       states.add(bentState);
       states.add(collapseState);
-      states.add(straighteningToControlState);
 
       straighteningToStraightState.setDefaultNextState(LegConfigurationType.STRAIGHT);
       collapseState.setDefaultNextState(LegConfigurationType.BENT);
@@ -378,22 +376,6 @@ public class LegConfigurationControlModule
       return privilegedAccelerationCommand;
    }
 
-   private class StraightenToStraightControlState extends StraighteningKneeControlState
-   {
-      public StraightenToStraightControlState(YoDouble straighteningSpeed)
-      {
-         super(LegConfigurationType.STRAIGHTEN_TO_STRAIGHT, straighteningSpeed);
-      }
-   }
-
-   private class StraightenToControllableControlState extends StraighteningKneeControlState
-   {
-      public StraightenToControllableControlState(YoDouble straighteningSpeed)
-      {
-         super(LegConfigurationType.STRAIGHTEN_TO_CONTROLLABLE, straighteningSpeed);
-      }
-   }
-
    private class StraighteningKneeControlState extends FinishableState<LegConfigurationType>
    {
       private final YoDouble yoStraighteningSpeed;
@@ -409,9 +391,9 @@ public class LegConfigurationControlModule
 
       private double previousTime;
 
-      public StraighteningKneeControlState(LegConfigurationType stateEnum, YoDouble straighteningSpeed)
+      public StraighteningKneeControlState(YoDouble straighteningSpeed)
       {
-         super(stateEnum);
+         super(LegConfigurationType.STRAIGHTEN);
 
          this.yoStraighteningSpeed = straighteningSpeed;
       }
