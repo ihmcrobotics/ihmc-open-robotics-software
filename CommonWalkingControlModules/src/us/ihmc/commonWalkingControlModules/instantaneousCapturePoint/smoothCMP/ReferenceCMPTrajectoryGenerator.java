@@ -62,7 +62,7 @@ public class ReferenceCMPTrajectoryGenerator
          transferCMPTrajectories.get(i).reset();
          swingCMPTrajectories.get(i).reset();
       }
-
+      transferCMPTrajectories.get(numberFootstepsToConsider.getIntegerValue()).reset();
       activeTrajectory = null;
    }
 
@@ -184,7 +184,7 @@ public class ReferenceCMPTrajectoryGenerator
       //      }
 
       int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
-      for (int stepIndex = 1; stepIndex < numberOfSteps; stepIndex++)
+      for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
          CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(stepIndex);
          CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(stepIndex);
@@ -211,7 +211,6 @@ public class ReferenceCMPTrajectoryGenerator
       // handle final transfer
       CMPTrajectory transferCMPTrajectory = transferCMPTrajectories.get(numberOfSteps);
       CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
-
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
          YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();

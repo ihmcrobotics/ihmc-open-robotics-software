@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -51,7 +52,6 @@ public class CMPTrajectory
    {
       YoFrameTrajectory3D activeSegment = availablePolynomials[numberOfSegments.getIntegerValue()];
       numberOfSegments.increment();
-
       return activeSegment;
    }
 
