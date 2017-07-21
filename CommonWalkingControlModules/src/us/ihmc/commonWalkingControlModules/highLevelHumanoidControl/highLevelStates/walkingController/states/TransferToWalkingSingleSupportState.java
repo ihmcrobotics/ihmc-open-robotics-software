@@ -83,8 +83,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          double transferDuration = footstepTiming.getTransferTime();
 
-         if (getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration
-               && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
+         boolean pastMinimumTime = getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
+         boolean isFootWellPosition = feetManager.areFeetWellPositioned(transferToSide.getOppositeSide());
+         if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegBent(transferToSide.getOppositeSide()))
          {
             legConfigurationManager.collapseLegDuringTransfer(transferToSide);
          }

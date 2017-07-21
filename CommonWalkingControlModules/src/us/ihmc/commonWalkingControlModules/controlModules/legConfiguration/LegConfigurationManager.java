@@ -61,9 +61,14 @@ public class LegConfigurationManager
       return (legConfigurationControlState.equals(LegConfigurationType.BENT) || legConfigurationControlState.equals(LegConfigurationType.COLLAPSE));
    }
 
+   public boolean isLegBent(RobotSide robotSide)
+   {
+      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
+      return (legConfigurationControlState.equals(LegConfigurationType.BENT));
+   }
+
    public void collapseLegDuringTransfer(RobotSide transferSide)
    {
-
       if (attemptToStraightenLegs.getBooleanValue())
       {
          legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.BENT);
