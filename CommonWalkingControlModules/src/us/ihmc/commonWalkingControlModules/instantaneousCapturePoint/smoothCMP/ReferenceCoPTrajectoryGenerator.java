@@ -119,7 +119,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private FootstepData currentFootstepData;
    private FrameConvexPolygon2d framePolygonReference;
    private FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
-   private ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
    private FramePoint tempFramePoint = new FramePoint();
    private FramePoint2d tempFramePoint2d = new FramePoint2d();
 
@@ -129,8 +129,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    // Input data
    private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<FootstepData>(maxNumberOfFootstepsToConsider,
                                                                                                                FootstepData.class);
-
    /**
+    *
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
@@ -641,7 +641,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    private void constrainToSupportPolygon(FramePoint2d copPointToConstrain, FrameConvexPolygon2d supportPolygon, double safeDistanceFromSupportPolygonEdges)
    {
-      polygonShrinker.shrinkConstantDistanceInto(supportPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
+      polygonScaler.scaleConvexPolygon(supportPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       tempPolygon.orthogonalProjection(copPointToConstrain);
    }
 
