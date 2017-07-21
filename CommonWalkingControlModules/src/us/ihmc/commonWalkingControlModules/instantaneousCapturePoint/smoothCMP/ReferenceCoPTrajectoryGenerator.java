@@ -105,8 +105,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private FrameVector desiredCoPAcceleration = new FrameVector();
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
-   private int numberOfSwingSegments;
-   private int numberOfTransferSegments;
+   private int numberOfSwingSegments = 10;
+   private int numberOfTransferSegments = 10;
    private CoPTrajectory activeTrajectory;
    private double initialTime;
    private FrameConvexPolygon2d tempDoubleSupportPolygon = new FrameConvexPolygon2d();
@@ -262,19 +262,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       for (int waypointIndex = 0; waypointIndex < copForwardOffsetBounds.size(); waypointIndex++)
       {
          Vector2D bounds = copForwardOffsetBounds.get(waypointIndex);
-         minCoPOffsets.get(waypointIndex).set(bounds.getX());
-         maxCoPOffsets.get(waypointIndex).set(bounds.getY());
+         minCoPOffsets.get(CoPPointName.values[waypointIndex]).set(bounds.getX());
+         maxCoPOffsets.get(CoPPointName.values[waypointIndex]).set(bounds.getY());
       }
    }
 
    @Override
-   public void setSymmetricCoPConstantOffsets(int waypointNumber, Vector2D heelOffset)
+   public void setSymmetricCoPConstantOffsets(int waypointNumber, Vector2D offset)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameVector2d copUserOffset = copOffsets.get(robotSide).get(waypointNumber);
-         copUserOffset.setX(heelOffset.getX());
-         copUserOffset.setY(robotSide.negateIfLeftSide(heelOffset.getY()));
+         YoFrameVector2d copUserOffset = copOffsets.get(robotSide).get(CoPPointName.values[waypointNumber]);
+         copUserOffset.setX(offset.getX());
+         copUserOffset.setY(robotSide.negateIfLeftSide(offset.getY()));
       }
    }
 
@@ -576,7 +576,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       setCoPPointToPolygonOrigin(copPointToPlan, copPointName);
       this.tempDouble = copOffsets.get(supportSide).get(copPointName).getX() + getStepLengthToCoPOffset(copPointName);
-
       if (isConstrainedToMinMaxFlags.get(copPointName))
          this.tempDouble = MathTools.clamp(this.tempDouble, minCoPOffsets.get(copPointName).getDoubleValue(), maxCoPOffsets.get(copPointName).getDoubleValue());
       copPointToPlan.add(this.tempDouble, copOffsets.get(supportSide).get(copPointName).getY());

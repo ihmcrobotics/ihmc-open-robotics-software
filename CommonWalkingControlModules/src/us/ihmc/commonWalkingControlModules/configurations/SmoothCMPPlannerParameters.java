@@ -41,7 +41,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
     */
    private final Vector2D[] copOffsets = {new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.0)};
    private final CoPSupportPolygonNames[] copOffsetFrames = {CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON,
-         CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.FINAL_DOUBLE_SUPPORT_POLYGON, };
+         CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.FINAL_DOUBLE_SUPPORT_POLYGON};
 
    /**
     * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
@@ -225,6 +225,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       List<Vector2D> copBounds = new ArrayList<>();
       copBounds.add(heelBounds);
       copBounds.add(ballBounds);
+      copBounds.add(ballBounds);
 
       return copBounds;
    }
@@ -377,11 +378,6 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       return segmentTime;
    }
 
-   /**
-    * Provides a list of the alphas that denote the percentage of time taken to transition from one CoP way point to another.
-    * Summation of the list must be equal to 1. 
-    * @return
-    */
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
