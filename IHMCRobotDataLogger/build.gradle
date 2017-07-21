@@ -60,7 +60,7 @@ task loggerStartScripts(type: CreateStartScripts) {
 task compileIDL(type: us.ihmc.idl.generator.IDLGeneratorTask) {
    idlFiles = fileTree(dir: 'idl')
    includeDirs = files(".")
-   targetDirectory = file("generated-src")
+   targetDirectory = file("generated-src2")
    packagePrefix = ""
 }
 
