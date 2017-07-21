@@ -55,7 +55,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoBoolean minimizeAngularMomentumRateZDuringSwing = new YoBoolean("minimizeAngularMomentumRateZDuringSwing", registry);
 
    private final FrameVector touchdownErrorVector = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final YoBoolean offsetFootstepPlanOnTouchdown = new YoBoolean("offsetFootstepPlanOnTouchdown", registry);
 
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -78,8 +77,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
-
-      offsetFootstepPlanOnTouchdown.set(walkingControllerParameters.offsetFootstepPlanOnTouchdown());
 
       setYoVariablesToNaN();
    }
@@ -273,13 +270,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
 
-      if (offsetFootstepPlanOnTouchdown.getBooleanValue())
-      {
-         actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
-         touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
-         touchdownErrorVector.setZ(0.0);
-         walkingMessageHandler.addOffsetVector(touchdownErrorVector);
-      }
+      actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
+      touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
+      touchdownErrorVector.setZ(0.0);
+      walkingMessageHandler.addOffsetVector(touchdownErrorVector);
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
