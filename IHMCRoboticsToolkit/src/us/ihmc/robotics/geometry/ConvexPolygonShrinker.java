@@ -2,12 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.MathTools;
 
 public class ConvexPolygonShrinker
 {
@@ -76,6 +78,8 @@ public class ConvexPolygonShrinker
          polygonAsLineSegment.set(vertex0, vertex1);
          double percentageAlongSegment = distance / polygonAsLineSegment.length();
 
+         percentageAlongSegment = MathTools.clamp(percentageAlongSegment, 0.0, 1.0);
+         
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
 
@@ -144,7 +148,7 @@ public class ConvexPolygonShrinker
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
       ConvexPolygon2D polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
-      shrinkConstantDistanceInto(polygonQ.getConvexPolygon2dCopy(), distance, polygon2dToPack);
+      shrinkConstantDistanceInto(polygonQ.getConvexPolygon2d(), distance, polygon2dToPack);
 //      framePolygonToPack.updateFramePoints();
       framePolygonToPack.update();
    }
