@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -74,7 +74,7 @@ public class MomentumRecoveryControlModule
    private RobotSide supportSide;
    private Footstep nextFootstep;
 
-   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler polygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d extendedSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeCMPArea = new FrameConvexPolygon2d();
@@ -211,7 +211,7 @@ public class MomentumRecoveryControlModule
 
          tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
          safeArea.addVertices(tempPolygon1);
          safeArea.update();
       }
@@ -222,12 +222,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -256,12 +256,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -331,7 +331,7 @@ public class MomentumRecoveryControlModule
    {
       if (alwaysAllowMomentum.getBooleanValue() || usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
+         polygonShrinker.scaleConvexPolygon(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
          areaToProjectInto.setIncludingFrameAndUpdate(extendedSupportPolygon);
          safeCMPArea.changeFrameAndProjectToXYPlane(worldFrame);
          safeArea.setIncludingFrameAndUpdate(safeCMPArea);

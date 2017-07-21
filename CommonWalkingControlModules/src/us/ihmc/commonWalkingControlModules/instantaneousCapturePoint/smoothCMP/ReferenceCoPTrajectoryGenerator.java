@@ -89,7 +89,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
    private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempSupportPolygonForShrinking = new FrameConvexPolygon2d();
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private final FramePoint2d centroidOfUpcomingFootstep = new FramePoint2d();
    private final FramePoint2d centroidOfCurrentFootstep = new FramePoint2d();
@@ -918,7 +918,7 @@ public class ReferenceCoPTrajectoryGenerator implements CoPPolynomialTrajectoryP
 
       // Then constrain the computed CoP to be inside a safe support region
       tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(footSupportPolygon);
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempSupportPolygonForShrinking, safeDistanceFromCoPToSupportEdges.getDoubleValue(), footSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempSupportPolygonForShrinking, safeDistanceFromCoPToSupportEdges.getDoubleValue(), footSupportPolygon);
 
       footSupportPolygon.orthogonalProjection(copToPack);
    }
