@@ -8,7 +8,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -66,7 +65,10 @@ public class LegConfigurationControlModule
    private final YoDouble kneePrivilegedDAction;
    private final YoDouble privilegedMaxAcceleration;
 
+   private final YoBoolean useFullyExtendedLeg;
+   private final YoDouble desiredAngle;
    private final YoDouble desiredAngleWhenStraight;
+   private final YoDouble desiredAngleWhenExtended;
 
    private final YoDouble straighteningSpeed;
    private final YoDouble collapsingDuration;
@@ -175,8 +177,15 @@ public class LegConfigurationControlModule
       blendingFactor = new YoDouble(namePrefix + "BlendingFactor", registry);
       dampingActionScaleFactor = new YoDouble(namePrefix + "DampingActionScaleFactor", registry);
 
+      useFullyExtendedLeg = new YoBoolean(namePrefix + "UseFullyExtendedLeg", registry);
+
+      desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
+
       desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
+
+      desiredAngleWhenExtended = new YoDouble(namePrefix + "DesiredAngleWhenExtended", registry);
+      desiredAngleWhenExtended.set(0.0);
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
@@ -258,6 +267,11 @@ public class LegConfigurationControlModule
 
    public void doControl()
    {
+      if (useFullyExtendedLeg.getBooleanValue())
+         desiredAngle.set(desiredAngleWhenExtended.getDoubleValue());
+      else
+         desiredAngle.set(desiredAngleWhenStraight.getDoubleValue());
+
       stateMachine.checkTransitionConditions();
       stateMachine.getCurrentState().doAction();
 
@@ -272,6 +286,11 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+   }
+
+   public void setFullyExtendLeg(boolean fullyExtendLeg)
+   {
+      useFullyExtendedLeg.set(fullyExtendLeg);
    }
 
    private double computeKneeAcceleration()
@@ -449,7 +468,7 @@ public class LegConfigurationControlModule
          previousKneePitchAngle = kneePitchJoint.getQ();
 
          straighteningSpeed = yoStraighteningSpeed.getDoubleValue();
-         timeUntilStraight = (startingPosition - desiredAngleWhenStraight.getDoubleValue()) / straighteningSpeed;
+         timeUntilStraight = (startingPosition - desiredAngle.getDoubleValue()) / straighteningSpeed;
          timeUntilStraight = Math.max(timeUntilStraight, 0.0);
 
          desiredPrivilegedPosition = startingPosition;
@@ -490,7 +509,7 @@ public class LegConfigurationControlModule
       @Override
       public void doAction()
       {
-         kneePitchPrivilegedConfiguration.set(desiredAngleWhenStraight.getDoubleValue());
+         kneePitchPrivilegedConfiguration.set(desiredAngle.getDoubleValue());
 
          jointSpaceConfigurationGain = straightJointSpacePositionGain.getDoubleValue();
          jointSpaceVelocityGain = straightJointSpaceVelocityGain.getDoubleValue();
@@ -572,7 +591,7 @@ public class LegConfigurationControlModule
       @Override
       public void doAction()
       {
-         double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngleWhenStraight.getDoubleValue(), kneeMidRangeOfMotion,
+         double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngle.getDoubleValue(), kneeMidRangeOfMotion,
                getTimeInCurrentState() / collapsingDuration.getDoubleValue());
 
          kneePitchPrivilegedConfiguration.set(desiredKneePosition);
