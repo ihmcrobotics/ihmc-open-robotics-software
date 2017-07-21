@@ -50,6 +50,10 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
    protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
+   /** Desired position for the Center of Pressure (CoP) */
+   protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCenterOfPressurePosition", worldFrame, registry);
+   /** Desired velocity for the Center of Pressure (CoP) */
+   protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
    protected final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
@@ -401,6 +405,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    {
       desiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCentroidalMomentumPivotPosition(YoFramePoint desiredCentroidalMomentumPivotPositionToPack)
+   {
+      desiredCentroidalMomentumPivotPositionToPack.set(desiredCMPPosition);
+   }
 
    @Override
    /** {@inheritDoc} */
@@ -414,6 +424,48 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   {
+      desiredCentroidalMomentumPivotVelocityToPack.set(desiredCMPVelocity);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressurePosition(FramePoint desiredCenterOfPressurePositionToPack)
+   {
+      desiredCoPPosition.getFrameTupleIncludingFrame(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressurePosition(FramePoint2d desiredCenterOfPressurePositionToPack)
+   {
+      desiredCoPPosition.getFrameTuple2dIncludingFrame(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressurePosition(YoFramePoint desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressureVelocity(FrameVector desiredCenterOfPressureVelocityToPack)
+   {
+      desiredCoPVelocity.getFrameTupleIncludingFrame(desiredCenterOfPressureVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressureVelocity(FrameVector2d desiredCenterOfPressureVelocityToPack)
+   {
+      desiredCoPVelocity.getFrameTuple2dIncludingFrame(desiredCenterOfPressureVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressureVelocity(YoFrameVector desiredCenterOfPressureVelocityToPack)
+   {
+      desiredCenterOfPressureVelocityToPack.set(desiredCoPVelocity);
    }
 
    @Override
