@@ -22,6 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FlatGroundContactForceOptimizerTest
 {
+   
    private static final boolean showSCS = false;
 
    @Test
@@ -43,9 +44,15 @@ public class FlatGroundContactForceOptimizerTest
 
       Point3D comPosition = new Point3D(0.0, 0.0, 0.6);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
-      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-      scs.addYoVariableRegistry(registry);
+      
+      SimulationConstructionSet scs = null;
+      
+      if (showSCS)
+      {
+         new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+         scs.addYoVariableRegistry(registry);
+      }
 
       FrameVector torque = new FrameVector(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);
       WeightMatrix6D weights = new WeightMatrix6D();
@@ -65,8 +72,11 @@ public class FlatGroundContactForceOptimizerTest
 
          assertTrue(optimizer.compute(contactPoints, centerOfMass, force, torque, weights));
 
-         scs.setTime(i);
-         scs.tickAndUpdate();
+         if (showSCS)
+         {
+            scs.setTime(i);
+            scs.tickAndUpdate();
+         }
       }
 
       if (showSCS)
