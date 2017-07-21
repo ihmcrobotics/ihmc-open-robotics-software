@@ -136,7 +136,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       isStanding.set(true);
       isDoubleSupport.set(true);
-
       
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
@@ -269,18 +268,54 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getWaypoints();     
    }
    
+   private final FramePoint tempFinalICP = new FramePoint();
+   
    @Override
    /** {@inheritDoc} */
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
-      throw new RuntimeException("to implement"); //TODO
+      if(isStanding.getBooleanValue())
+      {
+         // TODO: replace by CMP
+         referenceCoPGenerator.getWaypoints().get(0).get(endCoPName).getPosition(tempFinalICP);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
+      }
+      else
+      {
+         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
+      }
    }
 
    @Override
    /** {@inheritDoc} */
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
-      throw new RuntimeException("to implement"); //TODO
+      if(isStanding.getBooleanValue())
+      {
+         // TODO: replace by CMP
+         referenceCoPGenerator.getWaypoints().get(0).get(endCoPName).getPosition(tempFinalICP);
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
+      else
+      {
+         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      }
+   }
+   
+   public List<FramePoint> getInitialDesiredCapturePointPositions()
+   {
+      return referenceICPGenerator.getICPPositionDesiredInitialList();
+   }
+   
+   public List<FramePoint> getFinalDesiredCapturePointPositions()
+   {
+      return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
 
    @Override
@@ -302,6 +337,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public boolean isOnExitCMP()
    {
+//      if(isInDoubleSupport())
+//         return false;
+//      else
+//         return referenceCMPGenerator.isOnExitCMP();
       throw new RuntimeException("to implement"); //TODO
    }
 
@@ -317,5 +356,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public int getNumberOfFootstepsRegistered()
    {
       return referenceCoPGenerator.getNumberOfFootstepsRegistered();
+   }
+   
+   public int getTotalNumberOfSegments()
+   {
+      return referenceICPGenerator.getTotalNumberOfSegments();
    }
 }
