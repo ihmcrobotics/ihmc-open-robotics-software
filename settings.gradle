@@ -4,7 +4,6 @@ println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
 if (startParameter.searchUpwards)
 {
-   println settingsDir.getAbsolutePath()
    settingsDir.list().each { childDir ->
       if (new File(settingsDir, childDir + "/build.gradle").exists())
       {
