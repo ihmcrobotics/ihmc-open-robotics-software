@@ -179,9 +179,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                return new LeapOfFaithParameters()
                {
                   @Override
-                  public boolean useFootForce()
+                  public boolean scaleFootWeight()
                   {
-                     return false;
+                     return true;
                   }
 
                   @Override
