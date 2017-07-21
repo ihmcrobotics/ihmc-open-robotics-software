@@ -98,7 +98,6 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       currentSegmentIndex.set(segmentIndex);
    }
 
-   //TODO convert this access to protected 
    public List<YoFrameTrajectory3D> getSegments()
    {
       return segments;
