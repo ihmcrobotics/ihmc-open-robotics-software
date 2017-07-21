@@ -2,6 +2,8 @@ package us.ihmc.tools.inputDevices.keyboard;
 
 import java.util.ArrayList;
 
+import us.ihmc.tools.inputDevices.keyboard.Key;
+
 public class KeyListenerHolder
 {
    private final ArrayList<KeyListener> keyListeners = new ArrayList<KeyListener>();

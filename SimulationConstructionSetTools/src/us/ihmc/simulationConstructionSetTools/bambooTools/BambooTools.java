@@ -85,7 +85,42 @@ public class BambooTools
 
          reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse, scs.getSimulationConstructionSetParameters().getShowWindows());
 
-         createVideoAndDataWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, additionalStackDepthForRelevantCallingMethod + 2);
+         createVideoWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, true, additionalStackDepthForRelevantCallingMethod + 2);
+      }
+      catch (Throwable t)
+      {
+         reportErrorMessage("createVideoAndData failed with " + t.toString(), scs.getSimulationConstructionSetParameters().getShowWindows());
+         t.printStackTrace();
+         System.err.flush();
+         if (t instanceof Error)
+         {
+            throw (Error) t;
+         }
+         else
+         {
+            throw (RuntimeException) t;
+         }
+      }
+   }
+
+   public static void createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
+         int additionalStackDepthForRelevantCallingMethod)
+   {
+      PrintTools.info("Trying to create video!");
+      try
+      {
+         String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
+         
+         if (rootDirectoryToUse == null)
+         {
+            reportErrorMessage("Couldn't find a BambooDataAndVideos directory (for share drive)!", scs.getSimulationConstructionSetParameters().getShowWindows());
+            
+            return;
+         }
+         
+         reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse, scs.getSimulationConstructionSetParameters().getShowWindows());
+         
+         createVideoWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, false, additionalStackDepthForRelevantCallingMethod + 2);
       }
       catch (Throwable t)
       {
@@ -230,8 +265,8 @@ public class BambooTools
       return fileAlphabeticalComparator;
    }
 
-   private static File[] createVideoAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs,
-         int stackDepthForRelevantCallingMethod)
+   private static File[] createVideoWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs,
+         boolean writeData, int stackDepthForRelevantCallingMethod)
    {
       String dateString = FormattingTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";
@@ -260,14 +295,17 @@ public class BambooTools
 
       File dataFile = new File(dataFilename);
 
-      try
+      if(writeData)
       {
-         scs.writeData(dataFile);
-      }
-      catch (Exception e)
-      {
-         System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
-         e.printStackTrace();
+         try
+         {
+            scs.writeData(dataFile);
+         }
+         catch (Exception e)
+         {
+            System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
+            e.printStackTrace();
+         }
       }
 
       if (doVideoUpload())

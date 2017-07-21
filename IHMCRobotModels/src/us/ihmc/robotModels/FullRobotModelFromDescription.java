@@ -38,15 +38,14 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.tools.containers.ContainerTools;
 
 public class FullRobotModelFromDescription implements FullRobotModel
 {
    protected final RobotDescription description;
 
    protected final JointNameMap sdfJointNameMap;
-   protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
-   protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
+   protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = new EnumMap<>(NeckJointName.class);
+   protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
 //   protected final SDFLinkHolder rootLink;
    protected RigidBody chest;
@@ -398,6 +397,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
 
       inverseDynamicsJoint.setEffortLimits(-joint.getEffortLimit(), joint.getEffortLimit());
+      inverseDynamicsJoint.setVelocityLimit(-joint.getVelocityLimit(), joint.getVelocityLimit());
 
       if (joint.containsLimitStops())
       {

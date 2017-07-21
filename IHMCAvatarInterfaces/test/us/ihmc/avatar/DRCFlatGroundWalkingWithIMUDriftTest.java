@@ -14,7 +14,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -154,7 +154,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    {
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 
@@ -165,7 +165,6 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
-      scsInitialSetup.setSimulatedSensorNoiseParameters(DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise());
       
       if (cheatWithGroundHeightAtForFootstep)
          scsInitialSetup.setInitializeEstimatorToActual(true);

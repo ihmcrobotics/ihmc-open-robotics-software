@@ -130,7 +130,7 @@ public abstract class ToolboxModule
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
       yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
       yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,

@@ -166,6 +166,13 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          taskspaceTrajectoryPoints[i].applyTransform(transform);
    }
 
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         taskspaceTrajectoryPoints[i].applyInverseTransform(transform);
+   }
+
    /**
     * Sets the selection matrix to use for executing this message.
     * <p>

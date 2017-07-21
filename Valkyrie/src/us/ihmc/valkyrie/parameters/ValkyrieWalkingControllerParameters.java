@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -19,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -28,7 +30,6 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -59,7 +60,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
-   private Map<String, Pose> bodyHomeConfiguration = null;
+   private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
@@ -862,14 +863,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
       if (bodyHomeConfiguration != null)
          return bodyHomeConfiguration;
 
-      bodyHomeConfiguration = new HashMap<String, Pose>();
+      bodyHomeConfiguration = new HashMap<String, Pose3D>();
 
-      Pose homeChestPoseInPelvisZUpFrame = new Pose();
+      Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
@@ -1260,6 +1261,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return new ValkyrieMomentumOptimizationSettings(jointMap);
+   }
+
+   @Override
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+   {
+      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override

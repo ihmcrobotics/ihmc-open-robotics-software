@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
@@ -25,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -33,7 +31,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -54,8 +51,9 @@ public class HighLevelControlManagerFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private CapturePointPlannerParameters capturePointPlannerParameters;
+   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
+   private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
@@ -73,9 +71,10 @@ public class HighLevelControlManagerFactory
    {
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
    }
 
-   public void setCapturePointPlannerParameters(CapturePointPlannerParameters capturePointPlannerParameters)
+   public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
    {
       this.capturePointPlannerParameters = capturePointPlannerParameters;
    }
@@ -99,7 +98,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters,
+                                          angularMomentumModifierParameters, registry);
       Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
       Vector3D angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
@@ -153,7 +153,7 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
-      Pose homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
+      Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
       Map<String, JointAccelerationIntegrationSettings> integrationSettings = walkingControllerParameters.getOrCreateIntegrationSettings();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
@@ -252,7 +252,7 @@ public class HighLevelControlManagerFactory
    {
       if (capturePointPlannerParameters != null)
          return true;
-      missingObjectWarning(CapturePointPlannerParameters.class, managerClass);
+      missingObjectWarning(ICPTrajectoryPlannerParameters.class, managerClass);
       return false;
    }
 

@@ -101,7 +101,7 @@ public class FormattingToolsTest
       System.out.flush();
       System.setOut(systemOut);
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
-      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + "\r\n", byteArrayOutputStream.toString());
+      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + System.lineSeparator(), byteArrayOutputStream.toString());
    }
 	
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

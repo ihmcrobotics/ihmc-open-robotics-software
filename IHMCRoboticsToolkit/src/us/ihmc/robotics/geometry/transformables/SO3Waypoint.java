@@ -128,6 +128,13 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      orientation.applyInverseTransform(transform);
+      angularVelocity.applyInverseTransform(transform);
+   }
+
+   @Override
    public boolean epsilonEquals(SO3Waypoint other, double epsilon)
    {
       if (!orientation.epsilonEquals(other.orientation, epsilon))

@@ -1,9 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.*;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ICPPlanToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.SimpleToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffEnum;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.WrapperForMultipleToeOffCalculators;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -15,7 +22,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -26,8 +32,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-
-import java.util.EnumMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetManager
 {
@@ -50,6 +56,9 @@ public class FeetManager
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
+
+   private final FramePoint tempSolePosition = new FramePoint();
+   private final YoDouble blindFootstepsHeightOffset = new YoDouble("blindFootstepsHeightOffset", registry);
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -93,6 +102,8 @@ public class FeetManager
          footControlModules.put(robotSide, footControlModule);
       }
 
+      blindFootstepsHeightOffset.set(walkingControllerParameters.getBlindFootstepsHeightOffset());
+
       parentRegistry.addChild(registry);
    }
 
@@ -131,16 +142,18 @@ public class FeetManager
       }
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   public void adjustHeightIfNeeded(Footstep footstep)
    {
       if (!footstep.getTrustHeight())
       {
-         FramePoint supportSolePosition = new FramePoint(soleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
-         supportSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
-         double newHeight = supportSolePosition.getZ();
-         footstep.setZ(newHeight);
+         tempSolePosition.setToZero(soleZUpFrames.get(footstep.getRobotSide().getOppositeSide()));
+         tempSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
+         footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getDoubleValue());
       }
+   }
 
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
       footControlModule.setFootstep(footstep, swingTime);
       setContactStateForSwing(upcomingSwingSide);

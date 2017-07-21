@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -24,8 +25,6 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
-   private static final boolean USE_TIMING_OPTIMIZATION = false;
-
    private final ICPOptimizationController icpOptimizationController;
    private final YoDouble yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -33,7 +32,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
          double gravityZ, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -42,7 +41,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    }
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
          YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
@@ -64,7 +63,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
 
-      if (USE_TIMING_OPTIMIZATION)
+      if (icpOptimizationParameters.useTimingOptimization())
       {
          icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
                bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
@@ -165,5 +164,17 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    public ICPOptimizationController getICPOptimizationController()
    {
       return icpOptimizationController;
+   }
+
+   @Override
+   public double getOptimizedTimeRemaining()
+   {
+      return icpOptimizationController.getOptimizedTimeRemaining();
+   }
+
+   @Override
+   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity)
+   {
+      icpOptimizationController.setReferenceICPVelocity(referenceICPVelocity);
    }
 }

@@ -1,16 +1,17 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -408,6 +409,120 @@ public class RotationToolsTest
       for (int i = 0; i < expected.length; i++)
       {
          assertEquals(expected[i], actual[i], epsilon);
+      }
+   }
+
+   @Test
+   public void testComputeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate() throws Exception
+   {
+      double dt = 1.0e-8;
+
+      for (int i = 0; i < 1000; i++)
+      {
+         double yaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pitch = RandomNumbers.nextDouble(random, Math.PI / 2.0);
+         double roll = RandomNumbers.nextDouble(random, Math.PI);
+
+         double yawRate = RandomNumbers.nextDouble(random, 1.0);
+         double pitchRate = RandomNumbers.nextDouble(random, 1.0);
+         double rollRate = RandomNumbers.nextDouble(random, 1.0);
+
+         double previousYaw = yaw - yawRate * dt;
+         double previousPitch = pitch - pitchRate * dt;
+         double previousRoll = roll - rollRate * dt;
+
+         Quaternion rotation = new Quaternion();
+         rotation.setYawPitchRoll(yaw, pitch, roll);
+         Quaternion previousRotation = new Quaternion();
+         previousRotation.setYawPitchRoll(previousYaw, previousPitch, previousRoll);
+
+         Vector3D expectedAngularVelocity = new Vector3D();
+         Quaternion difference = new Quaternion();
+         difference.difference(previousRotation, rotation);
+         difference.get(expectedAngularVelocity);
+         expectedAngularVelocity.scale(1.0 / dt);
+
+         Vector3D actualAngularVelocity = new Vector3D();
+         RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, actualAngularVelocity);
+
+         EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-7);
+      }
+   }
+
+   @Test
+   public void testComputeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate() throws Exception
+   {
+      for (int i = 0; i < 1000; i++)
+      {
+         double yaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pitch = RandomNumbers.nextDouble(random, Math.PI / 2.0);
+         double roll = RandomNumbers.nextDouble(random, Math.PI);
+
+         double yawRate = RandomNumbers.nextDouble(random, 1.0);
+         double pitchRate = RandomNumbers.nextDouble(random, 1.0);
+         double rollRate = RandomNumbers.nextDouble(random, 1.0);
+
+         Quaternion rotation = new Quaternion();
+         rotation.setYawPitchRoll(yaw, pitch, roll);
+
+         Vector3D expectedAngularVelocity = new Vector3D();
+         RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, expectedAngularVelocity);
+         rotation.transform(expectedAngularVelocity);
+
+         Vector3D actualAngularVelocity = new Vector3D();
+         RotationTools.computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, actualAngularVelocity);
+
+         EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON);
+      }
+   }
+
+   @Test
+   public void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame() throws Exception
+   {
+      for (int i = 0; i < 1000; i++)
+      {
+         double yaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pitch = RandomNumbers.nextDouble(random, Math.PI / 2.0);
+         double roll = RandomNumbers.nextDouble(random, Math.PI);
+
+         double yawRate = RandomNumbers.nextDouble(random, 1.0);
+         double pitchRate = RandomNumbers.nextDouble(random, 1.0);
+         double rollRate = RandomNumbers.nextDouble(random, 1.0);
+
+         Vector3D angularVelocityInBodyFrame = new Vector3D();
+         RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocityInBodyFrame);
+
+         double[] actualYawPitchRollRates = new double[3];
+         RotationTools.computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame(angularVelocityInBodyFrame, yaw, pitch, roll, actualYawPitchRollRates);
+
+         assertEquals("Iteration: " + i, yawRate, actualYawPitchRollRates[0], EPSILON);
+         assertEquals("Iteration: " + i, pitchRate, actualYawPitchRollRates[1], EPSILON);
+         assertEquals("Iteration: " + i, rollRate, actualYawPitchRollRates[2], EPSILON);
+      }
+   }
+
+   @Test
+   public void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame() throws Exception
+   {
+      for (int i = 0; i < 1000; i++)
+      {
+         double yaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pitch = RandomNumbers.nextDouble(random, Math.PI / 2.0);
+         double roll = RandomNumbers.nextDouble(random, Math.PI);
+
+         double yawRate = RandomNumbers.nextDouble(random, 1.0);
+         double pitchRate = RandomNumbers.nextDouble(random, 1.0);
+         double rollRate = RandomNumbers.nextDouble(random, 1.0);
+
+         Vector3D angularVelocityInWorldFrame = new Vector3D();
+         RotationTools.computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocityInWorldFrame);
+
+         double[] actualYawPitchRollRates = new double[3];
+         RotationTools.computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame(angularVelocityInWorldFrame, yaw, pitch, roll, actualYawPitchRollRates);
+
+         assertEquals(yawRate, actualYawPitchRollRates[0], EPSILON);
+         assertEquals(pitchRate, actualYawPitchRollRates[1], EPSILON);
+         assertEquals(rollRate, actualYawPitchRollRates[2], EPSILON);
       }
    }
 

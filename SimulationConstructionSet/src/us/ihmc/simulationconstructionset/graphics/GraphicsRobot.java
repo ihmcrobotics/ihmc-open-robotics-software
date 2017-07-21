@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.kinematics.CommonJoint;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class GraphicsRobot implements GraphicsUpdatable
 {
