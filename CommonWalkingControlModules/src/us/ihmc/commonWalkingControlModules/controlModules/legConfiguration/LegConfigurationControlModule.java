@@ -332,12 +332,12 @@ public class LegConfigurationControlModule
       double pAction, dAction;
 
       if (blendPositionError)
-         pAction = InterpolationTools.linearInterpolate(jointSpacePAction, actuatorSpacePAction, percentDistanceToMidRange);
+         pAction = InterpolationTools.linearInterpolate(jointSpacePAction, actuatorSpacePAction, blendingFactor);
       else
          pAction = jointSpacePAction;
 
       if (blendVelocityError)
-         dAction = InterpolationTools.linearInterpolate(jointSpaceDAction, actuatorSpaceDAction, percentDistanceToMidRange);
+         dAction = InterpolationTools.linearInterpolate(jointSpaceDAction, actuatorSpaceDAction, blendingFactor);
       else
          dAction = jointSpaceDAction;
 

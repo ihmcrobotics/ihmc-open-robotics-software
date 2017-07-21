@@ -212,7 +212,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   @Override
                   public double getSpeedForSupportKneeStraightening()
                   {
-                     return 2.0;
+                     return 1.5;
                   }
 
                   @Override
@@ -222,39 +222,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   }
 
                   @Override
-                  public double getFractionOfSwingToStraightenLeg()
-                  {
-                     return 0.5;
-                  }
-
-                  @Override
-                  public double getFractionOfTransferToCollapseLeg()
-                  {
-                     return 0.7;
-                  }
-
-                  @Override
-                  public double getFractionOfSwingToCollapseStanceLeg()
-                  {
-                     return 0.8;
-                  }
-
-                  @Override
-                  public double getSupportKneeCollapsingDuration()
-                  {
-                     return 0.5;
-                  }
-
-                  @Override
                   public boolean attemptToStraightenLegs()
                   {
                      return true;
-                  }
-
-                  @Override
-                  public double getStraightKneeAngle()
-                  {
-                     return 0.1;
                   }
 
                   @Override
@@ -273,12 +243,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   public double getKneeBentLegPrivilegedWeight()
                   {
                      return 10.0;
-                  }
-
-                  @Override
-                  public double getPrivilegedMaxAcceleration()
-                  {
-                     return 200.0;
                   }
                };
             }

@@ -31,7 +31,7 @@ public class StraightLegWalkingParameters
     */
    public double getStraightKneeAngle()
    {
-      return 0.2;
+      return 0.25;
    }
 
    /**
@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.8;
+      return 0.5;
    }
 
    /**
@@ -54,7 +54,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfTransferToCollapseLeg()
    {
-      return 0.9;
+      return 0.7;
    }
 
    /**
@@ -64,7 +64,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.7;
    }
 
    /**
@@ -108,6 +108,8 @@ public class StraightLegWalkingParameters
       gains.setJointSpaceKd(6.0);
       gains.setActuatorSpaceKp(60.0);
       gains.setActuatorSpaceKd(6.0);
+
+      gains.setMaxBlendingFactor();
 
       gains.setBlendPositionError(false);
       gains.setBlendVelocityError(false);
