@@ -37,6 +37,7 @@
 **/.LSOverride
 **/.AppleDouble
 **/pitest
+**/generated-src
 
 
 # File types to ignore
