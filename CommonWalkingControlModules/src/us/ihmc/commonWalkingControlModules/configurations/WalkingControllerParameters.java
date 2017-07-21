@@ -901,16 +901,4 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
       return leapOfFaithParameters;
    }
-
-   /**
-    * Determines whether the upcoming footstep plan is shifted on touchdown to reflect any error between the foot position
-    * at touchdown and the desired footstep position. E.g. if the foot touches down too short all upcoming footsteps are
-    * shifted backwards.
-    *
-    * @return whether the upcoming footstep plan is shifted on touchdown.
-    */
-   public boolean offsetFootstepPlanOnTouchdown()
-   {
-      return false;
-   }
 }

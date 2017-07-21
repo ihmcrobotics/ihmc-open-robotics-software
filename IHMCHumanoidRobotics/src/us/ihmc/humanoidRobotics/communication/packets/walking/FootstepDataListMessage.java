@@ -61,6 +61,9 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
    /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
    public boolean trustHeightOfFootsteps = true;
 
+   /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
+   public boolean offsetFootstepsWithExecutionError = false;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -195,6 +198,11 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
          return false;
       }
 
+      if (this.offsetFootstepsWithExecutionError != otherList.offsetFootstepsWithExecutionError)
+      {
+         return false;
+      }
+
       return super.epsilonEquals(otherList, epsilon);
    }
 
@@ -305,6 +313,16 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
    public void setTrustHeightOfFootsteps(boolean trustHeight)
    {
       trustHeightOfFootsteps = trustHeight;
+   }
+
+   public void setOffsetFootstepsWithExecutionError(boolean offsetFootstepsWithExecutionError)
+   {
+      this.offsetFootstepsWithExecutionError = offsetFootstepsWithExecutionError;
+   }
+
+   public boolean isOffsetFootstepsWithExecutionError()
+   {
+      return offsetFootstepsWithExecutionError;
    }
 
    public FootstepDataListMessage(Random random)
