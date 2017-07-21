@@ -288,6 +288,6 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String timeToString = "time = " + doubleFormat.format(getTime());
-      return "Euclidean trajectory point: (" + timeToString + ", " + geometryObject + ")";
+      return "Euclidean trajectory point: (" + timeToString + ", " + geometryObject + ")-" + getReferenceFrame().toString();
    }
 }

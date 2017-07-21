@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -26,15 +28,15 @@ public class YoTrajectory3D
 
    public YoTrajectory3D(YoTrajectory xTrajectory, YoTrajectory yTrajectory, YoTrajectory zTrajectory)
    {
-      this.xTrajectory = xTrajectory ;
-      this.yTrajectory = yTrajectory ;
-      this.zTrajectory = zTrajectory ;
+      this.xTrajectory = xTrajectory;
+      this.yTrajectory = yTrajectory;
+      this.zTrajectory = zTrajectory;
    }
 
-   public YoTrajectory3D(YoTrajectory [] yoTrajectory)
+   public YoTrajectory3D(YoTrajectory[] yoTrajectory)
    {
-      if (yoTrajectory .length != 3)
-         throw new RuntimeException("Expected 3 YoTrajectories for representing the three axes X, Y, and Z, but had: " + yoTrajectory .length
+      if (yoTrajectory.length != 3)
+         throw new RuntimeException("Expected 3 YoTrajectories for representing the three axes X, Y, and Z, but had: " + yoTrajectory.length
                + " YoTrajectories.");
 
       this.xTrajectory = yoTrajectory[0];
@@ -71,6 +73,12 @@ public class YoTrajectory3D
       public double getZ()
       {
          return zTrajectory.getPosition();
+      }
+      
+      @Override
+      public String toString()
+      {
+         return "X: " + getX() + " Y: " + getY() + " Z: " + getZ();
       }
    };
 
@@ -204,6 +212,86 @@ public class YoTrajectory3D
       zTrajectory.compute(t);
    }
 
+   public void add(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.add(this, traj1, traj2);
+   }
+
+   public void add(YoTrajectory3D addTraj)
+   {
+      add(this, addTraj);
+   }
+   
+   public void addByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.addByTrimming(this, traj1, traj2);
+   }
+
+   public void addByTrimming(YoTrajectory3D addTraj)
+   {
+      addByTrimming(this, addTraj);
+   }
+   
+   public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.subtract(this, traj1, traj2);
+   }
+   
+   public void subtract(YoTrajectory3D subTraj)
+   {
+      subtract(this, subTraj);
+   }
+   
+   public void subtractByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
+   }
+
+   public void subtractByTrimming(YoTrajectory3D subTraj)
+   {
+      subtractByTrimming(this, subTraj);
+   }
+   
+   public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.dotProduct(this, traj1, traj2);
+   }
+   
+   public void dotProduct(YoTrajectory3D dotPTraj)
+   {
+      dotProduct(this, dotPTraj);
+   }
+   
+   public void dotProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.dotProductByTrimming(this, traj1, traj2);
+   }
+   
+   public void dotProductByTrimming(YoTrajectory3D dotPTraj)
+   {
+      dotProductByTrimming(this, dotPTraj);
+   }
+
+   public void crossProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.crossProduct(this, traj1, traj2);
+   }
+   
+   public void crossProduct(YoTrajectory3D crossPTraj)
+   {
+      crossProduct(this, crossPTraj);
+   }
+   
+   public void crossProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
+   {
+      TrajectoryMathTools.crossProductByTrimming(this, traj1, traj2);
+   }
+   
+   public void crossProductByTrimming(YoFrameTrajectory3D crossPTraj)
+   {
+      crossProduct(this, crossPTraj);
+   }
+   
    public Point3DReadOnly getPosition()
    {
       return position;
@@ -274,7 +362,7 @@ public class YoTrajectory3D
 
    public boolean timeIntervalContains(double timeToCheck)
    {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime());
+      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
    }
    
    public int getNumberOfCoefficients()
@@ -297,7 +385,7 @@ public class YoTrajectory3D
       yTrajectory.set(other.getYoTrajectoryY());
       zTrajectory.set(other.getYoTrajectoryZ());
    }
-   
+
    @Deprecated
    public void setConstant(Point3DReadOnly z)
    {
@@ -305,11 +393,11 @@ public class YoTrajectory3D
       yTrajectory.setConstant(z.getY());
       zTrajectory.setConstant(z.getZ());
    }
-   
-   public void setConstant(double t0, double tFinal, Point3DReadOnly z)
+
+   public void setConstant(double t0, double tFinal, Point3DReadOnly z0)
    {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
+      for(int index = 0; index < 3; index ++)
+         getYoTrajectory(index).setConstant(t0, tFinal, z0.getElement(index));
    }
    
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
@@ -583,5 +671,16 @@ public class YoTrajectory3D
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
    }
-
+   
+   public void getDerivative(YoTrajectory3D dervTraj)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index));
+   }
+   
+   public void getDerivative(YoTrajectory3D dervTraj, int order)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
+   }
 }
