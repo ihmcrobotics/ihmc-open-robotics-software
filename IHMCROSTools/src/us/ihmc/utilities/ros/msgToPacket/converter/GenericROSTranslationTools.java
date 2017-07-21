@@ -87,6 +87,7 @@ public class GenericROSTranslationTools
       // QuaternionBasedTransform <-> Transform
       customFieldConversions.registerIHMCPacketFieldConverter(QuaternionBasedTransform.class, GenericROSTranslationTools::convertQuaternionBasedTransformToTransform);
       customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
+      customFieldConversions.registerIHMCPacketFieldConverter(Tuple3DReadOnly.class, GenericROSTranslationTools::convertTuple3d);
    }
 
    public static MessageFactory getMessageFactory()
@@ -167,10 +168,6 @@ public class GenericROSTranslationTools
             {
                setEnumFromByte(rosMessage, ihmcMessage, rosGetter, ihmcField, (Class<? extends Enum>) ihmcMessageFieldType);
             }
-            else if(ihmcMessageFieldType.getCanonicalName().contains("javax.vecmath"))
-            {
-               setVecmathFieldFromRosGeometryMessage(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
-            }
             else if(customFieldConversions.contains(rosMessageClass))
             {
                Message rosMessageField = (Message) rosGetter.invoke(rosMessage);
@@ -187,31 +184,6 @@ public class GenericROSTranslationTools
       }
 
       return null;
-   }
-
-   private static void setVecmathFieldFromRosGeometryMessage(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField,
-         Class<?> ihmcMessageFieldType) throws IllegalAccessException, InvocationTargetException, InstantiationException
-   {
-      if(ihmcMessageFieldType.equals(Point2D.class))
-      {
-         Point2D point2d = convertPoint2DRos((Point2dRosMessage) rosGetter.invoke(rosMessage));
-         ihmcField.set(ihmcMessage, point2d);
-      }
-      else
-      {
-         if(rosGetter.getReturnType().equals(geometry_msgs.Quaternion.class))
-         {
-            Tuple4DBasics newTuple = (Tuple4DBasics) ihmcField.getType().newInstance();
-            newTuple.set(convertQuaternion((geometry_msgs.Quaternion) rosGetter.invoke(rosMessage)));
-            ihmcField.set(ihmcMessage, newTuple);
-         }
-         else if(rosGetter.getReturnType().equals(Vector3.class))
-         {
-            Tuple3DBasics newTuple = (Tuple3DBasics) ihmcField.getType().newInstance();
-            newTuple.set(convertVector3((Vector3) rosGetter.invoke(rosMessage)));
-            ihmcField.set(ihmcMessage, newTuple);
-         }
-      }
    }
 
    private static void setEnumFromByte(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<? extends Enum> fieldType)
@@ -391,11 +363,6 @@ public class GenericROSTranslationTools
             Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
             setField(message, field, rosMessageField);
          }
-         // TODO: remove vecmath stuff
-         if (field.getType().getCanonicalName().contains("javax.vecmath"))
-         {
-            convertVecmathField(ihmcMessage, message, field);
-         }
          else if (field.getType().isArray() && !field.getType().getComponentType().isPrimitive())
          {
             setListFromArray(ihmcMessage, message, field);
@@ -411,21 +378,6 @@ public class GenericROSTranslationTools
       }
    }
 
-   private static void convertVecmathField(Packet<?> ihmcMessage, Message message, Field field)
-         throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
-   {
-      if (field.getType().equals(Point2D.class))
-      {
-         Point2D point = (Point2D) field.get(ihmcMessage);
-         setPoint2dField(message, field, point);
-      }
-      else
-      {
-         Object vecmathObject = field.get(ihmcMessage);
-         setVecmathField(message, field, vecmathObject);
-      }
-   }
-
    private static void setPoint2dField(Message message, Field field, Point2D value)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
@@ -434,25 +386,6 @@ public class GenericROSTranslationTools
       setterMethod.setAccessible(true);
 
       setterMethod.invoke(message, convertPoint2d(value));
-   }
-
-   private static void setVecmathField(Message message, Field field, Object value)
-         throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
-   {
-      String setterName = getRosSetterNameForField(field);
-      String rosTypeForJavaType = getRosTypeForJavaType(field, field.getType());
-
-      assert rosTypeForJavaType != null;
-      Method setterMethod = message.getClass().getMethod(setterName, Class.forName(rosTypeForJavaType.replace("/", ".")));
-      setterMethod.setAccessible(true);
-
-      Class<?> vecmathClass = field.getType();
-      Class<?> genericVecmathClass = (Class<?>) vecmathClass.getGenericSuperclass();
-      String genericVecmathClassName = genericVecmathClass.getSimpleName();
-      Method converterMethod = GenericROSTranslationTools.class.getMethod("convert" + genericVecmathClassName, genericVecmathClass);
-      converterMethod.setAccessible(true);
-
-      setterMethod.invoke(message, converterMethod.invoke(null, value));
    }
 
    private static void setField(Message message, Field field, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
