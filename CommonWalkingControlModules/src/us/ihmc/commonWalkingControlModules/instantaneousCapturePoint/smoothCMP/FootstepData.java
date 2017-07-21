@@ -4,6 +4,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -74,15 +75,10 @@ public class FootstepData
       return footstep;
    }
 
-   public ReferenceFrame getSoleReferenceFrame()
+   public ReferenceFrame getFootstepPoseReferenceFrame()
    {
-      return footstep.getSoleReferenceFrame();
+      return footstep.getFootstepPose().getReferenceFrame();
    }
-
-   public FramePoint getCentroidOfExpectedFootPolygonLocation()
-   {
-      return footstep.getFootstepPose().getFramePointCopy();
-   } 
    
    public RobotSide getSwingSide()
    {
@@ -117,5 +113,10 @@ public class FootstepData
    public double getStepTime()
    {
       return timing.getStepTime();
+   }
+
+   public FramePose getFramePose()
+   {
+      return footstep.getFootstepPose();
    }   
 }

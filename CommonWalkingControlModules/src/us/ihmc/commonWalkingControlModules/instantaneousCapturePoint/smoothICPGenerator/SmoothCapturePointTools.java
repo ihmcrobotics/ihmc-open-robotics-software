@@ -9,6 +9,10 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameTuple;
 
+/**
+ * @author Tim Seyde
+ */
+
 public class SmoothCapturePointTools extends CapturePointTools
 {
    // private static final ThreadLocal<DenseMatrix64F> dummyName = new ThreadLocal<>();

@@ -1,114 +1,204 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final List<YoFramePointInMultipleFrames> copLocations = new ArrayList<>();
-   private final List<YoFramePoint> copLocationsInWorldFrameReadOnly = new ArrayList<>();
+   private static final FrameVector zeroVector = new FrameVector();
+   
+   private final List<CoPPointName> copPointsList = new ArrayList<>(CoPPointName.values.length); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
+   private final EnumMap<CoPPointName, CoPTrajectoryPoint> copLocations = new EnumMap<>(CoPPointName.class); // Location of CoP points defined 
+   private final EnumMap<CoPPointName, YoFramePoint> copLocationsInWorldFrameReadOnly = new EnumMap<>(CoPPointName.class); // YoFramePoints for visualization
 
    private final int stepNumber;
-   private final int maxNumberOfPointsPerFoot;
 
-   public CoPPointsInFoot(int stepNumber, int maxNumberOfPointsPerFoot, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
+   private final YoFramePointInMultipleFrames footStepCentroid;
+
+   public CoPPointsInFoot(int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
       this.stepNumber = stepNumber;
-      this.maxNumberOfPointsPerFoot = maxNumberOfPointsPerFoot;
 
-      for (int index = 0; index < maxNumberOfPointsPerFoot; index++)
+      for (int i = 0; i < CoPPointName.values.length; i++)
       {
-         YoFramePointInMultipleFrames constantCoP = new YoFramePointInMultipleFrames("step" + stepNumber + "CoP" + index, registry, framesToRegister);
+         CoPPointName copPointName = CoPPointName.values[i];
+         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint("step" + stepNumber + "CoP" + copPointName.toString(), "", registry, framesToRegister);
          constantCoP.setToNaN();
-         copLocations.add(constantCoP);
-         copLocationsInWorldFrameReadOnly.add(constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
+         copLocations.put(copPointName, constantCoP);
+         copLocationsInWorldFrameReadOnly.put(copPointName, constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
       }
+      footStepCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
    }
 
    public void notifyVariableChangedListeners()
    {
-      for (int i = 0; i < maxNumberOfPointsPerFoot; i++)
-         copLocations.get(i).notifyVariableChangedListeners();
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         copLocations.get(CoPPointName.values[i]).notifyVariableChangedListeners();
    }
 
    public void reset()
    {
-      for (int i = 0; i < maxNumberOfPointsPerFoot; i++)
+      footStepCentroid.setToNaN();
+      copPointsList.clear();
+      for (int i = 0; i < CoPPointName.values.length; i++)
       {
-         copLocations.get(i).setToNaN(worldFrame);
-         copLocationsInWorldFrameReadOnly.get(i).setToNaN();
+         copLocations.get(CoPPointName.values[i]).setToNaN(worldFrame);
+         copLocationsInWorldFrameReadOnly.get(CoPPointName.values[i]).setToNaN();
       }
    }
 
-   public void setIncludingFrame(int waypointNumber, FramePoint location)
+   public void addWayPoint(CoPPointName copPointName)
    {
-      copLocations.get(waypointNumber).setIncludingFrame(location);
+      this.copPointsList.add(copPointName);
    }
 
-   public void setIncludingFrame(int waypointNumber, YoFramePoint location)
+   public void setIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
    {
-      copLocations.get(waypointNumber).setIncludingFrame(location);
+      copLocations.get(copPointName).set(time, location, zeroVector);
    }
 
-   public void setToNaN(int waypointNumber)
+   public void setIncludingFrame(CoPPointName copPointName, double time, YoFramePoint location)
    {
-      copLocations.get(waypointNumber).setToNaN();
+      copLocations.get(copPointName).set(time, location.getFrameTuple(), zeroVector);
    }
 
-   public void set(int waypointNumber, FramePoint location)
+   public void setIncludingFrame(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
    {
-      copLocations.get(waypointNumber).set(location);
-   }
-   
-   public void set(CoPPointsInFoot copPoints)
-   {      
-      List<YoFramePointInMultipleFrames> newCoPLocations = copPoints.copLocations;
-      if(newCoPLocations.size() >  this.maxNumberOfPointsPerFoot)
-         return;      
-      int index = 0;
-      for(; index < newCoPLocations.size(); index++)
-         copLocations.get(index).setIncludingFrame(newCoPLocations.get(index));      
-      for(;index < this.maxNumberOfPointsPerFoot; index++)
-         copLocations.get(index).setToNaN();
+      copLocations.get(copPointName).set(time, location.getPosition().getFrameTuple(), zeroVector);
    }
 
-   public void set(int waypointNumber, YoFramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
    {
-      copLocations.get(waypointNumber).set(location);
+      addWayPoint(copPointName);
+      setIncludingFrame(copPointName, time, location);
    }
 
-   public YoFramePointInMultipleFrames get(int waypointNumber)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, YoFramePoint location)
    {
-      return copLocations.get(waypointNumber);
+      addWayPoint(copPointName);
+      setIncludingFrame(copPointName, time, location);
    }
 
-   public YoFramePoint getWaypointInWorldFrameReadOnly(int waypointNumber)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, CoPTrajectoryPoint location)
    {
-      return copLocationsInWorldFrameReadOnly.get(waypointNumber);
+      addWayPoint(copPointName);
+      setIncludingFrame(copPointName, time, location);
+   }
+
+   public void setToNaN(CoPPointName copPointName)
+   {
+      copLocations.get(copPointName).setToNaN();
+   }
+
+   public void addWayPoints(CoPPointName[] copPointNames)
+   {
+      for (int i = 0; i < copPointNames.length; i++)
+         this.copPointsList.add(copPointNames[i]);
+   }
+
+   //   public void set(int waypointNumber, FramePoint location)
+   //   {
+   //      copLocations.get(waypointNumber).set(location);
+   //   }
+   //   
+   //   public void set(int waypointNumber, YoFramePoint location)
+   //   {
+   //      copLocations.get(waypointNumber).set(location);
+   //   }
+   //   
+   //   public void set(int waypointNumber, CoPTrajectoryPoint location)
+   //   {
+   //      copLocations.get(waypointNumber).set(location);
+   //   }
+   //
+   public void setIncludingFrame(CoPPointsInFoot other)
+   {
+      this.footStepCentroid.setIncludingFrame(other.footStepCentroid);
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         this.copLocations.get(CoPPointName.values[i]).setIncludingFrame(other.get(CoPPointName.values[i]));
+   }
+
+   public CoPTrajectoryPoint get(CoPPointName copPointName)
+   {
+      return copLocations.get(copPointName);
+   }
+
+   public YoFramePoint getWaypointInWorldFrameReadOnly(CoPPointName copPointName)
+   {
+      return copLocationsInWorldFrameReadOnly.get(copPointName);
    }
 
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      for (int i = 0; i < maxNumberOfPointsPerFoot; i++)
-         copLocations.get(i).changeFrame(desiredFrame);
+      footStepCentroid.changeFrame(desiredFrame);
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         copLocations.get(CoPPointName.values[i]).changeFrame(desiredFrame);
    }
 
+   public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
+   {
+      footStepCentroid.registerReferenceFrame(newReferenceFrame);
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         copLocations.get(CoPPointName.values[i]).registerReferenceFrame(newReferenceFrame);      
+   }
+   
    public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
    {
-      for (int i = 0; i < maxNumberOfPointsPerFoot; i++)
-         copLocations.get(i).switchCurrentReferenceFrame(desiredFrame);
+      footStepCentroid.switchCurrentReferenceFrame(desiredFrame);
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         copLocations.get(CoPPointName.values[i]).switchCurrentReferenceFrame(desiredFrame);
    }
 
    public void switchCurrentReferenceFrame(int waypointIndex, ReferenceFrame desiredFrame)
    {
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
+   }
+
+   public void setFootLocation(FramePoint footLocation)
+   {
+      this.footStepCentroid.setIncludingFrame(footLocation);
+   }
+
+   public void setFootLocation(FramePoint2d footLocation)
+   {
+      this.footStepCentroid.setXYIncludingFrame(footLocation);
+   }
+
+   public void getFootLocation(FramePoint footLocationToPack)
+   {
+      footLocationToPack.setIncludingFrame(footStepCentroid.getFrameTuple());
+   }
+
+   public String toString()
+   {
+      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      for (int i = 0; i < CoPPointName.values.length; i++)
+         output += CoPPointName.values[i].toString() + " : " + copLocations.get(CoPPointName.values[i]) + "\n";
+      return output;
+   }
+
+   public String toString2()
+   {
+      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      for (int i = 0; i < copPointsList.size(); i++)
+         output += copPointsList.get(i).toString() + " : " + copLocations.get(copPointsList.get(i)) + "\n";
+      return output;
+   }
+
+   public List<CoPPointName> getCoPPointList()
+   {
+      return copPointsList;
    }
 }
