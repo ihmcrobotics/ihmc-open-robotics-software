@@ -508,7 +508,7 @@ public class StepAndTimingAdjustmentExampleGraphic
 
    private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private void updateViz()
    {
@@ -536,7 +536,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       double polygonShrinkAmount = 0.005;
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(0).getSoleReferenceFrame(), footstepSolutions.get(0).getPredictedContactPoints());
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
@@ -557,7 +557,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          footstepSolutions.get(1).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(1).getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(1).getSoleReferenceFrame(), footstepSolutions.get(1).getPredictedContactPoints());
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
@@ -576,7 +576,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          footstepSolutions.get(2).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(2).getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(2).getSoleReferenceFrame(), footstepSolutions.get(2).getPredictedContactPoints());
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);

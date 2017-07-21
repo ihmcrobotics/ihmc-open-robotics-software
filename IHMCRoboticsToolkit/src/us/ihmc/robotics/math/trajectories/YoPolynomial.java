@@ -409,14 +409,14 @@ public class YoPolynomial
       solveForCoefficients();
       setYoVariables();
    }
-   
+
    public void setCubicBezier(double t0, double tFinal, double z0, double zR1, double zR2, double zFinal)
    {
       reshape(4);
       setPositionRow(0, t0, z0);
       setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, t0, 3*(zR1 - z0));
-      setVelocityRow(3, tFinal, 3*(zFinal - zR2));
+      setVelocityRow(2, t0, 3 * (zR1 - z0));
+      setVelocityRow(3, tFinal, 3 * (zFinal - zR2));
       solveForCoefficients();
       setYoVariables();
    }
@@ -506,7 +506,7 @@ public class YoPolynomial
    }
 
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
-                                              double zIntermediate2, double zFinal)
+                                               double zIntermediate2, double zFinal)
    {
       reshape(4);
       MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
@@ -558,6 +558,39 @@ public class YoPolynomial
       {
          this.a[i].set(coefficients[i]);
       }
+   }
+
+   public void setDirectly(int power, double coefficient)
+   {
+      if (power >= maximumNumberOfCoefficients)
+         throw new RuntimeException("Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't set coefficient as it requires: " + power + 1
+               + " coefficients");
+
+      if (power >= getNumberOfCoefficients())
+      {
+         for (int i = getNumberOfCoefficients(); i <= power; i++)
+            a[i].set(0.0);
+         this.coefficientVector.reshape(power + 1, 1);
+         this.constraintMatrix.reshape(power + 1, power + 1);
+         this.constraintVector.reshape(power + 1, 1);
+         this.xPowersDerivativeVector.reshape(power + 1, 1);
+         numberOfCoefficients.set(power + 1);
+      }
+      a[power].set(coefficient);
+   }
+   
+   /**
+    * Set a specific coefficient of the polynomial. A sequence of calls to this function should typically be followed by a call to {@code reshape(int)} later.
+    * @param power
+    * @param coefficient
+    */   
+   public void setDirectlyFast(int power, double coefficient)
+   {
+      if(power >= maximumNumberOfCoefficients)
+         return;
+      if(power >= getNumberOfCoefficients())
+         numberOfCoefficients.set(power + 1);
+      a[power].set(coefficient);
    }
 
    public void setDirectlyReverse(double[] coefficients)
@@ -733,7 +766,7 @@ public class YoPolynomial
    public String toString()
    {
       String inString = "Polynomial: " + a[0].getDoubleValue();
-      for (int i = 1; i < a.length; i++)
+      for (int i = 1; i < getNumberOfCoefficients(); i++)
       {
          inString += " ";
          if (a[i].getDoubleValue() >= 0)

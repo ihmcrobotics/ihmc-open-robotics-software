@@ -2,14 +2,16 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.MathTools;
 
-public class ConvexPolygonShrinker
+public class ConvexPolygonScaler
 {
    private final LineSegment2D polygonAsLineSegment = new LineSegment2D();
    private final ArrayList<Point2D> newVertices = new ArrayList<Point2D>();
@@ -27,7 +29,7 @@ public class ConvexPolygonShrinker
    
    private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
-   public ConvexPolygonShrinker()
+   public ConvexPolygonScaler()
    {
       for (int i=0; i<8; i++)
       {
@@ -49,18 +51,44 @@ public class ConvexPolygonShrinker
    }
    
    
-   public boolean shrinkConstantDistanceInto(ConvexPolygon2D polygonQ, double distance, ConvexPolygon2D polygonToPack)
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
+    */
+   public boolean scaleConvexPolygon(ConvexPolygon2D polygonQ, double distance, ConvexPolygon2D polygonToPack)
    {
       if (Math.abs(distance) < 1.0e-10)
       {
          polygonToPack.setAndUpdate(polygonQ);
          return true;
       }
-
+      
       if (polygonQ.getNumberOfVertices() == 2)
       {
          Point2DReadOnly vertex0 = polygonQ.getVertex(0);
          Point2DReadOnly vertex1 = polygonQ.getVertex(1);
+         polygonAsLineSegment.set(vertex0, vertex1);
+         
+         if(distance < 0.0)
+         {
+            polygonToPack.clear();
+            polygonAsLineSegment.direction(true, normalizedVector);
+            normalizedVector.scale(-distance);
+            polygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
+            polygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
+            
+            polygonAsLineSegment.perpendicular(true, normalizedVector);
+            normalizedVector.scale(distance);
+            
+            polygonToPack.addVertex(vertex0.getX() + normalizedVector.getX(), vertex0.getY() + normalizedVector.getY());
+            polygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
+            polygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
+            polygonToPack.addVertex(vertex1.getX() - normalizedVector.getX(), vertex1.getY() - normalizedVector.getY());
+            polygonToPack.update();
+            return true;
+         }
+         
          if (vertex0.distance(vertex1) < 2.0 * distance)
          {
             Point2D midPoint = new Point2D(vertex0);
@@ -73,9 +101,7 @@ public class ConvexPolygonShrinker
             return false;
          }
 
-         polygonAsLineSegment.set(vertex0, vertex1);
          double percentageAlongSegment = distance / polygonAsLineSegment.length();
-
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
 
@@ -90,8 +116,17 @@ public class ConvexPolygonShrinker
 
       if (polygonQ.getNumberOfVertices() == 1)
       {
+         if(distance < 0.0)
+         {
+            Point2DReadOnly vertex0 = polygonQ.getVertex(0);
+            polygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() + distance);
+            polygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() - distance);
+            polygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() + distance);
+            polygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() - distance);
+            polygonToPack.update();
+            return true;
+         }
          polygonToPack.setAndUpdate(polygonQ);
-         
          return false;
       }
 
@@ -133,7 +168,12 @@ public class ConvexPolygonShrinker
       return foundSolution;
    }
    
-   public void shrinkConstantDistanceInto(FrameConvexPolygon2d polygonQ, double distance, FrameConvexPolygon2d framePolygonToPack)
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
+    */
+   public void scaleConvexPolygon(FrameConvexPolygon2d polygonQ, double distance, FrameConvexPolygon2d framePolygonToPack)
    {      
       if (Math.abs(distance) < 1.0e-10)
       {
@@ -144,7 +184,7 @@ public class ConvexPolygonShrinker
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
       ConvexPolygon2D polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
-      shrinkConstantDistanceInto(polygonQ.getConvexPolygon2dCopy(), distance, polygon2dToPack);
+      scaleConvexPolygon(polygonQ.getConvexPolygon2d(), distance, polygon2dToPack);
 //      framePolygonToPack.updateFramePoints();
       framePolygonToPack.update();
    }
