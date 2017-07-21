@@ -8,6 +8,8 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+import java.util.Random;
+
 /**
  * This is a holder for frame related information that is passed through packages that implement
  * {@link FrameBasedMessage}.
@@ -56,6 +58,12 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
    public FrameInformation(ReferenceFrame trajectoryFrame)
    {
       trajectoryReferenceFrameId = trajectoryFrame.getNameBasedHashCode();
+   }
+
+   public FrameInformation(Random random)
+   {
+      trajectoryReferenceFrameId = random.nextLong();
+      dataReferenceFrameId = random.nextLong();
    }
 
    public long getTrajectoryReferenceFrameId()
