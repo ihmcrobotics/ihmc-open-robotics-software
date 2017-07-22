@@ -175,7 +175,7 @@ public class GenericROSTranslationTools
             {
                setEnumFromByte(rosMessage, ihmcMessage, rosGetter, ihmcField, (Class<? extends Enum>) ihmcMessageFieldType);
             }
-            else if(customFieldConversions.contains(rosMessageClass))
+            else if(customFieldConversions.containsConverterFor(rosMessageClass))
             {
                Message rosMessageField = (Message) rosGetter.invoke(rosMessage);
                Object ihmcPacketField = customFieldConversions.convert(rosMessageField);
@@ -364,7 +364,7 @@ public class GenericROSTranslationTools
    {
       for (Field field : fields)
       {
-         if (customFieldConversions.contains(field.getType()))
+         if (customFieldConversions.containsConverterFor(field.getType()))
          {
             Object fieldVariableToConvert = field.getType().cast(field.get(ihmcMessage));
             Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
