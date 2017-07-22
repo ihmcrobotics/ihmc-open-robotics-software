@@ -40,10 +40,13 @@ import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 public class IHMCROSTranslationRuntimeTools
 {
    private static final MessageFactory messageFactory = GenericROSTranslationTools.getMessageFactory();
-   private final CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
+   private static final CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
    {
-      customFieldConversions.registerROSMessageFieldConverter(FootstepDataListRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
       customFieldConversions.registerIHMCPacketFieldConverter(FootstepDataListMessage.class, IHMCROSTranslationRuntimeTools::customConvertToRosMessage);
+      customFieldConversions.registerROSMessageFieldConverter(FootstepDataListRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
+
+      customFieldConversions.registerIHMCPacketFieldConverter(FootstepDataMessage.class, IHMCROSTranslationRuntimeTools::customConvertToRosMessage);
+      customFieldConversions.registerROSMessageFieldConverter(FootstepDataRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
    }
 
    public static Message convertToRosMessage(Packet<?> ihmcMessage)
@@ -54,13 +57,12 @@ public class IHMCROSTranslationRuntimeTools
          return null;
       }
       Class<? extends Packet> aClass = ihmcMessage.getClass();
-      try
+
+      if(customFieldConversions.contains(aClass))
       {
-         Method convertToRosMessageMethod = IHMCROSTranslationRuntimeTools.class.getDeclaredMethod("customConvertToRosMessage", aClass);
-         convertToRosMessageMethod.setAccessible(true);
-         return (Message) convertToRosMessageMethod.invoke(null, ihmcMessage);
+         return customFieldConversions.convert(ihmcMessage);
       }
-      catch (NoSuchMethodException exception)
+      else
       {
          return GenericROSTranslationTools.convertIHMCMessageToRosMessage(ihmcMessage);
       }
@@ -76,13 +78,11 @@ public class IHMCROSTranslationRuntimeTools
       }
       Class<?> aClass = Class.forName(rosMessage.toRawMessage().getType().replace("/", "."));
 
-      try
+      if(customFieldConversions.contains(aClass))
       {
-         Method convertToIHMCMessageMethod = IHMCROSTranslationRuntimeTools.class.getDeclaredMethod("customConvertToIHMCMessage", aClass);
-         convertToIHMCMessageMethod.setAccessible(true);
-         return (Packet<?>) convertToIHMCMessageMethod.invoke(null, rosMessage);
+         return customFieldConversions.convert(rosMessage);
       }
-      catch (NoSuchMethodException exception)
+      else
       {
          return GenericROSTranslationTools.convertRosMessageToIHMCMessage(rosMessage);
       }
@@ -117,7 +117,7 @@ public class IHMCROSTranslationRuntimeTools
       return footsteps;
    }
 
-   private static Packet customConvertToIHMCMessage(FootstepDataRosMessage message) throws Exception
+   private static Packet customConvertToIHMCMessage(FootstepDataRosMessage message)
    {
       FootstepDataMessage ihmcMessage = new FootstepDataMessage();
 
@@ -245,7 +245,7 @@ public class IHMCROSTranslationRuntimeTools
       }
    }
 
-   private static Message customConvertToRosMessage(FootstepDataMessage footstep) throws Exception
+   private static Message customConvertToRosMessage(FootstepDataMessage footstep)
    {
       Class<? extends Packet> ihmcMessageClass = FootstepDataMessage.class;
       String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
