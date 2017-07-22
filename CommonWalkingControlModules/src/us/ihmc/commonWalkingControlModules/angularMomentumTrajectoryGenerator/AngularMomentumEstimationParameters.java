@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 public class AngularMomentumEstimationParameters
 {
    double comHeight = 0.5;
-   SmoothCMPPlannerParameters copPlannerParameters;
+   private SmoothCMPPlannerParameters copPlannerParameters;
    public AngularMomentumEstimationParameters(SmoothCMPPlannerParameters cmpPlannerParameters)
    {
       this.copPlannerParameters = cmpPlannerParameters;
