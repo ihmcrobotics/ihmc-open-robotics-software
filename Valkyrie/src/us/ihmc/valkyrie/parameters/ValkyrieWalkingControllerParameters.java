@@ -73,13 +73,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
+      super(1.0);
+
       this.jointMap = jointMap;
       this.target = target;
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
 
-      // Genreated using ValkyrieFullRobotModelVisualizer
+      // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
             0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112,
             0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
