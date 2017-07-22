@@ -400,7 +400,7 @@ public class YoTrajectory
 
    public String toString()
    {
-      return polynomial.toString() + " TInitial: " + tInitial.getDoubleValue() + " TFinal: " + tFinal.getDoubleValue();
+      return name + ":\n" + polynomial.toString() + " TInitial: " + tInitial.getDoubleValue() + " TFinal: " + tFinal.getDoubleValue();
    }
 
    public void scale(double scalar)

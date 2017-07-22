@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final String name;
+   protected final String name;
 
    protected final int maxNumberOfSegments;
    protected final int maxNumberOfCoefficients;

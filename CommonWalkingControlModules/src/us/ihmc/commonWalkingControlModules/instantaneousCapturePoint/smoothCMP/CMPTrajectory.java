@@ -13,7 +13,7 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
 
    public CMPTrajectory(String namePrefix, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
    {
-      super(namePrefix, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      super(namePrefix + "CMP", maxNumberOfSegments, maxNumberOfCoefficients, registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
    }
 

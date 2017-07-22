@@ -190,7 +190,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfSegments.increment();
       }
-      
       initialize();
    }
 

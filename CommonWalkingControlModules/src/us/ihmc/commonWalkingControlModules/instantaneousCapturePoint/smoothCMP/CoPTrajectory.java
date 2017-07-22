@@ -18,7 +18,7 @@ public class CoPTrajectory extends YoSegmentedFrameTrajectory3D implements CoPTr
    public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type,
                         YoVariableRegistry registry)
    {      
-      super(namePrefix + stepNumber + type.toString(), maxNumberOfSegments, splineType.getNumberOfCoefficients(), registry);
+      super(namePrefix + stepNumber + type.toString() + "CoP", maxNumberOfSegments, splineType.getNumberOfCoefficients(), registry);
       this.name = namePrefix + stepNumber + type.toString();
       this.splineType = splineType;
       this.trajectoryType = type;

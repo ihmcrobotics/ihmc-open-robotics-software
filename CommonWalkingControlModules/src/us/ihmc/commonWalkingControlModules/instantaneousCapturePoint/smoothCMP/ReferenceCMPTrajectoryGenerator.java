@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.An
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TrajectoryMathTools;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -59,6 +60,7 @@ public class ReferenceCMPTrajectoryGenerator
       }
       CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, 25, 8, registry);
       transferCMPTrajectories.add(transferCMPTrajectory);
+      this.torqueTrajectory = new TorqueTrajectory(namePrefix + "TempTorqueTraj", 25, 8, registry);
       this.z = new YoDouble("CMPTorqueOffsetScalingFactor", registry);
       this.z.set(0.5);
    }
@@ -140,6 +142,7 @@ public class ReferenceCMPTrajectoryGenerator
                                      List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories)
    {
       this.initialTime = currentTime;
+      PrintTools.debug(transferAngularMomentumTrajectories.get(0).toString());
       setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngularMomentumTrajectories);
       activeTrajectory = transferCMPTrajectories.get(0);      
    }
@@ -150,6 +153,7 @@ public class ReferenceCMPTrajectoryGenerator
                                   List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories)
    {
       this.initialTime = currentTime;
+      PrintTools.debug(swingAngularMomentumTrajectories.get(0).toString());
       setCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories, swingAngularMomentumTrajectories);
       activeTrajectory = swingCMPTrajectories.get(0);
    }
@@ -160,12 +164,11 @@ public class ReferenceCMPTrajectoryGenerator
    {
       if (transferAngularMomentumTrajectories == null || swingAngularMomentumTrajectories == null)
       {
-         copyCoPTrajectoriesToCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories, transferAngularMomentumTrajectories,
-                                              swingAngularMomentumTrajectories);
+         copyCoPTrajectoriesToCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories);
          return;
       }
-      int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
-      for (int i = 0; i < numberOfFootstepsToCopy; i++)
+      int numberOfFootstepsToSet = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
+      for (int i = 0; i < numberOfFootstepsToSet; i++)
       {
          cmpTrajectoryReference = transferCMPTrajectories.get(i);
          copTrajectoryReference = transferCoPTrajectories.get(i);
@@ -182,9 +185,9 @@ public class ReferenceCMPTrajectoryGenerator
             return;
          TrajectoryMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
       }
-      cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
-      copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
-      torqueTrajectory.set(transferAngularMomentumTrajectories.get(numberOfFootstepsToCopy));
+      cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToSet);
+      copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToSet);
+      torqueTrajectory.set(transferAngularMomentumTrajectories.get(numberOfFootstepsToSet));
       torqueTrajectory.scale(1.0/z.getDoubleValue());
       if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          return;
@@ -192,9 +195,7 @@ public class ReferenceCMPTrajectoryGenerator
    }
 
    private void copyCoPTrajectoriesToCMPTrajectories(List<? extends CoPTrajectory> transferCoPTrajectories,
-                                                     List<? extends CoPTrajectory> swingCoPTrajectories,
-                                                     List<? extends AngularMomentumTrajectory> transferAngularMomentumTrajectories,
-                                                     List<? extends AngularMomentumTrajectory> swingAngulartMomentumTrajectories)
+                                                     List<? extends CoPTrajectory> swingCoPTrajectories)
    {
       int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
       for (int i = 0; i < numberOfFootstepsToCopy; i++)
