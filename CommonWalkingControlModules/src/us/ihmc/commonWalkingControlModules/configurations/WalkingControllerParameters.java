@@ -39,6 +39,19 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private DynamicReachabilityParameters dynamicReachabilityParameters;
    private PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
+   private LeapOfFaithParameters leapOfFaithParameters;
+
+   private final double massScale;
+
+   public WalkingControllerParameters()
+   {
+      this(1.0);
+   }
+
+   public WalkingControllerParameters(double massScale)
+   {
+      this.massScale = massScale;
+   }
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -855,6 +868,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Limits the swing foot motion according to the motion range.
+    */
+   public boolean useSingularityAvoidanceInSwing()
+   {
+      return true;
+   }
+
+   /**
+    * Progressively limits the CoM height as the support leg(s) are getting straighter.
+    */
+   public boolean useSingularityAvoidanceInSupport()
+   {
+      return true;
+   }
+
+   /**
     * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}
     */
    public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
@@ -865,15 +894,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return pelvisOffsetWhileWalkingParameters;
    }
 
-   /**
-    * Determines whether the upcoming footstep plan is shifted on touchdown to reflect any error between the foot position
-    * at touchdown and the desired footstep position. E.g. if the foot touches down too short all upcoming footsteps are
-    * shifted backwards.
-    *
-    * @return whether the upcoming footstep plan is shifted on touchdown.
-    */
-   public boolean offsetFootstepPlanOnTouchdown()
+   public LeapOfFaithParameters getLeapOfFaithParameters()
    {
-      return false;
+      if (leapOfFaithParameters == null)
+         leapOfFaithParameters = new LeapOfFaithParameters();
+
+      return leapOfFaithParameters;
    }
 }

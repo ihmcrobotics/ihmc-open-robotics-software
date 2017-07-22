@@ -13,6 +13,7 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
@@ -83,6 +84,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LeapOfFaithParameters leapOfFaithParameters;
 
    public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -104,6 +106,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
+      leapOfFaithParameters = new LeapOfFaithParameters();
 
       for (RobotSide robotSide : RobotSide.values)
       {
