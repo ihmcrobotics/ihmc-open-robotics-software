@@ -86,12 +86,12 @@ public class AngularMomentumEstimationParameters
    
    public double getCoMHeight()
    {
-      return 0.3;
+      return 0.33;
    }
 
    public double getSwingFootMaxLift()
    {
-      return 0.01;
+      return 0.10;
    }
    
    public int getNumberOfPointsToSampleForTransfer()
