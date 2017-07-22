@@ -5,6 +5,7 @@ import org.ros.internal.message.Message;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class CustomFieldConversions
 {
@@ -47,8 +48,20 @@ public class CustomFieldConversions
       return function.apply(field);
    }
 
-   public boolean contains(Class<?> clazz)
+   public boolean containsConverterFor(Class<?> clazz)
    {
-      return classToPacketFieldConveterMap.containsKey(clazz) || classToMessageFieldConverterMap.containsKey(clazz);
+      boolean ret = false;
+
+      for (Class aClass : classToPacketFieldConveterMap.keySet())
+      {
+         ret |= aClass.isAssignableFrom(clazz);
+      }
+
+      for (Class<? extends Message> aClass : classToMessageFieldConverterMap.keySet())
+      {
+         ret |= aClass.isAssignableFrom(clazz);
+      }
+
+      return ret;
    }
 }

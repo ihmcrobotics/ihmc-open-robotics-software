@@ -58,7 +58,7 @@ public class IHMCROSTranslationRuntimeTools
       }
       Class<? extends Packet> aClass = ihmcMessage.getClass();
 
-      if(customFieldConversions.contains(aClass))
+      if(customFieldConversions.containsConverterFor(aClass))
       {
          return customFieldConversions.convert(ihmcMessage);
       }
@@ -78,7 +78,7 @@ public class IHMCROSTranslationRuntimeTools
       }
       Class<?> aClass = Class.forName(rosMessage.toRawMessage().getType().replace("/", "."));
 
-      if(customFieldConversions.contains(aClass))
+      if(customFieldConversions.containsConverterFor(aClass))
       {
          return customFieldConversions.convert(rosMessage);
       }
