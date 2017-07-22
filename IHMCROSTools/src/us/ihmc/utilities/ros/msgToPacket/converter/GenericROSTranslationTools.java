@@ -87,7 +87,14 @@ public class GenericROSTranslationTools
       // QuaternionBasedTransform <-> Transform
       customFieldConversions.registerIHMCPacketFieldConverter(QuaternionBasedTransform.class, GenericROSTranslationTools::convertQuaternionBasedTransformToTransform);
       customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
+
+      // Tuple3DReadOnly <-> Vector3
       customFieldConversions.registerIHMCPacketFieldConverter(Tuple3DReadOnly.class, GenericROSTranslationTools::convertTuple3d);
+      customFieldConversions.registerROSMessageFieldConverter(Vector3.class, GenericROSTranslationTools::convertVector3);
+
+      // Quaternion <-> ROS Quaternion
+      customFieldConversions.registerIHMCPacketFieldConverter(Tuple4DReadOnly.class, GenericROSTranslationTools::convertTuple4d);
+      customFieldConversions.registerROSMessageFieldConverter(geometry_msgs.Quaternion.class, GenericROSTranslationTools::convertQuaternion);
    }
 
    public static MessageFactory getMessageFactory()
