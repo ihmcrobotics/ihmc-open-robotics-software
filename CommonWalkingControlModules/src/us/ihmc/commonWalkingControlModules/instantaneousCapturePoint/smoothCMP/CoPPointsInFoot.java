@@ -26,8 +26,8 @@ public class CoPPointsInFoot
 
    private final int stepNumber;
 
-   private final YoFramePointInMultipleFrames footStepCentroid;
-
+   private final YoFramePointInMultipleFrames swingFootCentroid;
+   private final YoFramePointInMultipleFrames supportFootCentroid;
    public CoPPointsInFoot(int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
       this.stepNumber = stepNumber;
@@ -40,7 +40,8 @@ public class CoPPointsInFoot
          copLocations.put(copPointName, constantCoP);
          copLocationsInWorldFrameReadOnly.put(copPointName, constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
       }
-      footStepCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
+      swingFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
+      supportFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "supportCentroid", registry, framesToRegister);
    }
 
    public void notifyVariableChangedListeners()
@@ -51,7 +52,8 @@ public class CoPPointsInFoot
 
    public void reset()
    {
-      footStepCentroid.setToNaN();
+      swingFootCentroid.setToNaN();
+      supportFootCentroid.setToNaN();
       copPointsList.clear();
       for (int i = 0; i < CoPPointName.values.length; i++)
       {
@@ -126,7 +128,8 @@ public class CoPPointsInFoot
    //
    public void setIncludingFrame(CoPPointsInFoot other)
    {
-      this.footStepCentroid.setIncludingFrame(other.footStepCentroid);
+      this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
+      this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
       for (int i = 0; i < CoPPointName.values.length; i++)
          this.copLocations.get(CoPPointName.values[i]).setIncludingFrame(other.get(CoPPointName.values[i]));
       for(int i = 0; i < other.copPointsList.size(); i++)
@@ -145,21 +148,24 @@ public class CoPPointsInFoot
 
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      footStepCentroid.changeFrame(desiredFrame);
+      swingFootCentroid.changeFrame(desiredFrame);
+      supportFootCentroid.changeFrame(desiredFrame);
       for (int i = 0; i < CoPPointName.values.length; i++)
          copLocations.get(CoPPointName.values[i]).changeFrame(desiredFrame);
    }
 
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
-      footStepCentroid.registerReferenceFrame(newReferenceFrame);
+      swingFootCentroid.registerReferenceFrame(newReferenceFrame);
+      supportFootCentroid.registerReferenceFrame(newReferenceFrame);
       for (int i = 0; i < CoPPointName.values.length; i++)
          copLocations.get(CoPPointName.values[i]).registerReferenceFrame(newReferenceFrame);
    }
 
    public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
    {
-      footStepCentroid.switchCurrentReferenceFrame(desiredFrame);
+      swingFootCentroid.switchCurrentReferenceFrame(desiredFrame);
+      supportFootCentroid.switchCurrentReferenceFrame(desiredFrame);
       for (int i = 0; i < CoPPointName.values.length; i++)
          copLocations.get(CoPPointName.values[i]).switchCurrentReferenceFrame(desiredFrame);
    }
@@ -169,24 +175,46 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
    }
 
-   public void setFootLocation(FramePoint footLocation)
+   public void setSwingFootLocation(FramePoint footLocation)
    {
-      this.footStepCentroid.setIncludingFrame(footLocation);
+      this.swingFootCentroid.setIncludingFrame(footLocation);
    }
 
-   public void setFootLocation(FramePoint2d footLocation)
+   public void setSwingFootLocation(FramePoint2d footLocation)
    {
-      this.footStepCentroid.setXYIncludingFrame(footLocation);
+      this.swingFootCentroid.setXYIncludingFrame(footLocation);
    }
 
-   public void getFootLocation(FramePoint footLocationToPack)
+   public void getSwingFootLocation(FramePoint footLocationToPack)
    {
-      footLocationToPack.setIncludingFrame(footStepCentroid.getFrameTuple());
+      footLocationToPack.setIncludingFrame(swingFootCentroid.getFrameTuple());
    }
 
+   public void setSupportFootLocation(FramePoint footLocation)
+   {
+      this.supportFootCentroid.setIncludingFrame(footLocation);
+   }
+
+   public void setSupportFootLocation(FramePoint2d footLocation)
+   {
+      this.supportFootCentroid.setXYIncludingFrame(footLocation);
+   }
+
+   public void getSupportFootLocation(FramePoint footLocationToPack)
+   {
+      footLocationToPack.setIncludingFrame(supportFootCentroid.getFrameTuple());
+   }
+   
+   public void setFeetLocation(FramePoint swingFootLocation, FramePoint supportFootLocation)
+   {
+      setSwingFootLocation(swingFootLocation);
+      setSupportFootLocation(supportFootLocation);
+   }
+   
    public String toString()
    {
-      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      String output = "SwingFootstepLocation: " + swingFootCentroid.toString() + "\n";
+      output += "SupportFootstepLocation: " + supportFootCentroid.toString() + "\n";
       for (int i = 0; i < CoPPointName.values.length; i++)
          output += CoPPointName.values[i].toString() + " : " + copLocations.get(CoPPointName.values[i]) + "\n";
       for (int i = 0; i < copPointsList.size(); i++)
@@ -197,7 +225,8 @@ public class CoPPointsInFoot
 
    public String toString2()
    {
-      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      String output = "FootstepLocation: " + swingFootCentroid.toString() + "\n";
+      output += "SupportFootstepLocation: " + supportFootCentroid.toString() + "\n";
       for (int i = 0; i < copPointsList.size(); i++)
          output += copPointsList.get(i).toString() + " : " + copLocations.get(copPointsList.get(i)).toString() + "\n";
       return output;

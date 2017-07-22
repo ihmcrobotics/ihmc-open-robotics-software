@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -329,5 +330,19 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public int getNumberOfFootstepsRegistered()
    {
       return referenceCoPGenerator.getNumberOfFootstepsRegistered();
+   }
+
+   public void getEstimatedCoM(YoFramePoint estCoM, double time)
+   {
+      FramePoint a = new FramePoint();
+      estimatedAMGenerator.getCoMPosition(a, time);
+      estCoM.set(a);
+   }
+   
+   public void getEstimatedSwFoot(YoFramePoint estSwFoot, double time)
+   {
+      FramePoint a = new FramePoint();
+      estimatedAMGenerator.getSwingFootPosition(a, time);
+      estSwFoot.set(a);
    }
 }
