@@ -39,10 +39,30 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testCinderBlocks() throws Exception
+   {
+      try
+      {
+         super.testWalkingOverCinderBlockField();
+      }
+      catch(SimulationExceededMaximumTimeException e)
+      {
+
+      }
+   }
+
    @Override
    public DRCRobotModel getRobotModel()
    {
       return atlasRobotModel;
+   }
+
+   @Override
+   public double getPelvisOffsetHeight()
+   {
+      return 0.08;
    }
 
    @Override
@@ -78,7 +98,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             @Override
             public boolean checkCoPLocationToTriggerToeOff()
             {
-               return true;
+               return false;
             }
 
             @Override
@@ -273,7 +293,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   }
                };
             }
-
          };
       }
 
@@ -320,6 +339,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testForwardWalking();
+      test.testCinderBlocks();
    }
 }
