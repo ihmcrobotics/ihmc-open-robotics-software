@@ -11,8 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -20,12 +19,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import java.util.ArrayList;
 import java.util.List;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
@@ -39,7 +37,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
    public void testCinderBlocks() throws Exception
    {
@@ -83,6 +81,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
          {
+            /*
             @Override
             public double getDefaultTransferTime()
             {
@@ -94,6 +93,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             {
                return 0.9 - getDefaultTransferTime();
             }
+            */
 
             @Override
             public boolean checkCoPLocationToTriggerToeOff()
@@ -190,7 +190,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             {
                return false;
             }
-
 
 
             @Override
@@ -304,7 +303,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             @Override
             public double getMinTimeToSpendOnExitCoPInSingleSupport()
             {
-               return 0.15;
+               return 0.0;//0.05; //0.15;
             }
 
             @Override

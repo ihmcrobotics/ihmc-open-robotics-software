@@ -159,12 +159,14 @@ public class WalkingSingleSupportState extends SingleSupportState
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
+      boolean feetAreWellPositioned = feetManager.areFeetWellPositioned(swingSide.getOppositeSide(), nextFootstep.getSoleReferenceFrame());
 
       if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
       {
          legConfigurationManager.straightenLegDuringSwing(swingSide);
       }
-      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide))
+      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide) &&
+            feetAreWellPositioned)
       {
          legConfigurationManager.collapseLegDuringSwing(swingSide.getOppositeSide());
       }

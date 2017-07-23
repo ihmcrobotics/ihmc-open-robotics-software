@@ -524,6 +524,11 @@ public class FeetManager
    public boolean areFeetWellPositioned(RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleZUpFrames.get(trailingLeg.getOppositeSide());
-      return toeOffManager.isFrontFootWellPositionedForToeOff(trailingLeg, soleFrame);
+      return areFeetWellPositioned(trailingLeg, soleFrame);
+   }
+
+   public boolean areFeetWellPositioned(RobotSide trailingLeg, ReferenceFrame upcomingStepFrame)
+   {
+      return toeOffManager.isFrontFootWellPositionedForCollapse(trailingLeg, upcomingStepFrame);
    }
 }
