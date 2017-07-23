@@ -506,11 +506,11 @@ public class TrajectoryMathTools
       if (trajToPack.getMaximumNumberOfCoefficients() < trajToDifferentiate.getNumberOfCoefficients() - 1)
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
       
-      trajToPack.polynomial.setDirectly(0, 0.0);
+      trajToPack.polynomial.reshape(Math.max(trajToDifferentiate.getNumberOfCoefficients() - 1, 1));
+      if(trajToDifferentiate.getNumberOfCoefficients() == 1)
+         trajToPack.polynomial.setConstant(0);
       for (int i = trajToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
          trajToPack.polynomial.setDirectlyFast(i - 1, i * trajToDifferentiate.polynomial.getCoefficient(i));
-      trajToPack.polynomial.reshape(Math.max(trajToDifferentiate.getNumberOfCoefficients() - 1, 1));
-
       trajToPack.setTime(trajToDifferentiate.getInitialTime(), trajToDifferentiate.getFinalTime());
    }
 

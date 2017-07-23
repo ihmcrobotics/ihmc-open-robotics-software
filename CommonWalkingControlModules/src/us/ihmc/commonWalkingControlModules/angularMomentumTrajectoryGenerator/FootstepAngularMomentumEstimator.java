@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -85,6 +86,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    private YoFrameTrajectory3D comTrajD;
    private YoFrameTrajectory3D swingTrajD;
    private YoFrameVector anguMomTraj;
+   private YoFramePoint comPos;
+   private YoFramePoint swingFootTraj;
 
    public FootstepAngularMomentumEstimator(String namePrefix, YoVariableRegistry parentRegistry)
    {
@@ -129,6 +132,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       this.comTrajD = new YoFrameTrajectory3D("CoMDebugTraj", maxNumberOfTrajectoryCoefficients, worldFrame, registry);
       this.swingTrajD = new YoFrameTrajectory3D("SwingDebugTraj", maxNumberOfTrajectoryCoefficients, worldFrame, registry);
       this.anguMomTraj = new YoFrameVector("AngMomViz", worldFrame, registry);
+      this.comPos = new YoFramePoint("CoMViz", "", worldFrame, registry);
+      this.swingFootTraj = new YoFramePoint("SwFViz", worldFrame, registry);
       parentRegistry.addChild(registry);
    }
 
@@ -350,12 +355,15 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      //swingFootTrajectory.compute(0.0);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
-      //swingFootTrajectory.compute(currentSwingSegmentDuration);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
+      if (swingStart)
+      {
+         swingFootVelocity.compute(0.0);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());
+         swingFootVelocity.compute(currentSwingSegmentDuration);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());   
+      }
    }
 
    private void updateSwingLiftTrajectory()
@@ -368,7 +376,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    // Second transfer - endCoP to entry CoP
    private void setSwingFootTrajectoryForFirstTransfer(int footstepIndex)
    {
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint1);
+      upcomingCoPsInFootsteps.get(footstepIndex + 1).getSupportFootLocation(tempFramePoint1);
       swingFootTrajectory.setConstant(0.0, currentFirstTransferSegmentDuration, tempFramePoint1);
       swingFootTrajectory.getDerivative(swingFootVelocity);
 
@@ -377,12 +385,16 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      //swingFootTrajectory.compute(0.0);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
-      //swingFootTrajectory.compute(currentFirstTransferSegmentDuration);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
+      if (!swingStart)
+      {
+         PrintTools.debug("First");
+         swingFootVelocity.compute(0.0);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());
+         swingFootVelocity.compute(currentFirstTransferSegmentDuration);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());
+      }
    }
 
    private void setSwingFootTrajectoryForSecondTransfer(int footstepIndex, double segmentStartTime)
@@ -396,12 +408,16 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      //swingFootTrajectory.compute(segmentStartTime);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
-      //swingFootTrajectory.compute(segmentStartTime + currentSecondTransferSegmentDuration);
-      //swingFootTrajectory.getFramePosition(tempFramePoint1);
-      //PrintTools.debug(tempFramePoint1.toString());
+      if (!swingStart)
+      {
+         PrintTools.debug("Second");
+         swingFootVelocity.compute(segmentStartTime);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());
+         swingFootVelocity.compute(segmentStartTime + currentSecondTransferSegmentDuration);
+         swingFootVelocity.getFramePosition(tempFramePoint1);
+         PrintTools.debug(tempFramePoint1.toString());
+      }
    }
 
    private void setCoMTrajectoryForSwing()
@@ -418,7 +434,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       //segmentCoMTrajectory.getFramePosition(tempFramePoint1);
       //PrintTools.debug(tempFramePoint1.toString());
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
-      if (firstCoM)
+      if (firstCoM && swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
          firstCoM = false;
@@ -440,7 +456,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       //PrintTools.debug(tempFramePoint1.toString());
       //throw new RuntimeException();
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
-      if (firstCoM)
+      if (firstCoM && !swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
          firstCoM = false;
@@ -460,7 +476,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       //segmentCoMTrajectory.getFramePosition(tempFramePoint1);
       //PrintTools.debug(tempFramePoint1.toString());
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
-      if (firstCoM)
+      if (firstCoM && !swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
          firstCoM = false;
@@ -506,6 +522,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    {
       comTrajD.compute(time - initialTime);
       comTrajD.getFramePosition(pointToPack);
+      comPos.set(pointToPack);
    }
 
    public void getSwingFootPosition(FramePoint pointToPack, double time)
@@ -514,11 +531,11 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          transferAngularMomentumTrajectories.get(0).update(time - initialTime, tempFramePoint1);
       else
          swingAngularMomentumTrajectories.get(0).update(time - initialTime, tempFramePoint1);
-      PrintTools.debug("Time: " + (time - initialTime) + " " + tempFramePoint1.toString());
       anguMomTraj.set(tempFramePoint1);
 
       swingTrajD.compute(time - initialTime);
       swingTrajD.getFramePosition(pointToPack);
+      swingFootTraj.set(pointToPack);
    }
 
    @Override
