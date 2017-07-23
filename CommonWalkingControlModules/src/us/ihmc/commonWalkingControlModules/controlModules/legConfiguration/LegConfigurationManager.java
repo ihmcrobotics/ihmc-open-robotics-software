@@ -61,9 +61,14 @@ public class LegConfigurationManager
       return (legConfigurationControlState.equals(LegConfigurationType.BENT) || legConfigurationControlState.equals(LegConfigurationType.COLLAPSE));
    }
 
+   public boolean isLegBent(RobotSide robotSide)
+   {
+      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
+      return (legConfigurationControlState.equals(LegConfigurationType.BENT));
+   }
+
    public void collapseLegDuringTransfer(RobotSide transferSide)
    {
-
       if (attemptToStraightenLegs.getBooleanValue())
       {
          legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.BENT);
@@ -80,12 +85,18 @@ public class LegConfigurationManager
 
    public void straightenLegDuringSwing(RobotSide swingSide)
    {
-      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN_TO_STRAIGHT &&
+      if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN &&
             legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHT)
       {
          //beginStraightening(swingSide);
          setStraight(swingSide);
+         setFullyExtendLeg(swingSide, true);
       }
+   }
+
+   public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)
+   {
+      legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
    }
 
    public void setStraight(RobotSide robotSide)
@@ -100,7 +111,7 @@ public class LegConfigurationManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN_TO_STRAIGHT);
+         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN);
       }
    }
 

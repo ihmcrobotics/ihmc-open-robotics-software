@@ -498,7 +498,7 @@ public class ToeOffManager
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
    }
 
-   private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
+   public boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempTrailingFootPosition.setToZero(trailingFootFrame);
