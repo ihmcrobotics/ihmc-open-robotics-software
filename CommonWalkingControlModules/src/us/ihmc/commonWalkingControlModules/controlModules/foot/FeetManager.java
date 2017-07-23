@@ -520,15 +520,4 @@ public class FeetManager
    {
       return footControlModules.get(robotSideToCheck).isFootToeingOffSlipping();
    }
-
-   public boolean areFeetWellPositioned(RobotSide trailingLeg)
-   {
-      ReferenceFrame soleFrame = soleZUpFrames.get(trailingLeg.getOppositeSide());
-      return areFeetWellPositioned(trailingLeg, soleFrame);
-   }
-
-   public boolean areFeetWellPositioned(RobotSide trailingLeg, ReferenceFrame upcomingStepFrame)
-   {
-      return toeOffManager.isFrontFootWellPositionedForCollapse(trailingLeg, upcomingStepFrame);
-   }
 }

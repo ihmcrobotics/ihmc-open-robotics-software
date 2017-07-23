@@ -206,7 +206,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(LegConfigurationManager.class))
          return null;
 
-      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters.getStraightLegWalkingParameters(), registry);
+      legConfigurationManager = new LegConfigurationManager(controllerToolbox, walkingControllerParameters, registry);
       return legConfigurationManager;
    }
 
