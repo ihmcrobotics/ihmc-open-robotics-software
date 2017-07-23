@@ -390,8 +390,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          updateDoubleSupportPolygon(currentSupportFootPolygon, currentSwingFootInitialPolygon);
          computeMidFeetPointWithChickenSupportForInitialTransfer(tempFramePoint);
          copLocationWaypoints.get(footstepIndex).addAndSetIncludingFrame(endCoPName, 0.0, tempFramePoint);
-         PrintTools.debug("Support "  + currentSupportFootPolygon.getCentroid().toString());
-         PrintTools.debug("Swing I: "  + currentSwingFootInitialPolygon.getCentroid().toString());
          // Save footsteps swaped
          copLocationWaypoints.get(footstepIndex).setSwingFootLocation(currentSupportFootPolygon.getCentroid());
          copLocationWaypoints.get(footstepIndex).setSupportFootLocation(currentSwingFootInitialPolygon.getCentroid());
