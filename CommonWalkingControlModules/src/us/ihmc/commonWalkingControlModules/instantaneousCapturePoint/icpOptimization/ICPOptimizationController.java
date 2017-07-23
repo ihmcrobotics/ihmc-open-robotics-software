@@ -32,10 +32,10 @@ import java.util.List;
 
 public abstract class ICPOptimizationController
 {
-   protected static final boolean VISUALIZE = true;
+   protected static final boolean VISUALIZE = false;
    protected static final boolean COMPUTE_COST_TO_GO = false;
    protected static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
 
    protected static final String yoNamePrefix = "controller";
 
