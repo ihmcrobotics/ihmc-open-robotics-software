@@ -67,6 +67,9 @@ public class LegConfigurationControlModule
    private final YoDouble kneePrivilegedDAction;
    private final YoDouble privilegedMaxAcceleration;
 
+   private final YoDouble effectiveKneeStiffness;
+   private final YoDouble effectiveKneeDamping;
+
    private final YoBoolean useFullyExtendedLeg;
    private final YoDouble desiredAngle;
    private final YoDouble desiredAngleWhenStraight;
@@ -158,6 +161,9 @@ public class LegConfigurationControlModule
       kneePitchPrivilegedError = new YoDouble(sidePrefix + "KneePitchPrivilegedError", registry);
       kneePrivilegedPAction = new YoDouble(sidePrefix + "KneePrivilegedPAction", registry);
       kneePrivilegedDAction = new YoDouble(sidePrefix + "KneePrivilegedDAction", registry);
+
+      effectiveKneeStiffness = new YoDouble(sidePrefix + "EffectiveKneeStiffness", registry);
+      effectiveKneeDamping = new YoDouble(sidePrefix + "EffectiveKneeDamping", registry);
 
       legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
 
@@ -352,9 +358,11 @@ public class LegConfigurationControlModule
       else
          dAction = jointSpaceDAction;
 
-
       kneePrivilegedPAction.set(pAction);
       kneePrivilegedDAction.set(dAction);
+
+      effectiveKneeStiffness.set(pAction / error);
+      effectiveKneeDamping.set(-dAction / kneePitchJoint.getQd());
 
       return MathTools.clamp(kneePrivilegedPAction.getDoubleValue() + kneePrivilegedDAction.getDoubleValue(), privilegedMaxAcceleration.getDoubleValue());
    }
