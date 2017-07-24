@@ -45,7 +45,7 @@ public class CTTaskNodeTree
       this.taskNames = new ArrayList<String>();
       this.taskNames.add("time");
       for(int i=1;i<this.dimensionOfTask+1;i++)
-         this.taskNames.add("Task_"+i+"_"+"..");
+         this.taskNames.add("Task_"+i+"_");
    }
    
    public CTTaskNodeTree(CTTaskNode rootNode, String... taskNames)
