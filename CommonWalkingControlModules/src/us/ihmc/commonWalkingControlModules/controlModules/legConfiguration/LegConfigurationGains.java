@@ -10,6 +10,9 @@ public class LegConfigurationGains
    private boolean blendPositionError = false;
    private boolean blendVelocityError = false;
 
+   private boolean useActuatorSpacePositionControl = false;
+   private boolean useActuatorSpaceVelocityControl = false;
+
    private double maxPositionBlendingFactor = 0.0;
    private double maxVelocityBlendingFactor = 0.0;
 
@@ -53,6 +56,15 @@ public class LegConfigurationGains
       blendVelocityError = blend;
    }
 
+   public void setUseActuatorSpacePositionControl(boolean useActuatorSpacePositionControl)
+   {
+      this.useActuatorSpacePositionControl = useActuatorSpacePositionControl;
+   }
+
+   public void setUseActuatorSpaceVelocityControl(boolean useActuatorSpaceVelocityControl)
+   {
+      this.useActuatorSpaceVelocityControl = useActuatorSpaceVelocityControl;
+   }
 
    public double getJointSpaceKp()
    {
@@ -92,5 +104,15 @@ public class LegConfigurationGains
    public boolean getBlendVelocityError()
    {
       return blendVelocityError;
+   }
+
+   public boolean getUseActuatorSpacePositionControl()
+   {
+      return useActuatorSpacePositionControl;
+   }
+
+   public boolean getUseActuatorSpaceVelocityControl()
+   {
+      return useActuatorSpaceVelocityControl;
    }
 }
