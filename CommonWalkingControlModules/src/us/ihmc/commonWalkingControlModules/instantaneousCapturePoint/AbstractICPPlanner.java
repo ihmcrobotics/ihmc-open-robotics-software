@@ -56,6 +56,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
    protected final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   /** Desired position for the Center of Mass (CoM) 3D*/
+   protected final YoFramePoint desiredCoMPosition3D = new YoFramePoint(namePrefix + "DesiredCoMPosition3D", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -412,6 +414,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
+   {
+      desiredCenterOfMassPositionToPack.set(desiredCoMPosition3D);
    }
 
    @Override

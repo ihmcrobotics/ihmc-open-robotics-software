@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -474,5 +478,41 @@ public class CoMIntegrationTools
             - 2.0 / Math.pow(omega0, 2.0) * polynomial.getCoefficient(2) + 6.0 / Math.pow(omega0, 3.0) * polynomial.getCoefficient(3));
 
       return position;
+   }
+   
+   
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCenterOfMassCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
+                                                             List<FramePoint> entryCoMCornerPointsToPack, List<FramePoint> exitCoMCornerPointsToPack,
+                                                             List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
+   {
+      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(cmpPolynomials3D.size() - 1);
+      
+      cmpPolynomial3D.compute(cmpPolynomial3D.getFinalTime());
+      FramePoint nextEntryCoMCornerPoint = cmpPolynomial3D.getFramePosition();
+            
+      for (int i = cmpPolynomials3D.size() - 1; i >= 0; i--)
+      {
+         cmpPolynomial3D = cmpPolynomials3D.get(i);
+         
+         FramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         
+         FramePoint exitCoMCornerPoint = exitCoMCornerPointsToPack.get(i);
+         FramePoint entryCoMCornerPoint = entryCoMCornerPointsToPack.get(i);
+         
+         exitCoMCornerPoint.set(nextEntryCoMCornerPoint);
+         
+         computeDesiredCenterOfMassPosition(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, exitCoMCornerPoint, cmpPolynomial3D, entryCoMCornerPoint);
+
+         nextEntryCoMCornerPoint = entryCoMCornerPoint;
+      }
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint finalCapturePoint, FramePoint finalCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                         FramePoint desiredCenterOfMassToPack)
+   {         
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, finalCenterOfMass, desiredCenterOfMassToPack);
    }
 }

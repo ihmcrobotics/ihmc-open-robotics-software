@@ -257,6 +257,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
       referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
       referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
+	  referenceICPGenerator.getCoMPosition(desiredCoMPosition3D);
 
       decayDesiredVelocityIfNeeded();
 
@@ -316,6 +317,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public List<FramePoint> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
+   }
+   
+   public List<FramePoint> getInitialDesiredCenterOfMassPositions()
+   {
+      return referenceICPGenerator.getCoMPositionDesiredInitialList();
+   }
+   
+   public List<FramePoint> getFinalDesiredCenterOfMassPositions()
+   {
+      return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }
 
    @Override
