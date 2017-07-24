@@ -185,8 +185,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.00), EPSILON));
          else
             assertTrue(copList.get(1).get(copPointName).containsNaN());
       }
@@ -194,8 +198,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.00), EPSILON));
          else
             assertTrue(copList.get(2).get(copPointName).containsNaN());
       }
@@ -203,8 +211,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
          else
             assertTrue(copList.get(3).get(copPointName).containsNaN());
       }
@@ -221,8 +233,10 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       for (CoPPointName copPointName : CoPPointName.values)
       {
-         if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         if (copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
             assertTrue(copList.get(0).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(0).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.00), EPSILON));
          else
             assertTrue(copList.get(0).get(copPointName).containsNaN());
       }
@@ -230,8 +244,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.000), EPSILON));
          else
             assertTrue(copList.get(1).get(copPointName).containsNaN());         
       }
@@ -240,8 +258,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.000), EPSILON));
          else
             assertTrue(copList.get(2).get(copPointName).containsNaN());         
       }
@@ -250,8 +272,12 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
             assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
             assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
          else
             assertTrue(copList.get(3).get(copPointName).containsNaN());         
       }
@@ -269,30 +295,49 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       for( CoPPointName copPointName : CoPPointName.values)
       {
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(0).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
-            assertTrue(copList.get(0).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
+         if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(0).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.000, 0.000), EPSILON));
          else
             assertTrue(copList.get(0).get(copPointName).containsNaN());         
       }
       for( CoPPointName copPointName : CoPPointName.values)
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
-            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(1).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.000), EPSILON));
          else
             assertTrue(copList.get(1).get(copPointName).containsNaN());         
       }
       for( CoPPointName copPointName : CoPPointName.values)
       {
          if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
-            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(2).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.000), EPSILON));
          else
             assertTrue(copList.get(2).get(copPointName).containsNaN());         
+      }
+      for( CoPPointName copPointName : CoPPointName.values)
+      {
+         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
+         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
+            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
+         else
+            assertTrue(copList.get(3).get(copPointName).containsNaN());         
       }
       // Is this needed here ?
       /*for( CoPPointName copPointName : CoPPointName.values)
