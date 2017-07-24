@@ -279,7 +279,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       if(isStanding.getBooleanValue())
       {
          // TODO: replace by CMP
-         referenceCoPGenerator.getWaypoints().get(0).get(endCoPName).getPosition(tempFinalICP);
+         int footstepIndex = 0;
+         int waypointIndex = 0;
+         referenceCoPGenerator.getWaypoints().get(footstepIndex).get(waypointIndex).getPosition(tempFinalICP);
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
@@ -295,19 +297,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
-      if(isStanding.getBooleanValue())
-      {
-         // TODO: replace by CMP
-         referenceCoPGenerator.getWaypoints().get(0).get(endCoPName).getPosition(tempFinalICP);
-         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
-      }
-      else
-      {
-         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
-         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
-      }
+      getFinalDesiredCapturePointPosition(tempFinalICP);
+      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
    
    public List<FramePoint> getInitialDesiredCapturePointPositions()
@@ -329,10 +320,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   public void getNextExitCMP(FramePoint entryCMPToPack)
+   public void getNextExitCMP(FramePoint exitCMPToPack)
    {
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
-      plannedCoPWaypoints.get(1).get(this.exitCoPName).getPosition(entryCMPToPack);
+      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
+      int size = copPointsInFoot.getCoPPointList().size();
+      copPointsInFoot.get(size).getPosition(exitCMPToPack);
    }
 
    @Override
