@@ -173,7 +173,7 @@ public class DRCNetworkProcessor
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
+      new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
 
       PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
@@ -181,6 +181,7 @@ public class DRCNetworkProcessor
 
       String methodName = "setupConstrainedWholebodyPlanningModule";
       printModuleConnectedDebugStatement(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -196,6 +197,7 @@ public class DRCNetworkProcessor
 
       String methodName = "setupWholeBodyInverseKinematicsModule";
       printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupKinematicsToolboxModule");
    }
 
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
