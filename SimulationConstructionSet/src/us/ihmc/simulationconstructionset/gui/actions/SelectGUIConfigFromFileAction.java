@@ -1,31 +1,27 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
-import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
 
-@SuppressWarnings("serial")
-public class SelectGUIConfigFromFileAction extends SCSAction
+import javax.swing.AbstractAction;
+
+import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
+public class SelectGUIConfigFromFileAction extends AbstractAction
 {
+   private static final long serialVersionUID = -8579530834957317679L;
    private final String fullPath;
 
    private final SelectGUIConfigFromFileCommandExecutor executor;
 
    public SelectGUIConfigFromFileAction(String fullPath, String name, SelectGUIConfigFromFileCommandExecutor executor)
    {
-      super(name,
-              "",
-              KeyEvent.VK_UNDEFINED,
-              "Select: "+fullPath,
-              "Select GUI Configuration: "+fullPath
-      );
+      super(name);
 
       this.fullPath = fullPath;
       this.executor = executor;
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.selectGUIConfigFromFile(fullPath);
    }
