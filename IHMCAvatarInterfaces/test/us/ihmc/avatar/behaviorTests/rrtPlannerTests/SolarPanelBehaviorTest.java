@@ -82,7 +82,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private boolean isKinematicsToolboxVisualizerEnabled = true;
+   private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
