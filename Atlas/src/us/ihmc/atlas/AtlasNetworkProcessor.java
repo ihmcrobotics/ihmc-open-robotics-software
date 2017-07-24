@@ -24,6 +24,7 @@ public class AtlasNetworkProcessor
 {
    private static final boolean ENABLE_BEHAVIOR_MODULE = true;
    private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
+   private static final boolean ENABLE_CONSTRAINED_WHOLE_BODY_TOOLBOX_SERVER = true;   
    private static final boolean ENABLE_MOCAP_MODULE = false;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
 
@@ -62,11 +63,13 @@ public class AtlasNetworkProcessor
         networkModuleParams.setDrillDetectionModuleEnabled(true);
         networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
         networkModuleParams.enableHeightQuadTreeToolbox(true);
-        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
+        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);        
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
         networkModuleParams.enableKinematicsToolboxVisualizer(true);
         networkModuleParams.enableFootstepPlanningToolbox(true);
         networkModuleParams.enableKinematicsToolbox(true);
+        networkModuleParams.enableConstrainedWholeBodyPlanningToolboxVisualizer(ENABLE_CONSTRAINED_WHOLE_BODY_TOOLBOX_SERVER);
+        networkModuleParams.enableConstrainedWholeBodyPlanningToolbox(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)

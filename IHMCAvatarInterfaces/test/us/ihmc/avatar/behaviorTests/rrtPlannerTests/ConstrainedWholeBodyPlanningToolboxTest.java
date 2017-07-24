@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.CTTaskNodeTree;
@@ -38,6 +39,11 @@ import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.Configur
 import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
 import us.ihmc.manipulation.planning.trajectory.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -65,9 +71,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
-      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, false);
-
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
+      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT,
@@ -194,7 +199,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
    
-   @Test
+//   @Test
    public void testForRealTimeVisulaizer() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -237,6 +242,59 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
       
+
+      System.out.println("End");
+   }
+   
+//   @Test
+   public void testForInverseKinematicsToolbox() throws SimulationExceededMaximumTimeException, IOException
+   {
+      ThreadTools.sleep(10000);
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      System.out.println("Start");
+
+      
+      RobotSide robotSide = RobotSide.RIGHT;
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     drcBehaviorTestHelper.getSDFFullRobotModel());
+
+      ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+
+      FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      RigidBody chest = fullRobotModel.getChest();
+      ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
+      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
+      initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ReferenceFrame pelvisControlFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.prependTranslation(0.50, 0.0, 0.3);
+      ik.setTrajectoryTime(0.5);
+      ik.setDesiredHandPose(robotSide, desiredHandPose);
+      ik.holdCurrentChestOrientation();
+      ik.holdCurrentPelvisOrientation();
+      ik.holdCurrentPelvisHeight();
+
+      drcBehaviorTestHelper.updateRobotModel();
+      FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
+      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      desiredHandPoseCopy.changeFrame(chestFrame);
+
+      drcBehaviorTestHelper.dispatchBehavior(ik);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       System.out.println("End");
    }

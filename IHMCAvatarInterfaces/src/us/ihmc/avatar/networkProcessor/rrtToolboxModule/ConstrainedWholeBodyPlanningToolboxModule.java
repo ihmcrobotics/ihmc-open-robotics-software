@@ -7,7 +7,6 @@ import java.util.List;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
@@ -23,18 +22,16 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
    private static final NetworkPorts NETWORK_PORT = NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT;
 
    private final ConstrainedWholeBodyPlanningToolboxController rrtToolboxController;
-   
+
    public ConstrainedWholeBodyPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                           boolean startYoVariableServer)
+                                                    boolean startYoVariableServer)
          throws IOException
    {
       super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      
-      
+
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      
+
       rrtToolboxController = new ConstrainedWholeBodyPlanningToolboxController(statusOutputManager, registry);
-      
       packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
