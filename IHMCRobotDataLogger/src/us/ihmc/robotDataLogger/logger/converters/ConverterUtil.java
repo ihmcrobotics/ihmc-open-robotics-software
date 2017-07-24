@@ -23,7 +23,7 @@ public class ConverterUtil
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
    
-      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(type, "logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(type);
       parser.parseFrom(handshakeData);
       return parser;
    }

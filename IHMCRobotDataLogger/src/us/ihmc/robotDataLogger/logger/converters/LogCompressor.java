@@ -80,6 +80,7 @@ public class LogCompressor extends SimpleFileVisitor<Path>
       return FileVisitResult.CONTINUE;
    }
 
+   @SuppressWarnings("resource")
    public static void compress(File directory, LogProperties properties) throws IOException
    {
       if (!properties.getVariables().getCompressed())
