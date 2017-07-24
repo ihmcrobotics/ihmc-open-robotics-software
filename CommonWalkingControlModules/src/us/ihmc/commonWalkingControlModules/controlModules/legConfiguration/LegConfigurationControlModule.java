@@ -71,9 +71,11 @@ public class LegConfigurationControlModule
    private final YoDouble effectiveKneeDamping;
 
    private final YoBoolean useFullyExtendedLeg;
+   private final YoBoolean useBracingLeg;
    private final YoDouble desiredAngle;
    private final YoDouble desiredAngleWhenStraight;
    private final YoDouble desiredAngleWhenExtended;
+   private final YoDouble desiredAngleWhenBracing;
 
    private final YoDouble straighteningSpeed;
    private final YoDouble collapsingDuration;
@@ -193,6 +195,7 @@ public class LegConfigurationControlModule
       dampingActionScaleFactor = new YoDouble(namePrefix + "DampingActionScaleFactor", registry);
 
       useFullyExtendedLeg = new YoBoolean(namePrefix + "UseFullyExtendedLeg", registry);
+      useBracingLeg = new YoBoolean(namePrefix + "UseBracingLeg", registry);
 
       desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
 
@@ -201,6 +204,9 @@ public class LegConfigurationControlModule
 
       desiredAngleWhenExtended = new YoDouble(namePrefix + "DesiredAngleWhenExtended", registry);
       desiredAngleWhenExtended.set(0.0);
+
+      desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
+      desiredAngleWhenBracing.set(0.4);
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
@@ -280,7 +286,9 @@ public class LegConfigurationControlModule
 
    public void doControl()
    {
-      if (useFullyExtendedLeg.getBooleanValue())
+      if (useBracingLeg.getBooleanValue())
+         desiredAngle.set(desiredAngleWhenBracing.getDoubleValue());
+      else if (useFullyExtendedLeg.getBooleanValue())
          desiredAngle.set(desiredAngleWhenExtended.getDoubleValue());
       else
          desiredAngle.set(desiredAngleWhenStraight.getDoubleValue());
@@ -304,6 +312,11 @@ public class LegConfigurationControlModule
    public void setFullyExtendLeg(boolean fullyExtendLeg)
    {
       useFullyExtendedLeg.set(fullyExtendLeg);
+   }
+
+   public void setLegBracing(boolean legBracing)
+   {
+      useBracingLeg.set(legBracing);
    }
 
    private double computeKneeAcceleration()

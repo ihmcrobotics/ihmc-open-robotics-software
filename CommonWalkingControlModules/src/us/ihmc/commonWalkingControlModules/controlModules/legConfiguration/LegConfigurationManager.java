@@ -121,12 +121,21 @@ public class LegConfigurationManager
          //beginStraightening(swingSide);
          setStraight(swingSide);
          setFullyExtendLeg(swingSide, true);
+
+         boolean isNextStepTooLow = stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
+         if (isNextStepTooLow)
+            setLegBracing(swingSide, true);
       }
    }
 
    public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)
    {
       legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
+   }
+
+   public void setLegBracing(RobotSide robotSide, boolean legBracing)
+   {
+      legConfigurationControlModules.get(robotSide).setLegBracing(legBracing);
    }
 
    public void setStraight(RobotSide robotSide)
@@ -175,43 +184,22 @@ public class LegConfigurationManager
 
       stepHeight.set(tempLeadingFootPositionInWorld.getZ() - tempTrailingFootPositionInWorld.getZ());
 
-      if (isNextStepTooLow())
+      boolean isNextStepTooLow = stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
+      if (isNextStepTooLow)
          return true;
 
-      if (!isForwardStepping())
+      boolean isForwardStepping = tempLeadingFootPositionInWorld.getX() > forwardSteppingThreshold;
+      if (!isForwardStepping)
          return false;
 
-      if (isNextStepTooHigh())
+      boolean isNextStepTooHigh = stepHeight.getDoubleValue() > maxStepHeightForCollapse.getDoubleValue();
+      if (isNextStepTooHigh)
          return false;
 
-      if (isSideStepping())
+      boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
+      if (isSideStepping)
          return false;
 
-      return isStepLongEnough();
-   }
-
-   private boolean isForwardStepping()
-   {
-      return tempLeadingFootPositionInWorld.getX() > forwardSteppingThreshold;
-   }
-
-   private boolean isNextStepTooHigh()
-   {
-      return stepHeight.getDoubleValue() > maxStepHeightForCollapse.getDoubleValue();
-   }
-
-   private boolean isNextStepTooLow()
-   {
-      return stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
-   }
-
-   private boolean isSideStepping()
-   {
-      return Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping);
-   }
-
-   private boolean isStepLongEnough()
-   {
       boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForCollapse.getDoubleValue();
       boolean isStepLongEnoughAlongX = tempLeadingFootPosition.getX() > footLength;
       return isStepLongEnough && isStepLongEnoughAlongX;
