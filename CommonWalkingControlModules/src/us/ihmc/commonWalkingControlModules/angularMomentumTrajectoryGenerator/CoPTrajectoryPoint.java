@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,50 +26,6 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       this.registry = registry;
    }
    
-//   public FramePoint getFrameTuple()
-//   {
-//      getPositionIncludingFrame(localPosition);
-//      return localPosition;
-//   }
-//   
-//   public void getFrameTuple2dIncludingFrame(FramePoint2d pointToPack)
-//   {
-//      pointToPack.setIncludingFrame(getPosition().getReferenceFrame(), getPosition().getX(), getPosition().getY());
-//   }
-//   
-//   public void set(Point3DReadOnly position)
-//   {
-//      getPosition().set(position.getX(), position.getY(), position.getZ());
-//      putYoValuesIntoFrameWaypoint();
-//   }
-//   
-//   public void set(YoFramePoint position)
-//   {
-//      getPosition().set(position);
-//      putYoValuesIntoFrameWaypoint();
-//   }
-//   
-//   public void set(CoPTrajectoryPoint position)
-//   {
-//      getPosition().set(position.getPosition());
-//      putYoValuesIntoFrameWaypoint();
-//   }
-//   
-//   public void setIncludingFrame(FramePoint position)
-//   {
-//      registerReferenceFrame(position.getReferenceFrame());
-//      switchCurrentReferenceFrame(position.getReferenceFrame());
-//      setPosition(position);
-//      putYoValuesIntoFrameWaypoint();
-//   }
-//   
-//   public void setIncludingFrame(YoFramePoint position)
-//   {
-//      switchCurrentReferenceFrame(position.getReferenceFrame());
-//      getPosition().set(position);
-//      putYoValuesIntoFrameWaypoint();
-//   }
-//   
    public void setIncludingFrame(CoPTrajectoryPoint other)
    {
       setTime(other.getTime());
@@ -78,6 +35,12 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       setLinearVelocity(other.getLinearVelocity().getFrameTuple());
       putYoValuesIntoFrameWaypoint();
    }
+
+   public FrameTuple getFrameTuple()
+   {
+      return yoFramePointInWorld.getFrameTuple();
+   }
+
       
    public boolean epsilonEquals(FramePoint2d point, double threshold)
    {

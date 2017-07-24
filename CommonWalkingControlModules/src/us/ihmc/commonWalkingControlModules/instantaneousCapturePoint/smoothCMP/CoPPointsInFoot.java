@@ -25,11 +25,9 @@ public class CoPPointsInFoot
 
    private final int stepNumber;
 
-   private final YoFramePointInMultipleFrames footStepCentroid;
-
    public CoPPointsInFoot(int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
-      this(stepNumber, 5, framesToRegister, registry);
+      this(stepNumber, 6, framesToRegister, registry);
    }
 
    public CoPPointsInFoot(int stepNumber, int size, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
@@ -43,7 +41,6 @@ public class CoPPointsInFoot
          copLocations.add(constantCoP);
          copLocationsInWorldFrameReadOnly.add(constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
       }
-      footStepCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
    }
 
    public void notifyVariableChangedListeners()
@@ -54,7 +51,6 @@ public class CoPPointsInFoot
 
    public void reset()
    {
-      footStepCentroid.setToNaN();
       copPointsList.clear();
       for (int i = 0; i < copLocations.size(); i++)
       {
@@ -117,7 +113,6 @@ public class CoPPointsInFoot
 
    public void setIncludingFrame(CoPPointsInFoot other)
    {
-      this.footStepCentroid.setIncludingFrame(other.footStepCentroid);
       for (int i = 0; i < other.copPointsList.size(); i++)
          this.copLocations.get(i).setIncludingFrame(other.get(i));
    }
@@ -134,21 +129,18 @@ public class CoPPointsInFoot
 
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      footStepCentroid.changeFrame(desiredFrame);
       for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).changeFrame(desiredFrame);
    }
 
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
-      footStepCentroid.registerReferenceFrame(newReferenceFrame);
       for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).registerReferenceFrame(newReferenceFrame);
    }
    
    public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
    {
-      footStepCentroid.switchCurrentReferenceFrame(desiredFrame);
       for (int i = 0; i < copLocations.size(); i++)
          copLocations.get(i).switchCurrentReferenceFrame(desiredFrame);
    }
@@ -158,28 +150,14 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
    }
 
-   public void setFootLocation(FramePoint footLocation)
-   {
-      this.footStepCentroid.setIncludingFrame(footLocation);
-   }
-
-   public void setFootLocation(FramePoint2d footLocation)
-   {
-      this.footStepCentroid.setXYIncludingFrame(footLocation);
-   }
-
-   public void getFootLocation(FramePoint footLocationToPack)
-   {
-      footLocationToPack.setIncludingFrame(footStepCentroid.getFrameTuple());
-   }
-
    public String toString()
    {
-      String output = "FootstepLocation: " + footStepCentroid.toString() + "\n";
+      String output = "";
       for (int i = 0; i < copPointsList.size(); i++)
          output += copPointsList.get(i) + " : " + copLocations.get(i) + "\n";
       return output;
    }
+
    public List<CoPPointName> getCoPPointList()
    {
       return copPointsList;
