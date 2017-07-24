@@ -58,12 +58,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   public double getPelvisOffsetHeight()
-   {
-      return 0.08;
-   }
-
-   @Override
    public String getSimpleRobotName()
    {
       return "Atlas";
@@ -96,9 +90,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             */
 
             @Override
+            public double getMaximumToeOffAngle()
+            {
+               return Math.toRadians(20);
+            }
+
+            @Override
             public boolean checkCoPLocationToTriggerToeOff()
             {
-               return false;
+               return true;
             }
 
             @Override
@@ -338,6 +338,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testCinderBlocks();
+      test.testForwardWalking();
    }
 }

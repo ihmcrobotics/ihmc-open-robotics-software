@@ -128,13 +128,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      FramePoint pelvisPosition = new FramePoint(fullRobotModel.getPelvis().getBodyFixedFrame());
-      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
-      double desiredHeight = pelvisPosition.getZ();
-      drcSimulationTestHelper.send(new PelvisHeightTrajectoryMessage(0.5, desiredHeight));
-
       drcSimulationTestHelper.send(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
@@ -145,8 +138,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       assertTrue(success);
 
    }
-
-   public abstract double getPelvisOffsetHeight();
 
    private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses)
    {
