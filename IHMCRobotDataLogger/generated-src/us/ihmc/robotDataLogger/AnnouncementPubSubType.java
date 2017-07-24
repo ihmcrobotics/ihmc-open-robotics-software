@@ -57,10 +57,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
-
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -89,9 +85,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
 
-	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getHostName().length() + 1;
@@ -115,14 +108,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	    cdr.write_type_d(data.getIdentifier());else
 	        throw new RuntimeException("identifier field exceeds the maximum length");
 
-	    for(int a = 0; a < data.getDataIP().length; ++a)
-	    {
-	        	cdr.write_type_9(data.getDataIP()[a]);	
-	    }
-
-
-	    cdr.write_type_3(data.getDataPort());
-
 	    if(data.getName().length() <= 255)
 	    cdr.write_type_d(data.getName());else
 	        throw new RuntimeException("name field exceeds the maximum length");
@@ -145,16 +130,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 
 	    	cdr.read_type_d(data.getIdentifier());	
 
-	    	for(int a = 0; a < data.getDataIP().length; ++a)
-	    	{
-	    	    	data.getDataIP()[a] = cdr.read_type_9();
-	    	    	
-	    	}
-	    	
-
-	    	data.setDataPort(cdr.read_type_3());
-	    	
-
 	    	cdr.read_type_d(data.getName());	
 
 	    	cdr.read_type_d(data.getHostName());	
@@ -171,9 +146,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	public final void serialize(us.ihmc.robotDataLogger.Announcement data, InterchangeSerializer ser)
 	{
 			    ser.write_type_d("identifier", data.getIdentifier());
-			    
-				    	ser.write_type_f("dataIP", data.getDataIP());	    
-			    ser.write_type_3("dataPort", data.getDataPort());
 			    
 			    ser.write_type_d("name", data.getName());
 			    
@@ -192,11 +164,6 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.Announcement data)
 	{
 	    			ser.read_type_d("identifier", data.getIdentifier());	
-	    	    
-	    		    	ser.read_type_f("dataIP", data.getDataIP());			
-	    	
-	    	    
-	    			data.setDataPort(ser.read_type_3("dataPort"));	
 	    	    
 	    			ser.read_type_d("name", data.getName());	
 	    	    
