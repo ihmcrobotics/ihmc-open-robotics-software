@@ -29,7 +29,9 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.GenericTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.CTTaskNodeTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
@@ -191,8 +193,55 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       setupCWBPlanningToolboxModule();
    }
-
+   
    @Test
+   public void testForRealTimeVisulaizer() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      System.out.println("Start");
+
+      /*
+       * constrained end effector trajectory (WorldFrame).
+       */
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+
+      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+
+      /*
+       * tester
+       */
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+
+      sdfFullRobotModel.updateFrames();
+      referenceFrames.updateFrames();
+      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
+
+      GenericTaskNode.nodeTester = wbikTester;
+      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+
+      /*
+       * put on generic task node
+       */
+
+      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
+      
+      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
+      
+
+      System.out.println("End");
+   }
+
+//   @Test
    public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -229,31 +278,29 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * put on generic task node
        */
 
-      //      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      //      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      //      rootNode.setNodeData(10, -0.4*Math.PI);   // is selected
-      //      rootNode.setNodeData(9, -0.25*Math.PI);   // will be ignored.
-      //            
-      //      GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1*Math.PI, 0.0*Math.PI, 0.0*Math.PI);
-      //      node1.setNodeData(10, -0.25*Math.PI);      
-      //      node1.setParentNode(rootNode);
-      //      
-      //      System.out.println(rootNode.isValidNode());
-      //      
-      //      /*
-      //       * show the ik result
-      //       */
-      //      FullHumanoidRobotModel createdFullRobotModel;
-      //      HumanoidReferenceFrames createdReferenceFrames;
-      //      
-      //      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
-      //      createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
-      //      
-      //      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
-      //      showUpFullRobotModelWithConfiguration(createdFullRobotModel);
-      //          
-      //      scs.addStaticLinkGraphics(getXYZAxis(rootNode.getEndEffectorPose()));
+      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
+      
+      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
+      
+      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
+      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
+      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(4, -0.0/180*Math.PI, 0.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(10, 0.0, 0.0);
+      
+      tree.expandTree(100);
 
+      CTTaskNodeTreeVisualizer taskNodeTreeVisualizer = new CTTaskNodeTreeVisualizer(scs, tree);
+      taskNodeTreeVisualizer.visualize();
+      
       System.out.println("End");
    }
 
@@ -296,6 +343,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
       rootNode.setNodeData(10, -0.4 * Math.PI); // is selected
       rootNode.setNodeData(9, -0.25 * Math.PI); // will be ignored.
 

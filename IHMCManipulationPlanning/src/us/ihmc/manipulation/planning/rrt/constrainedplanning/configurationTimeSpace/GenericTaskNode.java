@@ -4,23 +4,20 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode;
 import us.ihmc.manipulation.planning.trajectory.ConfigurationSpace;
-import us.ihmc.manipulation.planning.trajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class GenericTaskNode extends CTTaskNode
 {
-   
-   
    public GenericTaskNode()
    {
       super(11);
    }
-   
-   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, double eeX, double eeY, double eeZ, double eeRoll, double eePitch, double eeYaw)
+
+   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, double eeX, double eeY, double eeZ,
+                          double eeRoll, double eePitch, double eeYaw)
    {
       super(11);
       setNodeData(0, time);
@@ -35,7 +32,7 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(9, eePitch);
       setNodeData(10, eeYaw);
    }
-   
+
    public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, ConfigurationSpace eeConfigurationSpace)
    {
       super(11);
@@ -51,7 +48,7 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(9, eeConfigurationSpace.getRotationPitch());
       setNodeData(10, eeConfigurationSpace.getRotationYaw());
    }
-   
+
    public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll)
    {
       super(11);
@@ -59,7 +56,7 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(1, pelvisHeight);
       setNodeData(2, chestYaw);
       setNodeData(3, chestPitch);
-      setNodeData(4, chestRoll);      
+      setNodeData(4, chestRoll);
       ConfigurationSpace eeConfigurationSpace = new ConfigurationSpace();
       setNodeData(5, eeConfigurationSpace.getTranslationX());
       setNodeData(6, eeConfigurationSpace.getTranslationY());
@@ -68,7 +65,7 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(9, eeConfigurationSpace.getRotationPitch());
       setNodeData(10, eeConfigurationSpace.getRotationYaw());
    }
-   
+
    private ConfigurationSpace getEndEffectorConfigurationSpace()
    {
       ConfigurationSpace configurationSpace = new ConfigurationSpace();
@@ -76,7 +73,7 @@ public class GenericTaskNode extends CTTaskNode
       configurationSpace.setRotation(getNodeData(8), getNodeData(9), getNodeData(10));
       return configurationSpace;
    }
-   
+
    public Pose3D getEndEffectorPose()
    {
       return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
@@ -86,20 +83,20 @@ public class GenericTaskNode extends CTTaskNode
    public boolean isValidNode()
    {
       /*
-       * using @code WheneverWholeBodyKinematicsSolver.
-       * set initial configuration
+       * using @code WheneverWholeBodyKinematicsSolver. set initial
+       * configuration
        */
-      
-      if(getParentNode() != null)
+
+      if (getParentNode() != null)
       {
          nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
          for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
-         {         
-            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();         
-         }         
+         {
+            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();
+         }
       }
       else
-      {         
+      {
          PrintTools.warn("parentNode is required.");
       }
 
@@ -112,29 +109,29 @@ public class GenericTaskNode extends CTTaskNode
       Pose3D desiredPose = getEndEffectorPose();
       FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
-            
-      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);      
-      
+
+      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
+
       desiredPoseToWorld.changeFrame(midZUpFrame);
-      
+
       Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);      
+      nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
-      
+
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(getNodeData(2));
       desiredChestOrientation.appendPitchRotation(getNodeData(3));
       desiredChestOrientation.appendRollRotation(getNodeData(4));
       nodeTester.setDesiredChestOrientation(desiredChestOrientation);
-            
+
       nodeTester.setDesiredPelvisHeight(getNodeData(1));
-      
+
       nodeTester.putTrajectoryMessages();
-      
+
       setIsValidNode(nodeTester.isSolved());
-      
+
       setConfigurationJoints(nodeTester.getFullRobotModelCopy());
-     
+
       return isValid;
    }
 
