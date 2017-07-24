@@ -10,7 +10,11 @@ public class LegConfigurationGains
    private boolean blendPositionError = false;
    private boolean blendVelocityError = false;
 
-   private double maxBlendingFactor = 0.0;
+   private boolean useActuatorSpacePositionControl = false;
+   private boolean useActuatorSpaceVelocityControl = false;
+
+   private double maxPositionBlendingFactor = 0.0;
+   private double maxVelocityBlendingFactor = 0.0;
 
    public void setJointSpaceKp(double kp)
    {
@@ -32,9 +36,14 @@ public class LegConfigurationGains
       actuatorSpaceKd = kd;
    }
 
-   public void setMaxBlendingFactor(double factor)
+   public void setMaxPositionBlendingFactor(double factor)
    {
-      maxBlendingFactor = factor;
+      maxPositionBlendingFactor = factor;
+   }
+
+   public void setMaxVelocityBlendingFactor(double factor)
+   {
+      maxVelocityBlendingFactor = factor;
    }
 
    public void setBlendPositionError(boolean blend)
@@ -47,6 +56,15 @@ public class LegConfigurationGains
       blendVelocityError = blend;
    }
 
+   public void setUseActuatorSpacePositionControl(boolean useActuatorSpacePositionControl)
+   {
+      this.useActuatorSpacePositionControl = useActuatorSpacePositionControl;
+   }
+
+   public void setUseActuatorSpaceVelocityControl(boolean useActuatorSpaceVelocityControl)
+   {
+      this.useActuatorSpaceVelocityControl = useActuatorSpaceVelocityControl;
+   }
 
    public double getJointSpaceKp()
    {
@@ -68,9 +86,14 @@ public class LegConfigurationGains
       return actuatorSpaceKd;
    }
 
-   public double getMaxBlendingFactor()
+   public double getMaxPositionBlendingFactor()
    {
-      return maxBlendingFactor;
+      return maxPositionBlendingFactor;
+   }
+
+   public double getMaxVelocityBlendingFactor()
+   {
+      return maxVelocityBlendingFactor;
    }
 
    public boolean getBlendPositionError()
@@ -81,5 +104,15 @@ public class LegConfigurationGains
    public boolean getBlendVelocityError()
    {
       return blendVelocityError;
+   }
+
+   public boolean getUseActuatorSpacePositionControl()
+   {
+      return useActuatorSpacePositionControl;
+   }
+
+   public boolean getUseActuatorSpaceVelocityControl()
+   {
+      return useActuatorSpaceVelocityControl;
    }
 }

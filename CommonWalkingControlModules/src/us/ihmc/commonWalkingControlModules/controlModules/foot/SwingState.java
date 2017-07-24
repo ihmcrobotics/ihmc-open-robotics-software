@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.PrintTools;
@@ -56,6 +55,8 @@ public class SwingState extends AbstractUnconstrainedState
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
+   private static final boolean modifyOrientationForAvoidance = false;
+
    private final YoEnum<TrajectoryType> activeTrajectoryType;
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
@@ -86,6 +87,9 @@ public class SwingState extends AbstractUnconstrainedState
    private final FrameOrientation finalOrientation = new FrameOrientation();
    private final FrameVector finalAngularVelocity = new FrameVector();
    private final FramePoint stanceFootPosition = new FramePoint();
+
+   private final FrameOrientation tmpOrientation = new FrameOrientation();
+   private final FrameVector tmpVector = new FrameVector();
 
    private final RecyclingArrayList<FramePoint> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
@@ -348,6 +352,15 @@ public class SwingState extends AbstractUnconstrainedState
             swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
          }
 
+         // make the foot orientation better for avoidance
+         if (modifyOrientationForAvoidance && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+         {
+            swingTrajectoryOptimizer.getWaypointData(0, tempPositionTrajectoryPoint);
+            tmpOrientation.setToZero(worldFrame);
+            tmpVector.setToZero(worldFrame);
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, 0.5);
+            swingTrajectory.appendOrientationWaypoint(tempPositionTrajectoryPoint.getTime(), tmpOrientation, tmpVector);
+         }
       }
 
       modifyFinalOrientationForTouchdown(finalOrientation);
