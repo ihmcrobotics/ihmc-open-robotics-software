@@ -392,8 +392,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          computePreviousExitCoP(tempFramePoint, upcomingFootstepsData.get(footstepIndex).getSwingSide());
       copWaypoints.addAndSetIncludingFrame(exitCoPName, 0.0, tempFramePoint);
 
-      computeCoPPointsForTransfer(footstepIndex);
-      computeCoPPointsForUpcomingFootsteps(footstepIndex);
+      if (!noUpcomingFootsteps)
+      {
+         computeCoPPointsForTransfer(footstepIndex);
+         computeCoPPointsForUpcomingFootsteps(footstepIndex);
+      }
 
       generateCoPTrajectoriesFromWayPoints();
    }

@@ -175,6 +175,13 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);
       }
+      YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + numberOfFootstepsToConsider, registry);
+      YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + numberOfFootstepsToConsider,
+                                                    "Repartition of the transfer duration around the entry corner point.", registry);
+      transferDuration.setToNaN();
+      transferDurationAlpha.setToNaN();
+      transferDurations.add(transferDuration);
+      transferDurationAlphas.add(transferDurationAlpha);
    }
 
    public void initializeParameters(ICPTrajectoryPlannerParameters parameters)

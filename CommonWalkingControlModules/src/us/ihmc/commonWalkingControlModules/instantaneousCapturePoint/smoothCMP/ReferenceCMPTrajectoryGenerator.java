@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -159,8 +160,12 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-         cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
+         YoFrameTrajectory3D transferCoPPolynomial = transferCoPTrajectory.getPolynomials().get(segmentIndex);
+         if (transferCoPPolynomial.getFinalTime() - transferCoPPolynomial.getInitialTime() > 0.0)
+         { // By default, the final transfer duration sometimes equals zero
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
+         }
       }
 
       activeTrajectory = transferCMPTrajectories.get(0);
