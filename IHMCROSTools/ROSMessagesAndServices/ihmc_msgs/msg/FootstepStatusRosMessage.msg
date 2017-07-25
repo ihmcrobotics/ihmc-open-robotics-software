@@ -14,7 +14,7 @@ uint8 robot_side
 
 # desiredFootPositionInWorld gives the position of the desired position sent to the controller as
 # opposed to where the foot actually landed
-geometry_msgs/Vector3 desired_foot_position_in_world
+geometry_msgs/Point desired_foot_position_in_world
 
 # desiredFootOrientationInWorld gives the desired orientation of the foot sent to the controller as
 # opposed to the orientation where the foot actually is
@@ -22,7 +22,7 @@ geometry_msgs/Quaternion desired_foot_orientation_in_world
 
 # actualFootPositionInWorld gives the position of where the foot actually landed as opposed to the
 # desired position sent to the controller
-geometry_msgs/Vector3 actual_foot_position_in_world
+geometry_msgs/Point actual_foot_position_in_world
 
 # actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to the desired
 # orientation sent to the controller

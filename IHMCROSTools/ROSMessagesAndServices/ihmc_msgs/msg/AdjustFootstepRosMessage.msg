@@ -6,7 +6,7 @@
 uint8 robot_side
 
 # Specifies the adjusted position of the footstep. It is expressed in world frame.
-geometry_msgs/Vector3 location
+geometry_msgs/Point location
 
 # Specifies the adjusted orientation of the footstep. It is expressed in world frame.
 geometry_msgs/Quaternion orientation
