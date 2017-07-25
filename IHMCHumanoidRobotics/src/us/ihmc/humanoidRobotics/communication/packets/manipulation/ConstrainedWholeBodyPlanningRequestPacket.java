@@ -4,6 +4,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
 {      
+   /*
+    * input parameters will be set in behavior.
+    */
    public double tempInputValue;
 
    public ConstrainedWholeBodyPlanningRequestPacket()

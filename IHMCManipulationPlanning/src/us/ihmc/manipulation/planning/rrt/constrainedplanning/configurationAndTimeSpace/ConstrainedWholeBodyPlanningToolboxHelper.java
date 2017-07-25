@@ -10,24 +10,22 @@ public class ConstrainedWholeBodyPlanningToolboxHelper
 {
    public static void setConstrainedEndEffectorTrajectory(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
    {
-      GenericTaskNode.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
+      CTTaskNode.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
    }
    
    public static void setInitialFullRobotModel(FullHumanoidRobotModel toolboxFullRobotModel)
    {  
       toolboxFullRobotModel.updateFrames();
-      GenericTaskNode.initialRobotModel = toolboxFullRobotModel;
+      CTTaskNode.initialRobotModel = toolboxFullRobotModel;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(toolboxFullRobotModel);
-      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+      CTTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
    }
    
    public static void setFullRobotModelFactory(FullHumanoidRobotModelFactory toolboxFullRobotModelFactory)
    {
-      if(GenericTaskNode.initialRobotModel != null)
-         GenericTaskNode.nodeTester = new WheneverWholeBodyKinematicsSolver(toolboxFullRobotModelFactory, GenericTaskNode.initialRobotModel);
+      if(CTTaskNode.initialRobotModel != null)
+         CTTaskNode.nodeTester = new WheneverWholeBodyKinematicsSolver(toolboxFullRobotModelFactory, CTTaskNode.initialRobotModel);
       else
          PrintTools.error("should be define initial robot model see 'GenericTaskNode.initialRobotModel' ");
    }
-
-
 }
