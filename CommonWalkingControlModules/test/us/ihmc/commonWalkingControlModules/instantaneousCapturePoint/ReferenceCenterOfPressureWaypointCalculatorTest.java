@@ -9,12 +9,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -37,6 +39,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCenterOfPressureWaypointCalculatorTest
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final int numberOfContactPoints = 4;
    private final double soleFrameYDisplacement = 0.2;
    private final double ankleFrameZDisplacement = 0.05;
@@ -48,7 +51,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    private final double transferTime = 0.1;
    private final double stepLength = 0.3;
    private final double stepWidth = soleFrameYDisplacement;
-   private final double EPSILON = 10e-5;
+   private final double EPSILON = 5e-4;
 
    ReferenceCoPTrajectoryGenerator testCoPGenerator;
    SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
@@ -173,57 +176,83 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
-      // initial waypoint between the feet
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      CoPPointName exitCoPName = plannerParameters.getExitCoPName();
+      //  Check first step
+      CoPPointsInFoot firstStep = copList.get(0);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(0).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0), EPSILON));
-         else
-            assertTrue(copList.get(0).get(i).containsNaN());
+         CoPTrajectoryPoint previousExitCoP = firstStep.get(0);
+         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(0) == exitCoPName);
+         CoPTrajectoryPoint midStanceCoP = firstStep.get(1);
+         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = firstStep.get(2);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = firstStep.get(3);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = firstStep.get(4);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(4) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = firstStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(5) == exitCoPName);
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check second step
+      CoPPointsInFoot secondStep = copList.get(1);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.00), EPSILON));
-         else
-            assertTrue(copList.get(1).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = secondStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = secondStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = secondStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = secondStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(secondStep.get(5).containsNaN());
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check third step
+      CoPPointsInFoot thirdStep = copList.get(2);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.00), EPSILON));
-         else
-            assertTrue(copList.get(2).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = thirdStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = thirdStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = thirdStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = thirdStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(thirdStep.get(5).containsNaN());
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check final transfer
+      CoPPointsInFoot finalTransfer = copList.get(3);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(3).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         for (int i = 1; i < 6; i++)
+            assertTrue(finalTransfer.get(i).containsNaN());
       }
+
       testCoPGenerator.clear();
       assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepsRegistered() == 0);
    }
@@ -235,59 +264,81 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       //testCoPGenerator.setInitialCoPPosition(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
-      for (int i = 0; i < CoPPointName.values.length; i++)
+      CoPPointName exitCoPName = plannerParameters.getExitCoPName();
+
+      // check first step
+      CoPPointsInFoot firstStep = copList.get(0);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(0).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(0).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.00), EPSILON));
-         else
-            assertTrue(copList.get(0).get(i).containsNaN());
-      }
-      for (int i = 0; i < CoPPointName.values.length; i++)
-      {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.06, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(1).get(i).containsNaN());
+         CoPTrajectoryPoint previousExitCoP = firstStep.get(0);
+         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(0) == exitCoPName);
+         CoPTrajectoryPoint midStanceCoP = firstStep.get(1);
+         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = firstStep.get(2);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = firstStep.get(3);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = firstStep.get(4);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(4) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = firstStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(5) == exitCoPName);
       }
 
-      for (int i = 0; i < CoPPointName.values.length; i++)
+      //  Check second step
+      CoPPointsInFoot secondStep = copList.get(1);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(2).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = secondStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = secondStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = secondStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = secondStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(secondStep.get(5).containsNaN());
       }
 
-      for (int i = 0; i < CoPPointName.values.length; i++)
+      //  Check third step
+      CoPPointsInFoot thirdStep = copList.get(2);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(3).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = thirdStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = thirdStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = thirdStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = thirdStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(thirdStep.get(5).containsNaN());
+      }
+
+      //  Check final transfer
+      CoPPointsInFoot finalTransfer = copList.get(3);
+      {
+         CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         for (int i = 1; i < 6; i++)
+            assertTrue(finalTransfer.get(i).containsNaN());
       }
    }
 
@@ -297,70 +348,80 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       int numberOfFootsteps = 10;
       sendFootStepMessages(numberOfFootsteps);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
-      FramePoint2d initialCoPPosition = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.2);
       //testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
       testCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
-      for (int i = 0; i < CoPPointName.values.length; i++)
+      CoPPointName exitCoPName = plannerParameters.getExitCoPName();
+
+      // check first step
+      CoPPointsInFoot firstStep = copList.get(0);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(0).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.000, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(0).get(i).containsNaN());
+         CoPTrajectoryPoint entryCoP = firstStep.get(0);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(0) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = firstStep.get(1);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = firstStep.get(2);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = firstStep.get(3);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(firstStep.getCoPPointList().get(3) == exitCoPName);
+         assertTrue(firstStep.get(4).containsNaN());
+         assertTrue(firstStep.get(5).containsNaN());
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check second step
+      CoPPointsInFoot secondStep = copList.get(1);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.060, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(1).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.150, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(1).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = secondStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = secondStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = secondStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = secondStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(secondStep.get(5).containsNaN());
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check third step
+      CoPPointsInFoot thirdStep = copList.get(2);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.26, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.36, 0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(2).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.450, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(2).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         CoPTrajectoryPoint entryCoP = thirdStep.get(1);
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
+         CoPTrajectoryPoint ballCoP = thirdStep.get(2);
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
+         CoPTrajectoryPoint toeCoP = thirdStep.get(3);
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
+         CoPTrajectoryPoint exitCoP = thirdStep.get(4);
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
+         assertTrue(thirdStep.get(5).containsNaN());
       }
-      for (int i = 0; i < CoPPointName.values.length; i++)
+
+      //  Check final transfer
+      CoPPointsInFoot finalTransfer = copList.get(3);
       {
-         CoPPointName copPointName = CoPPointName.values[i];
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.56, -0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.BALL_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.TOE_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.66, -0.180), EPSILON));
-         else if(copPointName.checkCoPPointMatch(CoPPointName.MIDFEET_COP))
-            assertTrue(copList.get(3).get(i).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.750, 0.000), EPSILON));
-         else
-            assertTrue(copList.get(3).get(i).containsNaN());
+         CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
+         for (int i = 1; i < 6; i++)
+            assertTrue(finalTransfer.get(i).containsNaN());
       }
-      // Is this needed here ?
-      /*for( CoPPointName copPointName : CoPPointName.values)
-      {
-         PrintTools.debug(copList.get(3).get(copPointName).toString());
-         if (copPointName.checkCoPPointMatch(CoPPointName.HEEL_COP))
-            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.86, 0.205), EPSILON));
-         else if(copPointName.checkCoPPointMatch(copPointName.BALL_COP))
-            assertTrue(copList.get(3).get(copPointName).epsilonEquals(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.96, 0.180), EPSILON));
-         else
-            assertTrue(copList.get(3).get(copPointName).containsNaN());         
-      }*/
    }
 }
