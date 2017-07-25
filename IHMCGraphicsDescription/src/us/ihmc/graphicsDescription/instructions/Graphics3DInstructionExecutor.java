@@ -1,4 +1,4 @@
-package us.ihmc.jMonkeyEngineToolkit.graphics;
+package us.ihmc.graphicsDescription.instructions;
 
 import java.util.ArrayList;
 

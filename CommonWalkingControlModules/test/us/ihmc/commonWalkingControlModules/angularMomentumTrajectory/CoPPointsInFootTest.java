@@ -78,12 +78,12 @@ public class CoPPointsInFootTest
          CoPPointName copPointName = CoPPointName.values[i];
          if (copPointsInFoot.getCoPPointList().contains(copPointName))
          {
-            PrintTools.info("Set: " + copPointName.toString() + " Value: " + copPointsInFoot.get(i).toString());
+            //PrintTools.info("Set: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
             assert (copPointsInFoot.get(i).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
          }
          else
          {
-            PrintTools.info("Notset: " + copPointName.toString() + " Value: " + copPointsInFoot.get(i).toString());
+            //PrintTools.info("Notset: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
             assert (copPointsInFoot.get(i).containsNaN());
          }
       }

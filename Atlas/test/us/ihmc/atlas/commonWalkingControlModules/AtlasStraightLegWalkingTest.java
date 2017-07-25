@@ -39,7 +39,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
-   public void testCinderBlocks() throws Exception
+   public void testWalkingOverCinderBlockField() throws Exception
    {
       try
       {
