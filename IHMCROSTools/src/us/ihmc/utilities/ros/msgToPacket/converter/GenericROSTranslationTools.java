@@ -77,8 +77,8 @@ public class GenericROSTranslationTools
       javaClassToRosMessageTypeMap.put(Quaternion.class, "geometry_msgs/Quaternion");
       javaClassToRosMessageTypeMap.put(Quaternion32.class, "geometry_msgs/Quaternion");
 
-      javaClassToRosMessageTypeMap.put(Point3D.class, "geometry_msgs/Vector3");
-      javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Vector3");
+      javaClassToRosMessageTypeMap.put(Point3D.class, "geometry_msgs/Point");
+      javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Point");
       javaClassToRosMessageTypeMap.put(Vector3D.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3D32.class, "geometry_msgs/Vector3");
 
