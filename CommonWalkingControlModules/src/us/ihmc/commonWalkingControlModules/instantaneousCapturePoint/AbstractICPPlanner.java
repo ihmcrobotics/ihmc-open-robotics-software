@@ -99,6 +99,25 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** Time remaining before the end of the current state. */
    protected final YoDouble timeInCurrentStateRemaining = new YoDouble(namePrefix + "RemainingTime", registry);
 
+   /**
+    * Duration parameter used to linearly decrease the desired ICP velocity once the current state
+    * is done.
+    * <p>
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
+    * when the robot is getting stuck at the end of transfer.
+    * </p>
+    */
+   private final YoDouble velocityDecayDurationWhenDone = new YoDouble(namePrefix + "VelocityDecayDurationWhenDone", registry);
+   /**
+    * Output of the linear reduction being applied on the desired ICP velocity when the current
+    * state is done.
+    * <p>
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
+    * when the robot is getting stuck at the end of transfer.
+    true* </p>
+    */
+   private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
+
    protected final YoFramePointInMultipleFrames singleSupportInitialICP;
    protected final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
 
@@ -189,6 +208,9 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
       defaultSwingDurationAlpha.set(parameters.getSwingSplitFraction());
       finalTransferDurationAlpha.set(parameters.getTransferSplitFraction());
+
+      velocityDecayDurationWhenDone.set(parameters.getVelocityDecayDurationWhenDone());
+      velocityReductionFactor.set(Double.NaN);
    }
 
 
@@ -254,6 +276,27 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       return estimatedTimeRemaining;
+   }
+
+   protected void decayDesiredVelocityIfNeeded()
+   {
+      if (velocityDecayDurationWhenDone.isNaN() || isStanding.getBooleanValue())
+      {
+         velocityReductionFactor.set(Double.NaN);
+         return;
+      }
+
+      double hasBeenDoneForDuration = -timeInCurrentStateRemaining.getDoubleValue();
+
+      if (hasBeenDoneForDuration <= 0.0)
+      {
+         velocityReductionFactor.set(Double.NaN);
+      }
+      else
+      {
+         velocityReductionFactor.set(MathTools.clamp(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
+         desiredICPVelocity.scale(velocityReductionFactor.getDoubleValue());
+      }
    }
 
    @Override
