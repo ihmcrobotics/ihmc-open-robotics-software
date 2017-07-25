@@ -168,14 +168,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
 
       isDoubleSupport.set(true);
-      
+      isInitialTransfer.set(isStanding.getBooleanValue());
+      isStanding.set(false);
+
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
 
       updateTransferPlan();
 
-      isStanding.set(false);
    }
 
    @Override
@@ -221,7 +222,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
 
-      referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+      // TODO implement requested hold position
+      // TODO implement is done walking
+
+      referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide);
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
