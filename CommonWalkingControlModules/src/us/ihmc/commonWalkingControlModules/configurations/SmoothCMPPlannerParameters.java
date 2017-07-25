@@ -16,6 +16,9 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
 
    private final double modelScale;
    private final List<Vector2D> copOffsetsFootFrame = new ArrayList<>();
+   /**
+    * Vector offsets relative to centroid of support polygon defined copOffsetFrames
+    */
    private final EnumMap<CoPPointName, Vector2D> copOffsetsInFootFrame = new EnumMap<>(CoPPointName.class);
    private final EnumMap<CoPPointName, CoPSupportPolygonNames> copOffsetFrameNames = new EnumMap<>(CoPPointName.class);
 
@@ -39,39 +42,22 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /**
     * Ordered list of CoP points to plan for each footstep. End CoP must be at the end of the list 
     */
-   private final CoPPointName[] copPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP};
-   /**
-    * Vector offsets relative to centroid of support polygon defined copOffsetFrames 
-    */
-   private final Vector2D[] copOffsets = {new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.0)};
+   private final CoPPointName[] copPointsToPlan = {CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP};
+
+   private final CoPPointName[] swingCopPointsToPlan = {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
+   private final CoPPointName[] transferCoPPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
 
    /**
     * Define the bounding box in sole frame
     */
    private final BoundingBox2D[] copOffsetLimits = {new BoundingBox2D(-0.04, -1, 0.03, 1), new BoundingBox2D(0.0, -1, 0.08, -1), new BoundingBox2D(0.0, -1, 0.08, -1), null};
 
-
-   /**
-    * Final CoP name (chicken support will be used only for this point). In case 
-    */
+   /** Final CoP name (chicken support will be used only for this point). In case */
    private final CoPPointName endCoPName = CoPPointName.MIDFEET_COP;
-
-   /**
-    * Percentage chicken support
-    */
-   private final double chickenSuppportPercentage = 0.5;
-   
-   /**
-    * Indicate the first CoP for the swing phase 
-    */
+   /** Indicate the first CoP for the swing phase */
    private final CoPPointName entryCoPName = CoPPointName.HEEL_COP;
-   /**
-    * Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible
-    */
+   /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
    private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
-   
-   private final double additionalTimeForFinalTransfer = 0.05;
-   private final double additionalTimeForInitialTransfer = 0.05;
    
    public SmoothCMPPlannerParameters()
    {
@@ -106,6 +92,11 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 3.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
+
+      copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
+      copOffsetsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(0.0, -0.005));
+      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.025));
+      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.025));
 
       segmentTime.put(CoPPointName.MIDFEET_COP, 0.05);
       segmentTime.put(CoPPointName.HEEL_COP, 0.8);
@@ -239,13 +230,19 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       Vector2D tempVec;
       for (int i = 0; i < copPointsToPlan.length; i++)
       {
-         tempVec = copOffsets[i];
+         //tempVec = copOffsets[i]; // fixme
+         tempVec = new Vector2D();
          tempVec.scale(modelScale);
          copOffsetsFootFrame.add(tempVec);
       }
       return copOffsetsFootFrame;
    }
-   
+
+   public EnumMap<CoPPointName, Vector2D> getCopOffsetsInFootFrame()
+   {
+      return copOffsetsInFootFrame;
+   }
+
    public EnumMap<CoPPointName, CoPSupportPolygonNames> getSupportPolygonNames()
    {
       return copOffsetFrameNames;
@@ -276,6 +273,16 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public CoPPointName[] getCoPPointsToPlan()
    {
       return copPointsToPlan;
+   }
+
+   public CoPPointName[] getSwingCoPPointsToPlan()
+   {
+      return swingCopPointsToPlan;
+   }
+
+   public CoPPointName[] getTransferCoPPointsToPlan()
+   {
+      return transferCoPPointsToPlan;
    }
 
    @Override
@@ -361,20 +368,5 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
-   }
-
-   public double getPercentageChickenSupport()
-   {
-      return chickenSuppportPercentage;
-   }
-
-   public double getAdditionalTimeForInitialTransfer()
-   {
-      return additionalTimeForInitialTransfer;
-   }
-
-   public double getAdditionalTimeForFinalTransfer()
-   {
-      return additionalTimeForFinalTransfer;
    }
 }

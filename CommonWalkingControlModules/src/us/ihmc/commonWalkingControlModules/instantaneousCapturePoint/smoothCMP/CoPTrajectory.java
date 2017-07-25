@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -113,14 +112,15 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    @Override
    public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition)
    {
+      YoFrameTrajectory3D segment = segments.get(numberOfSegments.getIntegerValue());
+
       switch (segmentOrder)
       {
       case CUBIC:
-         segments.get(numberOfSegments.getIntegerValue()).setCubic(initialTime, finalTime, initialPosition, finalPosition);
+         segment.setCubic(initialTime, finalTime, initialPosition, finalPosition);
          break;
-
       default:
-         segments.get(numberOfSegments.getIntegerValue()).setLinear(initialTime, finalTime, initialPosition, finalPosition);
+         segment.setLinear(initialTime, finalTime, initialPosition, finalPosition);
          break;
       }
       numberOfSegments.increment();
