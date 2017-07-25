@@ -30,12 +30,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.manipulation.ConfigurationBuildOrder;
-import us.ihmc.humanoidRobotics.manipulation.ConfigurationSpace;
-import us.ihmc.humanoidRobotics.manipulation.DrawingTrajectory;
-import us.ihmc.humanoidRobotics.manipulation.ConfigurationBuildOrder.ConfigurationSpaceName;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.CTTaskNodeTree;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace.GenericTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationSpace;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConstrainedWholeBodyPlanningToolboxHelper;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.CTTaskNodeTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -199,50 +200,62 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
    
-//   @Test
-   public void testForRealTimeVisulaizer() throws SimulationExceededMaximumTimeException, IOException
+   @Test
+   public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
+      System.out.println("Send wakeup " + drcBehaviorTestHelper.getYoTime());
+      ToolboxStateMessage toolboxMessage;
+      
+      toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+      toolboxMessage.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
+      toolboxCommunicator.send(toolboxMessage);
+      System.out.println("Send wakeup done " + drcBehaviorTestHelper.getYoTime());
+      
       /*
        * constrained end effector trajectory (WorldFrame).
        */
+      System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
-
-      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-
-      /*
-       * tester
-       */
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-      referenceFrames.updateFrames();
-
-      sdfFullRobotModel.updateFrames();
-      referenceFrames.updateFrames();
-      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
-
-      GenericTaskNode.nodeTester = wbikTester;
-      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-
-      /*
-       * put on generic task node
-       */
-
-      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      rootNode.setConfigurationJoints(sdfFullRobotModel);
       
-      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
+      ConstrainedWholeBodyPlanningToolboxHelper.setConstrainedEndEffectorTrajectory(endeffectorTrajectory);
+      ConstrainedWholeBodyPlanningToolboxHelper.setInitialFullRobotModel(drcBehaviorTestHelper.getControllerFullRobotModel());
+      ConstrainedWholeBodyPlanningToolboxHelper.setFullRobotModelFactory(getRobotModel());
       
-
+      ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();      
+      packet.setTempValue(0.2);      
+      packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
+      
+      toolboxCommunicator.send(packet);
+      System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
+//      
+//            
+//      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+//
+//      /*
+//       * tester
+//       */
+//      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
+//
+//      GenericTaskNode.nodeTester = wbikTester;
+//      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
+//
+//      /*
+//       * put on generic task node
+//       */
+//
+//      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+//      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+//      rootNode.setConfigurationJoints(sdfFullRobotModel);
+//      
+//      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
    
@@ -513,7 +526,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   //   @Test
+//   @Test
    public void testForToolboxMessage() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);

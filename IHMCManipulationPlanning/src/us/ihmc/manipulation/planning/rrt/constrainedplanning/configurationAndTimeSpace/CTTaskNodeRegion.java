@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 public class CTTaskNodeRegion
 {

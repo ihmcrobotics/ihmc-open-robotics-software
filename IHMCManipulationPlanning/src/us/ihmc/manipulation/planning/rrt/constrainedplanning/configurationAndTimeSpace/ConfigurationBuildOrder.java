@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.manipulation;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 

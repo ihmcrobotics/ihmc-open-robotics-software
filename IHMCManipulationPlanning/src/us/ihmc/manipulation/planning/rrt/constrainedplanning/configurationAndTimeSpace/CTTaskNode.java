@@ -1,9 +1,8 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.manipulation.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
@@ -24,7 +23,7 @@ public abstract class CTTaskNode
    protected OneDoFJoint[] configurationJoints;   
    
    public static WheneverWholeBodyKinematicsSolver nodeTester;
-   
+   public static FullHumanoidRobotModel initialRobotModel;
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
    
    public static ReferenceFrame midZUpFrame;
