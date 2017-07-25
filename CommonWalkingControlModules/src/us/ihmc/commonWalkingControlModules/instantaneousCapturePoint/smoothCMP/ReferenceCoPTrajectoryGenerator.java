@@ -467,7 +467,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       tempFramePoint2d.set(currentSwingFootInitialPolygon.getCentroid());
 
       // Determine the forward offset location of the CoP waypoint in the foot
-      double forwardOffset = copOffsets.get(supportSide).get(exitCoPName).getX() + getStepLengthToCoPOffset(exitCoPName);
+      double forwardOffset = copOffsets.get(supportSide).get(exitCoPName).getX();
+      forwardOffset += getStepLengthBasedOffset(currentSwingFootInitialPolygon, currentSupportFootPolygon, stepLengthToCoPOffsetFactors.get(exitCoPName));
       if (isConstrainedToMinMaxFlags.get(exitCoPName))
          forwardOffset = MathTools.clamp(forwardOffset, minCoPOffsets.get(exitCoPName).getDoubleValue(), maxCoPOffsets.get(exitCoPName).getDoubleValue());
 
