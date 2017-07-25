@@ -89,11 +89,12 @@ public class GenericROSTranslationTools
       customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
 
       // Tuple3DReadOnly <-> Vector3
-      customFieldConversions.registerIHMCPacketFieldConverter(Tuple3DReadOnly.class, GenericROSTranslationTools::convertTuple3d);
+      customFieldConversions.registerIHMCPacketFieldConverter(Point3D.class, GenericROSTranslationTools::convertTuple3d);
+      customFieldConversions.registerIHMCPacketFieldConverter(Vector3D.class, GenericROSTranslationTools::convertTuple3d);
       customFieldConversions.registerROSMessageFieldConverter(Vector3.class, GenericROSTranslationTools::convertVector3);
 
       // Quaternion <-> ROS Quaternion
-      customFieldConversions.registerIHMCPacketFieldConverter(Tuple4DReadOnly.class, GenericROSTranslationTools::convertTuple4d);
+      customFieldConversions.registerIHMCPacketFieldConverter(Quaternion.class, GenericROSTranslationTools::convertTuple4d);
       customFieldConversions.registerROSMessageFieldConverter(geometry_msgs.Quaternion.class, GenericROSTranslationTools::convertQuaternion);
    }
 
@@ -175,7 +176,7 @@ public class GenericROSTranslationTools
             {
                setEnumFromByte(rosMessage, ihmcMessage, rosGetter, ihmcField, (Class<? extends Enum>) ihmcMessageFieldType);
             }
-            else if(customFieldConversions.containsConverterFor(rosMessageClass))
+            else if(customFieldConversions.containsConverterFor(rosGetter.getReturnType()))
             {
                Message rosMessageField = (Message) rosGetter.invoke(rosMessage);
                Object ihmcPacketField = customFieldConversions.convert(rosMessageField);
@@ -366,9 +367,13 @@ public class GenericROSTranslationTools
       {
          if (customFieldConversions.containsConverterFor(field.getType()))
          {
-            Object fieldVariableToConvert = field.getType().cast(field.get(ihmcMessage));
+            Object fieldVariableToConvert = field.get(ihmcMessage);
             Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
-            setField(message, field, rosMessageField);
+
+            String rosSetterForField = getRosSetterNameForField(field);
+            Method setterMethod = message.getClass().getMethod(rosSetterForField, rosMessageField.getClass().getInterfaces()[0]);
+            setterMethod.setAccessible(true);
+            setterMethod.invoke(message, rosMessageField);
          }
          else if (field.getType().isArray() && !field.getType().getComponentType().isPrimitive())
          {

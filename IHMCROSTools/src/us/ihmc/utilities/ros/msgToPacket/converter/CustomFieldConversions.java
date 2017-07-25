@@ -44,7 +44,7 @@ public class CustomFieldConversions
 
    public <T, S extends Message> T convert(S field)
    {
-      Function<S, T> function = classToMessageFieldConverterMap.get(field);
+      Function<S, T> function = classToMessageFieldConverterMap.get(field.getClass().getInterfaces()[0]);
       return function.apply(field);
    }
 
