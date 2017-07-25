@@ -55,7 +55,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_DYN_REACHABILITY = true;
+   private static final boolean ENABLE_DYN_REACHABILITY = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
