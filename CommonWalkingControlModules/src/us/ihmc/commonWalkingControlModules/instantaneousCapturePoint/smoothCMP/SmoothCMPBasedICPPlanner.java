@@ -164,14 +164,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       this.initialTime.set(initialTime);
 
-      isStanding.set(false);
-      isDoubleSupport.set(true);      
+      isDoubleSupport.set(true);
       
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
 
       updateTransferPlan();
+
+      isStanding.set(false);
    }
 
    @Override
