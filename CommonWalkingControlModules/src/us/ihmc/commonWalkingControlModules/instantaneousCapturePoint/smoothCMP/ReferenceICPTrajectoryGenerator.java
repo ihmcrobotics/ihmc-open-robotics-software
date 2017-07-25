@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Yo
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationTools;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -35,18 +36,22 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int defaultSize = 1000;
    
+   private final List<FramePoint> cmpDesiredFinalPositions = new ArrayList<>();
+
    private final List<FramePoint> icpDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint> icpDesiredFinalPositions = new ArrayList<>();
-   private final List<FramePoint> cmpDesiredFinalPositions = new ArrayList<>();
    
    private FramePoint icpPositionDesiredCurrent = new FramePoint();
    private FrameVector icpVelocityDesiredCurrent = new FrameVector();
    private FrameVector icpAccelerationDesiredCurrent = new FrameVector();
+   private FrameVector icpVelocityDynamicsCurrent = new FrameVector();
    
    private final List<FramePoint> comDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint> comDesiredFinalPositions = new ArrayList<>();
    
    private FramePoint comPositionDesiredCurrent = new FramePoint();
+   private FrameVector comVelocityDesiredCurrent = new FrameVector();
+   private FrameVector comVelocityDynamicsCurrent = new FrameVector();
    
    private FramePoint icpPositionDesiredFinalFirstSegment = new FramePoint();
    private FramePoint comPositionDesiredFinalFirstSegment = new FramePoint();
@@ -62,6 +67,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private YoInteger currentSegmentIndex;
 
    private final YoBoolean isStanding;
+   private final YoBoolean areICPDynamicsSatisfied;
+   private final YoBoolean areCoMDynamicsSatisfied;
 
    private final YoInteger totalNumberOfSegments;
    private final YoInteger numberOfFootstepsToConsider;
@@ -84,6 +91,11 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.useDecoupled = useDecoupled;
+      
+      areICPDynamicsSatisfied = new YoBoolean("areICPDynamicsSatisfied", registry);
+      areICPDynamicsSatisfied.set(false);
+      areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
+      areCoMDynamicsSatisfied.set(false);
       
       totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
@@ -213,10 +225,20 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          if(useDecoupled.getBooleanValue())
          {
             SmoothCapturePointTools.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+            
+//            PrintTools.debug("Exit ICPs = " + icpDesiredFinalPositions.subList(0,17).toString());
+//            PrintTools.debug("Entry ICPs = " + icpDesiredInitialPositions.subList(0,17).toString());
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, 
+                                                                             comDesiredInitialPositions, comDesiredFinalPositions, 
+                                                                             cmpTrajectories, omega0.getDoubleValue());
+
          }
          else
          {
             SmoothCapturePointTools.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+            
+//            PrintTools.debug("Exit ICPs = " + icpDesiredFinalPositions.subList(0,17).toString());
+//            PrintTools.debug("Entry ICPs = " + icpDesiredInitialPositions.subList(0,17).toString());
             SmoothCoMIntegrationTools.computeDesiredCenterOfMassCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, 
                                                                              comDesiredInitialPositions, comDesiredFinalPositions, 
                                                                              cmpTrajectories, omega0.getDoubleValue());
@@ -246,15 +268,23 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
          if(useDecoupled.getBooleanValue())
          {
+            // ICP
             SmoothCapturePointTools.computeDesiredCapturePointPositionDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpPositionDesiredCurrent);
             SmoothCapturePointTools.computeDesiredCapturePointVelocityDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                 icpVelocityDesiredCurrent);
             SmoothCapturePointTools.computeDesiredCapturePointAccelerationDecoupled(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                                     icpAccelerationDesiredCurrent);
+            
+            // CoM
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, comPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                         comPositionDesiredCurrent);
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, comPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                         comVelocityDesiredCurrent);
          }
          else
          {
+            // ICP
             SmoothCapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                        icpPositionDesiredCurrent);
             SmoothCapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
@@ -262,11 +292,41 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
             SmoothCapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                            icpAccelerationDesiredCurrent);
             
+            // CoM
             SmoothCoMIntegrationTools.computeDesiredCenterOfMassPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, comPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
                                                                          comPositionDesiredCurrent);
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalFirstSegment, comPositionDesiredFinalFirstSegment, cmpPolynomial3D, 
+                                                                         comVelocityDesiredCurrent);
          }
+         checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
+         checkCoMDynamics(localTimeInCurrentPhase.getDoubleValue(), comVelocityDesiredCurrent, icpPositionDesiredCurrent, comPositionDesiredCurrent);
       }
+
       icpCurrentTest.set(icpPositionDesiredCurrent);
+   }
+   
+   private void checkICPDynamics(double time, FrameVector icpVelocityDesiredCurrent, FramePoint icpPositionDesiredCurrent, YoFrameTrajectory3D cmpPolynomial3D)
+   {
+      cmpPolynomial3D.compute(time);
+      
+      icpVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, cmpPolynomial3D.getFramePosition());
+      icpVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
+      
+      areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-6));
+      
+//      PrintTools.debug("ICP velocity desired  = " + icpVelocityDesiredCurrent.toString());
+//      PrintTools.debug("ICP velocity dynamics = " + icpVelocityDynamicsCurrent.toString());
+   }
+   
+   private void checkCoMDynamics(double time, FrameVector comVelocityDesiredCurrent, FramePoint icpPositionDesiredCurrent, FramePoint comPositionDesiredCurrent)
+   {      
+      comVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
+      comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
+      
+      areCoMDynamicsSatisfied.set(comVelocityDesiredCurrent.epsilonEquals(comVelocityDynamicsCurrent, 10e-6));
+      
+//      PrintTools.debug("CoM velocity desired  = " + comVelocityDesiredCurrent.toString());
+//      PrintTools.debug("CoM velocity dynamics = " + comVelocityDynamicsCurrent.toString());
    }
    
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<YoFrameTrajectory3D> cmpTrajectories)

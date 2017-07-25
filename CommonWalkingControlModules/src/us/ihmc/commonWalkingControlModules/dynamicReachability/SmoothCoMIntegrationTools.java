@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameTuple;
 
@@ -37,12 +38,12 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
                                                                            YoFrameTrajectory3D cmpPolynomial3D, 
                                                                            FrameTuple<?, ?> icpPositionDesiredFinal, 
                                                                            FrameTuple<?, ?> comPositionDesiredFinal, 
-                                                                           FrameTuple<?, ?> icpQuantityDesired)
+                                                                           FrameTuple<?, ?> comQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
-      if(numberOfCoefficients == -1)
+      if(numberOfCoefficients < 0)
       {
-         icpQuantityDesired.setToNaN();
+         comQuantityDesired.setToNaN();
          return;
       }
       
@@ -56,13 +57,15 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       CommonOps.subtract(generalizedAlphaCoMPrimeMatrix, generalizedBetaCoMPrimeMatrix, generalizedAlphaBetaCoMPrimeMatrix);
 
       calculateCoMQuantity3D(generalizedAlphaBetaCoMPrimeMatrix, generalizedGammaCoMPrimeMatrix, generalizedDeltaCoMPrimeMatrix, polynomialCoefficientCombinedVector, 
-                             icpPositionDesiredFinal, comPositionDesiredFinal, icpQuantityDesired);
+                             icpPositionDesiredFinal, comPositionDesiredFinal, comQuantityDesired);
       
-//      PrintTools.debug("A: " + generalizedAlphaCoMPrimeMatrix.toString());
-//      PrintTools.debug("B: " + generalizedBetaCoMPrimeMatrix.toString());
-//      PrintTools.debug("C: " + generalizedGammaCoMPrimeMatrix.toString());
-//      PrintTools.debug("AB: " + generalizedAlphaBetaCoMPrimeMatrix.toString());
-//      PrintTools.debug("P: " + polynomialCoefficientCombinedVector.toString());
+      PrintTools.debug("A: " + generalizedAlphaCoMPrimeMatrix.toString());
+      PrintTools.debug("B: " + generalizedBetaCoMPrimeMatrix.toString());
+      PrintTools.debug("C: " + generalizedGammaCoMPrimeMatrix.toString());
+      PrintTools.debug("AB: " + generalizedAlphaBetaCoMPrimeMatrix.toString());
+      PrintTools.debug("P: " + polynomialCoefficientCombinedVector.toString());
+      PrintTools.debug("ICPf: " + icpPositionDesiredFinal.toString());
+      PrintTools.debug("CoMf: " + comPositionDesiredFinal.toString());
    }
    
    public static double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, YoTrajectory cmpPolynomial, double icpPositionDesiredFinal, double comPositionDesiredFinal)
@@ -83,32 +86,36 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
    
    public static void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, DenseMatrix64F generalizedGammaCoMPrimeMatrix, DenseMatrix64F generalizedDeltaCoMPrimeMatrix,
                                              DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple<?, ?> icpPositionDesiredFinal, FrameTuple<?, ?> comPositionDesiredFinal,
-                                             FrameTuple<?, ?> icpQuantityDesired)
+                                             FrameTuple<?, ?> comQuantityDesired)
    {
       M1.reshape(generalizedAlphaBetaCoMPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
       M1.zero();
 
       CommonOps.mult(generalizedAlphaBetaCoMPrimeMatrix, polynomialCoefficientCombinedVector, M1);
-
+      
       M2.reshape(M1.getNumRows(),  M1.getNumCols());
       M2.set(0, 0, generalizedGammaCoMPrimeMatrix.get(0, 0) * comPositionDesiredFinal.getX());
       M2.set(1, 0, generalizedGammaCoMPrimeMatrix.get(0, 0) * comPositionDesiredFinal.getY());
       M2.set(2, 0, generalizedGammaCoMPrimeMatrix.get(0, 0) * comPositionDesiredFinal.getZ());
-      
-      double scalar = 0.5 * (generalizedGammaCoMPrimeMatrix.get(0, 0) - 1.0 / generalizedGammaCoMPrimeMatrix.get(0, 0));
+
       M3.reshape(generalizedAlphaBetaCoMPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
       M3.zero();
-
+      
+      double scalar = 0.5 * (generalizedGammaCoMPrimeMatrix.get(0, 0) - 1.0 / generalizedGammaCoMPrimeMatrix.get(0, 0));
       CommonOps.mult(generalizedDeltaCoMPrimeMatrix, polynomialCoefficientCombinedVector, M3);
       M3.set(0, 0, M3.get(0, 0) - icpPositionDesiredFinal.getX());
       M3.set(1, 0, M3.get(1, 0) - icpPositionDesiredFinal.getY());
       M3.set(2, 0, M3.get(2, 0) - icpPositionDesiredFinal.getZ());
       CommonOps.scale(scalar, M3);
+      
+//      PrintTools.debug("M1 = " + M1.toString());
+//      PrintTools.debug("M2 = " + M2.toString());
+//      PrintTools.debug("M3 = " + M3.toString());
             
       CommonOps.addEquals(M1, M2);
       CommonOps.addEquals(M1, M3);
       
-      icpQuantityDesired.set(M1.get(0, 0), M1.get(1, 0), M1.get(2, 0));
+      comQuantityDesired.set(M1.get(0, 0), M1.get(1, 0), M1.get(2, 0));
    }
    
    public static double calculateCoMQuantity1D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, DenseMatrix64F generalizedGammaCoMPrimeMatrix, DenseMatrix64F generalizedDeltaCoMPrimeMatrix,
@@ -122,10 +129,10 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       M2.reshape(M1.getNumRows(),  M1.getNumCols());
       M2.set(0, 0, generalizedGammaCoMPrimeMatrix.get(0, 0) * comPositionDesiredFinal);
       
-      double scalar = 0.5 * (generalizedGammaCoMPrimeMatrix.get(0, 0) - 1.0 / generalizedGammaCoMPrimeMatrix.get(0, 0));
       M3.reshape(generalizedAlphaBetaCoMPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
       M3.zero();
 
+      double scalar = 0.5 * (generalizedGammaCoMPrimeMatrix.get(0, 0) - 1.0 / generalizedGammaCoMPrimeMatrix.get(0, 0));
       CommonOps.mult(generalizedDeltaCoMPrimeMatrix, polynomialCoefficientVector, M3);
       M3.set(0, 0, M3.get(0, 0) - icpPositionDesiredFinal);
       CommonOps.scale(scalar, M3);
@@ -162,15 +169,15 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       
       for(int i = 0; i < numberOfCoefficients; i++)
       {
-         for(int j = 0; j < numberOfCoefficients - i; i++)
+         for(int j = i; j < numberOfCoefficients; j++)
          {
             tPowersDerivativeVector.zero();
             tPowersDerivativeVectorTranspose.zero();
             
-            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + j + alphaCoMDerivativeOrder, time));
+            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
             CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
             
-            double scalar = Math.pow(-1.0, j) * Math.pow(omega0, -(i + j));
+            double scalar = Math.pow(-1.0, i) * Math.pow(omega0, -j);
             CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);            
          }
       }
@@ -203,15 +210,15 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       
       for(int i = 0; i < numberOfCoefficients; i++)
       {
-         for(int j = 0; j < numberOfCoefficients - i; i++)
+         for(int j = i; j < numberOfCoefficients; j++)
          {
             tPowersDerivativeVector.zero();
             tPowersDerivativeVectorTranspose.zero();
             
-            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + j, timeSegmentTotal));
+            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentTotal));
             CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
             
-            double scalar =  Math.pow(-1.0, j + betaCoMDerivativeOrder) * Math.pow(omega0,  -(i + j) + betaCoMDerivativeOrder) * Math.exp(omega0*(timeSegmentTotal-time));
+            double scalar =  Math.pow(-1.0, i + betaCoMDerivativeOrder) * Math.pow(omega0,  -j + betaCoMDerivativeOrder) * Math.exp(omega0*(timeSegmentTotal-time));
             CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);            
          }
       }
@@ -221,7 +228,7 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
                                                                       int gammaCoMDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {      
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
-      double ddGamaPrimeValue = Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder)*Math.exp(omega0 * (timeSegmentTotal - time));
+      double ddGamaPrimeValue = Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentTotal - time));
       generalizedGammaCoMPrime.set(0, 0, ddGamaPrimeValue);
    }
    
@@ -258,15 +265,15 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       generalizedDeltaCoMPrimeRow.reshape(1, numberOfCoefficients);
       generalizedDeltaCoMPrimeRow.zero();
       
-      for(int i = 0; i < numberOfCoefficients; i++)
+      for(int j = 0; j < numberOfCoefficients; j++)
       {
          tPowersDerivativeVector.zero();
          tPowersDerivativeVectorTranspose.zero();
          
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + deltaCoMDerivativeOrder, timeSegmentTotal));
+         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j + deltaCoMDerivativeOrder, timeSegmentTotal));
          CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
                   
-         double scalar = Math.pow(omega0, -i);
+         double scalar = Math.pow(omega0, -j);
          CommonOps.addEquals(generalizedDeltaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);
       }
    }
