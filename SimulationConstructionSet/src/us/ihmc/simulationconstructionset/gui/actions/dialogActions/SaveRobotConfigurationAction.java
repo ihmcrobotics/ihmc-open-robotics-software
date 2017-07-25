@@ -1,31 +1,25 @@
 package us.ihmc.simulationconstructionset.gui.actions.dialogActions;
 
-import us.ihmc.simulationconstructionset.gui.SCSAction;
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
-import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
 import java.io.File;
 
-@SuppressWarnings("serial")
-public class SaveRobotConfigurationAction extends SCSAction
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
+
+public class SaveRobotConfigurationAction extends AbstractAction
 {
+   private static final long serialVersionUID = 5813345490164040993L;
    private SaveRobotConfigurationDialogConstructor constructor;
 
    public SaveRobotConfigurationAction(SaveRobotConfigurationDialogConstructor constructor) 
    {
-      super("Save Robot Configuration",
-              "",
-              KeyEvent.VK_UNDEFINED,
-              "Save Robot Config",
-              "Save Robot Configuration"
-      );
-
+      super("Save Robot Configuration");
       this.constructor = constructor;
-   }
 
-   @Override
-   public void doAction()
-   {
-      constructor.constructDialog();
+      this.putValue(Action.LONG_DESCRIPTION, "Save Robot Configuration");
+      this.putValue(Action.SHORT_DESCRIPTION, "save robot config");
    }
 
    public void setCurrentDirectory(File directory)
@@ -38,4 +32,9 @@ public class SaveRobotConfigurationAction extends SCSAction
       constructor.setCurrentDirectory(directory);
    }
 
+   @Override
+   public void actionPerformed(ActionEvent e)
+   {
+      constructor.constructDialog();
+   }
 }
