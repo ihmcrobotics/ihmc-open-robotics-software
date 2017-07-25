@@ -63,7 +63,7 @@ public class CTTaskNodeTree
          PrintTools.warn("Task dimension is incorrect");
       else
          for(int i=1;i<this.dimensionOfTask+1;i++)
-            this.taskNames.add("Task_"+i+"_"+taskNames[i-1]);
+            this.taskNames.add("Task_"+i+"_"+taskNames[i-1]);      
    }
       
    public String getTaskName(int indexOfDimension)
@@ -110,6 +110,8 @@ public class CTTaskNodeTree
    
    public void expandTree(int numberOfExpanding)
    {
+      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
+      
       for(int i=0;i<numberOfExpanding;i++)
       {
          PrintTools.info("expanding process "+i);         
@@ -314,6 +316,9 @@ public class CTTaskNodeTree
    {
       this.newNode.convertNormalizedDataToData(nodeRegion);
       this.newNode.setParentNode(this.nearNode);
+
+//      for (int i = 0; i < newNode.getDimensionOfNodeData(); i++)
+//         PrintTools.info("newNode "+newNode.getNodeData(i) + " ");
       
       if(this.newNode.isValidNode())
       {
