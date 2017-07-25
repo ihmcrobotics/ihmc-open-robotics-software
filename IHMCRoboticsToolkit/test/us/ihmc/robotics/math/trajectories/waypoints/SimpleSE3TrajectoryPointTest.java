@@ -535,10 +535,6 @@ public class SimpleSE3TrajectoryPointTest
       assertEquals(0.0, positionDistance, 1e-7);
       
       assertTrue(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
-
-      String string = simpleSE3TrajectoryPoint.toString();
-      String expectedString = "SE3 trajectory point: (time =  9.90, SE3 waypoint: [position = ( 3.90,  2.20,  1.10), orientation = ( 0.08,  0.24,  0.45,  0.86), linearVelocity = ( 8.80,  1.40,  9.22), angular velocity = ( 7.10,  2.20,  3.33)].)";
-      assertEquals(expectedString, string);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
