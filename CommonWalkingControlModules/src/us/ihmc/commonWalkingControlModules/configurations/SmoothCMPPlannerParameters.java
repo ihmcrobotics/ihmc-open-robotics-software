@@ -91,8 +91,8 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       constrainToSupportPolygon.put(CoPPointName.TOE_COP, true);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 8.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 5.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 8.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
 
       copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
