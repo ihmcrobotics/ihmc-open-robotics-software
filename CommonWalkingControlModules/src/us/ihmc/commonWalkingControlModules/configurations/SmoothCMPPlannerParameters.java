@@ -127,7 +127,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
-      return 3;
+      return swingCopPointsToPlan.length + 1;
    }
 
    @Override
