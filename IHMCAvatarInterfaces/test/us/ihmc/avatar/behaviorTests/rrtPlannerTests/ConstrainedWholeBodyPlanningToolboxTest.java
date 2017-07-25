@@ -291,7 +291,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   @Test
+//   @Test
    public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -354,7 +354,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//      @Test
+      @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -399,9 +399,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1 * Math.PI, 0.0 * Math.PI, 0.0 * Math.PI);
       node1.setNodeData(10, -0.25 * Math.PI);
       node1.setParentNode(rootNode);
+      
+      /*
+       * when EE of the DrawingTrajectory is RIGHT.
+       */
+      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, 0.1 * Math.PI, 0.0 * Math.PI, 0.0 * Math.PI);
+      node2.setNodeData(10, 0.25 * Math.PI);
+      node2.setParentNode(rootNode);
 
-      System.out.println(rootNode.isValidNode());
+//      System.out.println(rootNode.isValidNode());
       System.out.println(node1.isValidNode());
+//      System.out.println(node2.isValidNode());
 
       /*
        * show the ik result
@@ -412,9 +420,11 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
       createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
 
-      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
+//      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
 
+      scs.addStaticLinkGraphics(getXYZAxis(node1.getEndEffectorPose()));
+//      scs.addStaticLinkGraphics(getXYZAxis(node2.getEndEffectorPose()));
       scs.addStaticLinkGraphics(getXYZAxis(rootNode.getEndEffectorPose()));
 
       System.out.println("End");

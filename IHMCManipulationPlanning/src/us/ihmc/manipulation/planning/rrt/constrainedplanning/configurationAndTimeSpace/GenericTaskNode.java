@@ -10,6 +10,8 @@ import us.ihmc.robotics.geometry.FramePose;
 
 public class GenericTaskNode extends CTTaskNode
 {
+   public static double handCoordinateOffsetX = -0.2;
+   
    public GenericTaskNode()
    {
       super(11);
@@ -75,6 +77,9 @@ public class GenericTaskNode extends CTTaskNode
 
    public Pose3D getEndEffectorPose()
    {
+      /*
+       * to world frame.
+       */
       return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
    }
 
@@ -104,16 +109,18 @@ public class GenericTaskNode extends CTTaskNode
       nodeTester.holdCurrentTrajectoryMessages();
       /*
        * set whole body tasks.
-       */
+       */      
       Pose3D desiredPose = getEndEffectorPose();
       FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
 
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-
+     
       desiredPoseToWorld.changeFrame(midZUpFrame);
 
       Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
+      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+      
       nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
 
