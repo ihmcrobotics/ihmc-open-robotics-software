@@ -8,8 +8,9 @@ import java.util.List;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class SmoothCMPPlannerParameters extends ICPPlannerParameters
+public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParameters
 {
+
    public enum CoPSupportPolygonNames
    {
       INITIAL_SWING_POLYGON, FINAL_SWING_POLYGON, SUPPORT_FOOT_POLYGON, INITIAL_DOUBLE_SUPPORT_POLYGON, FINAL_DOUBLE_SUPPORT_POLYGON, NULL
@@ -128,6 +129,34 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public int getNumberOfCoPWayPointsPerFoot()
    {
       return swingCopPointsToPlan.length + 1;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return modelScale * 0.25;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return modelScale * 0.03;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getDoTimeFreezing()
+   {
+      return false;
    }
 
    @Override
