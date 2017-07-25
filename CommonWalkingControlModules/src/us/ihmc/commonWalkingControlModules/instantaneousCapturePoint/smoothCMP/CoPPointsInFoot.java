@@ -11,6 +11,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -18,10 +19,12 @@ public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector zeroVector = new FrameVector();
-   
+
    private final List<CoPPointName> copPointsList = new ArrayList<>(); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
    private final List<CoPTrajectoryPoint> copLocations = new ArrayList<>(); // Location of CoP points defined
    private final List<YoFramePoint> copLocationsInWorldFrameReadOnly = new ArrayList<>(); // YoFramePoints for visualization
+
+   private final FrameEuclideanTrajectoryPoint tempVariableForSetting = new FrameEuclideanTrajectoryPoint();
 
    private final int stepNumber;
 
@@ -69,17 +72,26 @@ public class CoPPointsInFoot
 
    public void setIncludingFrame(int waypointIndex, double time, FramePoint location)
    {
-      copLocations.get(waypointIndex).set(time, location, zeroVector);
+      copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
+      zeroVector.setToZero(location.getReferenceFrame());;
+      tempVariableForSetting.setIncludingFrame(time, location, zeroVector);
+      copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
    public void setIncludingFrame(int waypointIndex, double time, YoFramePoint location)
    {
-      copLocations.get(waypointIndex).set(time, location.getFrameTuple(), zeroVector);
+      copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
+      zeroVector.setToZero(location.getReferenceFrame());
+      tempVariableForSetting.setIncludingFrame(time, location.getFrameTuple(), zeroVector);
+      copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
    public void setIncludingFrame(int waypointIndex, double time, CoPTrajectoryPoint location)
    {
-      copLocations.get(waypointIndex).set(time, location.getPosition().getFrameTuple(), zeroVector);
+      copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
+      zeroVector.setToZero(location.getReferenceFrame());;
+      tempVariableForSetting.setIncludingFrame(time, location.getPosition().getFrameTuple(), zeroVector);
+      copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
    public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)

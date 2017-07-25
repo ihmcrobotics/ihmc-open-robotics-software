@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
+import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 
 import us.ihmc.robotDataLogger.JointType;
@@ -15,6 +16,13 @@ public class OneDoFState extends JointState
    public OneDoFState(String name)
    {
       super(name, JointType.OneDoFJoint);
+   }
+
+   @Override
+   public void update(DoubleBuffer buffer)
+   {
+      q = buffer.get();
+      qd = buffer.get();
    }
 
    @Override
@@ -39,6 +47,12 @@ public class OneDoFState extends JointState
    {
       array[0] = q;
       array[1] = qd;
+   }
+   
+   public void get(LongBuffer buffer)
+   {
+      buffer.put(Double.doubleToLongBits(q));
+      buffer.put(Double.doubleToLongBits(qd));
    }
 
    @Override

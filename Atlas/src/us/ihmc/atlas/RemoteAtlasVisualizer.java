@@ -14,9 +14,9 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
@@ -38,7 +38,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", new RemoteAtlasVisualizerLogFilter());
+      YoVariableClient client = new YoVariableClient(scsVisualizer, new RemoteAtlasVisualizerLogFilter());
       client.start();
    }
 
@@ -114,13 +114,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       @Override
       public boolean shouldAddToDisplay(Announcement description)
       {
-         String ipAsString = ipToString(description.getDataIP());
-         return ipAsString.startsWith("10.7.4.") || ipAsString.startsWith("10.7.1.");
-      }
-
-      private String ipToString(byte[] address)
-      {
-         return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
+         return description.getHostNameAsString().startsWith("cpu") || description.getHostNameAsString().equals("kiwi-test-server");
       }
    }
 }

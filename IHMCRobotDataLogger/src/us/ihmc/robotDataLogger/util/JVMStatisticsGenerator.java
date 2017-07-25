@@ -115,7 +115,7 @@ public class JVMStatisticsGenerator
 
          systemLoadAverage.set(operatingSystemMXBean.getSystemLoadAverage());
 
-         visualizer.update(0, registry);
+         visualizer.update(visualizer.getLatestTimestamp(), registry);
       }
 
       public void updateMemoryUsageStatistics()
