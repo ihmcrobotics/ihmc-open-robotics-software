@@ -21,7 +21,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
    
-   private WheneverWholeBodyKinematicsSolver wbikTester;
+   private GenericTaskNode rootNode;
+   private CTTaskNodeTree tree;
+   
    
    public ConstrainedWholeBodyPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -34,10 +36,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal()
    {
       PrintTools.info("update toolbox " + updateCount);
-
-      if (updateCount == 100)
-         isDone.set(true);
-      updateCount++;
+      tree.expandTree(100);
+      isDone.set(true);
+//      if (updateCount == 100)
+//         isDone.set(true);
+//      updateCount++;
       
    }
 
@@ -54,18 +57,32 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       PrintTools.info("initialize");
       PrintTools.info("temp input " + request.tempInputValue);
       
-//      GenericTaskNode.constrainedEndEffectorTrajectory = request.constrainedEndEffectorTrajectory;
-//      
-//      wbikTester = new WheneverWholeBodyKinematicsSolver(request.toolboxfullRobotModelFactory, request.toolboxFullRobotModel);
-//
-//      GenericTaskNode.nodeTester = wbikTester;
-//      GenericTaskNode.midZUpFrame = request.referenceFrames.getMidFootZUpGroundFrame();
-//      
-//      double initialPelvisHeight = request.toolboxFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-//      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-//      rootNode.setConfigurationJoints(request.toolboxFullRobotModel);
-//      
-//      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
+      double initialPelvisHeight = GenericTaskNode.initialRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+      
+      /*
+       * in near future, find initial posture algorith is needed.
+       */
+      
+      /*
+       * root node and tree define
+       */
+      rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);
+      
+      PrintTools.info("initial node is "+rootNode.isValidNode());
+      
+      tree = new CTTaskNodeTree(rootNode);
+      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, GenericTaskNode.constrainedEndEffectorTrajectory.getTrajectoryTime());
+      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
+      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(4, -0.0/180*Math.PI, 0.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(10, 0.0, 0.0);
       
       return true;
    }

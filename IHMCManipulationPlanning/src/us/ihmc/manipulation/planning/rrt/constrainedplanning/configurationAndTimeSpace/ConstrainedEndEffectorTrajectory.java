@@ -54,7 +54,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
 
       ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrix,
                                                                                                                 controllableConfigurationSpace);
-
+      
       Point3D translation;
       Quaternion orientation;
       Pose3D pose3D;

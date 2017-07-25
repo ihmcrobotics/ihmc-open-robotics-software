@@ -72,8 +72,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
-      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
+      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, false);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT,
@@ -200,7 +200,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
    
-   @Test
+//   @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -233,27 +233,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
       toolboxCommunicator.send(packet);
       System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
-//      
-//            
-//      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-//
-//      /*
-//       * tester
-//       */
-//      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
-//
-//      GenericTaskNode.nodeTester = wbikTester;
-//      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-//
-//      /*
-//       * put on generic task node
-//       */
-//
-//      double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-//      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-//      rootNode.setConfigurationJoints(sdfFullRobotModel);
-//      
-//      CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
@@ -312,7 +291,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//   @Test
+   @Test
    public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -348,10 +327,10 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       /*
        * put on generic task node
        */
-
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
       rootNode.setConfigurationJoints(sdfFullRobotModel);
+      rootNode.isValidNode();
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
       
@@ -359,13 +338,13 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
       tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(4, -0.0/180*Math.PI, 0.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(10, 0.0, 0.0);
+      tree.getTaskNodeRegion().setRandomRegion(10, -30.0/180*Math.PI, 30.0/180*Math.PI);
       
       tree.expandTree(100);
 
@@ -375,7 +354,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   //   @Test
+//      @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -411,7 +390,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       /*
        * put on generic task node
        */
-
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
       GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
       rootNode.setConfigurationJoints(sdfFullRobotModel);
@@ -423,6 +401,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       node1.setParentNode(rootNode);
 
       System.out.println(rootNode.isValidNode());
+      System.out.println(node1.isValidNode());
 
       /*
        * show the ik result
