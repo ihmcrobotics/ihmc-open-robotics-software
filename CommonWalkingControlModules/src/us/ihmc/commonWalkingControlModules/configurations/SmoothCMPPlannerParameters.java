@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -20,6 +21,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
     * Vector offsets relative to centroid of support polygon defined copOffsetFrames
     */
    private final EnumMap<CoPPointName, Vector2D> copOffsetsInFootFrame = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, Vector2D> copOffsetBoundsInFootFrame = new EnumMap<>(CoPPointName.class);
    private final EnumMap<CoPPointName, CoPSupportPolygonNames> copOffsetFrameNames = new EnumMap<>(CoPPointName.class);
 
    /**
@@ -89,14 +91,18 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       constrainToSupportPolygon.put(CoPPointName.TOE_COP, true);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
-      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 8.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 5.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
 
       copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
       copOffsetsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(0.0, -0.005));
-      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.025));
+      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.01));
       copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.025));
+
+      copOffsetBoundsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(-0.04, 0.03));
+      copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
+      copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
 
       segmentTime.put(CoPPointName.MIDFEET_COP, 0.05);
       segmentTime.put(CoPPointName.HEEL_COP, 0.8);
@@ -121,7 +127,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
-      return 2;
+      return 3;
    }
 
    @Override
@@ -213,6 +219,11 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       copBounds.add(ballBounds);
 
       return copBounds;
+   }
+
+   public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
+   {
+      return copOffsetBoundsInFootFrame;
    }
 
    @Override
