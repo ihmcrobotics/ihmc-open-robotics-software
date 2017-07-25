@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeSpace;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 import java.util.Random;
