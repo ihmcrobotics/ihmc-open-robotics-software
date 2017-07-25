@@ -85,6 +85,7 @@ public class CoPTrajectory implements CoPTrajectoryInterface
       currentSegment.getFrameAcceleration(desiredCoPAccelerationToPack);
    }
 
+   // TODO make this so that if the time is exceeded, it continues on the last segment
    private void setCurrentSegmentIndexFromStateTime(double timeInState)
    {
       int segmentIndex = 0;
