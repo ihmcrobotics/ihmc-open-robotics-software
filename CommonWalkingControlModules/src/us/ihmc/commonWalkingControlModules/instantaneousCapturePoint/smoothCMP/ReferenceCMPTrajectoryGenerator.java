@@ -218,10 +218,12 @@ public class ReferenceCMPTrajectoryGenerator
       CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
          YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
-
-         cmpSegment.set(copSegment);
+         if (copSegment.getFinalTime() - copSegment.getInitialTime() > 0.0)
+         { // By default, the final transfer duration sometimes equals zero
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            cmpSegment.set(copSegment);
+         }
       }
 
       activeTrajectory = swingCMPTrajectories.get(0);
