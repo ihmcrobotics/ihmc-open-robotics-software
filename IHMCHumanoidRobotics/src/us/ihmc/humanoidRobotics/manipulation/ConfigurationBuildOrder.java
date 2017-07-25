@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.trajectory;
+package us.ihmc.humanoidRobotics.manipulation;
 
 import java.util.ArrayList;
 

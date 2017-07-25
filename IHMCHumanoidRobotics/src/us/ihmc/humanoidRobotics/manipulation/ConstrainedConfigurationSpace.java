@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.trajectory;
+package us.ihmc.humanoidRobotics.manipulation;
 
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 

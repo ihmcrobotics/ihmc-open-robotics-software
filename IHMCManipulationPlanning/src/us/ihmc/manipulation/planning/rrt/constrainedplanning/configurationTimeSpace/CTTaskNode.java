@@ -3,9 +3,9 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationTimeS
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.manipulation.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
-import us.ihmc.manipulation.planning.trajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;

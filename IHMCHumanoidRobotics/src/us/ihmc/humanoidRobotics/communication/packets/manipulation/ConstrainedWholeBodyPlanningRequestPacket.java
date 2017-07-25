@@ -2,21 +2,17 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.manipulation.ConstrainedEndEffectorTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
 {
-   public enum CONSTRAINED_TRAJECTORY_TYPE
-   {
-      DRAWING_TRAJECTORY,
-      PUSH_DOOR,
-      CLEANING_PANEL
-   }
-
+   public ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   
    public FullHumanoidRobotModel toolboxFullRobotModel;
    public HumanoidReferenceFrames referenceFrames;
    
-   public CONSTRAINED_TRAJECTORY_TYPE constrainedTrajectoryType;
+   
       
    public double tempInputValue;
 
@@ -25,9 +21,9 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    }
    
-   public void setConstrainedTrajectoryType(CONSTRAINED_TRAJECTORY_TYPE constrainedTrajectoryType)
+   public void setConstrainedTrajectoryType(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
    {
-      this.constrainedTrajectoryType = constrainedTrajectoryType;
+      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
    }
    
    public void setFullRobotModel(FullHumanoidRobotModel toolboxFullRobotModel)
