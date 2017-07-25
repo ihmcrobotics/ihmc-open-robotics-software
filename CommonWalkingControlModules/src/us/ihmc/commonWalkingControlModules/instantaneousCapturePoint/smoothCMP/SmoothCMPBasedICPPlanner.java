@@ -209,20 +209,19 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    protected void updateTransferPlan()
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
+      double initialTime = this.initialTime.getDoubleValue();
       
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
 
-      if (isStanding.getBooleanValue())
-         referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, transferToSide);
-      else
-         referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, transferToSide);
+      referenceCoPGenerator.initializeForTransfer(initialTime);
+      referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       
-      referenceCoPGenerator.initializeForTransfer(this.initialTime.getDoubleValue());
-      referenceCMPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
-      referenceICPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
+      referenceCMPGenerator.initializeForTransfer(initialTime, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.initializeForTransfer(initialTime, referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
    }
 
    @Override
@@ -230,14 +229,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    protected void updateSingleSupportPlan()
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
-      
+      double initialTime = this.initialTime.getDoubleValue();
+
+      referenceCoPGenerator.initializeForSwing(initialTime);
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
+
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       
-      referenceCoPGenerator.initializeForSwing(this.initialTime.getDoubleValue());
-      referenceCMPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
-      referenceICPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
+      referenceCMPGenerator.initializeForSwing(initialTime, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.initializeForSwing(initialTime, referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
    }
 
    @Override
