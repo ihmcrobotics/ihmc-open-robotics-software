@@ -291,7 +291,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//   @Test
+   @Test
    public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -328,25 +328,26 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * put on generic task node
        */
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      rootNode.setConfigurationJoints(sdfFullRobotModel);
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, -10.0/180*Math.PI, 0.0, 0.0);
+      rootNode.setNodeData(10, -70.0/180 * Math.PI);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);      
       rootNode.isValidNode();
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
       
       tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
       tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(2, -25.0/180*Math.PI, 25.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(3, -25.0/180*Math.PI, 25.0/180*Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(10, -30.0/180*Math.PI, 30.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
       
-      tree.expandTree(100);
+      tree.expandTree(1000);
 
       CTTaskNodeTreeVisualizer taskNodeTreeVisualizer = new CTTaskNodeTreeVisualizer(scs, tree);
       taskNodeTreeVisualizer.visualize();
@@ -354,7 +355,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-      @Test
+//      @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -396,18 +397,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       rootNode.setNodeData(10, -0.4 * Math.PI); // is selected
       rootNode.setNodeData(9, -0.25 * Math.PI); // will be ignored.
 
-      GenericTaskNode node1 = new GenericTaskNode(2.0, initialPelvisHeight, -0.1 * Math.PI, 0.0 * Math.PI, 0.0 * Math.PI);
-      node1.setNodeData(10, -0.25 * Math.PI);
+      GenericTaskNode node1 = new GenericTaskNode(5.0, initialPelvisHeight, -20.0/180 * Math.PI, 20.0/180 * Math.PI, 0.0 * Math.PI);
+      node1.setNodeData(10, -70.0/180 * Math.PI);
       node1.setParentNode(rootNode);
       
       /*
        * when EE of the DrawingTrajectory is RIGHT.
        */
-      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, 0.1 * Math.PI, 0.0 * Math.PI, 0.0 * Math.PI);
-      node2.setNodeData(10, 0.25 * Math.PI);
-      node2.setParentNode(rootNode);
+//      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, 20/180 * Math.PI, 0.0 * Math.PI, 0.0 * Math.PI);
+//      node2.setNodeData(10, 0.25 * Math.PI);
+//      node2.setParentNode(rootNode);
 
-//      System.out.println(rootNode.isValidNode());
       System.out.println(node1.isValidNode());
 //      System.out.println(node2.isValidNode());
 

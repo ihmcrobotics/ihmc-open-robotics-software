@@ -38,11 +38,16 @@ public class CTTaskNodeTreeVisualizer
    {
       int dimensionOfTask = taskNodeTree.getDimensionOfTask();      
       
+      
+      
       for(int i=1;i<dimensionOfTask+1;i++)
       {
-         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-         
-         plottingTaskTree(simulationOverheadPlotterFactory, i);
+         if(taskNodeTree.getTaskNodeRegion().isEnable(i))
+         {
+            SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+            
+            plottingTaskTree(simulationOverheadPlotterFactory, i);   
+         }
       }
    }
    
@@ -59,12 +64,12 @@ public class CTTaskNodeTreeVisualizer
          String prefix = taskNodeTree.getTaskName(indexOfDimension)+"_node_"+i;
          if(node.getParentNode() == null)
          {
-            PrintTools.info("this is root node");
-            yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, true));
+            PrintTools.info("whole node : this is root node");
+            yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, 0));
          }
          else
          {  
-            yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, true));
+            yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, 0));
             yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_branch", createBranch(node, indexOfDimension, prefix));
          }  
       }      
@@ -77,7 +82,29 @@ public class CTTaskNodeTreeVisualizer
          CTTaskNode node = taskNodeTree.getFailNodes().get(i);
          String prefix = taskNodeTree.getTaskName(indexOfDimension)+"_fail_node_"+i;
          
-         yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, false));            
+         yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_node", createNode(node, indexOfDimension, prefix, 1));            
+      }
+      
+      /*
+       * path nodes
+       */
+      if(taskNodeTree.getPath() != null)
+      {
+         for(int i=0;i<taskNodeTree.getPath().size();i++)
+         {
+            CTTaskNode node = taskNodeTree.getPath().get(i);
+            String prefix = taskNodeTree.getTaskName(indexOfDimension)+"_path_"+i;
+            if(node.getParentNode() == null)
+            {
+               PrintTools.info("path : this is root node");
+               yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_path", createNode(node, indexOfDimension, prefix, 2));
+            }
+            else
+            {  
+               yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_path", createNode(node, indexOfDimension, prefix, 2));
+               yoGraphicsListRegistry.registerArtifact(""+prefix+"_artifact_pathbranch", createBranch(node, indexOfDimension, prefix));
+            }  
+         }
       }
       simulationOverheadPlotterFactory.setPlotterName("Task Tree Plotter : "+taskNodeTree.getTaskName(indexOfDimension));
       simulationOverheadPlotterFactory.setVariableNameToTrack("");
@@ -112,7 +139,12 @@ public class CTTaskNodeTreeVisualizer
       return artifactLine;
    }
    
-   private YoArtifactOval createNode(CTTaskNode taskNode, int indexOfDimension, String prefix, boolean isValid)
+   /*
+    * 0 = valid
+    * 1 = fail
+    * 2 = path
+    */
+   private YoArtifactOval createNode(CTTaskNode taskNode, int indexOfDimension, String prefix, int type)
    {        
       YoFramePoint yoPoint = new YoFramePoint(""+prefix, ReferenceFrame.getWorldFrame(), registry);
       if(showNormalized)
@@ -128,16 +160,24 @@ public class CTTaskNodeTreeVisualizer
       
       YoDouble radius = new YoDouble(""+prefix, registry);
       
-      YoArtifactOval artifactOval;
-      if(isValid)
+      YoArtifactOval artifactOval = new YoArtifactOval(""+prefix, yoPoint, radius, Color.BLUE);
+      switch(type)
       {
-         artifactOval = new YoArtifactOval(""+prefix, yoPoint, radius, Color.BLUE);   
-      }
-      else
-      {
+      case 0:
+         artifactOval = new YoArtifactOval(""+prefix, yoPoint, radius, Color.BLUE);
+         radius.set(0.02);
+         break;
+      case 1:
          artifactOval = new YoArtifactOval(""+prefix, yoPoint, radius, Color.RED);
+         radius.set(0.02);
+         break;
+      case 2:
+         artifactOval = new YoArtifactOval(""+prefix, yoPoint, radius, Color.GREEN);
+         radius.set(0.03);
+         break;
       }
-      radius.set(0.02);   
+      
+         
       
       return artifactOval;
    }

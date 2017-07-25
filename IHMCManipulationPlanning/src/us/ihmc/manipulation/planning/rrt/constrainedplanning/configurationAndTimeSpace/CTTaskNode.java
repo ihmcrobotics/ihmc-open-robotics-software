@@ -148,13 +148,16 @@ public abstract class CTTaskNode
       for(int i=0;i<getDimensionOfNodeData();i++)
       {
          double normalizedValue = 0;
-         if(i==0)
+         if(i == 0)
          {
             normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.getTrajectoryTime();
          }
          else
          {
-            normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.sizeOfRegion(i);               
+            if(nodeRegion.isEnable(i))
+               normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.sizeOfRegion(i);
+            else
+               normalizedValue = 0;
          }
          normalizedNodeData.setQ(i, normalizedValue);
       }
@@ -172,7 +175,7 @@ public abstract class CTTaskNode
          }
          else
          {
-            value = (getNormalizedNodeData(i)+0.5)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
+            value = (getNormalizedNodeData(i))*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
          }
          nodeData.setQ(i, value);
       }
