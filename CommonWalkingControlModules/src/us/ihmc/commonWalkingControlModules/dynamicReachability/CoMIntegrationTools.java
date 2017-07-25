@@ -3,10 +3,11 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -492,6 +493,7 @@ public class CoMIntegrationTools
       cmpPolynomial3D.compute(cmpPolynomial3D.getFinalTime());
       FramePoint nextEntryCoMCornerPoint = cmpPolynomial3D.getFramePosition();
             
+      PrintTools.debug("Step");
       for (int i = cmpPolynomials3D.size() - 1; i >= 0; i--)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
@@ -505,14 +507,35 @@ public class CoMIntegrationTools
          
          computeDesiredCenterOfMassPosition(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, exitCoMCornerPoint, cmpPolynomial3D, entryCoMCornerPoint);
 
+//         PrintTools.debug("Omega0 = " + omega0);
+//         PrintTools.debug("t0 = " + cmpPolynomial3D.getInitialTime());
+//         PrintTools.debug("tF = " + cmpPolynomial3D.getFinalTime());
+//         PrintTools.debug("a1 = " + cmpPolynomial3D.getYoTrajectoryX().getCoefficient(1));
+//         PrintTools.debug("Entry ICP = " + entryCornerPointsToPack.get(i).toString());
+//         PrintTools.debug("Exit ICP = " + exitCornerPoint.toString());
+//         PrintTools.debug("Entry CoM = " + entryCoMCornerPoint.toString());
+//         PrintTools.debug("Exit CoM = " + exitCoMCornerPoint.toString());
+//         cmpPolynomial3D.compute(cmpPolynomial3D.getInitialTime());
+//         PrintTools.debug("Entry CMP = " + cmpPolynomial3D.getFramePosition().toString());
+         PrintTools.debug("");
+         
          nextEntryCoMCornerPoint = entryCoMCornerPoint;
       }
+//      PrintTools.debug("Exit CoMs = " + exitCoMCornerPointsToPack.subList(0,20).toString());
+//      PrintTools.debug("Entry CoMs = " + entryCoMCornerPointsToPack.subList(0,20).toString());
    }
    
    //TODO: implement validity checks
    public static void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint finalCapturePoint, FramePoint finalCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
-                                                         FramePoint desiredCenterOfMassToPack)
+                                                         FramePoint desiredCenterOfMassPositionToPack)
    {         
-      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, finalCenterOfMass, desiredCenterOfMassToPack);
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, finalCenterOfMass, desiredCenterOfMassPositionToPack);
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint finalCapturePoint, FramePoint finalCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                         FrameVector desiredCenterOfMassVelocityToPack)
+   {         
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, finalCenterOfMass, desiredCenterOfMassVelocityToPack);
    }
 }
