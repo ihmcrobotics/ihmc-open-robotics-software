@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commons.PrintTools;
@@ -25,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
-public class SimpleICPOptimizationController implements ICPOptimizationController
+public class SimpleAdjustmentICPOptimizationController implements ICPOptimizationController
 {
    private static final boolean VISUALIZE = true;
    private static final boolean DEBUG = false;
@@ -105,6 +106,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
 
+   private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
+   private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
+
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final SimpleICPOptimizationSolutionHandler solutionHandler;
@@ -134,9 +138,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private final double controlDT;
 
-   public SimpleICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
-                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimpleAdjustmentICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
+                                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                                    double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
@@ -145,6 +149,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
+
+      if (walkingControllerParameters != null)
+         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      else
+         swingSpeedUpEnabled.set(false);
 
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
@@ -306,6 +315,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
+
+      speedUpTime.set(0.0);
    }
 
    @Override
@@ -341,6 +352,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void initializeOnContactChange(double initialTime)
    {
+      speedUpTime.set(0.0);
+
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
 
@@ -435,7 +448,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       modifyAngularMomentumWeightUsingIntegral();
 
       controllerTimer.stopMeasurement();
-
    }
 
    @Override
@@ -451,13 +463,17 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    @Override
    public double getOptimizedTimeRemaining()
    {
-      return 0;
+      throw new RuntimeException("This is not implemented in this solver.");
    }
 
    @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
-
+      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
+      {
+         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
+         this.speedUpTime.add(speedUpTime);
+      }
    }
 
    private int submitSolverTaskConditions(int numberOfFootstepsToConsider, double omega0)
@@ -590,7 +606,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void computeTimeInCurrentState(double currentTime)
    {
-      timeInCurrentState.set(currentTime - initialTime.getDoubleValue());
+      timeInCurrentState.set(currentTime - initialTime.getDoubleValue() + speedUpTime.getDoubleValue());
    }
 
    private void computeTimeRemainingInState()
