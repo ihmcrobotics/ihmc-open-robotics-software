@@ -122,7 +122,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    // Input data
-   private final RecyclingArrayList<FootstepData> upcomingFootstepsData = new RecyclingArrayList<>(4, FootstepData.class);
+   private final RecyclingArrayList<FootstepData> upcomingFootstepsData;
    /**
     *
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
@@ -141,6 +141,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", registry);
       percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
       numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
+      upcomingFootstepsData = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider, FootstepData.class);
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
