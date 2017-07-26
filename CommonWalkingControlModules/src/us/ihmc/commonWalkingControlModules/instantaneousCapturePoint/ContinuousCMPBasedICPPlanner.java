@@ -38,7 +38,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Implementation of the ICP (Instantaneous Capture Point) planners introduced by Johannes
@@ -128,25 +127,6 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
-   /**
-    * Duration parameter used to linearly decrease the desired ICP velocity once the current state
-    * is done.
-    * <p>
-    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
-    * when the robot is getting stuck at the end of transfer.
-    * </p>
-    */
-   private final YoDouble velocityDecayDurationWhenDone = new YoDouble(namePrefix + "VelocityDecayDurationWhenDone", registry);
-   /**
-    * Output of the linear reduction being applied on the desired ICP velocity when the current
-    * state is done.
-    * <p>
-    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
-    * when the robot is getting stuck at the end of transfer.
-    true* </p>
-    */
-   private final YoDouble velocityReductionFactor = new YoDouble(namePrefix + "VelocityReductionFactor", registry);
-
    private final YoFramePoint2d yoSingleSupportInitialCoM;
    private final YoFramePoint2d yoSingleSupportFinalCoM;
    private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
@@ -222,10 +202,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       useTwoConstantCMPsPerSupport.set(icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
 
-      velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
-
-      velocityReductionFactor.set(Double.NaN);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -776,27 +753,6 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          entryCornerPoints.get(i).notifyVariableChangedListeners();
       for (int i = 0; i < exitCornerPoints.size(); i++)
          exitCornerPoints.get(i).notifyVariableChangedListeners();
-   }
-
-   private void decayDesiredVelocityIfNeeded()
-   {
-      if (velocityDecayDurationWhenDone.isNaN() || isStanding.getBooleanValue())
-      {
-         velocityReductionFactor.set(Double.NaN);
-         return;
-      }
-
-      double hasBeenDoneForDuration = -timeInCurrentStateRemaining.getDoubleValue();
-
-      if (hasBeenDoneForDuration <= 0.0)
-      {
-         velocityReductionFactor.set(Double.NaN);
-      }
-      else
-      {
-         velocityReductionFactor.set(MathTools.clamp(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
-         desiredICPVelocity.scale(velocityReductionFactor.getDoubleValue());
-      }
    }
 
 
