@@ -34,6 +34,8 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
    private StraightLegWalkingParameters straightLegWalkingParameters;
 
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
@@ -849,5 +851,10 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
          pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
 
       return pelvisOffsetWhileWalkingParameters;
+   }
+
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
    }
 }
