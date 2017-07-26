@@ -11,13 +11,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -25,9 +21,13 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBridge
 {
@@ -63,7 +63,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
+   private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
          robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
 
    /* package private */ final YoDouble masterScaleFactor = new YoDouble("masterScaleFactor", registry);

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 
 public class StraightLegWalkingParameters
@@ -13,36 +14,12 @@ public class StraightLegWalkingParameters
     */
    public double getSpeedForSupportKneeStraightening()
    {
-      return 0.25;
+      return 0.2;
    }
 
    public double getSupportKneeCollapsingDuration()
    {
       return 0.5;
-   }
-
-   /**
-    * If set to true, the privileged acceleration for the leg pitch joints will be determined by blending feedback
-    * based on both the joint space error and a virtual actuator length error. If the leg is desired to be fully extended,
-    * it will use entirely virtual actuator feedback. If the knee setpoint is at the midpoint, it will use entirely joint
-    * space feedback.
-    * @return whether or not to blend jointspace with virtual actuator feedback
-    */
-   public boolean blendPrivilegedConfigurationPositionError()
-   {
-      return false;
-   }
-
-   /**
-    * If set to true, the privileged acceleration for the leg pitch joints will be determined by blending feedback
-    * based on both the joint space velocity error and a virtual actuator velocity error. If the leg is desired to be fully extended,
-    * it will use entirely virtual actuator feedback. If the knee setpoint is at the midpoint, it will use entirely joint
-    * space feedback.
-    * @return whether or not to blend jointspace with virtual actuator feedback
-    */
-   public boolean blendPrivilegedConfigurationVelocityError()
-   {
-      return false;
    }
 
    /**
@@ -54,7 +31,7 @@ public class StraightLegWalkingParameters
     */
    public double getStraightKneeAngle()
    {
-      return 0.2;
+      return 0.25;
    }
 
    /**
@@ -65,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.8;
+      return 0.5;
    }
 
    /**
@@ -77,7 +54,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfTransferToCollapseLeg()
    {
-      return 0.9;
+      return 0.7;
    }
 
    /**
@@ -87,7 +64,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.7;
    }
 
    /**
@@ -117,59 +94,32 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
+    * These are the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
     * when the leg is in the straight leg state or straightening state.
-    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
+    * It contains the gains used by the {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule} to determine either
     * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
     *
     * @return privileged configuration gain.
     */
-   public double getStraightLegJointSpacePrivilegedConfigurationGain()
+   public LegConfigurationGains getStraightLegGains()
    {
-      return 40.0;
-   }
+      LegConfigurationGains gains = new LegConfigurationGains();
+      gains.setJointSpaceKp(40.0);
+      gains.setJointSpaceKd(6.0);
+      gains.setActuatorSpaceKp(60.0);
+      //gains.setActuatorSpaceKd(20.0);
 
-   /**
-    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
-    * when the leg is in the straight leg state or straightening state.
-    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
-    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
-    *
-    * @return privileged configuration gain.
-    */
-   public double getStraightLegActuatorSpacePrivilegedConfigurationGain()
-   {
-      return 60.0;
-   }
+      //gains.setUseActuatorSpacePositionControl(true);
 
-   /**
-    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the straight
-    * leg state.
-    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
-    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
-    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
-    * joint accelerations.
-    *
-    * @return privileged velocity gain.
-    */
-   public double getStraightLegJointSpacePrivilegedVelocityGain()
-   {
-      return 6.0;
-   }
+      /*
+      gains.setBlendPositionError(true);
+      gains.setMaxPositionBlendingFactor(1.3);
 
-   /**
-    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the straight
-    * leg state.
-    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
-    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
-    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
-    * joint accelerations.
-    *
-    * @return privileged velocity gain.
-    */
-   public double getStraightLegActuatorSpacePrivilegedVelocityGain()
-   {
-      return 6.0;
+      gains.setBlendVelocityError(true);
+      gains.setMaxVelocityBlendingFactor(2.0);
+      */
+
+      return gains;
    }
 
    /**
@@ -185,61 +135,26 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
-    * when the leg is in the bent leg state.
-    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
+    * These are the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
+    * when the leg is in the straight leg state or straightening state.
+    * It contains the gains used by the {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule} to determine either
     * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
     *
     * @return privileged configuration gain.
     */
-   public double getBentLegJointSpacePrivilegedConfigurationGain()
+   public LegConfigurationGains getBentLegGains()
    {
-      return 40.0;
-   }
+      LegConfigurationGains gains = new LegConfigurationGains();
+      gains.setJointSpaceKp(40.0);
+      gains.setJointSpaceKd(6.0);
+      gains.setActuatorSpaceKp(60.0);
+      gains.setActuatorSpaceKd(6.0);
 
-   /**
-    * This is the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
-    * when the leg is in the bent leg state.
-    * It is the proportional gain used by the {@link JointPrivilegedConfigurationHandler} to determine either
-    * the privileged acceleration or the privileged velocity to project into the nullspace of the full task Jacobian.
-    *
-    * @return privileged configuration gain.
-    */
-   public double getBentLegActuatorSpacePrivilegedConfigurationGain()
-   {
-      return 60.0;
-   }
+      gains.setBlendPositionError(false);
+      gains.setBlendVelocityError(false);
 
-   /**
-    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the bent
-    * leg state.
-    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
-    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
-    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
-    * joint accelerations.
-    *
-    * @return privileged velocity gain.
-    */
-   public double getBentLegJointSpacePrivilegedVelocityGain()
-   {
-      return 6.0;
+      return gains;
    }
-
-   /**
-    * This is the velocity gain used to damp the knee privileged joint accelerations when the leg is in the bent
-    * leg state.
-    * This is the velocity gain used by the {@link JointPrivilegedConfigurationHandler} to damp the privileged
-    * accelerations to project into the nullspace of the full task Jacobian. Note that if using the inverse kinematics
-    * module, this gain does nothing, as that is determining privileged joint velocities rather than privileged
-    * joint accelerations.
-    *
-    * @return privileged velocity gain.
-    */
-   public double getBentLegActuatorSpacePrivilegedVelocityGain()
-   {
-      return 6.0;
-   }
-
    /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
     * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and

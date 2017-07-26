@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,7 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -161,7 +160,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected boolean useDifferentSplitRatioForBigAdjustment;
    protected double minimumTimeOnInitialCMPForBigAdjustment;
 
-   public AbstractICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                             BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                             boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -201,7 +200,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      useTwoCMPs = icpPlannerParameters.useTwoCMPsPerSupport();
+      useTwoCMPs = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() == 2;
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
 

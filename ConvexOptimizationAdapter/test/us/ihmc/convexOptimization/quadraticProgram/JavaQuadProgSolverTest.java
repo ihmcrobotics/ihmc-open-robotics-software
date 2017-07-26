@@ -19,6 +19,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JavaQuadProgSolverTest
@@ -1358,6 +1359,21 @@ public class JavaQuadProgSolverTest
       solver.solve(solution);
 
       assertTrue(!MatrixTools.containsNaN(solution));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFindValidSolutionForKiwiDataset20170712() throws NoConvergenceException
+   {
+      ActualDatasetFromKiwi20170712 dataset = new ActualDatasetFromKiwi20170712();
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
+      solver.clear();
+      solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
+      DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
+      solver.solve(solution);
+
+      assertFalse(MatrixTools.containsNaN(solution));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

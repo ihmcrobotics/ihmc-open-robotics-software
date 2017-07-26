@@ -95,7 +95,11 @@ public class StandingState extends WalkingState
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
 
       for (RobotSide robotSide : RobotSide.values)
+      {
          legConfigurationManager.setStraight(robotSide);
+         legConfigurationManager.setFullyExtendLeg(robotSide, false);
+         legConfigurationManager.setLegBracing(robotSide, false);
+      }
    }
 
    @Override

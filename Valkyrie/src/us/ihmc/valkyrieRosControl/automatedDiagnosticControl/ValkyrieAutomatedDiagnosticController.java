@@ -20,11 +20,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -55,7 +52,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.SettableTimestampProvider;
-import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -68,6 +64,10 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControlJavaBridge
 {
@@ -142,7 +142,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create network servers/clients
        */
       double diagnosticControllerDT = robotModel.getEstimatorDT();
-      yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY),
+      yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY),
             robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
 
       /*

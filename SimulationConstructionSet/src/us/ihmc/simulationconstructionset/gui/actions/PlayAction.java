@@ -1,28 +1,34 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.PlayCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-@SuppressWarnings("serial")
-public class PlayAction extends SCSAction
+import javax.swing.AbstractAction;
+
+import us.ihmc.simulationconstructionset.commands.PlayCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+public class PlayAction extends AbstractAction
 {
+   private static final long serialVersionUID = -5829585200441213981L;
+
    private PlayCommandExecutor executor;
 
    public PlayAction(PlayCommandExecutor executor)
    {
-      super("Play",
-              "icons/Play.png",
-              KeyEvent.VK_P,
-              "Play",
-              "Start playing simulation."
-      );
-
+      super("Play");
       this.executor = executor;
+
+      String iconFilename = "icons/Play24.gif";
+      int shortKey = KeyEvent.VK_P;
+      String longDescription = "Start playing simulation.";
+      String shortDescription = "Play";
+      
+      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.play();
    }
