@@ -2,9 +2,11 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import org.junit.After;
 import org.junit.Before;
+import org.ojalgo.random.RandomNumber;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,22 +17,21 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnvironment;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 {
+   private static final Random random = new Random(100L);
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -62,32 +63,22 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testUnknownStepDownTwoFeetOnEachStep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      double swingTime = 1.5;
-      double transferTime = 0.7;
+      double swingTime = 1.0;
+      double transferTime = 0.2;
 
-      int numberOfStepsDown = 2;
+      int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.05;
+      double stepDownHeight = 0.15;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "AvatarLeapOfFaithTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-
-      double ankleDamping = 1.0;
-      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
-         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
-         simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName).setDamping(ankleDamping);
-         simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName).setDamping(ankleDamping);
-      }
 
       setupCameraForWalkingUpToRamp();
 
@@ -146,32 +137,22 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testUnknownStepDownOneFootOnEachStep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      double swingTime = 1.5;
-      double transferTime = 0.7;
+      double swingTime = 1.0;
+      double transferTime = 0.2;
 
-      int numberOfStepsDown = 2;
-      double stepLength = 0.35;
-      double stepDownHeight = 0.05;
+      int numberOfStepsDown = 5;
+      double stepLength = 0.5;
+      double stepDownHeight = 0.14;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-
-      double ankleDamping = 1.0;
-      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
-         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
-         simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName).setDamping(ankleDamping);
-         simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName).setDamping(ankleDamping);
-      }
 
       setupCameraForWalkingUpToRamp();
 
@@ -208,6 +189,143 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
+      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+      message.add(footstepData);
+      executionDuration += transferTime + swingTime;
+
+
+      message.setOffsetFootstepsWithExecutionError(true);
+      drcSimulationTestHelper.send(message);
+
+      double timeOverrunFactor = 1.2;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
+
+      assertTrue(success);
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      double swingTime = 1.0;
+      double transferTime = 0.2;
+
+      int numberOfStepsDown = 5;
+      double stepLength = 0.35;
+      double stepDownHeight = 0.14;
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      double executionDuration = 0.0;
+
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      // take care of steps down
+      for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
+      {
+         // step forward
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      int numberOfClosingSteps = 3;
+      for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
+      {
+         // step forward
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // step forward
+      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+      message.add(footstepData);
+      executionDuration += transferTime + swingTime;
+
+
+      message.setOffsetFootstepsWithExecutionError(true);
+      drcSimulationTestHelper.send(message);
+
+      double timeOverrunFactor = 1.2;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
+
+      assertTrue(success);
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+
+   public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      double swingTime = 1.0;
+      double transferTime = 0.2;
+
+      int numberOfStepsDown = 5;
+      double stepLength = 0.35;
+      double stepDownHeight = 0.13;
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      double executionDuration = 0.0;
+
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      // take care of steps down
+      for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
+      {
+         // step forward
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight + RandomNumbers.nextDouble(random, 0.6 * stepDownHeight));
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      int numberOfClosingSteps = 3;
+      for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
+      {
+         // step forward
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+         executionDuration += transferTime + swingTime;
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // step square
       FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
