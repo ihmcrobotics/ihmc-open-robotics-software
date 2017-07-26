@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleAdjustmentICPOptimizationController;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -72,8 +72,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
                bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
                */
-         icpOptimizationController = new SimpleICPOptimizationController(icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, registry,
-                                                                         yoGraphicsListRegistry);
+         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
+                                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
    }
 
