@@ -216,7 +216,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       putExitCMPOnToes.set(icpPlannerParameters.putExitCoPOnToes());
       exitCMPForwardSafetyMarginOnToes.set(icpPlannerParameters.getExitCoPForwardSafetyMarginOnToes());
-      exitCMPForwardSafetyMarginOnToes.set(icpPlannerParameters.getExitCoPForwardSafetyMarginOnToes());
       footstepLengthThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepLengthThresholdForExitCoPOnToes());
    }
 

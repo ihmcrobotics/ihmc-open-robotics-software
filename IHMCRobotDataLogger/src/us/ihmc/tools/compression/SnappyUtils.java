@@ -3,20 +3,10 @@ package us.ihmc.tools.compression;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import us.ihmc.commons.PrintTools;
-
 public class SnappyUtils
 {
-   public static final boolean DISABLE_COMPRESSION = false;
-   static
-   {
-      if (DISABLE_COMPRESSION)
-      {
-         PrintTools.warn(SnappyUtils.class, "DISABLE_COMPRESSION is set to true");
-      }
-   }
-
    public static SnappyLibrary snappyLibrary = new SnappyLibrary();
+
    public static void setLibrary(SnappyLibrary library)
    {
       snappyLibrary = library;
@@ -66,18 +56,9 @@ public class SnappyUtils
          out = output.array();
          outOffset = output.position() + output.arrayOffset();
       }
-      
-      int compressedSize;
-      if(DISABLE_COMPRESSION)
-      {
-         System.arraycopy(in, inOffset, out, outOffset, inLength);
-         compressedSize = inLength;
-      }
-      else
-      {
-         compressedSize = snappyLibrary.compress(in, inOffset, inLength, out, outOffset);
-      }
-      
+
+      int compressedSize = snappyLibrary.compress(in, inOffset, inLength, out, outOffset);
+
       if (!output.hasArray())
       {
          output.put(out, outOffset, compressedSize);
@@ -87,7 +68,7 @@ public class SnappyUtils
          output.position(output.position() + compressedSize);
       }
    }
-   
+
    /**
     * Uncompress Snappy compressed data packet. 
     * 
@@ -100,7 +81,7 @@ public class SnappyUtils
    {
       byte[] in;
       int inOffset, inLength;
-      if(!input.hasArray())
+      if (!input.hasArray())
       {
          inOffset = 0;
          inLength = input.remaining();
@@ -114,7 +95,7 @@ public class SnappyUtils
          in = input.array();
          input.position(input.position() + input.remaining());
       }
-      
+
       byte[] out;
       int outOffset;
       if (!output.hasArray())
@@ -128,19 +109,10 @@ public class SnappyUtils
          out = output.array();
          outOffset = output.position() + output.arrayOffset();
       }
-      
-      int uncompressedSize;
-      if(DISABLE_COMPRESSION)
-      {
-         System.arraycopy(in, inOffset, out, outOffset, inLength);
-         uncompressedSize = inLength;
-      }
-      else
-      {
-         uncompressedSize = snappyLibrary.uncompress(in, inOffset, inLength, out, outOffset);
-      }
-      
-      if(!output.hasArray())
+
+      int uncompressedSize = snappyLibrary.uncompress(in, inOffset, inLength, out, outOffset);
+
+      if (!output.hasArray())
       {
          output.put(out, outOffset, uncompressedSize);
       }
@@ -149,7 +121,7 @@ public class SnappyUtils
          output.position(output.position() + uncompressedSize);
       }
    }
-   
+
    /**
     * Get the maximum size of the compressed data
     * 

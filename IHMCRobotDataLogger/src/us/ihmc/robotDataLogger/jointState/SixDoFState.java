@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
+import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -38,6 +39,28 @@ public class SixDoFState extends JointState
       twist.getArray(array, 7);
    }
 
+   public void update(DoubleBuffer buffer)
+   {
+      
+      double qs = (buffer.get());
+      double qx = (buffer.get());
+      double qy = (buffer.get());
+      double qz = (buffer.get());
+      rotation.set(qx, qy, qz, qs);
+      translation.setX((buffer.get()));
+      translation.setY((buffer.get()));
+      translation.setZ((buffer.get()));
+      
+      twist.setAngularPartX((buffer.get()));
+      twist.setAngularPartY((buffer.get()));
+      twist.setAngularPartZ((buffer.get()));
+      
+      twist.setLinearPartX((buffer.get()));
+      twist.setLinearPartY((buffer.get()));
+      twist.setLinearPartZ((buffer.get()));
+   }
+
+
    public void update(LongBuffer buffer)
    {
       
@@ -57,6 +80,27 @@ public class SixDoFState extends JointState
       twist.setLinearPartX(Double.longBitsToDouble(buffer.get()));
       twist.setLinearPartY(Double.longBitsToDouble(buffer.get()));
       twist.setLinearPartZ(Double.longBitsToDouble(buffer.get()));
+   }
+   
+   
+   public void get(LongBuffer buffer)
+   {      
+      buffer.put(Double.doubleToLongBits(rotation.getS()));
+      buffer.put(Double.doubleToLongBits(rotation.getX()));
+      buffer.put(Double.doubleToLongBits(rotation.getY()));
+      buffer.put(Double.doubleToLongBits(rotation.getZ()));
+      
+      buffer.put(Double.doubleToLongBits(translation.getX()));
+      buffer.put(Double.doubleToLongBits(translation.getY()));
+      buffer.put(Double.doubleToLongBits(translation.getZ()));
+      
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartX()));
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartY()));
+      buffer.put(Double.doubleToLongBits(twist.getAngularPartZ()));
+      
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartX()));
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartY()));
+      buffer.put(Double.doubleToLongBits(twist.getLinearPartZ()));
    }
 
    @Override

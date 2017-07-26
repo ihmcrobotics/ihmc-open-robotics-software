@@ -1,12 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -14,70 +10,59 @@ import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.SummaryProvider;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
-import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
+import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-
 
 public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
 {
-   private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
-   
+
    private final double dt;
-   private final InetAddress bindAddress;
+
+   private String rootRegistryName = "main";
    
-   // Data to send
-   private List<RigidBody> mainBodies = new ArrayList<>();
-   private YoVariableRegistry mainRegistry;
-   private YoGraphicsListRegistry mainYoGraphicsListRegistry;
-   private final ArrayList<ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry>> variableData = new ArrayList<>();
-   
-   // Variable data
-   private ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
-   private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<RegistryBuffer>> buffers = new LinkedHashMap<>(); 
-   
+   private YoVariableRegistry mainRegistry = null;
+   private final ArrayList<RegistrySendBufferBuilder> registeredBuffers = new ArrayList<>();
+   private final HashMap<YoVariableRegistry, RegistryPublisher> publishers = new HashMap<>();
+
    // Change data
-   private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new LinkedHashMap<>();
-      
-   private YoInteger skippedMainRegistryTicksDueFullBuffer;
-   private HashMap<YoVariableRegistry, YoInteger> skippedRegistryTicksDueFullBuffer = new HashMap<>();
-   
+   private final HashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new HashMap<>();
+
    // State
    private boolean started = false;
+   private boolean stopped = false;
 
-   private final PeriodicThreadScheduler scheduler;
-   
+   private final PeriodicThreadSchedulerFactory schedulerFactory;
+
    // Servers
    private final DataProducerParticipant dataProducerParticipant;
-   private YoVariableProducer producer;
    private YoVariableHandShakeBuilder handshakeBuilder;
 
-   
-   private long uid = 0; 
-   
    private boolean sendKeepAlive = false;
+
+   private volatile long latestTimestamp;
    
    private final SummaryProvider summaryProvider = new SummaryProvider();
-   
-   public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+
+   public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
-      this(mainClazz.getSimpleName(), scheduler, logModelProvider, logSettings, dt);
+      this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
    }
-   
-   public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+
+   public YoVariableServer(String mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       LoggerConfigurationLoader config;
       try
@@ -86,70 +71,108 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
       catch (IOException e1)
       {
-        throw new RuntimeException("Cannot load configuration to start logger, aborting", e1);
+         throw new RuntimeException("Cannot load configuration to start logger, aborting", e1);
       }
-      
+
       this.dt = dt;
-      this.scheduler = scheduler;
-      this.bindAddress = config.getMyNetworkAddress();
-      
+      this.schedulerFactory = schedulerFactory;
+
       try
       {
-         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this);
-         dataProducerParticipant.setDataAddress(bindAddress);
-         dataProducerParticipant.setPort(getRandomPort());
+         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this, config.getPublicBroadcast());
          dataProducerParticipant.setLog(logSettings.isLog());
          addCameras(config, logSettings);
-         
+
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      
+
    }
    
-   
-   public void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
+   public void setRootRegistryName(String name)
+   {
+      this.rootRegistryName = name;
+   }
+
+   private void addCameras(LoggerConfigurationLoader config, LogSettings logSettings)
    {
       TByteArrayList cameras = config.getCameras();
-      for(int i = 0; i < cameras.size(); i++)
+      for (int i = 0; i < cameras.size(); i++)
       {
          dataProducerParticipant.addCamera(CameraType.CAPTURE_CARD, "Camera-" + cameras.get(i), String.valueOf(cameras.get(i)));
       }
-      
-      if(logSettings.getVideoStream() != null)
+
+      if (logSettings.getVideoStream() != null)
       {
          dataProducerParticipant.addCamera(CameraType.NETWORK_STREAM, logSettings.getVideoStream(), logSettings.getVideoStream());
       }
    }
-   
-   public static int getRandomPort()
-   {
-      return LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START + (new Random().nextInt(1023) + 1);
-   }
 
    public synchronized void start()
    {
-      if(started)
+      if (started)
       {
          throw new RuntimeException("Server already started");
       }
-      
-      skippedMainRegistryTicksDueFullBuffer = new YoInteger("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
-      for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> registry : variableData)
+
+      handshakeBuilder = new YoVariableHandShakeBuilder(rootRegistryName, dt);
+      int maxVariables = 0;
+      int maxStates = 0;
+      for (int i = 0; i < registeredBuffers.size(); i++)
       {
-         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new YoInteger("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
+         RegistrySendBufferBuilder builder = registeredBuffers.get(i);
+         YoVariableRegistry registry = builder.getYoVariableRegistry();
+         handshakeBuilder.addRegistryBuffer(builder);
+
+         variableChangeData.put(registry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
+            
+         if(builder.getNumberOfVariables() > maxVariables)
+         {
+            maxVariables = builder.getNumberOfVariables();
+         }
+         if(builder.getNumberOfJointStates() > maxStates)
+         {
+            maxStates = builder.getNumberOfJointStates();
+         }
+         
       }
       
-      handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
+      
+      CustomLogDataPublisherType type = new CustomLogDataPublisherType(maxVariables, maxStates);
+
+      for (int i = 0; i < registeredBuffers.size(); i++)
+      {
+         RegistrySendBufferBuilder builder = registeredBuffers.get(i);
+         YoVariableRegistry registry = builder.getYoVariableRegistry();
+         
+         try
+         {
+            publishers.put(registry, dataProducerParticipant.createRegistryPublisher(type, schedulerFactory, builder));
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+
       handshakeBuilder.setSummaryProvider(summaryProvider);
-      registerVariablesAndCreateBuffers();
-      
-      
-      
+
       try
       {
+         for (int i = 0; i < registeredBuffers.size(); i++)
+         {
+            RegistrySendBufferBuilder builder = registeredBuffers.get(i);
+            YoVariableRegistry registry = builder.getYoVariableRegistry();
+            publishers.get(registry).start();
+         }
+
+         if(sendKeepAlive)
+         {
+            dataProducerParticipant.sendKeepAlive(schedulerFactory);
+         }
+         
          dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
          dataProducerParticipant.announce();
       }
@@ -157,9 +180,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       {
          throw new RuntimeException(e);
       }
-      producer = new YoVariableProducer(scheduler, handshakeBuilder, dataProducerParticipant, mainBuffer,
-            buffers.values(), sendKeepAlive);
-      producer.start();     
       started = true;
    }
 
@@ -167,35 +187,20 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    {
       this.sendKeepAlive = sendKeepAlive;
    }
-   
-   private List<JointHolder> registerVariablesAndCreateBuffers()
-   {
-      List<JointHolder> jointHolders = handshakeBuilder.getJointHolders();
-      
-      ArrayList<YoVariable<?>> variables = new ArrayList<>();
-      int mainOffset = handshakeBuilder.addRegistry(mainRegistry, variables);
-      if(mainYoGraphicsListRegistry != null)
-      {
-         handshakeBuilder.addDynamicGraphicObjects(mainYoGraphicsListRegistry);
-      }
-      FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
-      mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
-      variableChangeData.put(mainRegistry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
-      
-      for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> data : variableData)
-      {
-         addVariableBuffer(data);
-      }
-
-      return jointHolders;
-   }
 
    public synchronized void close()
    {
-      if(started)
+      if (started && !stopped)
       {
-         producer.close();
-         dataProducerParticipant.remove();         
+         stopped = false;
+         for (int i = 0; i < registeredBuffers.size(); i++)
+         {
+            RegistrySendBufferBuilder builder = registeredBuffers.get(i);
+            YoVariableRegistry registry = builder.getYoVariableRegistry();
+            publishers.get(registry).stop();
+         }
+         dataProducerParticipant.remove();
+         
       }
    }
 
@@ -208,7 +213,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    @Override
    public void tickAndUpdate(double timeToSetInSeconds)
    {
-      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));   
+      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));
    }
 
    /**
@@ -220,47 +225,30 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    {
       update(timestamp, mainRegistry);
    }
-   
+
+   /**
+    * Update registry data
+    * 
+    * @param timestamp timestamp to send to the logger
+    * @param registry Top level registry to update
+    */
    public void update(long timestamp, YoVariableRegistry registry)
    {
-      if(!started)
+      if (!started && !stopped)
       {
          return;
       }
-      ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer;
-      if(registry.equals(mainRegistry))
+      if (registry == mainRegistry)
       {
-         updateMainVariableBuffer(timestamp);
+         dataProducerParticipant.publishTimestamp(timestamp);
+         latestTimestamp = timestamp;
+
       }
-      else
-      {
-         ringBuffer = buffers.get(registry);
-         if(ringBuffer == null)
-         {
-            throw new RuntimeException("Cannot find root registry " + registry.getName());
-         }
-         updateVariableBuffer(timestamp, ringBuffer, registry);
-      }
+
+      RegistryPublisher publisher = publishers.get(registry);
+      publisher.update(timestamp);
       updateChangedVariables(registry);
-      
-      
-   }
-   
-   private void addVariableBuffer(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> data)
-   {
-      ArrayList<YoVariable<?>> variables = new ArrayList<>();
-      YoVariableRegistry registry = data.getLeft();
-      YoGraphicsListRegistry yoGraphicsListRegistry = data.getRight();
-      int variableOffset = handshakeBuilder.addRegistry(registry, variables);
-      if(yoGraphicsListRegistry != null)
-      {
-         handshakeBuilder.addDynamicGraphicObjects(yoGraphicsListRegistry);
-      }
-      RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
-      ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);
-      
-      buffers.put(registry, buffer);
-      variableChangeData.put(registry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
+
    }
 
    private void updateChangedVariables(YoVariableRegistry rootRegistry)
@@ -268,104 +256,70 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(rootRegistry);
       buffer.poll();
       VariableChangedMessage msg;
-      while((msg = buffer.read()) != null)
+      while ((msg = buffer.read()) != null)
       {
-         msg.getVariable().setValueFromDouble(msg.getVal());            
+         msg.getVariable().setValueFromDouble(msg.getVal());
       }
       buffer.flush();
    }
 
-   private void updateVariableBuffer(long timestamp, ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer, YoVariableRegistry registry)
-   {
-      RegistryBuffer buffer = ringBuffer.next();
-      if(buffer != null)
-      {
-         buffer.update(timestamp);
-         ringBuffer.commit();
-      }
-      else
-      {
-         skippedRegistryTicksDueFullBuffer.get(registry).increment();
-      }
-   }
-   private void updateMainVariableBuffer(long timestamp)
-   {
-      FullStateBuffer buffer = mainBuffer.next();
-      if(buffer != null)
-      {
-         buffer.update(timestamp, uid);
-         mainBuffer.commit();
-      }
-      else
-      {
-         skippedMainRegistryTicksDueFullBuffer.increment();
-      }
-      producer.publishTimestampRealtime(timestamp);
-      uid++;
-   }
-   
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> data = new ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry>(registry, yoGraphicsListRegistry);
-      variableData.add(data);
+      registeredBuffers.add(new RegistrySendBufferBuilder(registry, null, yoGraphicsListRegistry));
    }
 
    @Override
    public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      if(rootBody != null)
+      if (this.mainRegistry != null)
       {
-         mainBodies.add(rootBody);
+         throw new RuntimeException("Main registry is already set");
       }
-      mainRegistry = registry;
-      mainYoGraphicsListRegistry = yoGraphicsListRegistry;
-      
+      registeredBuffers.add(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry));
+      this.mainRegistry = registry;
    }
-   
+
    private YoVariable<?> findVariableInRegistries(String variableName)
    {
-      YoVariable<?> ret = mainRegistry.getVariable(variableName);
-      if(ret == null)
+
+      for (RegistrySendBufferBuilder buffer : registeredBuffers)
       {
-         for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> v : variableData)
+         YoVariableRegistry registry = buffer.getYoVariableRegistry();
+         YoVariable<?> ret = registry.getVariable(variableName);
+         if (ret != null)
          {
-            ret = v.getLeft().getVariable(variableName);
-            if(ret != null)
-            {
-               return ret;
-            }
+            return ret;
          }
       }
-      return ret;
+      return null;
    }
-   
 
    public void createSummary(YoVariable<?> isWalkingVariable)
    {
       createSummary(isWalkingVariable.getFullNameWithNameSpace());
    }
-   
+
    public void createSummary(String summaryTriggerVariable)
    {
-      if(findVariableInRegistries(summaryTriggerVariable) == null)
+      if (findVariableInRegistries(summaryTriggerVariable) == null)
       {
          throw new RuntimeException("Variable " + summaryTriggerVariable + " is not registered with the logger");
       }
       this.summaryProvider.setSummarize(true);
       this.summaryProvider.setSummaryTriggerVariable(summaryTriggerVariable);
    }
-   
+
    public void addSummarizedVariable(String variable)
    {
-      if(findVariableInRegistries(variable) == null)
+      if (findVariableInRegistries(variable) == null)
       {
          throw new RuntimeException("Variable " + variable + " is not registered with the logger");
       }
       this.summaryProvider.addSummarizedVariable(variable);
    }
-   
+
    public void addSummarizedVariable(YoVariable<?> variable)
-   {      
+   {
       this.summaryProvider.addSummarizedVariable(variable);
    }
 
@@ -390,5 +344,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
 
    }
 
+   @Override
+   public long getLatestTimestamp()
+   {
+      return latestTimestamp;
+   }
 
 }
