@@ -49,7 +49,7 @@ dependencies {
    testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
 
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
-   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'

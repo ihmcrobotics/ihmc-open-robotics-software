@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -159,8 +160,12 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
-         cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
+         YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
+         if (copSegment.getFinalTime() - copSegment.getInitialTime() > 0.0)
+         { // By default, the final transfer duration sometimes equals zero
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            cmpSegment.set(transferCoPTrajectory.getPolynomials().get(segmentIndex));
+         }
       }
 
       activeTrajectory = transferCMPTrajectories.get(0);
@@ -171,17 +176,6 @@ public class ReferenceCMPTrajectoryGenerator
    {
       initialTime = currentTime;
       // TODO this needs to combine the angular momentum trajectory with the cop trajectory
-
-      // handle current swing
-      CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
-      CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(0);
-      //      for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
-      //      {
-      //         YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
-      //         YoFrameTrajectory3D copSegment = swingCoPTrajectory.getPolynomials().get(segmentIndex);
-      //
-      //         cmpSegment.set(copSegment);
-      //      }
 
       int numberOfSteps = Math.min(numberOfRegisteredSteps, numberFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -197,8 +191,8 @@ public class ReferenceCMPTrajectoryGenerator
             cmpSegment.set(copSegment);
          }
 
-         swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
-         swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
+         CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(stepIndex);
+         CoPTrajectoryInterface swingCoPTrajectory = swingCoPTrajectories.get(stepIndex);
          for (int segmentIndex = 0; segmentIndex < swingCoPTrajectory.getNumberOfSegments(); segmentIndex++)
          {
             YoFrameTrajectory3D cmpSegment = swingCMPTrajectory.getNextSegment();
@@ -213,10 +207,12 @@ public class ReferenceCMPTrajectoryGenerator
       CoPTrajectoryInterface transferCoPTrajectory = transferCoPTrajectories.get(numberOfSteps);
       for (int segmentIndex = 0; segmentIndex < transferCoPTrajectory.getNumberOfSegments(); segmentIndex++)
       {
-         YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
          YoFrameTrajectory3D copSegment = transferCoPTrajectory.getPolynomials().get(segmentIndex);
-
-         cmpSegment.set(copSegment);
+         if (copSegment.getFinalTime() - copSegment.getInitialTime() > 0.0)
+         { // By default, the final transfer duration sometimes equals zero
+            YoFrameTrajectory3D cmpSegment = transferCMPTrajectory.getNextSegment();
+            cmpSegment.set(copSegment);
+         }
       }
 
       activeTrajectory = swingCMPTrajectories.get(0);

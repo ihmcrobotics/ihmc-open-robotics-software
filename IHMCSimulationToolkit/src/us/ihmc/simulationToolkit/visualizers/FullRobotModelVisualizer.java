@@ -1,5 +1,6 @@
 package us.ihmc.simulationToolkit.visualizers;
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -37,6 +38,8 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private FloatingInverseDynamicsJoint rootJoint;
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
+   private volatile long latestTimestamp = 0;
+   
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
    {   
       this.fullRobot = fullRobotModel;
@@ -106,6 +109,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    public void update(long timestamp)
    {
       fullRobot.updateFrames();
+      this.latestTimestamp = timestamp;
       
       if(rootJoint != null)
       {
@@ -146,6 +150,12 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       robot.addYoVariableRegistry(registry);
+   }
+
+   @Override
+   public long getLatestTimestamp()
+   {
+      return latestTimestamp;
    }
 
 }

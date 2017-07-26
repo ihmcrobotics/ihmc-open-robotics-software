@@ -2,13 +2,15 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class SmoothCMPPlannerParameters extends ICPPlannerParameters
+public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParameters
 {
+
    public enum CoPSupportPolygonNames
    {
       INITIAL_SWING_POLYGON, FINAL_SWING_POLYGON, SUPPORT_FOOT_POLYGON, INITIAL_DOUBLE_SUPPORT_POLYGON, FINAL_DOUBLE_SUPPORT_POLYGON, NULL
@@ -16,78 +18,49 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
 
    private final double modelScale;
    private final List<Vector2D> copOffsetsFootFrame = new ArrayList<>();
+   /**
+    * Vector offsets relative to centroid of support polygon defined copOffsetFrames
+    */
    private final EnumMap<CoPPointName, Vector2D> copOffsetsInFootFrame = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, Vector2D> copOffsetBoundsInFootFrame = new EnumMap<>(CoPPointName.class);
    private final EnumMap<CoPPointName, CoPSupportPolygonNames> copOffsetFrameNames = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> maxXCoPOffsets = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> minXCoPOffsets = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> maxYCoPOffsets = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> minYCoPOffsets = new EnumMap<>(CoPPointName.class);
-   
-   private final EnumMap<CoPPointName, Boolean> constrainToMinMax = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Boolean> constrainToSupportPolygon = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, CoPSupportPolygonNames> stepLengthOffsetPolygon = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactor = new EnumMap<>(CoPPointName.class);
-   private final EnumMap<CoPPointName, Double> segmentTime = new EnumMap<>(CoPPointName.class);
-   /**
-    * Ordered list of CoP points to plan for each footstep. End CoP must be at the end of the list 
-    */
-   private final CoPPointName[] copPointsToPlan = {CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP, CoPPointName.MIDFEET_COP};
-   /**
-    * Ordered list of transition time to a particular CoP point from the previous CoP point
-    */
-   private final double[] segmentDurations = {0.05, 0.8, 0.2, 0.05}; // {to HEEL , to BALL, to TOE, to MIDFEET}
-   /**
-    * Vector offsets relative to centroid of support polygon defined copOffsetFrames 
-    */
-   private final Vector2D[] copOffsets = {new Vector2D(0.0, -0.005), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.025), new Vector2D(0.0, 0.0)};
-   private final CoPSupportPolygonNames[] copOffsetFrames = {CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON,
-         CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON, CoPSupportPolygonNames.FINAL_DOUBLE_SUPPORT_POLYGON};
 
    /**
     * Order list of flags indicating whether specified bounding boxes should be used to constrain the CoP point
     */
-   private final boolean[] constrainMinMaxFlags = {true, true, true, false};
+   private final EnumMap<CoPPointName, Boolean> constrainToMinMax = new EnumMap<>(CoPPointName.class);
+   /**
+    * Order list of flags indicating whether CoP should reside within the support polygon specified in copOffsetFrames
+    */
+   private final EnumMap<CoPPointName, Boolean> constrainToSupportPolygon = new EnumMap<>(CoPPointName.class);
+   private final EnumMap<CoPPointName, CoPSupportPolygonNames> stepLengthOffsetPolygon = new EnumMap<>(CoPPointName.class);
+   /**
+    * Ordered list of fractions indicating whether CoP offset changes with step length
+    */
+   private final EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactor = new EnumMap<>(CoPPointName.class);
+   /**
+    * Ordered list of transition time to a particular CoP point from the previous CoP point
+    */
+   private final EnumMap<CoPPointName, Double> segmentTime = new EnumMap<>(CoPPointName.class);
+   /**
+    * Ordered list of CoP points to plan for each footstep. End CoP must be at the end of the list 
+    */
+   private final CoPPointName[] copPointsToPlan = {CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP};
+
+   private final CoPPointName[] swingCopPointsToPlan = {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
+   private final CoPPointName[] transferCoPPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
+
    /**
     * Define the bounding box in sole frame
     */
    private final BoundingBox2D[] copOffsetLimits = {new BoundingBox2D(-0.04, -1, 0.03, 1), new BoundingBox2D(0.0, -1, 0.08, -1), new BoundingBox2D(0.0, -1, 0.08, -1), null};
 
-   /**
-    * Order list of flags indicating whether CoP should reside within the support polygon specified in copOffsetFrames
-    */
-   private final boolean[] constrainSupportPolygonFlags = {true, true, true, false};
-
-   /**
-    * Ordered list of fractions indicating whether CoP offset changes with step length
-    */
-   private final double[] stepLengthToCoPOffsetFactorValues = {1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0, 0.0};
-   /**
-    * Defines the manner in which the step length is calculated
-    */
-   private final CoPSupportPolygonNames[] stepLengthOffsetPolygonValues = {CoPSupportPolygonNames.INITIAL_SWING_POLYGON,
-         CoPSupportPolygonNames.FINAL_SWING_POLYGON, CoPSupportPolygonNames.FINAL_SWING_POLYGON, CoPSupportPolygonNames.NULL};
-
-   /**
-    * Final CoP name (chicken support will be used only for this point). In case 
-    */
+   /** Final CoP name (chicken support will be used only for this point). In case */
    private final CoPPointName endCoPName = CoPPointName.MIDFEET_COP;
-
-   /**
-    * Percentage chicken support
-    */
-   private final double chickenSuppportPercentage = 0.5;
-   
-   /**
-    * Indicate the first CoP for the swing phase 
-    */
+   /** Indicate the first CoP for the swing phase */
    private final CoPPointName entryCoPName = CoPPointName.HEEL_COP;
-   /**
-    * Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible
-    */
+   /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
    private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
-   
-   private final double additionalTimeForFinalTransfer = 0.05;
-   private final double additionalTimeForInitialTransfer = 0.05;
    
    public SmoothCMPPlannerParameters()
    {
@@ -97,6 +70,45 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public SmoothCMPPlannerParameters(double modelScale)
    {
       this.modelScale = modelScale;
+
+      copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
+      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.FINAL_DOUBLE_SUPPORT_POLYGON);
+
+      stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
+      stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
+      stepLengthOffsetPolygon.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
+      stepLengthOffsetPolygon.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.FINAL_SWING_POLYGON);
+
+      constrainToMinMax.put(CoPPointName.MIDFEET_COP, false);
+      constrainToMinMax.put(CoPPointName.HEEL_COP, true);
+      constrainToMinMax.put(CoPPointName.BALL_COP, true);
+      constrainToMinMax.put(CoPPointName.TOE_COP, true);
+
+      constrainToSupportPolygon.put(CoPPointName.MIDFEET_COP, false);
+      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, true);
+      constrainToSupportPolygon.put(CoPPointName.BALL_COP, true);
+      constrainToSupportPolygon.put(CoPPointName.TOE_COP, true);
+
+      stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.BALL_COP, 1.0 / 8.0);
+      stepLengthToCoPOffsetFactor.put(CoPPointName.TOE_COP, 1.0 / 3.0);
+
+      copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
+      copOffsetsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(0.0, -0.005));
+      copOffsetsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.01));
+      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.025));
+
+      copOffsetBoundsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(-0.04, 0.03));
+      copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
+      copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
+
+      segmentTime.put(CoPPointName.MIDFEET_COP, 0.05);
+      segmentTime.put(CoPPointName.HEEL_COP, 0.8);
+      segmentTime.put(CoPPointName.BALL_COP, 0.2);
+      segmentTime.put(CoPPointName.TOE_COP, 0.05);
    }
 
    @Override
@@ -116,7 +128,35 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
-      return copPointsToPlan.length;
+      return swingCopPointsToPlan.length + 1;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return modelScale * 0.25;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return modelScale * 0.03;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getDoTimeFreezing()
+   {
+      return false;
    }
 
    @Override
@@ -126,7 +166,7 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
     */
    public double getTransferSplitFraction()
    {
-      return 0.5;
+      return 0.75;
    }
 
    @Override
@@ -164,26 +204,6 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public double getMinTimeToSpendOnExitCoPInSingleSupport()
    {
       return 0.0;
-   }
-
-   public EnumMap<CoPPointName, Double> getMaxXCoPOffsets()
-   {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-      {
-         if(copOffsetLimits[i] != null)
-            maxXCoPOffsets.put(copPointsToPlan[i], copOffsetLimits[i].getMaxX() * modelScale);
-      }
-      return maxXCoPOffsets;
-   }
-
-   public EnumMap<CoPPointName, Double> getMinXCoPOffsets()
-   {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-      {
-         if(copOffsetLimits[i] != null)
-            minXCoPOffsets.put(copPointsToPlan[i], copOffsetLimits[i].getMinX() * modelScale);
-      }
-      return minXCoPOffsets;
    }
 
    @Override
@@ -230,6 +250,11 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       return copBounds;
    }
 
+   public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
+   {
+      return copOffsetBoundsInFootFrame;
+   }
+
    @Override
    /**
     * <p>
@@ -245,20 +270,22 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
       Vector2D tempVec;
       for (int i = 0; i < copPointsToPlan.length; i++)
       {
-         tempVec = copOffsets[i];
+         //tempVec = copOffsets[i]; // fixme
+         tempVec = new Vector2D();
          tempVec.scale(modelScale);
          copOffsetsFootFrame.add(tempVec);
       }
       return copOffsetsFootFrame;
    }
-   
+
+   public EnumMap<CoPPointName, Vector2D> getCopOffsetsInFootFrame()
+   {
+      return copOffsetsInFootFrame;
+   }
+
    public EnumMap<CoPPointName, CoPSupportPolygonNames> getSupportPolygonNames()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-      {
-         copOffsetFrameNames.put(copPointsToPlan[i], copOffsetFrames[i]);
-      }
-      return copOffsetFrameNames;      
+      return copOffsetFrameNames;
    }
    
    public CoPPointName getEntryCoPName()
@@ -286,6 +313,16 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
    public CoPPointName[] getCoPPointsToPlan()
    {
       return copPointsToPlan;
+   }
+
+   public CoPPointName[] getSwingCoPPointsToPlan()
+   {
+      return swingCopPointsToPlan;
+   }
+
+   public CoPPointName[] getTransferCoPPointsToPlan()
+   {
+      return transferCoPPointsToPlan;
    }
 
    @Override
@@ -345,56 +382,31 @@ public class SmoothCMPPlannerParameters extends ICPPlannerParameters
 
    public EnumMap<CoPPointName, Boolean> getIsConstrainedToMinMaxFlags()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-         constrainToMinMax.put(copPointsToPlan[i], constrainMinMaxFlags[i]);
       return constrainToMinMax;
    }
 
    public EnumMap<CoPPointName, Boolean> getIsConstrainedToSupportPolygonFlags()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-         constrainToSupportPolygon.put(copPointsToPlan[i], constrainSupportPolygonFlags[i]);
       return constrainToSupportPolygon;
    }
 
    public EnumMap<CoPPointName, CoPSupportPolygonNames> getStepLengthToCoPOffsetFlags()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-         stepLengthOffsetPolygon.put(copPointsToPlan[i], stepLengthOffsetPolygonValues[i]);
       return stepLengthOffsetPolygon;
    }
 
    public EnumMap<CoPPointName, Double> getStepLengthToCoPOffsetFactors()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-         stepLengthToCoPOffsetFactor.put(copPointsToPlan[i], stepLengthToCoPOffsetFactorValues[i]);
       return stepLengthToCoPOffsetFactor;
    }
 
    public EnumMap<CoPPointName, Double> getSegmentTimes()
    {
-      for (int i = 0; i < copPointsToPlan.length; i++)
-         segmentTime.put(copPointsToPlan[i], segmentDurations[i]);
       return segmentTime;
    }
 
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
-   }
-
-   public double getPercentageChickenSupport()
-   {
-      return chickenSuppportPercentage;
-   }
-
-   public double getAdditionalTimeForInitialTransfer()
-   {
-      return additionalTimeForInitialTransfer;
-   }
-
-   public double getAdditionalTimeForFinalTransfer()
-   {
-      return additionalTimeForFinalTransfer;
    }
 }

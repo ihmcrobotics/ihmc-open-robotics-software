@@ -1,28 +1,34 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-@SuppressWarnings("serial")
-public class SetOutPointAction extends SCSAction
+import javax.swing.AbstractAction;
+
+import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+public class SetOutPointAction extends AbstractAction
 {
+   private static final long serialVersionUID = 3859062359920445441L;
+
    private SetOutPointCommandExecutor executor;
 
    public SetOutPointAction(SetOutPointCommandExecutor executor)
    {
-      super("Set Out Point",
-              "icons/SetOutPoint.png",
-              KeyEvent.VK_U,
-              "Set Out Point",
-              "Set the current Out point in the data buffer."
-      );
-
+      super("Set Out Point");
       this.executor = executor;
+
+      String iconFilename = "icons/YoSetOutPoint24.gif";
+      int shortKey = KeyEvent.VK_U;
+      String longDescription = "Set Out Point";
+      String shortDescription = "Set Out Point";
+      
+      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.setOutPoint();
    }
