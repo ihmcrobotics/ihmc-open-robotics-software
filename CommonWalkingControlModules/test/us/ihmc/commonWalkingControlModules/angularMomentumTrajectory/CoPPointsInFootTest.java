@@ -73,17 +73,18 @@ public class CoPPointsInFootTest
       assert (copPointsInFoot.getCoPPointList().isEmpty());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.0, testLocation);
       assert (copPointsInFoot.getCoPPointList().size() == 1);
-      for (CoPPointName copPointName : CoPPointName.values)
+      for (int i = 0; i < CoPPointName.values.length; i++)
       {
+         CoPPointName copPointName = CoPPointName.values[i];
          if (copPointsInFoot.getCoPPointList().contains(copPointName))
          {
             //PrintTools.info("Set: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
-            assert (copPointsInFoot.get(copPointName).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
+            assert (copPointsInFoot.get(i).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
          }
          else
          {
             //PrintTools.info("Notset: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
-            assert (copPointsInFoot.get(copPointName).containsNaN());
+            assert (copPointsInFoot.get(i).containsNaN());
          }
       }
    }   
