@@ -166,7 +166,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    public double getTransferSplitFraction()
    {
-      return 0.5;
+      return 0.75;
    }
 
    @Override
