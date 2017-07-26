@@ -49,6 +49,9 @@ dependencies {
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
+
+    compile files('lib/jassimp.jar')
 
     
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
