@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -33,7 +35,7 @@ import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVi
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.FootstepPlannerForBehaviorsHelper;
+import us.ihmc.footstepPlanning.FootstepPlannerUtils;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -43,6 +45,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningTo
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -98,18 +101,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
-//      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
-//      for (RobotSide side : RobotSide.values)
-//         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
-
-      SideDependentList<ConvexPolygon2D> planningPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(contactPointParameters);
-      SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygons(contactPointParameters, 1.0, 1.0);
+      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
 
-      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(planningPolygonsInSoleFrame, controllerPolygonsInSoleFrame));
-      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), planningPolygonsInSoleFrame));
+      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
+      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
       plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createDefaultPlanner(null));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
@@ -117,13 +115,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       isDone.set(true);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame)
+   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
-      FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
+      FootstepPlannerUtils.setPlannerParametersForToolbox(footstepPlanningParameters);
 
       PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, registry);
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, controllerPolygonsInSoleFrame);
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
       footstepPlanner.setTimeout(5.0);
@@ -307,6 +305,19 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
       result.planningResult = status;
       return result;
+   }
+
+   private static SideDependentList<ConvexPolygon2D> createFootPolygonsFromContactPoints(RobotContactPointParameters contactPointParameters)
+   {
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(footPoints);
+         footPolygons.set(side, scaledFoot);
+      }
+
+      return footPolygons;
    }
 
 }
