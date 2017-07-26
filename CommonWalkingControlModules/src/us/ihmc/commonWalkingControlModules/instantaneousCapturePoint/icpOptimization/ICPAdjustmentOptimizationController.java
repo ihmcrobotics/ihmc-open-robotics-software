@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -18,10 +18,10 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
-   public ICPAdjustmentOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPAdjustmentOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                              WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
+                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, true, yoGraphicsListRegistry);
 
@@ -32,8 +32,8 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
       else
          swingSpeedUpEnabled.set(false);
 
-      defaultSwingSplitFraction.set(icpPlannerParameters.getSwingDurationAlpha());
-      defaultTransferSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
+      defaultSwingSplitFraction.set(icpPlannerParameters.getSwingSplitFraction());
+      defaultTransferSplitFraction.set(icpPlannerParameters.getTransferSplitFraction());
 
       transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());

@@ -1,28 +1,30 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-@SuppressWarnings("serial")
-public class CropBufferAction extends SCSAction
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+
+import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
+
+public class CropBufferAction extends AbstractAction
 {
+   private static final long serialVersionUID = 5039888169851613916L;
    private CropBufferCommandExecutor executor;
 
    public CropBufferAction(CropBufferCommandExecutor executor)
    {
-      super("Crop Buffer to In/Out",
-              "icons/CropBuffer.png",
-              KeyEvent.VK_C,
-              "Crop Buffer to In/Out",
-              "Crop the data buffer to between the current In and Out points."
-      );
-
+      super("Crop Buffer to In/Out");
       this.executor = executor;
+
+      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_C));
+      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
+      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.cropBuffer();
    }

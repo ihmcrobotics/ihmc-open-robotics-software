@@ -56,7 +56,7 @@ dependencies {
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
-    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
     compile "org.boofcv:geo:0.19"
 
