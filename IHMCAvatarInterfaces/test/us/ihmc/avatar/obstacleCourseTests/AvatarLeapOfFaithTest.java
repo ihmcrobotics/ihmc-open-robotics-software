@@ -72,7 +72,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.15;
+      double stepDownHeight = 0.17;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -146,7 +146,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.5;
-      double stepDownHeight = 0.14;
+      double stepDownHeight = 0.15;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -214,7 +214,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.14;
+      double stepDownHeight = 0.16;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);

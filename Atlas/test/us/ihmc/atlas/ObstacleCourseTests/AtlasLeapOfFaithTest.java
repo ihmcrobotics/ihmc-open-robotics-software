@@ -8,6 +8,7 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.AvatarLeapOfFaithTest;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -82,15 +83,44 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
+      private final TestLeapOfFaithParameters leapOfFaithParameters;
       public TestWalkingParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
+
+         leapOfFaithParameters = new TestLeapOfFaithParameters();
+      }
+
+      @Override
+      public LeapOfFaithParameters getLeapOfFaithParameters()
+      {
+         return leapOfFaithParameters;
+      }
+   }
+
+   private class TestLeapOfFaithParameters extends LeapOfFaithParameters
+   {
+      public TestLeapOfFaithParameters()
+      {
+         super();
+      }
+
+      @Override
+      public boolean scaleFootWeight()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean usePelvisRotation()
+      {
+         return false;
       }
    }
 
    public static void main(String[] args) throws Exception
    {
       AtlasLeapOfFaithTest test = new AtlasLeapOfFaithTest();
-      test.testUnknownStepDownOneFootOnEachStepWithUncertainty();
+      test.testUnknownStepDownOneFootOnEachStepLong();
    }
 }
