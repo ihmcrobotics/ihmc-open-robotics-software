@@ -1,14 +1,13 @@
 package us.ihmc.avatar.ros;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import geometry_msgs.Point;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 
-import geometry_msgs.Vector3;
 import ihmc_msgs.ArmTrajectoryRosMessage;
 import ihmc_msgs.ChestTrajectoryRosMessage;
 import ihmc_msgs.FootTrajectoryRosMessage;
@@ -122,7 +121,7 @@ public class IHMCROSTranslationRuntimeTools
       FootstepDataMessage ihmcMessage = new FootstepDataMessage();
 
       ihmcMessage.setRobotSide(RobotSide.values[message.getRobotSide()]);
-      ihmcMessage.setLocation(new Point3D(GenericROSTranslationTools.convertVector3(message.getLocation())));
+      ihmcMessage.setLocation(new Point3D(GenericROSTranslationTools.convertPoint(message.getLocation())));
       ihmcMessage.setOrientation(new us.ihmc.euclid.tuple4D.Quaternion(GenericROSTranslationTools.convertQuaternion(message.getOrientation())));
       ihmcMessage.setSwingHeight(message.getSwingHeight());
       ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
@@ -139,7 +138,7 @@ public class IHMCROSTranslationRuntimeTools
       Point3D[] trajectoryWaypoints = new Point3D[message.getPositionWaypoints().size()];
       for (int i = 0; i < message.getPositionWaypoints().size(); i++)
       {
-         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertVector3(message.getPositionWaypoints().get(i)));
+         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertPoint(message.getPositionWaypoints().get(i)));
       }
 
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
@@ -254,7 +253,7 @@ public class IHMCROSTranslationRuntimeTools
       FootstepDataRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
       message.setUniqueId(footstep.getUniqueId());
-      message.setLocation(GenericROSTranslationTools.convertTuple3d(footstep.getLocation()));
+      message.setLocation(GenericROSTranslationTools.convertPoint3D(footstep.getLocation()));
       message.setOrientation(GenericROSTranslationTools.convertTuple4d(footstep.getOrientation()));
       message.setRobotSide((byte) footstep.getRobotSide().ordinal());
       message.setSwingHeight(footstep.getSwingHeight());
@@ -271,17 +270,17 @@ public class IHMCROSTranslationRuntimeTools
          }
       }
 
-      List<Vector3> trajectoryWaypoints = new ArrayList<>();
+      List<Point> positionWaypoints = new ArrayList<>();
       if(footstep.getCustomPositionWaypoints() != null)
       {
          for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints())
          {
-            trajectoryWaypoints.add(GenericROSTranslationTools.convertTuple3d(trajectoryWaypoint));
+            positionWaypoints.add(GenericROSTranslationTools.convertPoint3D(trajectoryWaypoint));
          }
       }
 
       message.setPredictedContactPoints(predictedContatcPointsRos);
-      message.setPositionWaypoints(trajectoryWaypoints);
+      message.setPositionWaypoints(positionWaypoints);
 
       return message;
    }
