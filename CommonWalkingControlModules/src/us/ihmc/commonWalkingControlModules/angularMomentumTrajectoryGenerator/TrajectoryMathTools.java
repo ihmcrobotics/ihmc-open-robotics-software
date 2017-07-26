@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TrajectoryMathTools
 {
-   private static final int maxNumberOfCoefficients = 8;
+   private static final int maxNumberOfCoefficients = 16;
    private static double tempVal;
    private static double tempVal2;
    private static YoVariableRegistry testRegistry = new YoVariableRegistry("DummyRegistryForTrajectoryMath");
@@ -23,7 +23,7 @@ public class TrajectoryMathTools
    private static YoPolynomial tempPoly2 = new YoPolynomial("TempPoly2", maxNumberOfCoefficients, testRegistry);
    private static YoTrajectory tempTraj1 = new YoTrajectory("TempTraj1", maxNumberOfCoefficients, testRegistry);
    private static YoTrajectory tempTraj2 = new YoTrajectory("TempTraj2", maxNumberOfCoefficients, testRegistry);
-   private static YoTrajectory3D tempTraj3 = new YoTrajectory3D("TempTraj3D", 8, testRegistry);
+   private static YoTrajectory3D tempTraj3 = new YoTrajectory3D("TempTraj3D", maxNumberOfCoefficients, testRegistry);
    private static List<Double> tempTimeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
    private static int tempTimeArrayLength = 4;
    private static FastFourierTransform fft = new FastFourierTransform(maxNumberOfCoefficients);
@@ -307,7 +307,8 @@ public class TrajectoryMathTools
    {
       if (trajToPack.getMaximumNumberOfCoefficients() < Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()))
       {
-         PrintTools.warn("Not enough coefficients to store result of trajectory operation");
+         PrintTools.warn("Not enough coefficients to store result of trajectory operation. Needed: "
+               + Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()) + " Available: " + trajToPack.getMaximumNumberOfCoefficients());
          throw new InvalidParameterException();
       }
    }
@@ -505,9 +506,9 @@ public class TrajectoryMathTools
    {
       if (trajToPack.getMaximumNumberOfCoefficients() < trajToDifferentiate.getNumberOfCoefficients() - 1)
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
-      
+
       trajToPack.polynomial.reshape(Math.max(trajToDifferentiate.getNumberOfCoefficients() - 1, 1));
-      if(trajToDifferentiate.getNumberOfCoefficients() == 1)
+      if (trajToDifferentiate.getNumberOfCoefficients() == 1)
          trajToPack.polynomial.setConstant(0);
       for (int i = trajToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
          trajToPack.polynomial.setDirectlyFast(i - 1, i * trajToDifferentiate.polynomial.getCoefficient(i));

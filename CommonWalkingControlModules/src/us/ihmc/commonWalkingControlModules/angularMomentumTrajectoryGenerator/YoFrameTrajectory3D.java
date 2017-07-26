@@ -75,7 +75,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       this.referenceFrame = traj1.getReferenceFrame();
       TrajectoryMathTools.add(this, traj1, traj2);
    }
-   
+
    public void add(YoFrameTrajectory3D addTraj)
    {
       add(this, addTraj);
@@ -110,7 +110,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    {
       subtract(this, subTraj);
    }
-   
+
    public void subtractByTrimming(YoFrameTrajectory3D traj1, YoFrameTrajectory3D traj2)
    {
       traj1.checkReferenceFrameMatch(traj2);
@@ -288,7 +288,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       checkReferenceFrameMatch(zR1);
       checkReferenceFrameMatch(zR2);
       checkReferenceFrameMatch(zFinal);
-      
+
       setCubicBezier(t0, tFinal, z0.getPoint(), zR1.getPoint(), zR2.getPoint(), zFinal.getPoint());
    }
 
@@ -614,6 +614,29 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                            zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf.getVector(), zddf.getVector());
    }
 
+   public void setPentic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0, FramePoint zFinal, FrameVector zdFinal,
+                         FrameVector zddFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zd0.checkReferenceFrameMatch(referenceFrame);
+      zdd0.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+      zdFinal.checkReferenceFrameMatch(referenceFrame);
+      zddFinal.checkReferenceFrameMatch(referenceFrame);
+
+      setPentic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
+   }
+
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal, FrameVector zdFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zd0.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+      zdFinal.checkReferenceFrameMatch(referenceFrame);
+
+      setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+   }
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0,
                                       FramePoint zIntermediate, FramePoint zf, FrameVector zdf, FrameVector zddf)
    {
@@ -687,7 +710,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    {
       return referenceFrame;
    }
-   
+
    @Override
    public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
    {
@@ -716,13 +739,13 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       checkReferenceFrameMatch(dervTraj);
       super.getDerivative(dervTraj, order);
    }
-   
+
    public void getIntegral(YoFrameTrajectory3D integralTraj)
    {
       checkReferenceFrameMatch(integralTraj);
       super.getIntegral(integralTraj);
    }
-   
+
    public void addTimeOffset(YoFrameTrajectory3D trajToCopy, double deltaT)
    {
       set(trajToCopy);
