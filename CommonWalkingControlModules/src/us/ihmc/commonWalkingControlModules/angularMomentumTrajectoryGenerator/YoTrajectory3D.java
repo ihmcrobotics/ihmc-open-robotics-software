@@ -416,9 +416,10 @@ public class YoTrajectory3D
 
    public boolean timeIntervalContains(double timeToCheck, double EPSILON)
    {
-      return (xTrajectory.timeIntervalContains(timeToCheck, EPSILON) && yTrajectory.timeIntervalContains(timeToCheck, EPSILON) && zTrajectory.timeIntervalContains(timeToCheck, EPSILON));
+      return (xTrajectory.timeIntervalContains(timeToCheck, EPSILON) && yTrajectory.timeIntervalContains(timeToCheck, EPSILON)
+            && zTrajectory.timeIntervalContains(timeToCheck, EPSILON));
    }
-   
+
    public boolean timeIntervalContains(double timeToCheck)
    {
       return (xTrajectory.timeIntervalContains(timeToCheck) && yTrajectory.timeIntervalContains(timeToCheck) && zTrajectory.timeIntervalContains(timeToCheck));
@@ -460,16 +461,16 @@ public class YoTrajectory3D
       zTrajectory.set(other.getYoTrajectoryZ());
    }
 
-
    public void setZero()
    {
       for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).setZero();;
+         getYoTrajectory(index).setZero();
+      ;
    }
 
    public void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
-      for(int index = 0; index < 3; index ++)
+      for (int index = 0; index < 3; index++)
          getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
    }
 
@@ -719,6 +720,22 @@ public class YoTrajectory3D
 
    }
 
+   public void setPentic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zFinal,
+                         Vector3DReadOnly zdFinal, Vector3DReadOnly zddFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setPentic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
+                                          zdFinal.getElement(index), zddFinal.getElement(index));
+   }
+
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
+                                                     Vector3DReadOnly zdFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
+                                                                      zdFinal.getElement(index));
+   }
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                       Point3DReadOnly zIntermediate, Point3DReadOnly zf, Vector3DReadOnly zdf, Vector3DReadOnly zddf)
    {
@@ -759,7 +776,7 @@ public class YoTrajectory3D
 
    public void getIntegral(YoTrajectory3D integralTraj)
    {
-      for(int index = 0; index < 3; index++)
+      for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getIntegral(integralTraj.getYoTrajectory(index));
    }
 

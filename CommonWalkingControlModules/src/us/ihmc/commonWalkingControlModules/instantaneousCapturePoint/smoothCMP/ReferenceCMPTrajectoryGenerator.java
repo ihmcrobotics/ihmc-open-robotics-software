@@ -31,6 +31,8 @@ public class ReferenceCMPTrajectoryGenerator
 
    private double initialTime;
    private int numberOfRegisteredSteps;
+   private final int maxNumberOfCoefficients = 10;
+   private final int maxNumberOfSegments = 25;
    private CMPTrajectory activeTrajectory;
 
    private final FramePoint desiredCMP = new FramePoint();
@@ -52,14 +54,14 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + i, 25, 8, registry);
-         CMPTrajectory swingCMPTrajectory = new CMPTrajectory(namePrefix + "Swing" + i, 25, 8, registry);
+         CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + i, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+         CMPTrajectory swingCMPTrajectory = new CMPTrajectory(namePrefix + "Swing" + i, maxNumberOfSegments, maxNumberOfCoefficients, registry);
          transferCMPTrajectories.add(transferCMPTrajectory);
          swingCMPTrajectories.add(swingCMPTrajectory);
       }
-      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, 25, 8, registry);
+      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, maxNumberOfSegments, maxNumberOfCoefficients, registry);
       transferCMPTrajectories.add(transferCMPTrajectory);
-      this.torqueTrajectory = new TorqueTrajectory(namePrefix + "TempTorqueTraj", 25, 8, registry);
+      this.torqueTrajectory = new TorqueTrajectory(namePrefix + "TempTorqueTraj", maxNumberOfSegments, maxNumberOfCoefficients, registry);
       this.verticalGroundReaction = new YoDouble("CMPTorqueOffsetScalingFactor", registry);
       this.verticalGroundReaction.set(10.0);
    }
