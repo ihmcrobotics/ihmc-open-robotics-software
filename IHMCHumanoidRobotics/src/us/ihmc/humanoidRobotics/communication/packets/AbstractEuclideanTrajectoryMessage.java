@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -61,6 +62,9 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       {
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(random);
       }
+
+      useCustomControlFrame = random.nextBoolean();
+      controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
    }
 
    public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
@@ -389,7 +393,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          return false;
       }
 
-      if (linearSelectionMatrix != null && !linearSelectionMatrix.equals(other.linearSelectionMatrix))
+      if (linearSelectionMatrix != null && !linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
       {
          return false;
       }
@@ -399,7 +403,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          return false;
       }
 
-      if (linearWeightMatrix != null && !linearWeightMatrix.equals(other.linearWeightMatrix))
+      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(other.linearWeightMatrix, epsilon))
       {
          return false;
       }
