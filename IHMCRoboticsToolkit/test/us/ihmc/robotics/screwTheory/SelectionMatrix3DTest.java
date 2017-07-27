@@ -102,7 +102,7 @@ public class SelectionMatrix3DTest
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -111,9 +111,9 @@ public class SelectionMatrix3DTest
          {
             for (ReferenceFrame vectorFrame : referenceFrames.subList(1, referenceFrames.size()))
             {
-               FrameVector originalVector = FrameVector.generateRandomFrameVector(random, vectorFrame);
-               FrameVector expectedVector = new FrameVector(originalVector);
-               FrameVector actualVector = new FrameVector(originalVector);
+               FrameVector3D originalVector = EuclidFrameRandomTools.generateRandomFrameVector3D(random, vectorFrame);
+               FrameVector3D expectedVector = new FrameVector3D(originalVector);
+               FrameVector3D actualVector = new FrameVector3D(originalVector);
 
                boolean xSelected = random.nextBoolean();
                boolean ySelected = random.nextBoolean();

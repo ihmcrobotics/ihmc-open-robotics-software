@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TransferAngularMomentumTrajectory extends AngularMomentumTrajectory

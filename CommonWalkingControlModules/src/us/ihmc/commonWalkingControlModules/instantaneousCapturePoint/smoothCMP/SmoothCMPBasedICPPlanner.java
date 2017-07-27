@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +10,14 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -277,11 +276,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getWaypoints();     
    }
    
-   private final FramePoint tempFinalICP = new FramePoint();
+   private final FramePoint3D tempFinalICP = new FramePoint3D();
    
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if(isStanding.getBooleanValue())
       {
@@ -308,26 +307,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
    
-   public List<FramePoint> getInitialDesiredCapturePointPositions()
+   public List<FramePoint3D> getInitialDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredInitialList();
    }
    
-   public List<FramePoint> getFinalDesiredCapturePointPositions()
+   public List<FramePoint3D> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint2D finalDesiredCenterOfMassPositionToPack)
    {
       throw new RuntimeException("to implement"); //TODOLater
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getNextExitCMP(FramePoint exitCMPToPack)
+   public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
       CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);

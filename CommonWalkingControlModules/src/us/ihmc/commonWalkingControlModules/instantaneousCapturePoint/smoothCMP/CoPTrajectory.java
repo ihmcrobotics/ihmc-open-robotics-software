@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -26,9 +26,9 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    private final int stepNumber;
    
    private YoFrameTrajectory3D currentSegment;
-   private final FramePoint copToThrowAway = new FramePoint();
-   private final FrameVector copVelocityToThrowAway = new FrameVector();
-   private final FrameVector copAccelerationToThrowAway = new FrameVector();
+   private final FramePoint3D copToThrowAway = new FramePoint3D();
+   private final FrameVector3D copVelocityToThrowAway = new FrameVector3D();
+   private final FrameVector3D copAccelerationToThrowAway = new FrameVector3D();
    private final String name;
 
    public CoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type,
@@ -67,19 +67,19 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    }
 
    @Override
-   public void update(double timeInState, FramePoint desiredCoPToPack)
+   public void update(double timeInState, FramePoint3D desiredCoPToPack)
    {
       update(timeInState, desiredCoPToPack, copVelocityToThrowAway, copAccelerationToThrowAway);
    }
 
    @Override
-   public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack)
+   public void update(double timeInState, FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack)
    {
       update(timeInState, desiredCoPToPack, desiredCoPVelocityToPack, copAccelerationToThrowAway);
    }
 
    @Override
-   public void update(double timeInState, FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack, FrameVector desiredCoPAccelerationToPack)
+   public void update(double timeInState, FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack, FrameVector3D desiredCoPAccelerationToPack)
    {
       currentTrajectoryTime.set(timeInState);
       setCurrentSegmentIndexFromStateTime(timeInState);
@@ -116,7 +116,7 @@ public class CoPTrajectory implements CoPTrajectoryInterface
    }
 
    @Override
-   public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition)
+   public void setSegment(CoPSplineType segmentOrder, double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
    {
       YoFrameTrajectory3D segment = segments.get(numberOfSegments.getIntegerValue());
 

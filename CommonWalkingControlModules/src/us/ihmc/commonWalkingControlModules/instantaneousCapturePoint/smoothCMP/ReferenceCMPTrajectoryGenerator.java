@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -31,8 +29,8 @@ public class ReferenceCMPTrajectoryGenerator
    private int numberOfRegisteredSteps;
    private CMPTrajectory activeTrajectory;
 
-   private final FramePoint desiredCMP = new FramePoint();
-   private final FrameVector desiredCMPVelocity = new FrameVector();
+   private final FramePoint3D desiredCMP = new FramePoint3D();
+   private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
 
    public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations,
                                           List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
@@ -75,7 +73,7 @@ public class ReferenceCMPTrajectoryGenerator
          activeTrajectory.update(timeInState, desiredCMP, desiredCMPVelocity);
    }
 
-   public void getPosition(FramePoint desiredCMPToPack)
+   public void getPosition(FramePoint3D desiredCMPToPack)
    {
       desiredCMPToPack.setIncludingFrame(desiredCMP);
    }
@@ -85,7 +83,7 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPToPack.set(desiredCMP);
    }
    
-   public void getVelocity(FrameVector desiredCMPVelocityToPack)
+   public void getVelocity(FrameVector3D desiredCMPVelocityToPack)
    {
       desiredCMPVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
@@ -95,7 +93,7 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPVelocityToPack.set(desiredCMPVelocity);
    }
    
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

@@ -1,24 +1,21 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector zeroVector = new FrameVector();
+   private static final FrameVector3D zeroVector = new FrameVector3D();
 
    private final List<CoPPointName> copPointsList = new ArrayList<>(); // List of CoP way points defined for this footstep. Hopefully this does not create garbage
    private final List<CoPTrajectoryPoint> copLocations = new ArrayList<>(); // Location of CoP points defined
@@ -70,7 +67,7 @@ public class CoPPointsInFoot
       return waypointIndex;
    }
 
-   public void setIncludingFrame(int waypointIndex, double time, FramePoint location)
+   public void setIncludingFrame(int waypointIndex, double time, FramePoint3D location)
    {
       copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
       zeroVector.setToZero(location.getReferenceFrame());;
@@ -94,7 +91,7 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint3D location)
    {
       int waypointIndex = addWayPoint(copPointName);
       setIncludingFrame(waypointIndex, time, location);

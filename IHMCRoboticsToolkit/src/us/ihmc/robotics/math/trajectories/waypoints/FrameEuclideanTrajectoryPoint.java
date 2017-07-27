@@ -1,5 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

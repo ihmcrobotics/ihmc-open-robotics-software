@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,10 +23,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -94,7 +92,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameOrientation tmpOrientation = new FrameOrientation();
-   private final FrameVector tmpVector = new FrameVector();
+   private final FrameVector3D tmpVector = new FrameVector3D();
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;

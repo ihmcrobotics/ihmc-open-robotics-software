@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
