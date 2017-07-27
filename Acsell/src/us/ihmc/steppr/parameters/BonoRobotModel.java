@@ -8,7 +8,6 @@ import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -33,7 +32,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -243,12 +241,6 @@ public class BonoRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return new AcsellSensorSuiteManager(createFullRobotModel(), runningOnRealRobot);
-   }
-
-   @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-      return null;
    }
 
    @Override

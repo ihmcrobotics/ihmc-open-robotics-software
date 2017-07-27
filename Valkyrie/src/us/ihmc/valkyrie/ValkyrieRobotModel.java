@@ -14,7 +14,6 @@ import com.jme3.math.Vector3f;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -399,12 +398,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return new ValkyrieSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap, target);
-   }
-
-   @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-	   return null;
    }
 
    @Override
