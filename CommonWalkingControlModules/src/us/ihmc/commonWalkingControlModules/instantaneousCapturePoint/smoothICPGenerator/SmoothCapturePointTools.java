@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -7,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Yo
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 
 /**
@@ -35,6 +38,9 @@ public class SmoothCapturePointTools extends CapturePointTools
    
    private static final DenseMatrix64F M1 = new DenseMatrix64F(defaultSize, defaultSize);
    private static final DenseMatrix64F M2 = new DenseMatrix64F(defaultSize, defaultSize);
+   
+   private static final DenseMatrix64F boundaryConditionMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private static final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
    
    /**
     * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
@@ -291,6 +297,9 @@ public class SmoothCapturePointTools extends CapturePointTools
       
       generalizedGammaPrimeMatrix.reshape(1, 1);
       generalizedGammaPrimeMatrix.zero();
+      
+      boundaryConditionMatrix.reshape(2 * numberOfCoefficients,  2 * numberOfCoefficients);
+      boundaryConditionVector.reshape(2 * numberOfCoefficients,  1);
    }
    
    public static void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, YoFrameTrajectory3D cmpPolynomial3D)
@@ -312,6 +321,83 @@ public class SmoothCapturePointTools extends CapturePointTools
       
       polynomialCoefficientVector.setData(polynomialCoefficients);
    }
+   
+   
+   private static final DenseMatrix64F generalizedAlphaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   private static final DenseMatrix64F generalizedBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   private static final DenseMatrix64F generalizedGammaPrimeMatrixSegment1 = new DenseMatrix64F(1, 1);
+   private static final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   
+   private static final DenseMatrix64F generalizedAlphaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   private static final DenseMatrix64F generalizedBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   private static final DenseMatrix64F generalizedGammaPrimeMatrixSegment2 = new DenseMatrix64F(1, 1);
+   private static final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   
+   
+//   public static void adaptTrajectoriesForInitialOffset3D(double omega0, YoFrameTrajectory3D cmpPolynomial3DSegment1, YoFrameTrajectory3D cmpPolynomial3DSegment2, 
+//                                                          FramePoint cmpDesiredInitialPositionSegment1, FramePoint cmpDesiredInitialPositionSegment2,
+//                                                          FramePoint icpDesiredInitialPositionSegment1, FramePoint icpDesiredInitialPositionSegment2)
+//   {
+//      setBoundaryConditionVector3D(omega0, cmpPolynomial3DSegment1, cmpPolynomial3DSegment2, 
+//                                   cmpDesiredInitialPositionSegment1, cmpDesiredInitialPositionSegment2,
+//                                   icpDesiredInitialPositionSegment1, icpDesiredInitialPositionSegment2);
+//      setBoundaryConditionMatrix3D();
+//   }   
+//   
+//   public static void setBoundaryConditionVector3D(double omega0, YoFrameTrajectory3D cmpPolynomial3DSegment1, YoFrameTrajectory3D cmpPolynomial3DSegment2,
+//                                                   FramePoint cmpDesiredInitialPositionSegment1, FramePoint cmpDesiredInitialPositionSegment2,
+//                                                   FramePoint icpDesiredInitialPositionSegment1, FramePoint icpDesiredInitialPositionSegment2)
+//   {
+//      for(Direction dir : Direction.values())
+//      {
+//         YoTrajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getYoTrajectory(dir);
+//         YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(dir);
+//         
+//         double cmpDesiredInitialPositionScalarSegment1 = cmpDesiredInitialPositionSegment1.get(dir);
+//         double cmpDesiredInitialPositionScalarSegment2 = cmpDesiredInitialPositionSegment2.get(dir);
+//         
+//         double icpDesiredInitialPositionScalarSegment1 = icpDesiredInitialPositionSegment1.get(dir);
+//         double icpDesiredInitialPositionScalarSegment2 = icpDesiredInitialPositionSegment2.get(dir);
+//         
+//         // TODO: check whether division always integer
+//         for(int i = 0; i < cmpPolynomialSegment1.getNumberOfCoefficients() / 2; i++)
+//         {
+//            double t01 = cmpPolynomialSegment1.getInitialTime();
+//            double t02 = cmpPolynomialSegment2.getInitialTime();
+//            
+//            double generalizedCMPDesiredInitialQuantityScalarSegment1 = cmpPolynomialSegment1.get
+//            
+//            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t01, generalizedGammaPrimeMatrixSegment1, i, cmpPolynomialSegment1);
+//            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t02, generalizedGammaPrimeMatrixSegment2, i, cmpPolynomialSegment2);
+//            
+//            
+//         }
+//      }
+//   }
+//   
+//   public static void setBoundaryConditionMatrix3D()
+//   {
+//      for(Direction dir : Direction.values())
+//      {
+//         YoTrajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getYoTrajectory(dir);
+//         YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(dir);
+//         
+//         // TODO: check whether division always integer
+//         for(int i = 0; i < cmpPolynomialSegment1.getNumberOfCoefficients() / 2; i++)
+//         {
+//            double t01 = cmpPolynomialSegment1.getInitialTime();
+//            double t02 = cmpPolynomialSegment2.getInitialTime();
+//            
+//            calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, t01, generalizedAlphaPrimeRowSegment1, i, cmpPolynomialSegment1);
+//            calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, t01, generalizedBetaPrimeRowSegment1, i, cmpPolynomialSegment1);
+//            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t01, generalizedGammaPrimeMatrixSegment1, i, cmpPolynomialSegment1);
+//            
+//            calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, t02, generalizedAlphaPrimeRowSegment2, i, cmpPolynomialSegment2);
+//            calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, t02, generalizedBetaPrimeRowSegment2, i, cmpPolynomialSegment2);
+//            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t02, generalizedGammaPrimeMatrixSegment2, i, cmpPolynomialSegment2);
+//         }
+//      }
+//   }
    
 //   // MATRIX FORMULATION
 //   // ICP = (M1)^(-1) * M2 * P = M3 * P
