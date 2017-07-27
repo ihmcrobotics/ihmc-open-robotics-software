@@ -35,11 +35,6 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters
 {
-   enum RobotTarget
-   {
-      SCS, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK
-   }
-
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
    public abstract StateEstimatorParameters getStateEstimatorParameters();

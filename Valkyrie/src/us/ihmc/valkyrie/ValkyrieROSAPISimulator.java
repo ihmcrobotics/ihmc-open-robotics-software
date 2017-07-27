@@ -11,6 +11,7 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -48,7 +49,7 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
    {
       Options opt = parseArguments(args);
       
-      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       
       DRCStartingLocation startingLocation;
       try

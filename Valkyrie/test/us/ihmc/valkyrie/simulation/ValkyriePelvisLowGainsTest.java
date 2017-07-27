@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -15,7 +16,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
    public DRCRobotModel getRobotModel()

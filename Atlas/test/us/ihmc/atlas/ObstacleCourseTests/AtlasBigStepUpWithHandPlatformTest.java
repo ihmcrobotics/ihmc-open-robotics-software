@@ -3,6 +3,7 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCBigStepUpWithHandPlatformTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -16,7 +17,7 @@ public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlat
    public AtlasBigStepUpWithHandPlatformTest()
    {
       boolean createAdditionalContactPoints = true;
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, createAdditionalContactPoints);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, createAdditionalContactPoints);
    }
 
    @Override

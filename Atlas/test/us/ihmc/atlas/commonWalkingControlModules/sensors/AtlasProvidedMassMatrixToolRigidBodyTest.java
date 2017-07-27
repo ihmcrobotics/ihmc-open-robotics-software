@@ -5,7 +5,7 @@ import java.util.stream.DoubleStream;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
@@ -15,7 +15,7 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
 {
    AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    RobotSide side = RobotSide.LEFT;
-   AtlasRobotModel atlasRobotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
+   AtlasRobotModel atlasRobotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
 
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
