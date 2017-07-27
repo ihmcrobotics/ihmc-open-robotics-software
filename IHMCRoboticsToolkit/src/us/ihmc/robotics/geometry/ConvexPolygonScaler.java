@@ -31,7 +31,7 @@ public class ConvexPolygonScaler
 
    public ConvexPolygonScaler()
    {
-      for (int i=0; i<8; i++)
+      for (int i = 0; i < 16; i++)
       {
          edgePool.add(new Line2D());
       }
