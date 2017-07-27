@@ -29,10 +29,11 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.SimulatedWholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
-public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
+public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters
 {
    enum RobotTarget
    {
