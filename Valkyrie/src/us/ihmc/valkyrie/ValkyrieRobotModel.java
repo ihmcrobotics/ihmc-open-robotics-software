@@ -45,9 +45,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -243,6 +241,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return jointMap;
    }
 
+   @Override
    public double getStandPrepAngle(String jointName)
    {
       return standPrepAngles.get(jointName);
@@ -284,7 +283,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          Vector3f centerOfHandToWristTranslation = new Vector3f();
          float[] angles = new float[3];
 
-         centerOfHandToWristTranslation = new Vector3f(0f, (float) robotSide.negateIfLeftSide(0.015f), -0.06f);
+         centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
          angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
          angles[1] = 0.0f;
          angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
@@ -447,12 +446,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public LogModelProvider getLogModelProvider()
    {
       return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
-   }
-
-   @Override
-   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
-   {
-      return null;
    }
 
    @Override

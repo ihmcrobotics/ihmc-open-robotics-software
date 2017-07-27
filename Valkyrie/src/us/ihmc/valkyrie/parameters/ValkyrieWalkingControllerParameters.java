@@ -29,7 +29,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -39,6 +38,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
 import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -73,8 +73,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
-      super(1.0);
-
       this.jointMap = jointMap;
       this.target = target;
 

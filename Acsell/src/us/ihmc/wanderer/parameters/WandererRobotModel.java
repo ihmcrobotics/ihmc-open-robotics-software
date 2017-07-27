@@ -34,23 +34,20 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
-import us.ihmc.wanderer.hardware.controllers.WandererOutputProcessor;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -297,12 +294,6 @@ public class WandererRobotModel implements DRCRobotModel
    public LogModelProvider getLogModelProvider()
    {
       return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
-   }
-
-   @Override
-   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
-   {
-      return new WandererOutputProcessor(controllerFullRobotModel);
    }
 
    @Override
