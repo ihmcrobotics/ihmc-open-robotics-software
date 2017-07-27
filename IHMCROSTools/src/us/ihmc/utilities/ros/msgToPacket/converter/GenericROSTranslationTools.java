@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 
@@ -742,6 +743,11 @@ public class GenericROSTranslationTools
    private static Transform convertQuaternionBasedTransformToTransform(QuaternionBasedTransform quaternionBasedTransform)
    {
       Transform message = messageFactory.newFromType("geometry_msgs/Transform");
+
+      if(quaternionBasedTransform == null)
+      {
+         quaternionBasedTransform = new QuaternionBasedTransform((QuaternionReadOnly) null, null);
+      }
 
       message.setTranslation(convertVector3D(quaternionBasedTransform.getTranslationVector()));
       message.setRotation(convertTuple4d(quaternionBasedTransform.getQuaternion()));
