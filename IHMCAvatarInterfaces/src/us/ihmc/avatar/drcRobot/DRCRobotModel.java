@@ -1,9 +1,5 @@
 package us.ihmc.avatar.drcRobot;
 
-import java.util.LinkedHashMap;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import com.jme3.math.Transform;
 
 import us.ihmc.avatar.handControl.HandCommandManager;
@@ -17,7 +13,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParam
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -71,10 +66,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
          CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract DRCHandType getDRCHandType();
-
-   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
-
-   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract LogSettings getLogSettings();
 
