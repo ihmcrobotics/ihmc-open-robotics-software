@@ -1,23 +1,24 @@
 package us.ihmc.avatar.ros;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -31,7 +32,9 @@ public class IHMCROSTranslationRuntimeToolsTest
    {
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<?>> concreteTypes = new HashSet<>();
-      for (Class<?> aClass : reflections.getTypesAnnotatedWith(RosMessagePacket.class))
+      Set<Class<?>> annotatedTypes = reflections.getTypesAnnotatedWith(RosMessagePacket.class);
+      Stream<Class<?>> ihmcPacketClassesStream = annotatedTypes.stream().filter(annotatedType -> annotatedType.getAnnotation(RosMessagePacket.class).isIHMCPacket());
+      for (Class<?> aClass : ihmcPacketClassesStream.collect(Collectors.toSet()))
       {
          if(!Modifier.isAbstract(aClass.getModifiers()))
          {
