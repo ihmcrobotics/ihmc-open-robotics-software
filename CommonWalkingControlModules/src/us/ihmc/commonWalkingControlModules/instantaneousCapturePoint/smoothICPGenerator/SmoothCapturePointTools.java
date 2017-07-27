@@ -5,9 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FrameTuple;
 
 /**
  * @author Tim Seyde
@@ -49,8 +49,8 @@ public class SmoothCapturePointTools extends CapturePointTools
     */
    public static void calculateICPQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int icpDerivativeOrder, 
                                                                            YoFrameTrajectory3D cmpPolynomial3D, 
-                                                                           FrameTuple<?, ?> icpPositionDesiredFinal, 
-                                                                           FrameTuple<?, ?> icpQuantityDesired)
+                                                                           FrameTuple3DReadOnly icpPositionDesiredFinal, 
+                                                                           FrameTuple3D<?, ?> icpQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if(numberOfCoefficients == -1)
@@ -107,8 +107,8 @@ public class SmoothCapturePointTools extends CapturePointTools
     * @return
     */
    public static void calculateICPQuantity3D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
-                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple<?, ?> icpPositionDesiredFinal,
-                                             FrameTuple<?, ?> icpQuantityDesired)
+                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3DReadOnly icpPositionDesiredFinal,
+                                             FrameTuple3D<?, ?> icpQuantityDesired)
    {
       M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
       M1.zero();

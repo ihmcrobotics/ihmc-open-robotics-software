@@ -15,8 +15,6 @@ import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -28,6 +26,8 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class StepprSingleThreadedController extends RealtimeThread

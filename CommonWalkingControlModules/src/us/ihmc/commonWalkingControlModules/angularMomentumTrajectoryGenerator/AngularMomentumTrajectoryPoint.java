@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -34,7 +34,7 @@ public class AngularMomentumTrajectoryPoint
       this.angularMomentum.set(vector);
    }
    
-   public void setAngularMomentum(FrameVector vector)
+   public void setAngularMomentum(FrameVector3D vector)
    {
       this.angularMomentum.set(vector);
    }
@@ -44,7 +44,7 @@ public class AngularMomentumTrajectoryPoint
       this.torque.set(vector);
    }
    
-   public void setTorque(FrameVector vector)
+   public void setTorque(FrameVector3D vector)
    {
       this.torque.set(vector);
    }
@@ -54,7 +54,7 @@ public class AngularMomentumTrajectoryPoint
       this.rotatum.set(vector);
    }
 
-   public void setRotatum(FrameVector vector)
+   public void setRotatum(FrameVector3D vector)
    {
       this.rotatum.set(vector);
    }
@@ -75,32 +75,32 @@ public class AngularMomentumTrajectoryPoint
       this.time.set(0);
    }
    
-   public FrameVector getAngularMomentum()
+   public FrameVector3D getAngularMomentum()
    {
       return angularMomentum.getFrameTuple();
    }
    
-   public FrameVector getTorque()
+   public FrameVector3D getTorque()
    {
       return torque.getFrameTuple();
    }
 
-   public FrameVector getRotatum()
+   public FrameVector3D getRotatum()
    {
       return rotatum.getFrameTuple();
    }
 
-   public void getAngularMomentum(FrameVector angMomToPack)
+   public void getAngularMomentum(FrameVector3D angMomToPack)
    {
       angMomToPack.setIncludingFrame(angularMomentum.getFrameTuple());
    }
 
-   public void getTorque(FrameVector torqueToPack)
+   public void getTorque(FrameVector3D torqueToPack)
    {
       torqueToPack.setIncludingFrame(torque.getFrameTuple());
    }
 
-   public void getRotatum(FrameVector rotatumToPack)
+   public void getRotatum(FrameVector3D rotatumToPack)
    {
       rotatumToPack.setIncludingFrame(rotatum.getFrameTuple());
    }

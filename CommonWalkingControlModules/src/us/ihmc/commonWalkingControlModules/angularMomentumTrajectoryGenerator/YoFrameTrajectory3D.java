@@ -3,21 +3,20 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
 
-   private final FramePoint framePosition = new FramePoint();
-   private final FrameVector frameVelocity = new FrameVector();
-   private final FrameVector frameAcceleration = new FrameVector();
+   private final FramePoint3D framePosition = new FramePoint3D();
+   private final FrameVector3D frameVelocity = new FrameVector3D();
+   private final FrameVector3D frameAcceleration = new FrameVector3D();
 
    public YoFrameTrajectory3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
@@ -260,20 +259,20 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    }
 
    @Deprecated
-   public void setConstant(FramePoint z)
+   public void setConstant(FramePoint3D z)
    {
       z.checkReferenceFrameMatch(referenceFrame);
 
       setConstant(z.getPoint());
    }
 
-   public void setConstant(double t0, double tFinal, FramePoint z0)
+   public void setConstant(double t0, double tFinal, FramePoint3D z0)
    {
       checkReferenceFrameMatch(z0);
       setConstant(t0, tFinal, z0.getPoint());
    }
 
-   public void setCubic(double t0, double tFinal, FramePoint z0, FramePoint zFinal)
+   public void setCubic(double t0, double tFinal, FramePoint3D z0, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
@@ -281,7 +280,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubic(t0, tFinal, z0.getPoint(), zFinal.getPoint());
    }
 
-   public void setCubic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal, FrameVector zdFinal)
+   public void setCubic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -291,7 +290,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubic(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setCubicBezier(double t0, double tFinal, FramePoint z0, FramePoint zR1, FramePoint zR2, FramePoint zFinal)
+   public void setCubicBezier(double t0, double tFinal, FramePoint3D z0, FramePoint3D zR1, FramePoint3D zR2, FramePoint3D zFinal)
    {
       checkReferenceFrameMatch(z0);
       checkReferenceFrameMatch(zR1);
@@ -300,8 +299,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicBezier(t0, tFinal, z0.getPoint(), zR1.getPoint(), zR2.getPoint(), zFinal.getPoint());
    }
 
-   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, FramePoint z0, FramePoint zFinal, FrameVector zdFinal,
-                                                           FrameVector zddFinal)
+   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, FramePoint3D z0, FramePoint3D zFinal, FrameVector3D zdFinal,
+                                                           FrameVector3D zddFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
@@ -311,7 +310,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0, FramePoint zFinal)
+   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -321,8 +320,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicThreeInitialConditionsFinalPosition(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint());
    }
 
-   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdFinal,
-                                                                 FrameVector zddFinal)
+   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdFinal,
+                                                                 FrameVector3D zddFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -332,8 +331,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getPoint(), zd0.getVector(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, FramePoint z0, FramePoint zIntermediate1,
-                                               FramePoint zIntermediate2, FramePoint zFinal)
+   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1,
+                                               FramePoint3D zIntermediate2, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate1.checkReferenceFrameMatch(referenceFrame);
@@ -344,7 +343,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                       zFinal.getPoint());
    }
 
-   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint z0, FramePoint zIntermediate1, FramePoint zFinal)
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate1.checkReferenceFrameMatch(referenceFrame);
@@ -353,8 +352,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zFinal.getPoint());
    }
 
-   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint z0,
-                                                                          FramePoint zIntermediate, FramePoint zFinal, FrameVector zdFinal)
+   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint3D z0,
+                                                                          FramePoint3D zIntermediate, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate.checkReferenceFrameMatch(referenceFrame);
@@ -365,8 +364,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                                                  zdFinal.getVector());
    }
 
-   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0,
-                                                                            FramePoint zIntermediate, FramePoint zFinal)
+   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                                                            FramePoint3D zIntermediate, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -377,8 +376,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                                                    zFinal.getPoint());
    }
 
-   public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal,
-                                                                       FrameVector zdFinal)
+   public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal,
+                                                                       FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -388,7 +387,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setLinear(double t0, double tFinal, FramePoint z0, FramePoint zf)
+   public void setLinear(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zf.checkReferenceFrameMatch(referenceFrame);
@@ -396,8 +395,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setLinear(t0, tFinal, z0.getPoint(), zf.getPoint());
    }
 
-   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zIntermediate0,
-                        FrameVector zdIntermediate0, FramePoint zIntermediate1, FrameVector zdIntermediate1, FramePoint zf, FrameVector zdf)
+   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate0,
+                        FrameVector3D zdIntermediate0, FramePoint3D zIntermediate1, FrameVector3D zdIntermediate1, FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -412,7 +411,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                zIntermediate1.getPoint(), zdIntermediate1.getVector(), zf.getPoint(), zdf.getVector());
    }
 
-   public void setQuadratic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal)
+   public void setQuadratic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -421,7 +420,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuadratic(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint());
    }
 
-   public void setQuadraticUsingInitialAcceleration(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0)
+   public void setQuadraticUsingInitialAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -430,7 +429,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuadraticUsingInitialAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector());
    }
 
-   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FramePoint zIntermediate, FramePoint zFinal)
+   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate.checkReferenceFrameMatch(referenceFrame);
@@ -439,7 +438,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuadraticUsingIntermediatePoint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zFinal.getPoint());
    }
 
-   public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, FramePoint z0, FramePoint zFinal, FrameVector zdFinal)
+   public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, FramePoint3D z0, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
@@ -448,7 +447,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuadraticWithFinalVelocityConstraint(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setQuartic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0, FramePoint zFinal, FrameVector zdFinal)
+   public void setQuartic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -459,8 +458,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuartic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setQuarticUsingFinalAcceleration(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zFinal, FrameVector zdFinal,
-                                                FrameVector zddFinal)
+   public void setQuarticUsingFinalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal,
+                                                FrameVector3D zddFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -471,8 +470,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuarticUsingFinalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdIntermediate,
-                                                   FramePoint zFinal, FrameVector zdFinal)
+   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdIntermediate,
+                                                   FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -484,7 +483,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                           zdFinal.getVector());
    }
 
-   public void setQuarticUsingMidPoint(double t0, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zMid, FramePoint zFinal, FrameVector zdFinal)
+   public void setQuarticUsingMidPoint(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zMid, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -495,8 +494,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuarticUsingMidPoint(t0, tFinal, z0.getPoint(), zd0.getVector(), zMid.getPoint(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0,
-                                                      FramePoint zIntermediate0, FramePoint zIntermediate1, FramePoint zFinal, FrameVector zdIntermediate1)
+   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0,
+                                                      FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zFinal, FrameVector3D zdIntermediate1)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate0.checkReferenceFrameMatch(referenceFrame);
@@ -508,8 +507,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                              zFinal.getPoint(), zdIntermediate1.getVector());
    }
 
-   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zIntermediate, FramePoint zf,
-                                       FrameVector zdf)
+   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate, FramePoint3D zf,
+                                       FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -520,7 +519,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate.getPoint(), zf.getPoint(), zdf.getVector());
    }
 
-   public void setQuintic(double t0, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0, FramePoint zf, FrameVector zdf, FrameVector zddf)
+   public void setQuintic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zf, FrameVector3D zdf, FrameVector3D zddf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -532,8 +531,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuintic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zf.getPoint(), zdf.getVector(), zddf.getVector());
    }
 
-   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0,
-                                      FramePoint zIntermediate0, FramePoint zIntermediate1, FramePoint zf, FrameVector zdf)
+   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                      FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -546,9 +545,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                              zf.getPoint(), zdf.getVector());
    }
 
-   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0,
-                                                                  FrameVector zdIntermediate, FrameVector zddIntermediate, FramePoint zFinal,
-                                                                  FrameVector zdFinal)
+   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                                                  FrameVector3D zdIntermediate, FrameVector3D zddIntermediate, FramePoint3D zFinal,
+                                                                  FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -561,8 +560,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                                          zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0,
-                                       FramePoint zIntermediate, FramePoint zf, FrameVector zdf)
+   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
+                                       FramePoint3D zIntermediate, FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -575,8 +574,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                               zdf.getVector());
    }
 
-   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0,
-                                        FramePoint zIntermediate, FrameVector zdIntermediate, FramePoint zf)
+   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
+                                        FramePoint3D zIntermediate, FrameVector3D zdIntermediate, FramePoint3D zf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -589,8 +588,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                zdIntermediate.getVector(), zf.getPoint());
    }
 
-   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0, FramePoint zIntermediate0,
-                         FrameVector zdIntermediate0, FramePoint zIntermediate1, FrameVector zdIntermediate1, FramePoint zf, FrameVector zdf)
+   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate0,
+                         FrameVector3D zdIntermediate0, FramePoint3D zIntermediate1, FrameVector3D zdIntermediate1, FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -605,9 +604,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                 zIntermediate1.getPoint(), zdIntermediate1.getVector(), zf.getPoint(), zdf.getVector());
    }
 
-   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint z0, FrameVector zd0,
-                                                    FrameVector zdd0, FramePoint zIntermediate0, FramePoint zIntermediate1, FramePoint zf, FrameVector zdf,
-                                                    FrameVector zddf)
+   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                                    FrameVector3D zdd0, FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zf, FrameVector3D zdf,
+                                                    FrameVector3D zddf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -622,8 +621,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                            zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf.getVector(), zddf.getVector());
    }
 
-   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0,
-                                      FramePoint zIntermediate, FramePoint zf, FrameVector zdf, FrameVector zddf)
+   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
+                                      FramePoint3D zIntermediate, FramePoint3D zf, FrameVector3D zdf, FrameVector3D zddf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -637,8 +636,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                              zdf.getVector(), zddf.getVector());
    }
 
-   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint z0, FrameVector zd0, FrameVector zdd0,
-                                                             FrameVector zdIntermediate, FrameVector zddIntermediate, FramePoint zFinal, FrameVector zdFinal)
+   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
+                                                             FrameVector3D zdIntermediate, FrameVector3D zddIntermediate, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -652,40 +651,40 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                                     zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public FramePoint getFramePosition()
+   public FramePoint3D getFramePosition()
    {
       framePosition.setToZero(referenceFrame);
       framePosition.set(getPosition());
       return framePosition;
    }
 
-   public void getFramePosition(FramePoint positionToPack)
+   public void getFramePosition(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }
 
-   public FrameVector getFrameVelocity()
+   public FrameVector3D getFrameVelocity()
    {
       frameVelocity.setToZero(referenceFrame);
       frameVelocity.set(getVelocity());
       return frameVelocity;
    }
 
-   public void getFrameVelocity(FrameVector velocityToPack)
+   public void getFrameVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setToZero(referenceFrame);
       velocityToPack.set(getVelocity());
    }
 
-   public FrameVector getFrameAcceleration()
+   public FrameVector3D getFrameAcceleration()
    {
       frameAcceleration.setToZero(referenceFrame);
       frameAcceleration.set(getAcceleration());
       return frameAcceleration;
    }
 
-   public void getFrameAcceleration(FrameVector accelerationToPack)
+   public void getFrameAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero(referenceFrame);
       accelerationToPack.set(getAcceleration());

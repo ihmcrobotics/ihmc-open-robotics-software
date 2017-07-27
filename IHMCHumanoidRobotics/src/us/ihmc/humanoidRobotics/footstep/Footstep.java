@@ -5,13 +5,13 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -312,16 +312,6 @@ public class Footstep
       setY(position2d.getY());
    }
 
-   public void setExpectedInitialPose(FramePose expectedInitialPose)
-   {
-      this.expectedInitialPose.setIncludingFrame(expectedInitialPose);
-   }
-
-   public void setExpectedInitialPose(FramePoint3D expectedInitialPosition, FrameOrientation expectedInitialOrientation)
-   {
-      this.expectedInitialPose.setPoseIncludingFrame(expectedInitialPosition, expectedInitialOrientation);
-   }
-
    public String getId()
    {
       return id;
@@ -476,7 +466,7 @@ public class Footstep
       footstepPose.setPoseIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector offset)
+   public void addOffset(FrameVector3D offset)
    {
       footstepPose.prependTranslation(offset.getVector());
 

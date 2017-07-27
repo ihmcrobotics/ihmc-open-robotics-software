@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -55,26 +54,26 @@ public class CMPTrajectory
       return activeSegment;
    }
 
-   private final FramePoint cmpPositionToThrowAway = new FramePoint();
-   private final FrameVector cmpVelocityToThrowAway = new FrameVector();
-   private final FrameVector cmpAccelerationToThrowAway = new FrameVector();
+   private final FramePoint3D cmpPositionToThrowAway = new FramePoint3D();
+   private final FrameVector3D cmpVelocityToThrowAway = new FrameVector3D();
+   private final FrameVector3D cmpAccelerationToThrowAway = new FrameVector3D();
 
    public void update(double timeInState)
    {
       update(timeInState, cmpPositionToThrowAway);
    }
 
-   public void update(double timeInState, FramePoint desiredCMPToPack)
+   public void update(double timeInState, FramePoint3D desiredCMPToPack)
    {
       update(timeInState, desiredCMPToPack, cmpVelocityToThrowAway);
    }
 
-   public void update(double timeInState, FramePoint desiredCMPToPack, FrameVector desiredCMPVelocityToPack)
+   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector3D desiredCMPVelocityToPack)
    {
       update(timeInState, desiredCMPToPack, desiredCMPVelocityToPack, cmpAccelerationToThrowAway);
    }
 
-   public void update(double timeInState, FramePoint desiredCMPToPack, FrameVector desiredCMPVelocityToPack, FrameVector desiredCMPAccelerationToPack)
+   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector3D desiredCMPVelocityToPack, FrameVector3D desiredCMPAccelerationToPack)
    {
       if (!availablePolynomials[trajectoryIndex.getIntegerValue()].timeIntervalContains(timeInState)
          && (trajectoryIndex.getIntegerValue() < numberOfSegments.getIntegerValue() -1))

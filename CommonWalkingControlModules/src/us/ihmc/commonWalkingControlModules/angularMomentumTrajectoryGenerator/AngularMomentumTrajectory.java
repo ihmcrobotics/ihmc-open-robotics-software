@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -77,14 +77,14 @@ public class AngularMomentumTrajectory implements AngularMomentumTrajectoryInter
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack)
    {
       update(timeInState);
       desiredAngularMomentumToPack.setIncludingFrame(trajectories.get(currentSegment.getIntegerValue()).getFramePosition());
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack)
    {
       update(timeInState, desiredAngularMomentumToPack);
       desiredTorqueToPack.setIncludingFrame(trajectories.get(currentSegment.getIntegerValue()).getFrameVelocity());
@@ -102,7 +102,7 @@ public class AngularMomentumTrajectory implements AngularMomentumTrajectoryInter
 
    }
 
-   public void computeFromCoPWaypoints(double t0, double tFinal, FramePoint zInitial, FramePoint zRefPoint1, FramePoint zRefPoint2, FramePoint zFinal)
+   public void computeFromCoPWaypoints(double t0, double tFinal, FramePoint3D zInitial, FramePoint3D zRefPoint1, FramePoint3D zRefPoint2, FramePoint3D zFinal)
    {
       trajectories.get(0).setCubicBezier(t0, tFinal, zInitial, zRefPoint1, zRefPoint2, zFinal);
       numberOfSegments.set(1);
