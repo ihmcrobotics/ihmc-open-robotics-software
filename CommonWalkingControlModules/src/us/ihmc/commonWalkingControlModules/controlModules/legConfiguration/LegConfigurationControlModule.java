@@ -221,7 +221,7 @@ public class LegConfigurationControlModule
       desiredAngleWhenExtended.set(0.0);
 
       desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenBracing.set(0.6);
+      desiredAngleWhenBracing.set(0.4);
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
