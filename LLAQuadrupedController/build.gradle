@@ -60,7 +60,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":SensorProcessing")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
-   compile ihmc.getProjectDependency(":IHMCRobotModels")
+   //compile ihmc.getProjectDependency(":IHMCRobotModels")
    
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
