@@ -101,7 +101,7 @@ public class LeapOfFaithParameters
 
    public double getRelaxationRate()
    {
-      return 1.0;
+      return 2.0;
    }
 
    public double getMinimumPelvisWeight()
