@@ -15,6 +15,7 @@ import com.martiansoftware.jsap.JSAPException;
 import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.DarpaRoboticsChallengeFinalsEnvironment;
 import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
@@ -78,11 +79,11 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
       {
          if (opt.robotModel.equals(DEFAULT_STRING))
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, DRCRobotModel.RobotTarget.SCS, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, RobotTarget.SCS, false);
          }
          else
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, DRCRobotModel.RobotTarget.SCS, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, RobotTarget.SCS, false);
          }
       }
       catch (IllegalArgumentException e)

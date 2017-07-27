@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
@@ -47,7 +47,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
@@ -86,7 +86,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final StraightLegWalkingParameters straightLegWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
 
-   public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+   public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       this.target = target;
       this.jointMap = jointMap;
@@ -102,7 +102,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
 
-      runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);

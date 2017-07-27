@@ -2,7 +2,7 @@ package us.ihmc.atlas.operatorInterfaceDebugging;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -50,7 +50,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
    public AtlasNoSimPacketBlaster() throws IOException
    {
-      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
+      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       initRobotConfiguration();

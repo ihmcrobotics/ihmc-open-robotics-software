@@ -15,6 +15,7 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -88,7 +89,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
 
    private final String[] resourceDirectories;
    {
@@ -105,22 +106,22 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean enableJointDamping = true;
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
       this(target,headless, "DEFAULT", simulationContactPoints);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
       this(target,headless, "DEFAULT", null);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model)
    {
       this(target, headless, model, null);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap();

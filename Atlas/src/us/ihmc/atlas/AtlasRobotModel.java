@@ -21,6 +21,7 @@ import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -87,7 +88,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
    private final AtlasRobotVersion selectedVersion;
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
    private static final double ESTIMATOR_DT = Conversions.nanosecondsToSeconds(ESTIMATOR_DT_IN_NS);
@@ -114,22 +115,22 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final RobotDescription robotDescription;
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
    {
       this(atlasVersion, target, headless, null, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
    {
       this(atlasVersion, target, headless, null, createAdditionalContactPoints);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
       this(atlasVersion, target, headless, simulationContactPoints, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
          boolean createAdditionalContactPoints)
    {
       if (SCALE_ATLAS)
@@ -159,7 +160,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
 
-      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       if (USE_SMOOTH_CMP_PLANNER)
          capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
@@ -356,12 +357,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
-      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
+      if (target == RobotTarget.REAL_ROBOT)
       {
          return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if ((target == DRCRobotModel.RobotTarget.SCS) && AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
+      if ((target == RobotTarget.SCS) && AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }

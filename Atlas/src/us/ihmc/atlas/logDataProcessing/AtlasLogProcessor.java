@@ -5,6 +5,7 @@ import java.io.IOException;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.logProcessor.DRCLogProcessor;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 
@@ -29,6 +30,6 @@ public class AtlasLogProcessor extends DRCLogProcessor
    @Override
    public DRCRobotModel createDRCRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
    }
 }

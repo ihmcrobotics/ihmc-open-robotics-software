@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCInverseDynamicsCalculatorTestHelper;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -24,7 +25,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -82,7 +83,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
          this.simulatedRobot = simulatedRobot;
 
          boolean headless = false;
-         AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, headless);
+         AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, headless);
 //         FullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
 
          boolean createCollisionMeshes = false;

@@ -13,6 +13,7 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -76,7 +77,7 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final String robotName = "STICK_BOT";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
 
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
 
    private final String[] resourceDirectories;
    {
@@ -92,23 +93,23 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
 
    // One of the three constructors below calls the fourth constructor with different configuration settings
-   public StickRobotModel(DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public StickRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
       this(target,headless, "DEFAULT", simulationContactPoints);
    }
 
-   public StickRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
+   public StickRobotModel(RobotTarget target, boolean headless)
    {
       this(target,headless, "DEFAULT", null);
    }
 
-   public StickRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
+   public StickRobotModel(RobotTarget target, boolean headless, String model)
    {
       this(target, headless, model, null);
    }
 
    // main constructor being called
-   public StickRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   public StickRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
    {
       this.target = target;
       jointMap = new StickRobotJointMap();

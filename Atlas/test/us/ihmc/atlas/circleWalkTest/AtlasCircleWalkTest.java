@@ -9,8 +9,8 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.circleWalkTest.HumanoidCircleWalkTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotics.partNames.ArmJointName;
 
 public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
