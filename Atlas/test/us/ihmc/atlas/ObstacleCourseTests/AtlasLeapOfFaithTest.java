@@ -19,52 +19,61 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.SLOW})
+   @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      super.testUnknownStepDownTwoFeetOnEachStep();
+      double stepDownHeight = 0.13;
+      super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.SLOW})
+   @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      super.testUnknownStepDownOneFootOnEachStep();
+      double stepDownHeight = 0.13;
+      super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.SLOW})
+   @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
-      super.testUnknownStepDownOneFootOnEachStepLong();
+      double stepDownHeight = 0.12;
+      super.testUnknownStepDownOneFootOnEachStepLong(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.SLOW})
+   // FIXME
+   @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
-      super.testUnknownStepDownOneFootOnEachStepWithUncertainty();
+      double stepDownHeight = 0.12;
+      super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 110.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testRandomHeightField() throws SimulationExceededMaximumTimeException
    {
-      super.testRandomHeightField();
+      double maxStepIncrease = 0.07;
+      double maxStepHeight = 0.04;
+      double minStepHeight = -0.12;
+      super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      super.testDropOffsWhileWalking();
+      double stepDownHeight = 0.13;
+      super.testDropOffsWhileWalking(stepDownHeight);
    }
 
    @Override
@@ -105,6 +114,18 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          super(target, jointMap, contactPointParameters);
 
          leapOfFaithParameters = new TestLeapOfFaithParameters();
+      }
+
+      @Override
+      public double nominalHeightAboveAnkle()
+      {
+         return 0.77;
+      }
+
+      @Override
+      public double maximumHeightAboveAnkle()
+      {
+         return 0.88;
       }
 
       @Override

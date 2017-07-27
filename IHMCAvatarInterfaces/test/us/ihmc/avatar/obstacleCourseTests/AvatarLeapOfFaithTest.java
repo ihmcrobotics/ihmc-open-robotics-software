@@ -64,7 +64,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownTwoFeetOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -73,7 +73,6 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.17;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -138,7 +137,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepLong(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -147,7 +146,6 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.5;
-      double stepDownHeight = 0.15;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -206,7 +204,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -215,7 +213,6 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.16;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -275,7 +272,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    }
 
 
-   public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -284,7 +281,6 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfStepsDown = 5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.13;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
@@ -343,7 +339,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testRandomHeightField() throws SimulationExceededMaximumTimeException
+   public void testRandomHeightField(double maxStepHeight, double minStepHeight, double maxStepIncrease) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(10);
@@ -353,9 +349,6 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       int numberOfSteps = 16;
 
-      double maxStepIncrease = 0.08;
-      double maxStepHeight = 0.05;
-      double minStepHeight = -0.17;
       double minStepLength = 0.3;
       double maxStepLength = 0.6;
       double endingStepLength = 0.3;
@@ -432,7 +425,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled + 0.5 * endingStepLength, 0.0, 0.0);
+      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -448,7 +441,10 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
+
+
+
+   public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -456,7 +452,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double transferTime = 0.2;
 
       double stepLength = 0.4;
-      double dropHeight = -0.15;
+      double dropHeight = -stepDownHeight;
 
       int numberOfDrops = 4;
       int stepsBeforeDrop = 2;
