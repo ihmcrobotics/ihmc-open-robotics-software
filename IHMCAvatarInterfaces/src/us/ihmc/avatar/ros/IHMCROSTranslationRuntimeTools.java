@@ -5,23 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import geometry_msgs.Point;
+import ihmc_msgs.*;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 
-import ihmc_msgs.ArmTrajectoryRosMessage;
-import ihmc_msgs.ChestTrajectoryRosMessage;
-import ihmc_msgs.FootTrajectoryRosMessage;
-import ihmc_msgs.FootstepDataListRosMessage;
-import ihmc_msgs.FootstepDataRosMessage;
-import ihmc_msgs.HandTrajectoryRosMessage;
-import ihmc_msgs.PelvisTrajectoryRosMessage;
-import ihmc_msgs.Point2dRosMessage;
-import ihmc_msgs.WholeBodyTrajectoryRosMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -40,12 +33,16 @@ public class IHMCROSTranslationRuntimeTools
 {
    private static final MessageFactory messageFactory = GenericROSTranslationTools.getMessageFactory();
    private static final CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
+   static
    {
       customFieldConversions.registerIHMCPacketFieldConverter(FootstepDataListMessage.class, IHMCROSTranslationRuntimeTools::customConvertToRosMessage);
       customFieldConversions.registerROSMessageFieldConverter(FootstepDataListRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
 
       customFieldConversions.registerIHMCPacketFieldConverter(FootstepDataMessage.class, IHMCROSTranslationRuntimeTools::customConvertToRosMessage);
       customFieldConversions.registerROSMessageFieldConverter(FootstepDataRosMessage.class, IHMCROSTranslationRuntimeTools::customConvertToIHMCMessage);
+
+      customFieldConversions.registerIHMCPacketFieldConverter(FrameInformation.class, IHMCROSTranslationRuntimeTools::convertFrameInformation);
+      customFieldConversions.registerROSMessageFieldConverter(FrameInformationRosMessage.class, IHMCROSTranslationRuntimeTools::convertFrameInformationRosMessage);
    }
 
    public static Message convertToRosMessage(Packet<?> ihmcMessage)
@@ -316,6 +313,30 @@ public class IHMCROSTranslationRuntimeTools
       message.setFootstepDataList(convertedFootsteps);
 
       return message;
+   }
+
+   private static FrameInformationRosMessage convertFrameInformation(FrameInformation frameInformation)
+   {
+      Class<?> ihmcClass = FrameInformation.class;
+      String rosMessageClassNameFromIHMCClass = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcClass.getSimpleName());
+      RosMessagePacket rosAnnotation = ihmcClass.getAnnotation(RosMessagePacket.class);
+
+      FrameInformationRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCClass);
+
+      message.setDataReferenceFrameId(frameInformation.getDataReferenceFrameId());
+      message.setTrajectoryReferenceFrameId(frameInformation.getTrajectoryReferenceFrameId());
+
+      return message;
+   }
+
+   private static FrameInformation convertFrameInformationRosMessage(FrameInformationRosMessage message)
+   {
+      FrameInformation frameInformation = new FrameInformation();
+
+      frameInformation.setDataReferenceFrameId(message.getDataReferenceFrameId());
+      frameInformation.setTrajectoryReferenceFrameId(message.getTrajectoryReferenceFrameId());
+
+      return frameInformation;
    }
 
    public static String getROSMessageTypeStringFromIHMCMessageClass(Class outputType)
