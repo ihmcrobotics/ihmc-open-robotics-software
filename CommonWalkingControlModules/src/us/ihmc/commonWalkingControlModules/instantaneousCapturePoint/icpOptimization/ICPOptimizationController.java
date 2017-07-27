@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -33,10 +33,10 @@ import java.util.List;
 
 public abstract class ICPOptimizationController
 {
-   protected static final boolean VISUALIZE = true;
+   protected static final boolean VISUALIZE = false;
    protected static final boolean COMPUTE_COST_TO_GO = false;
    protected static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
 
    protected static final String yoNamePrefix = "controller";
 
@@ -161,9 +161,9 @@ public abstract class ICPOptimizationController
    protected boolean useDifferentSplitRatioForBigAdjustment;
    protected double minimumTimeOnInitialCMPForBigAdjustment;
 
-   public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-         boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
@@ -201,7 +201,7 @@ public abstract class ICPOptimizationController
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      useTwoCMPs = icpPlannerParameters.useTwoCMPsPerSupport();
+      useTwoCMPs = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1;
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
 

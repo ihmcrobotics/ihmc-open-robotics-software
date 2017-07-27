@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -81,7 +82,8 @@ public class GroundContactForceOptimizationControlModule
       }
 
       rhoMin.set(optimizationSettings.getRhoMin());
-      qpSolver = new GroundContactForceQPSolver(rhoSize, registry);
+      ActiveSetQPSolver activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      qpSolver = new GroundContactForceQPSolver(activeSetQPSolver, rhoSize, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
 
       parentRegistry.addChild(registry);

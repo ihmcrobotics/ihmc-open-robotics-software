@@ -100,7 +100,7 @@ public class LogVisualizer
       LogFormatUpdater.updateLogs(selectedFile, logProperties);
 
       File handshake = new File(selectedFile, logProperties.getVariables().getHandshakeAsString());
-      if (!handshake.exists())
+      if (!handshake.exists() || handshake.isDirectory())
       {
          throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
@@ -111,7 +111,7 @@ public class LogVisualizer
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType(), "logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;

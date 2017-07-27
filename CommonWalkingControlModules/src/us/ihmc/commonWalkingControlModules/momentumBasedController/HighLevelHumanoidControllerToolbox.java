@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisu
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -152,6 +153,7 @@ public class HighLevelHumanoidControllerToolbox
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
+   private WalkingMessageHandler walkingMessageHandler;
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
@@ -992,6 +994,16 @@ public class HighLevelHumanoidControllerToolbox
    public Collection<ReferenceFrame> getTrajectoryFrames()
    {
       return trajectoryFrames;
+   }
+
+   public void setWalkingMessageHandler(WalkingMessageHandler walkingMessageHandler)
+   {
+      this.walkingMessageHandler = walkingMessageHandler;
+   }
+   
+   public WalkingMessageHandler getWalkingMessageHandler()
+   {
+      return walkingMessageHandler;
    }
 
 }

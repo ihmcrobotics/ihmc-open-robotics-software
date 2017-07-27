@@ -287,7 +287,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       frameChestOrientation.get(desiredChestOrientation);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(chestTrajectoryTime, desiredChestOrientation, worldFrame, worldFrame);
       drcSimulationTestHelper.send(chestMessage);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(chestTrajectoryTime + 0.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(chestTrajectoryTime + 1.0);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, scs, epsilon);

@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
@@ -290,8 +290,8 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
       // shrink polygon and project line origin inside
       ConvexPolygon2D shrunkSolePolygon = new ConvexPolygon2D();
-      ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      shrinker.shrinkConstantDistanceInto(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
+      ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
+      shrinker.scaleConvexPolygon(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
 
       Point2D lineOrigin = new Point2D(xLine, yLine);
       shrunkSolePolygon.orthogonalProjection(lineOrigin);

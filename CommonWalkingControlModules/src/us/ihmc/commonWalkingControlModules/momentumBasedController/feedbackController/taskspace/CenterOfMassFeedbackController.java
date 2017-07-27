@@ -22,6 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
@@ -65,6 +66,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    private final MomentumRateCommand inverseDynamicsOutput = new MomentumRateCommand();
    private final MomentumCommand inverseKinematicsOutput = new MomentumCommand();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
@@ -145,6 +147,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       inverseDynamicsOutput.set(command.getMomentumRateCommand());
 
       gains.set(command.getGains());
+      command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
 
       command.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
@@ -270,6 +273,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
@@ -300,6 +304,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
@@ -333,6 +338,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 

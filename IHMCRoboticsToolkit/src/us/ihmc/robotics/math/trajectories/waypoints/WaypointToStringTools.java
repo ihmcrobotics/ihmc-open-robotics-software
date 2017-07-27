@@ -86,7 +86,7 @@ public abstract class WaypointToStringTools
 
    private static DecimalFormat createNumberFormat()
    {
-      return new DecimalFormat(" 0.00;-0.00");
+      return new DecimalFormat(" 0.000;-0.000");
    }
 
    public static String waypointToString(Point3DReadOnly position, Vector3DReadOnly linearVelocity, NumberFormat format)

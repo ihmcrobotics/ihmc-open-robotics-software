@@ -24,12 +24,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -39,6 +33,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * TODO There is not enough HumanoidReferenceFrames in that class, it is pretty fragile
@@ -106,7 +106,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
    private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
-   
+
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
    private final YoLong lastCommandId;
@@ -732,7 +732,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (!isTrajectoryOffsetStopped.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue();
-         offsetHeightTrajectoryGenerator.compute(deltaTime);
+
+         if (!offsetHeightTrajectoryGenerator.isEmpty())
+         {
+            offsetHeightTrajectoryGenerator.compute(deltaTime);
+         }
 
          if (offsetHeightTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
          {

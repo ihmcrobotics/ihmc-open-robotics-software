@@ -13,15 +13,15 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This control module can activate the use of upper body momentum during walking to allow the robot to recover from
@@ -61,6 +61,7 @@ public class MomentumRecoveryControlModule
    private final YoBoolean allowUpperBodyMomentumInSingleSupport = new YoBoolean("allowUpperBodyMomentumInSingleSupport", registry);
    private final YoBoolean allowUpperBodyMomentumInDoubleSupport = new YoBoolean("allowUpperBodyMomentumInDoubleSupport", registry);
    private final YoBoolean allowUsingHighMomentumWeight = new YoBoolean("allowUsingHighMomentumWeight", registry);
+   private final YoBoolean alwaysAllowMomentum = new YoBoolean("alwaysAllowMomentum", registry);
 
    private final YoDouble maxDistanceCMPSupport = new YoDouble("maxDistanceCMPSupport", registry);
 
@@ -73,7 +74,7 @@ public class MomentumRecoveryControlModule
    private RobotSide supportSide;
    private Footstep nextFootstep;
 
-   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler polygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d extendedSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeCMPArea = new FrameConvexPolygon2d();
@@ -90,10 +91,12 @@ public class MomentumRecoveryControlModule
    private final YoFrameConvexPolygon2d yoProjectionArea;
    private final YoFramePoint2d yoCapturePoint;
 
+
    public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2d> defaultFootPolygons, double maxAllowedDistanceCMPSupport,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                        boolean alwaysAllowMomentum, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultFootPolygons = defaultFootPolygons;
+      this.alwaysAllowMomentum.set(alwaysAllowMomentum);
 
       distanceToExtendUpcomingFoothold.set(defaultDistanceToExtendUpcomingFoothold);
       distanceToShrinkSafeAreaSS.set(defaultDistanceToShrinkSafeAreaSS);
@@ -121,7 +124,8 @@ public class MomentumRecoveryControlModule
          artifacts.add(new YoArtifactPolygon("Safe CMP Area", yoSafeCMPArea, Color.CYAN, false));
 
          yoCapturePoint = new YoFramePoint2d("CapturePointForMomentum", worldFrame, registry);
-         artifacts.add(new YoArtifactPosition("Capture Point For Momentum", yoCapturePoint.getYoX(), yoCapturePoint.getYoY(), GraphicType.BALL, Color.BLUE, 0.01));
+         artifacts.add(new YoArtifactPosition("Capture Point For Momentum", yoCapturePoint.getYoX(), yoCapturePoint.getYoY(), GraphicType.BALL, Color.BLUE,
+                                              0.01));
 
          yoProjectionArea = new YoFrameConvexPolygon2d("ProjectionArea", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon("Projection Area", yoProjectionArea, Color.BLUE, false));
@@ -207,7 +211,7 @@ public class MomentumRecoveryControlModule
 
          tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
          safeArea.addVertices(tempPolygon1);
          safeArea.update();
       }
@@ -218,12 +222,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -252,12 +256,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
+         polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -325,9 +329,9 @@ public class MomentumRecoveryControlModule
 
    public void getCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
    {
-      if (usingUpperBodyMomentum.getBooleanValue())
+      if (alwaysAllowMomentum.getBooleanValue() || usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
+         polygonShrinker.scaleConvexPolygon(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
          areaToProjectInto.setIncludingFrameAndUpdate(extendedSupportPolygon);
          safeCMPArea.changeFrameAndProjectToXYPlane(worldFrame);
          safeArea.setIncludingFrameAndUpdate(safeCMPArea);

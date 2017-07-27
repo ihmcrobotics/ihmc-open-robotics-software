@@ -117,6 +117,9 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -174,6 +177,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
@@ -283,6 +287,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ChestHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(HeadHybridJointspaceTaskspaceTrajectoryMessage.class);
       registerPacketClass(ClearDelayQueueMessage.class);
+      registerPacketClass(MomentumTrajectoryMessage.class);
+      registerPacketClass(CenterOfMassTrajectoryMessage.class);
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);
@@ -309,6 +315,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
       registerPacketField(Class.class);
+      registerPacketField(TrajectoryPoint3D.class);
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);
@@ -355,6 +362,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(PauseWalkingMessage.class);
       registerPacketClass(FootstepStatus.class);
+      registerPacketClass(PlanOffsetStatus.class);
       registerPacketClass(WalkingStatusMessage.class);
       registerPacketClass(TrajectoryType.class);
 

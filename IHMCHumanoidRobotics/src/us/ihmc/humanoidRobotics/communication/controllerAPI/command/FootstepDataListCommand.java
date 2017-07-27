@@ -21,8 +21,10 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero**/
    private double adjustedExecutionTime;
-   /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
+   /** If {@code false} the controller adjust each footstep height to be at the support sole height. */
    private boolean trustHeightOfFootsteps = true;
+   /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
+   private boolean offsetFootstepsWithExecutionError = false;
 
    public FootstepDataListCommand()
    {
@@ -50,6 +52,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionTiming = message.executionTiming;
       executionDelayTime = message.executionDelayTime;
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
+      offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
@@ -72,6 +75,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionDelayTime = other.executionDelayTime;
       adjustedExecutionTime = other.adjustedExecutionTime;
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
+      offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -206,6 +210,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isTrustHeightOfFootsteps()
    {
       return trustHeightOfFootsteps;
+   }
+
+   public boolean isOffsetFootstepsWithExecutionError()
+   {
+      return offsetFootstepsWithExecutionError;
    }
 
    @Override

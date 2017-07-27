@@ -13,18 +13,19 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -73,6 +74,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final Twist currentTwist = new Twist();
    private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
@@ -179,6 +181,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
@@ -311,6 +314,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       desiredOrientation.normalizeAndLimitToPiMinusPi();
       desiredOrientation.getRotationVectorIncludingFrame(feedbackTermToPack);
+      selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorRotationVector);
@@ -350,6 +354,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
+      selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorAngularVelocity.set(feedbackTermToPack);
 
@@ -396,6 +401,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       errorOrientationCumulated.getRotationVectorIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
+      selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorRotationVectorIntegrated.set(feedbackTermToPack);
 

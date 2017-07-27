@@ -1454,21 +1454,51 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setCameraTrackingVars(String xName, String yName, String zName)
    {
+      setCameraTrackingVars(null, xName, yName, zName);
+   }
+
+   public void setCameraTrackingVars(String nameSpace, String xName, String yName, String zName)
+   {
       YoDouble xVar, yVar, zVar;
 
-      xVar = (YoDouble) rootRegistry.getVariable(xName);
-      yVar = (YoDouble) rootRegistry.getVariable(yName);
-      zVar = (YoDouble) rootRegistry.getVariable(zName);
+      if (nameSpace != null)
+      {
+         xVar = (YoDouble) rootRegistry.getVariable(nameSpace, xName);
+         yVar = (YoDouble) rootRegistry.getVariable(nameSpace, yName);
+         zVar = (YoDouble) rootRegistry.getVariable(nameSpace, zName);
+      }
+      else
+      {
+         xVar = (YoDouble) rootRegistry.getVariable(xName);
+         yVar = (YoDouble) rootRegistry.getVariable(yName);
+         zVar = (YoDouble) rootRegistry.getVariable(zName);
+      }
+
       viewportPanel.setCameraTrackingVars(xVar, yVar, zVar);
    }
 
    public void setCameraDollyVars(String xName, String yName, String zName)
    {
+      setCameraDollyVars(null, xName, yName, zName);
+   }
+
+   public void setCameraDollyVars(String nameSpace, String xName, String yName, String zName)
+   {
       YoDouble xVar, yVar, zVar;
 
-      xVar = (YoDouble) rootRegistry.getVariable(xName);
-      yVar = (YoDouble) rootRegistry.getVariable(yName);
-      zVar = (YoDouble) rootRegistry.getVariable(zName);
+      if (nameSpace != null)
+      {
+         xVar = (YoDouble) rootRegistry.getVariable(nameSpace, xName);
+         yVar = (YoDouble) rootRegistry.getVariable(nameSpace, yName);
+         zVar = (YoDouble) rootRegistry.getVariable(nameSpace, zName);
+      }
+      else
+      {
+         xVar = (YoDouble) rootRegistry.getVariable(xName);
+         yVar = (YoDouble) rootRegistry.getVariable(yName);
+         zVar = (YoDouble) rootRegistry.getVariable(zName);
+      }
+
       viewportPanel.setCameraDollyVars(xVar, yVar, zVar);
    }
 
