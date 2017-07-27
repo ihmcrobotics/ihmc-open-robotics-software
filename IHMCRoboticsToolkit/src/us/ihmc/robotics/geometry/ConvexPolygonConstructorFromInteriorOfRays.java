@@ -12,11 +12,20 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class ConvexPolygonConstructorFromInteriorOfRays
 {
+   private static final int POINT_POOL_INITIAL_SIZE = 10;
    private final ArrayList<Point2D> pointPool = new ArrayList<Point2D>();
    
    private final ArrayList<Point2D> intersectionArrayList = new ArrayList<Point2D>();
    private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>();
    private final RecyclingArrayList<MutableBoolean> removeRay = new RecyclingArrayList<MutableBoolean>(MutableBoolean.class);
+   
+   public ConvexPolygonConstructorFromInteriorOfRays()
+   {
+      for(int i = 0; i < POINT_POOL_INITIAL_SIZE; i++)
+      {
+         pointPool.add(new Point2D());
+      }
+   }
    
    public boolean constructFromInteriorOfRays(List<Line2D> rays, ConvexPolygon2D polygonToPack)
    {      
