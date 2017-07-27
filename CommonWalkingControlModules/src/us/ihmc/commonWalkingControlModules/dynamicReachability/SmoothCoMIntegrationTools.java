@@ -59,13 +59,13 @@ public class SmoothCoMIntegrationTools extends CoMIntegrationTools
       calculateCoMQuantity3D(generalizedAlphaBetaCoMPrimeMatrix, generalizedGammaCoMPrimeMatrix, generalizedDeltaCoMPrimeMatrix, polynomialCoefficientCombinedVector, 
                              icpPositionDesiredFinal, comPositionDesiredFinal, comQuantityDesired);
       
-      PrintTools.debug("A: " + generalizedAlphaCoMPrimeMatrix.toString());
-      PrintTools.debug("B: " + generalizedBetaCoMPrimeMatrix.toString());
-      PrintTools.debug("C: " + generalizedGammaCoMPrimeMatrix.toString());
-      PrintTools.debug("AB: " + generalizedAlphaBetaCoMPrimeMatrix.toString());
-      PrintTools.debug("P: " + polynomialCoefficientCombinedVector.toString());
-      PrintTools.debug("ICPf: " + icpPositionDesiredFinal.toString());
-      PrintTools.debug("CoMf: " + comPositionDesiredFinal.toString());
+//      PrintTools.debug("A: " + generalizedAlphaCoMPrimeMatrix.toString());
+//      PrintTools.debug("B: " + generalizedBetaCoMPrimeMatrix.toString());
+//      PrintTools.debug("C: " + generalizedGammaCoMPrimeMatrix.toString());
+//      PrintTools.debug("AB: " + generalizedAlphaBetaCoMPrimeMatrix.toString());
+//      PrintTools.debug("P: " + polynomialCoefficientCombinedVector.toString());
+//      PrintTools.debug("ICPf: " + icpPositionDesiredFinal.toString());
+//      PrintTools.debug("CoMf: " + comPositionDesiredFinal.toString());
    }
    
    public static double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, YoTrajectory cmpPolynomial, double icpPositionDesiredFinal, double comPositionDesiredFinal)
