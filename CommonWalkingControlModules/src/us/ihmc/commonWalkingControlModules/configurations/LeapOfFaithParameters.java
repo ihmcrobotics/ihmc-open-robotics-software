@@ -66,7 +66,7 @@ public class LeapOfFaithParameters
     */
    public double getPelvisReachingRollGain()
    {
-      return 2.5;
+      return 2.0;
    }
 
    /**
@@ -82,7 +82,7 @@ public class LeapOfFaithParameters
     */
    public double getPelvisReachingMaxRoll()
    {
-      return 0.5;
+      return 0.3;
    }
 
    /**
@@ -101,6 +101,11 @@ public class LeapOfFaithParameters
 
    public double getRelaxationRate()
    {
-      return 10.0;
+      return 1.0;
+   }
+
+   public double getMinimumPelvisWeight()
+   {
+      return 1.0;
    }
 }
