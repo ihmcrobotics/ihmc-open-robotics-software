@@ -10,7 +10,6 @@ import com.jme3.math.Transform;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -76,7 +75,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -110,7 +108,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
-   private final AtlasDefaultArmConfigurations defaultArmConfigurations;
    private final AtlasFootstepSnappingParameters snappingParameters;
 
    private boolean enableJointDamping = true;
@@ -172,7 +169,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
-      defaultArmConfigurations = new AtlasDefaultArmConfigurations();
       snappingParameters = new AtlasFootstepSnappingParameters();
 
       robotDescription = createRobotDescription();
@@ -444,12 +440,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       default :
          return LogSettings.SIMULATION;
       }
-   }
-
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      return defaultArmConfigurations;
    }
 
    @Override

@@ -57,7 +57,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 /**
  * @author Shlok Agarwal on 7/5/17
@@ -426,12 +425,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    @Override
    public FootstepSnappingParameters getSnappingParameters()
-   {
-      return null;
-   }
-
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
    {
       return null;
    }

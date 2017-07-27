@@ -51,7 +51,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class BonoRobotModel implements DRCRobotModel
 {
@@ -305,13 +304,6 @@ public class BonoRobotModel implements DRCRobotModel
       {
          return LogSettings.SIMULATION;
       }
-   }
-
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 
    @Override public String getSimpleRobotName()
