@@ -2,7 +2,6 @@ package us.ihmc.avatar.drcRobot;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -14,7 +13,6 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -58,8 +56,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
-
-   public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
          ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer,

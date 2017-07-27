@@ -19,7 +19,6 @@ import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -58,7 +57,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
@@ -248,7 +246,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
-      AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
+      AtlasDampingParameters.setDampingParameters(simulatedRobot, getJointMap());
    }
 
    @Override
@@ -382,12 +380,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
-   }
-
-   @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-      return null;
    }
 
    @Override

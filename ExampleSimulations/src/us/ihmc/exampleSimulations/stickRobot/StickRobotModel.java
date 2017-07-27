@@ -11,7 +11,6 @@ import com.jme3.math.Vector3f;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -373,17 +372,10 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-   @Override
    public HandModel getHandModel()
    {
       return null;
    }
-
 
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
