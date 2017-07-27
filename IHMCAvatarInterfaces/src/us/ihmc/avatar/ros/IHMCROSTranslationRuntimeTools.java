@@ -14,6 +14,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -96,7 +97,7 @@ public class IHMCROSTranslationRuntimeTools
       footsteps.setUniqueId(message.getUniqueId());
       footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
       footsteps.finalTransferDuration = message.getFinalTransferDuration();
-//      footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
+      footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -312,7 +313,7 @@ public class IHMCROSTranslationRuntimeTools
       message.setUniqueId(footstepList.getUniqueId());
       message.setExecutionMode((byte) footstepList.executionMode.ordinal());
       message.setFinalTransferDuration(footstepList.finalTransferDuration);
-//      message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
+      message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
