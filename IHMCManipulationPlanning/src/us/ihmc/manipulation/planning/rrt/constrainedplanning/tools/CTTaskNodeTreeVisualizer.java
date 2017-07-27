@@ -8,7 +8,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.TaskNode;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -25,7 +24,7 @@ public class CTTaskNodeTreeVisualizer
    private final SimulationConstructionSet scs;
    private CTTaskNodeTree taskNodeTree;
    
-   private static boolean showNormalized = false;
+   private static boolean showNormalized = true;
    
    public CTTaskNodeTreeVisualizer(SimulationConstructionSet scs, CTTaskNodeTree tree)
    {

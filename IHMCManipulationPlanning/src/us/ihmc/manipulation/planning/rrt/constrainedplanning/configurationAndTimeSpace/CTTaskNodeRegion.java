@@ -6,8 +6,7 @@ public class CTTaskNodeRegion
    private double[] lowerLimit;
    private boolean[] isEnable;
    
-   private double trajectoryTime;
-   private static double intentionalTimeRatio = 1.2; 
+   private double trajectoryTime; 
    
    public CTTaskNodeRegion(int size)
    {
@@ -16,16 +15,11 @@ public class CTTaskNodeRegion
       isEnable = new boolean[size];
    }
    
-   public double getIntentionalTimeRatio()
-   {
-      return intentionalTimeRatio;
-   }
-   
    public void setRandomRegion(int index, double lowerValue, double upperValue)
    {
       if(index == 0)
       {
-         upperLimit[index] = upperValue*intentionalTimeRatio;
+         upperLimit[index] = upperValue;
          trajectoryTime = upperValue;
       }
       else

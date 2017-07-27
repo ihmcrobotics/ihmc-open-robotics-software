@@ -35,6 +35,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       PrintTools.info("update toolbox " + updateCount);
       tree.expandTree(100);
+      
+      
+//      tree.expandTree(100);
+      
       isDone.set(true);
       //      if (updateCount == 100)
       //         isDone.set(true);

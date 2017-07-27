@@ -8,10 +8,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
-{
-   public DrawingTrajectory(double trajectoryTime)
+{   
+   public DrawingTrajectory(double trajectoryTime, RobotSide robotSide)
    {
       super(trajectoryTime);
+      this.robotSide = robotSide;
    }
 
    @Override
@@ -42,13 +43,19 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    @Override
    protected RobotSide defineRobotSide()
    {
-      return RobotSide.LEFT;
+      return robotSide;
    }
 
    @Override
    protected ConfigurationSpace getConfigurationSpace(double time)
    {
-      double arcRadius = 0.3;
+      double convertable;
+      if(robotSide == RobotSide.RIGHT)
+         convertable = -1;
+      else
+         convertable = 1;
+      
+      double arcRadius = 0.35;
       /*
        * Draw Circle in clockwise.
        */
@@ -60,7 +67,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
 
       arcCenterRigidBodyController.appendYawRotation(-arcAngle);
-      arcCenterRigidBodyController.appendTranslation(0, arcRadius, 0);
+      arcCenterRigidBodyController.appendTranslation(0, arcRadius*convertable, 0);
       arcCenterRigidBodyController.appendYawRotation(arcAngle);
 
       ConfigurationSpace configurationSpace = new ConfigurationSpace();
