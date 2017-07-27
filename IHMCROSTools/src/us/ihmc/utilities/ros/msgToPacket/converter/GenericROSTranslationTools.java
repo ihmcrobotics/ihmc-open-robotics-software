@@ -114,7 +114,16 @@ public class GenericROSTranslationTools
    public static Message convertIHMCMessageToRosMessage(Packet<?> ihmcMessage)
          throws IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException
    {
-      Class<? extends Packet> ihmcMessageClass = ihmcMessage.getClass();
+      return convertJavaObjectToRosMessage(ihmcMessage);
+   }
+
+   private static Message convertJavaObjectToRosMessage(Object ihmcObject)
+         throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException
+   {
+      if(!ihmcObject.getClass().isAnnotationPresent(RosMessagePacket.class))
+         return null;
+
+      Class<?> ihmcMessageClass = ihmcObject.getClass();
       String rosMessageClassNameFromIHMCMessage = getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
       RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
@@ -129,7 +138,7 @@ public class GenericROSTranslationTools
          }
       }
 
-      convertIHMCMessageFieldsToROSFields(ihmcMessage, message, fields);
+      convertIHMCMessageFieldsToROSFields(ihmcObject, message, fields);
 
       return message;
    }
@@ -363,12 +372,20 @@ public class GenericROSTranslationTools
       return inputTopicsForPackage;
    }
 
-   private static void convertIHMCMessageFieldsToROSFields(Packet<?> ihmcMessage, Message message, ArrayList<Field> fields)
+   private static void convertIHMCMessageFieldsToROSFields(Object ihmcMessage, Message message, ArrayList<Field> fields)
          throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
    {
       for (Field field : fields)
       {
-         if (customFieldConversions.containsConverterFor(field.getType()))
+         if (field.getType().isAnnotationPresent(RosMessagePacket.class))
+         {
+            Message rosMessageField = convertJavaObjectToRosMessage(field.get(ihmcMessage));
+            String rosSetterForField = getRosSetterNameForField(field);
+            Method setterMethod = message.getClass().getMethod(rosSetterForField, rosMessageField.getClass().getInterfaces()[0]);
+            setterMethod.setAccessible(true);
+            setterMethod.invoke(message, rosMessageField);
+         }
+         else if (customFieldConversions.containsConverterFor(field.getType()))
          {
             Object fieldVariableToConvert = field.get(ihmcMessage);
             Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
@@ -409,7 +426,7 @@ public class GenericROSTranslationTools
       rosSetterForField.invoke(message, value);
    }
 
-   private static void setByteFromEnum(Packet<?> ihmcMessage, Message message, Field field)
+   private static void setByteFromEnum(Object ihmcMessage, Message message, Field field)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Method rosSetterForField = getRosSetterForField(message.getClass(), field);
@@ -420,7 +437,7 @@ public class GenericROSTranslationTools
       }
    }
 
-   private static void setListFromArray(Packet<?> ihmcMessage, Message message, Field field)
+   private static void setListFromArray(Object ihmcMessage, Message message, Field field)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Object[] fieldAsArray = (Object[]) field.get(ihmcMessage);
