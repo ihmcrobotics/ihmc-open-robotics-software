@@ -72,7 +72,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -459,12 +458,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       {
          return LogSettings.SIMULATION;
       }
-   }
-
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      return null;
    }
 
    @Override
