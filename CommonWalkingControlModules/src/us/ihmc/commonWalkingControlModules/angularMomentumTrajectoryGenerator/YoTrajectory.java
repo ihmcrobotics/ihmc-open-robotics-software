@@ -365,6 +365,11 @@ public class YoTrajectory
 
       return polynomial.getIntegral(from, to);
    }
+   
+   public double getDerivative(int order, double x)
+   {
+      return polynomial.getDerivative(order, x);
+   }
 
    /**
     *  Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
