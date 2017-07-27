@@ -47,7 +47,6 @@ import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobot
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -387,12 +386,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
-   @Override
-   public DRCHandType getDRCHandType()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {

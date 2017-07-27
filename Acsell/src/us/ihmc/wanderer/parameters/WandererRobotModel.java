@@ -42,7 +42,6 @@ import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
@@ -255,12 +254,6 @@ public class WandererRobotModel implements DRCRobotModel
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return null;
-   }
-
-   @Override
-   public DRCHandType getDRCHandType()
-   {
-      return DRCHandType.NONE;
    }
 
    @Override

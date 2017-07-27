@@ -41,7 +41,6 @@ import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
@@ -253,12 +252,6 @@ public class BonoRobotModel implements DRCRobotModel
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return null;
-   }
-
-   @Override
-   public DRCHandType getDRCHandType()
-   {
-      return DRCHandType.NONE;
    }
 
    @Override
