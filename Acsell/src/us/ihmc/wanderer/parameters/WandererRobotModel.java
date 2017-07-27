@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -315,12 +314,6 @@ public class WandererRobotModel implements DRCRobotModel
 
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
-   {
-      return null;
-   }
-
-   @Override
-   public FootstepSnappingParameters getSnappingParameters()
    {
       return null;
    }
