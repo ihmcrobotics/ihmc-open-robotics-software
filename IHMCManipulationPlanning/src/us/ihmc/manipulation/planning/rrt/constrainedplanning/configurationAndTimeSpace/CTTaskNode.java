@@ -228,6 +228,11 @@ public abstract class CTTaskNode
       return configurationJoints;
    }
    
+   public boolean getIsValidNode()
+   {
+      return isValid;
+   }
+   
    public abstract boolean isValidNode();
    
    public abstract CTTaskNode createNode();

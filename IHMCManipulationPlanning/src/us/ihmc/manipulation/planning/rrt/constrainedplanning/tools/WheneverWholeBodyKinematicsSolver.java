@@ -136,7 +136,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 300;
+   private static int maximumCntForUpdateInternal = 100;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
@@ -693,7 +693,7 @@ public class WheneverWholeBodyKinematicsSolver
       double chestWeight = 10.0;
       chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
       chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
-
+      
       chestFrameOrientation.set(desiredOrientationToWorld);
    }
 
