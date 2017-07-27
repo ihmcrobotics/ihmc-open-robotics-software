@@ -21,11 +21,10 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -39,10 +38,6 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
    {
       SCS, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK
    }
-
-   // TODO: RobotBoundingBoxes.java
-
-   // public abstract boolean isRunningOnRealRobot();
 
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
@@ -101,7 +96,7 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
     * <p>
     * <b> This output writer is meant to be used in simulation only.
     * </p>
-    * 
+    *
     * @param parentOutputWriter the default output writer that should be wrapped in the custom output writer.
     * @return the custom output writer.
     */

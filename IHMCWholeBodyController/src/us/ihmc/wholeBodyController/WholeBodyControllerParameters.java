@@ -4,8 +4,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -21,10 +19,8 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 
 	public double getControllerDT();
 
-	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
-
 	public DefaultArmConfigurations getDefaultArmConfigurations();
-	
+
    public DRCRobotSensorInformation getSensorInformation();
-	
+
 }
