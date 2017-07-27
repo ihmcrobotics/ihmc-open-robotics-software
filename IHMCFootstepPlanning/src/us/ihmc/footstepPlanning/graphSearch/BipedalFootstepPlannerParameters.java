@@ -8,18 +8,96 @@ public class BipedalFootstepPlannerParameters
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   /**
+    * Maximum xy-distance the planner will consider for candidate steps.
+    *
+    * <p>
+    * Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
+    * where the parent is the last footstep taken on the other foot.
+    * </p>
+    *
+    * <p>
+    * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
+    * </p>
+    */
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
 
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
    private final YoDouble idealFootstepWidth = new YoDouble("idealFootstepWidth", registry);
 
+   /**
+    * Maximum vertical distance between consecutive footsteps
+    *
+    * <p>
+    * A candidate footstep will be rejected if its z-value is greater than this quantity, when expressed its parent's
+    * z-up sole frame.
+    * </p>
+    */
    private final YoDouble maximumStepZ = new YoDouble("maximumStepZ", registry);
    private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
+
+   /**
+    * Maximum step width the planner will consider for candidate steps.
+    *
+    * <p>
+    * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
+    * where the parent is the last footstep taken on the other foot.
+    * </p>
+    *
+    * <p>
+    * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
+    * </p>
+    */
    private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
+
+   /**
+    * Minimum step width the planner will consider for candidate steps.
+    *
+    * <p>
+    * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
+    * where the parent is the last footstep taken on the other foot.
+    * </p>
+    *
+    * <p>
+    * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
+    * on top of each other. If too high, footsteps might not be kinematically feasible.
+    * </p>
+    */
    private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
+
+   /**
+    * Minimum step length the planner will consider for candidate steps.
+    *
+    * <p>
+    * Step length refers to the x-position of a footstep expressed in its parent's sole frame,
+    * where the parent is the last footstep taken on the other foot.
+    * </p>
+    *
+    * <p>
+    * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
+    * on top of each other. If too high, footsteps might not be kinematically feasible.
+    * </p>
+    */
    private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
 
+   /**
+    * Maximum step length and height when stepping forward and down.
+    *
+    * <p>
+    * Large steps forward and down are rejected by the planner if two criteria are met:
+    * <ul>
+    * <li> The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+    * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+    * it's very close to hitting it's ankle pitch joint limit
+    * </p>
+    */
    private final YoDouble maximumStepXWhenForwardAndDown = new YoDouble("maximumStepXWhenForwardAndDown", registry);
    private final YoDouble maximumStepZWhenForwardAndDown = new YoDouble("maximumStepZWhenForwardAndDown", registry);
 
