@@ -172,7 +172,7 @@ public class ConfigurationSpace
       double rotationRoll = 0;
       double rotationPitch = 0;
       double rotationYaw = 0;
-
+      
       for (ConfigurationSpaceName configurationName : ConfigurationSpaceName.values())
       {
          switch (configurationName)
@@ -215,7 +215,7 @@ public class ConfigurationSpace
             break;
          }
       }
-
+      
       return new ConfigurationSpace(translationX, translationY, translationZ, rotationRoll, rotationPitch, rotationYaw);
    }
 }

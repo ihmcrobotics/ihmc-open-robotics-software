@@ -82,7 +82,7 @@ public class GenericTaskNode extends CTTaskNode
        */
       return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
    }
-
+  
    @Override
    public boolean isValidNode()
    {
@@ -126,6 +126,8 @@ public class GenericTaskNode extends CTTaskNode
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(getNodeData(2));
+
+      PrintTools.info("c yaw "+ getNodeData(2)*180/Math.PI);
       desiredChestOrientation.appendPitchRotation(getNodeData(3));
       desiredChestOrientation.appendRollRotation(getNodeData(4));
       nodeTester.setDesiredChestOrientation(desiredChestOrientation);

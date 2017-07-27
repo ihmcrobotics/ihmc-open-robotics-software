@@ -27,8 +27,8 @@ public class CTTaskNodeTree
     */
    private double matricRatioTimeToTask = 0.5;
 
-   private double maximumDisplacementOfStep = 0.15;
-   private double maximumTimeGapOfStep = 0.05;
+   private double maximumDisplacementOfStep = 0.7;
+   private double maximumTimeGapOfStep = 0.02;
 
    private int dimensionOfTask;
 
@@ -232,7 +232,7 @@ public class CTTaskNodeTree
     * As long as the tree does not reach the trajectory time, this method
     * returns false.
     */
-   private boolean expandingTree()
+   public boolean expandingTree()
    {
       updateRandomConfiguration();
       updateNearestNode();
@@ -401,6 +401,11 @@ public class CTTaskNodeTree
    public CTTaskNodeRegion getTaskNodeRegion()
    {
       return nodeRegion;
+   }
+   
+   public CTTaskNode getNewNode()
+   {
+      return newNode;
    }
 
    public ArrayList<CTTaskNode> getPath()

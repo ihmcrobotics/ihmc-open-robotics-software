@@ -8,6 +8,8 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
     * input parameters will be set in behavior.
     */
    public double tempInputValue;
+   
+   public int numberOfExpanding;
 
    public ConstrainedWholeBodyPlanningRequestPacket()
    {
@@ -15,6 +17,10 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
    }
    
 
+   public void setNumberOfExpanding(int value)
+   {
+      numberOfExpanding = value;
+   }
 
    public void setTempValue(double value)
    {

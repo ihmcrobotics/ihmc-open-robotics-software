@@ -1,7 +1,5 @@
 package us.ihmc.avatar.behaviorTests.rrtPlannerTests;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -14,7 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTrajectoryGenerator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -58,13 +55,11 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRobotTestInterface
+public abstract class ConstrainedWholeBodyPlanningToolboxTestOld implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-   
-   private static boolean visulaizerOn = true;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private ConstrainedWholeBodyPlanningToolboxModule cwbPlanningToolboxModule;
@@ -77,7 +72,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
-      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, visulaizerOn);
+      cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, true);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT,
@@ -203,63 +198,57 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       setupCWBPlanningToolboxModule();
    }
-   
+
    @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
-      if(visulaizerOn)
-         ThreadTools.sleep(10000);
-      
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
+      ThreadTools.sleep(10000);
 
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
       System.out.println("Send wakeup " + drcBehaviorTestHelper.getYoTime());
       ToolboxStateMessage toolboxMessage;
-      
+
       toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
       toolboxMessage.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       toolboxCommunicator.send(toolboxMessage);
       System.out.println("Send wakeup done " + drcBehaviorTestHelper.getYoTime());
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
       /*
        * constrained end effector trajectory (WorldFrame).
        */
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
-      
+
       ConstrainedWholeBodyPlanningToolboxHelper.setConstrainedEndEffectorTrajectory(endeffectorTrajectory);
       ConstrainedWholeBodyPlanningToolboxHelper.setInitialFullRobotModel(drcBehaviorTestHelper.getControllerFullRobotModel());
       ConstrainedWholeBodyPlanningToolboxHelper.setFullRobotModelFactory(getRobotModel());
-      
-      ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();      
-      packet.setTempValue(0.2);      
-      packet.setNumberOfExpanding(500);   
+
+      ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
+      packet.setTempValue(0.2);
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
-      
+
       toolboxCommunicator.send(packet);
       System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
-   
-//   @Test
+
+   //   @Test
    public void testForInverseKinematicsToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       ThreadTools.sleep(10000);
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
-      
       RobotSide robotSide = RobotSide.RIGHT;
 
       drcBehaviorTestHelper.updateRobotModel();
@@ -299,34 +288,34 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       System.out.println("End");
    }
-   
-//   @Test
+
+   //   @Test
    public void testForRandomNodeRegion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-      
+
       /*
        * reaching initial configuration
        */
       Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendRollRotation(Math.PI*0.5);
-      initialOrientation.appendYawRotation(Math.PI*0.5);
-      initialOrientation.appendPitchRotation(-Math.PI*0.3);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      initialOrientation.appendRollRotation(Math.PI * 0.5);
+      initialOrientation.appendYawRotation(Math.PI * 0.5);
+      initialOrientation.appendPitchRotation(-Math.PI * 0.3);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+                                                                              referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(handTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       /*
        * constrained end effector trajectory (WorldFrame).
        */
@@ -353,60 +342,60 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * put on generic task node
        */
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, -10.0/180*Math.PI, 0.0, 0.0);
-      rootNode.setNodeData(10, -70.0/180 * Math.PI);
-      rootNode.setConfigurationJoints(sdfFullRobotModel);      
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, -10.0 / 180 * Math.PI, 0.0, 0.0);
+      rootNode.setNodeData(10, -70.0 / 180 * Math.PI);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
       rootNode.isValidNode();
-      
+
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
-      
+
       tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
       tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(4, -5.0 / 180 * Math.PI, 5.0 / 180 * Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
-            
+      tree.getTaskNodeRegion().setRandomRegion(10, -90.0 / 180 * Math.PI, 90.0 / 180 * Math.PI);
+
       tree.testMonteCarlo(50);
 
       CTTaskNodeTreeVisualizer taskNodeTreeVisualizer = new CTTaskNodeTreeVisualizer(scs, tree);
       taskNodeTreeVisualizer.visualize();
-      
+
       System.out.println("End");
    }
 
-//   @Test
+   //   @Test
    public void testForNodeExpanding() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-      
+
       /*
        * reaching initial configuration
        */
       Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendRollRotation(Math.PI*0.5);
-      initialOrientation.appendYawRotation(Math.PI*0.5);
-      initialOrientation.appendPitchRotation(-Math.PI*0.3);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      initialOrientation.appendRollRotation(Math.PI * 0.5);
+      initialOrientation.appendYawRotation(Math.PI * 0.5);
+      initialOrientation.appendPitchRotation(-Math.PI * 0.3);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+                                                                              referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(handTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       /*
        * constrained end effector trajectory (WorldFrame).
        */
@@ -433,41 +422,40 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * put on generic task node
        */
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, -10.0/180*Math.PI, 0.0, 0.0);
-      rootNode.setNodeData(10, -70.0/180 * Math.PI);
-      rootNode.setConfigurationJoints(sdfFullRobotModel);      
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, -10.0 / 180 * Math.PI, 0.0, 0.0);
+      rootNode.setNodeData(10, -70.0 / 180 * Math.PI);
+      rootNode.setConfigurationJoints(sdfFullRobotModel);
       rootNode.isValidNode();
-      
+
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
-      
+
       tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
       tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+      tree.getTaskNodeRegion().setRandomRegion(4, -5.0 / 180 * Math.PI, 5.0 / 180 * Math.PI);
       tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
       tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
-            
+      tree.getTaskNodeRegion().setRandomRegion(10, -90.0 / 180 * Math.PI, 90.0 / 180 * Math.PI);
+
       tree.expandTree(500);
 
       CTTaskNodeTreeVisualizer taskNodeTreeVisualizer = new CTTaskNodeTreeVisualizer(scs, tree);
       taskNodeTreeVisualizer.visualize();
-      
+
       System.out.println("End");
    }
 
-    //  @Test
+   //  @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
@@ -475,18 +463,19 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-      
+
       /*
        * reaching initial configuration
        */
       Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendRollRotation(Math.PI*0.5);
-      initialOrientation.appendYawRotation(Math.PI*0.5);
-      initialOrientation.appendPitchRotation(-Math.PI*0.3);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      initialOrientation.appendRollRotation(Math.PI * 0.5);
+      initialOrientation.appendYawRotation(Math.PI * 0.5);
+      initialOrientation.appendPitchRotation(-Math.PI * 0.3);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+                                                                              referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(handTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       /*
        * constrained end effector trajectory (WorldFrame).
        */
@@ -518,23 +507,21 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       rootNode.setNodeData(10, -0.4 * Math.PI); // is selected
       rootNode.setNodeData(9, -0.25 * Math.PI); // will be ignored.
 
-      GenericTaskNode node1 = new GenericTaskNode(1.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node1.setNodeData(10, -70.0/180 * Math.PI);
+      GenericTaskNode node1 = new GenericTaskNode(1.0, initialPelvisHeight, -20.0 / 180 * Math.PI, 0.0 / 180 * Math.PI, 0.0 * Math.PI);
+      node1.setNodeData(10, -70.0 / 180 * Math.PI);
       node1.setParentNode(rootNode);
-      
-      
-      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node2.setNodeData(10, -70.0/180 * Math.PI);
+
+      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, -20.0 / 180 * Math.PI, 0.0 / 180 * Math.PI, 0.0 * Math.PI);
+      node2.setNodeData(10, -70.0 / 180 * Math.PI);
       node2.setParentNode(node1);
-      
-      GenericTaskNode node3 = new GenericTaskNode(3.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node3.setNodeData(10, -70.0/180 * Math.PI);
+
+      GenericTaskNode node3 = new GenericTaskNode(3.0, initialPelvisHeight, -20.0 / 180 * Math.PI, 0.0 / 180 * Math.PI, 0.0 * Math.PI);
+      node3.setNodeData(10, -70.0 / 180 * Math.PI);
       node3.setParentNode(node2);
-      
-      GenericTaskNode node4 = new GenericTaskNode(4.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node4.setNodeData(10, -70.0/180 * Math.PI);
+
+      GenericTaskNode node4 = new GenericTaskNode(4.0, initialPelvisHeight, -20.0 / 180 * Math.PI, 0.0 / 180 * Math.PI, 0.0 * Math.PI);
+      node4.setNodeData(10, -70.0 / 180 * Math.PI);
       node4.setParentNode(node3);
-      
 
       System.out.println(rootNode.isValidNode());
       System.out.println(node1.isValidNode());
@@ -569,8 +556,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
@@ -600,8 +586,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 
@@ -648,14 +633,13 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//   @Test
+   //   @Test
    public void testForToolboxMessage() throws SimulationExceededMaximumTimeException, IOException
    {
       ThreadTools.sleep(10000);
-      
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
 
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
 

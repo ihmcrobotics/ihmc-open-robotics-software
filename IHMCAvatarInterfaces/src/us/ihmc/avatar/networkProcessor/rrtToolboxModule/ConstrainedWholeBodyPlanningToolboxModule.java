@@ -21,7 +21,7 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
    private static final PacketDestination PACKET_DESTINATION = PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE;
    private static final NetworkPorts NETWORK_PORT = NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT;
 
-   private final ConstrainedWholeBodyPlanningToolboxController rrtToolboxController;
+   private final ConstrainedWholeBodyPlanningToolboxController constrainedWholeBodyPlanningToolboxController;
 
    public ConstrainedWholeBodyPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
                                                     boolean startYoVariableServer)
@@ -31,15 +31,15 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      rrtToolboxController = new ConstrainedWholeBodyPlanningToolboxController(statusOutputManager, registry);
-      packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, rrtToolboxController.createRequestConsumer());
+      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(fullRobotModel, statusOutputManager, registry);
+      packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, constrainedWholeBodyPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
 
    @Override
    public ToolboxController getToolboxController()
    {
-      return rrtToolboxController;
+      return constrainedWholeBodyPlanningToolboxController;
    }
 
    @Override
