@@ -12,11 +12,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -68,7 +71,13 @@ public class InverseKinematicsOptimizationControlModule
          jointMinimumVelocities.put(joint, new YoDouble("qd_min_qp_" + joint.getName(), registry));
       }
 
-      qpSolver = new InverseKinematicsQPSolver(numberOfDoFs, registry);
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      ActiveSetQPSolver activeSetQPSolver;
+      if (optimizationSettings == null)
+         activeSetQPSolver = new SimpleEfficientActiveSetQPSolver();
+      else
+         activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, registry);
 
       parentRegistry.addChild(registry);
    }

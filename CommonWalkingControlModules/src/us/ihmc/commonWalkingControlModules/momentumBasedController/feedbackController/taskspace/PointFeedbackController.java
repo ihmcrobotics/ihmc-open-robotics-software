@@ -23,6 +23,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -71,6 +72,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
    private final Matrix3DReadOnly kp, kd, ki;
@@ -167,6 +169,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);
@@ -297,6 +300,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
@@ -334,6 +338,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
@@ -374,6 +379,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 

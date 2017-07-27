@@ -58,8 +58,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingHeight = 0.0;
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
-      expectedInitialPosition.setToNaN();
-      expectedInitialOrientation.setToNaN();
       predictedContactPoints.clear();
       customPositionWaypoints.clear();
       swingTrajectory.clear();
@@ -77,18 +75,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
-
-      Point3D messageExpectedInitialLocation = message.getExpectedInitialLocation();
-      if (messageExpectedInitialLocation != null)
-      {
-         expectedInitialPosition.setIncludingFrame(worldFrame, messageExpectedInitialLocation);
-      }
-
-      Quaternion messageExpectedInitialOrientation = message.getExpectedInitialOrientation();
-      if (messageExpectedInitialOrientation != null)
-      {
-         expectedInitialOrientation.setIncludingFrame(worldFrame, messageExpectedInitialOrientation);
-      }
 
       Point3D[] originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
@@ -133,8 +119,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
-      expectedInitialPosition.setIncludingFrame(other.expectedInitialPosition);
-      expectedInitialOrientation.setIncludingFrame(other.expectedInitialOrientation);
 
       RecyclingArrayList<FramePoint3D> otherWaypointList = other.customPositionWaypoints;
       customPositionWaypoints.clear();
@@ -171,12 +155,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       this.position.set(position);
       this.orientation.set(orientation);
-   }
-
-   public void setExpectedInitialPose(Point3D position, Quaternion orientation)
-   {
-      this.expectedInitialPosition.set(position);
-      this.expectedInitialOrientation.set(orientation);
    }
 
    public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)

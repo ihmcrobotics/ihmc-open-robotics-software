@@ -1,178 +1,179 @@
 package us.ihmc.simulationconstructionset.gui.dialogs;
 
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
-import javafx.stage.Stage;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-import javax.swing.*;
-import java.awt.*;
 
-public class PlaybackPropertiesDialog extends Stage implements EventHandler<ActionEvent> {
-    private Button okButton, applyButton, cancelButton;
-    private PlaybackPropertiesPanel playbackPropertiesPanel;
-    private Container parentContainer;
+public class PlaybackPropertiesDialog extends JDialog implements ActionListener
+{
+   private static final long serialVersionUID = -8226475433536336684L;
+   private JButton okButton, applyButton, cancelButton;
+   private PlaybackPropertiesPanel playbackPropertiesPanel;
+   @SuppressWarnings("unused")
+   private JFrame ownerFrame;
+   private Container parentContainer;
 
-    private SimulationConstructionSet sim;
+   private SimulationConstructionSet sim;
 
-    public PlaybackPropertiesDialog(Container parentContainer, JFrame ownerFrame, SimulationConstructionSet sim) {
-        super();
+   public PlaybackPropertiesDialog(Container parentContainer, JFrame ownerFrame, SimulationConstructionSet sim)
+   {
+      super(ownerFrame, "Playback Properties", false);
+      this.parentContainer = parentContainer;
+      this.ownerFrame = ownerFrame;
+      this.sim = sim;
 
-        this.setTitle("Playback Properties");
+      Container contentPane = this.getContentPane();
+      playbackPropertiesPanel = new PlaybackPropertiesPanel();
 
-        this.parentContainer = parentContainer;
-        this.sim = sim;
+      contentPane.add(playbackPropertiesPanel);
 
-        GridPane pane = new GridPane();
+      // Buttons:
 
-        RowConstraints properties = new RowConstraints();
-        properties.setPercentHeight(80.00);
-        RowConstraints buttons = new RowConstraints();
-        buttons.setPercentHeight(20.00);
+      okButton = new JButton("OK");
+      okButton.addActionListener(this);
+      applyButton = new JButton("Apply");
+      applyButton.addActionListener(this);
+      cancelButton = new JButton("Cancel");
+      cancelButton.addActionListener(this);
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.add(okButton);
+      buttonPanel.add(applyButton);
+      buttonPanel.add(cancelButton);
 
-        pane.getRowConstraints().addAll(
-                properties,
-                buttons
-        );
+      contentPane.add(buttonPanel, BorderLayout.SOUTH);
 
-        playbackPropertiesPanel = new PlaybackPropertiesPanel();
-        GridPane.setConstraints(playbackPropertiesPanel, 0, 0);
-        GridPane.setMargin(playbackPropertiesPanel, new javafx.geometry.Insets(10, 10, 5, 10));
+      Point point = parentContainer.getLocation();
+      Dimension frameSize = parentContainer.getSize();
 
-        okButton = new Button("OK");
-        okButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+      point.translate(frameSize.width / 2, frameSize.height / 4);
+      this.setLocation(point);
 
-        applyButton = new Button("Apply");
-        applyButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
-        HBox.setMargin(applyButton, new javafx.geometry.Insets(0, 5, 0, 5));
+      this.setResizable(false);
+      this.pack();
 
-        cancelButton = new Button("Cancel");
-        cancelButton.addEventHandler(javafx.event.ActionEvent.ACTION, this);
+      this.pack();
+      this.setVisible(true);
 
-        HBox hbox = new HBox();
-        hbox.setAlignment(Pos.CENTER);
-        hbox.getChildren().addAll(
-                okButton,
-                applyButton,
-                cancelButton
-        );
-        hbox.setPrefSize(200, okButton.getHeight());
-        GridPane.setConstraints(hbox, 0, 1);
+      parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
+   }
 
-        pane.getChildren().addAll(
-                playbackPropertiesPanel,
-                hbox
-        );
+   @Override
+   public void actionPerformed(ActionEvent event)
+   {
+      if (event.getSource() == cancelButton)
+         this.setVisible(false);
 
-        parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
+      if (event.getSource() == applyButton)
+      {
+         playbackPropertiesPanel.commitChanges();
+      }
 
-        Dimension frameSize = parentContainer.getSize();
+      if (event.getSource() == okButton)
+      {
+         playbackPropertiesPanel.commitChanges();
+         this.setVisible(false);
+      }
 
-        this.setScene(new Scene(pane));
-        this.setX(frameSize.width / 2);
-        this.setY(frameSize.height / 4);
-        this.setResizable(false);
-        this.show();
-    }
+      parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
+   }
 
-    @Override
-    public void handle(ActionEvent event) {
-        if (event.getSource() == cancelButton) {
-            this.hide();
-        } else if (event.getSource() == applyButton) {
-            playbackPropertiesPanel.commitChanges();
-        } else if (event.getSource() == okButton) {
-            playbackPropertiesPanel.commitChanges();
-            this.hide();
-        }
+   public class PlaybackPropertiesPanel extends JPanel implements ActionListener
+   {
+      private static final long serialVersionUID = -6809250560000939671L;
 
-        parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
-    }
+      private double newRealTimeVal, newFrameRateVal, newSimulateDurationVal;
 
-    public class PlaybackPropertiesPanel extends GridPane implements EventHandler {
-        private double newRealTimeVal, newFrameRateVal, newSimulateDurationVal;
+      private GridBagLayout gridBagLayout1 = new GridBagLayout();
+      private JCheckBox updateGraphsDuringPlaybackCheckbox = new JCheckBox();
+      private JLabel realTimeRateLabel = new JLabel();
+      private JLabel desiredFrameRateLabel = new JLabel();
+      private JLabel simulateDurationLabel = new JLabel();
+      private JTextField realTimeTextField = new JTextField();
+      private JTextField frameRateTextField = new JTextField();
+      private JTextField simulateDurationTextField = new JTextField();
+      private JCheckBox simulateNoFasterThanRealTimeCheckbox = new JCheckBox();
 
-        private CheckBox updateGraphsDuringPlaybackCheckbox;
-        private Label realTimeRateLabel;
-        private Label desiredFrameRateLabel;
-        private Label simulateDurationLabel;
-        private TextField realTimeTextField;
-        private TextField frameRateTextField;
-        private TextField simulateDurationTextField;
-        private CheckBox simulateNoFasterThanRealTimeCheckbox;
+      public PlaybackPropertiesPanel()
+      {
+         setLayout(gridBagLayout1);
+         updateGraphsDuringPlaybackCheckbox.setText("Update Graphs");
+         realTimeRateLabel.setText("Real Time Rate:");
+         desiredFrameRateLabel.setText("Desired Frame Rate:");
+         simulateDurationLabel.setText("Simulate Duration:");
+         realTimeTextField.setMinimumSize(new Dimension(60, 21));
+         realTimeTextField.setPreferredSize(new Dimension(60, 21));
+         frameRateTextField.setMinimumSize(new Dimension(60, 21));
+         frameRateTextField.setPreferredSize(new Dimension(60, 21));
+         simulateDurationTextField.setMinimumSize(new Dimension(60, 21));
+         simulateDurationTextField.setPreferredSize(new Dimension(60, 21));
+         simulateNoFasterThanRealTimeCheckbox.setText("Simulate No Faster Than Real Time");
+         
+         add(updateGraphsDuringPlaybackCheckbox,
+               new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(realTimeRateLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
+         add(desiredFrameRateLabel,
+             new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
+         add(simulateDurationLabel,
+               new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
+         add(realTimeTextField, new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(frameRateTextField,
+             new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(simulateDurationTextField,
+               new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+         add(simulateNoFasterThanRealTimeCheckbox,
+               new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        PlaybackPropertiesPanel() {
-            updateGraphsDuringPlaybackCheckbox = new CheckBox("Update Graphs");
-            GridPane.setConstraints(updateGraphsDuringPlaybackCheckbox, 0, 0);
+         newRealTimeVal = sim.getPlaybackRealTimeRate();
+         newFrameRateVal = sim.getPlaybackFrameRate();
+         newSimulateDurationVal = sim.getSimulateDuration();
 
-            simulateNoFasterThanRealTimeCheckbox = new CheckBox("Simulate No Faster Than Real Time");
-            GridPane.setConstraints(simulateNoFasterThanRealTimeCheckbox, 0, 4);
+         updateGraphsDuringPlaybackCheckbox.setSelected(sim.areGraphsUpdatedDuringPlayback());
+         realTimeTextField.setText(String.valueOf(newRealTimeVal));
+         frameRateTextField.setText(String.valueOf(newFrameRateVal));
+         simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
+         simulateNoFasterThanRealTimeCheckbox.setSelected(sim.getSimulateNoFasterThanRealTime());
 
-            realTimeRateLabel = new Label("Real Time Rate:");
-            GridPane.setConstraints(realTimeRateLabel, 0, 1);
+         // sim.setUpdateGraphsDuringPlayback(updateGraphsCheckbox.isSelected());
 
-            desiredFrameRateLabel = new Label("Desired Frame Rate:");
-            GridPane.setConstraints(desiredFrameRateLabel, 0, 2);
 
-            simulateDurationLabel = new Label("Simulate Duration:");
-            GridPane.setConstraints(simulateDurationLabel, 0, 3);
+         Border blackLine = BorderFactory.createLineBorder(Color.black);
 
-            realTimeTextField = new TextField();
-            realTimeTextField.setPrefSize(60, 21);
-            GridPane.setConstraints(realTimeTextField, 1, 1);
+         // TitledBorder title = BorderFactory.createTitledBorder(blackLine,selectedVariable.getName());
+         // this.setBorder(title);
+         this.setBorder(blackLine);
+      }
 
-            frameRateTextField = new TextField();
-            frameRateTextField.setPrefSize(60, 21);
-            GridPane.setConstraints(frameRateTextField, 1, 2);
+      public void commitChanges()
+      {
+         updateRealTimeTextField();
+         updateFrameRateTextField();
+         updateSimulateDurationTextField();
 
-            simulateDurationTextField = new TextField();
-            simulateDurationTextField.setPrefSize(60, 21);
-            GridPane.setConstraints(simulateDurationTextField, 1, 3);
-
-            newRealTimeVal = sim.getPlaybackRealTimeRate();
-            newFrameRateVal = sim.getPlaybackFrameRate();
-            newSimulateDurationVal = sim.getSimulateDuration();
-
-            updateGraphsDuringPlaybackCheckbox.setSelected(sim.areGraphsUpdatedDuringPlayback());
-            realTimeTextField.setText(String.valueOf(newRealTimeVal));
-            frameRateTextField.setText(String.valueOf(newFrameRateVal));
-            simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
-            simulateNoFasterThanRealTimeCheckbox.setSelected(sim.getSimulateNoFasterThanRealTime());
-
-            // sim.setUpdateGraphsDuringPlayback(updateGraphsCheckbox.isSelected());
-
-            this.getChildren().addAll(
-                    updateGraphsDuringPlaybackCheckbox,
-                    realTimeRateLabel,
-                    realTimeTextField,
-                    desiredFrameRateLabel,
-                    frameRateTextField,
-                    simulateDurationLabel,
-                    simulateDurationTextField,
-                    simulateNoFasterThanRealTimeCheckbox
-            );
-        }
-
-        void commitChanges() {
-            updateRealTimeTextField();
-            updateFrameRateTextField();
-            updateSimulateDurationTextField();
-
-            sim.setSimulateNoFasterThanRealTime(simulateNoFasterThanRealTimeCheckbox.isSelected());
-            sim.setPlaybackRealTimeRate(newRealTimeVal);
-            sim.setPlaybackDesiredFrameRate(newFrameRateVal);
-            sim.setSimulateDuration(newSimulateDurationVal);
-            sim.setGraphsUpdatedDuringPlayback(updateGraphsDuringPlaybackCheckbox.isSelected());
+         sim.setSimulateNoFasterThanRealTime(simulateNoFasterThanRealTimeCheckbox.isSelected());  
+         sim.setPlaybackRealTimeRate(newRealTimeVal);
+         sim.setPlaybackDesiredFrameRate(newFrameRateVal);
+         sim.setSimulateDuration(newSimulateDurationVal);
+         sim.setGraphsUpdatedDuringPlayback(updateGraphsDuringPlaybackCheckbox.isSelected());
 
          /*
           * dataBuffer.setMaxBufferSize(newMaxVal);
@@ -180,48 +181,64 @@ public class PlaybackPropertiesDialog extends Stage implements EventHandler<Acti
           *
           * dataBuffer.setWrapBuffer(wrapButton.isSelected());
           */
-        }
+      }
 
-        private void updateRealTimeTextField() {
-            String text = realTimeTextField.getText();
+      @Override
+      public void actionPerformed(ActionEvent event)
+      {
+         if (event.getSource() == realTimeTextField)
+            updateRealTimeTextField();
+         if (event.getSource() == frameRateTextField)
+            updateFrameRateTextField();
+         if (event.getSource() == simulateDurationTextField)
+            updateSimulateDurationTextField();
+      }
 
-            try {
-                newRealTimeVal = Double.parseDouble(text);
-            } catch (NumberFormatException e) {
-                realTimeTextField.setText(String.valueOf(newRealTimeVal));
-            }
+      private void updateRealTimeTextField()
+      {
+         String text = realTimeTextField.getText();
 
-        }
+         try
+         {
+            double val = Double.parseDouble(text);
+            newRealTimeVal = val;
+         }
+         catch (NumberFormatException e)
+         {
+            realTimeTextField.setText(String.valueOf(newRealTimeVal));
+         }
 
-        private void updateFrameRateTextField() {
-            String text = frameRateTextField.getText();
+      }
 
-            try {
-                newFrameRateVal = Double.parseDouble(text);
-            } catch (NumberFormatException e) {
-                frameRateTextField.setText(String.valueOf(newFrameRateVal));
-            }
-        }
+      private void updateFrameRateTextField()
+      {
+         String text = frameRateTextField.getText();
 
-        private void updateSimulateDurationTextField() {
-            String text = simulateDurationTextField.getText();
+         try
+         {
+            double val = Double.parseDouble(text);
+            newFrameRateVal = val;
+         }
+         catch (NumberFormatException e)
+         {
+            frameRateTextField.setText(String.valueOf(newFrameRateVal));
+         }
+      }
+      
+      private void updateSimulateDurationTextField()
+      {
+         String text = simulateDurationTextField.getText();
 
-            try {
-                newSimulateDurationVal = Double.parseDouble(text);
-            } catch (NumberFormatException e) {
-                simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
-            }
-        }
+         try
+         {
+            double val = Double.parseDouble(text);
+            newSimulateDurationVal = val;
+         }
+         catch (NumberFormatException e)
+         {
+            simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
+         }
+      }
 
-        @Override
-        public void handle(Event event) {
-            if (event.getSource() == realTimeTextField) {
-                updateRealTimeTextField();
-            } else if (event.getSource() == frameRateTextField) {
-                updateFrameRateTextField();
-            } else if (event.getSource() == simulateDurationTextField) {
-                updateSimulateDurationTextField();
-            }
-        }
-    }
+   }
 }

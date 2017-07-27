@@ -2252,10 +2252,10 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLineSegment) == null);
          assertTrue(polygonWithOnePoint.intersectionWith(new LineSegment2D(pointThatDefinesThePolygon, arbitraryPoint0))[0].equals(pointThatDefinesThePolygon));
 
-         ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
+         ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
          ConvexPolygon2D shrunkenOnePointPolygon = new ConvexPolygon2D();
 
-         shrinker.shrinkConstantDistanceInto(polygonWithOnePoint, random.nextDouble(), shrunkenOnePointPolygon);
+         shrinker.scaleConvexPolygon(polygonWithOnePoint, random.nextDouble(), shrunkenOnePointPolygon);
 
          assertTrue(shrunkenOnePointPolygon.epsilonEquals(polygonWithOnePoint, 1e-7));
 
@@ -2568,14 +2568,14 @@ public class ConvexPolygon2dTest
          // shrinkConstantDistanceInto
          double shrinkDistance = random.nextDouble() * lineSegmentThatDefinesThePolygon.length() / 2.0;
 
-         ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
+         ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
 
          ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
-         shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
+         shrinker.scaleConvexPolygon(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
          shrinkDistance = lineSegmentThatDefinesThePolygon.length() / 2.0 + random.nextDouble();
 
-         shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
+         shrinker.scaleConvexPolygon(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
 
          assertTrue(shrunkenPolygon.getNumberOfVertices() == 1);
          ConvexPolygon2D shrinkInto = ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithTwoPoints);

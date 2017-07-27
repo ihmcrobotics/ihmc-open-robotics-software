@@ -23,7 +23,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
    
    private final Point2D tempFirstEndpoint = new Point2D();
    private final LineSegment2D tempLineSegment = new LineSegment2D();
-   private final ConvexPolygon2D tempArrowPolygon = new ConvexPolygon2D(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
+   private final ConvexPolygon2D tempArrowPolygon = new ConvexPolygon2D(new double[][] {{0.0, 0.1}, {0.1, 0.0}, {0.1, 0.1}});
    
    private final boolean drawArrow;
 

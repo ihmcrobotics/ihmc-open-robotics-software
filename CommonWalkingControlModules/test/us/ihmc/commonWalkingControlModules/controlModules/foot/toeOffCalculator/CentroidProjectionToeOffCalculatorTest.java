@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -532,6 +533,12 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
+         {
+            return null;
+         }
+
+         @Override
+         public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
          }

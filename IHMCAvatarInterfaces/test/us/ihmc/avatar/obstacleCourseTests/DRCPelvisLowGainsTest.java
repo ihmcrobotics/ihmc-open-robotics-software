@@ -66,7 +66,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
    // 150313: This test currently fails, seemingly due to some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator. Trying to fix it...
 	@ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test(timeout = 190000)
+   @Test
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.

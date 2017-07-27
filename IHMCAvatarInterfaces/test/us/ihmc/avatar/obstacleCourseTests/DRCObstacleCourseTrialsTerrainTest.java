@@ -73,7 +73,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 57.4)
-   @Test(timeout = 290000)
+   @Test
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -104,7 +104,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 61.5)
-   @Test(timeout = 310000)
+   @Test
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -145,7 +145,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 40.4)
-   @Test(timeout = 200000)
+   @Test
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -171,7 +171,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.4)
-   @Test(timeout = 150000)
+   @Test
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -207,7 +207,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 49.8)
-   @Test(timeout = 250000)
+   @Test
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

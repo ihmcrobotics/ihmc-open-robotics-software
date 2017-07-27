@@ -397,6 +397,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
 
       inverseDynamicsJoint.setEffortLimits(-joint.getEffortLimit(), joint.getEffortLimit());
+      inverseDynamicsJoint.setVelocityLimit(-joint.getVelocityLimit(), joint.getVelocityLimit());
 
       if (joint.containsLimitStops())
       {

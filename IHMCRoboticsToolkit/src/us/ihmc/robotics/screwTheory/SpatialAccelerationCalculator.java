@@ -500,7 +500,7 @@ public class SpatialAccelerationCalculator
     * </p>
     * 
     * @param body the rigid-body to get the twist of.
-    * @return the twist of the rigid-body with respect to the inertial frame.
+    * @return the acceleration of the rigid-body with respect to the inertial frame.
     */
    private SpatialAccelerationVector computeOrGetAccelerationOfBody(RigidBody body)
    {

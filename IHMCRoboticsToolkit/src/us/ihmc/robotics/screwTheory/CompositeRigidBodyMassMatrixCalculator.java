@@ -1,19 +1,20 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
-   private final RigidBody rootBody;
-   private final RigidBody[] allRigidBodiesInOrder;
+   private final RigidBody[] allBodiesExceptRoot;
    private final InverseDynamicsJoint[] jointsInOrder;
-   private final ArrayList<InverseDynamicsJoint> jointsToIgnore;
    private final CompositeRigidBodyInertia[] crbInertiasInOrder;
    private final int[] parentMap;
    private final int[] massMatrixIndices;
@@ -22,50 +23,61 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    private final Twist tempTwist = new Twist();
    private int nMomentaInUse = 0;
 
+   private final LinkedHashMap<InverseDynamicsJoint, int[]> srcJointIndices = new LinkedHashMap<>();
+
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
-      this.rootBody = rootBody;
-      this.jointsToIgnore = new ArrayList<InverseDynamicsJoint>(jointsToIgnore);
-      
-      ArrayList<RigidBody> rigidBodiesInOrderList = new ArrayList<RigidBody>();
-      ArrayList<InverseDynamicsJoint> jointsInOrderList = new ArrayList<InverseDynamicsJoint>();
-      populateMapsAndLists(jointsInOrderList, rigidBodiesInOrderList);
-      allRigidBodiesInOrder = rigidBodiesInOrderList.toArray(new RigidBody[0]);
-      jointsInOrder = jointsInOrderList.toArray(new InverseDynamicsJoint[0]);
-      
-      crbInertiasInOrder = createCrbInertiasInOrder(allRigidBodiesInOrder.length);
-      parentMap = ScrewTools.createParentMap(allRigidBodiesInOrder);
-      massMatrixIndices = createMassMatrixIndices(allRigidBodiesInOrder);
-      int size = determineSize(allRigidBodiesInOrder);
-      massMatrix = new DenseMatrix64F(size, size);
+      allBodiesExceptRoot = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore);
+
+
+      crbInertiasInOrder = createCompositeRigidBodyInertiasInOrder(allBodiesExceptRoot.length);
+      parentMap = ScrewTools.createParentMap(allBodiesExceptRoot);
+      massMatrixIndices = createMassMatrixIndices(allBodiesExceptRoot);
+
+      int degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
+      massMatrix = new DenseMatrix64F(degreesOfFreedom, degreesOfFreedom);
+
       unitMomenta = createMomenta();
+
+      for (InverseDynamicsJoint joint : jointsInOrder)
+      {
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indices = listToPackIndices.toArray();
+
+         srcJointIndices.put(joint, indices);
+      }
    }
+
 
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody)
    {
       this(rootBody, new ArrayList<InverseDynamicsJoint>());
    }
-   
+
    @Override
    public void compute()
    {
-      MatrixTools.setToZero(massMatrix);
+      massMatrix.zero();
 
-      for (int i = 0; i < allRigidBodiesInOrder.length; i++)
+      // // TODO: 1/1/17  does this ever change?
+      for (int i = 0; i < allBodiesExceptRoot.length; i++)
       {
-         crbInertiasInOrder[i].set(allRigidBodiesInOrder[i].getInertia());
+         crbInertiasInOrder[i].set(allBodiesExceptRoot[i].getInertia());
       }
 
-      for (int i = allRigidBodiesInOrder.length - 1; i >= 0; i--)
+      for (int bodyIndex = allBodiesExceptRoot.length - 1; bodyIndex >= 0; bodyIndex--)
       {
-         RigidBody currentBody = allRigidBodiesInOrder[i];
+         RigidBody currentBody = allBodiesExceptRoot[bodyIndex];
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
-         CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[i];
-         
+         CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
+         GeometricJacobian motionSubspace = parentJoint.getMotionSubspace();
+
          setUnitMomenta(currentBodyInertia, parentJoint);
-         setDiagonalTerm(i, parentJoint);
-         setOffDiagonalTerms(i);
-         buildCrbInertia(i);
+         setDiagonalTerm(bodyIndex, parentJoint);
+         setOffDiagonalTerms(bodyIndex);
+         buildCompositeRigidBodyInertia(bodyIndex);
       }
    }
 
@@ -81,30 +93,30 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       }
    }
 
-   private void setDiagonalTerm(int i, InverseDynamicsJoint joint)
+   private void setDiagonalTerm(int currentBodyIndex, InverseDynamicsJoint joint)
    {
-      setMassMatrixPart(i, i, joint);
+      setMassMatrixPart(currentBodyIndex, currentBodyIndex, joint);
    }
    
-   private void setOffDiagonalTerms(int i)
+   private void setOffDiagonalTerms(int currentBodyIndex)
    {
       int parentIndex;
-      int j = i;
-      while (isValidParentIndex(parentIndex = parentMap[j]))
+      int bodyIndex = currentBodyIndex;
+      while (isValidParentIndex(parentIndex = parentMap[bodyIndex]))
       {
-         ReferenceFrame parentFrame = allRigidBodiesInOrder[parentIndex].getInertia().getExpressedInFrame();
+         ReferenceFrame parentFrame = allBodiesExceptRoot[parentIndex].getInertia().getExpressedInFrame();
          changeFrameOfMomenta(parentFrame);
-         j = parentIndex;
-         setMassMatrixPart(i, j, allRigidBodiesInOrder[j].getParentJoint());
+         bodyIndex = parentIndex;
+         setMassMatrixPart(currentBodyIndex, bodyIndex, allBodiesExceptRoot[bodyIndex].getParentJoint());
       }
    }
 
-   private void buildCrbInertia(int i)
+   private void buildCompositeRigidBodyInertia(int currentBodyIndex)
    {
-      CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[i];
-      if (isValidParentIndex(parentMap[i]))
+      CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[currentBodyIndex];
+      if (isValidParentIndex(parentMap[currentBodyIndex]))
       {
-         CompositeRigidBodyInertia parentBodyInertia = crbInertiasInOrder[parentMap[i]];
+         CompositeRigidBodyInertia parentBodyInertia = crbInertiasInOrder[parentMap[currentBodyIndex]];
          ReferenceFrame parentFrame = parentBodyInertia.getExpressedInFrame();
          currentBodyInertia.changeFrame(parentFrame);
          parentBodyInertia.add(currentBodyInertia);
@@ -116,6 +128,13 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    {
       return massMatrix;
    }
+
+   @Override
+   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   {
+      massMatrixToPack.set(massMatrix);
+   }
+
 
    @Override
    public InverseDynamicsJoint[] getJointsInOrder()
@@ -133,22 +152,22 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
 
    private final Twist tempUnitTwist = new Twist();
 
-   private void setMassMatrixPart(int i, int j, InverseDynamicsJoint joint)
+   private void setMassMatrixPart(int rowBodyIndex, int colBodyIndex, InverseDynamicsJoint joint)
    {
-      int rowStart = massMatrixIndices[i];
-      int colStart = massMatrixIndices[j];
+      int rowStart = massMatrixIndices[rowBodyIndex];
+      int colStart = massMatrixIndices[colBodyIndex];
 
-      for (int m = 0; m < nMomentaInUse; m++)
+      for (int momentaIndex = 0; momentaIndex < nMomentaInUse; momentaIndex++)
       {
-         Momentum unitMomentum = unitMomenta[m];
-         int massMatrixRow = rowStart + m;
+         Momentum unitMomentum = unitMomenta[momentaIndex];
+         int massMatrixRow = rowStart + momentaIndex;
 
-         for (int n = 0; n < joint.getDegreesOfFreedom(); n++)
+         for (int subspaceIndex = 0; subspaceIndex < joint.getDegreesOfFreedom(); subspaceIndex++)
          {
-            joint.getUnitTwist(n, tempUnitTwist);
+            joint.getUnitTwist(subspaceIndex, tempUnitTwist);
             tempUnitTwist.changeFrame(unitMomentum.getExpressedInFrame());
             double entry = unitMomentum.computeKineticCoEnergy(tempUnitTwist);
-            int massMatrixCol = colStart + n;
+            int massMatrixCol = colStart + subspaceIndex;
             setMassMatrixSymmetrically(massMatrixRow, massMatrixCol, entry);
          }
       }
@@ -160,7 +179,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       massMatrix.set(column, row, entry);
    }
 
-   private static CompositeRigidBodyInertia[] createCrbInertiasInOrder(int length)
+   private static CompositeRigidBodyInertia[] createCompositeRigidBodyInertiasInOrder(int length)
    {
       CompositeRigidBodyInertia[] ret = new CompositeRigidBodyInertia[length];
       for (int i = 0; i < ret.length; i++)
@@ -185,17 +204,6 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return ret;
    }
 
-   private static int determineSize(RigidBody[] rigidBodiesInOrder)
-   {
-      int ret = 0;
-      for (RigidBody rigidBody : rigidBodiesInOrder)
-      {
-         ret += rigidBody.getParentJoint().getDegreesOfFreedom();
-      }
-
-      return ret;
-   }
-
    private static Momentum[] createMomenta()
    {
       Momentum[] ret = new Momentum[InverseDynamicsJoint.maxDoF];
@@ -212,45 +220,19 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return parentIndex >= 0;
    }
 
-   // TODO: Use ScrewTools
-   private void populateMapsAndLists(ArrayList<InverseDynamicsJoint> jointsInOrderListToPack, ArrayList<RigidBody> rigidBodiesInOrderListToPack)
+   private static InverseDynamicsJoint[] computeJointsInOrder(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
-      ArrayList<RigidBody> morgue = new ArrayList<RigidBody>();
-      
-      morgue.add(rootBody);
-
-      while (!morgue.isEmpty())
+      InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
+      ArrayList<InverseDynamicsJoint> joints = new ArrayList<>();
+      joints.addAll(Arrays.asList(jointsInOrder));
+      if (jointsToIgnore != null)
       {
-         RigidBody currentBody = morgue.get(0);
-
-         if (!currentBody.isRootBody())
+         for (InverseDynamicsJoint joint : jointsToIgnore)
          {
-            rigidBodiesInOrderListToPack.add(currentBody);
+            joints.remove(joint);
          }
-
-         if (currentBody.hasChildrenJoints())
-         {
-            List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-            for (InverseDynamicsJoint joint : childrenJoints)
-            {
-               if (!jointsToIgnore.contains(joint))
-               {
-                  RigidBody successor = joint.getSuccessor();
-                  if (successor != null)
-                  {
-                     if (rigidBodiesInOrderListToPack.contains(successor))
-                     {
-                        throw new RuntimeException("This algorithm doesn't do loops.");
-                     }
-
-                     jointsInOrderListToPack.add(joint);
-                     morgue.add(successor);
-                  }
-               }
-            }
-         }
-
-         morgue.remove(currentBody);
       }
+
+      return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 }
