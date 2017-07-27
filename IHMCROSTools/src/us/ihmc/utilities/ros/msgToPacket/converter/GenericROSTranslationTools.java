@@ -122,7 +122,7 @@ public class GenericROSTranslationTools
          throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException
    {
       if(!ihmcObject.getClass().isAnnotationPresent(RosMessagePacket.class))
-         return null;
+         throw new IllegalArgumentException("Class " + ihmcObject.getClass().getSimpleName() + " must contain RosMessagePacket class annotation to be converted.");
 
       Class<?> ihmcMessageClass = ihmcObject.getClass();
       String rosMessageClassNameFromIHMCMessage = getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
