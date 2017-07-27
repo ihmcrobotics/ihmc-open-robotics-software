@@ -3,11 +3,9 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -45,7 +43,6 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -244,18 +241,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public double getStandPrepAngle(String jointName)
    {
       return standPrepAngles.get(jointName);
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
 
    @Override
