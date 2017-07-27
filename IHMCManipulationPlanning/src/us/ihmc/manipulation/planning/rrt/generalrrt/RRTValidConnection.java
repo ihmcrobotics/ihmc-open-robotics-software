@@ -10,6 +10,9 @@ public class RRTValidConnection
 
    private ArrayList<RRTNode> nodes = new ArrayList<RRTNode>();
 
+   /*
+    * default numberOfPiece
+    */
    public int numberOfPiece = 20;
 
    public RRTValidConnection(RRTNode parentNode, RRTNode childNode)

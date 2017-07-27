@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
-import us.ihmc.manipulation.planning.trajectory.EndEffectorTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,6 +39,7 @@ public abstract class CTTaskNode
       this.childNodes = node.childNodes;
       this.parentNode = node.parentNode;
       this.normalizedNodeData = node.normalizedNodeData;
+      this.configurationJoints = node.configurationJoints;
    }
 
    public CTTaskNode(double[] rootData)
@@ -85,14 +85,6 @@ public abstract class CTTaskNode
    public final void setNormalizedNodeData(int index, double data)
    {
       normalizedNodeData.setQ(index, data);
-   }
-   
-   public final void setNodeData(CTTaskNode copyNode)
-   {
-      for(int i=0;i<copyNode.getDimensionOfNodeData();i++)
-      {
-         nodeData.setQ(i, copyNode.getNodeData(i));
-      }
    }
 
    public final void addChildNode(CTTaskNode node)
@@ -175,19 +167,60 @@ public abstract class CTTaskNode
          }
          else
          {
-            value = (getNormalizedNodeData(i))*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
+            value = getNormalizedNodeData(i)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
          }
          nodeData.setQ(i, value);
       }
    }
    
+   /*
+    * alpha is within 0 ~ 1.
+    * if i, the createdNewNode would be towardNode.
+    * if 0, the createdNewNode would be this.
+    */
+   public CTTaskNode createNewNodeTowardNode(CTTaskNode towardNode, double alpha)
+   {
+      /*
+       * clamping alpha first.
+       */
+      if(alpha > 1)
+         alpha = 1;
+      else if(alpha < 0)
+         alpha = 0;
+      else
+         ;
+      
+      CTTaskNode createdNewNode = this.createNode();
+      
+      for(int i=0;i<createdNewNode.getDimensionOfNodeData();i++)
+      {
+         double stepToward;
+         stepToward = (towardNode.getNodeData(i) - this.getNodeData(i)) * alpha;
+         createdNewNode.setNodeData(i, this.getNodeData(i)+stepToward);
+         
+         stepToward = (towardNode.getNormalizedNodeData(i) - this.getNormalizedNodeData(i)) * alpha;
+         createdNewNode.setNormalizedNodeData(i, this.getNormalizedNodeData(i)+stepToward);
+      }      
+      createdNewNode.setParentNode(this);
+      return createdNewNode;
+   }
+   
+   /*
+    * this method is only used to create optimal path in CTTaskNodeTree.
+    */
+   public CTTaskNode createNodeCopy()
+   {
+      CTTaskNode nodeCopy = createNode();
+      
+      nodeCopy.nodeData = new NodeData(this.nodeData);
+      nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
+      
+      return nodeCopy;
+   }
+   
    public void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
-      
-//      for(int i=0;i<this.configurationJoints.length;i++)
-//         this.configurationJoints[i] = robot.getOneDoFJoints()[i];
-      
+      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);  
    }
    
    public OneDoFJoint[] getOneDoFJoints()

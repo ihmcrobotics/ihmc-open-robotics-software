@@ -119,7 +119,7 @@ public class GenericTaskNode extends CTTaskNode
       desiredPoseToWorld.changeFrame(midZUpFrame);
 
       Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);      
       
       nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
