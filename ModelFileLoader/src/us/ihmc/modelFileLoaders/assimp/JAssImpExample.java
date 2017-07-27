@@ -1,9 +1,9 @@
 package us.ihmc.modelFileLoaders.assimp;
 
-import jassimp.AiMesh;
-import jassimp.AiScene;
-import jassimp.Jassimp;
+import jassimp.*;
 import javafx.application.Application;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
@@ -15,9 +15,12 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -25,10 +28,8 @@ import java.util.List;
  */
 public class JAssImpExample extends Application
 {
-   static
-   {
-      NativeLibraryLoader.loadLibrary("jassimp", "jassimp");
-   }
+
+   private final AiBuiltInWrapperProvider wrapperProvider = new AiBuiltInWrapperProvider();
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -38,15 +39,69 @@ public class JAssImpExample extends Application
       View3DFactory view3DFactory = new View3DFactory(1024, 768);
       view3DFactory.addCameraController();
 
-      AiScene aiScene = Jassimp.importFile("Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae");
+      Jassimp.setLibraryLoader(new IHMCJassimpNativeLibraryLoader());
+
+      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
+
+      HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
+      aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
+      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps);
+
+      int numMaterials = aiScene.getNumMaterials();
 
       List<AiMesh> meshes = aiScene.getMeshes();
 
       MeshDataHolder[] meshDataHolders = new MeshDataHolder[meshes.size()];
+      Material[] materials = new Material[meshes.size()];
 
       for (int i = 0; i < meshes.size(); i++)
       {
          AiMesh aiMesh = meshes.get(i);
+
+         int materialIndex = aiMesh.getMaterialIndex();
+         if (materialIndex >= 0)
+         {
+            AiMaterial aiMaterial = aiScene.getMaterials().get(materialIndex);
+
+            AiColor diffuseColor = aiMaterial.getDiffuseColor(wrapperProvider);
+            AiColor specularColor = aiMaterial.getSpecularColor(wrapperProvider);
+            float shininess = aiMaterial.getShininess();
+
+            int numDiffuseTextures = aiMaterial.getNumTextures(AiTextureType.DIFFUSE);
+
+            int textureUVIndex = aiMaterial.getTextureUVIndex(AiTextureType.DIFFUSE, 0);
+
+            int numUVComponents = aiMesh.getNumUVComponents(textureUVIndex);
+
+            Image diffuseMap = null;
+            for (int j = 0; j < numDiffuseTextures; j++)
+            {
+               String textureFile = aiMaterial.getTextureFile(AiTextureType.DIFFUSE, j);
+               Path path = Paths.get(meshFileName);
+               Path textureLocation = path.getParent().resolve(textureFile);
+               diffuseMap = new Image(new FileInputStream(textureLocation.toFile()), 2048, 2048, true, true);
+
+               AiBlendMode blendMode = aiMaterial.getBlendMode();
+               System.out.println("blend mode: " + blendMode);
+            }
+
+            PhongMaterial material = new PhongMaterial(aiColorToJFXColor(diffuseColor));
+            material.setSpecularPower(shininess);
+            material.setSpecularColor(aiColorToJFXColor(specularColor));
+            material.setDiffuseMap(diffuseMap);
+            //            material.setSelfIlluminationMap(diffuseMap);
+            //            material.setSpecularMap(diffuseMap);
+            //            material.setBumpMap(diffuseMap);
+
+            materials[i] = material;
+         }
+         else
+         {
+            double hue = i / (meshDataHolders.length - 1.0) * 360.0;
+            Material material = new PhongMaterial(Color.hsb(hue, 0.9, 0.9));
+            materials[i] = material;
+         }
+
          int totalNumberOfVertices = aiMesh.getNumVertices();
          int numberOfTriangles = aiMesh.getNumFaces();
          int totalNumberOfTexturePoints = aiMesh.getNumUVComponents(2);
@@ -74,7 +129,11 @@ public class JAssImpExample extends Application
                vertexNormals[currentIndex] = new Vector3D32(aiMesh.getNormalX(faceVertexIndex), aiMesh.getNormalY(faceVertexIndex),
                                                             aiMesh.getNormalZ(faceVertexIndex));
 
-               texturePoints[currentIndex] = new TexCoord2f();
+               float texCoordU = aiMesh.getTexCoordU(faceVertexIndex, 0);
+               float texCoordV = aiMesh.getTexCoordV(faceVertexIndex, 0);
+
+//               System.out.println("[u, v]: " + texCoordU + ", " + texCoordV);
+               texturePoints[currentIndex] = new TexCoord2f(texCoordU, texCoordV);
 
                for (int l = 0; l < 3; l++)
                {
@@ -88,18 +147,26 @@ public class JAssImpExample extends Application
 
       for (int i = 0; i < meshDataHolders.length; i++)
       {
-         double hue = i / (meshDataHolders.length - 1.0) * 360.0;
          MeshDataHolder meshDataHolder = meshDataHolders[i];
-         Material material = new PhongMaterial(Color.hsb(hue, 0.9, 0.9));
          MeshView meshView = new MeshView();
          meshView.setMesh(JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder));
-         meshView.setMaterial(material);
+         meshView.setMaterial(materials[i]);
 
          view3DFactory.addNodeToView(meshView);
       }
 
       primaryStage.setScene(view3DFactory.getScene());
       primaryStage.show();
+   }
+
+   private Color aiColorToJFXColor(AiColor aiColor)
+   {
+      float alpha = aiColor.getAlpha();
+      int red = (int) (aiColor.getRed() * 255.0);
+      int blue = (int) (aiColor.getBlue() * 255.0);
+      int green = (int) (aiColor.getGreen() * 255.0);
+
+      return Color.rgb(red, green, blue, alpha);
    }
 
    public static void main(String[] args) throws IOException
