@@ -40,15 +40,14 @@ public class JAssImpExample extends Application
 
       Jassimp.setLibraryLoader(new IHMCJassimpNativeLibraryLoader());
 
-      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
-      //      String meshFileName = "SimulationConstructionSet/resources/models/cinderblock1Meter.obj";
+      String meshFileName = "models/cinderblock1Meter.obj";
 
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
       aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
       aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_GRAPH);
       aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_MESHES);
 
-      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps);
+      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps, new AiClassLoaderIOSystem(getClass().getClassLoader()));
 
       List<AiMesh> meshes = aiScene.getMeshes();
 
@@ -79,9 +78,9 @@ public class JAssImpExample extends Application
             for (int j = 0; j < numDiffuseTextures; j++)
             {
                String textureFile = aiMaterial.getTextureFile(AiTextureType.DIFFUSE, j);
-               Path path = Paths.get(meshFileName);
+               Path path = Paths.get(meshFileName);   // TODO: Do not use Path, gives weird slashes on windows
                Path textureLocation = path.getParent().resolve(textureFile);
-               diffuseMap = new Image(new FileInputStream(textureLocation.toFile()));
+               diffuseMap = new Image(getClass().getClassLoader().getResourceAsStream(textureLocation.toString()));
                uvIndexToUse = j;
             }
 
