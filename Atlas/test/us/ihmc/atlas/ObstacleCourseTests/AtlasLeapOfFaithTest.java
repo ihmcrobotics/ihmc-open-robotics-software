@@ -114,6 +114,12 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       @Override
       public boolean usePelvisRotation()
       {
+         return true;
+      }
+
+      @Override
+      public boolean relaxPelvisControl()
+      {
          return false;
       }
    }
@@ -121,6 +127,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public static void main(String[] args) throws Exception
    {
       AtlasLeapOfFaithTest test = new AtlasLeapOfFaithTest();
-      test.testUnknownStepDownOneFootOnEachStepLong();
+      test.testRandomHeightField();
    }
 }

@@ -3,7 +3,6 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -27,25 +26,51 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
    private final CombinedTerrainObject3D terrainObject = new CombinedTerrainObject3D(name);
 
    private final int numberOfStepsDown;
-   private final double stepDownHeight;
-   private final double stepDepth;
 
    public SmallStepDownEnvironment(int numberOfStepsDown, double stepDepth, double stepDownHeight)
    {
       this.numberOfStepsDown = numberOfStepsDown;
-      this.stepDownHeight = stepDownHeight;
-      this.stepDepth = stepDepth;
 
-      addGround();
+      addGround(numberOfStepsDown, stepDownHeight);
       addStartBlock();
 
       for (int i = 0; i < numberOfStepsDown; i++)
-         addBlockDown(i);
+         addBlockDown(i, stepDepth, stepDownHeight);
 
-      addEndBlock();
+      addEndBlock(numberOfStepsDown, stepDepth, stepDownHeight);
    }
 
-   private void addGround()
+   public SmallStepDownEnvironment(List<Double> heightField, List<Double> stepLength, double starterWidth)
+   {
+      this.numberOfStepsDown = heightField.size();
+
+      double minHeight = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < numberOfStepsDown; i++)
+         minHeight = Math.min(minHeight, heightField.get(i));
+
+      addGround(minHeight);
+      addStartBlock(starterWidth);
+
+      double distanceTraveled = 0.0;
+      for (int i = 0; i < numberOfStepsDown; i++)
+      {
+         double length = stepLength.get(i);
+         addRandomBlock(distanceTraveled, heightField.get(i), length);
+
+         distanceTraveled += length;
+      }
+
+      addEndBlock(distanceTraveled, 0.5);
+   }
+
+   private void addGround(double height)
+   {
+      Vector3D position = new Vector3D(0.0, 0.0, -0.05 + height - blockHeight / 2.0);
+      Vector3D dimensions = new Vector3D(30.0, 30.0, 0.1);
+      addBlock(0.0, position, dimensions, groundColor);
+   }
+
+   private void addGround(int numberOfStepsDown, double stepDownHeight)
    {
       Vector3D position = new Vector3D(0.0, 0.0, -0.05 - (2 + numberOfStepsDown) * stepDownHeight - blockHeight / 2.0);
       Vector3D dimensions = new Vector3D(30.0, 30.0, 0.1);
@@ -54,12 +79,17 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
 
    private void addStartBlock()
    {
+      addStartBlock(length);
+   }
+
+   private void addStartBlock(double starterLength)
+   {
       Vector3D position = new Vector3D(0.0, 0.0, -blockHeight / 2.0);
-      Vector3D dimensions = new Vector3D(length, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(starterLength, 0.6, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
-   private void addEndBlock()
+   private void addEndBlock(int numberOfStepsDown, double stepDepth, double stepDownHeight )
    {
       double endBlockLength = 5.0 * stepDepth;
       Vector3D position = new Vector3D(0.5 * (length + endBlockLength) + (numberOfStepsDown - 0.5) * stepDepth, 0.0, -numberOfStepsDown * stepDownHeight - blockHeight / 2.0);
@@ -67,19 +97,26 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
       addBlock(0.0, position, dimensions, blockColor);
    }
 
-   private void addBlockDown(int stepNumber)
+   private void addEndBlock(double forwardPosition, double stepDepth)
+   {
+      double endBlockLength = 5.0 * stepDepth;
+      Vector3D position = new Vector3D(0.5 * (length + endBlockLength) + forwardPosition, 0.0, -blockHeight / 2.0);
+      Vector3D dimensions = new Vector3D(endBlockLength, 0.6, blockHeight);
+      addBlock(0.0, position, dimensions, blockColor);
+   }
+
+   private void addBlockDown(int stepNumber, double stepDepth, double stepDownHeight)
    {
       Vector3D position = new Vector3D(0.5 * length + (stepNumber + 0.5) * stepDepth, 0.0, -blockHeight / 2.0 - (1 + stepNumber) * stepDownHeight);
       Vector3D dimensions = new Vector3D(stepDepth, 0.6, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
-
-   private void addBlock(double yaw, Vector2D position, Vector2D dimensions)
+   private void addRandomBlock(double forwardPosition, double height, double stepDepth)
    {
-      Vector3D position3d = new Vector3D(position.getX(), position.getY(), -blockHeight/2.0);
-      Vector3D dimensions3d = new Vector3D(dimensions.getX(), dimensions.getY(), blockHeight);
-      addBlock(yaw, position3d, dimensions3d, blockColor);
+      Vector3D position = new Vector3D(0.5 * (length + stepDepth) + forwardPosition, 0.0, -blockHeight / 2.0 + height);
+      Vector3D dimensions = new Vector3D(stepDepth, 0.6, blockHeight);
+      addBlock(0.0, position, dimensions, blockColor);
    }
 
    private void addBlock(double yaw, Vector3D position, Vector3D dimensions, AppearanceDefinition color)
