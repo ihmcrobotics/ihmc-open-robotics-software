@@ -1,5 +1,6 @@
 package us.ihmc.modelFileLoaders.assimp;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import jassimp.*;
 import javafx.application.Application;
 import javafx.scene.effect.BlendMode;
@@ -20,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -41,13 +43,15 @@ public class JAssImpExample extends Application
 
       Jassimp.setLibraryLoader(new IHMCJassimpNativeLibraryLoader());
 
-      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
+//      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
+      String meshFileName = "SimulationConstructionSet/resources/models/cinderblock1Meter.obj";
 
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
       aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
-      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps);
+      aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_GRAPH);
+      aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_MESHES);
 
-      int numMaterials = aiScene.getNumMaterials();
+      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps);
 
       List<AiMesh> meshes = aiScene.getMeshes();
 
@@ -57,21 +61,21 @@ public class JAssImpExample extends Application
       for (int i = 0; i < meshes.size(); i++)
       {
          AiMesh aiMesh = meshes.get(i);
+         AiMaterial aiMaterial = null;
 
          int materialIndex = aiMesh.getMaterialIndex();
          if (materialIndex >= 0)
          {
-            AiMaterial aiMaterial = aiScene.getMaterials().get(materialIndex);
+            aiMaterial = aiScene.getMaterials().get(materialIndex);
+         }
+
+         if(aiMaterial != null)
+         {
+            int numDiffuseTextures = aiMaterial.getNumTextures(AiTextureType.DIFFUSE);
 
             AiColor diffuseColor = aiMaterial.getDiffuseColor(wrapperProvider);
             AiColor specularColor = aiMaterial.getSpecularColor(wrapperProvider);
             float shininess = aiMaterial.getShininess();
-
-            int numDiffuseTextures = aiMaterial.getNumTextures(AiTextureType.DIFFUSE);
-
-            int textureUVIndex = aiMaterial.getTextureUVIndex(AiTextureType.DIFFUSE, 0);
-
-            int numUVComponents = aiMesh.getNumUVComponents(textureUVIndex);
 
             Image diffuseMap = null;
             for (int j = 0; j < numDiffuseTextures; j++)
@@ -79,7 +83,7 @@ public class JAssImpExample extends Application
                String textureFile = aiMaterial.getTextureFile(AiTextureType.DIFFUSE, j);
                Path path = Paths.get(meshFileName);
                Path textureLocation = path.getParent().resolve(textureFile);
-               diffuseMap = new Image(new FileInputStream(textureLocation.toFile()), 2048, 2048, true, true);
+               diffuseMap = new Image(new FileInputStream(textureLocation.toFile()));
 
                AiBlendMode blendMode = aiMaterial.getBlendMode();
                System.out.println("blend mode: " + blendMode);
@@ -89,9 +93,6 @@ public class JAssImpExample extends Application
             material.setSpecularPower(shininess);
             material.setSpecularColor(aiColorToJFXColor(specularColor));
             material.setDiffuseMap(diffuseMap);
-            //            material.setSelfIlluminationMap(diffuseMap);
-            //            material.setSpecularMap(diffuseMap);
-            //            material.setBumpMap(diffuseMap);
 
             materials[i] = material;
          }
@@ -104,17 +105,11 @@ public class JAssImpExample extends Application
 
          int totalNumberOfVertices = aiMesh.getNumVertices();
          int numberOfTriangles = aiMesh.getNumFaces();
-         int totalNumberOfTexturePoints = aiMesh.getNumUVComponents(2);
 
          Point3D32[] vertices = new Point3D32[totalNumberOfVertices];
          TexCoord2f[] texturePoints = new TexCoord2f[totalNumberOfVertices];
          Vector3D32[] vertexNormals = new Vector3D32[totalNumberOfVertices];
          int[] triangleIndices = new int[3 * totalNumberOfVertices];
-
-         if(totalNumberOfTexturePoints != 0)
-         {
-            System.out.println("Total number of texture points for mesh [" + aiMesh.getName() + "]: " + totalNumberOfTexturePoints);
-         }
 
          for (int j = 0; j < numberOfTriangles; j++)
          {
@@ -129,11 +124,17 @@ public class JAssImpExample extends Application
                vertexNormals[currentIndex] = new Vector3D32(aiMesh.getNormalX(faceVertexIndex), aiMesh.getNormalY(faceVertexIndex),
                                                             aiMesh.getNormalZ(faceVertexIndex));
 
-               float texCoordU = aiMesh.getTexCoordU(faceVertexIndex, 0);
-               float texCoordV = aiMesh.getTexCoordV(faceVertexIndex, 0);
+               if(aiMaterial != null && aiMesh.getNumUVComponents(aiMaterial.getTextureUVIndex(AiTextureType.DIFFUSE, 0)) == 2)
+               {
+                  float texCoordU = aiMesh.getTexCoordU(faceVertexIndex, 0);
+                  float texCoordV = aiMesh.getTexCoordV(faceVertexIndex, 0);
 
-//               System.out.println("[u, v]: " + texCoordU + ", " + texCoordV);
-               texturePoints[currentIndex] = new TexCoord2f(texCoordU, texCoordV);
+                  texturePoints[currentIndex] = new TexCoord2f(texCoordU, texCoordV);
+               }
+               else
+               {
+                  texturePoints[currentIndex] = new TexCoord2f();
+               }
 
                for (int l = 0; l < 3; l++)
                {
