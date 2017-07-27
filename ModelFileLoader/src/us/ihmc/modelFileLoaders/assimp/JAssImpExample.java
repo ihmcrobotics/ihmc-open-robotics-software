@@ -1,9 +1,7 @@
 package us.ihmc.modelFileLoaders.assimp;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import jassimp.*;
 import javafx.application.Application;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -21,7 +19,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -43,8 +40,8 @@ public class JAssImpExample extends Application
 
       Jassimp.setLibraryLoader(new IHMCJassimpNativeLibraryLoader());
 
-//      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
-      String meshFileName = "SimulationConstructionSet/resources/models/cinderblock1Meter.obj";
+      String meshFileName = "Valkyrie/resources/models/val_description/model/meshes/torso/torso.dae";
+      //      String meshFileName = "SimulationConstructionSet/resources/models/cinderblock1Meter.obj";
 
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
       aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
@@ -84,9 +81,6 @@ public class JAssImpExample extends Application
                Path path = Paths.get(meshFileName);
                Path textureLocation = path.getParent().resolve(textureFile);
                diffuseMap = new Image(new FileInputStream(textureLocation.toFile()));
-
-               AiBlendMode blendMode = aiMaterial.getBlendMode();
-               System.out.println("blend mode: " + blendMode);
             }
 
             PhongMaterial material = new PhongMaterial(aiColorToJFXColor(diffuseColor));
