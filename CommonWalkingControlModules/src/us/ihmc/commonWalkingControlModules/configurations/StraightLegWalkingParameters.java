@@ -14,7 +14,7 @@ public class StraightLegWalkingParameters
     */
    public double getSpeedForSupportKneeStraightening()
    {
-      return 0.2;
+      return 0.5;
    }
 
    public double getSupportKneeCollapsingDuration()
@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.5;
+      return 0.85;
    }
 
    /**
@@ -64,7 +64,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return 0.7;
+      return 0.75;
    }
 
    /**

@@ -19,6 +19,7 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
 {
    private static final double length = 0.35;
    private static final double blockHeight = 0.1;
+   private static final double blockWidth = 1.5;
    private static final AppearanceDefinition groundColor = YoAppearance.Texture("Textures/water.png");
    private final AppearanceDefinition blockColor = YoAppearance.Grey();
 
@@ -85,7 +86,7 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
    private void addStartBlock(double startBlockLength, double startBlockHeight)
    {
       Vector3D position = new Vector3D(0.0, 0.0, -blockHeight / 2.0 + startBlockHeight);
-      Vector3D dimensions = new Vector3D(startBlockLength, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(startBlockLength, blockWidth, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
@@ -93,7 +94,7 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
    {
       double endBlockLength = 5.0 * stepDepth;
       Vector3D position = new Vector3D(0.5 * (length + endBlockLength) + (numberOfStepsDown - 0.5) * stepDepth, 0.0, -numberOfStepsDown * stepDownHeight - blockHeight / 2.0);
-      Vector3D dimensions = new Vector3D(endBlockLength, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(endBlockLength, blockWidth, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
@@ -101,21 +102,21 @@ public class SmallStepDownEnvironment implements CommonAvatarEnvironmentInterfac
    {
       double endBlockLength = 5.0 * stepDepth;
       Vector3D position = new Vector3D(0.5 * (length + endBlockLength) + forwardPosition, 0.0, -blockHeight / 2.0 + endBlockHeight);
-      Vector3D dimensions = new Vector3D(endBlockLength, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(endBlockLength, blockWidth, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
    private void addBlockDown(int stepNumber, double stepDepth, double stepDownHeight)
    {
       Vector3D position = new Vector3D(0.5 * length + (stepNumber + 0.5) * stepDepth, 0.0, -blockHeight / 2.0 - (1 + stepNumber) * stepDownHeight);
-      Vector3D dimensions = new Vector3D(stepDepth, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(stepDepth, blockWidth, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
    private void addRandomBlock(double forwardPosition, double height, double stepDepth)
    {
       Vector3D position = new Vector3D(0.5 * (length + stepDepth) + forwardPosition, 0.0, -blockHeight / 2.0 + height);
-      Vector3D dimensions = new Vector3D(stepDepth, 0.6, blockHeight);
+      Vector3D dimensions = new Vector3D(stepDepth, blockWidth, blockHeight);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
