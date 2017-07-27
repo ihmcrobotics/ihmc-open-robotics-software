@@ -198,8 +198,8 @@ public class SmoothCoMIntegrationToolsTest
       
       for(int i = 0; i < nTests; i++)
       {
-         double scaleTFinal = 1.0 / Math.random();
-         double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
+//         double scaleTFinal = 1.0 / Math.random();
+         double t0 = 0.0, tFinal = t0 + Math.random(); //scaleTFinal * Math.random();
                     
          FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
@@ -212,21 +212,31 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint comPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
          
          FramePoint icpPositionDesiredInitial = new FramePoint(worldFrame);
-         CapturePointTools.computeDesiredCapturePointPosition(omega0, time, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
          // Position
          FramePoint comPositionDesiredCurrent = new FramePoint(worldFrame);
+         FramePoint comPositionDesiredInitial = new FramePoint(worldFrame);
          FramePoint comPositionDesiredCurrentByHand = new FramePoint(worldFrame);
+         FramePoint comPositionDesiredInitialByHand = new FramePoint(worldFrame);
          
          SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredCurrent);
+         SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, t0, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitial);
          calculateCoMPositionByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredCurrentByHand);
+         calculateCoMPositionByHand3DLinear(omega0, t0, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitialByHand);
          
-         PrintTools.debug("Time = " + time + " [" + t0 + ", " + tFinal + "]");
-         PrintTools.debug("Ini ICP: " + icpPositionDesiredInitial.toString());
-         PrintTools.debug("End ICP: " + icpPositionDesiredFinal.toString());
-         PrintTools.debug("End CoM: " + comPositionDesiredFinal.toString());
-         PrintTools.debug("CoM pos calc: " + comPositionDesiredCurrent.toString());
-         PrintTools.debug("CoM pos hand: " + comPositionDesiredCurrentByHand.toString());
+//         PrintTools.debug("Test " + i);
+//         PrintTools.debug("Time = " + time + ", [" + t0 + ", " + tFinal + "]");
+//         PrintTools.debug("Ini CMP: " + cmp0.toString());
+//         PrintTools.debug("End CMP: " + cmpFinal.toString());
+//         PrintTools.debug("Ini ICP: " + icpPositionDesiredInitial.toString());
+//         PrintTools.debug("End ICP: " + icpPositionDesiredFinal.toString());
+//         PrintTools.debug("End CoM: " + comPositionDesiredFinal.toString());
+//         PrintTools.debug("Ini CoM calc: " + comPositionDesiredInitial.toString());
+//         PrintTools.debug("Ini CoM hand: " + comPositionDesiredInitialByHand.toString());
+//         PrintTools.debug("CoM pos calc: " + comPositionDesiredCurrent.toString());
+//         PrintTools.debug("CoM pos hand: " + comPositionDesiredCurrentByHand.toString());
+//         PrintTools.debug("");
 
          EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredCurrent.getPoint(), comPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
@@ -251,6 +261,46 @@ public class SmoothCoMIntegrationToolsTest
 //         
 //         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
       }
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCalculateCoMInsanityCheck()
+   {
+   // Linear polynomial: y(x) = a0 + a1*x
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      int numberOfCoefficients = 2;
+      YoFrameTrajectory3D linear3D = new YoFrameTrajectory3D(namePrefix + "Linear", numberOfCoefficients, worldFrame, registry);
+      
+      double t0 = 0.0, tFinal = 1.0;
+                 
+      FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(0.0, 0.0, 0.0));
+      FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(1.0, 1.0, 0.0));
+      
+      linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
+            
+      FramePoint icpPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
+      FramePoint comPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
+      
+      FramePoint icpPositionDesiredInitial = new FramePoint(worldFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
+
+      // Position
+      FramePoint comPositionDesiredInitial = new FramePoint(worldFrame);
+      FramePoint comPositionDesiredInitialByHand = new FramePoint(worldFrame);
+      
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, linear3D.getInitialTime(), 0, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitial);
+      calculateCoMPositionByHand3DLinear(omega0, linear3D.getInitialTime(), linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitialByHand);
+      
+      PrintTools.debug("Insanity Check");
+      PrintTools.debug("Time = " + "[" + t0 + ", " + tFinal + "]");
+      PrintTools.debug("CMP: " + cmp0.getPoint().toString() + " --> " + cmpFinal.getPoint().toString());
+      PrintTools.debug("ICP: " + icpPositionDesiredInitial.getPoint().toString() + " --> " + icpPositionDesiredFinal.getPoint().toString());
+      PrintTools.debug("CoM: " + comPositionDesiredInitial.getPoint().toString() + " --> " + comPositionDesiredFinal.getPoint().toString());
+      PrintTools.debug("CoM: " + comPositionDesiredInitialByHand.getPoint().toString() + " --> " + comPositionDesiredFinal.getPoint().toString());
+      PrintTools.debug("");
+
+      EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredInitial.getPoint(), comPositionDesiredInitialByHand.getPoint(), EPSILON);
    }
    
 //   @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -324,54 +374,22 @@ public class SmoothCoMIntegrationToolsTest
       linear3D.compute(linear3D.getFinalTime());
       FramePoint cmpRefFinal = new FramePoint(linear3D.getFramePosition());
       
-      linear3D.compute(time);
-      FramePoint cmpRefCurrent = new FramePoint(linear3D.getFramePosition());
-      
-      FramePoint deltaPoint = cmpRefFinal;
-      deltaPoint.add(linear3D.getYoTrajectoryX().getCoefficient(1) / omega0, linear3D.getYoTrajectoryY().getCoefficient(1) / omega0, linear3D.getYoTrajectoryZ().getCoefficient(1) / omega0);
-      deltaPoint.sub(icpPositionDesiredFinal);
       
       double timeFinal = linear3D.getFinalTime();
       
-//      double alpha = 1.0;
-//      double beta = -Math.exp(omega0 * (timeFinal - time));
-//      double gamma =  Math.exp(omega0 * (timeFinal - time));
-//      double delta = 0.5 * (Math.exp(omega0 * (timeFinal - time)) - Math.exp(omega0 * (time - timeFinal)));
-//      
-//      PrintTools.debug("alpha = " + alpha);
-//      PrintTools.debug("beta = " + beta);
-//      PrintTools.debug("gamma = " + gamma);
-//      PrintTools.debug("delta = " + delta);
-//      PrintTools.debug("CMP curr = " + cmpRefCurrent.toString());
-//      PrintTools.debug("CMP finl = " + cmpRefFinal.toString());
-//      PrintTools.debug("CoM finl = " + comPositionDesiredFinal.toString());
-//      PrintTools.debug("Delta pt = " + deltaPoint.toString());
-//      
-//      comPositionDesiredCurrent.setToZero();
-//      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), alpha, cmpRefCurrent.getPointCopy());
-//      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
-//      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), gamma, comPositionDesiredFinal.getPointCopy());
-//      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), delta, deltaPoint.getPointCopy());
-      
-      double alpha = 1.0 - time/timeFinal - 1/(omega0*timeFinal) * Math.sinh(omega0)*(timeFinal - time);
-      double beta = time/timeFinal - Math.cosh(omega0)*(timeFinal - time) + 1/(omega0*timeFinal) * Math.sinh(omega0)*(timeFinal - time);
-      double gamma =  Math.exp(omega0 * (timeFinal - time));
-      double delta = -Math.sinh(omega0)*(timeFinal - time);
-      
-      PrintTools.debug("alpha = " + alpha);
-      PrintTools.debug("beta = " + beta);
-      PrintTools.debug("gamma = " + gamma);
-      PrintTools.debug("delta = " + delta);
-      PrintTools.debug("CMP curr = " + cmpRefCurrent.toString());
-      PrintTools.debug("CMP finl = " + cmpRefFinal.toString());
-      PrintTools.debug("CoM finl = " + comPositionDesiredFinal.toString());
-      PrintTools.debug("Delta pt = " + deltaPoint.toString());
+      double at = Math.exp(omega0 * (timeFinal - time)) - 1;
+      double bt = timeFinal * Math.exp(omega0 * (timeFinal - time)) - time - 1.0/omega0 * Math.exp(omega0 * (timeFinal - time)) + 1.0/omega0;
+      double ct = 0.5 * Math.exp(omega0 * (timeFinal - time)) - 0.5 * Math.exp(omega0 * (time - timeFinal));
       
       comPositionDesiredCurrent.setToZero();
-      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), alpha, cmpRefInit.getPointCopy());
-      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
-      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), gamma, comPositionDesiredFinal.getPointCopy());
-      comPositionDesiredCurrent.scaleAdd(1.0, comPositionDesiredCurrent.getPointCopy(), delta, icpPositionDesiredFinal.getPointCopy());
+      for(int i = 0; i < 3; i++)
+      {
+         double a0 = (1.0 - 1.0/(omega0*timeFinal)) * cmpRefInit.getElement(i) + 1.0/(omega0*timeFinal) * cmpRefFinal.getElement(i);
+         double b0 = 1.0/timeFinal * (cmpRefFinal.getElement(i) - cmpRefInit.getElement(i));
+         double c0 = 1.0/(omega0*timeFinal) * cmpRefInit.getElement(i) - (1.0 + 1.0/(omega0*timeFinal)) * cmpRefFinal.getElement(i) + icpPositionDesiredFinal.getElement(i);
+         
+         comPositionDesiredCurrent.setElement(i, Math.exp(omega0 * (timeFinal - time)) * comPositionDesiredFinal.getElement(i) - (a0*at + b0*bt + c0*ct));
+      }
    }
    
 //   public static void calculateCoMPositionByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint icpPositionDesiredFinal, FramePoint icpPositionDesiredCurrent)
