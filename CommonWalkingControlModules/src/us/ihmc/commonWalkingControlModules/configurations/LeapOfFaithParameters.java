@@ -66,7 +66,7 @@ public class LeapOfFaithParameters
     */
    public double getPelvisReachingRollGain()
    {
-      return 5.0;
+      return 2.5;
    }
 
    /**
