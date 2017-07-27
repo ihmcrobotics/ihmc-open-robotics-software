@@ -59,6 +59,7 @@ public class JAssImpExample extends Application
       {
          AiMesh aiMesh = meshes.get(i);
          AiMaterial aiMaterial = null;
+         int uvIndexToUse = 0;
 
          int materialIndex = aiMesh.getMaterialIndex();
          if (materialIndex >= 0)
@@ -81,6 +82,7 @@ public class JAssImpExample extends Application
                Path path = Paths.get(meshFileName);
                Path textureLocation = path.getParent().resolve(textureFile);
                diffuseMap = new Image(new FileInputStream(textureLocation.toFile()));
+               uvIndexToUse = j;
             }
 
             PhongMaterial material = new PhongMaterial(aiColorToJFXColor(diffuseColor));
@@ -118,10 +120,10 @@ public class JAssImpExample extends Application
                vertexNormals[currentIndex] = new Vector3D32(aiMesh.getNormalX(faceVertexIndex), aiMesh.getNormalY(faceVertexIndex),
                                                             aiMesh.getNormalZ(faceVertexIndex));
 
-               if(aiMaterial != null && aiMesh.getNumUVComponents(aiMaterial.getTextureUVIndex(AiTextureType.DIFFUSE, 0)) == 2)
+               if(aiMaterial != null && aiMesh.getNumUVComponents(aiMaterial.getTextureUVIndex(AiTextureType.DIFFUSE, uvIndexToUse)) == 2)
                {
-                  float texCoordU = aiMesh.getTexCoordU(faceVertexIndex, 0);
-                  float texCoordV = aiMesh.getTexCoordV(faceVertexIndex, 0);
+                  float texCoordU = aiMesh.getTexCoordU(faceVertexIndex, uvIndexToUse);
+                  float texCoordV = aiMesh.getTexCoordV(faceVertexIndex, uvIndexToUse);
 
                   texturePoints[currentIndex] = new TexCoord2f(texCoordU, texCoordV);
                }
