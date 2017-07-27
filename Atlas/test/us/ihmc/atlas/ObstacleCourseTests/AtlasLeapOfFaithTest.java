@@ -160,7 +160,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
-      @Override
       public double getPelvisReachingFractionOfSwing()
       {
          return 0.90;

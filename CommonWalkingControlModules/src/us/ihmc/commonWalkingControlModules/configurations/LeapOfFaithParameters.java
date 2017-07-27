@@ -91,7 +91,7 @@ public class LeapOfFaithParameters
     */
    public double getPelvisReachingFractionOfSwing()
    {
-      return 0.97;
+      return 0.90;
    }
 
    public boolean relaxPelvisControl()
