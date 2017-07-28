@@ -11,11 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -85,6 +81,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final StraightLegWalkingParameters straightLegWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
+   private final ToeOffParameters toeOffParameters;
 
    public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -107,6 +104,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
       leapOfFaithParameters = new LeapOfFaithParameters();
+      toeOffParameters = new AtlasToeOffParameters(jointMap);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -148,54 +146,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getTimeToGetPreparedForLocomotion()
    {
       return runningOnRealRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-  @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return getFootLength();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getAnkleLowerLimitToTriggerToeOff()
-   {
-      return -1.0;
-   }
-
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
    }
 
    /** {@inheritDoc} */
@@ -1435,8 +1385,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getICPPercentOfStanceForDSToeOff()
+   public ToeOffParameters getToeOffParameters()
    {
-      return 0.05; // JCarff ToeOff
+      return toeOffParameters;
    }
 }

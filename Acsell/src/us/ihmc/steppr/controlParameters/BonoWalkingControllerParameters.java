@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -34,11 +35,13 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
 
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
+   private final ToeOffParameters toeOffParameters;
 
    public BonoWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
+      this.toeOffParameters = new BonoToeOffParameters();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -62,45 +65,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public double getTimeToGetPreparedForLocomotion()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return 0.20;
-   }
-
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
-    */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
    }
 
    @Override
@@ -954,5 +918,11 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public void useVirtualModelControlCore()
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
+   }
+
+   @Override
+   public ToeOffParameters getToeOffParameters()
+   {
+      return toeOffParameters;
    }
 }

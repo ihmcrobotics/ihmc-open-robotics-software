@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -65,6 +66,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final ToeOffParameters toeOffParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -80,6 +82,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
+      toeOffParameters = new ValkyrieToeOffParameters();
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -133,48 +136,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getTimeToGetPreparedForLocomotion()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      // Used to be: target != RobotTarget.REAL_ROBOT;
-      // Trying to see if that's really necessary (Sylvain)
-      // It delays the toe-off to some extent which can cause some issues.
-      return false;
-   }
-
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return getFootLength();
-   }
-
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
-    */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(30.0);
    }
 
    @Override
@@ -1366,4 +1327,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return true;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public ToeOffParameters getToeOffParameters()
+   {
+      return toeOffParameters;
+   }
+
 }
