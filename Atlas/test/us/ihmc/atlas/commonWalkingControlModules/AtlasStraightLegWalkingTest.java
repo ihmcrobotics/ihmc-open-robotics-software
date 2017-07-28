@@ -289,6 +289,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
+
+      @Override
+      public boolean addOrientationMidpointForObstacleClearance()
+      {
+         return true;
+      }
    }
 
    private class TestLeapOfFaithParameters extends LeapOfFaithParameters
