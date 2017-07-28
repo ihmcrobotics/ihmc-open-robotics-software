@@ -36,7 +36,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testWalkingOverCinderBlockField();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 120000)
    public void testDropOffsWhileWalking() throws Exception
    {
@@ -162,7 +162,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getAnkleLowerLimitToTriggerToeOff()
       {
-         return -0.75;
+         return -1.0; //-0.75;
       }
 
       @Override
@@ -228,7 +228,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double[] getSwingWaypointProportions()
       {
-         return new double[] {0.15, 0.80};
+         return new double[] {0.15, 0.95};
       }
 
 
@@ -282,18 +282,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return -5.0;
       }
-
-      @Override
-      public double getRelaxationRate()
-      {
-         return 2.0;
-      }
-
-      @Override
-      public double getPelvisReachingRollGain()
-      {
-         return 1.0;
-      }
    }
 
    private class TestStraightLegWalkingParameters extends AtlasStraightLegWalkingParameters
@@ -301,18 +289,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public TestStraightLegWalkingParameters()
       {
          super(false);
-      }
-
-      @Override
-      public double getSpeedForSupportKneeStraightening()
-      {
-         return 1.5;
-      }
-
-      @Override
-      public double getPrivilegedMaxVelocity()
-      {
-         return super.getPrivilegedMaxVelocity();
       }
 
       @Override
@@ -325,12 +301,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public double getLegPitchPrivilegedWeight()
       {
          return 10.0;
-      }
-
-      @Override
-      public double getKneeStraightLegPrivilegedWeight()
-      {
-         return 200.0;
       }
 
       @Override
@@ -350,7 +320,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getJointAccelerationWeight()
       {
-         //return 0.005;
          return 0.05;
       }
    }
@@ -369,12 +338,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
       {
          super(physicalProperties);
-      }
-
-      @Override
-      public double getMinTimeToSpendOnExitCoPInSingleSupport()
-      {
-         return 0.0;//0.05; //0.15;
       }
 
       @Override
@@ -407,6 +370,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testDropOffsWhileWalking();
+      test.testWalkingOverCinderBlockField();
    }
 }
