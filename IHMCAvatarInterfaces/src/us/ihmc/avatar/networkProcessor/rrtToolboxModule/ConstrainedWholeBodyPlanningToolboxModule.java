@@ -31,7 +31,7 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(fullRobotModel, statusOutputManager, registry);
+      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(fullRobotModel, statusOutputManager, registry, yoGraphicsListRegistry);
       packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, constrainedWholeBodyPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }

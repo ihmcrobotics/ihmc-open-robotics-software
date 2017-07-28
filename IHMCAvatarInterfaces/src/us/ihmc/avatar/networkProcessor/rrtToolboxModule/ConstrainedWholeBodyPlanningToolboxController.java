@@ -7,14 +7,17 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
@@ -23,7 +26,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private YoInteger updateCount = new YoInteger("UpdateCount", registry);
    
-   private YoBoolean isValidNode = new YoBoolean("IsValidNode", registry);
+   /*
+    * check the current pose is valid or not.
+    */
+   private YoBoolean currentIsValid = new YoBoolean("CurrentIsValid", registry);
+   
+   /*
+    * check the tree reaching the normalized time from 0.0 to 1.0.
+    */
+   private YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
    
    /*
     * a ball in visulaizer need to be represented to show that the node and pose are valid or not. The validity can be expressed with different color.
@@ -38,13 +49,21 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private CTTaskNodeTree tree;
    
    private int numberOfExpanding;
+   
+   /*
+    * visualizer
+    */
+   private TreeStateVisualizer visualizer;
+   
 
    public ConstrainedWholeBodyPlanningToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
-                                                        YoVariableRegistry parentRegistry)
+                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
    {
-      super(statusOutputManager, parentRegistry);
+      super(statusOutputManager, registry);
       this.fullRobotModel = fullRobotModel;
-      isDone.set(false);
+      this.isDone.set(false);
+      
+      this.visualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
    }
 
    @Override
@@ -52,7 +71,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       PrintTools.info("update toolbox " + updateCount.getIntegerValue());
      
-//      tree.expandTree(100);
+      visualizer.updateVisualizer();
 
       if(tree.expandingTree())
       {         
@@ -95,7 +114,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          /*
           * set Yovariables
           */
-         isValidNode.set(tree.getNewNode().getIsValidNode());
+         currentIsValid.set(tree.getNewNode().getIsValidNode());
+         currentTrajectoryTime.set(tree.getNewNode().getNormalizedNodeData(0));
+         
          /*
           * set fullRobotModel
           */
