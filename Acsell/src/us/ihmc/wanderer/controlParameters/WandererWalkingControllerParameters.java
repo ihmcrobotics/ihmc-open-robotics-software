@@ -8,6 +8,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -34,11 +36,15 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
+   private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public WandererWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
+      this.toeOffParameters = new WandererToeOffParameters();
+      this.swingTrajectoryParameters = new WandererSwingTrajectoryParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -62,69 +68,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getTimeToGetPreparedForLocomotion()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return 0.20;
-   }
-
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
-    */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
    }
 
    @Override
@@ -262,19 +205,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getLegLength()
    {
       return WandererPhysicalProperties.legLength;
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      //TODO: Useful values
-      return 0.1;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return 0.1;
    }
 
    @Override
@@ -804,24 +734,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return -0.02;
-   }
-
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return -0.1;
-   }
-
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      return 0;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       return 90.0;
@@ -954,5 +866,17 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public void useVirtualModelControlCore()
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
+   }
+
+   @Override
+   public ToeOffParameters getToeOffParameters()
+   {
+      return toeOffParameters;
+   }
+
+   @Override
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
    }
 }
