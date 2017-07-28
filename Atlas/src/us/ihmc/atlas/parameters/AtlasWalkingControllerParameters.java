@@ -57,9 +57,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
    private final double spineRollLimit = Math.PI / 4.0;
 
-   private final double min_leg_length_before_collapsing_single_support;// = 0.53;    // corresponds to q_kny = 1.70 rad
-   private final double min_mechanical_leg_length;// = 0.420;    // corresponds to a q_kny that is close to knee limit
-
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
    private double       nominalHeightAboveGround;// = 0.705;
@@ -82,6 +79,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final StraightLegWalkingParameters straightLegWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
    private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -91,9 +89,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
       angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
-
-      min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
-      min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
 
       minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );
       nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
@@ -105,6 +100,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
       leapOfFaithParameters = new LeapOfFaithParameters();
       toeOffParameters = new AtlasToeOffParameters(jointMap);
+      swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -164,30 +160,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double slippageDistanceThreshold = 0.04;
       double filterBreakFrequency = 10.0;
       toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
    }
 
    @Override
@@ -342,18 +314,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getLegLength()
    {
       return jointMap.getPhysicalProperties().getShinLength()  + jointMap.getPhysicalProperties().getThighLength();
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      return min_leg_length_before_collapsing_single_support;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return min_mechanical_leg_length;
    }
 
    @Override
@@ -1133,31 +1093,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return jointMap.getModelScale() * -0.3;
-   }
-
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      switch (target)
-      {
-         case SCS:
-            return jointMap.getModelScale() * -2.0;
-
-         default :
-            return jointMap.getModelScale() * -1.0;
-      }
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       switch (target)
@@ -1350,13 +1285,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean controlToeDuringSwing()
    {
       return true;
@@ -1389,4 +1317,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return toeOffParameters;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
+   }
+
 }

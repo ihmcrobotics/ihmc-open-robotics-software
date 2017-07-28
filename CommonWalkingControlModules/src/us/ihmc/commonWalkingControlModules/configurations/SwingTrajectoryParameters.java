@@ -108,4 +108,6 @@ public abstract class SwingTrajectoryParameters
    {
       return true;
    }
+
+   public abstract double getMinMechanicalLegLength();
 }
