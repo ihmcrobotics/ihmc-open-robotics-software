@@ -19,7 +19,6 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -351,17 +350,12 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-   @Override
    public double getStandPrepAngle(String jointName)
    {
       // TODO Auto-generated method stub
       return 0;
    }
+
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {

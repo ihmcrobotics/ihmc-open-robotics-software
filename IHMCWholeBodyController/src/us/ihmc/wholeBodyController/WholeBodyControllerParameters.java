@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public interface WholeBodyControllerParameters
 {
@@ -17,6 +18,8 @@ public interface WholeBodyControllerParameters
    {
       return null;
    }
+
+   public StateEstimatorParameters getStateEstimatorParameters();
 
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
 

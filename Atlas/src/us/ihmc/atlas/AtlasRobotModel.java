@@ -35,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -217,12 +216,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
       return selectedVersion.getOffsetFromAttachmentPlate(side);
-   }
-
-   @Override
-   public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
-   {
-      return JMEGeometryUtils.transformFromJMECoordinatesToZup(getJmeTransformWristToHand(side));
    }
 
    @Override

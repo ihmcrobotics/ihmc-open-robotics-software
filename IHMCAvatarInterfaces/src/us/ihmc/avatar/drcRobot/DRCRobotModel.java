@@ -6,13 +6,11 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -25,8 +23,6 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters
 {
-   public abstract StateEstimatorParameters getStateEstimatorParameters();
-
    public abstract DRCRobotPhysicalProperties getPhysicalProperties();
 
    public abstract DRCRobotJointMap getJointMap();
@@ -40,8 +36,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract HandModel getHandModel();
 
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
-
-   public abstract RigidBodyTransform getTransform3dWristToHand(RobotSide side);
 
    public abstract double getSimulateDT();
 
