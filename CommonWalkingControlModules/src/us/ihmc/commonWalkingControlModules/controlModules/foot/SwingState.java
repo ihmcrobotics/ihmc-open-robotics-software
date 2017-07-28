@@ -56,8 +56,6 @@ public class SwingState extends AbstractUnconstrainedState
    private static final double minScalingFactor = 0.1;
    private static final double exponentialScalingRate = 5.0;
 
-   private static final boolean modifyOrientationForAvoidance = false;
-
    private final YoEnum<TrajectoryType> activeTrajectoryType;
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
@@ -149,6 +147,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
 
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -164,7 +164,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
+      swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
       finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
       finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
@@ -211,10 +211,12 @@ public class SwingState extends AbstractUnconstrainedState
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
       double[] waypointProportions = swingTrajectoryParameters.getSwingWaypointProportions();
+      double[] obstacleClearanceProportions = swingTrajectoryParameters.getObstacleClearanceProportions();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, obstacleClearanceProportions,
+                                                               minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
       blendedSwingTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
@@ -349,13 +351,13 @@ public class SwingState extends AbstractUnconstrainedState
          }
 
          // make the foot orientation better for avoidance
-         if (modifyOrientationForAvoidance && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+         if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
          {
             swingTrajectoryOptimizer.getWaypointData(0, tempPositionTrajectoryPoint);
             tmpOrientation.setToZero(worldFrame);
             tmpVector.setToZero(worldFrame);
-            tmpOrientation.interpolate(initialOrientation, finalOrientation, 0.5);
-            swingTrajectory.appendOrientationWaypoint(tempPositionTrajectoryPoint.getTime(), tmpOrientation, tmpVector);
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
+            swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
          }
       }
 
