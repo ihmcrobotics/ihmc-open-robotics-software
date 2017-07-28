@@ -103,7 +103,7 @@ public class FeetManager
          footControlModules.put(robotSide, footControlModule);
       }
 
-      blindFootstepsHeightOffset.set(walkingControllerParameters.getBlindFootstepsHeightOffset());
+      blindFootstepsHeightOffset.set(walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset());
 
       parentRegistry.addChild(registry);
    }

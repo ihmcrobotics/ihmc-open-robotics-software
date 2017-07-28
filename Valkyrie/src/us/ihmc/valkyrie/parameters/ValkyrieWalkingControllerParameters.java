@@ -11,10 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -67,6 +64,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final StraightLegWalkingParameters straightLegWalkingParameters;
    private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -83,6 +81,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
       toeOffParameters = new ValkyrieToeOffParameters();
+      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -136,30 +135,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getTimeToGetPreparedForLocomotion()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
    }
 
    @Override
@@ -322,19 +297,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getLegLength()
    {
       return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      // TODO: Useful values
-      return 0.1;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return 0.1;
    }
 
    @Override
@@ -1129,34 +1091,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return 0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return -0.3;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      switch(target)
-      {
-      case REAL_ROBOT:
-      case GAZEBO:
-         return -1.0;
-      default:
-         return -2.0;
-      }
-   }
-
    @Override
    public double getContactThresholdForce()
    {
@@ -1335,4 +1269,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return toeOffParameters;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
+   }
 }

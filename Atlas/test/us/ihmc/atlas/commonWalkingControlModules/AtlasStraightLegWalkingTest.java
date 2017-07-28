@@ -85,19 +85,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                return 0.9 - getDefaultTransferTime();
             }
             */
-
-            @Override
-            public boolean doHeelTouchdownIfPossible()
-            {
-               return true;
-            }
-
-            @Override
-            public double getHeelTouchdownLengthRatio()
-            {
-               return 0.5;
-            }
-
             @Override
             public boolean controlHeightWithMomentum()
             {
@@ -120,18 +107,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             public boolean applySecondaryJointScaleDuringSwing()
             {
                return true;
-            }
-
-            @Override
-            public boolean useSingularityAvoidanceInSwing()
-            {
-               return false;
-            }
-
-            @Override
-            public boolean useSingularityAvoidanceInSupport()
-            {
-               return false;
             }
 
 
@@ -194,9 +169,46 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   {
                      return 0.02;
                   }
+               };
+            }
 
+            @Override
+            public SwingTrajectoryParameters getSwingTrajectoryParameters()
+            {
+               return new AtlasSwingTrajectoryParameters(RobotTarget.SCS, 1.0)
+               {
+                  @Override
+                  public boolean doHeelTouchdownIfPossible()
+                  {
+                     return true;
+                  }
+
+                  @Override
+                  public double getHeelTouchdownLengthRatio()
+                  {
+                     return 0.5;
+                  }
+
+                  @Override
+                  public boolean useSingularityAvoidanceInSwing()
+                  {
+                     return false;
+                  }
+
+                  @Override
+                  public boolean useSingularityAvoidanceInSupport()
+                  {
+                     return false;
+                  }
+
+                  @Override
+                  public double[] getSwingWaypointProportions()
+                  {
+                     return new double[] {0.15, 0.80};
+                  }
 
                };
+
             }
 
             @Override
@@ -222,12 +234,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      return false;
                   }
                };
-            }
-
-            @Override
-            public double[] getSwingWaypointProportions()
-            {
-               return new double[] {0.15, 0.80};
             }
 
             @Override
