@@ -21,6 +21,10 @@ public class BipedalFootstepPlannerParameters
     * </p>
     */
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
+
+   /**
+    * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted
+    */
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
 
    /**
