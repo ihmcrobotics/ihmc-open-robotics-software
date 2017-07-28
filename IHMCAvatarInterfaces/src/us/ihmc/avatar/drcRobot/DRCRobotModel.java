@@ -29,10 +29,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public abstract void setEnableJointDamping(boolean enableJointDamping);
-
-   public abstract boolean getEnableJointDamping();
-
    public abstract HandModel getHandModel();
 
    public abstract Transform getJmeTransformWristToHand(RobotSide side);

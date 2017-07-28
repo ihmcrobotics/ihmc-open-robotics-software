@@ -58,8 +58,6 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
 
-   private boolean enableJointDamping = true;
-
    private final RobotDescription robotDescription;
 
    public BonoRobotModel(boolean runningOnRealRobot, boolean headless)
@@ -162,18 +160,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setEnableJointDamping(boolean enableJointDamping)
-   {
-      this.enableJointDamping  = enableJointDamping;
-   }
-
-   @Override
-   public boolean getEnableJointDamping()
-   {
-      return enableJointDamping;
-   }
-
-   @Override
    public HandModel getHandModel()
    {
       return null;
@@ -192,10 +178,9 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      boolean enableJointDamping = getEnableJointDamping();
       return new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
    }
 
