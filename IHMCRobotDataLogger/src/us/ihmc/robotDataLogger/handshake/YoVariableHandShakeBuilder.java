@@ -16,46 +16,38 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotDataLogger.AppearanceDefinitionMessage;
 import us.ihmc.robotDataLogger.EnumType;
-import us.ihmc.robotDataLogger.FullStateBuffer;
 import us.ihmc.robotDataLogger.GraphicObjectMessage;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.JointDefinition;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class YoVariableHandShakeBuilder
 {
    private final Handshake handshake = new Handshake();
-   private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();   
+   private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();
    private final TObjectIntHashMap<YoVariable<?>> yoVariableIndices = new TObjectIntHashMap<>();
    private final ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
-   private final TObjectIntHashMap<String> enumDescriptions = new TObjectIntHashMap<>(); 
-   
+   private final TObjectIntHashMap<String> enumDescriptions = new TObjectIntHashMap<>();
+
    private int registryID = 1;
    private int enumID = 0;
 
-   public YoVariableHandShakeBuilder(List<RigidBody> rootBodies, double dt)
+   public YoVariableHandShakeBuilder(String rootRegistryName, double dt)
    {
-      createRootRegistry();
+      createRootRegistry(rootRegistryName);
 
       handshake.setDt(dt);
 
-      if (rootBodies != null)
-      {
-         addJointHolders(rootBodies);
-      }
    }
 
-   public void addDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void addDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ArrayList<YoGraphicsList> yoGraphicsLists = new ArrayList<YoGraphicsList>();
       yoGraphicsListRegistry.getRegisteredYoGraphicsLists(yoGraphicsLists);
@@ -65,14 +57,14 @@ public class YoVariableHandShakeBuilder
          {
             if (yoGraphic instanceof RemoteYoGraphic)
             {
-               if(handshake.getGraphicObjects().remaining() == 0)
+               if (handshake.getGraphicObjects().remaining() == 0)
                {
                   throw new RuntimeException("The number of YoGraphics exceeds the maximum amount for the logger (" + handshake.getGraphicObjects().capacity() + ")");
                }
                GraphicObjectMessage msg = handshake.getGraphicObjects().add();
                msg.setListName(yoGraphicsList.getLabel());
                messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
-               
+
             }
             else
             {
@@ -88,10 +80,10 @@ public class YoVariableHandShakeBuilder
       {
          for (Artifact artifact : artifactList.getArtifacts())
          {
-            
+
             if (artifact instanceof RemoteYoGraphic)
             {
-               if(handshake.getArtifacts().remaining() == 0)
+               if (handshake.getArtifacts().remaining() == 0)
                {
                   throw new RuntimeException("The number of Artifacts exceeds the maximum amount for the logger (" + handshake.getArtifacts().capacity() + ")");
                }
@@ -106,18 +98,16 @@ public class YoVariableHandShakeBuilder
       }
    }
 
-   private void addJointHolders(List<RigidBody> rootBodies)
+   private void addJointHolders(List<JointHolder> jointHolders)
    {
-      InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(rootBodies);
-      for (InverseDynamicsJoint joint : joints)
+      for (JointHolder jointHolder : jointHolders)
       {
-         JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
 
          JointDefinition jointDefinition = handshake.getJoints().add();
-         jointDefinition.setName(joint.getName());
+         jointDefinition.setName(jointHolder.getName());
          jointDefinition.setType(jointHolder.getJointType());
 
-         jointHolders.add(jointHolder);
+         this.jointHolders.add(jointHolder);
       }
    }
 
@@ -125,34 +115,51 @@ public class YoVariableHandShakeBuilder
    {
       return Collections.unmodifiableList(jointHolders);
    }
-   
+
    public int getNumberOfJointStates()
    {
-      return FullStateBuffer.getNumberOfJointStates(jointHolders);
+      return RegistrySendBufferBuilder.getNumberOfJointStates(jointHolders);
    }
 
-   private void createRootRegistry()
+   private void createRootRegistry(String rootRegistryName)
    {
-      
+
       YoRegistryDefinition yoRegistryDescription = handshake.getRegistries().add();
-      yoRegistryDescription.setName("main");
+      yoRegistryDescription.setName(rootRegistryName);
       yoRegistryDescription.setParent((short) 0);
    }
 
-   public int addRegistry(YoVariableRegistry registry, List<YoVariable<?>> variableListToPack)
+   public void addRegistryBuffer(RegistrySendBufferBuilder builder)
    {
-      int offset = variablesAndRootRegistries.size();
-      addRegistry(0, registry, variableListToPack, registry);
-      return offset;
+      YoVariableRegistry registry = builder.getYoVariableRegistry();
+
+      int registryID = addRegistry(0, registry, builder.getVariables(), registry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = builder.getYoGraphicsListRegistry();
+      if(yoGraphicsListRegistry != null)
+      {
+         addDynamicGraphicObjects(yoGraphicsListRegistry);
+      }
+
+      builder.build(registryID);
+      List<JointHolder> jointHolders = builder.getJointHolders();
+      if (jointHolders != null && !jointHolders.isEmpty())
+      {
+         if(!this.jointHolders.isEmpty())
+         {
+            throw new RuntimeException("Cannot register multiple registries with joint holders");
+         }
+         
+         addJointHolders(jointHolders);
+      }
    }
 
-   private void addRegistry(int parentID, YoVariableRegistry registry, List<YoVariable<?>> variableListToPack, YoVariableRegistry rootRegistry)
+   private int addRegistry(int parentID, YoVariableRegistry registry, List<YoVariable<?>> variableListToPack, YoVariableRegistry rootRegistry)
    {
-      
+
       int myID = registryID;
-      if(myID > handshake.getRegistries().capacity())
+      if (myID > handshake.getRegistries().capacity())
       {
-         throw new RuntimeException("The number of registries exceeds the maximum number of registries for the logger (" + handshake.getRegistries().capacity() +")");
+         throw new RuntimeException("The number of registries exceeds the maximum number of registries for the logger (" + handshake.getRegistries().capacity() + ")");
       }
       registryID++;
 
@@ -167,63 +174,64 @@ public class YoVariableHandShakeBuilder
          addRegistry(myID, child, variableListToPack, rootRegistry);
       }
 
+      return myID;
    }
-   
+
    private short getOrAddEnumType(String enumClass, String[] enumTypes)
    {
-      if(enumDescriptions.containsKey(enumClass))
+      if (enumDescriptions.containsKey(enumClass))
       {
          return (short) enumDescriptions.get(enumClass);
       }
-      
+
       int myID = enumID;
-      if(myID > handshake.getEnumTypes().capacity())
+      if (myID > handshake.getEnumTypes().capacity())
       {
-         throw new RuntimeException("The number of enum types exceeds the maximum number of enum types for the logger (" + handshake.getEnumTypes().capacity() +")");
+         throw new RuntimeException("The number of enum types exceeds the maximum number of enum types for the logger (" + handshake.getEnumTypes().capacity() + ")");
       }
       enumID++;
-      
+
       EnumType enumTypeDescription = handshake.getEnumTypes().add();
       String name = enumClass;
-      if(name.length() > 255)
+      if (name.length() > 255)
       {
          name = name.substring(name.length() - 255);
-         if(name.startsWith("."))
+         if (name.startsWith("."))
          {
             name = name.substring(1);
          }
       }
-      
+
       enumTypeDescription.setName(name);
-      if(enumTypes.length > enumTypeDescription.getEnumValues().capacity())
+      if (enumTypes.length > enumTypeDescription.getEnumValues().capacity())
       {
          throw new RuntimeException("The number of enum values for " + name + " exceeds the maximum number of enum values (" + enumTypeDescription.getEnumValues().capacity() + ")");
       }
       for (String enumType : enumTypes)
       {
-         if(enumType == null)
+         if (enumType == null)
          {
             enumType = "null";
          }
-         if(enumType.length() > 255)
+         if (enumType.length() > 255)
          {
             enumType = enumType.substring(0, 255);
          }
-         
+
          enumTypeDescription.getEnumValues().add(enumType);
       }
-      
+
       enumDescriptions.put(enumClass, myID);
-      
+
       return (short) myID;
    }
 
    private void addVariables(int registryID, YoVariableRegistry registry, List<YoVariable<?>> variableListToPack, YoVariableRegistry rootRegistry)
    {
       ArrayList<YoVariable<?>> variables = registry.getAllVariablesInThisListOnly();
-      if(variables.size() > handshake.getVariables().capacity())
+      if (variables.size() > handshake.getVariables().capacity())
       {
-         throw new RuntimeException("The number of variables exceeds the maximum number of variables for the logger (" + handshake.getVariables().capacity() +")");
+         throw new RuntimeException("The number of variables exceeds the maximum number of variables for the logger (" + handshake.getVariables().capacity() + ")");
       }
       for (YoVariable<?> variable : variables)
       {
@@ -247,7 +255,7 @@ public class YoVariableHandShakeBuilder
             break;
          case ENUM:
             yoVariableDefinition.setType(YoType.EnumYoVariable);
-            if(((YoEnum<?>) variable).isBackedByEnum())
+            if (((YoEnum<?>) variable).isBackedByEnum())
             {
                yoVariableDefinition.setEnumType(getOrAddEnumType(((YoEnum<?>) variable).getEnumType().getCanonicalName(), ((YoEnum<?>) variable).getEnumValuesAsString()));
             }
@@ -288,11 +296,11 @@ public class YoVariableHandShakeBuilder
          System.err.println(e.getMessage());
       }
 
-      if(obj.getVariables().length > objectMessage.getYoVariableIndex().capacity())
+      if (obj.getVariables().length > objectMessage.getYoVariableIndex().capacity())
       {
          throw new RuntimeException(obj.getName() + " has too many variables. It has " + obj.getVariables().length + " variables");
       }
-      
+
       for (YoVariable<?> yoVar : obj.getVariables())
       {
          if (!this.yoVariableIndices.containsKey(yoVar))
@@ -309,7 +317,6 @@ public class YoVariableHandShakeBuilder
       }
 
    }
-   
 
    public int getNumberOfVariables()
    {
@@ -329,11 +336,11 @@ public class YoVariableHandShakeBuilder
    public void setSummaryProvider(SummaryProvider summaryProvider)
    {
       handshake.getSummary().setCreateSummary(summaryProvider.isSummarize());
-      if(summaryProvider.isSummarize())
+      if (summaryProvider.isSummarize())
       {
          handshake.getSummary().setSummaryTriggerVariable(summaryProvider.getSummaryTriggerVariable());
          String[] summarizedVariables = summaryProvider.getSummarizedVariables();
-         for(int i = 0; i < summarizedVariables.length; i++)
+         for (int i = 0; i < summarizedVariables.length; i++)
          {
             String var = summarizedVariables[i];
             handshake.getSummary().getSummarizedVariables().add(var);

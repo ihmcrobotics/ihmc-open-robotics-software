@@ -17,15 +17,15 @@ public class LogProducerFinder
       participant.listenForAnnouncements(new LogSessionCallback());
    }
    
-   public Announcement getAnnounceRequestByIP(String IPAdress)
+   public Announcement getAnnounceRequestByHostname(String hostName)
    {
-      PrintTools.info("Looking for: " + IPAdress + " to come online");
+      PrintTools.info("Looking for logger with hostname: " + hostName + " to come online");
       Announcement announcement;
       try
       {
          while ((announcement = sessions.take()) != null)
          {
-            if(LogProducerDisplay.ipToString(announcement.getDataIP()).equals(IPAdress))
+            if(announcement.getHostName().equals(hostName))
             {
                return announcement;
             }

@@ -53,7 +53,7 @@ import us.ihmc.graphicsDescription.instructions.listeners.ScaleChangedListener;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.jMonkeyEngineToolkit.graphics.Graphics3DInstructionExecutor;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
 import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.tralala.ShapeUtilities;
