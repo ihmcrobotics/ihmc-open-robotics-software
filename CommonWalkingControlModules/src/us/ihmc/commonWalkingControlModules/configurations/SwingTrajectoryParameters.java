@@ -84,6 +84,33 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when taking a step
+    * of the type obstacle clearance
+    */
+   public double[] getObstacleClearanceProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
+    * Whether or not to add an orientation midpoint when doing trajectories of type obstacle clearance
+    */
+   public boolean addOrientationMidpointForObstacleClearance()
+   {
+      return false;
+   }
+
+   /**
+    * Amount of interpolation between the initial orientation and the final orientation during obstacle clearance.
+    * Is not used unless {@link #addOrientationMidpointForObstacleClearance()} returns true.
+    * @return
+    */
+   public double midpointOrientationInterpolationForObstacleClearance()
+   {
+      return 0.4;
+   }
+
+   /**
     * If a step up or a step down is executed, the swing trajectory will switch to the obstacle clearance
     * mode. The value defined here determines the threshold for the height difference between current foot
     * position and step position that causes this switch.
