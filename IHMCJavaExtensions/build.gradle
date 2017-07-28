@@ -5,11 +5,11 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.4.0"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.0"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
-apply plugin: "ihmc-build"
+apply plugin: "us.ihmc.ihmc-build"
 
 dependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
