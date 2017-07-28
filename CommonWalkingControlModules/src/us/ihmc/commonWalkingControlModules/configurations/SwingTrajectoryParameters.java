@@ -84,6 +84,15 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when taking a step
+    * of the type obstacle clearance
+    */
+   public double[] getObstacleClearanceProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
     * If a step up or a step down is executed, the swing trajectory will switch to the obstacle clearance
     * mode. The value defined here determines the threshold for the height difference between current foot
     * position and step position that causes this switch.
