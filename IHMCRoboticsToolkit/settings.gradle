@@ -1,13 +1,10 @@
 rootProject.name = hyphenatedName
 
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+println "Evaluating " + pascalCasedName + " settings.gradle"
 
-if (startParameter.searchUpwards)
-{
-   settingsDir.getParentFile().list().each { siblingDir ->
-      if (siblingDir != pascalCasedName && new File(settingsDir.getParentFile(), siblingDir + "/build.gradle").exists())
-      {
-         includeBuild "../" + siblingDir
-      }
-   }
+Eval.me(extraSourceSets).each {
+   include it
+   project(":" + it).name = hyphenatedName + "-" + it
 }
+
+includeBuild "../IHMCJavaExtensions"
