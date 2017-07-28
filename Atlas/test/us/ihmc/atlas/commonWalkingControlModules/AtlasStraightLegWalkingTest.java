@@ -240,7 +240,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getAnkleLowerLimitToTriggerToeOff()
       {
-         return -1.0; //-0.75;
+         return -0.75;
       }
 
    }
@@ -268,7 +268,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double[] getSwingWaypointProportions()
       {
-         return new double[] {0.15, 0.95};
+         return new double[] {0.15, 0.95}; //0.83};// 0.95};
       }
 
       @Override
@@ -410,6 +410,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testWalkingOverCinderBlockField();
+      test.testForwardWalking();
    }
 }
