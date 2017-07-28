@@ -23,6 +23,10 @@ public class BipedalFootstepPlannerParameters
    private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
    private final YoDouble minimumFootholdPercent = new YoDouble("minimumFootholdPercent", registry);
 
+   /**
+    * These parameters describe the ideal xy-position of a step relative to its parent,
+    * where the parent is the last footstep taken on the other foot.
+    */
    private final YoDouble idealFootstepLength = new YoDouble("idealFootstepLength", registry);
    private final YoDouble idealFootstepWidth = new YoDouble("idealFootstepWidth", registry);
 
@@ -30,11 +34,25 @@ public class BipedalFootstepPlannerParameters
     * Maximum vertical distance between consecutive footsteps
     *
     * <p>
-    * A candidate footstep will be rejected if its z-value is greater than this quantity, when expressed its parent's
+    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
     * z-up sole frame.
     * </p>
     */
    private final YoDouble maximumStepZ = new YoDouble("maximumStepZ", registry);
+
+   /**
+    * Maximum yaw between consecutive footsteps
+    *
+    * <p>
+    * A candidate footstep will be rejected if the yaw between it and its parent is greater than this value.
+    * </p>
+    *
+    * <p>
+    * This restricts the planner from planning kinematically infeasible footsteps. It is constant through the
+    * space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
+    * its maximum reach.
+    * </p>
+    */
    private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
 
    /**
@@ -101,18 +119,83 @@ public class BipedalFootstepPlannerParameters
    private final YoDouble maximumStepXWhenForwardAndDown = new YoDouble("maximumStepXWhenForwardAndDown", registry);
    private final YoDouble maximumStepZWhenForwardAndDown = new YoDouble("maximumStepZWhenForwardAndDown", registry);
 
+   /**
+    * Minimum distance between the edge of a candidate footstep and the edge of its associated planar region.
+    * This value can be negative, meaning a footstep can partially intersect with a planar region.
+    *
+    * <p>
+    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
+    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
+    *
+    * <ul>
+    *    <li>The smallest acceptable distance to the edge of a cliff</li>
+    *    <li>The maximum error between desired and actual foot placement</li>
+    * </ul>
+    * </p>
+    */
    private final YoDouble wiggleInsideDelta = new YoDouble("wiggleInsideDelta", registry);
+
+   /**
+    * The planner attempts to transform a candidate footstep inside its associated planar region,
+    * as parametrized by wiggleIntoConvexHullOfPlanarRegions, wiggleInsideDelta, maximumXYWiggleDistance,
+    * and maximumYawWiggle. If this transform cannot be found, the candidate footstep will be rejected when this is true.
+    */
    private final YoBoolean rejectIfCannotFullyWiggleInside = new YoBoolean("rejectIfCannotFullyWiggleInside", registry);
+
+   /**
+    * There are two methods of wiggling a polygon into a planar region.
+    * <ul>
+    *    <li>Wiggle the polygon into the planar region itself, which isn't necessarily convex </li>
+    *    <li>Wiggle the polygon into the convex hull of the planar region</li>
+    * </ul>
+    *
+    * If this parameter is enabled, the second wiggle method will be used.
+    */
    private final YoBoolean wiggleIntoConvexHullOfPlanarRegions = new YoBoolean("WiggleIntoConvexHullOfPlanarRegions", registry);
 
+   /**
+    * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
+    * distance the planner will use
+    */
    private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
+
+   /**
+    * When wiggling a candidate footstep into a planar region, this is the maximum yaw
+    * distance the planner will use
+    */
    private final YoDouble maximumYawWiggle = new YoDouble("maximumYawWiggle", registry);
 
+   /**
+    * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region
+    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
    private final YoDouble cliffHeightToShiftAwayFrom = new YoDouble("cliffHeightToShiftAwayFrom", registry);
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumDistanceFromCliffBottoms", registry);
 
-   private double minimumSurfaceNormalZ = 0.7;
-   private double maximumZPenetrationOnVRegions = 0.008;
+   /**
+    * The planner will ignore candidate footsteps if they are on a planar region of this incline
+    *
+    * <p>
+    * Each footstep has an associated planar region. If this planar region's surface normal has a
+    * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+    * </p>
+    */
+   private double minimumSurfaceInclineRadians = Math.toRadians(45.0);
+
+   /**
+    * When snapping a candidate footstep to a planar region, its possible that another planar region
+    * intersects the footstep at a steep angle, i.e. a valley. If this intersecting planar region
+    * is never more than maximumZPenetrationOnValleyRegions above the footstep, it won't be rejected,
+    * otherwise it will.
+    */
+   private double maximumZPenetrationOnValleyRegions = 0.008;
 
    public BipedalFootstepPlannerParameters(YoVariableRegistry parentRegistry)
    {
@@ -255,9 +338,9 @@ public class BipedalFootstepPlannerParameters
       return minimumFootholdPercent.getDoubleValue();
    }
 
-   public double getMinimumSurfaceNormalZ()
+   public double getMinimumSurfaceInclineRadians()
    {
-      return minimumSurfaceNormalZ;
+      return minimumSurfaceInclineRadians;
    }
 
    public boolean getWiggleIntoConvexHullOfPlanarRegions()
@@ -280,9 +363,9 @@ public class BipedalFootstepPlannerParameters
       return maximumYawWiggle.getDoubleValue();
    }
 
-   public double getMaximumZPenetrationOnVRegions()
+   public double getMaximumZPenetrationOnValleyRegions()
    {
-      return maximumZPenetrationOnVRegions;
+      return maximumZPenetrationOnValleyRegions;
    }
 
    public double getMaximumStepWidth()
