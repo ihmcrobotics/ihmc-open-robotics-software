@@ -433,10 +433,6 @@ public class FrameEuclideanTrajectoryPointTest
       positionDistance = FrameEuclideanTrajectoryPoint.positionDistance(FrameEuclideanTrajectoryPointTwo);
       assertEquals(0.0, positionDistance, 1e-7);
       assertTrue(FrameEuclideanTrajectoryPoint.epsilonEquals(FrameEuclideanTrajectoryPointTwo, 1e-7));
-
-      String string = FrameEuclideanTrajectoryPoint.toString();
-      String expectedString = "Euclidean trajectory point: (time =  9.90, Euclidean trajectory point: (time =  9.90, Euclidean waypoint: [position = ( 3.90,  2.20,  1.10), linearVelocity = ( 8.80,  1.40,  9.22)].))";
-      assertEquals(expectedString, string);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -4,7 +4,7 @@ module robotDataLogger{
 	struct LoggerConfiguration
 	{
 		string camerasToCapture;
-		string loggerNetwork;
+		boolean publicBroadcast;
 	};
 };
 };

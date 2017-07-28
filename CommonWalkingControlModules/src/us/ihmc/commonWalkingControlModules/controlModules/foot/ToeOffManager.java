@@ -85,6 +85,7 @@ public class ToeOffManager
    private final YoDouble minStepHeightForToeOff = new YoDouble("minStepHeightForToeOff", registry);
    private final YoDouble extraCoMMaxHeightWithToes = new YoDouble("extraCoMMaxHeightWithToes", registry);
 
+
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint> contactStatePoints = new ArrayList<>();
 
@@ -521,8 +522,8 @@ public class ToeOffManager
       if (isNextStepHighEnough)
          return true;
 
-      boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > forwardSteppingThreshold;
-      if (!isForwardOrSideStepping)
+      boolean isForwardStepping = tempLeadingFootPositionInWorld.getX() > forwardSteppingThreshold;
+      if (!isForwardStepping)
          return false;
 
       if (ENABLE_TOE_OFF_FOR_STEP_DOWN)

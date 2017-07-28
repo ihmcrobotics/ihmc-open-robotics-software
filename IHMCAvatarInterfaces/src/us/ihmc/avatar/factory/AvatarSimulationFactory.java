@@ -22,15 +22,20 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
 import us.ihmc.simulationToolkit.controllers.JointLowLevelPositionControlSimulator;
 import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
@@ -43,11 +48,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotController;
-import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -61,6 +61,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AvatarSimulationFactory
 {
@@ -101,7 +102,7 @@ public class AvatarSimulationFactory
    {
       if (robotModel.get().getLogSettings().isLog())
       {
-         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("DRCSimulationYoVariableServer"),
+         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
                                                  robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
       }
       else

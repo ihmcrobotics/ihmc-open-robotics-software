@@ -5,6 +5,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 public enum Direction
 {
    X(0), Y(1), Z(2);
+
+   public static final int size = 3;
    
    public static final Direction[] values = values();
    
