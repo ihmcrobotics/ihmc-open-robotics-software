@@ -100,30 +100,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getMaximumToeOffAngle()
-      {
-         return Math.toRadians(20);
-      }
-
-      @Override
-      public boolean checkCoPLocationToTriggerToeOff()
-      {
-         return true;
-      }
-
-      @Override
-      public double getCoPProximityForToeOff()
-      {
-         return 0.05;
-      }
-
-      @Override
-      public boolean doToeTouchdownIfPossible()
-      {
-         return true;
-      }
-
-      @Override
       public boolean rampUpAllowableToeLoadAfterContact()
       {
          return true;
@@ -141,34 +117,93 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return 20.0;
       }
 
-      @Override
-      public boolean doHeelTouchdownIfPossible()
-      {
-         return true;
-      }
-
-      @Override
-      public double getHeelTouchdownLengthRatio()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public boolean doToeOffIfPossibleInSingleSupport()
-      {
-         return true;
-      }
-
-      @Override
-      public double getAnkleLowerLimitToTriggerToeOff()
-      {
-         return -1.0; //-0.75;
-      }
 
       @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
+      }
+
+
+      @Override
+      public boolean useOptimizationBasedICPController()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean editStepTimingForReachability()
+      {
+         return false; // // TODO: 4/27/17
+      }
+
+      @Override
+      public boolean applySecondaryJointScaleDuringSwing()
+      {
+         return true;
+      }
+
+
+      @Override
+      public LeapOfFaithParameters getLeapOfFaithParameters()
+      {
+         return new TestLeapOfFaithParameters();
+      }
+
+      @Override
+      public StraightLegWalkingParameters getStraightLegWalkingParameters()
+      {
+         return new TestStraightLegWalkingParameters();
+      }
+
+      @Override
+      public MomentumOptimizationSettings getMomentumOptimizationSettings()
+      {
+         return new TestMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
+      }
+
+      @Override
+      public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+      {
+         return new TestPelvisOffsetWhileWalkingParameters();
+      }
+
+      @Override
+      public SwingTrajectoryParameters getSwingTrajectoryParameters()
+      {
+         return new TestSwingTrajectoryParameters();
+      }
+
+      @Override
+      public TestToeOffParameters getToeOffParameters()
+      {
+         return new TestToeOffParameters(jointMap);
+      }
+   }
+
+   private class TestToeOffParameters extends AtlasToeOffParameters
+   {
+      public TestToeOffParameters(AtlasJointMap jointMap)
+      {
+         super(jointMap);
+      }
+
+      @Override
+      public double getMaximumToeOffAngle()
+      {
+         return Math.toRadians(20);
+      }
+
+      @Override
+      public boolean checkCoPLocationToTriggerToeOff()
+      {
+         return true;
+      }
+
+      @Override
+      public double getCoPProximityForToeOff()
+      {
+         return 0.05;
       }
 
       @Override
@@ -195,23 +230,28 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return 0.02;
       }
 
+
       @Override
-      public boolean useOptimizationBasedICPController()
+      public boolean doToeOffIfPossibleInSingleSupport()
       {
          return true;
       }
 
       @Override
-      public boolean editStepTimingForReachability()
+      public double getAnkleLowerLimitToTriggerToeOff()
       {
-         return false; // // TODO: 4/27/17
+         return -1.0; //-0.75;
       }
 
-      @Override
-      public boolean applySecondaryJointScaleDuringSwing()
+   }
+
+   private class TestSwingTrajectoryParameters extends AtlasSwingTrajectoryParameters
+   {
+      public TestSwingTrajectoryParameters()
       {
-         return true;
+         super(DRCRobotModel.RobotTarget.SCS, 1.0);
       }
+
 
       @Override
       public boolean useSingularityAvoidanceInSwing()
@@ -231,29 +271,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return new double[] {0.15, 0.95};
       }
 
-
       @Override
-      public LeapOfFaithParameters getLeapOfFaithParameters()
+      public boolean doHeelTouchdownIfPossible()
       {
-         return new TestLeapOfFaithParameters();
+         return true;
       }
 
       @Override
-      public StraightLegWalkingParameters getStraightLegWalkingParameters()
+      public double getHeelTouchdownLengthRatio()
       {
-         return new TestStraightLegWalkingParameters();
+         return 0.5;
       }
 
-      @Override
-      public MomentumOptimizationSettings getMomentumOptimizationSettings()
-      {
-         return new TestMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
-      }
 
       @Override
-      public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
+      public boolean doToeTouchdownIfPossible()
       {
-         return new TestPelvisOffsetWhileWalkingParameters();
+         return true;
       }
    }
 

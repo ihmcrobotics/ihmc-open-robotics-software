@@ -20,6 +20,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    private final RigidBody rigidBody;
    private final ReferenceFrame soleFrame;
    private final List<Point2D> contactPoints = new ArrayList<Point2D>();
+   private final List<FramePoint2d> frameContactPoints = new ArrayList<FramePoint2d>();
    private final int totalNumberOfContactPoints;
 
    public ListOfPointsContactablePlaneBody(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame)
@@ -29,8 +30,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
 
       for (Point2D contactPoint : contactPointsInSoleFrame)
       {
-         this.contactPoints.add(new Point2D(contactPoint));
+         Point2D point = new Point2D(contactPoint);
+         this.contactPoints.add(point);
+         frameContactPoints.add(new FramePoint2d(soleFrame, point));
       }
+      
 
       totalNumberOfContactPoints = contactPoints.size();
    }
@@ -80,14 +84,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    @Override
    public List<FramePoint2d> getContactPoints2d()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         Tuple2DBasics point = contactPoints.get(i);
-         ret.add(new FramePoint2d(soleFrame, point));
-      }
-
-      return ret;
+      return frameContactPoints;
    }
 
    @Override

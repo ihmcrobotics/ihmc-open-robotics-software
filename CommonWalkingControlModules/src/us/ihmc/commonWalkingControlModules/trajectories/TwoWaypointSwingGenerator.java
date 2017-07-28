@@ -37,6 +37,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoDouble minSwingHeight;
 
    private final List<YoDouble> waypointProportions = new ArrayList<>();
+   private final List<YoDouble> obstacleClearanceWaypointProportions = new ArrayList<>();
 
    private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
@@ -57,10 +58,10 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, null, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, null, null, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double minSwingHeight,
+   public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double[] obstacleClearanceProportions, double minSwingHeight,
          double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -80,12 +81,17 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       if (waypointProportions == null)
          waypointProportions = defaultWaypointProportions;
+      if (obstacleClearanceProportions == null)
+         obstacleClearanceProportions = defaultWaypointProportions;
 
       for (int i = 0; i < numberWaypoints; i++)
       {
          YoDouble waypointProportion = new YoDouble(namePrefix + "WaypointProportion" + i, registry);
+         YoDouble obstacleClearanceWaypointProportion = new YoDouble(namePrefix + "ObstacleClearanceWaypointProportion" + i, registry);
          waypointProportion.set(waypointProportions[i]);
+         obstacleClearanceWaypointProportion.set(obstacleClearanceProportions[i]);
          this.waypointProportions.add(waypointProportion);
+         this.obstacleClearanceWaypointProportions.add(obstacleClearanceWaypointProportion);
       }
 
       trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints);
@@ -185,7 +191,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       case OBSTACLE_CLEARANCE:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getDoubleValue());
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, obstacleClearanceWaypointProportions.get(i).getDoubleValue());
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
          }
          break;
