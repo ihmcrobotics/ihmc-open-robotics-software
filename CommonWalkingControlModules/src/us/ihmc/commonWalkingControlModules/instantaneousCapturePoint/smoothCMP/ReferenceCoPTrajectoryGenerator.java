@@ -268,11 +268,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
    @Override
-   public void setSymmetricCoPConstantOffsets(int waypointNumber, Vector2D offset)
+   public void setSymmetricCoPConstantOffsets(CoPPointName copPointName, Vector2D offset)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameVector2d copUserOffset = copOffsets.get(robotSide).get(CoPPointName.values[waypointNumber]);
+         YoFrameVector2d copUserOffset = copOffsets.get(robotSide).get(copPointName);
          copUserOffset.setX(offset.getX());
          copUserOffset.setY(robotSide.negateIfLeftSide(offset.getY()));
       }

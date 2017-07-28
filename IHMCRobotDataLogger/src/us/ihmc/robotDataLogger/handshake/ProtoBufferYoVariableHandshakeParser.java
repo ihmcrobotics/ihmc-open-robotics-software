@@ -42,9 +42,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 @Deprecated
 public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakeParser
 {
-   ProtoBufferYoVariableHandshakeParser(String registryPrefix)
+   ProtoBufferYoVariableHandshakeParser()
    {
-      super(registryPrefix);
+      super();
    }
    
    private static JointType convertJointType(us.ihmc.robotDataLogger.handshake.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType type)
@@ -77,7 +77,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
       
       this.dt = yoProtoHandshake.getDt();
-      List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake, registryPrefix);
+      List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake);
 
       // don't replace those list objects (it's a big code mess), just populate them with received data
       registries.clear();
@@ -97,10 +97,10 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
    }
 
-   private static List<YoVariableRegistry> parseRegistries(YoProtoHandshake yoProtoHandshake, String registryPrefix)
+   private static List<YoVariableRegistry> parseRegistries(YoProtoHandshake yoProtoHandshake)
    {
       YoRegistryDefinition rootDefinition = yoProtoHandshake.getRegistry(0);
-      YoVariableRegistry rootRegistry = new YoVariableRegistry(registryPrefix + rootDefinition.getName());
+      YoVariableRegistry rootRegistry = new YoVariableRegistry(rootDefinition.getName());
 
       List<YoVariableRegistry> registryList = new ArrayList<>();
       registryList.add(rootRegistry);

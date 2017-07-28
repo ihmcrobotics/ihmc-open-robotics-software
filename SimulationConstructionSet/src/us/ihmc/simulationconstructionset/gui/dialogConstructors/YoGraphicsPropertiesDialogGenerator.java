@@ -5,7 +5,6 @@ import java.awt.Container;
 
 import javax.swing.JFrame;
 
-import javafx.application.Platform;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.dialogs.YoGraphicsPropertiesDialog;
 
@@ -25,9 +24,7 @@ public class YoGraphicsPropertiesDialogGenerator implements YoGraphicsProperties
    @Override
    public void constructDialog()
    {
-      Platform.runLater(() ->{
-         new YoGraphicsPropertiesDialog(parentContainer, frame, sim);
-      });
+      new YoGraphicsPropertiesDialog(parentContainer, frame, sim);
    }
 
    public void closeAndDispose()

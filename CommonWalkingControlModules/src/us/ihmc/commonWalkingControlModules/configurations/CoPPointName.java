@@ -6,7 +6,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum CoPPointName
 {
-   HEEL_COP, BALL_COP, TOE_COP, MIDFEET_COP;
+   MIDFEET_COP, HEEL_COP, BALL_COP, TOE_COP;
 
    public static final EnumSet<CoPPointName> set = EnumSet.allOf(CoPPointName.class);
    public static final CoPPointName[] values = values();

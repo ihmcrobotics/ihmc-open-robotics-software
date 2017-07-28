@@ -48,7 +48,7 @@ import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.jMonkeyEngineToolkit.graphics.Graphics3DInstructionExecutor;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
 
 /**
  * Converts a {@link us.ihmc.graphicsDescription.Graphics3DObject} to a {@link MeshView}

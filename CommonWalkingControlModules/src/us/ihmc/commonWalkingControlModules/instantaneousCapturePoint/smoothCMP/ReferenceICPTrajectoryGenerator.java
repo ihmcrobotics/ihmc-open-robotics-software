@@ -196,7 +196,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public void initialize()
    {
-      if (!isStanding.getBooleanValue())
+      // FIXME
+//      if (!isStanding.getBooleanValue())
       {         
          if(useDecoupled.getBooleanValue())
          {

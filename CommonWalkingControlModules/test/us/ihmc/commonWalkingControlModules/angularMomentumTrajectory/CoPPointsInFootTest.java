@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
@@ -73,18 +74,11 @@ public class CoPPointsInFootTest
       assert (copPointsInFoot.getCoPPointList().isEmpty());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.0, testLocation);
       assert (copPointsInFoot.getCoPPointList().size() == 1);
-      for (CoPPointName copPointName : CoPPointName.values)
+
+      List<CoPPointName> pointsList = copPointsInFoot.getCoPPointList();
+      for (int i = 0; i < pointsList.size(); i++)
       {
-         if (copPointsInFoot.getCoPPointList().contains(copPointName))
-         {
-            //PrintTools.info("Set: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
-            assert (copPointsInFoot.get(copPointName).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
-         }
-         else
-         {
-            //PrintTools.info("Notset: " + copPointName.toString() + " Value: " + copPointsInFoot.get(copPointName).toString());
-            assert (copPointsInFoot.get(copPointName).containsNaN());
-         }
+         assert (copPointsInFoot.get(CoPPointName.values[i]).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
       }
    }   
 }

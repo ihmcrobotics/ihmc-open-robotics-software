@@ -116,8 +116,9 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
          if (stateChangedListeners != null)
          {
-            for (StateChangedListener<E> listener : stateChangedListeners)
+            for (int i = 0; i < stateChangedListeners.size(); i++)
             {
+               StateChangedListener<E> listener = stateChangedListeners.get(i);
                listener.stateChanged(previousState, state, switchTimeYoVariable.getDoubleValue());
             }
          }

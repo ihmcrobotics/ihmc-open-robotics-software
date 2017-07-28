@@ -1,11 +1,12 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
-import javafx.application.Platform;
+
+import java.awt.Container;
+
+import javax.swing.JFrame;
+
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.dialogs.PlaybackPropertiesDialog;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class PlaybackPropertiesDialogGenerator implements PlaybackPropertiesDialogConstructor
 {
@@ -13,7 +14,7 @@ public class PlaybackPropertiesDialogGenerator implements PlaybackPropertiesDial
    private JFrame frame;
    private Container parentContainer;
 
-   PlaybackPropertiesDialogGenerator(SimulationConstructionSet sim, Container parentContainer, JFrame frame)
+   public PlaybackPropertiesDialogGenerator(SimulationConstructionSet sim, Container parentContainer, JFrame frame)
    {
       this.sim = sim;
       this.frame = frame;
@@ -23,7 +24,7 @@ public class PlaybackPropertiesDialogGenerator implements PlaybackPropertiesDial
    @Override
    public void constructDialog()
    {
-      Platform.runLater(() -> new PlaybackPropertiesDialog(parentContainer, frame, sim));
+      new PlaybackPropertiesDialog(parentContainer, frame, sim);
    }
 
    public void closeAndDispose()
