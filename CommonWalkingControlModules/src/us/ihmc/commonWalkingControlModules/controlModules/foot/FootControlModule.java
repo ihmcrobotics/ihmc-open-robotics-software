@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -89,6 +90,7 @@ public class FootControlModule
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
 
+      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
@@ -117,11 +119,11 @@ public class FootControlModule
 
       setupContactStatesMap();
 
-      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
+      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
       YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
       yoTouchdownVelocity.set(touchdownVelocity);
 
-      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration());
+      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
       YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
       yoTouchdownAcceleration.set(touchdownAcceleration);
 
