@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.85;
+      return 0.8;
    }
 
    /**
