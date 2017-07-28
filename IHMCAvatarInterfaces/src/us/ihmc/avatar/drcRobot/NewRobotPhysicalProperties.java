@@ -5,10 +5,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface NewRobotPhysicalProperties extends DRCRobotPhysicalProperties
 {
-   double getMassScalePower();
-
-   double getModelScale();
-
    SideDependentList<RigidBodyTransform> getHandAttachmentPlateToWristTransforms();
 
    SideDependentList<RigidBodyTransform> getSoleToAnkleFrameTransforms();
