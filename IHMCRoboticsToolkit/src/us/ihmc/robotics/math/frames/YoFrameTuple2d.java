@@ -339,12 +339,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       return this.frameTuple2d.epsilonEquals(frameTuple2d, threshold);
    }
 
-   public final void checkForNaN()
-   {
-      putYoValuesIntoFrameTuple2d();
-      frameTuple2d.checkForNaN();
-   }
-
    public final boolean containsNaN()
    {
       putYoValuesIntoFrameTuple2d();
