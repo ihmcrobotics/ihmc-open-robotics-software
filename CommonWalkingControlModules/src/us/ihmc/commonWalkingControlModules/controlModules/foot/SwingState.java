@@ -113,6 +113,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble stepDownHeightForToeTouchdown;
    private final YoDouble toeTouchdownDepthRatio;
 
+   private final YoBoolean addOrientationMidpointForClearance;
+   private final YoDouble midpointOrientationInterpolationForClearance;
 
    private final YoDouble finalSwingHeightOffset;
    private final double controlDT;
@@ -194,6 +196,11 @@ public class SwingState extends AbstractUnconstrainedState
       toeTouchdownAngle.set(swingTrajectoryParameters.getToeTouchdownAngle());
       stepDownHeightForToeTouchdown.set(swingTrajectoryParameters.getStepDownHeightForToeTouchdown());
       toeTouchdownDepthRatio.set(swingTrajectoryParameters.getToeTouchdownDepthRatio());
+
+      addOrientationMidpointForClearance = new YoBoolean(namePrefix + "AddOrientationMidpointForClearance", registry);
+      midpointOrientationInterpolationForClearance = new YoDouble(namePrefix + "MidpointOrientationInterpolationForClearance", registry);
+      addOrientationMidpointForClearance.set(swingTrajectoryParameters.addOrientationMidpointForObstacleClearance());
+      midpointOrientationInterpolationForClearance.set(swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
@@ -351,12 +358,12 @@ public class SwingState extends AbstractUnconstrainedState
          }
 
          // make the foot orientation better for avoidance
-         if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+         if (addOrientationMidpointForClearance.getBooleanValue() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
          {
             swingTrajectoryOptimizer.getWaypointData(0, tempPositionTrajectoryPoint);
             tmpOrientation.setToZero(worldFrame);
             tmpVector.setToZero(worldFrame);
-            tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, midpointOrientationInterpolationForClearance.getDoubleValue());
             swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
          }
       }
