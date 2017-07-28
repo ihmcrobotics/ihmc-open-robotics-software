@@ -1,6 +1,20 @@
 package us.ihmc.modelFileLoaders.assimp;
 
-import jassimp.*;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.List;
+
+import jassimp.AiBuiltInWrapperProvider;
+import jassimp.AiClassLoaderIOSystem;
+import jassimp.AiColor;
+import jassimp.AiMaterial;
+import jassimp.AiMesh;
+import jassimp.AiPostProcessSteps;
+import jassimp.AiScene;
+import jassimp.AiTextureType;
+import jassimp.IHMCJassimp;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -14,13 +28,6 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -38,8 +45,6 @@ public class JAssImpExample extends Application
       View3DFactory view3DFactory = new View3DFactory(1024, 768);
       view3DFactory.addCameraController();
 
-      Jassimp.setLibraryLoader(new IHMCJassimpNativeLibraryLoader());
-
       String meshFileName = "models/cinderblock1Meter.obj";
 
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
@@ -47,7 +52,7 @@ public class JAssImpExample extends Application
       aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_GRAPH);
       aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_MESHES);
 
-      AiScene aiScene = Jassimp.importFile(meshFileName, aiPostProcessSteps, new AiClassLoaderIOSystem(getClass().getClassLoader()));
+      AiScene aiScene = IHMCJassimp.importFile(meshFileName, aiPostProcessSteps, new AiClassLoaderIOSystem(getClass().getClassLoader()));
 
       List<AiMesh> meshes = aiScene.getMeshes();
 
