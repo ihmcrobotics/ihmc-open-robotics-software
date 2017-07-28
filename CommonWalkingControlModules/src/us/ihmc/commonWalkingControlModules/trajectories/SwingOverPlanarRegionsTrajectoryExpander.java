@@ -99,7 +99,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
-      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getSwingWaypointProportions(),
+      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions(),
             walkingControllerParameters.getMinSwingHeightFromStanceFoot(), walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry,
             graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
@@ -141,7 +141,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       rigidBodyTransform = new RigidBodyTransform();
 
       initialVelocity = new FrameVector(WORLD, 0.0, 0.0, 0.0);
-      touchdownVelocity = new FrameVector(WORLD, 0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity());
+      touchdownVelocity = new FrameVector(WORLD, 0.0, 0.0, walkingControllerParameters.getSwingTrajectoryParameters().getDesiredTouchdownVelocity());
       swingStartPosition = new FramePoint();
       swingEndPosition = new FramePoint();
       stanceFootPosition = new FramePoint();

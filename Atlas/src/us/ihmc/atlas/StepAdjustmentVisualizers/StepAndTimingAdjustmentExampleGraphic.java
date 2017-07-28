@@ -682,18 +682,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public double getMinLegLengthBeforeCollapsingSingleSupport()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinMechanicalLegLength()
-         {
-            return 0;
-         }
-
-         @Override
          public double minimumHeightAboveAnkle()
          {
             return 0;
@@ -725,66 +713,6 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override
          public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMinStepLengthForToeOff()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffWhenHittingAnkleLimit()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMaximumToeOffAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getToeTouchdownAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doHeelTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getHeelTouchdownAngle()
          {
             return 0;
          }
@@ -959,24 +887,6 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override
          public double getSideLengthOfBoundingBoxForFootstepHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownHeightOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownVelocity()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownAcceleration()
          {
             return 0;
          }
@@ -1280,6 +1190,104 @@ public class StepAndTimingAdjustmentExampleGraphic
          {
             return 0;
          }
+
+         @Override
+         public ToeOffParameters getToeOffParameters()
+         {
+            return new ToeOffParameters()
+            {
+               @Override
+               public boolean doToeOffIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean doToeOffIfPossibleInSingleSupport()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMinStepLengthForToeOff()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doToeOffWhenHittingAnkleLimit()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMaximumToeOffAngle()
+               {
+                  return 0;
+               }
+            };
+         }
+
+         @Override
+         public SwingTrajectoryParameters getSwingTrajectoryParameters()
+         {
+            return new SwingTrajectoryParameters()
+            {
+               @Override
+               public boolean doToeTouchdownIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getToeTouchdownAngle()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doHeelTouchdownIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getHeelTouchdownAngle()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownHeightOffset()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownVelocity()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownAcceleration()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getMinMechanicalLegLength()
+               {
+                  return 0;
+               }
+            };
+         }
       };
    }
 
@@ -1514,6 +1522,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          {
             return 0.03;
          }
+
       };
    }
 }
