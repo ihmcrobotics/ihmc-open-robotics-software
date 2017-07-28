@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
@@ -126,12 +125,6 @@ public class WandererRobotModel implements DRCRobotModel
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
       return new Transform();
-   }
-
-   @Override
-   public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
-   {
-      return JMEGeometryUtils.transformFromJMECoordinatesToZup( getJmeTransformWristToHand(side));
    }
 
    private String getSdfFile()
