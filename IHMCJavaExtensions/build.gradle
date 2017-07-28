@@ -1,12 +1,6 @@
-buildscript {
-   repositories {
-      maven { url = "https://repo.gradle.org/gradle/libs-snapshots-local" }
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies { classpath "us.ihmc:ihmc-build:0.3.36" }
+plugins {
+  id "us.ihmc.ihmc-build" version "0.4.0"
 }
-apply plugin: "ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
