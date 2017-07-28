@@ -54,10 +54,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
-   private final double neckPitchUpperLimit = 1.14494;    // 0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
-   private final double neckPitchLowerLimit = -0.602139;    // -0.610865;    // -math.pi/2.0;
-   private final double headYawLimit = Math.PI / 4.0;
-   private final double headRollLimit = Math.PI / 4.0;
    private final double spineYawLimit = Math.PI / 4.0;
    private final double spinePitchUpperLimit = 0.4;
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
@@ -204,21 +200,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public boolean isNeckPositionControlled()
-   {
-      if (runningOnRealRobot)
-         return true;
-      else
-         return false;
-   }
-
-   @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-         return new String[] {jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH)};
-   }
-
-   @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
       String[] defaultChestOrientationControlJointNames = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
@@ -272,30 +253,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return neckPitchUpperLimit;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return neckPitchLowerLimit;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return headYawLimit;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return headRollLimit;
    }
 
    @Override
@@ -481,8 +438,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
@@ -500,8 +456,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
    {
       YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
 
@@ -517,18 +472,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 3.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] {0.0, 0.67, 0.0};
    }
 
    @Override
