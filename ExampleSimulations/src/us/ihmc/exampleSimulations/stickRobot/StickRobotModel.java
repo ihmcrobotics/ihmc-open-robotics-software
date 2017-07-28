@@ -80,9 +80,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
    private final RobotDescription robotDescription;
 
-   private boolean enableJointDamping = true;
-
-
    // One of the three constructors below calls the fourth constructor with different configuration settings
    public StickRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
@@ -189,10 +186,9 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
 
    @Override
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      boolean enableJointDamping = getEnableJointDamping();
 
       HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
 
@@ -278,17 +274,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
-   @Override
-   public void setEnableJointDamping(boolean enableJointDamping)
-   {
-      this.enableJointDamping   = enableJointDamping;
-   }
-
-   @Override
-   public boolean getEnableJointDamping()
-   {
-      return enableJointDamping;
-   }
    @Override
    public Transform getJmeTransformWristToHand(RobotSide side)
    {

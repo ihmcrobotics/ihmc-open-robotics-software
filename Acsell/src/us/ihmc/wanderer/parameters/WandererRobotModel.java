@@ -59,8 +59,6 @@ public class WandererRobotModel implements DRCRobotModel
    private final WandererCapturePointPlannerParameters capturePointPlannerParameters;
    private final WandererWalkingControllerParameters walkingControllerParameters;
 
-   private boolean enableJointDamping = true;
-
    private final RobotDescription robotDescription;
 
    public WandererRobotModel(boolean runningOnRealRobot, boolean headless)
@@ -162,18 +160,6 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setEnableJointDamping(boolean enableJointDamping)
-   {
-      this.enableJointDamping  = enableJointDamping;
-   }
-
-   @Override
-   public boolean getEnableJointDamping()
-   {
-      return enableJointDamping;
-   }
-
-   @Override
    public HandModel getHandModel()
    {
       return null;
@@ -192,12 +178,10 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
       HumanoidJointNameMap jointMap = getJointMap();
-      boolean enableJointDamping = getEnableJointDamping();
-
       return new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
    }
 

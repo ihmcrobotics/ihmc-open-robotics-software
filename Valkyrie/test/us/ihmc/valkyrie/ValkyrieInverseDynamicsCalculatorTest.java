@@ -11,11 +11,10 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 public class ValkyrieInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalculatorTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
-      robotModel.setEnableJointDamping(false);
       return robotModel;
    }
 
