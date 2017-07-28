@@ -15,7 +15,6 @@ public class LoggerConfiguration
     public LoggerConfiguration()
     {
         	camerasToCapture_ = new StringBuilder(255); 
-        	loggerNetwork_ = new StringBuilder(255); 
         
         
     }
@@ -24,8 +23,8 @@ public class LoggerConfiguration
     {
         	camerasToCapture_.setLength(0);
         	camerasToCapture_.append(other.camerasToCapture_);
-        	loggerNetwork_.setLength(0);
-        	loggerNetwork_.append(other.loggerNetwork_);
+        	publicBroadcast_ = other.publicBroadcast_;
+
     }
 
         public void setCamerasToCapture(String camerasToCapture)
@@ -45,20 +44,14 @@ public class LoggerConfiguration
     }
 
         
-        public void setLoggerNetwork(String loggerNetwork)
-        {
-        	loggerNetwork_.setLength(0);
-        	loggerNetwork_.append(loggerNetwork);
-        }
-        
-        public String getLoggerNetworkAsString()
-        {
-        	return getLoggerNetwork().toString();
-        }
-
-    public StringBuilder getLoggerNetwork()
+    public void setPublicBroadcast(boolean publicBroadcast)
     {
-        return loggerNetwork_;
+        publicBroadcast_ = publicBroadcast;
+    }
+
+    public boolean getPublicBroadcast()
+    {
+        return publicBroadcast_;
     }
 
         
@@ -77,7 +70,8 @@ public class LoggerConfiguration
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.camerasToCapture_, otherMyClass.camerasToCapture_);
                 
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.loggerNetwork_, otherMyClass.loggerNetwork_);
+        returnedValue &= this.publicBroadcast_ == otherMyClass.publicBroadcast_;
+
                 
 
         return returnedValue;
@@ -93,8 +87,8 @@ public class LoggerConfiguration
         builder.append(this.camerasToCapture_);
 
                 builder.append(", ");
-        builder.append("loggerNetwork=");
-        builder.append(this.loggerNetwork_);
+        builder.append("publicBroadcast=");
+        builder.append(this.publicBroadcast_);
 
                 
         builder.append("}");
@@ -102,6 +96,6 @@ public class LoggerConfiguration
     }
 
     private StringBuilder camerasToCapture_; 
-    private StringBuilder loggerNetwork_; 
+    private boolean publicBroadcast_; 
 
 }
