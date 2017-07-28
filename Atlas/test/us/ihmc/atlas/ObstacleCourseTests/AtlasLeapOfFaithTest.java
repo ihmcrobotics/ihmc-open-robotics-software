@@ -28,7 +28,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
-   // FIXME
    @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
