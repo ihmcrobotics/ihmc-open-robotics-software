@@ -6,6 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -78,7 +80,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters().getToeOffParameters(), parentRegistry);
       toeOffCalculators.put(toeOffCalculator.getEnum(), toeOffCalculator);
    }
 
@@ -241,42 +243,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
          @Override
          public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMinStepLengthForToeOff()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffWhenHittingAnkleLimit()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMaximumToeOffAngle()
          {
             return 0;
          }
@@ -796,6 +762,50 @@ public class WrapperForMultipleToeOffCalculatorsTest
          {
             return 0;
          }
+
+         @Override
+         public ToeOffParameters getToeOffParameters()
+         {
+            return new ToeOffParameters()
+            {
+               @Override
+               public boolean doToeOffIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean doToeOffIfPossibleInSingleSupport()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMinStepLengthForToeOff()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doToeOffWhenHittingAnkleLimit()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMaximumToeOffAngle()
+               {
+                  return 0;
+               }
+            };
+         }
+
       };
    }
 }

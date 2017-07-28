@@ -6,6 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -92,7 +94,7 @@ public class CentroidProjectionToeOffCalculatorTest
 	@Test(timeout = 30000)
    public void testConstructor()
    {
-      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
    }
 
 
@@ -100,7 +102,7 @@ public class CentroidProjectionToeOffCalculatorTest
    @Test(timeout = 30000)
    public void testClear()
    {
-      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
       toeOffCalculator.clear();
    }
 
@@ -113,7 +115,7 @@ public class CentroidProjectionToeOffCalculatorTest
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       exitCMP.setX(0.05);
 
-      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
       toeOffCalculator.setExitCMP(exitCMP, trailingSide);
    }
 
@@ -124,6 +126,7 @@ public class CentroidProjectionToeOffCalculatorTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
+
       FramePoint exitCMP = new FramePoint();
       FramePoint2d desiredCMP = new FramePoint2d();
 
@@ -133,7 +136,7 @@ public class CentroidProjectionToeOffCalculatorTest
       exitCMP.setX(0.05);
       desiredCMP.setX(0.05);
 
-      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
       toeOffCalculator.setExitCMP(exitCMP, trailingSide);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingSide);
    }
@@ -155,7 +158,7 @@ public class CentroidProjectionToeOffCalculatorTest
       exitCMP.setX(0.05);
       desiredCMP.setX(0.05);
 
-      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
       toeOffCalculator.setExitCMP(exitCMP, trailingSide);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingSide);
       toeOffCalculator.getToeOffContactPoint(toeOffPoint, trailingSide);
@@ -239,42 +242,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMinStepLengthForToeOff()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffWhenHittingAnkleLimit()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMaximumToeOffAngle()
          {
             return 0;
          }
@@ -791,6 +758,92 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public double getDangerAreaPercentForValidFootstep()
+         {
+            return 0;
+         }
+
+         @Override
+         public ToeOffParameters getToeOffParameters()
+         {
+            return new ToeOffParameters()
+            {
+               @Override
+               public boolean doToeOffIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean doToeOffIfPossibleInSingleSupport()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMinStepLengthForToeOff()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doToeOffWhenHittingAnkleLimit()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMaximumToeOffAngle()
+               {
+                  return 0;
+               }
+            };
+         }
+
+      };
+   }
+
+   public ToeOffParameters getToeOffParameters()
+   {
+      return new ToeOffParameters()
+      {
+         @Override
+         public boolean doToeOffIfPossible()
+         {
+            return false;
+         }
+
+         @Override
+         public boolean doToeOffIfPossibleInSingleSupport()
+         {
+            return false;
+         }
+
+         @Override
+         public boolean checkECMPLocationToTriggerToeOff()
+         {
+            return false;
+         }
+
+         @Override
+         public double getMinStepLengthForToeOff()
+         {
+            return 0;
+         }
+
+         @Override
+         public boolean doToeOffWhenHittingAnkleLimit()
+         {
+            return false;
+         }
+
+         @Override
+         public double getMaximumToeOffAngle()
          {
             return 0;
          }

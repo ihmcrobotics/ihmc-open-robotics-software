@@ -134,7 +134,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
-      double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getMinStepLengthForToeOff();
+      double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getToeOffParameters().getMinStepLengthForToeOff();
       Vector2D walkDirection = new Vector2D(-1, 0);
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
       int randomZeroOrOne = RandomNumbers.nextInt(new Random(), 0, 1);

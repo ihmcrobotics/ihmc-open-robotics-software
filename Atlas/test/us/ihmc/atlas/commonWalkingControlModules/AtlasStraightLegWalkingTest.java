@@ -6,10 +6,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -90,24 +87,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             */
 
             @Override
-            public double getMaximumToeOffAngle()
-            {
-               return Math.toRadians(20);
-            }
-
-            @Override
-            public boolean checkCoPLocationToTriggerToeOff()
-            {
-               return true;
-            }
-
-            @Override
-            public double getCoPProximityForToeOff()
-            {
-               return 0.05;
-            }
-
-            @Override
             public boolean doHeelTouchdownIfPossible()
             {
                return true;
@@ -120,45 +99,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             }
 
             @Override
-            public boolean doToeOffIfPossibleInSingleSupport()
-            {
-               return true;
-            }
-
-            @Override
-            public double getAnkleLowerLimitToTriggerToeOff()
-            {
-               return -0.75;
-            }
-
-            @Override
             public boolean controlHeightWithMomentum()
             {
                return false;
-            }
-
-            @Override
-            public double getICPPercentOfStanceForDSToeOff()
-            {
-               return 0.3;
-            }
-
-            @Override
-            public double getICPPercentOfStanceForSSToeOff()
-            {
-               return 0.08;
-            }
-
-            @Override
-            public boolean checkECMPLocationToTriggerToeOff()
-            {
-               return true;
-            }
-
-            @Override
-            public double getECMPProximityForToeOff()
-            {
-               return 0.02;
             }
 
             @Override
@@ -191,6 +134,70 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                return false;
             }
 
+
+            @Override
+            public ToeOffParameters getToeOffParameters()
+            {
+
+               return new AtlasToeOffParameters(getJointMap())
+               {
+                  @Override
+                  public double getMaximumToeOffAngle()
+                  {
+                     return Math.toRadians(20);
+                  }
+
+                  @Override
+                  public boolean checkCoPLocationToTriggerToeOff()
+                  {
+                     return true;
+                  }
+
+                  @Override
+                  public double getCoPProximityForToeOff()
+                  {
+                     return 0.05;
+                  }
+
+                  @Override
+                  public boolean doToeOffIfPossibleInSingleSupport()
+                  {
+                     return true;
+                  }
+
+                  @Override
+                  public double getAnkleLowerLimitToTriggerToeOff()
+                  {
+                     return -0.75;
+                  }
+
+                  @Override
+                  public double getICPPercentOfStanceForDSToeOff()
+                  {
+                     return 0.3;
+                  }
+
+                  @Override
+                  public double getICPPercentOfStanceForSSToeOff()
+                  {
+                     return 0.08;
+                  }
+
+                  @Override
+                  public boolean checkECMPLocationToTriggerToeOff()
+                  {
+                     return true;
+                  }
+
+                  @Override
+                  public double getECMPProximityForToeOff()
+                  {
+                     return 0.02;
+                  }
+
+
+               };
+            }
 
             @Override
             public LeapOfFaithParameters getLeapOfFaithParameters()
