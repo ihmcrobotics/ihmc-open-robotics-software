@@ -47,11 +47,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
-   private final double upperNeckExtensorUpperLimit = 0.0872665;
-   private final double upperNeckExtensorLowerLimit = -0.785398;
-   private final double LowerNeckPitchUpperLimit = 1.162;
-   private final double LowerNeckPitchLowerLimit = 0;
-
    private final ValkyrieJointMap jointMap;
 
    private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
@@ -169,12 +164,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean isNeckPositionControlled()
-   {
-      return target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO;
-   }
-
-   @Override
    public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
       return sliderBoardControlledNeckJointNamesWithLimits;
@@ -187,58 +176,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-      if (controlHeadAndHandsWithSliders())
-      {
-         // For sliders, return none of them, to make sure that the QP whole body controller doesn't control the neck.
-         return new String[]{};
-      }
-
-      else if (target == RobotTarget.REAL_ROBOT)
-      {
-         // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
-//         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
-         // For now the neck is not controllable
-         return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
-      }
-
-      // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
-      // don't do well with redundant joints yet. We'll have to fix that later some how.
-      else return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
-   }
-
-   @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
       String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
             jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
 
       return defaultChestOrientationControlJointNames;
-   }
-
-   @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return upperNeckExtensorUpperLimit + LowerNeckPitchUpperLimit; // 1.14494;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return upperNeckExtensorLowerLimit + LowerNeckPitchLowerLimit; // -0.602139;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return Math.PI / 4.0;
    }
 
    @Override
@@ -485,8 +428,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoValkyrieHeadPIDGains gains = new YoValkyrieHeadPIDGains("HeadOrientation", registry);
 
@@ -507,8 +449,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
    {
       YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
@@ -525,18 +466,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 2.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] { 0.0, 0.0, 0.0 };
    }
 
    @Override
@@ -1275,5 +1204,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getDefaultTrajectoryTime()
+   {
+      return 2.0;
    }
 }
