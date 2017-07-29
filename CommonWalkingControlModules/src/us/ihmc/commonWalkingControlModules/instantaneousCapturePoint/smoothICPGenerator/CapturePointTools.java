@@ -679,6 +679,7 @@ public class CapturePointTools
       YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       double tInitial = cmpPolynomial3D.getInitialTime();
       
+      // TODO: check whether better ways of setting it exist
       for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
       {
          cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
