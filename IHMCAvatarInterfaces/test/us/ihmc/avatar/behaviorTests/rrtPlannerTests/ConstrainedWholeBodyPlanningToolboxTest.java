@@ -215,6 +215,11 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       drcBehaviorTestHelper.updateRobotModel();
       System.out.println("Start");
+      
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
 
       System.out.println("Send wakeup " + drcBehaviorTestHelper.getYoTime());
       ToolboxStateMessage toolboxMessage;
@@ -224,7 +229,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       toolboxCommunicator.send(toolboxMessage);
       System.out.println("Send wakeup done " + drcBehaviorTestHelper.getYoTime());
       
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      /*
+//       * reaching initial configuration
+//       */
+//      Quaternion initialOrientation = new Quaternion();
+//      initialOrientation.appendRollRotation(Math.PI*0.5);
+//      initialOrientation.appendYawRotation(Math.PI*0.5);
+//      initialOrientation.appendPitchRotation(-Math.PI*0.0);
+//      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+//      drcBehaviorTestHelper.send(handTrajectoryMessage);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+//      
       /*
        * constrained end effector trajectory (WorldFrame).
        */
@@ -237,7 +252,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();      
       packet.setTempValue(0.2);      
-      packet.setNumberOfExpanding(500);   
+      packet.setNumberOfExpanding(100);   
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       
       toolboxCommunicator.send(packet);

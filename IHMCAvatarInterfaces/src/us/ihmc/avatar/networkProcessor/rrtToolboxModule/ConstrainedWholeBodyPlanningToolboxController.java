@@ -71,8 +71,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       PrintTools.info("update toolbox " + updateCount.getIntegerValue());
      
-      visualizer.updateVisualizer();
-
       if(tree.expandingTree())
       {         
          ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
@@ -135,7 +133,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       
       
       
-      
+
+      /*
+       * update visualizer
+       */
+      visualizer.setCurrentNormalizedTime(tree.getNewNode().getNormalizedNodeData(0));
+      visualizer.updateVisualizer();
 
       /*
        * terminate condition.
