@@ -55,6 +55,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private YoInteger currentSegmentIndex;
 
    private final YoBoolean isStanding;
+   private final YoBoolean isInitialTransfer;
 
    private final YoInteger totalNumberOfSegments;
    private final YoInteger numberOfFootstepsToConsider;
@@ -69,13 +70,14 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
    private final List<YoFrameTrajectory3D> icpTrajectories = new ArrayList<>();
 
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding, YoBoolean isInitialTransfer,
                                           YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.trajectoryFrame = trajectoryFrame;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
+      this.isInitialTransfer = isInitialTransfer;
       this.useDecoupled = useDecoupled;
       
       totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
@@ -116,7 +118,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
-
+      
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
@@ -214,6 +216,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpTerminalTest.set(icpPositionDesiredTerminal);
          cmpTrajectoryLength.set(cmpTrajectories.size());
          icpTerminalLength.set(icpDesiredFinalPositions.size());
+      }
+      
+      if(isInitialTransfer.getBooleanValue())
+      {
+         SmoothCapturePointTools.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
+                                                                              cmpTrajectories, omega0.getDoubleValue());
       }
    }
 

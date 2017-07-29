@@ -3,11 +3,15 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -651,6 +655,11 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zdIntermediate.getVector(),
                                                     zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
+   
+   public void setDirectly(Direction direction, DenseMatrix64F coefficients)
+   {
+      getYoTrajectory(direction).setDirectly(coefficients);
+   }
 
    public FramePoint getFramePosition()
    {
@@ -661,6 +670,22 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
 
    public void getFramePosition(FramePoint positionToPack)
    {
+      positionToPack.setToZero(referenceFrame);
+      positionToPack.set(getPosition());
+   }
+   
+   public void getFramePositionInitial(FramePoint positionToPack)
+   {
+      compute(xTrajectory.getInitialTime());
+      PrintTools.debug("Initial time = " + xTrajectory.getInitialTime());
+      positionToPack.setToZero(referenceFrame);
+      positionToPack.set(getPosition());
+   }
+   
+   public void getFramePositionFinal(FramePoint positionToPack)
+   {
+      compute(xTrajectory.getFinalTime());
+      PrintTools.debug("Final time = " + xTrajectory.getFinalTime());
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }
@@ -711,6 +736,11 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    public int getNumberOfCoefficients()
    {
       return Math.max(Math.max(xTrajectory.getNumberOfCoefficients(), yTrajectory.getNumberOfCoefficients()), zTrajectory.getNumberOfCoefficients());
+   }
+   
+   public void getDerivative(int order, double x, FrameTuple<?, ?> dQuantity)
+   {
+      dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }
 
    public void getDerivative(YoFrameTrajectory3D dervTraj)

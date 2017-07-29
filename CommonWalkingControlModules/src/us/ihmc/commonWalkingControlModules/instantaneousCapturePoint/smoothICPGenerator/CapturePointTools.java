@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -666,6 +668,26 @@ public class CapturePointTools
 
          nextEntryCornerPoint = entryCornerPoint;
       }
+   }
+   
+   private static List<FrameTuple<?, ?>> icpQuantityInitialSegment1List = new ArrayList<FrameTuple<?, ?>>();
+   private static FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
+   
+   public static void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
+                                                                   List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
+   {
+      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      double tInitial = cmpPolynomial3D.getInitialTime();
+      
+      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
+      {
+         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
+         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
+      }
+      
+      SmoothCapturePointAdjustmentTools.initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
+      SmoothCapturePointAdjustmentTools.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialSegment1List, 
+                                                                                       entryCornerPointsToPack, exitCornerPointsToPack);
    }
    
    //TODO: implement validity checks

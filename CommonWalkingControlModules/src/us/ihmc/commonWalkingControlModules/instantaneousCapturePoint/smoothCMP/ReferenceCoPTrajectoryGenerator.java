@@ -401,6 +401,33 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       generateCoPTrajectoriesFromWayPoints();
    }
+   
+   public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide, boolean isInitialTransfer)
+   {
+      int footstepIndex = 0;
+
+      boolean noUpcomingFootsteps = numberOfUpcomingFootsteps.isZero();
+      isDoneWalking.set(noUpcomingFootsteps);
+
+      updateCurrentSupportPolygons(transferToSide, noUpcomingFootsteps);
+      updateDoubleSupportPolygon(doubleSupportPolygon, supportFootPolygon, swingFootInitialPolygon);
+
+      CoPPointsInFoot copWaypoints = copLocationWaypoints.get(footstepIndex);
+
+      if (atAStop || noUpcomingFootsteps) // Put first CoP as per chicken support computations in case starting from rest
+         computeMidFeetPointWithChickenSupportForInitialTransfer(tempFramePoint);
+      else // Put first CoP at the exitCoP of the swing foot if not starting from rest
+         computePreviousExitCoP(tempFramePoint, upcomingFootstepsData.get(footstepIndex).getSwingSide());
+      copWaypoints.addAndSetIncludingFrame(exitCoPName, 0.0, tempFramePoint);
+
+      if (!noUpcomingFootsteps)
+      {
+         computeCoPPointsForTransfer(footstepIndex, isInitialTransfer);
+         computeCoPPointsForUpcomingFootsteps(footstepIndex);
+      }
+
+      generateCoPTrajectoriesFromWayPoints();
+   }
 
    @Override
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
@@ -541,7 +568,20 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          tempFramePoint.changeFrame(worldFrame);
          copWaypoints.addAndSetIncludingFrame(pointName, segmentDuration, tempFramePoint);
+         
+//         PrintTools.debug("Split fraction at index " + footstepIndex + " = " + transferSplitFractions.get(footstepIndex).getDoubleValue());
       }
+//      PrintTools.debug("");
+   }
+   
+   private void computeCoPPointsForTransfer(int footstepIndex, boolean isInitialTransfer)
+   {
+      if(isInitialTransfer)
+      {
+//         transferSplitFractions.get(0).set(0.1);         
+      }
+      computeCoPPointsForTransfer(footstepIndex);
+      transferSplitFractions.get(0).set(0.75);
    }
 
 
