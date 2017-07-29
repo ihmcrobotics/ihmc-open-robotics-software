@@ -237,6 +237,98 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   public void testSteppingDown(double stepDownHeight, double stepLength, int stepsBeforeDrop) throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      double dropHeight = -stepDownHeight;
+
+      int numberOfDrops = 4;
+
+      ArrayList<Double> stepHeights = new ArrayList<>();
+      ArrayList<Double> stepLengths = new ArrayList<>();
+
+      double currentHeight = 0.0;
+
+      for (int i = 0; i < numberOfDrops; i++)
+      {
+         for (int j = 0; j < stepsBeforeDrop; j++)
+         {
+            stepHeights.add(currentHeight);
+            stepLengths.add(stepLength);
+         }
+
+         currentHeight += dropHeight;
+
+         stepHeights.add(currentHeight);
+         stepLengths.add(stepLength);
+      }
+
+
+      double starterLength = 0.35;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      setupCamera();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      double distanceTraveled = 0.5 * starterLength;
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      RobotSide robotSide = RobotSide.LEFT;
+
+      int numberOfSteps = stepLengths.size();
+      double instep = 0.03;
+
+      // take care of falling steps
+      double stepHeight = 0.0;
+      for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
+      {
+         // step forward
+         distanceTraveled += stepLength;
+         instep = -instep;
+         stepHeight = stepHeights.get(stepNumber);
+
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, instep, stepHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      int numberOfClosingSteps = 3;
+      for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
+      {
+         // step forward
+         distanceTraveled += stepLength;
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // step forward
+      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+      message.add(footstepData);
+      //message.setOffsetFootstepsWithExecutionError(true);
+
+      drcSimulationTestHelper.send(message);
+
+      double timeOverrunFactor = 1.2;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.footstepDataList.size() * 2.0);
+
+      assertTrue(success);
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
    public void testRandomHeightField(double maxStepHeight, double minStepHeight, double maxStepIncrease) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

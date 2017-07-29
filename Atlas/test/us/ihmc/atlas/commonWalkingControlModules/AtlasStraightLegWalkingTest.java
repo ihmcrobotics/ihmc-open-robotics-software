@@ -44,6 +44,23 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 120000)
+   public void testSteppingDown() throws Exception
+   {
+      double stepDownHeight = 0.15;
+      super.testSteppingDown(stepDownHeight, 0.30, 1);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 120000)
+   public void testSteppingDownEveryTime() throws Exception
+   {
+      double stepLength = 0.35;
+      double stepDownHeight = 0.15;
+      super.testSteppingDown(stepDownHeight, stepLength, 0);
+   }
+
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
    public void testRandomHeightField() throws Exception
@@ -268,7 +285,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double[] getSwingWaypointProportions()
       {
-         return new double[] {0.15, 0.95}; //0.83};// 0.95};
+         return new double[] {0.2, 0.8}; //0.83};// 0.95};
       }
 
       @Override
