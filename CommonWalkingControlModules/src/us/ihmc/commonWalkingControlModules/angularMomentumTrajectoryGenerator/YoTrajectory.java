@@ -350,6 +350,11 @@ public class YoTrajectory
       setTime(t0, tFinal);
       polynomial.setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0, zFinal, zdFinal, zddFinal);
    }
+   
+   public void setDirectly(DenseMatrix64F coefficients)
+   {
+      polynomial.setDirectly(coefficients);
+   }
 
    public void compute(double x)
    {

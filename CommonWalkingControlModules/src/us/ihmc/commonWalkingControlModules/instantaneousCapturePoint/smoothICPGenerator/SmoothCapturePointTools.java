@@ -39,9 +39,6 @@ public class SmoothCapturePointTools extends CapturePointTools
    private static final DenseMatrix64F M1 = new DenseMatrix64F(defaultSize, defaultSize);
    private static final DenseMatrix64F M2 = new DenseMatrix64F(defaultSize, defaultSize);
    
-   private static final DenseMatrix64F boundaryConditionMatrix = new DenseMatrix64F(defaultSize, defaultSize);
-   private static final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
-   
    /**
     * Variation of J. Englsberger's "Smooth trajectory generation and push-recovery based on DCM"
     * <br>
@@ -271,6 +268,26 @@ public class SmoothCapturePointTools extends CapturePointTools
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
    }
    
+   public static void calculateGeneralizedMatricesPrimeOnCMPSegment3D(double omega0, double time, int derivativeOrder, YoFrameTrajectory3D cmpPolynomial, 
+                                                                      DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
+                                                                      DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
+   {
+      calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
+      CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
+   }
+   
+   public static void calculateGeneralizedMatricesPrimeOnCMPSegment1D(double omega0, double time, int derivativeOrder, YoTrajectory cmpPolynomial,
+                                                                      DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
+                                                                      DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
+   {
+      calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
+      CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
+   }
+   
    public static void initializeMatrices3D(int numberOfCoefficients)
    {
       initializeMatrices(3, numberOfCoefficients);
@@ -297,9 +314,6 @@ public class SmoothCapturePointTools extends CapturePointTools
       
       generalizedGammaPrimeMatrix.reshape(1, 1);
       generalizedGammaPrimeMatrix.zero();
-      
-      boundaryConditionMatrix.reshape(2 * numberOfCoefficients,  2 * numberOfCoefficients);
-      boundaryConditionVector.reshape(2 * numberOfCoefficients,  1);
    }
    
    public static void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, YoFrameTrajectory3D cmpPolynomial3D)
@@ -320,113 +334,6 @@ public class SmoothCapturePointTools extends CapturePointTools
       polynomialCoefficientVector.zero();
       
       polynomialCoefficientVector.setData(polynomialCoefficients);
-   }
-   
-   
-   private static final DenseMatrix64F generalizedAlphaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedGammaPrimeMatrixSegment1 = new DenseMatrix64F(1, 1);
-   private static final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
-   
-   private static final DenseMatrix64F generalizedAlphaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedGammaPrimeMatrixSegment2 = new DenseMatrix64F(1, 1);
-   private static final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
-   
-   private static final DenseMatrix64F generalizedTPowersVectorInitialSegment1 = new DenseMatrix64F(defaultSize, 1);
-   private static final DenseMatrix64F generalizedTPowersVectorFinalSegment1 = new DenseMatrix64F(defaultSize, 1);
-   private static final DenseMatrix64F generalizedTPowersVectorInitialSegment2 = new DenseMatrix64F(defaultSize, 1);
-   private static final DenseMatrix64F generalizedTPowersVectorFinalSegment2 = new DenseMatrix64F(defaultSize, 1);
-   
-   public static void adaptTrajectoriesForInitialOffset3D(double omega0, YoFrameTrajectory3D cmpPolynomial3DSegment1, YoFrameTrajectory3D cmpPolynomial3DSegment2, 
-                                                          FramePoint cmpDesiredInitialPositionSegment1, FramePoint cmpDesiredInitialPositionSegment2,
-                                                          FramePoint icpDesiredInitialPositionSegment1, FramePoint icpDesiredInitialPositionSegment2)
-   {
-      setBoundaryConditionVector3D(omega0, cmpPolynomial3DSegment1, cmpPolynomial3DSegment2, FramePoint icpDesiredInitialPositionSegment1, FramePoint icpDesiredInitialPositionSegment);
-      setBoundaryConditionMatrix3D();
-   }   
-   
-   public static void setBoundaryConditionVector3D(double omega0, YoFrameTrajectory3D cmpPolynomial3DSegment1, YoFrameTrajectory3D cmpPolynomial3DSegment2,
-                                                   FramePoint icpInitialSegment1, FramePoint icpDesiredFinalPositionSegment)
-   {
-      for(Direction dir : Direction.values())
-      {
-         YoTrajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getYoTrajectory(dir);
-         YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(dir);
-         
-         // TODO: check whether division always integer
-         for(int i = 0; i < cmpPolynomialSegment1.getNumberOfCoefficients() / 2; i++)
-         {
-            double tInitial1 = cmpPolynomialSegment1.getInitialTime();
-            double tInitial2 = cmpPolynomialSegment2.getInitialTime();
-            
-            double tFinal1 = cmpPolynomialSegment1.getFinalTime();
-            double tFinal2 = cmpPolynomialSegment2.getFinalTime();
-                        
-            double cmpQuantityScalarInitialSegment1 = cmpPolynomialSegment1.getDerivative(i, tInitial1);
-            double cmpQuantityScalarFinalSegment2 = cmpPolynomialSegment2.getDerivative(i, tFinal2);
-            
-            
-            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, tInitial1, generalizedGammaPrimeMatrixSegment1, i, cmpPolynomialSegment1);
-            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, tInitial2, generalizedGammaPrimeMatrixSegment2, i, cmpPolynomialSegment2);
-            
-            boundaryConditionMatrix.set(i, 0, );
-         }
-      }
-   }
-   
-   public static double calculateBoundaryConditionValueICPQuantity0(double omega0, int order, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
-   {
-      
-      calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, tFinal, order, cmpPolynomialSegment2, icpPositionDesiredFinal)
-      
-      return -1;
-   }
-   
-   public static double calculateBoundaryConditionValueCMPQuantity0(int order, YoTrajectory cmpPolynomialSegment1)
-   {
-      double tInitial = cmpPolynomialSegment1.getInitialTime();
-      return cmpPolynomialSegment1.getDerivative(order, tInitial);
-   }
-   
-   public static double calculateBoundaryConditionValueCMPQuantity1()
-   {
-      return 0.0;
-   }
-   
-   public static double calculateBoundaryConditionValueCMPQuantity2(int order, YoTrajectory cmpPolynomialSegment2)
-   {
-      double tFinal = cmpPolynomialSegment2.getFinalTime();
-      return cmpPolynomialSegment2.getDerivative(order, tFinal);
-   }
-   
-   public static void setBoundaryConditionMatrix3D()
-   {
-      for(Direction dir : Direction.values())
-      {
-         YoTrajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getYoTrajectory(dir);
-         YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(dir);
-         
-         // TODO: check whether division always integer
-         for(int i = 0; i < cmpPolynomialSegment1.getNumberOfCoefficients() / 2; i++)
-         {
-            double t01 = cmpPolynomialSegment1.getInitialTime();
-            double t02 = cmpPolynomialSegment2.getInitialTime();
-            
-            calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, t01, generalizedAlphaPrimeRowSegment1, i, cmpPolynomialSegment1);
-            calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, t01, generalizedBetaPrimeRowSegment1, i, cmpPolynomialSegment1);
-            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t01, generalizedGammaPrimeMatrixSegment1, i, cmpPolynomialSegment1);
-            
-            calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, t02, generalizedAlphaPrimeRowSegment2, i, cmpPolynomialSegment2);
-            calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, t02, generalizedBetaPrimeRowSegment2, i, cmpPolynomialSegment2);
-            calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, t02, generalizedGammaPrimeMatrixSegment2, i, cmpPolynomialSegment2);
-
-            generalizedTPowersVectorInitialSegment1.set(cmpPolynomialSegment1.getXPowersDerivativeVector(i, tInitial1));
-            generalizedTPowersVectorFinalSegment1.set(cmpPolynomialSegment1.getXPowersDerivativeVector(i, tFinal1));
-            generalizedTPowersVectorInitialSegment2.set(cmpPolynomialSegment2.getXPowersDerivativeVector(i, tInitial1));
-            generalizedTPowersVectorFinalSegment2.set(cmpPolynomialSegment2.getXPowersDerivativeVector(i, tFinal2));
-         }
-      }
    }
    
 //   // MATRIX FORMULATION
