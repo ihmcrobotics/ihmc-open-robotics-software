@@ -126,7 +126,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
             balanceManager.updateCurrentICPPlan();
-            legConfigurationManager.setLegBracing(swingSide, true);
+            legConfigurationManager.prepareForLegBracing(swingSide);
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -162,7 +162,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
       boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(), nextFootstep.getSoleReferenceFrame());
 
-      if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
+      if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegBracing(swingSide))
       {
          legConfigurationManager.straightenLegDuringSwing(swingSide);
       }

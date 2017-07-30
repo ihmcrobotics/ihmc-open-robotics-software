@@ -85,6 +85,12 @@ public class LegConfigurationManager
       }
    }
 
+   public boolean isLegBracing(RobotSide robotSide)
+   {
+      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
+      return (legConfigurationControlState.equals(LegConfigurationType.BRACING));
+   }
+
    public boolean isLegCollapsed(RobotSide robotSide)
    {
       LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
@@ -124,7 +130,7 @@ public class LegConfigurationManager
 
          boolean isNextStepTooLow = stepHeight.getDoubleValue() < stepHeightForForcedCollapse.getDoubleValue();
          if (isNextStepTooLow)
-            setLegBracing(swingSide, true);
+            setLegBracing(swingSide);
       }
    }
 
@@ -133,9 +139,17 @@ public class LegConfigurationManager
       legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);
    }
 
-   public void setLegBracing(RobotSide robotSide, boolean legBracing)
+   public void prepareForLegBracing(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).setLegBracing(legBracing);
+      legConfigurationControlModules.get(robotSide).prepareForLegBracing();
+   }
+
+   public void setLegBracing(RobotSide robotSide)
+   {
+      if (attemptToStraightenLegs.getBooleanValue())
+      {
+         legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.BRACING);
+      }
    }
 
    public void setStraight(RobotSide robotSide)
