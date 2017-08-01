@@ -132,6 +132,11 @@ public class LegConfigurationManager
       }
    }
 
+   public void setStepDuration(RobotSide supportSide, double stepDuration)
+   {
+      legConfigurationControlModules.get(supportSide).setStepDuration(stepDuration);
+   }
+
    public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)
    {
       legConfigurationControlModules.get(robotSide).setFullyExtendLeg(fullyExtendLeg);

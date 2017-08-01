@@ -90,6 +90,7 @@ public class LegConfigurationControlModule
 
    private final YoDouble straighteningSpeed;
    private final YoDouble collapsingDuration;
+   private final YoDouble collapsingDurationFractionOfStep;
 
    private final YoDouble desiredVirtualActuatorLength;
    private final YoDouble currentVirtualActuatorLength;
@@ -233,7 +234,8 @@ public class LegConfigurationControlModule
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
 
       collapsingDuration = new YoDouble(namePrefix + "SupportKneeCollapsingDuration", registry);
-      collapsingDuration.set(straightLegWalkingParameters.getSupportKneeCollapsingDuration());
+      collapsingDurationFractionOfStep = new YoDouble(namePrefix + "SupportKneeCollapsingDurationFractionOfStep", registry);
+      collapsingDurationFractionOfStep.set(straightLegWalkingParameters.getSupportKneeCollapsingDurationFractionOfStep());
 
       desiredVirtualActuatorLength = new YoDouble(namePrefix + "DesiredVirtualActuatorLength", registry);
       currentVirtualActuatorLength = new YoDouble(namePrefix + "CurrentVirtualActuatorLength", registry);
@@ -338,6 +340,11 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setWeight(hipPitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(anklePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
+   }
+
+   public void setStepDuration(double stepDuration)
+   {
+      collapsingDuration.set(collapsingDurationFractionOfStep.getDoubleValue() * stepDuration);
    }
 
    public void setFullyExtendLeg(boolean fullyExtendLeg)

@@ -17,9 +17,9 @@ public class StraightLegWalkingParameters
       return 1.0;
    }
 
-   public double getSupportKneeCollapsingDuration()
+   public double getSupportKneeCollapsingDurationFractionOfStep()
    {
-      return 0.5;
+      return 0.65;
    }
 
    /**
