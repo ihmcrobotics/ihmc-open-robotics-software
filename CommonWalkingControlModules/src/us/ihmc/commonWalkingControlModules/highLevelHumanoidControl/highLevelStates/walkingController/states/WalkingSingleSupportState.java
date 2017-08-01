@@ -249,6 +249,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
+      legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
 
       if (nextFootstepTiming != null)
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextFootstepTiming.getTransferTime(), nextFootstepTiming.getSwingTime());

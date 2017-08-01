@@ -79,7 +79,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupTest(getLongScript());
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
@@ -141,6 +141,63 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
+   }
+
+   public void testSlowerWalking() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+
+      int numberOfSteps = 6;
+      double stepLength = 0.35;
+      double transferDuration = 0.75;
+      double swingDuration = 1.25;
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      setupCamera();
+
+      ThreadTools.sleep(1000);
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      RobotSide robotSide = RobotSide.LEFT;
+
+      double distanceTraveled = 0.5 * stepLength;
+      double stepHeight = 0.95;
+
+      // take care of falling steps
+      for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
+      {
+         // step forward
+         distanceTraveled += stepLength;
+
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+         FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+         message.add(footstepData);
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // closing step
+      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+      FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
+      message.add(footstepData);
+
+      message.setDefaultTransferDuration(transferDuration);
+      message.setDefaultSwingDuration(swingDuration);
+
+      drcSimulationTestHelper.send(message);
+
+      double timeOverrunFactor = 1.2;
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * message.footstepDataList.size() * 2.0);
+
+      assertTrue(success);
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    public void testDropOffsWhileWalking(double stepDownHeight) throws SimulationExceededMaximumTimeException
@@ -489,18 +546,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   public String getScript()
+   public String getLongScript()
    {
       return forwardFastScript;
-   }
-
-   public String getYawscript()
-   {
-      return yawScript;
-   }
-
-   public String getSlowstepScript()
-   {
-      return slowStepScript;
    }
 }
