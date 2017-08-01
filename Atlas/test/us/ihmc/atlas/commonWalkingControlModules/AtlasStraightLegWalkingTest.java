@@ -172,12 +172,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-      {
-         return new TestPelvisOffsetWhileWalkingParameters();
-      }
-
-      @Override
       public SwingTrajectoryParameters getSwingTrajectoryParameters()
       {
          return new TestSwingTrajectoryParameters();
@@ -224,7 +218,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getICPPercentOfStanceForSSToeOff()
       {
-         return 0.1;
+         return 0.08;
       }
 
       @Override
@@ -330,14 +324,28 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 0.5;
+         return 10.0;
       }
 
       @Override
       public double getLegPrivilegedHighWeight()
       {
-         return 150.0;
+         return 200.0;
       }
+
+      /*
+      @Override
+      public double getSupportKneeCollapsingDuration()
+      {
+         return 0.25;
+      }
+
+      @Override
+      public double getSpeedForSupportKneeStraightening()
+      {
+         return 0.50;
+      }
+      */
    }
 
    private class TestMomentumOptimizationSettings extends AtlasMomentumOptimizationSettings
@@ -351,15 +359,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public double getJointAccelerationWeight()
       {
          return 0.05;
-      }
-   }
-
-   private class TestPelvisOffsetWhileWalkingParameters extends PelvisOffsetWhileWalkingParameters
-   {
-      @Override
-      public boolean addPelvisOrientationOffsetsFromWalkingMotion()
-      {
-         return true;
       }
    }
 
@@ -400,6 +399,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testForwardWalking();
+      test.testWalkingOverCinderBlockField();
    }
 }
