@@ -130,18 +130,10 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getContactThresholdForce()
-      {
-         return 20.0;
-      }
-
-
-      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
       }
-
 
       @Override
       public boolean useOptimizationBasedICPController()
@@ -160,7 +152,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
-
 
       @Override
       public LeapOfFaithParameters getLeapOfFaithParameters()
@@ -284,21 +275,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double[] getSwingWaypointProportions()
-      {
-         return new double[] {0.2, 0.8}; //0.83};// 0.95};
-      }
-
-      @Override
       public boolean doHeelTouchdownIfPossible()
       {
          return true;
-      }
-
-      @Override
-      public double getHeelTouchdownLengthRatio()
-      {
-         return 0.5;
       }
 
 
@@ -333,12 +312,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public boolean relaxPelvisControl()
       {
          return true;
-      }
-
-      @Override
-      public double getHorizontalFootWeightScaleFactor()
-      {
-         return -5.0;
       }
    }
 
@@ -380,7 +353,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedHighWeight()
       {
-         return 200.0;
+         return 150.0;
       }
    }
 
