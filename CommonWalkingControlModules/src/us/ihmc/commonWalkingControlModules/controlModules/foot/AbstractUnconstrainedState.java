@@ -45,7 +45,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    protected final YoDouble secondaryJointWeightScale;
 
    private final YoFrameVector angularWeight;
-   private final YoFrameVector linearWeight;
+   protected final YoFrameVector linearWeight;
 
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
@@ -73,8 +73,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
 
-      angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
-      linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
+      angularWeight = new YoFrameVector(namePrefix + "AngularWeight", worldFrame, registry);
+      linearWeight = new YoFrameVector(namePrefix + "LinearWeight", worldFrame, registry);
 
       angularWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
       linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);

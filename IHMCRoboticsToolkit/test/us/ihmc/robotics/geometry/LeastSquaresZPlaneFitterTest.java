@@ -11,11 +11,11 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class LeastSquaresZPlaneFitterTest
@@ -27,7 +27,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointListA = new ArrayList<Point3D>();
-      Plane3d plane3dA = new Plane3d();
+      Plane3D plane3dA = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointListA.add(new Point3D( 1.0,  1.0,  0.1));
       pointListA.add(new Point3D( 1.0, -1.0,  0.1));
@@ -38,7 +38,7 @@ public class LeastSquaresZPlaneFitterTest
       Vector3D normalA = plane3dA.getNormalCopy();
       
       List<Point3D> pointListB = new ArrayList<Point3D>();
-      Plane3d plane3dB = new Plane3d();
+      Plane3D plane3dB = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       pointListB.add(new Point3D( 1.0 + 4.0,  1.0 + 4.0,  0.1));
       pointListB.add(new Point3D( 1.0 + 4.0, -1.0 + 4.0,  0.1));
       pointListB.add(new Point3D(-1.0 + 4.0,  1.0 + 4.0, -0.1));
@@ -57,7 +57,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3d plane3d = new Plane3d();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -109,7 +109,7 @@ public class LeastSquaresZPlaneFitterTest
          if (planeNormal.getZ() < 0.0)
             planeNormal.scale(-1.0);
 
-         Plane3d plane3d = new Plane3d(planePoint, planeNormal);
+         Plane3D plane3d = new Plane3D(planePoint, planeNormal);
 
          int numberOfPoints = RandomNumbers.nextInt(random, 3, 50);
          ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
@@ -124,7 +124,7 @@ public class LeastSquaresZPlaneFitterTest
             listOfPoints.add(point);
          }
 
-         Plane3d plane3dSolution = new Plane3d();
+         Plane3D plane3dSolution = new Plane3D();
          leastSquaresZPlaneFitter.fitPlaneToPoints(listOfPoints, plane3dSolution);
 
          Point3D pointSolution = plane3dSolution.getPointCopy();
@@ -144,7 +144,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3d plane3d = new Plane3d();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -162,7 +162,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3d plane3d = new Plane3d();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));
@@ -192,7 +192,7 @@ public class LeastSquaresZPlaneFitterTest
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
 
       List<Point3D> pointList = new ArrayList<Point3D>();
-      Plane3d plane3d = new Plane3d();
+      Plane3D plane3d = new Plane3D(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
       pointList.add(new Point3D(0.0, 0.0, 0.0));
       pointList.add(new Point3D(0.0, 0.1, 0.0));

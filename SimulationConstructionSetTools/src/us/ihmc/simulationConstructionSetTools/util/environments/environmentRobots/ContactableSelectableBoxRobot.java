@@ -2,8 +2,8 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.EnumMap;
 
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,19 +11,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.input.SelectedListener;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
@@ -32,7 +26,6 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.tools.containers.EnumTools;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -51,8 +44,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    private final Graphics3DObject linkGraphics;
 
    // graphics
-   private final EnumMap<FaceName, Graphics3DInstruction> faceGraphics = new EnumMap<FaceName, Graphics3DInstruction>(FaceName.class);
-   private final YoEnum<Direction> selectedDirection = YoEnum.create("selectedDirection", "", Direction.class, yoVariableRegistry, true);
+   private final Graphics3DInstruction boxGraphics;
    private static final Color defaultColor = Color.BLUE;
    private static final Color selectedColor = Color.RED;
 
@@ -74,7 +66,8 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
       frameBox = new FrameBox3d(ReferenceFrame.getWorldFrame(), length, width, height);
 
-      createBoxGraphics(frameBox);
+      Box3D box = frameBox.getBox3d();
+      boxGraphics = linkGraphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ());
       setUpGroundContactPoints(frameBox);
 
       unSelect(true);
@@ -131,13 +124,13 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    }
 
    public void addYoGraphicForceVectorsToGroundContactPoints(double forceVectorScale, AppearanceDefinition appearance,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                             YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       addYoGraphicForceVectorsToGroundContactPoints(0, forceVectorScale, appearance, yoGraphicsListRegistry);
    }
 
    public void addYoGraphicForceVectorsToGroundContactPoints(int groupIdentifier, double forceVectorScale, AppearanceDefinition appearance,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                             YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null)
          return;
@@ -148,7 +141,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
          YoGraphicVector yoGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(),
-               groundContactPoint.getYoForce(), forceVectorScale, appearance);
+                                                               groundContactPoint.getYoForce(), forceVectorScale, appearance);
          yoGraphicsListRegistry.registerYoGraphic("ContactableSelectableBoxRobot", yoGraphicVector);
       }
    }
@@ -157,17 +150,10 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    {
       String name = this.getName();
 
-      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
-      for (int i = 0; i < vertices.length; i++)
+      for (int i = 0; i < 8; i++)
       {
-         vertices[i] = new Point3D();
-      }
-
-      frameBox.getBox3d().computeVertices(vertices);
-
-      for (int i = 0; i < vertices.length; i++)
-      {
-         Point3D vertex = vertices[i];
+         Point3D vertex = new Point3D();
+         frameBox.getBox3d().getVertex(i, vertex);
          GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoVariableRegistry());
 
          floatingJoint.addGroundContactPoint(groundContactPoint);
@@ -235,16 +221,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    public void select()
    {
       unSelect(false);
-      if (selectedDirection.getEnumValue() == null)
-         selectedDirection.set(Direction.Y);
-      else
-         selectedDirection.set(EnumTools.getNext(selectedDirection.getEnumValue()));
-
-      for (boolean positive : new boolean[] { true, false })
-      {
-         FaceName faceName = FaceName.get(positive, selectedDirection.getEnumValue());
-         faceGraphics.get(faceName).setAppearance(new YoAppearanceRGBColor(selectedColor, selectTransparency));
-      }
+      boxGraphics.setAppearance(new YoAppearanceRGBColor(selectedColor, selectTransparency));
 
       notifySelectedListenersThisWasSelected(this);
    }
@@ -252,14 +229,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    @Override
    public void unSelect(boolean reset)
    {
-      if (reset)
-         selectedDirection.set(null);
-
-      for (FaceName faceName : FaceName.values())
-      {
-         faceGraphics.get(faceName).setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
-      }
-
+      boxGraphics.setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
    }
 
    @Override
@@ -274,28 +244,6 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       {
          listener.wasSelected(this, selectedInformation);
       }
-   }
-
-   private void createBoxGraphics(FrameBox3d frameBox)
-   {
-      for (FaceName faceName : FaceName.values())
-      {
-         int nVerticesPerFace = Box3d.NUM_VERTICES_PER_FACE;
-         Point3D[] vertices = new Point3D[nVerticesPerFace];
-         for (int i = 0; i < vertices.length; i++)
-         {
-            vertices[i] = new Point3D();
-         }
-
-         frameBox.getBox3d().computeVertices(vertices, faceName);
-         Graphics3DAddMeshDataInstruction faceGraphic = linkGraphics.addPolygon(vertices, YoAppearance.Red());
-         faceGraphics.put(faceName, faceGraphic);
-      }
-   }
-
-   public Direction getSelectedDirection()
-   {
-      return selectedDirection.getEnumValue();
    }
 
    private void createCardboardBoxGraphics(double sizeX, double sizeY, double sizeZ)
@@ -345,7 +293,8 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+                        QuaternionReadOnly cameraRotation)
    {
       if (!modifierKeyHolder.isKeyPressed(Key.P))
          return;

@@ -4,12 +4,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class Graphics3DWorldTest
@@ -40,7 +40,7 @@ public class Graphics3DWorldTest
    public void addASphere()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d(), YoAppearance.Glass())));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D(), YoAppearance.Glass())));
       world.startWithoutGui();
       world.keepAlive(1.0);
       world.stop();
@@ -52,7 +52,7 @@ public class Graphics3DWorldTest
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       world.startWithoutGui();
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d())));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D())));
       world.keepAlive(1.0);
       world.stop();
    }
@@ -62,7 +62,7 @@ public class Graphics3DWorldTest
    public void testSetCameraPosition()
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
-      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d(), YoAppearance.Glass(0.2))));
+      world.addChild(new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D(), YoAppearance.Glass(0.2))));
       world.startWithGui();
       world.setCameraPosition(5, 5, 5);
       world.keepAlive(1.0);
@@ -75,7 +75,7 @@ public class Graphics3DWorldTest
    {
       Graphics3DWorld world = new Graphics3DWorld("testWorld", new JMEGraphics3DAdapter());
       
-      Graphics3DNode sphereNode = new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3d()));
+      Graphics3DNode sphereNode = new Graphics3DNode("Sphere", new Graphics3DObject(new Sphere3D()));
       world.addChild(sphereNode);
       world.startWithGui();
       world.setCameraPosition(5, 5, 5);

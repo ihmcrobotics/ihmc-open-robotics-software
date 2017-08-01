@@ -11,6 +11,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -286,7 +286,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       }
 
       // good list of points, fit plane;
-      Plane3d fittedPlane = new Plane3d();
+      Plane3D fittedPlane = new Plane3D();
       double avgSquaredError = planeFitter.fitPlaneToPoints(new Point2D(position.getX(), position.getY()), pointList, fittedPlane);
       height = fittedPlane.getZOnPlane(position.getX(), position.getY());
 
@@ -409,7 +409,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       // get the orientations and heights corresponding to those faces
       // for each footstep, calculate the support polygon out of the points near it
       List<FootstepDataMessage> possibleFootsteps = new ArrayList<FootstepDataMessage>();
-      Plane3d facePlane = new Plane3d();
+      Plane3D facePlane = new Plane3D();
       Vector3D planeNormal = new Vector3D();
       double x = position.getX();
       double y = position.getY();
@@ -501,7 +501,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       rotationMatrix.set(footstepData.getOrientation());
       Vector3D footNormal = new Vector3D();
       rotationMatrix.getColumn(2, footNormal);
-      Plane3d footPlane = new Plane3d(footstepData.getLocation(), footNormal);
+      Plane3D footPlane = new Plane3D(footstepData.getLocation(), footNormal);
 
       // get all points within distanceTolerance of the plane
       List<Point3D> pointsNearPlane = new ArrayList<Point3D>();

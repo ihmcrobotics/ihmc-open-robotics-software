@@ -6,9 +6,6 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
@@ -16,6 +13,9 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultip
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultipleWaypointsOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
@@ -240,6 +240,11 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    @Override
    public void compute(double time)
    {
+      if (isEmpty())
+      {
+         throw new RuntimeException("Can not call compute on an empty trajectory.");
+      }
+
       currentTrajectoryTime.set(time);
       boolean changedSubTrajectory = false;
 

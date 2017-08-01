@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.MathTools.*;
+import static us.ihmc.robotics.MathTools.square;
+
+import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -42,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Because in the paper the authors are using a specific type of quaternions, the expressions had to
  * be redefined for the general definition of unit-quaternions. Also, the expression for the angular
  * acceleration had to be derived. See the following Word document for more details:
- * <a href="https://1drv.ms/w/s!AtjeMRpLgFtkiPs2wgURmVReZVReAQ">Hermite Quaternion Curve
+ * <a href="https://1drv.ms/b/s!AtjeMRpLgFtkiP0oG_0fhZEg3cPhhA">Hermite Quaternion Curve
  * Revisited</a>.
  * </p>
  *
@@ -303,16 +305,11 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    @Override
    public void initialize()
    {
-      currentTime.set(0.0);
-
       if (initialOrientation.dot(finalOrientation) < 0.0)
          finalOrientation.negate();
 
       updateControlQuaternions();
-
-      currentOrientation.set(initialOrientation);
-      currentAngularVelocity.set(initialAngularVelocity);
-      currentAngularAcceleration.setToZero();
+      compute(0.0);
    }
 
    private final Quaternion tempQuaternion = new Quaternion();
@@ -364,16 +361,29 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    @Override
    public void compute(double time)
    {
+      if (Double.isNaN(time))
+      {
+         throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
+      }
+
       currentTime.set(time);
 
-      if (isDone())
+      if (time < 0.0)
       {
-         currentOrientation.set(finalOrientation);
-         currentAngularVelocity.set(finalAngularVelocity);
+         currentOrientation.set(initialOrientation);
+         currentAngularVelocity.setToZero();
          currentAngularAcceleration.setToZero();
          return;
       }
-      else if (currentTime.getDoubleValue() <= 0.0)
+      if (time > trajectoryTime.getDoubleValue())
+      {
+         currentOrientation.set(finalOrientation);
+         currentAngularVelocity.setToZero();
+         currentAngularAcceleration.setToZero();
+         return;
+      }
+
+      if (Precision.equals(0.0, trajectoryTime.getDoubleValue()))
       {
          currentOrientation.set(initialOrientation);
          currentAngularVelocity.set(initialAngularVelocity);

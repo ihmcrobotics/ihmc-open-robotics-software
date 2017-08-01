@@ -1,0 +1,11 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct LoggerConfiguration
+	{
+		string camerasToCapture;
+		boolean publicBroadcast;
+	};
+};
+};
+};

@@ -432,7 +432,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     */
    public void normalizeAndLimitToPiMinusPi()
    {
-      quaternion.normalizeAndLimitToPiMinusPi();
+      quaternion.normalizeAndLimitToPi();
    }
 
    public double getQx()

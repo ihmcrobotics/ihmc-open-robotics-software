@@ -50,7 +50,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
     compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
     compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
@@ -105,6 +105,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
     compile ihmc.getProjectDependency(":IHMCManipulationPlanning")
 
+    testCompile ihmc.getProjectTestDependency(":IHMCManipulationPlanning")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'

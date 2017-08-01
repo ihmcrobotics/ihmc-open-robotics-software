@@ -11,14 +11,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -28,7 +28,6 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -59,11 +58,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
-   private Map<String, Pose> bodyHomeConfiguration = null;
+   private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -72,13 +73,17 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
+      super(1.0);
+
       this.jointMap = jointMap;
       this.target = target;
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
+      toeOffParameters = new ValkyrieToeOffParameters();
+      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
 
-      // Genreated using ValkyrieFullRobotModelVisualizer
+      // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
             0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112,
             0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
@@ -130,72 +135,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getTimeToGetPreparedForLocomotion()
    {
       return 0.0;
-   }
-
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      // Used to be: target != RobotTarget.REAL_ROBOT;
-      // Trying to see if that's really necessary (Sylvain)
-      // It delays the toe-off to some extent which can cause some issues.
-      return false;
-   }
-
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return getFootLength();
-   }
-
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
-    */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(30.0);
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
    }
 
    @Override
@@ -358,19 +297,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getLegLength()
    {
       return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      // TODO: Useful values
-      return 0.1;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return 0.1;
    }
 
    @Override
@@ -860,14 +786,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, Pose> getOrCreateBodyHomeConfiguration()
+   public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
       if (bodyHomeConfiguration != null)
          return bodyHomeConfiguration;
 
-      bodyHomeConfiguration = new HashMap<String, Pose>();
+      bodyHomeConfiguration = new HashMap<String, Pose3D>();
 
-      Pose homeChestPoseInPelvisZUpFrame = new Pose();
+      Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
@@ -1165,34 +1091,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return 0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return -0.3;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      switch(target)
-      {
-      case REAL_ROBOT:
-      case GAZEBO:
-         return -1.0;
-      default:
-         return -2.0;
-      }
-   }
-
    @Override
    public double getContactThresholdForce()
    {
@@ -1258,6 +1156,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return new ValkyrieMomentumOptimizationSettings(jointMap);
+   }
+
+   @Override
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+   {
+      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override
@@ -1356,5 +1260,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public boolean useSupportState()
    {
       return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public ToeOffParameters getToeOffParameters()
+   {
+      return toeOffParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
    }
 }

@@ -2,15 +2,15 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -151,13 +151,17 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
          YoOneDoFTrajectoryPoint firstWaypoint = waypoints.get(0);
+         initialPositionProvider.setValue(firstWaypoint.getPosition());
+         initialVelocityProvider.setValue(firstWaypoint.getVelocity());
          finalPositionProvider.setValue(firstWaypoint.getPosition());
          finalVelocityProvider.setValue(firstWaypoint.getVelocity());
          trajectoryTimeProvider.setValue(0.0);
          subTrajectory.initialize();
       }
       else
+      {
          initializeSubTrajectory(0);
+      }
    }
 
    private void initializeSubTrajectory(int waypointIndex)
@@ -177,12 +181,29 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    @Override
    public void compute(double time)
    {
-      currentTrajectoryTime.set(time);
+      if (isEmpty())
+      {
+         throw new RuntimeException("Can not call compute on an empty trajectory.");
+      }
 
-      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+      currentTrajectoryTime.set(time);
+      boolean changedSubTrajectory = false;
+
+      if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
+      {
+         currentWaypointIndex.set(0);
+         changedSubTrajectory = true;
+      }
+
+      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
+         changedSubTrajectory = true;
+      }
+
+      if (changedSubTrajectory)
+      {
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 

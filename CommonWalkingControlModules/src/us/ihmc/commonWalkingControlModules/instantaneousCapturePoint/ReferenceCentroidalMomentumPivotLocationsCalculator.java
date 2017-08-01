@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPlannerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -20,7 +21,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -92,7 +93,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<ConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
    private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempSupportPolygonForShrinking = new FrameConvexPolygon2d();
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private final YoDouble safeDistanceFromCMPToSupportEdges;
    private final YoDouble safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
@@ -180,35 +181,42 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          exitCMPs.get(i).notifyVariableChangedListeners();
    }
 
-   public void initializeParameters(CapturePointPlannerParameters icpPlannerParameters)
+   public void initializeParameters(CoPPlannerParameters icpPlannerParameters)
    {
-      useTwoCMPsPerSupport = icpPlannerParameters.useTwoCMPsPerSupport();
-      safeDistanceFromCMPToSupportEdges.set(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());
+      useTwoCMPsPerSupport = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1;
+      safeDistanceFromCMPToSupportEdges.set(icpPlannerParameters.getCoPSafeDistanceAwayFromSupportEdges());
 
-      maxForwardEntryCMPOffset.set(icpPlannerParameters.getMaxEntryCMPForwardOffset());
-      minForwardEntryCMPOffset.set(icpPlannerParameters.getMinEntryCMPForwardOffset());
+      List<Vector2D> cmpForwardOffsetBounds = icpPlannerParameters.getCoPForwardOffsetBounds();
+      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(0);
+      Vector2D exitCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(1);
 
-      maxForwardExitCMPOffset.set(icpPlannerParameters.getMaxExitCMPForwardOffset());
-      minForwardExitCMPOffset.set(icpPlannerParameters.getMinExitCMPForwardOffset());
+      minForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getX());
+      maxForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getY());
 
-      stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToCMPOffsetFactor());
+      minForwardExitCMPOffset.set(exitCMPForwardOffsetBounds.getX());
+      maxForwardExitCMPOffset.set(exitCMPForwardOffsetBounds.getY());
 
-      double entryCMPForwardOffset = icpPlannerParameters.getEntryCMPForwardOffset();
-      double entryCMPInsideOffset = icpPlannerParameters.getEntryCMPInsideOffset();
-      double exitCMPForwardOffset = icpPlannerParameters.getExitCMPForwardOffset();
-      double exitCMPInsideOffset = icpPlannerParameters.getExitCMPInsideOffset();
+      stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToBallCoPOffsetFactor());
+
+      List<Vector2D> cmpOffsets = icpPlannerParameters.getCoPOffsets();
+      Vector2D entryCMPOffsets = cmpOffsets.get(0);
+      Vector2D exitCMPOffsets = cmpOffsets.get(1);
+      double entryCMPForwardOffset = entryCMPOffsets.getX();
+      double entryCMPInsideOffset = entryCMPOffsets.getY();
+      double exitCMPForwardOffset = exitCMPOffsets.getX();
+      double exitCMPInsideOffset = exitCMPOffsets.getY();
+
       setSymmetricEntryCMPConstantOffsets(entryCMPForwardOffset, entryCMPInsideOffset);
       setSymmetricExitCMPConstantOffsets(exitCMPForwardOffset, exitCMPInsideOffset);
 
-      useExitCMPOnToesForSteppingDown = icpPlannerParameters.useExitCMPOnToesForSteppingDown();
-      footstepHeightThresholdToPutExitCMPOnToesSteppingDown.set(icpPlannerParameters.getStepHeightThresholdForExitCMPOnToesWhenSteppingDown());
-      footstepLengthThresholdToPutExitCMPOnToesSteppingDown.set(icpPlannerParameters.getStepLengthThresholdForExitCMPOnToesWhenSteppingDown());
-      safeDistanceFromCMPToSupportEdgesWhenSteppingDown.set(icpPlannerParameters.getCMPSafeDistanceAwayFromToesWhenSteppingDown());
+      useExitCMPOnToesForSteppingDown = icpPlannerParameters.useExitCoPOnToesForSteppingDown();
+      footstepHeightThresholdToPutExitCMPOnToesSteppingDown.set(icpPlannerParameters.getStepHeightThresholdForExitCoPOnToesWhenSteppingDown());
+      footstepLengthThresholdToPutExitCMPOnToesSteppingDown.set(icpPlannerParameters.getStepLengthThresholdForExitCoPOnToesWhenSteppingDown());
+      safeDistanceFromCMPToSupportEdgesWhenSteppingDown.set(icpPlannerParameters.getCoPSafeDistanceAwayFromToesWhenSteppingDown());
 
-      putExitCMPOnToes.set(icpPlannerParameters.putExitCMPOnToes());
-      exitCMPForwardSafetyMarginOnToes.set(icpPlannerParameters.getExitCMPForwardSafetyMarginOnToes());
-      exitCMPForwardSafetyMarginOnToes.set(icpPlannerParameters.getExitCMPForwardSafetyMarginOnToes());
-      footstepLengthThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepLengthThresholdForExitCMPOnToes());
+      putExitCMPOnToes.set(icpPlannerParameters.putExitCoPOnToes());
+      exitCMPForwardSafetyMarginOnToes.set(icpPlannerParameters.getExitCoPForwardSafetyMarginOnToes());
+      footstepLengthThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepLengthThresholdForExitCoPOnToes());
    }
 
    public void setUseTwoCMPsPerSupport(boolean useTwoCMPsPerSupport)
@@ -659,7 +667,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(footSupportPolygon);
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue(),
+      convexPolygonShrinker.scaleConvexPolygon(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue(),
             footSupportPolygon);
 
       footSupportPolygon.orthogonalProjection(exitCMPToPack);
@@ -678,7 +686,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(footSupportPolygon);
-      convexPolygonShrinker.shrinkConstantDistanceInto(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdges.getDoubleValue(), footSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdges.getDoubleValue(), footSupportPolygon);
 
       footSupportPolygon.orthogonalProjection(cmpToPack);
    }

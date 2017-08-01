@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
@@ -20,8 +22,10 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
 import us.ihmc.tools.compression.SnappyUtils;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
@@ -49,7 +53,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private ByteBuffer compressedBuffer;
 
-   private YoVariableClient yoVariableClient;
    private volatile boolean connected = false;
 
    private final LogPropertiesWriter logProperties;
@@ -64,6 +67,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private long lastReceivedTimestamp = Long.MIN_VALUE;
    
    private YoVariableSummarizer yoVariableSummarizer = null;
+   
+   // Reconstruction variables for disk data format
+   private List<YoVariable<?>> variables;
+   private List<JointState> jointStates;
+   private ByteBuffer dataBuffer;
+   private LongBuffer dataBufferAsLong;
    
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, Announcement request, YoVariableLoggerOptions options)
    {
@@ -153,9 +162,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
+   public void receivedTimestampAndData(long timestamp)
    {
       receivedTimestampOnly(timestamp); // Call from here as backup for the UDP channel.
+      
+      ByteBuffer buffer = reconstructBuffer(timestamp);
       
       connected = true;
 
@@ -202,6 +213,28 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             }
          }
       }
+   }
+
+   private ByteBuffer reconstructBuffer(long timestamp)
+   {
+      dataBuffer.clear();
+      dataBufferAsLong.clear();
+      
+      dataBufferAsLong.put(timestamp);
+      for(int i = 0; i < variables.size();i++)
+      {
+         dataBufferAsLong.put(variables.get(i).getValueAsLongBits());
+      }
+      
+      for(int i = 0; i < jointStates.size(); i++)
+      {
+         jointStates.get(i).get(dataBufferAsLong);
+      }
+      
+      
+      dataBufferAsLong.flip();
+      dataBuffer.clear();
+      return dataBuffer;
    }
 
    public void disconnected()
@@ -292,22 +325,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    public void setYoVariableClient(YoVariableClient client)
    {
-      this.yoVariableClient = client;
    }
 
-   public void receiveTimedOut()
-   {
-      if (connected)
-      {
-         System.out.println("Connection lost, closing client.");
-         yoVariableClient.disconnected();
-      }
-      else
-      {
-         System.out.println("Cannot connect to client, closing");
-         yoVariableClient.disconnected();
-      }
-   }
 
    public boolean updateYoVariables()
    {
@@ -325,13 +344,22 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    {
    }
 
+   @SuppressWarnings("resource")
    @Override
    public void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       logHandshake(handshake, handshakeParser);
+      
 
       int bufferSize = handshakeParser.getBufferSize();
       this.compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
+      
+      // Initialize disk format variables
+      this.dataBuffer = ByteBuffer.allocate(bufferSize);
+      this.dataBufferAsLong = dataBuffer.asLongBuffer();
+      this.variables = handshakeParser.getYoVariablesList();
+      this.jointStates = handshakeParser.getJointStates();
+
 
       File dataFile = new File(tempDirectory, dataFilename);
       File indexFile = new File(tempDirectory, indexFilename);

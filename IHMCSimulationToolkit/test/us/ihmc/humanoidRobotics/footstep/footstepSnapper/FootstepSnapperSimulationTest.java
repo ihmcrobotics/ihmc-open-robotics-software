@@ -17,7 +17,9 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -42,8 +44,6 @@ import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -825,7 +825,7 @@ public class FootstepSnapperSimulationTest
 
 //       planePosition.set(planePosition.x, planePosition.y, planePosition.z - 0.01); adversary code, move foot plane down a little
          planePoint.set(planePosition);
-         Plane3d solePlane = new Plane3d(planePosition, planeNormal);
+         Plane3D solePlane = new Plane3D(planePosition, planeNormal);
 
          if (assertPointConditions)
          {
@@ -857,7 +857,7 @@ public class FootstepSnapperSimulationTest
    }
 
 
-   private boolean pointsBelowPlane(List<Point3D> point3ds, Plane3d plane, double tolerance)
+   private boolean pointsBelowPlane(List<Point3D> point3ds, Plane3D plane, double tolerance)
    {
       for (Point3D point3d : point3ds)
       {
@@ -870,7 +870,7 @@ public class FootstepSnapperSimulationTest
       return true;
    }
 
-   private boolean pointBelowPlane(Point3D point, Plane3d plane, double tolerance)
+   private boolean pointBelowPlane(Point3D point, Plane3D plane, double tolerance)
    {
       double distanceAlongNormal = plane.signedDistance(point);
       if (distanceAlongNormal > tolerance)
@@ -964,7 +964,7 @@ public class FootstepSnapperSimulationTest
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 

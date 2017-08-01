@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.PelvisLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -43,6 +45,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private final SimpleOrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
    private final SimpleOrientationTrajectoryGenerator pelvisOrientationOffsetTrajectoryGenerator;
+   private final PelvisLeapOfFaithModule leapOfFaithModule;
 
    private final YoDouble initialPelvisOrientationTime = new YoDouble("initialPelvisOrientationTime", registry);
    private final YoDouble initialPelvisOrientationOffsetTime = new YoDouble("initialPelvisOrientationOffsetTime", registry);
@@ -71,7 +74,8 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
 
    public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+                                             LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             YoVariableRegistry parentRegistry)
    {
       super(PelvisOrientationControlMode.WALKING_CONTROLLER);
 
@@ -127,6 +131,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
+      leapOfFaithModule = new PelvisLeapOfFaithModule(soleZUpFrames, leapOfFaithParameters, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -148,8 +153,12 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private void initialize(ReferenceFrame desiredTrajectoryFrame)
    {
-      initialPelvisOrientationTime.set(yoTime.getDoubleValue());
+      initializeTrajectoryFrame(desiredTrajectoryFrame);
+      initializeTiming();
+   }
 
+   private void initializeTrajectoryFrame(ReferenceFrame desiredTrajectoryFrame)
+   {
       initialPelvisOrientation.changeFrame(desiredTrajectoryFrame);
       finalPelvisOrientation.changeFrame(desiredTrajectoryFrame);
 
@@ -161,6 +170,11 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       desiredPelvisOrientation.setIncludingFrame(initialPelvisOrientation);
       desiredPelvisOrientation.changeFrame(worldFrame);
       desiredPelvisFrame.update();
+   }
+
+   private void initializeTiming()
+   {
+      initialPelvisOrientationTime.set(yoTime.getDoubleValue());
    }
 
    @Override
@@ -186,12 +200,16 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       offsetTrajectoryWhileWalking.update();
       offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
 
+      yoPelvisAngularWeight.get(pelvisAngularWeight);
+      leapOfFaithModule.updateAngularOffsets(deltaTime);
+      leapOfFaithModule.addAngularOffset(tempOrientation);
+      leapOfFaithModule.relaxAngularWeight(deltaTime, pelvisAngularWeight);
+
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
       desiredPelvisAngularAcceleration.add(tempAngularAcceleration);
 
       orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
-      yoPelvisAngularWeight.get(pelvisAngularWeight);
       orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
@@ -315,9 +333,17 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       nextSoleZUpFrame.update();
 
       offsetTrajectoryWhileWalking.setUpcomingFootstep(upcomingFootstep);
+      leapOfFaithModule.setUpcomingFootstep(upcomingFootstep);
    }
 
    public void setTrajectoryFromFootstep()
+   {
+      updateTrajectoryFromFootstep();
+
+      initializeTiming();
+   }
+
+   public void updateTrajectoryFromFootstep()
    {
       initialPelvisOrientation.setIncludingFrame(desiredPelvisOrientation);
 
@@ -335,22 +361,28 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(yawFootstep, yawSupportFoot);
       finalPelvisOrientation.setIncludingFrame(worldFrame, finalDesiredPelvisYawAngle, 0.0, 0.0);
 
-      initialize(worldFrame);
+      initializeTrajectoryFrame(worldFrame);
    }
 
    public void initializeStanding()
    {
+      initializeTiming();
       offsetTrajectoryWhileWalking.initializeStanding();
+      leapOfFaithModule.initializeStanding();
    }
 
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
+      initializeTiming();
       offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      leapOfFaithModule.initializeTransfer(transferDuration);
    }
 
    public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
    {
+      initializeTiming();
       offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      leapOfFaithModule.initializeSwing(swingDuration);
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
