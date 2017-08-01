@@ -23,15 +23,41 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * Angle used to what it means to set the knee privileged configuration to straight.
+    * Angle to define what the knee privileged configuration considers straight.
     * This is used in the straight leg state by the support legs when the robot is attempting to walk with
     * straight legs, and also to help extend the leg at the end of the swing state.
     *
     * @return knee angle in radians
     */
-   public double getStraightKneeAngle()
+   public double getKneeAngleWhenStraight()
    {
       return 0.25;
+   }
+
+   /**
+    * Knee angle used when the leg is in its bracing state. The bracing state can occur when stepping down,
+    * or recovering from large disturbances. This is used instead of {@link #getKneeAngleWhenExtended()} ()}.
+    */
+   public double getKneeAngleWhenBracing()
+   {
+      return 0.4;
+   }
+
+   /**
+    * Knee angle used when the leg is fully extending during swing.
+    */
+   public double getKneeAngleWhenExtended()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Fraction of the knee midrange angle to consider the "collapsed" angle, to be used by the
+    * {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.CollapseKneeControlState}
+    */
+   public double getDesiredFractionOfMidrangeForCollapsedAngle()
+   {
+      return 0.3;
    }
 
    /**
