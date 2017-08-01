@@ -50,6 +50,7 @@ public class LegConfigurationControlModule
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
    private final YoDouble highPrivilegedWeight;
+   private final YoDouble mediumPrivilegedWeight;
    private final YoDouble lowPrivilegedWeight;
 
    private final YoDouble straightJointSpacePositionGain;
@@ -152,6 +153,7 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.addJoint(anklePitchJoint, Double.NaN);
 
       highPrivilegedWeight = new YoDouble(sidePrefix + "HighPrivilegedWeight", registry);
+      mediumPrivilegedWeight = new YoDouble(sidePrefix + "MediumPrivilegedWeight", registry);
       lowPrivilegedWeight = new YoDouble(sidePrefix + "LowPrivilegedWeight", registry);
 
       straightJointSpacePositionGain = new YoDouble(sidePrefix + "StraightLegJointSpaceKp", registry);
@@ -183,6 +185,7 @@ public class LegConfigurationControlModule
       effectiveKneeDamping = new YoDouble(sidePrefix + "EffectiveKneeDamping", registry);
 
       highPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedHighWeight());
+      mediumPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedMediumWeight());
       lowPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedLowWeight());
 
       straightLegGains = straightLegWalkingParameters.getStraightLegGains();
@@ -318,6 +321,8 @@ public class LegConfigurationControlModule
       double kneePitchPrivilegedConfigurationWeight;
       if (legControlWeight.getEnumValue() == LegControlWeight.LOW)
          kneePitchPrivilegedConfigurationWeight = lowPrivilegedWeight.getDoubleValue();
+      else if (legControlWeight.getEnumValue() == LegControlWeight.MEDIUM)
+         kneePitchPrivilegedConfigurationWeight = mediumPrivilegedWeight.getDoubleValue();
       else
          kneePitchPrivilegedConfigurationWeight = highPrivilegedWeight.getDoubleValue();
 

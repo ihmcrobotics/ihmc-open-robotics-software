@@ -126,7 +126,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
             balanceManager.updateCurrentICPPlan();
-            legConfigurationManager.prepareForLegBracing(swingSide);
+            //legConfigurationManager.prepareForLegBracing(swingSide);
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())

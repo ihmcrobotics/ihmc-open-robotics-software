@@ -328,6 +328,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
+      public double getLegPrivilegedMediumWeight()
+      {
+         return 25.0;
+      }
+
+      @Override
       public double getLegPrivilegedHighWeight()
       {
          return 150.0;
