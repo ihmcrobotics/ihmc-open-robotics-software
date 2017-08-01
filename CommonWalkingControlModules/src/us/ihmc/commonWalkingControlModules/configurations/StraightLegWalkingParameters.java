@@ -14,7 +14,7 @@ public class StraightLegWalkingParameters
     */
    public double getSpeedForSupportKneeStraightening()
    {
-      return 1.5;
+      return 1.0;
    }
 
    public double getSupportKneeCollapsingDuration()
