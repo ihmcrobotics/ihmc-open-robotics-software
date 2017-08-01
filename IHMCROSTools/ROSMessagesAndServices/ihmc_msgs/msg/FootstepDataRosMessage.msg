@@ -2,20 +2,17 @@
 # This message specifies the position, orientation and side (left or right) of a desired footstep in
 # world frame.
 
-# Specifies whether the given location is the location of the ankle or the sole.
-uint8 origin
-
 # Specifies which foot will swing to reach the foostep.
 uint8 robot_side
 
-# Specifies the position of the footstep. It is expressed in world frame.
-geometry_msgs/Vector3 location
+# Specifies the position of the footstep (sole frame) in world frame.
+geometry_msgs/Point location
 
-# Specifies the orientation of the footstep. It is expressed in world frame.
+# Specifies the orientation of the footstep (sole frame) in world frame.
 geometry_msgs/Quaternion orientation
 
 # predictedContactPoints specifies the vertices of the expected contact polygon between the foot and
-# the world. A value of null or an empty list will default to using the entire foot. Contact points 
+# the world. A value of null or an empty list will default to using the entire foot. Contact points
 # are expressed in sole frame. This ordering does not matter. For example: to tell the controller to
 # use the entire foot, the predicted contact points would be: predicted_contact_points: - {x: 0.5 *
 # foot_length, y: -0.5 * toe_width} - {x: 0.5 * foot_length, y: 0.5 * toe_width} - {x: -0.5 *
@@ -23,38 +20,43 @@ geometry_msgs/Quaternion orientation
 ihmc_msgs/Point2dRosMessage[] predicted_contact_points
 
 # This contains information on what the swing trajectory should be for each step. Recomended is
-# DEFAULT. 
+# DEFAULT.
 uint8 trajectory_type
 
-# In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec
-# 2016 only two waypoints are supported). The waypoints specify the sole position in the world frame.
-geometry_msgs/Vector3[] trajectory_waypoints
-
-# Contains information on how high the robot should step. This affects trajectory types default and
-# obstacle clearance.Recommended values are between 0.1 (minimum swing height, default) and 0.25. 
+# Contains information on how high the robot should swing its foot. This affects trajectory types
+# DEFAULT and OBSTACLE_CLEARANCE.If a value smaller then the minumal swing height is chosen (e.g. 0.0)
+# the swing height will be changed to a default value.
 float64 swing_height
 
-# Boolean that determines whether the controller should use swing and transfer times specifies in this
-# message (if true) orif the default swing and transfer times from the FootstepDataListMessage should
-# be used (if false).
-bool has_timings
+# In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The
+# waypoints define sole positions.The controller will compute times and velocities at the waypoints.
+# This is a convinient way to shape the trajectory of the swing. If full control over the
+# swingtrajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are
+# expected in the trajectory frame.
+geometry_msgs/Point[] position_waypoints
 
-# Specifies the swing time for this footstep.
-float64 swing_time
+# In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The
+# waypoints do not include thestart point (which is set to the current foot state at lift-off) and the
+# touch down point (which is specified by the location and orientation fields).All waypoints are for
+# the sole frame and expressed in the trajectory frame. The maximum number of points can be found in
+# the Footstep class.
+ihmc_msgs/SE3TrajectoryPointRosMessage[] swing_trajectory
 
-# Specifies the transfer time before this step.
-float64 transfer_time
+# In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory
+# blend duration  in seconds. If greater than zero, waypoints that fall within the valid time window
+# (beginning at the start of the swing phase and spanning  the desired blend duration) will be
+# adjusted to account for the initial error between the actual and expected position and orientation
+# of the swing foot. Note that the expectedInitialLocation and expectedInitialOrientation fields must
+# be defined in order to enable trajectory blending.
+float64 swing_trajectory_blend_duration
 
-# Boolean that determines whether the controller should attemp at keeping absolute timings for the
-# execution of this footstep. This means that a time for foot lift-off (end of toe off) needs to be
-# specified. The timing is set with respect to the start of the execution of the FootstepDataList that
-# this footstep is part of.
-bool has_absolute_time
+# The swingDuration is the time a foot is not in ground contact during a step. If the value of this
+# field is invalid (not positive) it will be replaced by a default swingDuration.
+float64 swing_duration
 
-# If using absolute timings this is the time at which the controller will start the swing. The time is
-# with respect to the time at which the controller recieves the walking command. The value of this
-# time must be increasing throughout a FootstepDataListMessage, otherwise it is ignored.
-float64 swing_start_time
+# The transferDuration is the time spent with the feet in ground contact before a step. If the value
+# of this field is invalid (not positive) it will be replaced by a default transferDuration.
+float64 transfer_duration
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use
@@ -69,12 +71,9 @@ int64 unique_id
 uint8 LEFT=0 # refers to the LEFT side of a robot
 uint8 RIGHT=1 # refers to the RIGHT side of a robot
 
-# "footstep_origin" enum values:
-uint8 AT_ANKLE_FRAME=0 # The location of the footstep refers to the location of the ankle frame. The ankle frame is fixed in the foot, centered at the last ankle joint. The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward. This option is for backward compatibility only and will be gone in an upcoming release. This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.
-uint8 AT_SOLE_FRAME=1 # The location of the footstep refers to the location of the sole frame. The sole frame is fixed in the foot, centered at the center of the sole. The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward. This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.
-
 # "trajectory_type" enum values:
-uint8 DEFAULT=0 # is a default trajectory
-uint8 OBSTACLE_CLEARANCE=1 # will attempt to step over an obstacle
-uint8 CUSTOM=2 # allows to specify trajectory waypoints
+uint8 DEFAULT=0 # The controller will execute a default trajectory.
+uint8 OBSTACLE_CLEARANCE=1 # The controller will attempt to step on/off an obstacle.
+uint8 CUSTOM=2 # In this mode two trajectory position waypoints can be specified.
+uint8 WAYPOINTS=3 # The swing trajectory is fully defined by the given waypoints.
 
