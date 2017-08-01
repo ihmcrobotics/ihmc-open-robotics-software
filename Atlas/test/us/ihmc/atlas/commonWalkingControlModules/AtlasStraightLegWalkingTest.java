@@ -372,15 +372,15 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getKneeBentLegPrivilegedWeight()
+      public double getLegPrivilegedLowWeight()
       {
-         return 1.0;
+         return 0.5;
       }
 
       @Override
-      public double getKneeStraightLegPrivilegedWeight()
+      public double getLegPrivilegedHighWeight()
       {
-         return 150.0;
+         return 200.0;
       }
    }
 
@@ -444,6 +444,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testSteppingDownEveryTime();
+      test.testForwardWalking();
    }
 }
