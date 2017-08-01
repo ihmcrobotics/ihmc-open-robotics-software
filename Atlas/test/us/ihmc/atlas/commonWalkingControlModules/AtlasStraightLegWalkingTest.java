@@ -324,7 +324,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 1.0;
+         return 2.5;
       }
 
       @Override
