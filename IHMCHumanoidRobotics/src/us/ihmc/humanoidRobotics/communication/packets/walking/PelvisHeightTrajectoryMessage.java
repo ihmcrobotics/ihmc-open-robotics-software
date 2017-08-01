@@ -86,7 +86,7 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */

@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -61,6 +62,13 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
       }
+
+      frameInformation.setTrajectoryReferenceFrameId(random.nextLong());
+      frameInformation.setDataReferenceFrameId(random.nextLong());
+
+      useCustomControlFrame = random.nextBoolean();
+
+      controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
    }
 
    public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> so3TrajectoryMessage)

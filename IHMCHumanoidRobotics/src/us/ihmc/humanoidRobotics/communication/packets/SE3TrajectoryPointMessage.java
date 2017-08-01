@@ -176,7 +176,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       if (angularVelocity != null && other.angularVelocity == null)
          return false;
 
-      if (!MathTools.epsilonEquals(time, other.time, epsilon))
+      if (!MathTools.epsilonCompare(time, other.time, epsilon))
          return false;
       if (!position.epsilonEquals(other.position, epsilon))
          return false;
