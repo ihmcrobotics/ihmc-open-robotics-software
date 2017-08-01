@@ -252,7 +252,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();      
       packet.setTempValue(0.2);      
-      packet.setNumberOfExpanding(100);   
+      packet.setNumberOfExpanding(1000);   
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       
       toolboxCommunicator.send(packet);

@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.xbill.DNS.Update;
+
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -13,6 +15,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -36,10 +39,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
    
-   /*
-    * a ball in visulaizer need to be represented to show that the node and pose are valid or not. The validity can be expressed with different color.
-    */
-
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
@@ -53,7 +52,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    /*
     * visualizer
     */
-   private TreeStateVisualizer visualizer;
+   private TreeStateVisualizer treeStateVisualizer;
+   private CTTreeVisualizer treeVisualizer;
    
 
    public ConstrainedWholeBodyPlanningToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
@@ -63,7 +63,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.fullRobotModel = fullRobotModel;
       this.isDone.set(false);
       
-      this.visualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
+      this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
+      this.treeVisualizer = new CTTreeVisualizer(10);
    }
 
    @Override
@@ -137,8 +138,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * update visualizer
        */
-      visualizer.setCurrentNormalizedTime(tree.getNewNode().getNormalizedNodeData(0));
-      visualizer.updateVisualizer();
+      treeStateVisualizer.setCurrentNormalizedTime(tree.getNewNode().getNormalizedNodeData(0));
+      treeStateVisualizer.setCurrentCTTaskNodeValidity(tree.getNewNode().getIsValidNode());
+      treeStateVisualizer.updateVisualizer();
+      
+      treeVisualizer.update(tree.getNewNode());
 
       /*
        * terminate condition.
@@ -200,6 +204,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       rootNode.convertDataToNormalizedData(tree.getTaskNodeRegion());
       
+      treeVisualizer.initialize();
       return true;
    }
 
