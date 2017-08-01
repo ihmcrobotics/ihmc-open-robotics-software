@@ -418,7 +418,7 @@ public class DynamicReachabilityCalculator
       double planarDistance = tempFinalCoM.distance(tempPoint2d);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance >= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumStanceLegLength)
       {
          minimumHeight = 0.0;
       }
@@ -427,7 +427,7 @@ public class DynamicReachabilityCalculator
          minimumHeight = Math.sqrt(Math.pow(minimumStanceLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
-      if (planarDistance >= stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumStanceLegLength)
       {
          maximumHeight = 0.0;
       }
@@ -466,7 +466,7 @@ public class DynamicReachabilityCalculator
       hipMinimumLocations.get(swingSide).setXY(tempFinalCoM);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance >= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumStepLegLength)
       {
          minimumHeight = 0.0;
       }
@@ -475,7 +475,7 @@ public class DynamicReachabilityCalculator
          minimumHeight = Math.sqrt(Math.pow(minimumStepLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
-      if (planarDistance >= maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumStepLegLength)
       {
          maximumHeight = 0.0;
       }
@@ -718,7 +718,7 @@ public class DynamicReachabilityCalculator
          minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
 
-      computeHeightLineFromStance(supportSide, minimumStanceLegLength, maximumLegLength.getDoubleValue());
+      computeHeightLineFromStance(supportSide, minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
       computeHeightLineFromStep(nextFootstep, minimumStepLegLength, maximumLegLength.getDoubleValue());
 
       return stanceHeightLine.isOverlappingExclusive(stepHeightLine);
@@ -804,16 +804,16 @@ public class DynamicReachabilityCalculator
       if (USE_CONSERVATIVE_REQUIRED_ADJUSTMENT)
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               minimumStanceLegLength, maximumLegLength.getDoubleValue());
+               minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
       else
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               minimumStanceLegLength, maximumLegLength.getDoubleValue());
+               minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
 
       tempPoint.setToZero(predictedCoMFrame);
