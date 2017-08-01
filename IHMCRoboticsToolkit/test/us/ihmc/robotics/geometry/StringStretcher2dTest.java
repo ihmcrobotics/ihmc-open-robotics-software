@@ -78,7 +78,7 @@ public class StringStretcher2dTest
 
       assertEquals(1, waypoints.size());
 
-      assertTrue(maxPoint == waypoints.get(0));
+      assertTrue(maxPoint.epsilonEquals(waypoints.get(0), 1e-6));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -113,9 +113,9 @@ public class StringStretcher2dTest
 
       assertEquals(3, waypoints.size());
 
-      assertTrue(minPoint1 == waypoints.get(0));
-      assertTrue(maxPoint3 == waypoints.get(1));
-      assertTrue(minPoint2 == waypoints.get(2));
+      assertTrue(minPoint1.epsilonEquals(waypoints.get(0), 1e-8));
+      assertTrue(maxPoint3.epsilonEquals(waypoints.get(1), 1e-8));
+      assertTrue(minPoint2.epsilonEquals(waypoints.get(2), 1e-8));
 
 
    }
