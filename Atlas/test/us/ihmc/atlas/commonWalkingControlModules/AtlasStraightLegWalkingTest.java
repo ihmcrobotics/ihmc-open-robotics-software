@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -129,18 +130,10 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getContactThresholdForce()
-      {
-         return 20.0;
-      }
-
-
-      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
       }
-
 
       @Override
       public boolean useOptimizationBasedICPController()
@@ -160,7 +153,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return true;
       }
 
-
       @Override
       public LeapOfFaithParameters getLeapOfFaithParameters()
       {
@@ -177,12 +169,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public MomentumOptimizationSettings getMomentumOptimizationSettings()
       {
          return new TestMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
-      }
-
-      @Override
-      public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-      {
-         return new TestPelvisOffsetWhileWalkingParameters();
       }
 
       @Override
@@ -259,7 +245,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return -0.75;
       }
-
    }
 
    private class TestSwingTrajectoryParameters extends AtlasSwingTrajectoryParameters
@@ -283,21 +268,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double[] getSwingWaypointProportions()
-      {
-         return new double[] {0.2, 0.8}; //0.83};// 0.95};
-      }
-
-      @Override
       public boolean doHeelTouchdownIfPossible()
       {
          return true;
-      }
-
-      @Override
-      public double getHeelTouchdownLengthRatio()
-      {
-         return 0.5;
       }
 
 
@@ -333,12 +306,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
-
-      @Override
-      public double getHorizontalFootWeightScaleFactor()
-      {
-         return -5.0;
-      }
    }
 
    private class TestStraightLegWalkingParameters extends AtlasStraightLegWalkingParameters
@@ -355,16 +322,36 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getLegPitchPrivilegedWeight()
+      public double getLegPrivilegedLowWeight()
       {
-         return 10.0;
+         return 2.5;
       }
 
       @Override
-      public double getKneeBentLegPrivilegedWeight()
+      public double getLegPrivilegedMediumWeight()
       {
-         return 10.0;
+         return 25.0;
       }
+
+      @Override
+      public double getLegPrivilegedHighWeight()
+      {
+         return 150.0;
+      }
+
+      /*
+      @Override
+      public double getSupportKneeCollapsingDuration()
+      {
+         return 0.25;
+      }
+
+      @Override
+      public double getSpeedForSupportKneeStraightening()
+      {
+         return 0.50;
+      }
+      */
    }
 
    private class TestMomentumOptimizationSettings extends AtlasMomentumOptimizationSettings
@@ -381,15 +368,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
-   private class TestPelvisOffsetWhileWalkingParameters extends PelvisOffsetWhileWalkingParameters
-   {
-      @Override
-      public boolean addPelvisOrientationOffsetsFromWalkingMotion()
-      {
-         return true;
-      }
-   }
-
    private class TestICPPlannerParameters extends AtlasContinuousCMPPlannerParameters
    {
       public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
@@ -400,7 +378,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getExitCoPForwardSafetyMarginOnToes()
       {
-         return 0.002;
+         return 0.005;
       }
 
       @Override
@@ -427,6 +405,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testDropOffsWhileWalking();
+      test.testForwardWalking();
    }
 }
