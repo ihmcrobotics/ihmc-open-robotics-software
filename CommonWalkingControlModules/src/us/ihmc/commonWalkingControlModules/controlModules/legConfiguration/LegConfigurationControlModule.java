@@ -224,16 +224,14 @@ public class LegConfigurationControlModule
       desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
 
       desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
-      desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
-
       desiredAngleWhenExtended = new YoDouble(namePrefix + "DesiredAngleWhenExtended", registry);
-      desiredAngleWhenExtended.set(0.0);
+      desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
+      desiredAngleWhenStraight.set(straightLegWalkingParameters.getKneeAngleWhenStraight());
+      desiredAngleWhenExtended.set(straightLegWalkingParameters.getKneeAngleWhenExtended());
+      desiredAngleWhenBracing.set(straightLegWalkingParameters.getKneeAngleWhenBracing());
 
       desiredFractionOfMidRangeForCollapsed = new YoDouble(namePrefix + "DesiredFractionOfMidRangeForCollapsed", registry);
-      desiredFractionOfMidRangeForCollapsed.set(0.3);
-
-      desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenBracing.set(0.4);
+      desiredFractionOfMidRangeForCollapsed.set(straightLegWalkingParameters.getDesiredFractionOfMidrangeForCollapsedAngle());
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
