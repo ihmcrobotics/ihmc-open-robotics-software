@@ -645,9 +645,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
-      double kpXY = 80.0;
+      double kpXY = 40.0;
       double kpZ = 40.0;
-      double zeta = runningOnRealRobot ? 0.5 : 0.8;
+      double zeta = runningOnRealRobot ? 0.2 : 0.8;
       double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
 
@@ -736,11 +736,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       double kpXY = 40.0;
       double kpZ = 40.0;
-      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;
-      double zetaZ = runningOnRealRobot ? 0.22 : 0.8;
+      double zetaXY = runningOnRealRobot ? 0.2 : 0.8;
+      double zetaZ = runningOnRealRobot ? 0.2 : 0.8;
       double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
       double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
-      double maxProportionalError = 10.0 * Math.PI/180.0;
+      double maxProportionalError = Math.toRadians(10.0);
 
       gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaZ);
