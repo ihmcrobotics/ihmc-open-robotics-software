@@ -30,6 +30,11 @@ public class LegConfigurationControlModule
       STRAIGHTEN, STRAIGHT, COLLAPSE, BENT
    }
 
+   public enum LegControlWeight
+   {
+      HIGH, MEDIUM, LOW
+   }
+
    private static final double minimumDampingScale = 0.2;
    private static final boolean scaleDamping = true;
 
@@ -40,11 +45,14 @@ public class LegConfigurationControlModule
    private final PrivilegedAccelerationCommand privilegedAccelerationCommand = new PrivilegedAccelerationCommand();
 
    private final YoEnum<LegConfigurationType> requestedState;
+   private final YoEnum<LegControlWeight> legControlWeight;
+
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
-   private final YoDouble legPitchPrivilegedWeight;
+   private final YoDouble highPrivilegedWeight;
+   private final YoDouble mediumPrivilegedWeight;
+   private final YoDouble lowPrivilegedWeight;
 
-   private final YoDouble kneeStraightPrivilegedWeight;
    private final YoDouble straightJointSpacePositionGain;
    private final YoDouble straightJointSpaceVelocityGain;
    private final YoDouble straightActuatorSpacePositionGain;
@@ -54,7 +62,6 @@ public class LegConfigurationControlModule
    private final YoBoolean straightUseActuatorSpacePositionControl;
    private final YoBoolean straightUseActuatorSpaceVelocityControl;
 
-   private final YoDouble kneeBentPrivilegedWeight;
    private final YoDouble bentJointSpacePositionGain;
    private final YoDouble bentJointSpaceVelocityGain;
    private final YoDouble bentActuatorSpaceVelocityGain;
@@ -75,7 +82,7 @@ public class LegConfigurationControlModule
    private final YoDouble effectiveKneeDamping;
 
    private final YoBoolean useFullyExtendedLeg;
-   private final YoBoolean useBracingLeg;
+   private final YoBoolean useBracingAngle;
    private final YoDouble desiredAngle;
    private final YoDouble desiredAngleWhenStraight;
    private final YoDouble desiredAngleWhenExtended;
@@ -98,6 +105,19 @@ public class LegConfigurationControlModule
    private static final int kneePitchJointIndex = 1;
    private static final int anklePitchJointIndex = 2;
 
+   private double jointSpaceConfigurationGain;
+   private double jointSpaceVelocityGain;
+   private double actuatorSpaceConfigurationGain;
+   private double actuatorSpaceVelocityGain;
+   private double maxPositionBlendingFactor;
+   private double maxVelocityBlendingFactor;
+
+   private boolean useActuatorSpacePositionControl;
+   private boolean useActuatorSpaceVelocityControl;
+
+   private boolean blendPositionError;
+   private boolean blendVelocityError;
+
    private final double kneeRangeOfMotion;
    private final double kneeSquareRangeOfMotion;
    private final double kneeMidRangeOfMotion;
@@ -107,20 +127,6 @@ public class LegConfigurationControlModule
 
    private final LegConfigurationGains straightLegGains;
    private final LegConfigurationGains bentLegGains;
-
-   private boolean blendPositionError;
-   private boolean blendVelocityError;
-   private double jointSpaceConfigurationGain;
-   private double jointSpaceVelocityGain;
-   private double actuatorSpaceConfigurationGain;
-   private double actuatorSpaceVelocityGain;
-   private double maxPositionBlendingFactor;
-   private double maxVelocityBlendingFactor;
-
-   private boolean useActuatorSpacePostionControl;
-   private boolean useActuatorSpaceVelocityControl;
-
-   private double kneePitchPrivilegedConfigurationWeight;
 
    public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
                                         YoVariableRegistry parentRegistry)
@@ -146,9 +152,10 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.addJoint(kneePitchJoint, Double.NaN);
       privilegedAccelerationCommand.addJoint(anklePitchJoint, Double.NaN);
 
-      legPitchPrivilegedWeight = new YoDouble(sidePrefix + "LegPitchPrivilegedWeight", registry);
+      highPrivilegedWeight = new YoDouble(sidePrefix + "HighPrivilegedWeight", registry);
+      mediumPrivilegedWeight = new YoDouble(sidePrefix + "MediumPrivilegedWeight", registry);
+      lowPrivilegedWeight = new YoDouble(sidePrefix + "LowPrivilegedWeight", registry);
 
-      kneeStraightPrivilegedWeight = new YoDouble(sidePrefix + "KneeStraightPrivilegedWeight", registry);
       straightJointSpacePositionGain = new YoDouble(sidePrefix + "StraightLegJointSpaceKp", registry);
       straightJointSpaceVelocityGain = new YoDouble(sidePrefix + "StraightLegJointSpaceKv", registry);
       straightActuatorSpacePositionGain = new YoDouble(sidePrefix + "StraightLegActuatorSpaceKp", registry);
@@ -158,7 +165,6 @@ public class LegConfigurationControlModule
       straightUseActuatorSpacePositionControl = new YoBoolean(sidePrefix + "StraightUseActuatorSpacePositionControl", registry);
       straightUseActuatorSpaceVelocityControl = new YoBoolean(sidePrefix + "StraightUseActuatorSpaceVelocityControl", registry);
 
-      kneeBentPrivilegedWeight = new YoDouble(sidePrefix + "KneeBentPrivilegedWeight", registry);
       bentJointSpacePositionGain = new YoDouble(sidePrefix + "BentLegJointSpaceKp", registry);
       bentJointSpaceVelocityGain = new YoDouble(sidePrefix + "BentLegJointSpaceKv", registry);
       bentActuatorSpacePositionGain = new YoDouble(sidePrefix + "BentLegActuatorSpaceKp", registry);
@@ -178,12 +184,13 @@ public class LegConfigurationControlModule
       effectiveKneeStiffness = new YoDouble(sidePrefix + "EffectiveKneeStiffness", registry);
       effectiveKneeDamping = new YoDouble(sidePrefix + "EffectiveKneeDamping", registry);
 
-      legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
+      highPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedHighWeight());
+      mediumPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedMediumWeight());
+      lowPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedLowWeight());
 
       straightLegGains = straightLegWalkingParameters.getStraightLegGains();
       bentLegGains = straightLegWalkingParameters.getBentLegGains();
 
-      kneeStraightPrivilegedWeight.set(straightLegWalkingParameters.getKneeStraightLegPrivilegedWeight());
       straightJointSpacePositionGain.set(straightLegGains.getJointSpaceKp());
       straightJointSpaceVelocityGain.set(straightLegGains.getJointSpaceKd());
       straightActuatorSpacePositionGain.set(straightLegGains.getActuatorSpaceKp());
@@ -193,7 +200,6 @@ public class LegConfigurationControlModule
       straightUseActuatorSpacePositionControl.set(straightLegGains.getUseActuatorSpacePositionControl());
       straightUseActuatorSpaceVelocityControl.set(straightLegGains.getUseActuatorSpaceVelocityControl());
 
-      kneeBentPrivilegedWeight.set(straightLegWalkingParameters.getKneeBentLegPrivilegedWeight());
       bentJointSpacePositionGain.set(bentLegGains.getJointSpaceKp());
       bentJointSpaceVelocityGain.set(bentLegGains.getJointSpaceKd());
       bentActuatorSpacePositionGain.set(bentLegGains.getActuatorSpaceKp());
@@ -210,7 +216,7 @@ public class LegConfigurationControlModule
       dampingActionScaleFactor = new YoDouble(namePrefix + "DampingActionScaleFactor", registry);
 
       useFullyExtendedLeg = new YoBoolean(namePrefix + "UseFullyExtendedLeg", registry);
-      useBracingLeg = new YoBoolean(namePrefix + "UseBracingLeg", registry);
+      useBracingAngle = new YoBoolean(namePrefix + "UseBracingLeg", registry);
 
       desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
 
@@ -221,7 +227,7 @@ public class LegConfigurationControlModule
       desiredAngleWhenExtended.set(0.0);
 
       desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenBracing.set(0.6);
+      desiredAngleWhenBracing.set(0.4);
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
@@ -238,6 +244,7 @@ public class LegConfigurationControlModule
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", LegConfigurationType.class, time, registry);
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
       requestedState.set(null);
+      legControlWeight = YoEnum.create(namePrefix + "LegControlWeight", "", LegControlWeight.class, registry, false);
 
       // compute leg segment lengths
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -301,7 +308,7 @@ public class LegConfigurationControlModule
 
    public void doControl()
    {
-      if (useBracingLeg.getBooleanValue())
+      if (useBracingAngle.getBooleanValue())
          desiredAngle.set(desiredAngleWhenBracing.getDoubleValue());
       else if (useFullyExtendedLeg.getBooleanValue())
          desiredAngle.set(desiredAngleWhenExtended.getDoubleValue());
@@ -311,6 +318,15 @@ public class LegConfigurationControlModule
       stateMachine.checkTransitionConditions();
       stateMachine.getCurrentState().doAction();
 
+      double kneePitchPrivilegedConfigurationWeight;
+      if (legControlWeight.getEnumValue() == LegControlWeight.LOW)
+         kneePitchPrivilegedConfigurationWeight = lowPrivilegedWeight.getDoubleValue();
+      else if (legControlWeight.getEnumValue() == LegControlWeight.MEDIUM)
+         kneePitchPrivilegedConfigurationWeight = mediumPrivilegedWeight.getDoubleValue();
+      else
+         kneePitchPrivilegedConfigurationWeight = highPrivilegedWeight.getDoubleValue();
+
+
       double privilegedKneeAcceleration = computeKneeAcceleration();
       double privilegedHipPitchAcceleration = -0.5 * privilegedKneeAcceleration;
       double privilegedAnklePitchAcceleration = -0.5 * privilegedKneeAcceleration;
@@ -319,9 +335,9 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
       privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
 
-      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
-      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
+      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
    }
 
    public void setFullyExtendLeg(boolean fullyExtendLeg)
@@ -329,9 +345,14 @@ public class LegConfigurationControlModule
       useFullyExtendedLeg.set(fullyExtendLeg);
    }
 
-   public void setLegBracing(boolean legBracing)
+   public void prepareForLegBracing()
    {
-      useBracingLeg.set(legBracing);
+      useBracingAngle.set(true);
+   }
+
+   public void setLegControlWeight(LegControlWeight legControlWeight)
+   {
+      this.legControlWeight.set(legControlWeight);
    }
 
    private double computeKneeAcceleration()
@@ -376,7 +397,7 @@ public class LegConfigurationControlModule
 
       double pAction, dAction;
 
-      if (useActuatorSpacePostionControl)
+      if (useActuatorSpacePositionControl)
          pAction = actuatorSpacePAction;
       else if (blendPositionError)
          pAction = InterpolationTools.linearInterpolate(jointSpacePAction, actuatorSpacePAction, positionBlendingFactor);
@@ -481,22 +502,17 @@ public class LegConfigurationControlModule
          actuatorSpaceVelocityGain = straightActuatorSpaceVelocityGain.getDoubleValue();
          maxPositionBlendingFactor = straightMaxPositionBlendingFactor.getDoubleValue();
          maxVelocityBlendingFactor = straightMaxVelocityBlendingFactor.getDoubleValue();
-
-         useActuatorSpacePostionControl = straightUseActuatorSpacePositionControl.getBooleanValue();
+         useActuatorSpacePositionControl = straightUseActuatorSpacePositionControl.getBooleanValue();
          useActuatorSpaceVelocityControl = straightUseActuatorSpaceVelocityControl.getBooleanValue();
 
          blendPositionError = straightLegGains.getBlendPositionError();
          blendVelocityError = straightLegGains.getBlendVelocityError();
-
-         kneePitchPrivilegedConfigurationWeight = kneeStraightPrivilegedWeight.getDoubleValue();
 
          previousKneePitchAngle = currentPosition;
 
          if (isDone())
             transitionToDefaultNextState();
       }
-
-
 
       @Override
       public void doTransitionIntoAction()
@@ -512,6 +528,9 @@ public class LegConfigurationControlModule
 
          previousTime = 0.0;
          dwellTime = 0.0;
+
+         if (useBracingAngle.getBooleanValue())
+            legControlWeight.set(LegControlWeight.MEDIUM);
       }
 
       @Override
@@ -554,13 +573,11 @@ public class LegConfigurationControlModule
          actuatorSpaceVelocityGain = straightActuatorSpaceVelocityGain.getDoubleValue();
          maxPositionBlendingFactor = straightMaxPositionBlendingFactor.getDoubleValue();
          maxVelocityBlendingFactor = straightMaxVelocityBlendingFactor.getDoubleValue();
-         useActuatorSpacePostionControl = straightUseActuatorSpacePositionControl.getBooleanValue();
+         useActuatorSpacePositionControl = straightUseActuatorSpacePositionControl.getBooleanValue();
          useActuatorSpaceVelocityControl = straightUseActuatorSpaceVelocityControl.getBooleanValue();
 
          blendPositionError = straightLegGains.getBlendPositionError();
          blendVelocityError = straightLegGains.getBlendVelocityError();
-
-         kneePitchPrivilegedConfigurationWeight = kneeStraightPrivilegedWeight.getDoubleValue();
       }
 
       @Override
@@ -598,18 +615,17 @@ public class LegConfigurationControlModule
          actuatorSpaceVelocityGain = bentActuatorSpaceVelocityGain.getDoubleValue();
          maxPositionBlendingFactor = bentMaxPositionBlendingFactor.getDoubleValue();
          maxVelocityBlendingFactor = bentMaxVelocityBlendingFactor.getDoubleValue();
-         useActuatorSpacePostionControl = bentUseActuatorSpacePositionControl.getBooleanValue();
+         useActuatorSpacePositionControl = bentUseActuatorSpacePositionControl.getBooleanValue();
          useActuatorSpaceVelocityControl = bentUseActuatorSpaceVelocityControl.getBooleanValue();
 
          blendPositionError = bentLegGains.getBlendPositionError();
          blendVelocityError = bentLegGains.getBlendVelocityError();
-
-         kneePitchPrivilegedConfigurationWeight = kneeBentPrivilegedWeight.getDoubleValue();
       }
 
       @Override
       public void doTransitionIntoAction()
       {
+         legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override
@@ -645,13 +661,11 @@ public class LegConfigurationControlModule
          actuatorSpaceVelocityGain = bentActuatorSpaceVelocityGain.getDoubleValue();
          maxPositionBlendingFactor = bentMaxPositionBlendingFactor.getDoubleValue();
          maxVelocityBlendingFactor = bentMaxVelocityBlendingFactor.getDoubleValue();
-         useActuatorSpacePostionControl = bentUseActuatorSpacePositionControl.getBooleanValue();
+         useActuatorSpacePositionControl = bentUseActuatorSpacePositionControl.getBooleanValue();
          useActuatorSpaceVelocityControl = bentUseActuatorSpaceVelocityControl.getBooleanValue();
 
          blendPositionError = bentLegGains.getBlendPositionError();
          blendVelocityError = bentLegGains.getBlendVelocityError();
-
-         kneePitchPrivilegedConfigurationWeight = kneeBentPrivilegedWeight.getDoubleValue();
 
          if (isDone())
             transitionToDefaultNextState();
@@ -660,6 +674,7 @@ public class LegConfigurationControlModule
       @Override
       public void doTransitionIntoAction()
       {
+         legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override

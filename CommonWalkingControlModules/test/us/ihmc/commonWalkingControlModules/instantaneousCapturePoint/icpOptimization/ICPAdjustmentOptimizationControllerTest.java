@@ -9,9 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -641,13 +639,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getToeTouchdownAngle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public double getTimeToGetPreparedForLocomotion()
       {
          // TODO Auto-generated method stub
@@ -745,34 +736,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getMinStepLengthForToeOff()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinMechanicalLegLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinLegLengthBeforeCollapsingSingleSupport()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaximumToeOffAngle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public double getMaxICPErrorBeforeSingleSupportY()
       {
          // TODO Auto-generated method stub
@@ -815,13 +778,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getHeelTouchdownAngle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public double getFoot_start_toetaper_from_back()
       {
          // TODO Auto-generated method stub
@@ -833,27 +789,6 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return null;
-      }
-
-      @Override
-      public double getDesiredTouchdownVelocity()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredTouchdownHeightOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredTouchdownAcceleration()
-      {
-         // TODO Auto-generated method stub
-         return 0;
       }
 
       @Override
@@ -934,42 +869,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean doToeTouchdownIfPossible()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffWhenHittingAnkleLimit()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffIfPossibleInSingleSupport()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffIfPossible()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public boolean doPrepareManipulationForLocomotion()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doHeelTouchdownIfPossible()
       {
          // TODO Auto-generated method stub
          return false;
@@ -1067,13 +967,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean checkECMPLocationToTriggerToeOff()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public boolean allowShrinkingSingleSupportFootPolygon()
       {
          // TODO Auto-generated method stub
@@ -1092,6 +985,104 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return false;
+      }
+
+      @Override
+      public ToeOffParameters getToeOffParameters()
+      {
+         return new ToeOffParameters()
+         {
+            @Override
+            public boolean doToeOffIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public boolean doToeOffIfPossibleInSingleSupport()
+            {
+               return false;
+            }
+
+            @Override
+            public boolean checkECMPLocationToTriggerToeOff()
+            {
+               return false;
+            }
+
+            @Override
+            public double getMinStepLengthForToeOff()
+            {
+               return 0;
+            }
+
+            @Override
+            public boolean doToeOffWhenHittingAnkleLimit()
+            {
+               return false;
+            }
+
+            @Override
+            public double getMaximumToeOffAngle()
+            {
+               return 0;
+            }
+         };
+      }
+
+      @Override
+      public SwingTrajectoryParameters getSwingTrajectoryParameters()
+      {
+         return new SwingTrajectoryParameters()
+         {
+            @Override
+            public boolean doToeTouchdownIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public double getToeTouchdownAngle()
+            {
+               return 0;
+            }
+
+            @Override
+            public boolean doHeelTouchdownIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public double getHeelTouchdownAngle()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownHeightOffset()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownVelocity()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownAcceleration()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getMinMechanicalLegLength()
+            {
+               return 0;
+            }
+         };
       }
    };
 }
