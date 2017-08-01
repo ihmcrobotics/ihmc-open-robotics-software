@@ -144,7 +144,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean editStepTimingForReachability()
       {
-         return false; // // TODO: 4/27/17
+         return true; // // TODO: 4/27/17
       }
 
       @Override
