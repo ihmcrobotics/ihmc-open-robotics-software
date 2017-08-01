@@ -102,7 +102,7 @@ public class LegConfigurationManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.BENT);
+         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.COLLAPSE);
       }
    }
 
@@ -130,6 +130,11 @@ public class LegConfigurationManager
             //useMediumWeight(swingSide);
          }
       }
+   }
+
+   public void setStepDuration(RobotSide supportSide, double stepDuration)
+   {
+      legConfigurationControlModules.get(supportSide).setStepDuration(stepDuration);
    }
 
    public void setFullyExtendLeg(RobotSide robotSide, boolean fullyExtendLeg)

@@ -88,8 +88,11 @@ public class LegConfigurationControlModule
    private final YoDouble desiredAngleWhenExtended;
    private final YoDouble desiredAngleWhenBracing;
 
+   private final YoDouble desiredFractionOfMidRangeForCollapsed;
+
    private final YoDouble straighteningSpeed;
    private final YoDouble collapsingDuration;
+   private final YoDouble collapsingDurationFractionOfStep;
 
    private final YoDouble desiredVirtualActuatorLength;
    private final YoDouble currentVirtualActuatorLength;
@@ -221,19 +224,21 @@ public class LegConfigurationControlModule
       desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
 
       desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
-      desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
-
       desiredAngleWhenExtended = new YoDouble(namePrefix + "DesiredAngleWhenExtended", registry);
-      desiredAngleWhenExtended.set(0.0);
-
       desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenBracing.set(0.4);
+      desiredAngleWhenStraight.set(straightLegWalkingParameters.getKneeAngleWhenStraight());
+      desiredAngleWhenExtended.set(straightLegWalkingParameters.getKneeAngleWhenExtended());
+      desiredAngleWhenBracing.set(straightLegWalkingParameters.getKneeAngleWhenBracing());
+
+      desiredFractionOfMidRangeForCollapsed = new YoDouble(namePrefix + "DesiredFractionOfMidRangeForCollapsed", registry);
+      desiredFractionOfMidRangeForCollapsed.set(straightLegWalkingParameters.getDesiredFractionOfMidrangeForCollapsedAngle());
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
 
       collapsingDuration = new YoDouble(namePrefix + "SupportKneeCollapsingDuration", registry);
-      collapsingDuration.set(straightLegWalkingParameters.getSupportKneeCollapsingDuration());
+      collapsingDurationFractionOfStep = new YoDouble(namePrefix + "SupportKneeCollapsingDurationFractionOfStep", registry);
+      collapsingDurationFractionOfStep.set(straightLegWalkingParameters.getSupportKneeCollapsingDurationFractionOfStep());
 
       desiredVirtualActuatorLength = new YoDouble(namePrefix + "DesiredVirtualActuatorLength", registry);
       currentVirtualActuatorLength = new YoDouble(namePrefix + "CurrentVirtualActuatorLength", registry);
@@ -286,7 +291,6 @@ public class LegConfigurationControlModule
       states.add(collapseState);
 
       straighteningToStraightState.setDefaultNextState(LegConfigurationType.STRAIGHT);
-      collapseState.setDefaultNextState(LegConfigurationType.BENT);
 
       for (FinishableState<LegConfigurationType> fromState : states)
       {
@@ -338,6 +342,11 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setWeight(hipPitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(anklePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
+   }
+
+   public void setStepDuration(double stepDuration)
+   {
+      collapsingDuration.set(collapsingDurationFractionOfStep.getDoubleValue() * stepDuration);
    }
 
    public void setFullyExtendLeg(boolean fullyExtendLeg)
@@ -644,14 +653,15 @@ public class LegConfigurationControlModule
       @Override
       public boolean isDone()
       {
-         return getTimeInCurrentState() > collapsingDuration.getDoubleValue();
+         return false;
       }
 
       @Override
       public void doAction()
       {
-         double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngle.getDoubleValue(), kneeMidRangeOfMotion,
-               getTimeInCurrentState() / collapsingDuration.getDoubleValue());
+         double collapsedAngle = desiredFractionOfMidRangeForCollapsed.getDoubleValue() * kneeMidRangeOfMotion;
+         double alpha = MathTools.clamp(getTimeInCurrentState() / collapsingDuration.getDoubleValue(), 0.0, 1.0);
+         double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngle.getDoubleValue(), collapsedAngle, alpha);
 
          kneePitchPrivilegedConfiguration.set(desiredKneePosition);
 
@@ -666,9 +676,6 @@ public class LegConfigurationControlModule
 
          blendPositionError = bentLegGains.getBlendPositionError();
          blendVelocityError = bentLegGains.getBlendVelocityError();
-
-         if (isDone())
-            transitionToDefaultNextState();
       }
 
       @Override
