@@ -127,7 +127,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
             legConfigurationManager.prepareForLegBracing(swingSide);
-            legConfigurationManager.useLowWeight(swingSide);
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
