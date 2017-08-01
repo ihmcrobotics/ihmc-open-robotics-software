@@ -9,6 +9,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -213,5 +214,10 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = Status.values()[random.nextInt(Status.values().length)];
       this.footstepIndex = RandomNumbers.nextIntWithEdgeCases(random, 0.1);
+      this.robotSide = RobotSide.generateRandomRobotSide(random);
+      this.desiredFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+      this.desiredFootOrientationInWorld = RandomGeometry.nextQuaternion(random);
+      this.actualFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+      this.actualFootOrientationInWorld = RandomGeometry.nextQuaternion(random);
    }
 }

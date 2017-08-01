@@ -6,9 +6,19 @@
 # time. A message with a unique id equals to 0 will be interpreted as invalid and will not be
 # processed by the controller. This rule does not apply to the fields of this message.
 
-# List of trajectory points (in taskpsace) to go through while executing the trajectory. All the
-# information contained in these trajectory points needs to be expressed in world frame.
+# List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame
+# to define what frame the points are expressed in
 ihmc_msgs/SO3TrajectoryPointRosMessage[] taskspace_trajectory_points
+
+# Frame information for this message.
+ihmc_msgs/FrameInformationRosMessage frame_information
+
+# Flag that tells the controller whether the use of a custom control frame is requested.
+bool use_custom_control_frame
+
+# Pose of custom control frame. This is the frame attached to the rigid body that the taskspace
+# trajectory is defined for.
+geometry_msgs/Transform control_frame_pose
 
 # When OVERRIDE is chosen:  - The time of the first trajectory point can be zero, in which case the
 # controller will start directly at the first trajectory point. Otherwise the controller will prepend
