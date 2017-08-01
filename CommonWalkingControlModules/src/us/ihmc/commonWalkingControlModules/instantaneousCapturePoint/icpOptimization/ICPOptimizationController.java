@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -38,6 +38,8 @@ public abstract class ICPOptimizationController
    protected static final boolean DEBUG = false;
 
    protected static final String yoNamePrefix = "controller";
+
+   private static final  double maxICPVelocityAtTransferStart = 0.4;
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -155,12 +157,12 @@ public abstract class ICPOptimizationController
    protected final double dynamicRelaxationDoubleSupportWeightModifier;
    protected final int maximumNumberOfFootstepsToConsider;
 
-   protected final boolean useDifferentSplitRatioForBigAdjustment;
-   protected final double minimumTimeOnInitialCMPForBigAdjustment;
+   protected boolean useDifferentSplitRatioForBigAdjustment;
+   protected double minimumTimeOnInitialCMPForBigAdjustment;
 
-   public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-         boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
@@ -198,7 +200,7 @@ public abstract class ICPOptimizationController
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      useTwoCMPs = icpPlannerParameters.useTwoCMPsPerSupport();
+      useTwoCMPs = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1;
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
 
@@ -419,6 +421,11 @@ public abstract class ICPOptimizationController
       }
    }
 
+   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   {
+      solutionHandler.setReferenceICPVelocity(desiredICPVelocity);
+   }
+
 
    /**
     * Initializes the controller to smoothly re-center the ICP in the support polygon preparing the
@@ -607,7 +614,6 @@ public abstract class ICPOptimizationController
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider);
          reachabilityConstraintHandler.updateReachabilityConstraint(solver);
       }
-
 
       submitFeedbackTaskConditionsToSolver();
       submitAngularMomentumTaskConditionsToSolver();

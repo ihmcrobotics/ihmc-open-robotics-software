@@ -61,12 +61,12 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setFalse();
+               sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(false);
             }
          }
          else
          {
-            otherBodyPartRequestMap.get(bodyPart).setFalse();
+            otherBodyPartRequestMap.get(bodyPart).setValue(false);
          }
       }
    }
@@ -83,11 +83,11 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
       if (bodyPart.isRobotSideNeeded())
       {
          RobotSide robotSide = message.getRobotSide();
-         sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setTrue();
+         sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(true);
       }
       else
       {
-         otherBodyPartRequestMap.get(bodyPart).setTrue();
+         otherBodyPartRequestMap.get(bodyPart).setValue(true);
       }
    }
 
@@ -106,12 +106,12 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
             for (RobotSide robotSide : RobotSide.values)
             {
                if (other.getRequest(robotSide, bodyPart))
-                  sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setTrue();
+                  sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(true);
             }
          }
          else if (other.getRequest(bodyPart))
          {
-            otherBodyPartRequestMap.get(bodyPart).setTrue();
+            otherBodyPartRequestMap.get(bodyPart).setValue(true);
          }
       }
    }

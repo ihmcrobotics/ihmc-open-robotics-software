@@ -1,5 +1,6 @@
 package us.ihmc.simulationToolkit.visualizers;
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -8,14 +9,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /*
  * Simple class that makes simpler to visualize a FullRobotModel inside the SimulationConstructionSet.
@@ -36,6 +38,8 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private FloatingInverseDynamicsJoint rootJoint;
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
+   private volatile long latestTimestamp = 0;
+   
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
    {   
       this.fullRobot = fullRobotModel;
@@ -44,7 +48,18 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       this.name = robot.getName() + "Simulated";    
       this.updateDT = updateDT;
       this.robotRegistry = robot.getRobotsYoVariableRegistry();
-      this.setMainRegistry(robotRegistry, fullRobotModel, null);
+      this.rootJoint = fullRobotModel.getRootJoint();
+      revoluteJoints.clear();
+      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
+      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
+      {
+         String name = revoluteJoint.getName();
+         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
+         
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         this.revoluteJoints.add(jointPair);
+      }
+      this.setMainRegistry(robotRegistry, null, null);
    }
 
    public FloatingRootJointRobot getSDFRobot()
@@ -68,22 +83,9 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
    
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.rootJoint = fullRobotModel.getRootJoint();
-      
-      revoluteJoints.clear();
-      OneDoFJoint[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
-      
-      for (OneDoFJoint revoluteJoint : revoluteJointsArray)
-      {
-         String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
-         
-         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
-         this.revoluteJoints.add(jointPair);
-      }
-      
+            
       if( robot.getRobotsYoVariableRegistry() != registry)
       {
          robot.addYoVariableRegistry(registry); 
@@ -107,6 +109,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    public void update(long timestamp)
    {
       fullRobot.updateFrames();
+      this.latestTimestamp = timestamp;
       
       if(rootJoint != null)
       {
@@ -147,6 +150,12 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       robot.addYoVariableRegistry(registry);
+   }
+
+   @Override
+   public long getLatestTimestamp()
+   {
+      return latestTimestamp;
    }
 
 }

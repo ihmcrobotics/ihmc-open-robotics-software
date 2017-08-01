@@ -266,6 +266,10 @@ public class RigidBodyJointControlHelper
                   queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
                }
             }
+            else
+            {
+               queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
+            }
          }
       }
 
@@ -407,9 +411,14 @@ public class RigidBodyJointControlHelper
    {
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         jointTrajectoryGenerators.get(jointIdx).clear();
-         pointQueues.get(jointIdx).clear();
+         overrideTrajectory(jointIdx);
       }
+   }
+
+   private void overrideTrajectory(int jointIdx)
+   {
+      jointTrajectoryGenerators.get(jointIdx).clear();
+      pointQueues.get(jointIdx).clear();
    }
 
    public boolean isEmpty()

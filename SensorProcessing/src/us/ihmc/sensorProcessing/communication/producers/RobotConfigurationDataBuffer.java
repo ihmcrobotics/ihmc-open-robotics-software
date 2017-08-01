@@ -13,12 +13,13 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 /**
  * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make sure not to share fullrobotmodels between thread
- * 
+ *
  * @author jesper
  *
  */
@@ -71,7 +72,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          {
             System.out.println("Current timestamp: " + currentTimestamp + ", waiting for " + timestamp);
          }
-         
+
          try
          {
             timestampCondition.await();
@@ -119,12 +120,12 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
 
    /**
     * Update a full robot model with data from timestamp. Optionally update force sensors
-    * 
+    *
     * @param waitForTimestamp Will block if no timestamp is not received yet
     * @param timestamp Timestamp to get. Will return the data for the last received that is smaller or equal to timestamp.
     * @param model Model to update. Will call updateFramesRecursively()
     * @param forceSensorDataHolder. Optional, update force sensor data holders
-    * 
+    *
     * @return true if model is updated
     */
    public long updateFullRobotModel(boolean waitForTimestamp, long timestamp, FullRobotModel model, ForceSensorDataHolder forceSensorDataHolder)
@@ -175,15 +176,27 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       float[] newJointAngles = robotConfigurationData.getJointAngles();
+      float[] newJointVelocities = robotConfigurationData.getJointVelocities();
+
       for (int i = 0; i < newJointAngles.length; i++)
       {
          fullRobotModelCache.allJoints[i].setQ(newJointAngles[i]);
+         fullRobotModelCache.allJoints[i].setQd(newJointVelocities[i]);
       }
 
       Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
       rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+
+      Twist rootJointTwist = new Twist();
+      rootJoint.getJointTwist(rootJointTwist);
+      Vector3D32 pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
+      Vector3D32 pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
+      rootJointTwist.setAngularPart(pelvisAngularVelocity);
+      rootJointTwist.setLinearPart(pelvisLinearVelocity);
+      rootJoint.setJointTwist(rootJointTwist);
+
       rootJoint.getPredecessor().updateFramesRecursively();
 
       if (forceSensorDataHolder != null)

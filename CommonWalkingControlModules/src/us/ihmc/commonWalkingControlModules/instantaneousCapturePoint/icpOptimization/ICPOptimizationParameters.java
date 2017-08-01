@@ -196,7 +196,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean useDifferentSplitRatioForBigAdjustment()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -304,7 +304,7 @@ public abstract class ICPOptimizationParameters
     */
    public double getTimingAdjustmentGradientDescentWeight()
    {
-      return 0.0001;
+      return 0.1;
    }
 
    /**

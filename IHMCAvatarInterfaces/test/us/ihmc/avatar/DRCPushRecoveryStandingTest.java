@@ -15,8 +15,8 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
@@ -82,7 +82,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    
   
 	@ContinuousIntegrationTest(estimatedDuration = 25.3)
-	@Test(timeout = 130000)
+	@Test
    public void testPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -114,7 +114,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 33.4)
-	@Test(timeout = 170000)
+	@Test
    public void testPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -153,7 +153,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
 	@Ignore("Needs to be improved")
 	@ContinuousIntegrationTest(estimatedDuration = 49.1)
-	@Test(timeout = 250000)
+	@Test
    public void testDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -198,7 +198,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 30.8)
-	@Test(timeout = 150000)
+	@Test
    public void testPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -236,7 +236,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 48.6)
-	@Test(timeout = 240000)
+	@Test
    public void testPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -139,15 +139,9 @@ public abstract class PacketValidityChecker
             return errorMessage;
          }
 
-         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialLocation() == null)
+         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getSwingTrajectory()[0].getTime() > 1.0e-5)
          {
-            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial location is undefined.";
-            return errorMessage;
-         }
-
-         if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getExpectedInitialOrientation() == null)
-         {
-            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero but expected initial orientation is undefined.";
+            String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero, initial waypoint at t = 0.0 is missing.";
             return errorMessage;
          }
       }

@@ -28,7 +28,7 @@ public class TransformToolsTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      TransformTools.rotate(transform, Math.PI / 4, Axis.X);
+      TransformTools.appendRotation(transform, Math.PI / 4, Axis.X);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
 
@@ -38,7 +38,7 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.rotate(transform, 3 * Math.PI / 4, Axis.Y);
+      TransformTools.appendRotation(transform, 3 * Math.PI / 4, Axis.Y);
 
       transform2 = new RigidBodyTransform();
 
@@ -48,38 +48,13 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.rotate(transform, -Math.PI / 2, Axis.Z);
+      TransformTools.appendRotation(transform, -Math.PI / 2, Axis.Z);
 
       transform2 = new RigidBodyTransform();
 
       transform2.setRotationYawAndZeroTranslation(-Math.PI / 2);
 
       EuclidCoreTestTools.assertRigidBodyTransformEquals(transform, transform2, 1e-7);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testDifferentiate()
-   {
-      Random random = new Random();
-      RigidBodyTransform transform1 = new RigidBodyTransform();
-      RigidBodyTransform transform2 = new RigidBodyTransform();
-      DenseMatrix64F matrix1 = new DenseMatrix64F(4, 4);
-      DenseMatrix64F matrix2 = new DenseMatrix64F(4, 4);
-      double dt = 0.1;
-
-      createRandomTransformationMatrix(matrix1, random);
-      createRandomTransformationMatrix(matrix2, random);
-      transform1.set(matrix1);
-      transform2.set(matrix2);
-
-      CommonOps.subtract(matrix2, matrix1, matrix2);
-      CommonOps.scale(1 / dt, matrix2);
-      matrix2.set(3, 3, 1);
-
-      DenseMatrix64F testMatrix = TransformTools.differentiate(transform1, transform2, dt);
-
-      JUnitTools.assertMatrixEquals("", testMatrix, matrix2, 1e-8);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

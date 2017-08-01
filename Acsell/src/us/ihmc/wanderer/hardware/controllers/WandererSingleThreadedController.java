@@ -13,22 +13,22 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.command.WandererCommand;
 import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
 import us.ihmc.wanderer.hardware.state.WandererState;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WandererSingleThreadedController extends RealtimeThread
 {
@@ -39,7 +39,7 @@ public class WandererSingleThreadedController extends RealtimeThread
 
       YoVariableRegistry registry = new YoVariableRegistry("wanderer");
       WandererRobotModel robotModel = new WandererRobotModel(true, true);
-      PeriodicThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(45);
+      PeriodicThreadSchedulerFactory scheduler = new PeriodicRealtimeThreadSchedulerFactory(45);
       YoVariableServer variableServer = new YoVariableServer(WandererSingleThreadedController.class, scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
 
       AcsellSetup wandererSetup = new AcsellSetup(variableServer);
@@ -108,7 +108,7 @@ public class WandererSingleThreadedController extends RealtimeThread
 
       if (visualizer != null)
       {
-         visualizer.setMainRegistry(registry, fullRobotModel, null);
+         visualizer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
       }
 
       outputWriter.connect(new WandererNetworkParameters());

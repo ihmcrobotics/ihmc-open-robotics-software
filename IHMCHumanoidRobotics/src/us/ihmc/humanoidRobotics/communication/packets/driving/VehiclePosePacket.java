@@ -45,6 +45,12 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       position = new Point3D(translation);
    }
 
+   public VehiclePosePacket(VehiclePosePacket other)
+   {
+      this.position = new Point3D(other.position);
+      this.orientation = new Quaternion(other.orientation);
+   }
+
    public Point3D getPosition()
    {
       return position;
@@ -57,13 +63,10 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
 
    public VehiclePosePacket transform(RigidBodyTransform transform)
    {
-      VehiclePosePacket ret = new VehiclePosePacket();
+      VehiclePosePacket ret = new VehiclePosePacket(this);
 
-      // Point3D position;
-      ret.position = TransformTools.getTransformedPoint(this.getPosition(), transform);
-
-      // Quat4d orientation;
-      ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+      ret.position.applyTransform(transform);
+      ret.orientation.applyTransform(transform);
 
       return ret;
    }

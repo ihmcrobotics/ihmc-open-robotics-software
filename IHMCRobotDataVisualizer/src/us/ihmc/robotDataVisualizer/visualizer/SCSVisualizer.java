@@ -2,7 +2,6 @@ package us.ihmc.robotDataVisualizer.visualizer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +53,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = 1;
+   private long counter = 0;
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
@@ -92,20 +92,23 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
+   public void receivedTimestampAndData(long timestamp)
    {
-      long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
-      delayValue.setText(delayFormat.format(delay));
-
-      if (recording)
+      if(++counter % displayOneInNPackets == 0)
       {
-         for (int i = 0; i < jointUpdaters.size(); i++)
+         long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
+         delayValue.setText(delayFormat.format(delay));
+   
+         if (recording)
          {
-            jointUpdaters.get(i).update();
+            for (int i = 0; i < jointUpdaters.size(); i++)
+            {
+               jointUpdaters.get(i).update();
+            }
+            scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+            updateLocalVariables();
+            scs.tickAndUpdate();
          }
-         scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
-         updateLocalVariables();
-         scs.tickAndUpdate();
       }
    }
 
@@ -140,12 +143,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return true;
    }
 
-   @Override
-   public void receiveTimedOut()
-   {
-      System.out.println("Connection lost, closing client.");
-      yoVariableClient.disconnected();
-   }
 
    @Override
    public boolean updateYoVariables()
@@ -265,6 +262,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
+      this.registry.addChild(yoVariableClient.getDebugRegistry());
 
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
@@ -352,7 +350,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       SCSVisualizer visualizer = new SCSVisualizer(32169, true);
       visualizer.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(visualizer, "remote");
+      YoVariableClient client = new YoVariableClient(visualizer);
       client.start();
    }
 

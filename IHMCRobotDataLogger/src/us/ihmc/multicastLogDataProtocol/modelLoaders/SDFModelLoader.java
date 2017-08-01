@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,7 +12,6 @@ import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.management.IntrospectionException;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -98,7 +96,7 @@ public class SDFModelLoader implements LogModelLoader
          {
             ClassLoaderTools.addURLToSystemClassLoader(resourceDirectory.toUri().toURL());
          }
-         catch (IntrospectionException | MalformedURLException e)
+         catch (IOException e)
          {
             throw new RuntimeException(e);
          }

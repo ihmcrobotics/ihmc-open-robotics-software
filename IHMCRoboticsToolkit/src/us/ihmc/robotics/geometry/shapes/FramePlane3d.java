@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class FramePlane3d extends AbstractReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
-   private Plane3d plane3d;
+   private Plane3D plane3d;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    private final Vector3D temporaryVector = new Vector3D();
@@ -30,7 +31,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       this(ReferenceFrame.getWorldFrame());
    }
    
-   public FramePlane3d(ReferenceFrame referenceFrame, Plane3d plane3d)
+   public FramePlane3d(ReferenceFrame referenceFrame, Plane3D plane3d)
    {
       this.referenceFrame = referenceFrame;
       this.plane3d = plane3d;
@@ -39,26 +40,26 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    public FramePlane3d(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
-      this.plane3d = new Plane3d();
+      this.plane3d = new Plane3D();
    }
 
    public FramePlane3d(FramePlane3d framePlane3d)
    {
       this.referenceFrame = framePlane3d.referenceFrame;
-      this.plane3d = new Plane3d(framePlane3d.plane3d);
+      this.plane3d = new Plane3D(framePlane3d.plane3d);
    }
 
    public FramePlane3d(FrameVector normal, FramePoint point)
    {
       normal.checkReferenceFrameMatch(point);
       this.referenceFrame = normal.getReferenceFrame();
-      this.plane3d = new Plane3d(point.getPoint(), normal.getVector());
+      this.plane3d = new Plane3D(point.getPoint(), normal.getVector());
    }
 
    public FramePlane3d(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly normal)
    {
       this.referenceFrame = referenceFrame;
-      this.plane3d = new Plane3d(point, normal);
+      this.plane3d = new Plane3D(point, normal);
    }
 
    @Override
@@ -81,7 +82,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return returnVector;
    }
    
-   public Vector3D getNormal()
+   public Vector3DReadOnly getNormal()
    {
       return plane3d.getNormal();
    }
@@ -110,7 +111,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return pointToReturn;
    }
    
-   public Point3D getPoint()
+   public Point3DReadOnly getPoint()
    {
       return plane3d.getPoint();
    }
@@ -135,7 +136,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       pointB.get(temporaryPointB);
       pointC.get(temporaryPointC);
       
-      plane3d.setPoints(temporaryPointA, temporaryPointB, temporaryPointC);
+      plane3d.set(temporaryPointA, temporaryPointB, temporaryPointC);
    }
    
    public void changeFrame(ReferenceFrame desiredFrame)
@@ -269,7 +270,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
 	   Point3D intersectionToPack = new Point3D();
-	   plane3d.getIntersectionWithLine(intersectionToPack, line.getPoint(), line.getNormalizedVector());
+	   plane3d.intersectionWith(intersectionToPack, line.getPoint(), line.getNormalizedVector());
 	   pointToPack.set(intersectionToPack);
    }
 

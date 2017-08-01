@@ -72,11 +72,10 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enablePerceptionModule(true);
          networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.enableLocalControllerCommunicator(true);
-         networkProcessorParameters.enableKinematicsToolbox(true);
-         networkProcessorParameters.enableFootstepPlanningToolbox(true);
+         networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
+         networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
-         networkProcessorParameters.enableMocapModule(true);
-
+         networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }
       else
       {
@@ -355,7 +354,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI, MOCAP_MODULE, KINEMATICS_TOOLBOX, FOOTSTEP_PLANNING_TOOLBOX;
 
       public String getPropertyNameForEnable()
       {

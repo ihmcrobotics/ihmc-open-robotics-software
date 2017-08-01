@@ -196,6 +196,13 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
    }
 
    @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      euclideanWaypoint.applyInverseTransform(transform);
+      so3Waypoint.applyInverseTransform(transform);
+   }
+
+   @Override
    public boolean epsilonEquals(SE3Waypoint other, double epsilon)
    {
       if (!euclideanWaypoint.epsilonEquals(other.euclideanWaypoint, epsilon))
