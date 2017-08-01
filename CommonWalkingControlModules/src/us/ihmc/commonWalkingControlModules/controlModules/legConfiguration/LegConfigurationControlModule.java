@@ -30,9 +30,9 @@ public class LegConfigurationControlModule
       STRAIGHTEN, STRAIGHT, COLLAPSE, BENT
    }
 
-   public enum LegControlType
+   public enum LegControlWeight
    {
-      HIGH, LOW
+      HIGH, MEDIUM, LOW
    }
 
    private static final double minimumDampingScale = 0.2;
@@ -45,7 +45,7 @@ public class LegConfigurationControlModule
    private final PrivilegedAccelerationCommand privilegedAccelerationCommand = new PrivilegedAccelerationCommand();
 
    private final YoEnum<LegConfigurationType> requestedState;
-   private final YoEnum<LegControlType> legControlType;
+   private final YoEnum<LegControlWeight> legControlWeight;
 
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
@@ -241,7 +241,7 @@ public class LegConfigurationControlModule
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", LegConfigurationType.class, time, registry);
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
       requestedState.set(null);
-      legControlType = YoEnum.create(namePrefix + "LegControlType", "", LegControlType.class, registry, false);
+      legControlWeight = YoEnum.create(namePrefix + "LegControlWeight", "", LegControlWeight.class, registry, false);
 
       // compute leg segment lengths
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -316,7 +316,7 @@ public class LegConfigurationControlModule
       stateMachine.getCurrentState().doAction();
 
       double kneePitchPrivilegedConfigurationWeight;
-      if (legControlType.getEnumValue() == LegControlType.LOW)
+      if (legControlWeight.getEnumValue() == LegControlWeight.LOW)
          kneePitchPrivilegedConfigurationWeight = lowPrivilegedWeight.getDoubleValue();
       else
          kneePitchPrivilegedConfigurationWeight = highPrivilegedWeight.getDoubleValue();
@@ -345,12 +345,9 @@ public class LegConfigurationControlModule
       useBracingAngle.set(true);
    }
 
-   public void useLowWeight(boolean useLowWeight)
+   public void setLegControlWeight(LegControlWeight legControlWeight)
    {
-      if (useLowWeight)
-         legControlType.set(LegControlType.LOW);
-      else
-         legControlType.set(LegControlType.HIGH);
+      this.legControlWeight.set(legControlWeight);
    }
 
    private double computeKneeAcceleration()
@@ -526,6 +523,9 @@ public class LegConfigurationControlModule
 
          previousTime = 0.0;
          dwellTime = 0.0;
+
+         if (useBracingAngle.getBooleanValue())
+            legControlWeight.set(LegControlWeight.MEDIUM);
       }
 
       @Override
@@ -620,7 +620,7 @@ public class LegConfigurationControlModule
       @Override
       public void doTransitionIntoAction()
       {
-         legControlType.set(LegControlType.LOW);
+         legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override
@@ -669,7 +669,7 @@ public class LegConfigurationControlModule
       @Override
       public void doTransitionIntoAction()
       {
-         legControlType.set(LegControlType.LOW);
+         legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override

@@ -324,13 +324,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 10.0;
+         return 1.0;
       }
 
       @Override
       public double getLegPrivilegedHighWeight()
       {
-         return 200.0;
+         return 150.0;
       }
 
       /*
@@ -399,6 +399,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testWalkingOverCinderBlockField();
+      test.testForwardWalking();
    }
 }
