@@ -102,7 +102,7 @@ public class LegConfigurationManager
    {
       if (attemptToStraightenLegs.getBooleanValue())
       {
-         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.BENT);
+         legConfigurationControlModules.get(transferSide.getOppositeSide()).setKneeAngleState(LegConfigurationType.COLLAPSE);
       }
    }
 
