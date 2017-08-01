@@ -23,11 +23,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class IHMCROSTranslationRuntimeToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 24.4)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 16.5)
+   @Test(timeout = 30000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
