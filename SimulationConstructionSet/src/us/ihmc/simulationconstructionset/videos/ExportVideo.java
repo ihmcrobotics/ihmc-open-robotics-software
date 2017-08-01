@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
+import us.ihmc.codecs.builder.H264Settings;
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
+import us.ihmc.codecs.generated.EProfileIdc;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
@@ -197,13 +199,16 @@ public class ExportVideo implements ExportVideoCommandExecutor
 
       dataBufferCommandsExecutor.gotoInPoint();
       BufferedImage bufferedImage = captureDevice.exportSnapshotAsBufferedImage();
-      int bitrate = bufferedImage.getWidth() * bufferedImage.getHeight() / 100; // Heuristic bitrate in kbit/s
 
       MP4H264MovieBuilder movieBuilder = null;
       try
       {
-         movieBuilder = new MP4H264MovieBuilder(new File(file), bufferedImage.getWidth(), bufferedImage.getHeight(), (int) frameRate, bitrate,
-               EUsageType.CAMERA_VIDEO_REAL_TIME);
+         H264Settings settings = new H264Settings();
+         settings.setBitrate(bufferedImage.getWidth() * bufferedImage.getHeight() / 100);
+         settings.setUsageType(EUsageType.CAMERA_VIDEO_REAL_TIME);
+         settings.setProfileIdc(EProfileIdc.PRO_HIGH);
+         
+         movieBuilder = new MP4H264MovieBuilder(new File(file), bufferedImage.getWidth(), bufferedImage.getHeight(), (int) frameRate, settings);
 
          movieBuilder.encodeFrame(bufferedImage);
 
