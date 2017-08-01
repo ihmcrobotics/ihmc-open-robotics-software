@@ -77,8 +77,9 @@ public class StringStretcher2d
          }
       }
 
-      for (Point2D[] pointToInterpolate : pointsToInterpolate)
+      for(int i = 0; i < pointsToInterpolate.size(); i++)
       {
+         Point2D[] pointToInterpolate = pointsToInterpolate.get(i);
          ret.add(interpolate(leftPoint, endPoint, pointToInterpolate[0].getX()));
       }
       

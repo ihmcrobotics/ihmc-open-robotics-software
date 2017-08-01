@@ -14,7 +14,7 @@ public class StraightLegWalkingParameters
     */
    public double getSpeedForSupportKneeStraightening()
    {
-      return 0.2;
+      return 1.0;
    }
 
    public double getSupportKneeCollapsingDuration()
@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.5;
+      return 0.4;
    }
 
    /**
@@ -64,7 +64,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return 0.7;
+      return 0.75;
    }
 
    /**
@@ -81,19 +81,6 @@ public class StraightLegWalkingParameters
    }
 
    /**
-    * This is the weight placed on the privileged joint accelerations or velocities for the other leg pitch
-    * joints in the optimization. For a typical humanoid, these joints are the hip pitch and ankle pitch.
-    * These additional degrees of freedom are important to stabilize the knee pitch joint when attempting
-    * to stand and walk with straight legs.
-    *
-    * @return privileged configuration weight.
-    */
-   public double getLegPitchPrivilegedWeight()
-   {
-      return 5.0;
-   }
-
-   /**
     * These are the configuration gain used to control the knee privileged joint accelerations or privileged joint velocities
     * when the leg is in the straight leg state or straightening state.
     * It contains the gains used by the {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule} to determine either
@@ -106,32 +93,32 @@ public class StraightLegWalkingParameters
       LegConfigurationGains gains = new LegConfigurationGains();
       gains.setJointSpaceKp(40.0);
       gains.setJointSpaceKd(6.0);
-      gains.setActuatorSpaceKp(60.0);
-      //gains.setActuatorSpaceKd(20.0);
-
-      //gains.setUseActuatorSpacePositionControl(true);
-
-      /*
-      gains.setBlendPositionError(true);
-      gains.setMaxPositionBlendingFactor(1.3);
-
-      gains.setBlendVelocityError(true);
-      gains.setMaxVelocityBlendingFactor(2.0);
-      */
 
       return gains;
    }
 
    /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
-    * the straight leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
+    * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
     * ankle pitch.
-    *
-    * @return privileged configuration weight.
     */
-   public double getKneeStraightLegPrivilegedWeight()
+   public double getLegPrivilegedLowWeight()
    {
       return 5.0;
+   }
+
+   public double getLegPrivilegedMediumWeight()
+   {
+      return 10.0;
+   }
+
+   /**
+    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
+    * the straight leg state in the optimization.
+    */
+   public double getLegPrivilegedHighWeight()
+   {
+      return 200.0;
    }
 
    /**
@@ -147,24 +134,8 @@ public class StraightLegWalkingParameters
       LegConfigurationGains gains = new LegConfigurationGains();
       gains.setJointSpaceKp(40.0);
       gains.setJointSpaceKd(6.0);
-      gains.setActuatorSpaceKp(60.0);
-      gains.setActuatorSpaceKd(6.0);
-
-      gains.setBlendPositionError(false);
-      gains.setBlendVelocityError(false);
 
       return gains;
-   }
-   /**
-    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
-    * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
-    * ankle pitch.
-    *
-    * @return privileged configuration weight.
-    */
-   public double getKneeBentLegPrivilegedWeight()
-   {
-      return 5.0;
    }
 
    /**
