@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.5;
+      return 0.4;
    }
 
    /**
@@ -106,18 +106,6 @@ public class StraightLegWalkingParameters
       LegConfigurationGains gains = new LegConfigurationGains();
       gains.setJointSpaceKp(40.0);
       gains.setJointSpaceKd(6.0);
-      gains.setActuatorSpaceKp(60.0);
-      //gains.setActuatorSpaceKd(20.0);
-
-      //gains.setUseActuatorSpacePositionControl(true);
-
-      /*
-      gains.setBlendPositionError(true);
-      gains.setMaxPositionBlendingFactor(1.3);
-
-      gains.setBlendVelocityError(true);
-      gains.setMaxVelocityBlendingFactor(2.0);
-      */
 
       return gains;
    }
@@ -128,7 +116,7 @@ public class StraightLegWalkingParameters
     *
     * @return privileged configuration weight.
     */
-   public double getKneeStraightLegPrivilegedWeight()
+   public double getLegPrivilegedHighWeight()
    {
       return 200.0;
    }
@@ -146,11 +134,6 @@ public class StraightLegWalkingParameters
       LegConfigurationGains gains = new LegConfigurationGains();
       gains.setJointSpaceKp(40.0);
       gains.setJointSpaceKd(6.0);
-      gains.setActuatorSpaceKp(60.0);
-      gains.setActuatorSpaceKd(6.0);
-
-      gains.setBlendPositionError(false);
-      gains.setBlendVelocityError(false);
 
       return gains;
    }
@@ -161,7 +144,7 @@ public class StraightLegWalkingParameters
     *
     * @return privileged configuration weight.
     */
-   public double getKneeBentLegPrivilegedWeight()
+   public double getLegPrivilegedLowWeight()
    {
       return 5.0;
    }
