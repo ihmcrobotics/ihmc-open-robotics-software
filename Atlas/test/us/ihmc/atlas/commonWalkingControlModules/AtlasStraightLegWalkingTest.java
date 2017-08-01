@@ -224,7 +224,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getICPPercentOfStanceForSSToeOff()
       {
-         return 0.08;
+         return 0.1;
       }
 
       @Override
@@ -251,7 +251,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return -0.75;
       }
-
    }
 
    private class TestSwingTrajectoryParameters extends AtlasSwingTrajectoryParameters
@@ -326,22 +325,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public boolean attemptToStraightenLegs()
       {
          return true;
-      }
-
-      @Override
-      public LegConfigurationGains getBentLegGains()
-      {
-         LegConfigurationGains gains = new LegConfigurationGains();
-         gains.setJointSpaceKp(100.0);
-         gains.setJointSpaceKd(6.0);
-
-         return gains;
-      }
-
-      @Override
-      public double getLegPitchPrivilegedWeight()
-      {
-         return 1.0;
       }
 
       @Override

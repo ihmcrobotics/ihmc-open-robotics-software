@@ -49,7 +49,6 @@ public class LegConfigurationControlModule
 
    private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
 
-   private final YoDouble legPitchPrivilegedWeight;
    private final YoDouble highPrivilegedWeight;
    private final YoDouble lowPrivilegedWeight;
 
@@ -152,7 +151,6 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.addJoint(kneePitchJoint, Double.NaN);
       privilegedAccelerationCommand.addJoint(anklePitchJoint, Double.NaN);
 
-      legPitchPrivilegedWeight = new YoDouble(sidePrefix + "LegPitchPrivilegedWeight", registry);
       highPrivilegedWeight = new YoDouble(sidePrefix + "HighPrivilegedWeight", registry);
       lowPrivilegedWeight = new YoDouble(sidePrefix + "LowPrivilegedWeight", registry);
 
@@ -184,7 +182,6 @@ public class LegConfigurationControlModule
       effectiveKneeStiffness = new YoDouble(sidePrefix + "EffectiveKneeStiffness", registry);
       effectiveKneeDamping = new YoDouble(sidePrefix + "EffectiveKneeDamping", registry);
 
-      legPitchPrivilegedWeight.set(straightLegWalkingParameters.getLegPitchPrivilegedWeight());
       highPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedHighWeight());
       lowPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedLowWeight());
 
@@ -333,11 +330,6 @@ public class LegConfigurationControlModule
       privilegedAccelerationCommand.setOneDoFJoint(kneePitchJointIndex, privilegedKneeAcceleration);
       privilegedAccelerationCommand.setOneDoFJoint(anklePitchJointIndex, privilegedAnklePitchAcceleration);
 
-      /*
-      privilegedAccelerationCommand.setWeight(hipPitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-      privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
-      privilegedAccelerationCommand.setWeight(anklePitchJointIndex, legPitchPrivilegedWeight.getDoubleValue());
-      */
       privilegedAccelerationCommand.setWeight(hipPitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(kneePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
       privilegedAccelerationCommand.setWeight(anklePitchJointIndex, kneePitchPrivilegedConfigurationWeight);
