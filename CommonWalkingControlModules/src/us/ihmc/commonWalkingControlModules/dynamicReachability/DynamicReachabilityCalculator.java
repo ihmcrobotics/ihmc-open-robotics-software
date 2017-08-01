@@ -44,8 +44,9 @@ public class DynamicReachabilityCalculator
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = false;
    private static final boolean VISUALIZE_REACHABILITY = false;
-   private static final double epsilon = 0.005;
 
+   private static final double epsilon = 0.005;
+   private static final double stanceLegLengthToeOffFactor = 1.1;
 
    private static final double gradientThresholdForConsideration = 0.005;
 
@@ -426,7 +427,7 @@ public class DynamicReachabilityCalculator
          minimumHeight = Math.sqrt(Math.pow(minimumStanceLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
-      if (planarDistance >= maximumLegLength.getDoubleValue())
+      if (planarDistance >= stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue())
       {
          maximumHeight = 0.0;
       }
@@ -805,14 +806,14 @@ public class DynamicReachabilityCalculator
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
                minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
       else
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
                minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
 
       tempPoint.setToZero(predictedCoMFrame);
