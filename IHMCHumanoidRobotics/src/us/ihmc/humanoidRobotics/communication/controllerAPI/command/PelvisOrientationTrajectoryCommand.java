@@ -3,9 +3,20 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
+import java.util.Random;
+
 public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerCommand<PelvisOrientationTrajectoryCommand, PelvisOrientationTrajectoryMessage>
 {
    private boolean enableUserPelvisControlDuringWalking = false;
+
+   public PelvisOrientationTrajectoryCommand()
+   {
+   }
+
+   public PelvisOrientationTrajectoryCommand(Random random)
+   {
+      super(random);
+   }
 
    @Override
    public void set(PelvisOrientationTrajectoryCommand other)
@@ -50,10 +61,6 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
-   }
-
-   public PelvisOrientationTrajectoryCommand()
-   {
    }
 
    @Override

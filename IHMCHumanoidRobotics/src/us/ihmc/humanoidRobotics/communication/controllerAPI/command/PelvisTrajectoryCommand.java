@@ -4,9 +4,22 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
+import java.util.Random;
+
 public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryCommand, PelvisTrajectoryMessage>
 {
    private boolean enableUserPelvisControlDuringWalking = false;
+
+   public PelvisTrajectoryCommand()
+   {
+      super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
+   public PelvisTrajectoryCommand(Random random)
+   {
+      super(ReferenceFrame.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            ReferenceFrame.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+   }
 
    @Override
    public void set(PelvisTrajectoryCommand other)
@@ -37,11 +50,6 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
-   }
-
-   public PelvisTrajectoryCommand()
-   {
-      super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
 
    @Override

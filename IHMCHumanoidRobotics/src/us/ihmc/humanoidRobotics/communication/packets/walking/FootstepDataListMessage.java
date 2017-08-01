@@ -171,12 +171,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          }
       }
 
-      if (!MathTools.epsilonEquals(this.defaultSwingDuration, otherList.defaultSwingDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.defaultSwingDuration, otherList.defaultSwingDuration, epsilon))
       {
          return false;
       }
 
-      if (!MathTools.epsilonEquals(this.defaultTransferDuration, otherList.defaultTransferDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.defaultTransferDuration, otherList.defaultTransferDuration, epsilon))
       {
          return false;
       }
@@ -191,7 +191,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          return false;
       }
 
-      if (!MathTools.epsilonEquals(this.finalTransferDuration, otherList.finalTransferDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.finalTransferDuration, otherList.finalTransferDuration, epsilon))
       {
          return false;
       }

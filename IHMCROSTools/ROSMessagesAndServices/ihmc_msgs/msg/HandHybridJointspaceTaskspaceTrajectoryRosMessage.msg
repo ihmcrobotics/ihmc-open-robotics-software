@@ -1,17 +1,6 @@
-## ArmTrajectoryRosMessage
-# This message commands the controller to move an arm in jointspace to the desired joint angles while
-# going through the specified trajectory points. A third order polynomial function is used to
-# interpolate between trajectory points. The jointTrajectoryMessages can have different waypoint times
-# and different number of waypoints. If a joint trajectory message is empty, the controller will hold
-# the last desired joint position while executing the other joint trajectories. A message with a
-# unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
-# This rule does not apply to the fields of this message.
-
-# Specifies the side of the robot that will execute the trajectory.
-uint8 robot_side
-
-# List of points in the trajectory.
-ihmc_msgs/OneDoFJointTrajectoryRosMessage[] joint_trajectory_messages
+## HandHybridJointspaceTaskspaceTrajectoryRosMessage
+# This message commands the controller to move the chest in both taskspace amd jointspace to the
+# desired orientation and joint angles while going through the specified trajectory points.
 
 # When OVERRIDE is chosen:  - The time of the first trajectory point can be zero, in which case the
 # controller will start directly at the first trajectory point. Otherwise the controller will prepend
@@ -41,8 +30,4 @@ int64 unique_id
 # "execution_mode" enum values:
 uint8 OVERRIDE=0 # This message will override the previous.
 uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

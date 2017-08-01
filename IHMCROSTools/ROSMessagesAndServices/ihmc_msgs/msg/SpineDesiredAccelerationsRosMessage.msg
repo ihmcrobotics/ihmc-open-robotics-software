@@ -1,7 +1,7 @@
-## NeckDesiredAccelerationsRosMessage
-# This message gives the user the option to bypass IHMC feedback controllers for the neck joints by
-# sending desired neck joint accelerations. One needs experience in control when activating the bypass
-# as it can result in unexpected behaviors for unreasonable accelerations. A message with a unique id
+## SpineDesiredAccelerationsRosMessage
+# This message gives the user the option to bypass IHMC feedback controllers for the spine joints by
+# sending desired joint accelerations. One needs experience in control when activating the bypass as
+# it can result in unexpected behaviors for unreasonable accelerations. A message with a unique id
 # equals to 0 will be interpreted as invalid and will not be processed by the controller.
 
 # Specifies the desired joint accelerations.
