@@ -37,7 +37,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getHeelTouchdownLengthRatio()
    {
-      return 0.35;
+      return 0.5;
    }
 
    /**
