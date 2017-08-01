@@ -804,16 +804,16 @@ public class DynamicReachabilityCalculator
       if (USE_CONSERVATIVE_REQUIRED_ADJUSTMENT)
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
+               minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
       else
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
+               minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
 
       tempPoint.setToZero(predictedCoMFrame);
