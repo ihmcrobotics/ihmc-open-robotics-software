@@ -517,12 +517,13 @@ public class CoMIntegrationTools
 //         PrintTools.debug("Exit CoM = " + exitCoMCornerPoint.toString());
 //         cmpPolynomial3D.compute(cmpPolynomial3D.getInitialTime());
 //         PrintTools.debug("Entry CMP = " + cmpPolynomial3D.getFramePosition().toString());
-         PrintTools.debug("");
+//         PrintTools.debug("");
          
          nextEntryCoMCornerPoint = entryCoMCornerPoint;
       }
-//      PrintTools.debug("Exit CoMs = " + exitCoMCornerPointsToPack.subList(0,20).toString());
-//      PrintTools.debug("Entry CoMs = " + entryCoMCornerPointsToPack.subList(0,20).toString());
+      PrintTools.debug("Exit CoMs = " + exitCoMCornerPointsToPack.subList(0,20).toString());
+      PrintTools.debug("Entry CoMs = " + entryCoMCornerPointsToPack.subList(0,20).toString());
+      PrintTools.debug("");
    }
    
    //TODO: implement validity checks

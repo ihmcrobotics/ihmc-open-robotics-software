@@ -138,6 +138,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
+      
+      PrintTools.debug("Transfer");
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -175,6 +177,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
+      
+      PrintTools.debug("Swing");
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
