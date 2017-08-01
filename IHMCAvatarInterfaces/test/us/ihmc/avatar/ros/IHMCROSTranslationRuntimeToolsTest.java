@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 public class IHMCROSTranslationRuntimeToolsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 16.5)
-   @Test(timeout = 30000)
+   @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
