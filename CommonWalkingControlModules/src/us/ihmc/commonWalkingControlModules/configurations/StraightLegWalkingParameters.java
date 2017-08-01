@@ -135,7 +135,7 @@ public class StraightLegWalkingParameters
 
    public double getLegPrivilegedMediumWeight()
    {
-      return 10.0;
+      return 25.0;
    }
 
    /**
@@ -144,7 +144,7 @@ public class StraightLegWalkingParameters
     */
    public double getLegPrivilegedHighWeight()
    {
-      return 200.0;
+      return 150.0;
    }
 
    /**

@@ -131,12 +131,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getToeLoadingDuration()
-      {
-         return 0.2;
-      }
-
-      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
@@ -196,12 +190,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public TestToeOffParameters(AtlasJointMap jointMap)
       {
          super(jointMap);
-      }
-
-      @Override
-      public double getMaximumToeOffAngle()
-      {
-         return Math.toRadians(30);
       }
 
       @Override
@@ -397,6 +385,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testSlowerWalking();
+      test.testWalkingOverCinderBlockField();
    }
 }
