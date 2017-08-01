@@ -201,7 +201,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getMaximumToeOffAngle()
       {
-         return Math.toRadians(20);
+         return Math.toRadians(30);
       }
 
       @Override
@@ -219,7 +219,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getICPPercentOfStanceForDSToeOff()
       {
-         return 0.17;
+         return 0.20;
       }
 
       @Override
@@ -397,6 +397,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testSlowerWalking();
+      test.testForwardWalking();
    }
 }
