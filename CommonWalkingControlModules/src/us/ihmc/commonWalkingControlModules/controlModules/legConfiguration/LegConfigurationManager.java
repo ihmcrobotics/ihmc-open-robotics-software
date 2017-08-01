@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegConfigurationType;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegControlWeight;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -85,14 +86,6 @@ public class LegConfigurationManager
       }
    }
 
-   /*
-   public boolean isLegBracing(RobotSide robotSide)
-   {
-      LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
-      return (legConfigurationControlState.equals(LegConfigurationType.BRACING));
-   }
-   */
-
    public boolean isLegCollapsed(RobotSide robotSide)
    {
       LegConfigurationType legConfigurationControlState = legConfigurationControlModules.get(robotSide).getCurrentKneeControlState();
@@ -126,7 +119,6 @@ public class LegConfigurationManager
       if (legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHTEN &&
             legConfigurationControlModules.get(swingSide).getCurrentKneeControlState() != LegConfigurationType.STRAIGHT)
       {
-         //beginStraightening(swingSide);
          setStraight(swingSide);
          setFullyExtendLeg(swingSide, true);
          useHighWeight(swingSide);
@@ -135,7 +127,7 @@ public class LegConfigurationManager
          if (isNextStepTooLow)
          {
             prepareForLegBracing(swingSide);
-            useLowWeight(swingSide);
+            //useMediumWeight(swingSide);
          }
       }
    }
@@ -152,12 +144,17 @@ public class LegConfigurationManager
 
    public void useLowWeight(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).useLowWeight(true);
+      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.LOW);
+   }
+
+   public void useMediumWeight(RobotSide robotSide)
+   {
+      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.MEDIUM);
    }
 
    public void useHighWeight(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).useLowWeight(false);
+      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.HIGH);
    }
 
    public void setStraight(RobotSide robotSide)
@@ -229,7 +226,6 @@ public class LegConfigurationManager
 
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
    {
-      //return footControlModules.get(robotSide).getFeedbackControlCommand();
       return null;
    }
 

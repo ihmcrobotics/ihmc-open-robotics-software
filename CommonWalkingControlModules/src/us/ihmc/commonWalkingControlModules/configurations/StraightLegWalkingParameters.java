@@ -99,9 +99,22 @@ public class StraightLegWalkingParameters
 
    /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
+    * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
+    * ankle pitch.
+    */
+   public double getLegPrivilegedLowWeight()
+   {
+      return 5.0;
+   }
+
+   public double getLegPrivilegedMediumWeight()
+   {
+      return 10.0;
+   }
+
+   /**
+    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
     * the straight leg state in the optimization.
-    *
-    * @return privileged configuration weight.
     */
    public double getLegPrivilegedHighWeight()
    {
@@ -123,17 +136,6 @@ public class StraightLegWalkingParameters
       gains.setJointSpaceKd(6.0);
 
       return gains;
-   }
-   /**
-    * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
-    * the bent leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
-    * ankle pitch.
-    *
-    * @return privileged configuration weight.
-    */
-   public double getLegPrivilegedLowWeight()
-   {
-      return 5.0;
    }
 
    /**
