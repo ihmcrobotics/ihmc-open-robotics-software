@@ -103,11 +103,10 @@ public abstract class SwingTrajectoryParameters
    /**
     * Amount of interpolation between the initial orientation and the final orientation during obstacle clearance.
     * Is not used unless {@link #addOrientationMidpointForObstacleClearance()} returns true.
-    * @return
     */
    public double midpointOrientationInterpolationForObstacleClearance()
    {
-      return 0.4;
+      return 0.3;
    }
 
    /**

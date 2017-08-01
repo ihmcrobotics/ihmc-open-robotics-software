@@ -14,7 +14,7 @@ public class StraightLegWalkingParameters
     */
    public double getSpeedForSupportKneeStraightening()
    {
-      return 0.2;
+      return 1.5;
    }
 
    public double getSupportKneeCollapsingDuration()
@@ -42,7 +42,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToStraightenLeg()
    {
-      return 0.5;
+      return 0.8;
    }
 
    /**
@@ -64,7 +64,7 @@ public class StraightLegWalkingParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return 0.7;
+      return 0.75;
    }
 
    /**
@@ -124,14 +124,13 @@ public class StraightLegWalkingParameters
 
    /**
     * This is the weight placed on the knee privileged joint accelerations or velocities when the leg is in
-    * the straight leg state in the optimization. For a typical humanoid, these joints are the hip pitch and
-    * ankle pitch.
+    * the straight leg state in the optimization.
     *
     * @return privileged configuration weight.
     */
    public double getKneeStraightLegPrivilegedWeight()
    {
-      return 5.0;
+      return 200.0;
    }
 
    /**

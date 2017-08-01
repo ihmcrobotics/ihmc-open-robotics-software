@@ -72,7 +72,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       legConfigurationManager.beginStraightening(transferToSide);
       legConfigurationManager.setFullyExtendLeg(transferToSide, false);
-      legConfigurationManager.setLegBracing(transferToSide, false);
    }
 
    @Override

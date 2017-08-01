@@ -27,7 +27,7 @@ public class LegConfigurationControlModule
 {
    public enum LegConfigurationType
    {
-      STRAIGHTEN, STRAIGHT, COLLAPSE, BENT
+      BRACING, STRAIGHTEN, STRAIGHT, COLLAPSE, BENT
    }
 
    private static final double minimumDampingScale = 0.2;
@@ -75,7 +75,7 @@ public class LegConfigurationControlModule
    private final YoDouble effectiveKneeDamping;
 
    private final YoBoolean useFullyExtendedLeg;
-   private final YoBoolean useBracingLeg;
+   private final YoBoolean useBracingAngle;
    private final YoDouble desiredAngle;
    private final YoDouble desiredAngleWhenStraight;
    private final YoDouble desiredAngleWhenExtended;
@@ -210,7 +210,7 @@ public class LegConfigurationControlModule
       dampingActionScaleFactor = new YoDouble(namePrefix + "DampingActionScaleFactor", registry);
 
       useFullyExtendedLeg = new YoBoolean(namePrefix + "UseFullyExtendedLeg", registry);
-      useBracingLeg = new YoBoolean(namePrefix + "UseBracingLeg", registry);
+      useBracingAngle = new YoBoolean(namePrefix + "UseBracingLeg", registry);
 
       desiredAngle = new YoDouble(namePrefix + "DesiredAngle", registry);
 
@@ -221,7 +221,7 @@ public class LegConfigurationControlModule
       desiredAngleWhenExtended.set(0.0);
 
       desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenBracing.set(0.6);
+      desiredAngleWhenBracing.set(0.4);
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
       straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
@@ -271,10 +271,12 @@ public class LegConfigurationControlModule
 
       FinishableState<LegConfigurationType> straighteningToStraightState = new StraighteningKneeControlState(straighteningSpeed);
       FinishableState<LegConfigurationType> straightState = new StraightKneeControlState();
+      FinishableState<LegConfigurationType> bracingState = new BracingKneeControlState();
       FinishableState<LegConfigurationType> bentState = new BentKneeControlState();
       FinishableState<LegConfigurationType> collapseState = new CollapseKneeControlState();
       states.add(straighteningToStraightState);
       states.add(straightState);
+      states.add(bracingState);
       states.add(bentState);
       states.add(collapseState);
 
@@ -301,7 +303,7 @@ public class LegConfigurationControlModule
 
    public void doControl()
    {
-      if (useBracingLeg.getBooleanValue())
+      if (useBracingAngle.getBooleanValue())
          desiredAngle.set(desiredAngleWhenBracing.getDoubleValue());
       else if (useFullyExtendedLeg.getBooleanValue())
          desiredAngle.set(desiredAngleWhenExtended.getDoubleValue());
@@ -329,9 +331,9 @@ public class LegConfigurationControlModule
       useFullyExtendedLeg.set(fullyExtendLeg);
    }
 
-   public void setLegBracing(boolean legBracing)
+   public void prepareForLegBracing()
    {
-      useBracingLeg.set(legBracing);
+      useBracingAngle.set(true);
    }
 
    private double computeKneeAcceleration()
@@ -566,6 +568,52 @@ public class LegConfigurationControlModule
       @Override
       public void doTransitionIntoAction()
       {
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+         useBracingAngle.set(false);
+      }
+   }
+
+   private class BracingKneeControlState extends FinishableState<LegConfigurationType>
+   {
+      public BracingKneeControlState()
+      {
+         super(LegConfigurationType.BRACING);
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return false;
+      }
+
+      @Override
+      public void doAction()
+      {
+         kneePitchPrivilegedConfiguration.set(desiredAngleWhenBracing.getDoubleValue());
+
+         jointSpaceConfigurationGain = straightJointSpacePositionGain.getDoubleValue();
+         jointSpaceVelocityGain = straightJointSpaceVelocityGain.getDoubleValue();
+         actuatorSpaceConfigurationGain = straightActuatorSpacePositionGain.getDoubleValue();
+         actuatorSpaceVelocityGain = straightActuatorSpaceVelocityGain.getDoubleValue();
+         maxPositionBlendingFactor = straightMaxPositionBlendingFactor.getDoubleValue();
+         maxVelocityBlendingFactor = straightMaxVelocityBlendingFactor.getDoubleValue();
+         useActuatorSpacePostionControl = straightUseActuatorSpacePositionControl.getBooleanValue();
+         useActuatorSpaceVelocityControl = straightUseActuatorSpaceVelocityControl.getBooleanValue();
+
+         blendPositionError = straightLegGains.getBlendPositionError();
+         blendVelocityError = straightLegGains.getBlendVelocityError();
+
+         kneePitchPrivilegedConfigurationWeight = kneeStraightPrivilegedWeight.getDoubleValue();
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         useBracingAngle.set(false);
       }
 
       @Override
