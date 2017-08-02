@@ -56,7 +56,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
    protected final YoFramePoint2d desiredCoMPosition2D = new YoFramePoint2d(namePrefix + "DesiredCoMPosition2D", worldFrame, registry);
-   /** Desired position for the Center of Mass (CoM) 3D*/
+   /** Desired position for the Center of Mass (CoM)*/
    protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
    /** Desired velocity for the Center of Mass (CoM) */
    protected final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
