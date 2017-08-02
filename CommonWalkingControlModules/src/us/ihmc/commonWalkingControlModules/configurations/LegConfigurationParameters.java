@@ -8,7 +8,7 @@ public class LegConfigurationParameters
    /**
     * This is the speed used to straighten the desire privileged configuration of the support leg's knee.
     * This is used whenever a leg is first loaded to straighten from the current configuration to the
-    * straight configuration defined by {@link #getStraightKneeAngle()}.
+    * straight configuration defined by {@link #getKneeAngleWhenStraight()}.
     *
     * @return knee rad/second for straightening
     */
