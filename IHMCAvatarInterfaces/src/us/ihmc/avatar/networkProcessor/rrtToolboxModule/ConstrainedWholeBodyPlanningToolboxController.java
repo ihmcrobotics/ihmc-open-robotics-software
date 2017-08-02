@@ -49,6 +49,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    
    private int numberOfExpanding;
    
+   private boolean startYoVariableServer;
+   
    /*
     * visualizer
     */
@@ -57,14 +59,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    
 
    public ConstrainedWholeBodyPlanningToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
-                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry)
+                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
       super(statusOutputManager, registry);
       this.fullRobotModel = fullRobotModel;
       this.isDone.set(false);
       
+      this.startYoVariableServer = startYoVariableServer;
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
-      this.treeVisualizer = new CTTreeVisualizer(10);
+      // this.treeVisualizer = new CTTreeVisualizer(tree);
    }
 
    @Override
@@ -142,7 +145,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       treeStateVisualizer.setCurrentCTTaskNodeValidity(tree.getNewNode().getIsValidNode());
       treeStateVisualizer.updateVisualizer();
       
-      treeVisualizer.update(tree.getNewNode());
+      if(startYoVariableServer)
+         treeVisualizer.update(tree.getNewNode());
 
       /*
        * terminate condition.
@@ -204,7 +208,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       rootNode.convertDataToNormalizedData(tree.getTaskNodeRegion());
       
-      treeVisualizer.initialize();
+      if(startYoVariableServer)
+      {
+         treeVisualizer = new CTTreeVisualizer(tree);
+         treeVisualizer.initialize();
+      }
+         
       return true;
    }
 

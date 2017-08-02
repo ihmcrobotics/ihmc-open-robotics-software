@@ -29,8 +29,7 @@ public class CTTaskNodeTreeVisualizer
    public CTTaskNodeTreeVisualizer(SimulationConstructionSet scs, CTTaskNodeTree tree)
    {
       this.scs = scs;
-      this.taskNodeTree = tree;
-          
+      this.taskNodeTree = tree;          
    }
    
    public void visualize()

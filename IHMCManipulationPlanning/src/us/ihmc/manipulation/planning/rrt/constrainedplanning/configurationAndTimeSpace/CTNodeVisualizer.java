@@ -15,9 +15,13 @@ public class CTNodeVisualizer
    private int configurationIndex;
 
    private int updateCnt;
+   
+   private boolean enabled;
+   private String ctaskName;
 
-   public CTNodeVisualizer(int configurationIndex)
+   public CTNodeVisualizer(String ctaskName, int configurationIndex, boolean enabled)
    {
+      this.ctaskName = ctaskName;
       this.plotter = new Plotter();
 
       this.configurationIndex = configurationIndex;
@@ -25,23 +29,27 @@ public class CTNodeVisualizer
       /*
        * zoom- always normalized.
        */
-      plotter.setPreferredSize(800, 600);
+      plotter.setPreferredSize(700, 700);
 
-      plotter.setViewRange(10.0);
+      plotter.setViewRange(2.0);
       plotter.setXYZoomEnabled(true);
-      plotter.setShowLabels(true);      
+      plotter.setShowLabels(true);   
+      plotter.setFocusPointX(0.5);
+      plotter.setFocusPointY(0.5);
+      
+      this.enabled = enabled;
    }
    
    public void initialize()
    {
-      updateCnt = 0;
-      plotter.showInNewWindow();
+      updateCnt = 0;      
+      if(enabled)
+         plotter.showInNewWindow(ctaskName, false);
    }
 
    public void updateVisualizer(CTTaskNode newNode)
    {
       String prefix = ""+configurationIndex+""+updateCnt;
-      PrintTools.info(prefix);
       if (newNode.getIsValidNode())
       {
          CTTaskNode parentNode = newNode.getParentNode();
@@ -50,16 +58,16 @@ public class CTNodeVisualizer
          nodeArtifact.setColor(Color.blue);
          plotter.addArtifact(nodeArtifact);
          
-         CircleArtifact nodeArtifact1 = new CircleArtifact(prefix, newNode.getNormalizedNodeData(0), newNode.getNodeData(configurationIndex), 0.01, true);
+         CircleArtifact nodeArtifact1 = new CircleArtifact(prefix, newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
          nodeArtifact1.setColor(Color.blue);
-         CircleArtifact nodeArtifact2 = new CircleArtifact(prefix, parentNode.getNormalizedNodeData(0), parentNode.getNodeData(configurationIndex), 0.01, true);
+         CircleArtifact nodeArtifact2 = new CircleArtifact(prefix, parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex), 0.01, true);
          nodeArtifact2.setColor(Color.blue);
          plotter.addArtifact(nodeArtifact1);
          plotter.addArtifact(nodeArtifact2);
       }
       else
       {
-         CircleArtifact nodeArtifact = new CircleArtifact(prefix, newNode.getNormalizedNodeData(0), newNode.getNodeData(configurationIndex), 0.01, true);
+         CircleArtifact nodeArtifact = new CircleArtifact(prefix, newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
          nodeArtifact.setColor(Color.red);
          plotter.addArtifact(nodeArtifact);
       }

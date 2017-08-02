@@ -64,7 +64,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    
-   private static boolean visulaizerOn = true;
+   private static boolean visulaizerOn = false;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private ConstrainedWholeBodyPlanningToolboxModule cwbPlanningToolboxModule;
@@ -239,7 +239,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 //      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
 //      drcBehaviorTestHelper.send(handTrajectoryMessage);
 //      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-//      
+      
       /*
        * constrained end effector trajectory (WorldFrame).
        */
