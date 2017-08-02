@@ -1,6 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,23 +34,23 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterface
 {
@@ -77,12 +78,12 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       if(behaviorCommunicatorClient != null)
       {
          behaviorCommunicatorClient.disconnect();
       }
-      
+
       if(behaviorCommunicatorServer != null)
       {
          behaviorCommunicatorServer.disconnect();
@@ -145,9 +146,9 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       drcSimulationTestHelper.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      
-      
-      
+
+
+
       PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
@@ -181,8 +182,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       FramePose2d desiredMidFeetPose = offsetMidFeetPose2d(initialMidFeetPose, walkDistance, walkDirection);
 
-      final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime, getRobotModel().getPhysicalProperties()
-            .getAnkleHeight());
+      final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime);
       walkToGoalBehavior.initialize();
 
       WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
@@ -196,7 +196,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       walkToGoalBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalExecutePacket);
       walkToGoalBehavior.doControl();
       assertTrue( walkToGoalBehavior.hasInputBeenSet() );
-      
+
       boolean success = executeBehavior(walkToGoalBehavior, trajectoryTime);
       assertTrue(success);
 
@@ -232,6 +232,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       Thread behaviorThread = new Thread()
       {
+         @Override
          public void run()
          {
             {

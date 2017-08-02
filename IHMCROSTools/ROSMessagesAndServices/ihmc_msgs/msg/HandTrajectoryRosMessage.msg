@@ -10,13 +10,19 @@
 # Specifies which hand will execute the trajectory.
 uint8 robot_side
 
-# Specifies whether the pose should be held with respect to the world or the chest. Note that in any
-# case the desired hand pose must be expressed in world frame.
-uint8 base_for_control
-
 # List of trajectory points (in taskpsace) to go through while executing the trajectory. All the
 # information contained in these trajectory points needs to be expressed in world frame.
 ihmc_msgs/SE3TrajectoryPointRosMessage[] taskspace_trajectory_points
+
+# Frame information for this message.
+ihmc_msgs/FrameInformationRosMessage frame_information
+
+# Flag that tells the controller whether the use of a custom control frame is requested.
+bool use_custom_control_frame
+
+# Pose of custom control frame. This is the frame attached to the rigid body that the taskspace
+# trajectory is defined for.
+geometry_msgs/Transform control_frame_pose
 
 # When OVERRIDE is chosen:  - The time of the first trajectory point can be zero, in which case the
 # controller will start directly at the first trajectory point. Otherwise the controller will prepend
@@ -43,16 +49,11 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
-# "base_for_control" enum values:
-uint8 CHEST=0 # The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.
-uint8 WORLD=1 # The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.
-uint8 WALKING_PATH=2 # The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.
-
 # "execution_mode" enum values:
 uint8 OVERRIDE=0 # This message will override the previous.
 uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
+
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

@@ -5,16 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanState;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 
-public class AtlasFootstepPlanningParameterization extends FootstepPlanningParameterization
+public class AtlasFootstepPlanningParameters extends FootstepPlanningParameters
 {
    public double maxStepUp = 0.20;
    public double minStepDown = -0.17;
    public double maxStepDistance = 0.6;
    public double dangerDistance = 0.75;
 
-   public AtlasFootstepPlanningParameterization()
+   public AtlasFootstepPlanningParameters()
    {
       initialize();
    }

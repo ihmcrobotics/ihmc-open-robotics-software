@@ -5,10 +5,11 @@ import java.io.IOException;
 
 import org.jcodec.containers.mp4.MP4Packet;
 
+import us.ihmc.codecs.builder.H264Settings;
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
-import us.ihmc.codecs.generated.EUsageType;
+import us.ihmc.codecs.generated.EProfileIdc;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 
@@ -74,11 +75,15 @@ public class VideoConverter
     * 
     * @throws IOException
     */
-   public static void convert(File source, File target, long startPTS, long endPTS, int bitrate, ProgressMonitorInterface monitor) throws IOException
+   public static void convert(File source, File target, long startPTS, long endPTS, ProgressMonitorInterface monitor) throws IOException
    {
       MP4H264MovieBuilder builder = null;
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
       
+      
+      H264Settings settings = new H264Settings();
+      settings.setBitrate(10000);
+      settings.setProfileIdc(EProfileIdc.PRO_HIGH);
       
       
       int frameRate = getFrameRate(demuxer);
@@ -92,7 +97,7 @@ public class VideoConverter
       {
          if(builder == null)
          {
-            builder = new MP4H264MovieBuilder(target, frame.getWidth(), frame.getHeight(), frameRate, bitrate, EUsageType.CAMERA_VIDEO_REAL_TIME);
+            builder = new MP4H264MovieBuilder(target, frame.getWidth(), frame.getHeight(), frameRate, settings);
          }
         // frame.toYUV420();
          builder.encodeFrame(frame);
