@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataLogger.Announcement;
@@ -14,9 +15,9 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
@@ -38,7 +39,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", new RemoteAtlasVisualizerLogFilter());
+      YoVariableClient client = new YoVariableClient(scsVisualizer, new RemoteAtlasVisualizerLogFilter());
       client.start();
    }
 
@@ -87,7 +88,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
       try
       {
-        DRCRobotModel.RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? DRCRobotModel.RobotTarget.REAL_ROBOT : DRCRobotModel.RobotTarget.SCS;
+        RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? RobotTarget.REAL_ROBOT : RobotTarget.SCS;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
         int oneInNPacketsValue = DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ;
@@ -114,13 +115,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       @Override
       public boolean shouldAddToDisplay(Announcement description)
       {
-         String ipAsString = ipToString(description.getDataIP());
-         return ipAsString.startsWith("10.7.4.") || ipAsString.startsWith("10.7.1.");
-      }
-
-      private String ipToString(byte[] address)
-      {
-         return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
+         return description.getHostNameAsString().startsWith("cpu") || description.getHostNameAsString().equals("kiwi-test-server");
       }
    }
 }

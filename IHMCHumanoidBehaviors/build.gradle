@@ -48,7 +48,7 @@ dependencies {
     compile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
-    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
     compile "org.boofcv:ip:0.24.1"
     compile "org.boofcv:io:0.24.1"

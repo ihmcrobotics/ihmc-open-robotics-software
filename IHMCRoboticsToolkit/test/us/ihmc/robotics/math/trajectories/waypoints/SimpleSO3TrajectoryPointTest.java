@@ -422,10 +422,6 @@ public class SimpleSO3TrajectoryPointTest
       simpleSO3TrajectoryPoint.set(trajectoryPointAsInterface);
 
       assertTrue(simpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPointTwo, 1e-7));
-
-      String string = simpleSO3TrajectoryPoint.toString();
-      String expectedString = "SO3 trajectory point: (time =  9.90, SO3 waypoint: [orientation = ( 0.08,  0.24,  0.45,  0.86), angular velocity = ( 7.10,  2.20,  3.33)].)";
-      assertEquals(expectedString, string);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

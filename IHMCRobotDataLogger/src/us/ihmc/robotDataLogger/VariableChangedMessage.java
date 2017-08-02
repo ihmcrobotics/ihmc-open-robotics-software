@@ -4,19 +4,19 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VariableChangedMessage
 {
-   private YoVariable variable;
+   private YoVariable<?> variable;
    private double val = -1;
 
    public VariableChangedMessage()
    {
    }
 
-   public YoVariable getVariable()
+   public YoVariable<?> getVariable()
    {
       return variable;
    }
 
-   public void setVariable(YoVariable variable)
+   public void setVariable(YoVariable<?> variable)
    {
       this.variable = variable;
    }

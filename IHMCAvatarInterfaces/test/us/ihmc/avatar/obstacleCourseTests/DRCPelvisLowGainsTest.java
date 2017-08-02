@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,17 +15,17 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This end to end test is to make sure the pelvis doesn't flip out when it has low gains. In March, 2015 we started investigating this bug.
@@ -66,7 +66,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
    // 150313: This test currently fails, seemingly due to some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator. Trying to fix it...
 	@ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test(timeout = 190000)
+   @Test
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.
@@ -81,9 +81,6 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       DRCRobotModel robotModel = getRobotModel();
-
-      // Disable joint damping to make sure that damping isn't causing the problem.
-      robotModel.setEnableJointDamping(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", selectedLocation, simulationTestingParameters,
               robotModel);
 

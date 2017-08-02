@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
@@ -112,10 +112,10 @@ public class OneStepCaptureRegionCalculatorTest
       double movePointsFactor = 0.01;
       FrameConvexPolygon2d expectedPolygonInside = new FrameConvexPolygon2d(expectedPointsOnBorder);
 
-      ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
+      ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
       FrameConvexPolygon2d shrunkenPolygon = new FrameConvexPolygon2d();
 
-      shrinker.shrinkConstantDistanceInto(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
+      shrinker.scaleConvexPolygon(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
 
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(shrunkenPolygon.getConvexPolygon2d(), captureRegion.getConvexPolygon2d()));
 

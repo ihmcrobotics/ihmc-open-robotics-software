@@ -12,13 +12,17 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -26,6 +30,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -83,6 +88,12 @@ public class WalkingMessageHandler
    private final YoBoolean executingFootstep = new YoBoolean("ExecutingFootstep", registry);
    private final FootstepTiming lastTimingExecuted = new FootstepTiming();
 
+   private final MomentumTrajectoryHandler momentumTrajectoryHandler;
+   private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
+
+   private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
+   private final FrameVector planOffsetInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -120,11 +131,20 @@ public class WalkingMessageHandler
       footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
 
+      momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
+      comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
+
       parentRegistry.addChild(registry);
    }
 
    public void handleFootstepDataListCommand(FootstepDataListCommand command)
    {
+      offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+      if (!offsettingPlanWithFootstepError.getBooleanValue())
+      {
+         planOffsetInWorld.setToZero(ReferenceFrame.getWorldFrame());
+      }
+
       if (command.getNumberOfFootsteps() > 0)
       {
          switch(command.getExecutionMode())
@@ -136,7 +156,9 @@ public class WalkingMessageHandler
             clearFootTrajectory();
             currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
             if (yoTime != null)
+            {
                footstepDataListRecievedTime.set(yoTime.getDoubleValue());
+            }
             break;
          case QUEUE:
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
@@ -211,6 +233,39 @@ public class WalkingMessageHandler
          FootTrajectoryCommand command = commands.get(i);
          upcomingFootTrajectoryCommandListForFlamingoStance.get(command.getRobotSide()).addLast(command);
       }
+   }
+
+   public void handleMomentumTrajectoryCommand(MomentumTrajectoryCommand command)
+   {
+      momentumTrajectoryHandler.handleMomentumTrajectory(command);
+   }
+
+   /**
+    * This method will pack the angular momentum trajectory for planning the ICP trajectory. The parameters {@code startTime} and {@code endTime} refer
+    * to absolute controller time. To get the angular momentum trajectory from the current time to 1.0 seconds in the future the start time must
+    * be the value of yoTime and the end time must be the value of yoTime + 1.0. The {@code numberOfPoints} parameter defines in how many points the
+    * trajectory will be sampled. The packed trajectory will include the end points of the interval, therefore, the number of points must be equal
+    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty. The times of the packed trajectory points
+    * will be relative to the start time of the interval.
+    *
+    * @param startTime is the controller time for the start of the interval for which the trajectory is packed
+    * @param endTime is the controller time for the end of the interval for which the trajectory is packed
+    * @param numberOfPoints the number of sampling points of the trajectory
+    * @param trajectoryToPack the trajectory will be packed in here
+    */
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<TrajectoryPoint3D> trajectoryToPack)
+   {
+      momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
+   }
+
+   public CenterOfMassTrajectoryHandler getComTrajectoryHandler()
+   {
+      return comTrajectoryHandler;
+   }
+
+   public void handleComTrajectoryCommand(CenterOfMassTrajectoryCommand command)
+   {
+      comTrajectoryHandler.handleComTrajectory(command);
    }
 
    public FootstepTiming peekTiming(int i)
@@ -585,7 +640,7 @@ public class WalkingMessageHandler
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
-         if (swingTrajectory.getLast().getTime() >= swingTime)
+         if (swingTrajectory.getLast().getTime() > swingTime)
          {
             PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
@@ -599,7 +654,10 @@ public class WalkingMessageHandler
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
       footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
-      footstep.setExpectedInitialPose(footstepData.getExpectedInitialPosition(), footstepData.getExpectedInitialOrientation());
+      if (offsettingPlanWithFootstepError.getBooleanValue())
+      {
+         footstep.addOffset(planOffsetInWorld);
+      }
       return footstep;
    }
 
@@ -717,5 +775,25 @@ public class WalkingMessageHandler
       }
 
       return true;
+   }
+
+   public void addOffsetVector(FrameVector offset)
+   {
+      if (!offsettingPlanWithFootstepError.getBooleanValue())
+      {
+         return;
+      }
+
+      for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
+      {
+         Footstep footstep = upcomingFootsteps.get(stepIdx);
+         footstep.addOffset(offset);
+      }
+
+      this.planOffsetInWorld.add(offset);
+      comTrajectoryHandler.setPositionOffset(this.planOffsetInWorld);
+
+      updateVisualization();
+      statusOutputManager.reportStatusMessage(new PlanOffsetStatus(planOffsetInWorld.getVector()));
    }
 }

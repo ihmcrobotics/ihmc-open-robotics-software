@@ -1,14 +1,11 @@
 package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -38,9 +35,10 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 /**
  * This class implements all communication for a data producer inside a DDS logging network
@@ -56,8 +54,6 @@ public class DataProducerParticipant
    private volatile boolean activated = false;
 
    private ArrayList<CameraAnnouncement> cameras = new ArrayList<>();
-   private InetAddress dataAddress;
-   private int dataPort;
    private boolean log = false;
 
    private Handshake handshake;
@@ -69,6 +65,8 @@ public class DataProducerParticipant
    private final Publisher handshakePublisher;
 
    private final VariableChangedListener dataProducerListener;
+   
+   private final String partition;
 
    private class VariableChangeSubscriberListener implements SubscriberListener
    {
@@ -102,18 +100,24 @@ public class DataProducerParticipant
 
    }
 
-   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener) throws IOException
+   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, boolean publicBroadcast) throws IOException
    {
       announcement.setName(name);
       this.dataProducerListener = variableChangedListener;
 
       domain.setLogLevel(LogLevel.ERROR);
       ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
+      
+      if(!publicBroadcast)
+      {
+         att.bindToLocalhost();
+      }
+      
       participant = domain.createParticipant(att);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
 
-      String partition = getUniquePartition();
+      partition = getUniquePartition();
       handshakePublisher = createPersistentPublisher(partition, LogParticipantSettings.handshakeTopic, new HandshakePubSubType());
       announcementPublisher = createPersistentPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic,
                                                         new AnnouncementPubSubType());
@@ -178,42 +182,6 @@ public class DataProducerParticipant
    public void remove()
    {
       domain.removeParticipant(participant);
-   }
-
-   /**
-    * Set the data producer IP address for streaming data 
-    * 
-    * Temporary till streaming is done over RTPS
-    * 
-    * Required
-    * 
-    * @param dataAddress
-    */
-   @Deprecated
-   public void setDataAddress(InetAddress dataAddress)
-   {
-      this.dataAddress = dataAddress;
-   }
-
-   /** 
-    * Set the data producer port for streaming data
-    * 
-    * Temporary till streaming is done over RTPS
-    * 
-    * Required
-    * 
-    * @param port
-    */
-   @Deprecated
-   public void setPort(int port)
-   {
-      this.dataPort = port;
-   }
-
-   @Deprecated
-   public int getPort()
-   {
-      return this.dataPort;
    }
 
    /**
@@ -285,10 +253,10 @@ public class DataProducerParticipant
       {
          throw new IOException("This participant is already activated.");
       }
-      if (dataAddress == null || dataPort < 1024)
-      {
-         throw new RuntimeException("No data address and valid port (>=1024) provided");
-      }
+//      if (dataAddress == null || dataPort < 1024)
+//      {
+//         throw new RuntimeException("No data address and valid port (>=1024) provided");
+//      }
       if (handshake == null)
       {
          throw new RuntimeException("No handshake provided");
@@ -296,8 +264,8 @@ public class DataProducerParticipant
 
       announcement.setHostName(InetAddress.getLocalHost().getHostName());
       announcement.setIdentifier(guidString);
-      System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
-      announcement.setDataPort((short) dataPort);
+//      System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
+//      announcement.setDataPort((short) dataPort);
       announcement.setLog(log);
 
       for (CameraAnnouncement camera : cameras)
@@ -327,34 +295,45 @@ public class DataProducerParticipant
     * @param timestamp
     * @throws IOException 
     */
-   public void publishTimestamp(long timestamp) throws IOException
+   public void publishTimestamp(long timestamp)
    {
-      this.timestamp.setTimestamp(timestamp);
-      timestampPublisher.write(this.timestamp);
+      try
+      {
+         this.timestamp.setTimestamp(timestamp);
+         timestampPublisher.write(this.timestamp);
+      }
+      catch(IOException e)
+      {
+         if(timestampPublisher.isAvailable())
+         {
+            e.printStackTrace();
+         }
+      }
+   }
+   
+   
+   public RegistryPublisher createRegistryPublisher(CustomLogDataPublisherType type, PeriodicThreadSchedulerFactory schedulerFactory, RegistrySendBufferBuilder builder) throws IOException
+   {
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
+      Publisher publisher = domain.createPublisher(participant, attr);
+
+      
+      
+      return new RegistryPublisher(schedulerFactory, builder, publisher);
+   }
+   public void sendKeepAlive(PeriodicThreadSchedulerFactory schedulerFactory) throws IOException
+   {
+      CustomLogDataPublisherType type = new CustomLogDataPublisherType(0, 0);
+      PublisherAttributes attr = domain.createPublisherAttributes(participant, type, LogParticipantSettings.dataTopic, ReliabilityKind.RELIABLE, partition);
+      attr.getQos().setPublishMode(PublishModeKind.SYNCHRONOUS_PUBLISH_MODE);
+      Publisher publisher = domain.createPublisher(participant, attr);
+      new KeepAlivePublisher(schedulerFactory, publisher).start();
    }
 
-   public static void main(String[] args) throws IOException
+   public static int getMaximumSynchronousPacketSize()
    {
-      InputStream testStream = DataProducerParticipant.class.getClassLoader().getResourceAsStream("Models/unitBox.sdf");
-      String[] resourcesDirectories = {"Models"};
-      LogModelProvider logModelProvider = new SDFLogModelProvider("testModel", testStream, resourcesDirectories);
-      DataProducerParticipant participant = new DataProducerParticipant("testParticipant", logModelProvider, new VariableChangedListener()
-      {
-
-         @Override
-         public void changeVariable(int id, double newValue)
-         {
-            System.out.println("Required change for " + id + " to " + newValue);
-         }
-      });
-
-      participant.setDataAddress(Inet4Address.getLocalHost());
-      participant.setPort(2048);
-      participant.setHandshake(new Handshake());
-
-      participant.announce();
-
-      ThreadTools.sleepForever();
+      return 65000;
    }
 
 }

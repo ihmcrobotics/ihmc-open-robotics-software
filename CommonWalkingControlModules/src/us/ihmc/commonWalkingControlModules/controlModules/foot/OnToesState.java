@@ -69,7 +69,7 @@ public class OnToesState extends AbstractFootControlState
       String namePrefix = contactableFoot.getName();
 
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
-      maximumToeOffAngleProvider.set(footControlHelper.getWalkingControllerParameters().getMaximumToeOffAngle());
+      maximumToeOffAngleProvider.set(footControlHelper.getToeOffParameters().getMaximumToeOffAngle());
 
       contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
       contactableFoot.getToeOffContactLine(toeOffContactLine2d);
@@ -172,12 +172,10 @@ public class OnToesState extends AbstractFootControlState
       if (usePointContact.getBooleanValue())
       {
          setupSingleContactPoint();
-         setControlPointPositionFromContactPoint();
       }
       else
       {
          setupContactLine();
-         setControlPointPositionFromContactLine();
       }
    }
 

@@ -266,7 +266,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       SCSVisualizer scsYoVariablesUpdatedListener = new WandererStandPrepSliderboard(64000);
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
       client.start();
    }
 }

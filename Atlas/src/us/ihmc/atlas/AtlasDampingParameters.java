@@ -5,7 +5,6 @@ import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasDampingParameters
@@ -45,7 +44,7 @@ public class AtlasDampingParameters
       atlasDampingParameters[AtlasOrderedJointMap.r_arm_elx] = 0.1;
       atlasDampingParameters[AtlasOrderedJointMap.r_arm_wry] = 0.1;
       atlasDampingParameters[AtlasOrderedJointMap.r_arm_wrx] = 0.1;
-      
+
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.back_bkz]  = 10.0;
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.back_bky]  = 10.0;
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.back_bkx]  = 10.0;
@@ -74,13 +73,13 @@ public class AtlasDampingParameters
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.r_arm_elx] = 1.0;
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.r_arm_wry] = 1.0;
       atlasPositionControlDampingParameters[AtlasOrderedJointMap.r_arm_wrx] = 1.0;
-      
+
       for(RobotSide robotSide : RobotSide.values)
       {
          double[] sandiaDampingParametersForSide = new double[ROSSandiaJointMap.numberOfJointsPerHand];
          double standardFingerDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:1.0; //1.0;
 //         double firstJointDamping = USE_REALLY_HIGH_FINGER_DAMPING?5.0:30.0;
-         
+
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j0] = 30.0;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j1] = standardFingerDamping;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f0_j2] = standardFingerDamping;
@@ -93,18 +92,18 @@ public class AtlasDampingParameters
          sandiaDampingParametersForSide[ROSSandiaJointMap.f3_j0] = 30.0;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f3_j1] = standardFingerDamping;
          sandiaDampingParametersForSide[ROSSandiaJointMap.f3_j2] = 30.0;
-         
+
          sandiaDampingParameters.put(robotSide, sandiaDampingParametersForSide);
       }
-      
-      
+
+
    }
 
    public static double getAtlasDamping(int i)
    {
       return atlasDampingParameters[i];
    }
-   
+
    public static double getAtlasDampingForPositionControl(int i)
    {
       return atlasPositionControlDampingParameters[i];
@@ -129,14 +128,14 @@ public class AtlasDampingParameters
       }
       throw new RuntimeException("Joint not found: " + name);
    }
-   
-   public static void setDampingParameters(FloatingRootJointRobot simulatedRobot, DRCHandType handModel, DRCRobotJointMap jointMap)
+
+   public static void setDampingParameters(FloatingRootJointRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       String[] orderedJointNames = jointMap.getOrderedJointNames();
       for (int i = 0; i < orderedJointNames.length; i++)
       {
          simulatedRobot.getOneDegreeOfFreedomJoint(orderedJointNames[i]).setDamping(getAtlasDamping(i));
       }
-      
+
    }
 }

@@ -1,28 +1,34 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-@SuppressWarnings("serial")
-public class StepForwardAction extends SCSAction
+import javax.swing.AbstractAction;
+
+import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+public class StepForwardAction extends AbstractAction
 {
+   private static final long serialVersionUID = -4007043816767478116L;
+
    private StepForwardCommandExecutor executor;
 
    public StepForwardAction(StepForwardCommandExecutor executor)
    {
-      super("Step Forward",
-              "icons/StepForward.png",
-              KeyEvent.VK_F,
-      "Step Forward",
-      "Step forward one frame in the data buffer."
-      );
-
+      super("Step Forward");
       this.executor = executor;
+
+      String iconFilename = "icons/StepForward24.gif";
+      int shortKey = KeyEvent.VK_F;
+      String longDescription = "Step Forward";
+      String shortDescription = "Step Forward";
+      
+      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.stepForward();
    }

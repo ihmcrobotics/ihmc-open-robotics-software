@@ -21,7 +21,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -37,7 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -335,7 +335,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       final HighLevelState initialBehavior;
       initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!

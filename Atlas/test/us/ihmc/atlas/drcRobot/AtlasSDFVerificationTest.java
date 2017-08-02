@@ -20,6 +20,7 @@ import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -89,7 +90,7 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.SCS, false);
       FloatingRootJointRobot sdfRobot = selectedModel.createHumanoidFloatingRootJointRobot(true);
 
       pinRobotInAir(sdfRobot);
@@ -107,7 +108,7 @@ public class AtlasSDFVerificationTest
 
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
+         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

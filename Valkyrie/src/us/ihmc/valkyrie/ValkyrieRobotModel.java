@@ -3,11 +3,9 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -15,21 +13,19 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.avatar.handControl.HandCommandManager;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
@@ -45,9 +41,6 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -62,7 +55,7 @@ import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameterization;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -74,13 +67,12 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
 
-   private final CapturePointPlannerParameters capturePointPlannerParameters;
+   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
@@ -91,7 +83,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
 
    private final String[] resourceDirectories;
    {
@@ -106,24 +98,22 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
    private final RobotDescription robotDescription;
 
-   private boolean enableJointDamping = true;
-
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
       this(target,headless, "DEFAULT", simulationContactPoints);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
       this(target,headless, "DEFAULT", null);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model)
    {
       this(target, headless, model, null);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap();
@@ -208,7 +198,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
 
    @Override
-   public CapturePointPlannerParameters getCapturePointPlannerParameters()
+   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
 	   return capturePointPlannerParameters;
    }
@@ -243,21 +233,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return jointMap;
    }
 
+   @Override
    public double getStandPrepAngle(String jointName)
    {
       return standPrepAngles.get(jointName);
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
 
    @Override
@@ -271,12 +250,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return offsetHandFromWrist.get(side);
    }
 
-   @Override
-   public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
-   {
-      return JMEGeometryUtils.transformFromJMECoordinatesToZup(getJmeTransformWristToHand(side));
-   }
-
    private void createTransforms()
    {
       for (RobotSide robotSide : RobotSide.values())
@@ -284,7 +257,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          Vector3f centerOfHandToWristTranslation = new Vector3f();
          float[] angles = new float[3];
 
-         centerOfHandToWristTranslation = new Vector3f(0f, (float) robotSide.negateIfLeftSide(0.015f), -0.06f);
+         centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
          angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
          angles[1] = 0.0f;
          angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
@@ -331,18 +304,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public void setEnableJointDamping(boolean enableJointDamping)
-   {
-      this.enableJointDamping   = enableJointDamping;
-   }
-
-   @Override
-   public boolean getEnableJointDamping()
-   {
-      return enableJointDamping;
-   }
-
-   @Override
    public HandModel getHandModel()
    {
       return new ValkyrieHandModel();
@@ -361,10 +322,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      boolean enableJointDamping = getEnableJointDamping();
 
       HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
 
@@ -419,18 +379,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-	   return null;
-   }
-
-   @Override
-   public DRCHandType getDRCHandType()
-   {
-      return drcHandType;
-   }
-
-   @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
 	   return null;
@@ -438,21 +386,15 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public FootstepPlanningParameterization getFootstepParameters()
+   public FootstepPlanningParameters getFootstepPlanningParameters()
    {
-      return new ValkyrieFootstepPlanningParameterization();
+      return new ValkyrieFootstepPlanningParameters();
    }
 
    @Override
    public LogModelProvider getLogModelProvider()
    {
       return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
-   }
-
-   @Override
-   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
-   {
-      return null;
    }
 
    @Override
@@ -466,12 +408,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       {
          return LogSettings.SIMULATION;
       }
-   }
-
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      return null;
    }
 
    @Override
@@ -496,12 +432,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new ValkyrieCollisionBoxProvider(createFullRobotModel());
-   }
-
-   @Override
-   public FootstepSnappingParameters getSnappingParameters()
-   {
-      return null;
    }
 
    @Override
