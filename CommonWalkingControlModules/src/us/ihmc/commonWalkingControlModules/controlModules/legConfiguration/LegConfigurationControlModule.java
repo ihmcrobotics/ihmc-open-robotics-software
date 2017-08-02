@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -131,7 +131,7 @@ public class LegConfigurationControlModule
    private final LegConfigurationGains straightLegGains;
    private final LegConfigurationGains bentLegGains;
 
-   public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
+   public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, LegConfigurationParameters legConfigurationParameters,
                                         YoVariableRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -187,12 +187,12 @@ public class LegConfigurationControlModule
       effectiveKneeStiffness = new YoDouble(sidePrefix + "EffectiveKneeStiffness", registry);
       effectiveKneeDamping = new YoDouble(sidePrefix + "EffectiveKneeDamping", registry);
 
-      highPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedHighWeight());
-      mediumPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedMediumWeight());
-      lowPrivilegedWeight.set(straightLegWalkingParameters.getLegPrivilegedLowWeight());
+      highPrivilegedWeight.set(legConfigurationParameters.getLegPrivilegedHighWeight());
+      mediumPrivilegedWeight.set(legConfigurationParameters.getLegPrivilegedMediumWeight());
+      lowPrivilegedWeight.set(legConfigurationParameters.getLegPrivilegedLowWeight());
 
-      straightLegGains = straightLegWalkingParameters.getStraightLegGains();
-      bentLegGains = straightLegWalkingParameters.getBentLegGains();
+      straightLegGains = legConfigurationParameters.getStraightLegGains();
+      bentLegGains = legConfigurationParameters.getBentLegGains();
 
       straightJointSpacePositionGain.set(straightLegGains.getJointSpaceKp());
       straightJointSpaceVelocityGain.set(straightLegGains.getJointSpaceKd());
@@ -212,7 +212,7 @@ public class LegConfigurationControlModule
       bentUseActuatorSpacePositionControl.set(bentLegGains.getUseActuatorSpacePositionControl());
       bentUseActuatorSpaceVelocityControl.set(bentLegGains.getUseActuatorSpaceVelocityControl());
 
-      privilegedMaxAcceleration.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
+      privilegedMaxAcceleration.set(legConfigurationParameters.getPrivilegedMaxAcceleration());
 
       positionBlendingFactor = new YoDouble(namePrefix + "PositionBlendingFactor", registry);
       velocityBlendingFactor = new YoDouble(namePrefix + "VelocityBlendingFactor", registry);
@@ -226,19 +226,19 @@ public class LegConfigurationControlModule
       desiredAngleWhenStraight = new YoDouble(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenExtended = new YoDouble(namePrefix + "DesiredAngleWhenExtended", registry);
       desiredAngleWhenBracing = new YoDouble(namePrefix + "DesiredAngleWhenBracing", registry);
-      desiredAngleWhenStraight.set(straightLegWalkingParameters.getKneeAngleWhenStraight());
-      desiredAngleWhenExtended.set(straightLegWalkingParameters.getKneeAngleWhenExtended());
-      desiredAngleWhenBracing.set(straightLegWalkingParameters.getKneeAngleWhenBracing());
+      desiredAngleWhenStraight.set(legConfigurationParameters.getKneeAngleWhenStraight());
+      desiredAngleWhenExtended.set(legConfigurationParameters.getKneeAngleWhenExtended());
+      desiredAngleWhenBracing.set(legConfigurationParameters.getKneeAngleWhenBracing());
 
       desiredFractionOfMidRangeForCollapsed = new YoDouble(namePrefix + "DesiredFractionOfMidRangeForCollapsed", registry);
-      desiredFractionOfMidRangeForCollapsed.set(straightLegWalkingParameters.getDesiredFractionOfMidrangeForCollapsedAngle());
+      desiredFractionOfMidRangeForCollapsed.set(legConfigurationParameters.getDesiredFractionOfMidrangeForCollapsedAngle());
 
       straighteningSpeed = new YoDouble(namePrefix + "SupportKneeStraighteningSpeed", registry);
-      straighteningSpeed.set(straightLegWalkingParameters.getSpeedForSupportKneeStraightening());
+      straighteningSpeed.set(legConfigurationParameters.getSpeedForSupportKneeStraightening());
 
       collapsingDuration = new YoDouble(namePrefix + "SupportKneeCollapsingDuration", registry);
       collapsingDurationFractionOfStep = new YoDouble(namePrefix + "SupportKneeCollapsingDurationFractionOfStep", registry);
-      collapsingDurationFractionOfStep.set(straightLegWalkingParameters.getSupportKneeCollapsingDurationFractionOfStep());
+      collapsingDurationFractionOfStep.set(legConfigurationParameters.getSupportKneeCollapsingDurationFractionOfStep());
 
       desiredVirtualActuatorLength = new YoDouble(namePrefix + "DesiredVirtualActuatorLength", registry);
       currentVirtualActuatorLength = new YoDouble(namePrefix + "CurrentVirtualActuatorLength", registry);
@@ -269,7 +269,7 @@ public class LegConfigurationControlModule
 
       setupStateMachine();
 
-      if (straightLegWalkingParameters.attemptToStraightenLegs())
+      if (legConfigurationParameters.attemptToStraightenLegs())
          stateMachine.setCurrentState(LegConfigurationType.STRAIGHT);
       else
          stateMachine.setCurrentState(LegConfigurationType.BENT);

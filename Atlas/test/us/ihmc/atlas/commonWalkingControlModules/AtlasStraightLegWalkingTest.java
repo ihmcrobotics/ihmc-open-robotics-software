@@ -6,10 +6,8 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.*;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -161,9 +159,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public StraightLegWalkingParameters getStraightLegWalkingParameters()
+      public LegConfigurationParameters getLegConfigurationParameters()
       {
-         return new TestStraightLegWalkingParameters();
+         return new TestLegConfigurationParameters();
       }
 
       @Override
@@ -302,9 +300,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
-   private class TestStraightLegWalkingParameters extends AtlasStraightLegWalkingParameters
+   private class TestLegConfigurationParameters extends AtlasLegConfigurationParameters
    {
-      public TestStraightLegWalkingParameters()
+      public TestLegConfigurationParameters()
       {
          super(false);
       }
