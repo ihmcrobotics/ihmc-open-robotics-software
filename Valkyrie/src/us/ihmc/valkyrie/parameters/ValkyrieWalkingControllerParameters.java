@@ -62,7 +62,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
@@ -79,7 +79,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.target = target;
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
+      legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new ValkyrieToeOffParameters();
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
 
@@ -1241,9 +1241,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   public LegConfigurationParameters getLegConfigurationParameters()
    {
-      return straightLegWalkingParameters;
+      return legConfigurationParameters;
    }
 
    /** {@inheritDoc} */

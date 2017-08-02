@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegConfigurationType;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.LegControlWeight;
@@ -46,11 +46,11 @@ public class LegConfigurationManager
    {
       this.feet = controllerToolbox.getContactableFeet();
 
-      StraightLegWalkingParameters straightLegWalkingParameters = walkingControllerParameters.getStraightLegWalkingParameters();
+      LegConfigurationParameters legConfigurationParameters = walkingControllerParameters.getLegConfigurationParameters();
       for (RobotSide robotSide : RobotSide.values)
-         legConfigurationControlModules.put(robotSide, new LegConfigurationControlModule(robotSide, controllerToolbox, straightLegWalkingParameters, registry));
+         legConfigurationControlModules.put(robotSide, new LegConfigurationControlModule(robotSide, controllerToolbox, legConfigurationParameters, registry));
 
-      attemptToStraightenLegs.set(straightLegWalkingParameters.attemptToStraightenLegs());
+      attemptToStraightenLegs.set(legConfigurationParameters.attemptToStraightenLegs());
 
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();

@@ -1,12 +1,12 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 
-public class ValkyrieStraightLegWalkingParameters extends StraightLegWalkingParameters
+public class ValkyrieLegConfigurationParameters extends LegConfigurationParameters
 {
    private final boolean runningOnRealRobot;
 
-   public ValkyrieStraightLegWalkingParameters(boolean runningOnRealRobot)
+   public ValkyrieLegConfigurationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
