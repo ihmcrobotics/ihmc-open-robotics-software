@@ -31,7 +31,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
 
-      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfTransferToCollapseLeg());
+      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
    }
 
    @Override
