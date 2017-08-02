@@ -58,7 +58,7 @@ public class SmoothCapturePointTools extends CapturePointTools
          icpQuantityDesired.setToNaN();
          return;
       }
-      
+            
       initializeMatrices3D(numberOfCoefficients);
       setPolynomialCoefficientVector3D(polynomialCoefficientCombinedVector, cmpPolynomial3D);
 
@@ -114,11 +114,15 @@ public class SmoothCapturePointTools extends CapturePointTools
       M1.zero();
 
       CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientCombinedVector, M1);
+      
+//      PrintTools.debug("M1 = " + M1.toString());
 
       M2.reshape(M1.getNumRows(),  M1.getNumCols());
       M2.set(0, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getX());
       M2.set(1, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getY());
       M2.set(2, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getZ());
+      
+//      PrintTools.debug("M2 = " + M2.toString());
             
       CommonOps.addEquals(M1, M2);
       

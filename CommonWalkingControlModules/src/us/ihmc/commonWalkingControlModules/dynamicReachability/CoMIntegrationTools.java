@@ -496,7 +496,7 @@ public class CoMIntegrationTools
       YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       FramePoint previousExitCoMCornerPoint = initialCenterOfMass;
       
-      PrintTools.debug("Step");
+//      PrintTools.debug("Step");
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
@@ -524,9 +524,9 @@ public class CoMIntegrationTools
          
          previousExitCoMCornerPoint = exitCoMCornerPoint;
       }
-      PrintTools.debug("Entry CoMs = " + entryCoMCornerPointsToPack.subList(0,20).toString());
-      PrintTools.debug("Exit CoMs = " + exitCoMCornerPointsToPack.subList(0,20).toString());
-      PrintTools.debug("");
+//      PrintTools.debug("Entry CoMs = " + entryCoMCornerPointsToPack.subList(0,20).toString());
+//      PrintTools.debug("Exit CoMs = " + exitCoMCornerPointsToPack.subList(0,20).toString());
+//      PrintTools.debug("");
             
 //      PrintTools.debug("Step");
 //      for (int i = cmpPolynomials3D.size() - 1; i >= 0; i--)
@@ -573,5 +573,12 @@ public class CoMIntegrationTools
                                                          FrameVector desiredCenterOfMassVelocityToPack)
    {         
       SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassVelocityToPack);
+   }
+   
+   //TODO: implement validity checks
+   public static void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                         FrameVector desiredCenterOfMassAccelerationToPack)
+   {         
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassAccelerationToPack);
    }
 }

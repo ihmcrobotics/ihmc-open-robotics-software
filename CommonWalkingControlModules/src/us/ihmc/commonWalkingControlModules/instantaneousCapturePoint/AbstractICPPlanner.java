@@ -55,9 +55,13 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** Desired velocity for the Center of Pressure (CoP) */
    protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
-   protected final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   protected final YoFramePoint2d desiredCoMPosition2D = new YoFramePoint2d(namePrefix + "DesiredCoMPosition2D", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) 3D*/
-   protected final YoFramePoint desiredCoMPosition3D = new YoFramePoint(namePrefix + "DesiredCoMPosition3D", worldFrame, registry);
+   protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   /** Desired velocity for the Center of Mass (CoM) */
+   protected final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
+   /** Desired acceleration for the Center of Mass (CoM) */
+   protected final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -399,28 +403,39 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack)
    {
-      desiredCoMPosition.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
+      desiredCoMPosition2D.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
    }
 
    @Override
    /** {@inheritDoc} */
    public void getDesiredCenterOfMassPosition(FramePoint2d desiredCenterOfMassPositionToPack)
    {
-      desiredCoMPosition.getFrameTuple2dIncludingFrame(desiredCenterOfMassPositionToPack);
+      desiredCoMPosition2D.getFrameTuple2dIncludingFrame(desiredCenterOfMassPositionToPack);
    }
 
    @Override
    /** {@inheritDoc} */
    public void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack)
    {
-      desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
+      desiredCenterOfMassPositionToPack.set(desiredCoMPosition2D);
    }
    
    /** {@inheritDoc} */
    public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
    {
-      desiredCenterOfMassPositionToPack.set(desiredCoMPosition3D);
+      desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
+   
+   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+   
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
+   }
+
 
    @Override
    /** {@inheritDoc} */
