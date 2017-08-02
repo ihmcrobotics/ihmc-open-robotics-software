@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 
-public class StraightLegWalkingParameters
+public class LegConfigurationParameters
 {
    /**
     * This is the speed used to straighten the desire privileged configuration of the support leg's knee.
     * This is used whenever a leg is first loaded to straighten from the current configuration to the
-    * straight configuration defined by {@link #getStraightKneeAngle()}.
+    * straight configuration defined by {@link #getKneeAngleWhenStraight()}.
     *
     * @return knee rad/second for straightening
     */
@@ -17,21 +17,47 @@ public class StraightLegWalkingParameters
       return 1.0;
    }
 
-   public double getSupportKneeCollapsingDuration()
+   public double getSupportKneeCollapsingDurationFractionOfStep()
    {
-      return 0.5;
+      return 0.65;
    }
 
    /**
-    * Angle used to what it means to set the knee privileged configuration to straight.
+    * Angle to define what the knee privileged configuration considers straight.
     * This is used in the straight leg state by the support legs when the robot is attempting to walk with
     * straight legs, and also to help extend the leg at the end of the swing state.
     *
     * @return knee angle in radians
     */
-   public double getStraightKneeAngle()
+   public double getKneeAngleWhenStraight()
    {
       return 0.25;
+   }
+
+   /**
+    * Knee angle used when the leg is in its bracing state. The bracing state can occur when stepping down,
+    * or recovering from large disturbances. This is used instead of {@link #getKneeAngleWhenExtended()} ()}.
+    */
+   public double getKneeAngleWhenBracing()
+   {
+      return 0.4;
+   }
+
+   /**
+    * Knee angle used when the leg is fully extending during swing.
+    */
+   public double getKneeAngleWhenExtended()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Fraction of the knee midrange angle to consider the "collapsed" angle, to be used by the
+    * {@link us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationControlModule.CollapseKneeControlState}
+    */
+   public double getDesiredFractionOfMidrangeForCollapsedAngle()
+   {
+      return 0.3;
    }
 
    /**
@@ -109,7 +135,7 @@ public class StraightLegWalkingParameters
 
    public double getLegPrivilegedMediumWeight()
    {
-      return 10.0;
+      return 25.0;
    }
 
    /**
@@ -118,7 +144,7 @@ public class StraightLegWalkingParameters
     */
    public double getLegPrivilegedHighWeight()
    {
-      return 200.0;
+      return 150.0;
    }
 
    /**
