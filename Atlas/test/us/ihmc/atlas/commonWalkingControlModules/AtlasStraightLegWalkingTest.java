@@ -6,10 +6,8 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
 import us.ihmc.commonWalkingControlModules.configurations.*;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -28,6 +26,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalking();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 120000)
+   public void testSlowerWalking() throws SimulationExceededMaximumTimeException
+   {
+      super.testSlowerWalking();
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
@@ -124,12 +129,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getToeLoadingDuration()
-      {
-         return 0.2;
-      }
-
-      @Override
       public boolean controlHeightWithMomentum()
       {
          return false;
@@ -144,7 +143,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean editStepTimingForReachability()
       {
-         return true; // // TODO: 4/27/17
+         return true;
       }
 
       @Override
@@ -160,9 +159,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public StraightLegWalkingParameters getStraightLegWalkingParameters()
+      public LegConfigurationParameters getLegConfigurationParameters()
       {
-         return new TestStraightLegWalkingParameters();
+         return new TestLegConfigurationParameters();
       }
 
       @Override
@@ -192,12 +191,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getMaximumToeOffAngle()
-      {
-         return Math.toRadians(20);
-      }
-
-      @Override
       public boolean checkCoPLocationToTriggerToeOff()
       {
          return true;
@@ -212,13 +205,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getICPPercentOfStanceForDSToeOff()
       {
-         return 0.3;
+         return 0.20;
       }
 
       @Override
       public double getICPPercentOfStanceForSSToeOff()
       {
-         return 0.08;
+         return 0.10;
       }
 
       @Override
@@ -232,7 +225,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return 0.02;
       }
-
 
       @Override
       public boolean doToeOffIfPossibleInSingleSupport()
@@ -308,9 +300,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
    }
 
-   private class TestStraightLegWalkingParameters extends AtlasStraightLegWalkingParameters
+   private class TestLegConfigurationParameters extends AtlasLegConfigurationParameters
    {
-      public TestStraightLegWalkingParameters()
+      public TestLegConfigurationParameters()
       {
          super(false);
       }
@@ -324,7 +316,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 2.5;
+         return 5.0;
       }
 
       @Override
@@ -338,20 +330,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return 150.0;
       }
-
-      /*
-      @Override
-      public double getSupportKneeCollapsingDuration()
-      {
-         return 0.25;
-      }
-
-      @Override
-      public double getSpeedForSupportKneeStraightening()
-      {
-         return 0.50;
-      }
-      */
    }
 
    private class TestMomentumOptimizationSettings extends AtlasMomentumOptimizationSettings
@@ -405,6 +383,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testForwardWalking();
+      test.testWalkingOverCinderBlockField();
    }
 }

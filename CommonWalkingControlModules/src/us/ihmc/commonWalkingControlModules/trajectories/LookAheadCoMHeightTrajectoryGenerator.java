@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -566,6 +567,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private Point2D tempPoint2dForStringStretching = new Point2D();
 
    private final StringStretcher2d stringStretcher2d = new StringStretcher2d();
+   private final List<Point2D> stretchedStringWaypoints = new ArrayList<>();
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
       stringStretcher2d.reset();
@@ -626,11 +628,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
          stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
       }
 
-      List<Point2D> stretchedString = stringStretcher2d.stretchString();
+      stringStretcher2d.stretchString(stretchedStringWaypoints);
 
-      d0.set(stretchedString.get(1));
-      dF.set(stretchedString.get(2));
-      sF.set(stretchedString.get(3));
+      d0.set(stretchedStringWaypoints.get(1));
+      dF.set(stretchedStringWaypoints.get(2));
+      sF.set(stretchedStringWaypoints.get(3));
    }
 
    
