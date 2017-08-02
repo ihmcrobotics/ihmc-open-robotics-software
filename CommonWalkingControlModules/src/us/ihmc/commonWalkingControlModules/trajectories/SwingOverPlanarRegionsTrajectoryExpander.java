@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -99,9 +100,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
-      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions(),
-            walkingControllerParameters.getMinSwingHeightFromStanceFoot(), walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry,
-            graphicsListRegistry);
+      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
+      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, swingTrajectoryParameters.getSwingWaypointProportions(),
+            swingTrajectoryParameters.getObstacleClearanceProportions(), walkingControllerParameters.getMinSwingHeightFromStanceFoot(),
+            walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
       soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;

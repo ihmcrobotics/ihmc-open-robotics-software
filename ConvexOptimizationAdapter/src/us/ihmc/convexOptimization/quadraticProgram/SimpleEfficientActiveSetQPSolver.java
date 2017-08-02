@@ -24,8 +24,7 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
 {
-   private static final double epsilon = 1e-10;
-
+   private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(0, 0);
@@ -107,6 +106,12 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private int previousNumberOfInequalityConstraints = 0;
    private int previousNumberOfLowerBoundConstraints = 0;
    private int previousNumberOfUpperBoundConstraints = 0;
+
+   @Override
+   public void setConvergenceThreshold(double convergenceThreshold)
+   {
+      this.convergenceThreshold = convergenceThreshold;
+   }
 
    @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
@@ -557,7 +562,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          {
             if (activeInequalityIndices.contains(i))
                continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
-            if (linearInequalityConstraintsCheck.get(i, 0) > epsilon)
+            if (linearInequalityConstraintsCheck.get(i, 0) > convergenceThreshold)
             {
                activeSetWasModified = true;
                inequalityIndicesToAddToActiveSet.add(i);
@@ -586,7 +591,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
          double solutionVariable = solutionToPack.get(i, 0);
          double lowerBound = this.variableLowerBounds.get(i, 0);
-         if (solutionVariable < lowerBound - epsilon)
+         if (solutionVariable < lowerBound - convergenceThreshold)
          {
             activeSetWasModified = true;
             lowerBoundIndicesToAddToActiveSet.add(i);
@@ -601,7 +606,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
          double solutionVariable = solutionToPack.get(i, 0);
          double upperBound = this.variableUpperBounds.get(i, 0);
-         if (solutionVariable > upperBound + epsilon)
+         if (solutionVariable > upperBound + convergenceThreshold)
          {
             activeSetWasModified = true;
             upperBoundIndicesToAddToActiveSet.add(i);

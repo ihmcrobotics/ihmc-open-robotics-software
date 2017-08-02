@@ -78,7 +78,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LegConfigurationParameters legConfigurationParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
@@ -99,7 +99,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
-      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
+      legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       leapOfFaithParameters = new LeapOfFaithParameters();
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
@@ -1248,9 +1248,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   public LegConfigurationParameters getLegConfigurationParameters()
    {
-      return straightLegWalkingParameters;
+      return legConfigurationParameters;
    }
 
    /** {@inheritDoc} */

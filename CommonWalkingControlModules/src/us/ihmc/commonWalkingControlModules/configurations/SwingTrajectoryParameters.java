@@ -37,7 +37,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getHeelTouchdownLengthRatio()
    {
-      return 0.35;
+      return 0.5;
    }
 
    /**
@@ -81,6 +81,32 @@ public abstract class SwingTrajectoryParameters
    public double[] getSwingWaypointProportions()
    {
       return new double[] {0.15, 0.85};
+   }
+
+   /**
+    * Returns the percent of the step length which will be used to determine the swing waypoints when taking a step
+    * of the type obstacle clearance
+    */
+   public double[] getObstacleClearanceProportions()
+   {
+      return new double[] {0.15, 0.85};
+   }
+
+   /**
+    * Whether or not to add an orientation midpoint when doing trajectories of type obstacle clearance
+    */
+   public boolean addOrientationMidpointForObstacleClearance()
+   {
+      return false;
+   }
+
+   /**
+    * Amount of interpolation between the initial orientation and the final orientation during obstacle clearance.
+    * Is not used unless {@link #addOrientationMidpointForObstacleClearance()} returns true.
+    */
+   public double midpointOrientationInterpolationForObstacleClearance()
+   {
+      return 0.3;
    }
 
    /**
