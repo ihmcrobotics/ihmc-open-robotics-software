@@ -326,9 +326,9 @@ public class SmoothCoMIntegrationToolsTest
          SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comVelocityDesiredCurrent);
          calculateCoMVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comVelocityDesiredCurrentByHand);
          
-         PrintTools.debug("CoM vel calc: " + comVelocityDesiredCurrent.toString());
-         PrintTools.debug("CoM vel hand: " + comVelocityDesiredCurrentByHand.toString());
-         PrintTools.debug("");
+//         PrintTools.debug("CoM vel calc: " + comVelocityDesiredCurrent.toString());
+//         PrintTools.debug("CoM vel hand: " + comVelocityDesiredCurrentByHand.toString());
+//         PrintTools.debug("");
          
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
          
@@ -361,30 +361,30 @@ public class SmoothCoMIntegrationToolsTest
       double t0 = 0.0, tFinal = 1.0;
                  
       FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(0.0, 0.0, 0.0));
-      FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(1.0, 0.0, 0.0));
+      FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(1.0, 1.0, 0.0));
       
       linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
             
       FramePoint icpPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
-      FramePoint comPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
+      FramePoint comPositionDesiredInitial = new FramePoint(worldFrame, cmp0.getPoint());
       
       FramePoint icpPositionDesiredInitial = new FramePoint(worldFrame);
       CapturePointTools.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
       // Position
-      FramePoint comPositionDesiredInitial = new FramePoint(worldFrame);
+      FramePoint comPositionDesiredFinal = new FramePoint(worldFrame);
       FramePoint comPositionDesiredInitialByHand = new FramePoint(worldFrame);
       
-      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, linear3D.getInitialTime(), 0, linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitial);
-      calculateCoMPositionByHand3DLinear(omega0, linear3D.getInitialTime(), linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitialByHand);
+      SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, linear3D.getFinalTime(), 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredFinal);
+//      calculateCoMPositionByHand3DLinear(omega0, linear3D.getInitialTime(), linear3D, icpPositionDesiredFinal, comPositionDesiredFinal, comPositionDesiredInitialByHand);
       
-//      PrintTools.debug("Insanity Check");
-//      PrintTools.debug("Time = " + "[" + t0 + ", " + tFinal + "]");
-//      PrintTools.debug("CMP: " + cmp0.getPoint().toString() + " --> " + cmpFinal.getPoint().toString());
-//      PrintTools.debug("ICP: " + icpPositionDesiredInitial.getPoint().toString() + " --> " + icpPositionDesiredFinal.getPoint().toString());
-//      PrintTools.debug("CoM: " + comPositionDesiredInitial.getPoint().toString() + " --> " + comPositionDesiredFinal.getPoint().toString());
-//      PrintTools.debug("CoM: " + comPositionDesiredInitialByHand.getPoint().toString() + " --> " + comPositionDesiredFinal.getPoint().toString());
-//      PrintTools.debug("");
+      PrintTools.debug("Insanity Check");
+      PrintTools.debug("Time = " + "[" + t0 + ", " + tFinal + "]");
+      PrintTools.debug("CMP: " + cmp0.getPoint().toString() + " --> " + cmpFinal.getPoint().toString());
+      PrintTools.debug("ICP: " + icpPositionDesiredInitial.getPoint().toString() + " --> " + icpPositionDesiredFinal.getPoint().toString());
+      PrintTools.debug("CoM: " + comPositionDesiredInitial.getPoint().toString() + " --> " + comPositionDesiredFinal.getPoint().toString());
+      PrintTools.debug("CoM: " + comPositionDesiredInitialByHand.getPoint().toString() + " --> " + comPositionDesiredInitial.getPoint().toString());
+      PrintTools.debug("");
 
       EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredInitial.getPoint(), comPositionDesiredInitialByHand.getPoint(), EPSILON);
    }
