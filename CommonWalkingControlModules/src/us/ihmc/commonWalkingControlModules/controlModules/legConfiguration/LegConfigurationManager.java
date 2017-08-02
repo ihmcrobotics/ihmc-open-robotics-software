@@ -149,17 +149,26 @@ public class LegConfigurationManager
 
    public void useLowWeight(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.LOW);
+      if (attemptToStraightenLegs.getBooleanValue())
+      {
+         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.LOW);
+      }
    }
 
    public void useMediumWeight(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.MEDIUM);
+      if (attemptToStraightenLegs.getBooleanValue())
+      {
+         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.MEDIUM);
+      }
    }
 
    public void useHighWeight(RobotSide robotSide)
    {
-      legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.HIGH);
+      if (attemptToStraightenLegs.getBooleanValue())
+      {
+         legConfigurationControlModules.get(robotSide).setLegControlWeight(LegControlWeight.HIGH);
+      }
    }
 
    public void setStraight(RobotSide robotSide)
