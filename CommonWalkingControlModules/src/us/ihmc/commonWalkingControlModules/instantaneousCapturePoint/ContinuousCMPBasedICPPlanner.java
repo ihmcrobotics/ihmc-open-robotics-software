@@ -471,6 +471,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          integrateCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
          desiredCoMPosition2D.set(tempCoM);
       }
+      desiredCoMPosition.setXY(desiredCoMPosition2D);
 
       decayDesiredVelocityIfNeeded();
 
