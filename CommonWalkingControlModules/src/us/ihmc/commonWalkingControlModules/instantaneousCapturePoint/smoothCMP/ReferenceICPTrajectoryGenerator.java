@@ -51,6 +51,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    private FramePoint comPositionDesiredCurrent = new FramePoint();
    private FrameVector comVelocityDesiredCurrent = new FrameVector();
+   private FrameVector comAccelerationDesiredCurrent = new FrameVector();
    private FrameVector comVelocityDynamicsCurrent = new FrameVector();
    
    private FramePoint icpPositionDesiredFinalCurrentSegment = new FramePoint();
@@ -140,7 +141,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       reset();
       startTimeOfCurrentPhase.set(initialTime);
       
-      PrintTools.debug("Transfer");
+//      PrintTools.debug("Transfer");
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
@@ -179,7 +180,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       reset();
       startTimeOfCurrentPhase.set(initialTime);
       
-      PrintTools.debug("Swing");
+//      PrintTools.debug("Swing");
 
       CMPTrajectory swingCMPTrajectory = swingCMPTrajectories.get(0);
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
@@ -267,6 +268,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectoryLength.set(cmpTrajectories.size());
          icpTerminalLength.set(icpDesiredFinalPositions.size());
       }
+      
+//      PrintTools.debug("Entry ICPs = " + icpDesiredInitialPositions.subList(0,20).toString());
+//      PrintTools.debug("Exit ICPs = " + icpDesiredFinalPositions.subList(0,20).toString());
+//      PrintTools.debug("");
    }
 
    @Override
@@ -299,6 +304,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
                                                                          comPositionDesiredCurrent);
             SmoothCoMIntegrationTools.computeDesiredCenterOfMassVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, 
                                                                          comVelocityDesiredCurrent);
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, 
+                                                                         comAccelerationDesiredCurrent);
          }
          else
          {
@@ -315,6 +322,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
                                                                          comPositionDesiredCurrent);
             SmoothCoMIntegrationTools.computeDesiredCenterOfMassVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, 
                                                                          comVelocityDesiredCurrent);
+            SmoothCoMIntegrationTools.computeDesiredCenterOfMassAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(), icpPositionDesiredFinalCurrentSegment, comPositionDesiredInitialCurrentSegment, cmpPolynomial3D, 
+                                                                            comAccelerationDesiredCurrent);
          }
          checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
          checkCoMDynamics(localTimeInCurrentPhase.getDoubleValue(), comVelocityDesiredCurrent, icpPositionDesiredCurrent, comPositionDesiredCurrent);
@@ -376,6 +385,17 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       comPositionToPack.set(comPositionDesiredCurrent);
    }
+   
+   public void getCoMVelocity(YoFrameVector comVelocityToPack)
+   {
+      comVelocityToPack.set(comVelocityDesiredCurrent);
+   }
+   
+   public void getCoMAcceleration(YoFrameVector comAccelerationToPack)
+   {
+      comAccelerationToPack.set(comAccelerationDesiredCurrent);
+   }
+
 
    @Override
    public void getPosition(FramePoint positionToPack)

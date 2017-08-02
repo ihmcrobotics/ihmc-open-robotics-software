@@ -184,8 +184,8 @@ public class SmoothCapturePointToolsTest
          double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
                     
-         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
+         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
