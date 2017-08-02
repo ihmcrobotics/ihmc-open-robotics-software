@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -29,7 +29,8 @@ public class SmoothCoMIntegrationToolsTest
    
    String namePrefix = "SmoothCoMIntegrationToolsTest";
    
-   SmoothCoMIntegrationTools comM = new SmoothCoMIntegrationTools();
+   private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
+   private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -55,7 +56,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F alphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F alphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, alphaCoMPrimeAutomatic, 0, linear3D);
+         comToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, alphaCoMPrimeAutomatic, 0, linear3D);
          calculateAlphaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, alphaCoMPrimeManual);
          
 //         PrintTools.debug("A linear calc: " + alphaCoMPrimeAutomatic.toString());
@@ -72,7 +73,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F betaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F betaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, betaCoMPrimeAutomatic, 0, linear3D);
+         comToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, betaCoMPrimeAutomatic, 0, linear3D);
          calculateBetaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, betaCoMPrimeManual);
          
 //         PrintTools.debug("B linear calc: " + betaCoMPrimeAutomatic.toString());
@@ -89,7 +90,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F gammaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, gammaCoMPrimeAutomatic, 0, linear3D);
+         comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, gammaCoMPrimeAutomatic, 0, linear3D);
          calculateGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, gammaCoMPrimeManual);
          
 //         PrintTools.debug("C linear calc: " + gammaCoMPrimeAutomatic.toString());
@@ -100,7 +101,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F deltaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F deltaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
     
-         SmoothCoMIntegrationTools.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, deltaCoMPrimeAutomatic, 0, linear3D);
+         comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, deltaCoMPrimeAutomatic, 0, linear3D);
          calculateDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, deltaCoMPrimeManual);
        
 //         PrintTools.debug("D linear calc: " + deltaCoMPrimeAutomatic.toString());
@@ -140,7 +141,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F dAlphaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F dAlphaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, dAlphaCoMPrimeAutomatic, 1, linear3D);
+         comToolbox.calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, dAlphaCoMPrimeAutomatic, 1, linear3D);
          calculateDAlphaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dAlphaCoMPrimeManual);
          
 //         PrintTools.debug("dA linear calc: " + dAlphaCoMPrimeAutomatic.toString());
@@ -157,7 +158,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F dBetaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F dBetaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, dBetaCoMPrimeAutomatic, 1, linear3D);
+         comToolbox.calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, dBetaCoMPrimeAutomatic, 1, linear3D);
          calculateDBetaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dBetaCoMPrimeManual);
          
 //         PrintTools.debug("dB linear calc: " + dBetaCoMPrimeAutomatic.toString());
@@ -174,7 +175,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F dGammaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F dGammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, dGammaCoMPrimeAutomatic, 1, linear3D);
+         comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, dGammaCoMPrimeAutomatic, 1, linear3D);
          calculateDGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dGammaCoMPrimeManual);
          
 //         PrintTools.debug("dC linear calc: " + dGammaCoMPrimeAutomatic.toString());
@@ -185,7 +186,7 @@ public class SmoothCoMIntegrationToolsTest
          DenseMatrix64F dDeltaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F dDeltaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         SmoothCoMIntegrationTools.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, dDeltaCoMPrimeAutomatic, 1, linear3D);
+         comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, dDeltaCoMPrimeAutomatic, 1, linear3D);
          calculateDDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dDeltaCoMPrimeManual);
          
 //         PrintTools.debug("dD linear calc: " + dDeltaCoMPrimeAutomatic.toString());
@@ -220,7 +221,7 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint comPositionDesiredInitial = new FramePoint(worldFrame, cmp0.getPoint());
          
          FramePoint icpPositionDesiredInitial = new FramePoint(worldFrame);
-         CapturePointTools.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
+         icpToolbox.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
          // Position
          FramePoint comPositionDesiredCurrent = new FramePoint(worldFrame);
@@ -228,8 +229,8 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint comPositionDesiredCurrentByHand = new FramePoint(worldFrame);
          FramePoint comPositionDesiredFinalByHand = new FramePoint(worldFrame);
          
-         SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredCurrent);
-         SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, tFinal, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredFinal);
+         comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredCurrent);
+         comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, tFinal, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredFinal);
          calculateCoMPositionByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredCurrentByHand);
          calculateCoMPositionByHand3DLinear(omega0, tFinal, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredFinalByHand);
          
@@ -252,7 +253,7 @@ public class SmoothCoMIntegrationToolsTest
          FrameVector comVelocityDesiredCurrent = new FrameVector(worldFrame);
          FrameVector comVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
          
-         SmoothCoMIntegrationTools.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrent);
+         comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrent);
          calculateCoMVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrentByHand);
          
 //         PrintTools.debug("CoM vel calc: " + comVelocityDesiredCurrent.toString());
@@ -264,7 +265,7 @@ public class SmoothCoMIntegrationToolsTest
          // Dynamics
          linear3D.compute(time);
          FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
-         SmoothCapturePointTools.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
+         icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          
          FrameVector comVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
          comVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrent);
