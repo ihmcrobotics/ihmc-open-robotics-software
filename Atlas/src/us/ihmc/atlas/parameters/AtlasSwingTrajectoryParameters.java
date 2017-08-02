@@ -1,22 +1,22 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 
 public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
 {
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
    private final double modelScale;
    private final boolean runningOnRealRobot;
    private final double min_mechanical_leg_length;
 
-   public AtlasSwingTrajectoryParameters(DRCRobotModel.RobotTarget target, double modelScale)
+   public AtlasSwingTrajectoryParameters(RobotTarget target, double modelScale)
    {
       this.target = target;
       this.modelScale = modelScale;
       min_mechanical_leg_length = modelScale * 0.420;
 
-      runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
    }
 
    @Override

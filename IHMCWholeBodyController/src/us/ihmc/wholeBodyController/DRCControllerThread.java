@@ -63,7 +63,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
-   private final OutputProcessor outputProcessor;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -115,7 +114,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
-      this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
       this.globalDataProducer = dataProducer;
 
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
@@ -132,7 +130,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
       if (robotModel.getWalkingControllerParameters().useCenterOfMassVelocityFromEstimator())
       {
-         centerOfMassDataHolderForController = threadDataSynchronizer.getControllerCenterOfMassDataHolder();         
+         centerOfMassDataHolderForController = threadDataSynchronizer.getControllerCenterOfMassDataHolder();
       }
       else
       {
@@ -146,7 +144,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       InverseDynamicsJoint[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
-      robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
+      robotController = createMomentumBasedController(controllerFullRobotModel,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, centerOfMassDataHolderForController,
             threadDataSynchronizer.getControllerContactSensorHolder(),
             centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
@@ -208,7 +206,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
+   private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel,
          MomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
          ContactSensorHolder contactSensorHolder,
@@ -234,8 +232,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
-      if (outputProcessor != null)
-         modularRobotController.setOutputProcessor(outputProcessor);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -267,6 +263,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       return modularRobotController;
+   }
+
+   public void addOutputProcessorToController(OutputProcessor outputProcessor)
+   {
+      robotController.setOutputProcessor(outputProcessor);
    }
 
    public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
@@ -426,11 +427,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          return lastEstimatorStartTime.getLongValue() + controlDTInNS + estimatorDTInNS;
       }
-   }
-
-   public RobotController getRobotController()
-   {
-      return robotController;
    }
 
    /**

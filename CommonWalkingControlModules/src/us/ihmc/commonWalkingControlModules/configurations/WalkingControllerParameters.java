@@ -32,7 +32,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
+public abstract class WalkingControllerParameters implements SteppingParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
@@ -40,17 +40,8 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
 
-   private final double massScale;
-
    public WalkingControllerParameters()
    {
-      this(1.0);
-   }
-
-   public WalkingControllerParameters(double massScale)
-   {
-      this.massScale = massScale;
-
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
       dynamicReachabilityParameters = new DynamicReachabilityParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
@@ -637,4 +628,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract ToeOffParameters getToeOffParameters();
 
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
+
+   /**
+    * Used by the UI for head and chest trajectories.
+    */
+   public double getDefaultTrajectoryTime()
+   {
+      return 3.0;
+   }
 }

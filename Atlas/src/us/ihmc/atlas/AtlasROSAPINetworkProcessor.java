@@ -10,6 +10,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
@@ -90,7 +91,7 @@ public class AtlasROSAPINetworkProcessor
       {
          // This should *ALWAYS* be set to REAL_ROBOT, as this network processor is designed to run only on the real robot.
          // For sim, see AtlasROSAPISimulator
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.REAL_ROBOT, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.REAL_ROBOT, false);
       }
       catch (IllegalArgumentException e)
       {

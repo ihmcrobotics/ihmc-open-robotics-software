@@ -1,26 +1,40 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
+
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasLegConfigurationParameters;
+import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasToeOffParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
@@ -28,6 +42,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testForwardWalking();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 120000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
@@ -35,6 +50,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testSlowerWalking();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
    public void testWalkingOverCinderBlockField() throws Exception
@@ -116,7 +132,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
       public TestWalkingControllerParameters(AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
-         super(DRCRobotModel.RobotTarget.SCS, jointMap, contactPointParameters);
+         super(RobotTarget.SCS, jointMap, contactPointParameters);
 
          this.jointMap = jointMap;
          this.contactPointParameters = contactPointParameters;
@@ -243,7 +259,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    {
       public TestSwingTrajectoryParameters()
       {
-         super(DRCRobotModel.RobotTarget.SCS, 1.0);
+         super(RobotTarget.SCS, 1.0);
       }
 
 

@@ -20,7 +20,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,6 +27,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.steppr.parameters.BonoPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BonoWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -101,18 +101,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public boolean isNeckPositionControlled()
-   {
-      return false;
-   }
-
-   @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-      return new String[0];
-   }
-
-   @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
 //      if (runningOnRealRobot)
@@ -157,30 +145,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return 0.0;
    }
 
    @Override
@@ -370,30 +334,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 3.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] { 0.0, 0.0, 0.0 };
-   }
-
-   @Override
    public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
    {
       YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
@@ -470,10 +410,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       for (SpineJointName name : jointMap.getSpineJointNames())
          jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
 
-      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
-
       return jointspaceGains;
    }
 
@@ -489,9 +425,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
 
       YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
-
-      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
 
       return taskspaceAngularGains;
    }
@@ -649,7 +582,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public double getSpineYawLimit()
    {
-      return Math.PI / 4.0;
+      return 0.0;
    }
 
    /** @inheritDoc */
