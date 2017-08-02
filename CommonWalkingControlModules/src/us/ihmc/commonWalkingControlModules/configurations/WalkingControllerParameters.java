@@ -34,7 +34,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
@@ -55,7 +55,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       dynamicReachabilityParameters = new DynamicReachabilityParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
-      straightLegWalkingParameters = new StraightLegWalkingParameters();
+      legConfigurationParameters = new LegConfigurationParameters();
    }
 
 
@@ -575,9 +575,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    /**
     * Returns the parameters used for straight leg walking
     */
-   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   public LegConfigurationParameters getLegConfigurationParameters()
    {
-      return straightLegWalkingParameters;
+      return legConfigurationParameters;
    }
 
    /**
