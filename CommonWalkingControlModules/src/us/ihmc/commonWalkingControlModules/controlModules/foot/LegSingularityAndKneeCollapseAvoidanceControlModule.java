@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -166,7 +167,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       maximumLegLength.set(walkingControllerParameters.getLegLength());
 
       minimumLegLength = new YoDouble(namePrefix + "MinLegLength", registry);
-      minimumLegLength.set(walkingControllerParameters.getMinMechanicalLegLength());
+      minimumLegLength.set(walkingControllerParameters.getSwingTrajectoryParameters().getMinMechanicalLegLength());
 
       controlDT = controllerToolbox.getControlDT();
       yoTime = controllerToolbox.getYoTime();
@@ -223,8 +224,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       timeRemainingToDisableCollapseAvoidance.set(timeDelayToDisableCollapseAvoidance.getDoubleValue());
       timeSwitchCollapseAvoidance.set(yoTime.getDoubleValue());
 
-      useSingularityAvoidanceInSwing = walkingControllerParameters.useSingularityAvoidanceInSwing();
-      useSingularityAvoidanceInSupport = walkingControllerParameters.useSingularityAvoidanceInSupport();
+      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
+      useSingularityAvoidanceInSwing = swingTrajectoryParameters.useSingularityAvoidanceInSwing();
+      useSingularityAvoidanceInSupport = swingTrajectoryParameters.useSingularityAvoidanceInSupport();
 
       double deltaAwayFromLimit = Math.toRadians(20.0);
       if (hipPitchJoint.getJointAxis().getY() > 0.0)

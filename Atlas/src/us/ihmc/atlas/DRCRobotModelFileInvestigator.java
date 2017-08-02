@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class DRCRobotModelFileInvestigator
@@ -33,7 +34,7 @@ public class DRCRobotModelFileInvestigator
    {
       for (String st : AtlasRobotModelFactory.getAvailableRobotModels())
       {
-         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st, DRCRobotModel.RobotTarget.SCS, false));
+         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st, RobotTarget.SCS, false));
       }
    }
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
@@ -36,7 +36,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
-   
+
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
    private final DesiredJointDataHolder controllerDesiredJointDataHolder;
 
@@ -47,16 +47,16 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    private long estimatorClockStartTime;
    private long estimatorTick;
 
-   public ThreadDataSynchronizer(WholeBodyControllerParameters wholeBodyControlParameters)
+   public ThreadDataSynchronizer(FullHumanoidRobotModelFactory robotModelFactory)
    {
-      estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
+      estimatorFullRobotModel = robotModelFactory.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorCenterOfMassDataHolder = new CenterOfMassDataHolder();
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new DesiredJointDataHolder(estimatorFullRobotModel.getOneDoFJoints());
-      
+
       Map<RigidBody, ReferenceFrame> estimatorFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -64,14 +64,14 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       }
       estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFeetFrames);
 
-      controllerFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
+      controllerFullRobotModel = robotModelFactory.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       controllerCenterOfMassDataHolder = new CenterOfMassDataHolder();
       controllerContactSensorHolder = new ContactSensorHolder(Arrays.asList(controllerFullRobotModel.getContactSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
       controllerRobotMotionStatusHolder = new RobotMotionStatusHolder();
       controllerDesiredJointDataHolder = new DesiredJointDataHolder(controllerFullRobotModel.getOneDoFJoints());
-      
+
       Map<RigidBody, ReferenceFrame> controllerFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -79,7 +79,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       }
       controllerCenterOfPressureDataHolder = new CenterOfPressureDataHolder(controllerFeetFrames);
 
-      IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(wholeBodyControlParameters,
+      IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(robotModelFactory,
             estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
             estimatorCenterOfMassDataHolder, controllerCenterOfMassDataHolder,
             estimatorContactSensorHolder, controllerContactSensorHolder, estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
@@ -110,7 +110,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 
    @Override
    public void publishEstimatorState(long timestamp, long estimatorTick, long estimatorClockStartTime)
-   {      
+   {
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForWriting();
       estimatorStateHolder.setFromEstimatorModel(timestamp, estimatorTick, estimatorClockStartTime);
       estimatorStateCopier.commit();
@@ -127,7 +127,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    {
       return estimatorForceSensorDataHolder;
    }
-   
+
    @Override
    public CenterOfMassDataHolder getEstimatorCenterOfMassDataHolder()
    {
@@ -157,7 +157,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    {
       return controllerContactSensorHolder;
    }
-   
+
    @Override
    public ContactSensorHolder getEstimatorContactSensorHolder()
    {
@@ -205,7 +205,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    {
       return estimatorDesiredJointDataHolder;
    }
-   
+
    @Override
    public long getTimestamp()
    {

@@ -427,6 +427,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             {
                videoDataLoggers.get(i).timestampChanged(timestamp);
             }
+            lastReceivedTimestamp = timestamp;
          }
       }
    }

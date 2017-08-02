@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.WholeBodyPoseValidityTesterTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 
 public class AtlasWholeBodyPoseValidityTesterTest extends WholeBodyPoseValidityTesterTest
 {
