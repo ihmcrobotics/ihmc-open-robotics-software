@@ -15,7 +15,6 @@ public class Announcement
     public Announcement()
     {
         	identifier_ = new StringBuilder(255); 
-        	dataIP_ = new byte[4];
         	name_ = new StringBuilder(255); 
         	hostName_ = new StringBuilder(255); 
         	cameras_ = new IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, us.ihmc.robotDataLogger.CameraAnnouncement.class, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
@@ -29,18 +28,11 @@ public class Announcement
     {
         	identifier_.setLength(0);
         	identifier_.append(other.identifier_);
-        	for(int b = 0; b < dataIP_.length; ++b)
-        	{
-        	    	dataIP_[b] = other.dataIP_[b];	
-
-        	}
-        	
-        	dataPort_ = other.dataPort_;
         	name_.setLength(0);
         	name_.append(other.name_);
         	hostName_.setLength(0);
         	hostName_.append(other.hostName_);
-            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(modelFileDescription_, other.modelFileDescription_);log_ = other.log_;
+            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(other.modelFileDescription_, modelFileDescription_);log_ = other.log_;
 
     }
 
@@ -58,24 +50,6 @@ public class Announcement
     public StringBuilder getIdentifier()
     {
         return identifier_;
-    }
-
-        
-
-    public byte[] getDataIP()
-    {
-        return dataIP_;
-    }
-
-        
-    public void setDataPort(int dataPort)
-    {
-        dataPort_ = dataPort;
-    }
-
-    public int getDataPort()
-    {
-        return dataPort_;
     }
 
         
@@ -153,14 +127,6 @@ public class Announcement
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_);
                 
-                	for(int d = 0; d < dataIP_.length; ++d)
-                	{
-                	    returnedValue &= this.dataIP_[d] == otherMyClass.dataIP_[d];
-
-                	}        
-        returnedValue &= this.dataPort_ == otherMyClass.dataPort_;
-
-                
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
                 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.hostName_, otherMyClass.hostName_);
@@ -184,14 +150,6 @@ public class Announcement
       	builder.append("Announcement {");
         builder.append("identifier=");
         builder.append(this.identifier_);
-
-                builder.append(", ");
-        builder.append("dataIP=");
-        builder.append(Arrays.toString(this.dataIP_));
-
-                builder.append(", ");
-        builder.append("dataPort=");
-        builder.append(this.dataPort_);
 
                 builder.append(", ");
         builder.append("name=");
@@ -219,8 +177,6 @@ public class Announcement
     }
 
     private StringBuilder identifier_; 
-    private byte[] dataIP_; 
-    private int dataPort_; 
     private StringBuilder name_; 
     private StringBuilder hostName_; 
     private IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  cameras_; 

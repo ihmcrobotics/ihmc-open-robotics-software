@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.robotics.geometry.FrameMatrix3D;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -224,6 +225,29 @@ public class SelectionMatrix3D
       default:
          throw new IndexOutOfBoundsException(Integer.toString(axisIndex));
       }
+   }
+
+   /**
+    * Applies this selection matrix on the given vector:<br>
+    * v' = S * v<br>
+    * where v is the given vector, S this selection matrix, and v' the result of the selection.
+    * 
+    * @param vectorToBeModified the vector on which this selection matrix to be applied. Modified.
+    */
+   public void applySelection(FrameVector vectorToBeModified)
+   {
+      ReferenceFrame vectorFrame = vectorToBeModified.getReferenceFrame();
+      boolean canIgnoreSelectionFrame = canIgnoreSelectionFrame(vectorFrame);
+
+      if (!canIgnoreSelectionFrame)
+         vectorToBeModified.changeFrame(selectionFrame);
+
+      vectorToBeModified.setX(xSelected ? vectorToBeModified.getX() : 0.0);
+      vectorToBeModified.setY(ySelected ? vectorToBeModified.getY() : 0.0);
+      vectorToBeModified.setZ(zSelected ? vectorToBeModified.getZ() : 0.0);
+
+      if (!canIgnoreSelectionFrame)
+         vectorToBeModified.changeFrame(vectorFrame);
    }
 
    /**
@@ -488,5 +512,5 @@ public class SelectionMatrix3D
          return false;
       return true;
    }
-   
+
 }

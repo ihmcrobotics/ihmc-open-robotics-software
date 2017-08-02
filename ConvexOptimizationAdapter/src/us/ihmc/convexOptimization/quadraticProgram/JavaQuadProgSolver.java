@@ -39,7 +39,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  *     CE^T x = ce0
  *     CI^T x <= ci0
  */
-public class JavaQuadProgSolver
+public class JavaQuadProgSolver implements ActiveSetQPSolver
 {
    private enum QuadProgStep {step1, step2, step2a, step2b};
 
@@ -101,17 +101,25 @@ public class JavaQuadProgSolver
    private int constraintIndexForMinimumStepLength;
 
    private int maxNumberOfIterations = 100;
+   private double convergenceThreshold = Double.MIN_VALUE;
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
 
 
+   @Override
+   public void setConvergenceThreshold(double convergenceThreshold)
+   {
+      this.convergenceThreshold = convergenceThreshold;
+   }
 
+   @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
       this.maxNumberOfIterations = maxNumberOfIterations;
    }
 
+   @Override
    public void clear()
    {
       problemSize = 0;
@@ -137,6 +145,7 @@ public class JavaQuadProgSolver
       upperBoundsDVector.reshape(0, 0);
    }
 
+   @Override
    public void setLowerBounds(DenseMatrix64F variableLowerBounds)
    {
       if (variableLowerBounds != null)
@@ -151,6 +160,7 @@ public class JavaQuadProgSolver
       }
    }
 
+   @Override
    public void setUpperBounds(DenseMatrix64F variableUpperBounds)
    {
       if (variableUpperBounds != null)
@@ -165,22 +175,7 @@ public class JavaQuadProgSolver
       }
    }
 
-   public void setVariableBounds(DenseMatrix64F variableLowerBounds, DenseMatrix64F variableUpperBounds)
-   {
-      setLowerBounds(variableLowerBounds);
-      setUpperBounds(variableUpperBounds);
-   }
-
-   public void setVariableBounds(double[] variableLowerBounds, double[] variableUpperBounds)
-   {
-      setVariableBounds(MatrixTools.createVector(variableLowerBounds), MatrixTools.createVector(variableUpperBounds));
-   }
-
-   public void setQuadraticCostFunction(double[][] quadraticCostFunctionQMatrix, double[] quadraticCostFunctionQVector, double quadraticCostScalar)
-   {
-      setQuadraticCostFunction(new DenseMatrix64F(quadraticCostFunctionQMatrix), MatrixTools.createVector(quadraticCostFunctionQVector), quadraticCostScalar);
-   }
-
+   @Override
    public void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar)
    {
       problemSize = costQuadraticMatrix.getNumCols();
@@ -197,6 +192,7 @@ public class JavaQuadProgSolver
       this.quadraticCostScalar = quadraticCostScalar;
    }
 
+   @Override
    public double getObjectiveCost(DenseMatrix64F x)
    {
       multQuad(x, quadraticCostQMatrix, computedObjectiveFunctionValue);
@@ -215,13 +211,7 @@ public class JavaQuadProgSolver
       CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
    }
 
-
-
-   public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
-   {
-      setLinearEqualityConstraints(new DenseMatrix64F(linearEqualityConstraintsAMatrix), MatrixTools.createVector(linearEqualityConstraintsBVector));
-   }
-
+   @Override
    public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
    {
       numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
@@ -241,11 +231,7 @@ public class JavaQuadProgSolver
       this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
    }
 
-   public void setLinearInequalityConstraints(double[][] linearInequalityConstraintsCMatrix, double[] linearInqualityConstraintsDVector)
-   {
-      setLinearInequalityConstraints(new DenseMatrix64F(linearInequalityConstraintsCMatrix), MatrixTools.createVector(linearInqualityConstraintsDVector));
-   }
-
+   @Override
    public void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector)
    {
       numberOfInequalityConstraints = linearInequalityConstraintCMatrix.getNumRows();
@@ -265,6 +251,7 @@ public class JavaQuadProgSolver
       this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
    }
 
+   @Override
    public int solve(double[] solutionToPack) throws NoConvergenceException
    {
       if (solutionToPack.length != problemSize)
@@ -294,6 +281,7 @@ public class JavaQuadProgSolver
       return numberOfIterations;
    }
 
+   @Override
    public int solve(DenseMatrix64F solutionToPack) throws NoConvergenceException
    {
       solutionToPack.reshape(problemSize, 1);
@@ -405,7 +393,7 @@ public class JavaQuadProgSolver
                psi += Math.min(0.0, sum);
             }
 
-            if (Math.abs(psi) < numberOfInequalityConstraints * Double.MIN_VALUE * c1 * c2 * 100.0)
+            if (Math.abs(psi) < numberOfInequalityConstraints * convergenceThreshold * c1 * c2 * 100.0)
             { // numerically there are not infeasibilities anymore
                return numberOfIterations;
             }

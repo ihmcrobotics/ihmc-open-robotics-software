@@ -73,7 +73,14 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>vel_mag,vel_ang,qd_d_yaw,lift_up,hug_parallel,leg_x_off,leg_y_off</Entry Boxes>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.AgileHexapod.AgileHexapodController.vel_mag,root.AgileHexapod.AgileHexapodController.vel_ang,root.AgileHexapod.AgileHexapodController.qd_d_yaw,root.AgileHexapod.AgileHexapodController.lift_up,root.AgileHexapod.AgileHexapodController.hug_parallel,root.AgileHexapod.AgileHexapodController.leg_x_off,root.AgileHexapod.AgileHexapodController.leg_y_off</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -116,8 +123,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.31375700515585847</Fix X>
-<Fix Y>-0.05040092652330524</Fix Y>
+<Fix X>-0.5</Fix X>
+<Fix Y>-0.049837</Fix Y>
 <Fix Z>0.2</Fix Z>
 </Fix Position>
 </Canvas 1>

@@ -26,8 +26,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingHeight = 0.0;
    private final FramePoint position = new FramePoint();
    private final FrameOrientation orientation = new FrameOrientation();
-   private final FramePoint expectedInitialPosition = new FramePoint();
-   private final FrameOrientation expectedInitialOrientation = new FrameOrientation();
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
@@ -58,8 +56,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingHeight = 0.0;
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
-      expectedInitialPosition.setToNaN();
-      expectedInitialOrientation.setToNaN();
       predictedContactPoints.clear();
       customPositionWaypoints.clear();
       swingTrajectory.clear();
@@ -77,18 +73,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
-
-      Point3D messageExpectedInitialLocation = message.getExpectedInitialLocation();
-      if (messageExpectedInitialLocation != null)
-      {
-         expectedInitialPosition.setIncludingFrame(worldFrame, messageExpectedInitialLocation);
-      }
-
-      Quaternion messageExpectedInitialOrientation = message.getExpectedInitialOrientation();
-      if (messageExpectedInitialOrientation != null)
-      {
-         expectedInitialOrientation.setIncludingFrame(worldFrame, messageExpectedInitialOrientation);
-      }
 
       Point3D[] originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
@@ -133,8 +117,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
-      expectedInitialPosition.setIncludingFrame(other.expectedInitialPosition);
-      expectedInitialOrientation.setIncludingFrame(other.expectedInitialOrientation);
 
       RecyclingArrayList<FramePoint> otherWaypointList = other.customPositionWaypoints;
       customPositionWaypoints.clear();
@@ -171,12 +153,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       this.position.set(position);
       this.orientation.set(orientation);
-   }
-
-   public void setExpectedInitialPose(Point3D position, Quaternion orientation)
-   {
-      this.expectedInitialPosition.set(position);
-      this.expectedInitialOrientation.set(orientation);
    }
 
    public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
@@ -244,16 +220,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public FrameOrientation getOrientation()
    {
       return orientation;
-   }
-
-   public FramePoint getExpectedInitialPosition()
-   {
-      return expectedInitialPosition;
-   }
-
-   public FrameOrientation getExpectedInitialOrientation()
-   {
-      return expectedInitialOrientation;
    }
 
    public RecyclingArrayList<Point2D> getPredictedContactPoints()

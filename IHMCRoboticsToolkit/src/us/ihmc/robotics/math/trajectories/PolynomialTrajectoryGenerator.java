@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
@@ -34,6 +34,7 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void initialize()
    {
       currentTime.set(0.0);
@@ -44,9 +45,31 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
 
    protected abstract void setPolynomial();
 
+   @Override
    public void compute(double time)
    {
+      if (Double.isNaN(time))
+      {
+         throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
+      }
+
       this.currentTime.set(time);
+
+      if (time < 0.0)
+      {
+         currentValue.set(initialPositionProvider.getValue());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+      if (time > trajectoryTime.getDoubleValue())
+      {
+         currentValue.set(finalPositionProvider.getValue());
+         currentVelocity.set(0.0);
+         currentAcceleration.set(0.0);
+         return;
+      }
+
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
       currentValue.set(polynomial.getPosition());
@@ -54,21 +77,25 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
       currentAcceleration.set(polynomial.getAcceleration());
    }
 
+   @Override
    public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
+   @Override
    public double getValue()
    {
       return currentValue.getDoubleValue();
    }
 
+   @Override
    public double getVelocity()
    {
       return currentVelocity.getDoubleValue();
    }
 
+   @Override
    public double getAcceleration()
    {
       return currentAcceleration.getDoubleValue();

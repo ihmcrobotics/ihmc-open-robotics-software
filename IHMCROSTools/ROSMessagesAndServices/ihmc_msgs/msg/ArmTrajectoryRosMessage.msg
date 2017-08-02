@@ -10,8 +10,7 @@
 # Specifies the side of the robot that will execute the trajectory.
 uint8 robot_side
 
-# List of trajectory points per joint. The expected joint ordering is from the closest joint to the
-# chest to the closest joint to the hand.
+# List of points in the trajectory.
 ihmc_msgs/OneDoFJointTrajectoryRosMessage[] joint_trajectory_messages
 
 # When OVERRIDE is chosen:  - The time of the first trajectory point can be zero, in which case the
@@ -39,11 +38,11 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
 # "execution_mode" enum values:
 uint8 OVERRIDE=0 # This message will override the previous.
 uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
+
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

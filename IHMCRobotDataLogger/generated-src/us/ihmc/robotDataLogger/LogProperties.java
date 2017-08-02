@@ -30,9 +30,9 @@ public class LogProperties
         	version_.append(other.version_);
         	name_.setLength(0);
         	name_.append(other.name_);
-           	us.ihmc.robotDataLogger.VariablesPubSubType.staticCopy(variables_, other.variables_);us.ihmc.robotDataLogger.ModelPubSubType.staticCopy(model_, other.model_);timestamp_.setLength(0);
+           	us.ihmc.robotDataLogger.VariablesPubSubType.staticCopy(other.variables_, variables_);us.ihmc.robotDataLogger.ModelPubSubType.staticCopy(other.model_, model_);timestamp_.setLength(0);
         	timestamp_.append(other.timestamp_);
-            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.VideoPubSubType.staticCopy(video_, other.video_);
+            cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.VideoPubSubType.staticCopy(other.video_, video_);
     }
 
         public void setVersion(String version)

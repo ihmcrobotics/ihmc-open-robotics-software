@@ -14,8 +14,10 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
@@ -786,7 +788,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSolutionMethodsAreAllConsistent()
+   public void testSolutionMethodsAreAllConsistent() throws NoConvergenceException
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
 
@@ -1434,6 +1436,26 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    public void testFindValidSolutionForDataset20160319()
    {
       ActualDatasetFrom20160319 dataset = new ActualDatasetFrom20160319();
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      solver.clear();
+      solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
+      DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
+      solver.solve(solution);
+
+      assertFalse(MatrixTools.containsNaN(solution));
+   }
+
+   /**
+    * Test with dataset of a Kiwi simulation performing a fast pace gait.
+    * It seems that the problem is related to the fact that the robot has 6 contact points per foot.
+    * The solver still fails when increasing the max number of iterations.
+    */
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 30000)
+   public void testFindValidSolutionForKiwiDataset20170712()
+   {
+      ActualDatasetFromKiwi20170712 dataset = new ActualDatasetFromKiwi20170712();
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
       solver.clear();
       solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);

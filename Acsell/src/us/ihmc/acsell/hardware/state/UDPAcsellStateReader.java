@@ -15,8 +15,8 @@ import java.nio.channels.MembershipKey;
 import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.robotDataLogger.util.LogUtils;
 
 public class UDPAcsellStateReader
 {
@@ -52,7 +52,7 @@ public class UDPAcsellStateReader
 
       if (receiveBuffer.remaining() != 1048)
       {
-         throw new IOException("ReceiveBuffer is not the correct size");
+         throw new IOException("RegistryReceiveBuffer is not the correct size");
       }
 
       long currentTime = RealtimeThread.getCurrentMonotonicClockTime();

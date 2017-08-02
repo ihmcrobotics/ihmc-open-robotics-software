@@ -4,6 +4,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -25,7 +26,7 @@ public class ValkyriePushRecoveryTrack
    
    public static void main(String[] args) throws JSAPException
    {
-      DRCRobotModel model = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.SCS, false);
       final double groundHeight = 0.0;
 
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);

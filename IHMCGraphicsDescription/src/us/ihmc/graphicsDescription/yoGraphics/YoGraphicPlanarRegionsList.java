@@ -15,6 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
@@ -34,7 +35,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.gui.GraphicsUpdatable;
 
 /**
  * {@link YoGraphic} that can display {@link PlanarRegionsList} locally, with SCS for instance, and remotely, with SCSVisualizer for instance.

@@ -15,7 +15,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.logger.NetworkStreamVideoDataLogger;
 
@@ -103,7 +102,7 @@ public class GUICaptureRecorder extends JFrame
          target = new File(System.getProperty("user.home") + "/robotLogs/", timestamp + "_" + settings.toString() + "_UILog");
          target.mkdirs();
 
-         LogProperties logProperties = new LogProperties();
+//         LogProperties logProperties = new LogProperties();
          
 //         currentLogger = new NetworkStreamVideoDataLogger(listen.getAddress(), target, logProperties, address);
          start.setEnabled(false);
