@@ -1,13 +1,13 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 
 public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
 {
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
 
-   public ValkyrieSwingTrajectoryParameters(DRCRobotModel.RobotTarget target)
+   public ValkyrieSwingTrajectoryParameters(RobotTarget target)
    {
       this.target = target;
    }

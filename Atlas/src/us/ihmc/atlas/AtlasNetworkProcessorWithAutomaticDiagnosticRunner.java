@@ -10,6 +10,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -56,18 +57,18 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         }
         try
         {
-           DRCRobotModel.RobotTarget target;
+           RobotTarget target;
            if(config.getBoolean(runningOnRealRobot.getID()))
            {
-              target = DRCRobotModel.RobotTarget.REAL_ROBOT;
+              target = RobotTarget.REAL_ROBOT;
            }
            else if(config.getBoolean(runningOnGazebo.getID()))
            {
-             target = DRCRobotModel.RobotTarget.GAZEBO;
+             target = RobotTarget.GAZEBO;
            }
            else
            {
-              target = DRCRobotModel.RobotTarget.SCS;
+              target = RobotTarget.SCS;
            }
            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)

@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.List;
 
-public class FootstepPlanningParameterization
+public class FootstepPlanningParameters
 {
    protected List<FootstepOffset> offsetList;
    protected double footWidth;

@@ -28,13 +28,13 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.logging.LogTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.wanderer.hardware.output.WandererOutputWriter;
 import us.ihmc.wanderer.hardware.sensorReader.WandererSensorReaderFactory;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
@@ -130,6 +130,8 @@ public class WandererControllerFactory
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
+      WandererOutputProcessor outputProcessor = new WandererOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
+      controllerThread.addOutputProcessorToController(outputProcessor);
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
       if (wandererAffinity.setAffinity())

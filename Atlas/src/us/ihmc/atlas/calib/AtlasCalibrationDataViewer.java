@@ -13,6 +13,7 @@ import org.apache.tools.zip.ZipFile;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -172,7 +173,7 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    public static void main(String[] args)
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.SCS, false);
 	  
       AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator(robotModel);
       calib.loadData("data/manip_motions/log4.zip");

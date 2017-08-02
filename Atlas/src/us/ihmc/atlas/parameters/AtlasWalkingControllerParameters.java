@@ -10,8 +10,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -31,27 +37,23 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
-   private final double neckPitchUpperLimit = 1.14494;    // 0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
-   private final double neckPitchLowerLimit = -0.602139;    // -0.610865;    // -math.pi/2.0;
-   private final double headYawLimit = Math.PI / 4.0;
-   private final double headRollLimit = Math.PI / 4.0;
    private final double spineYawLimit = Math.PI / 4.0;
    private final double spinePitchUpperLimit = 0.4;
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
@@ -81,7 +83,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
-   public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+   public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       this.target = target;
       this.jointMap = jointMap;
@@ -94,7 +96,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
 
-      runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
       legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
@@ -198,21 +200,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public boolean isNeckPositionControlled()
-   {
-      if (runningOnRealRobot)
-         return true;
-      else
-         return false;
-   }
-
-   @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-         return new String[] {jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH)};
-   }
-
-   @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
       String[] defaultChestOrientationControlJointNames = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
@@ -266,30 +253,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return neckPitchUpperLimit;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return neckPitchLowerLimit;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return headYawLimit;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return headRollLimit;
    }
 
    @Override
@@ -475,8 +438,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
@@ -494,8 +456,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
    {
       YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
 
@@ -511,18 +472,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 3.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] {0.0, 0.67, 0.0};
    }
 
    @Override

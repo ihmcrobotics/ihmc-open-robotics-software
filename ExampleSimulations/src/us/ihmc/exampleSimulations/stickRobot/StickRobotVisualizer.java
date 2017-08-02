@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -30,7 +30,7 @@ public class StickRobotVisualizer
       // The first argument suggests that the robot is loaded for the SCS platform
       // The default model of the robot from the resources directory would be called.
       // It would create the robot description from the SDF file
-      StickRobotModel robotModel = new StickRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      StickRobotModel robotModel = new StickRobotModel(RobotTarget.SCS, false);
 
       // Setting the pelvis joint
       FloatingRootJointRobot stickRobot = robotModel.createHumanoidFloatingRootJointRobot(false);

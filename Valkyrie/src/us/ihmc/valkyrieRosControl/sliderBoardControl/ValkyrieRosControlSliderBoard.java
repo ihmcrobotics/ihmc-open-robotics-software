@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
