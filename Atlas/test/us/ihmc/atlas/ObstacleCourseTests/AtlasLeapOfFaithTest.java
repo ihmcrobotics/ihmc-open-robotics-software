@@ -26,7 +26,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
@@ -35,7 +35,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
    }
 
@@ -44,17 +44,16 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.12;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownOneFootOnEachStepLong(stepDownHeight);
    }
 
-   // FIXME
    @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.12;
+      double stepDownHeight = 0.09;
       super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight);
    }
 
@@ -65,7 +64,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    {
       double maxStepIncrease = 0.07;
       double maxStepHeight = 0.04;
-      double minStepHeight = -0.12;
+      double minStepHeight = -0.10;
       super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
    }
 
@@ -74,7 +73,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
@@ -162,11 +161,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
-      @Override
-      public double getPelvisReachingFractionOfSwing()
-      {
-         return 0.90;
-      }
    }
 
    public static void main(String[] args) throws Exception

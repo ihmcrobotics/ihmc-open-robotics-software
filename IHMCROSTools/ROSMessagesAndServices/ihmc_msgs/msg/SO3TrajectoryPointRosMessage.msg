@@ -8,12 +8,10 @@
 # starts.
 float64 time
 
-# Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world
-# frame.
+# Define the desired 3D orientation to be reached at this trajectory point.
 geometry_msgs/Quaternion orientation
 
-# Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in
-# world frame.
+# Define the desired 3D angular velocity to be reached at this trajectory point.
 geometry_msgs/Vector3 angular_velocity
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id

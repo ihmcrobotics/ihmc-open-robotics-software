@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -60,7 +60,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private ArrayList<String> positionControlledJoints = null;
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
@@ -75,7 +75,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       this.target = target;
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-      straightLegWalkingParameters = new ValkyrieStraightLegWalkingParameters(runningOnRealRobot);
+      legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new ValkyrieToeOffParameters();
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
 
@@ -1171,9 +1171,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   public LegConfigurationParameters getLegConfigurationParameters()
    {
-      return straightLegWalkingParameters;
+      return legConfigurationParameters;
    }
 
    /** {@inheritDoc} */
