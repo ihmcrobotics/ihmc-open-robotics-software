@@ -18,11 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.aStar.implementations.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -187,14 +183,15 @@ public class AStarPlanarRegionsPlannerTest
       RobotSide startSide = RobotSide.LEFT;
 
       // create planner
-      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz);
 
       // plan
       planner.setPlanarRegions(planarRegionsList);

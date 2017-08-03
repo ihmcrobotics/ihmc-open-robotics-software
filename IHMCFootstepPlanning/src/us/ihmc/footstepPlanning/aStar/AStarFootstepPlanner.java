@@ -12,12 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
-import us.ihmc.footstepPlanning.aStar.implementations.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.footstepPlanning.aStar.implementations.*;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -46,22 +41,25 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
+   private final FootstepNodeSnapper snapper;
 
    private double timeout = Double.POSITIVE_INFINITY;
 
-   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion, FootstepCost stepCostCalculator)
+   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion, FootstepCost stepCostCalculator,
+                               FootstepNodeSnapper snapper)
    {
-      this(nodeChecker, heuristics, expansion, stepCostCalculator, null);
+      this(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null);
    }
 
    public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion,
-         FootstepCost stepCostCalculator, GraphVisualization visualization)
+         FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, GraphVisualization visualization)
    {
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
       this.stepCostCalculator = stepCostCalculator;
       this.visualization = visualization;
+      this.snapper = snapper;
    }
 
    public void setWeight(double weight)
@@ -94,6 +92,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
          goalNodePose.setY(side.negateIfRightSide(DEFAULT_STEP_WIDTH / 2.0));
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
+
+         boolean validGoalNode = snapper.snapFootstepNode(goalNode);
+//         if(!validGoalNode)
+//            throw new RuntimeException("Invalid goal node. Failed to snap to planar regions");
+
          goalNodes.put(side, goalNode);
       }
    }
@@ -102,7 +105,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      nodeChecker.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegions(planarRegionsList);
    }
 
    public void setFootPolygons(SideDependentList<ConvexPolygon2D> footPolygons)
@@ -127,29 +130,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepPlan plan = new FootstepPlan();
       List<FootstepNode> path = graph.getPathFromStart(goalNode);
       for (int i = 1; i < path.size(); i++)
-         plan.addFootstep(path.get(i).getRobotSide(), createPoseFromNode(path.get(i)));
-      return plan;
-   }
-
-   private FramePose createPoseFromNode(FootstepNode node)
-   {
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(node.getYaw());
-      footstepPose.setTranslationX(node.getX());
-      footstepPose.setTranslationY(node.getY());
-
-      if (footPolygons != null && planarRegionsList != null)
       {
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(node.getRobotSide()));
-         RigidBodyTransform worldToSole = new RigidBodyTransform();
-         worldToSole.setRotationYawAndZeroTranslation(node.getYaw());
-         worldToSole.setTranslation(node.getX(), node.getY(), 0.0);
-         footPolygon.applyTransformAndProjectToXYPlane(worldToSole);
-         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList);
-         snapTransform.transform(footstepPose);
+         RobotSide robotSide = path.get(i).getRobotSide();
+         RigidBodyTransform soleTransform = path.get(i).getSoleTransform();
+         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), soleTransform));
       }
 
-      return new FramePose(ReferenceFrame.getWorldFrame(), footstepPose);
+      return plan;
    }
 
    private void initialize()
@@ -162,6 +149,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
       graph = new FootstepGraph(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
+
+      boolean validStartNode = snapper.snapFootstepNode(startNode);
+      if(!validStartNode)
+         throw new RuntimeException("Start node doesn't snap");
+
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       goalNode = null;
@@ -203,6 +195,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
+            boolean successfulSnap = snapper.snapFootstepNode(neighbor);
+            if(!successfulSnap)
+               continue;
+
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
                continue;
 
@@ -244,28 +240,30 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createDefaultPlanner(GraphVisualization viz)
+   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz)
    {
-      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
 
-      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz);
    }
 
    public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons);
+      StepHeightBasedNodeChecker nodeChecker = new StepHeightBasedNodeChecker();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz);
       planner.setFootPolygons(footPolygons);
       return planner;
    }
