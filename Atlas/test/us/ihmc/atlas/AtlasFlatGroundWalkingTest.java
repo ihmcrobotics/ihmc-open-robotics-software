@@ -7,6 +7,7 @@ import org.junit.internal.AssumptionViolatedException;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -24,7 +25,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test(timeout = 950000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       super.testFlatGroundWalking(robotModel, true);
    }
 
@@ -38,7 +39,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
          Assume.assumeTrue(BambooTools.isNightlyBuild());
          BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
-         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }

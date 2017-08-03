@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.obstacleCourse;
 import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -14,7 +15,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
    
    @Override
    public DRCRobotModel getRobotModel()

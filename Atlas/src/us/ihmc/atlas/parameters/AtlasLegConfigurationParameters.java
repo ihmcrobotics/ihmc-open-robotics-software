@@ -1,13 +1,13 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 
-public class AtlasStraightLegWalkingParameters extends StraightLegWalkingParameters
+public class AtlasLegConfigurationParameters extends LegConfigurationParameters
 {
    private final boolean runningOnRealRobot;
 
-   public AtlasStraightLegWalkingParameters(boolean runningOnRealRobot)
+   public AtlasLegConfigurationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }

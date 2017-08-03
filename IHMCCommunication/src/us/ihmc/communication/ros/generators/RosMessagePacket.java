@@ -17,4 +17,5 @@ public @interface RosMessagePacket
    String documentation();
    String topic() default NO_CORRESPONDING_TOPIC_STRING;
    String rosPackage();
+   boolean isIHMCPacket() default true;
 }

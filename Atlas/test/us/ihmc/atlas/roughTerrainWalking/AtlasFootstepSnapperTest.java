@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -38,7 +38,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
       boolean assertPositionConditions = true;
       boolean assertPointConditions = false;
       boolean visualizeAndKeepUp = false;
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters();
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       FootSpoof footSpoof = new FootSpoof("footSpoof", 0.0, 0.0, 0.0, atlasFootstepParameters.getFootForwardOffset(), atlasFootstepParameters.getFootBackwardOffset(), atlasFootstepParameters.getToeWidth()/2.0, 0.0);

@@ -228,7 +228,7 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       if (linearVelocity != null && other.linearVelocity == null)
          return false;
 
-      if (!MathTools.epsilonEquals(time, other.time, epsilon))
+      if (!MathTools.epsilonCompare(time, other.time, epsilon))
          return false;
       if (!position.epsilonEquals(other.position, epsilon))
          return false;

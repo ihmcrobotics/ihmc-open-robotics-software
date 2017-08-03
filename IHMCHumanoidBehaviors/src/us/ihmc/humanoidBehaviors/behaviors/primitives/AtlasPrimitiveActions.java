@@ -5,9 +5,10 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AtlasPrimitiveActions
 {
@@ -41,11 +42,13 @@ public class AtlasPrimitiveActions
    public HumanoidReferenceFrames referenceFrames;
 
    public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime,
-         WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
+                                FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
+                                WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
+
+      WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       addPrimitive(walkToLocationPlannedBehavior);
@@ -95,9 +98,9 @@ public class AtlasPrimitiveActions
       addPrimitive(setLidarParametersBehavior);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       addPrimitive(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
-      
+
 
    }
    private void addPrimitive(AbstractBehavior behavior)
