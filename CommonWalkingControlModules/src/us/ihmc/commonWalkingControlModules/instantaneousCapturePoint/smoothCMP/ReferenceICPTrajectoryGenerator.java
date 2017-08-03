@@ -87,7 +87,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
-   private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
+   private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding, YoBoolean isInitialTransfer,
                                           YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
@@ -242,6 +242,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          {
             icpToolbox.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
             
+            if(isInitialTransfer.getBooleanValue())
+            {
+               icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
+                                                                                 cmpTrajectories, omega0.getDoubleValue());
+            }
+            
             comToolbox.computeDesiredCenterOfMassCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, 
                                                                              comDesiredInitialPositions, comDesiredFinalPositions, 
                                                                              cmpTrajectories, comPositionDesiredInitialCurrentSegment, 
@@ -251,6 +257,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          else
          {
             icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
+            
+            if(isInitialTransfer.getBooleanValue())
+            {
+               icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
+                                                                                 cmpTrajectories, omega0.getDoubleValue());
+            }
 
             comToolbox.computeDesiredCenterOfMassCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, 
                                                                              comDesiredInitialPositions, comDesiredFinalPositions, 
@@ -265,11 +277,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpTerminalLength.set(icpDesiredFinalPositions.size());
       }
       
-      if(isInitialTransfer.getBooleanValue())
-      {
-         icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
-                                                                           cmpTrajectories, omega0.getDoubleValue());
-      }
    }
 
    @Override

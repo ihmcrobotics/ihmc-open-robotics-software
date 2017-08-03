@@ -35,13 +35,15 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment1 = new DenseMatrix64F(defaultSize, 1); 
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment2 = new DenseMatrix64F(defaultSize, 1); 
    
-   private final FramePoint cmp10 = new FramePoint();
-   private final FramePoint cmp11 = new FramePoint();
-   private final FramePoint cmp21 = new FramePoint();
-   private final FramePoint cmp22 = new FramePoint();
-   
    private List<FrameTuple<?, ?>> icpQuantityInitialSegment1List = new ArrayList<FrameTuple<?, ?>>();
    private FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
+   
+   private final SmoothCapturePointToolbox icpToolbox;
+   
+   public SmoothCapturePointAdjustmentToolbox(SmoothCapturePointToolbox smoothCapturePointToolbox)
+   {
+      this.icpToolbox = smoothCapturePointToolbox;
+   }
    
    public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                                    List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
@@ -65,17 +67,6 @@ public class SmoothCapturePointAdjustmentToolbox
    {
       YoFrameTrajectory3D cmpPolynomial3DSegment1 = cmpPolynomials3D.get(0);
       YoFrameTrajectory3D cmpPolynomial3DSegment2 = cmpPolynomials3D.get(1);
-      
-////      // this is very hack-ish
-//      cmpPolynomial3DSegment1.getFramePositionInitial(cmp10);
-//      cmpPolynomial3DSegment1.getFramePositionFinal(cmp11);
-//      cmpPolynomial3DSegment2.getFramePositionInitial(cmp21);
-//      cmpPolynomial3DSegment2.getFramePositionFinal(cmp22);
-//      
-//      // WORKS ONLY FOR LINEAR CASE
-//      double tAdjusted1 = 0.3 * (cmpPolynomial3DSegment2.getFinalTime() - cmpPolynomial3DSegment1.getInitialTime());
-//      cmpPolynomial3DSegment1.setLinear(cmpPolynomial3DSegment1.getInitialTime(), tAdjusted1, cmp10, cmp11);
-//      cmpPolynomial3DSegment2.setLinear(tAdjusted1, cmpPolynomial3DSegment2.getFinalTime(), cmp21, cmp22);
 
       FramePoint icpPositionFinalSegment2 = exitCornerPointsToPack.get(1);
 
@@ -90,21 +81,7 @@ public class SmoothCapturePointAdjustmentToolbox
          computeAdjustedPolynomialCoefficientVectors1D();
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
       }
-      SmoothCapturePointTools.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
-      
-      double t0 = cmpPolynomial3DSegment1.getInitialTime();
-      double t1 = cmpPolynomial3DSegment1.getFinalTime();
-      double t2 = cmpPolynomial3DSegment2.getFinalTime();
-      
-      PrintTools.debug("Timings = (" + t0 + ", " + t1 + ", " + t2 + ")");
-      cmpPolynomial3DSegment1.compute(t0);
-      PrintTools.debug("CMP10 = " + cmpPolynomial3DSegment1.getPosition().toString());
-      cmpPolynomial3DSegment1.compute(t1);
-      PrintTools.debug("CMP11 = " + cmpPolynomial3DSegment1.getPosition().toString());
-      cmpPolynomial3DSegment2.compute(t1);
-      PrintTools.debug("CMP21 = " + cmpPolynomial3DSegment2.getPosition().toString());
-      cmpPolynomial3DSegment2.compute(t2);
-      PrintTools.debug("CMP22 = " + cmpPolynomial3DSegment2.getPosition().toString());
+      icpToolbox.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
    }   
    
    private void adjustCMPPolynomials(YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
@@ -131,7 +108,7 @@ public class SmoothCapturePointAdjustmentToolbox
       }
    }
    
-   private  double generalizedBoundaryConditionValue = Double.NaN;
+   private double generalizedBoundaryConditionValue = Double.NaN;
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1 = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2 = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1Transpose = new DenseMatrix64F(defaultSize, 1);
@@ -229,14 +206,14 @@ public class SmoothCapturePointAdjustmentToolbox
    private void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment2)
    {
       double tInitial2 = cmpPolynomialSegment2.getInitialTime();
-      SmoothCapturePointTools.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, alphaPrimeRowSegment2, betaPrimeRowSegment2, 
+      icpToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, alphaPrimeRowSegment2, betaPrimeRowSegment2, 
                                                                               gammaPrimeMatrixSegment2, alphaBetaPrimeRowSegment2);
    }
    
    private void calculateGeneralizedICPMatricesOnCMPSegment1(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment1)
    {
       double tInitial1 = cmpPolynomialSegment1.getInitialTime();
-      SmoothCapturePointTools.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial1, derivativeOrder, cmpPolynomialSegment1, generalizedAlphaPrimeRowSegment1, 
+      icpToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial1, derivativeOrder, cmpPolynomialSegment1, generalizedAlphaPrimeRowSegment1, 
                                                                               generalizedBetaPrimeRowSegment1, generalizedGammaPrimeMatrixSegment1, generalizedAlphaBetaPrimeRowSegment1);
    }
    
