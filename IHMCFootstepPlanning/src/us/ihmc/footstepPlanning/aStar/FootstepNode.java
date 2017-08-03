@@ -14,7 +14,7 @@ public class FootstepNode
    private final int yIndex;
    private final int yawIndex;
    private final RobotSide robotSide;
-   private RigidBodyTransform soleTransform;
+   private final RigidBodyTransform soleTransform;
 
    public FootstepNode(double x, double y)
    {
@@ -27,7 +27,9 @@ public class FootstepNode
       yIndex = (int) Math.round(y / gridSizeY);
       yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
       this.robotSide = robotSide;
-      soleTransform = null;
+
+      soleTransform = new RigidBodyTransform();
+      soleTransform.setToNaN();
    }
 
    public double getX()
@@ -57,7 +59,7 @@ public class FootstepNode
 
    public void setSoleTransform(RigidBodyTransform soleTransform)
    {
-      this.soleTransform = soleTransform;
+      this.soleTransform.set(soleTransform);
    }
 
    public double euclideanDistance(FootstepNode other)
