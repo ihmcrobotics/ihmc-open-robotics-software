@@ -51,6 +51,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
+   public void testOverCinderBlockField()
+   {
+      testOverCinderBlockField(true);
+   }
+
    public void testOverCinderBlockField(boolean assertPlannerReturnedResult)
    {
       double startX = 0.0;

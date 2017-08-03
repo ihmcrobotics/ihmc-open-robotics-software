@@ -25,8 +25,8 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    private final FramePoint3D finalPositionInSpecificFrame = new FramePoint3D();
    private final FrameVector3D finalVelocityInSpecificFrame = new FrameVector3D();
 
-   private final FramePoint2D initialCoMPositionInSpecificFrame = new FramePoint2D();
-   private final FramePoint2D desiredCoMPosition = new FramePoint2D();
+   private final FramePoint3D initialCoMPositionInSpecificFrame = new FramePoint3D();
+   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
 
    private final YoDouble omega0;
 
@@ -49,9 +49,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void setInitialCoMPosition(YoFramePoint2d initialCoMPosition, ReferenceFrame attachedFrame)
+   public void setInitialCoMPosition(YoFramePoint initialCoMPosition, ReferenceFrame attachedFrame)
    {
-      initialCoMPosition.getFrameTuple2dIncludingFrame(initialCoMPositionInSpecificFrame);
+      initialCoMPosition.getFrameTupleIncludingFrame(initialCoMPositionInSpecificFrame);
       initialCoMPositionInSpecificFrame.changeFrame(attachedFrame);
    }
    
@@ -63,7 +63,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void computeFinalCoMPosition(FramePoint2D finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint3D finalCoMToPack)
    {
       computeCoMPosition(doubleSupportCapturePointTrajectory.getTrajectoryTime(), finalCoMToPack);
    }
@@ -87,7 +87,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       computeCoMPosition(time, desiredCoMPosition);
    }
 
-   public void computeCoMPosition(double time, FramePoint2D comPositionToPack)
+   public void computeCoMPosition(double time, FramePoint3D comPositionToPack)
    {
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
@@ -154,7 +154,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
-   public void getCoMPosition(YoFramePoint2d positionToPack)
+   public void getCoMPosition(YoFramePoint positionToPack)
    {
       positionToPack.set(desiredCoMPosition);
    }

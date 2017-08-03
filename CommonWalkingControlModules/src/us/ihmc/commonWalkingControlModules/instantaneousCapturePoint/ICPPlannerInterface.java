@@ -246,17 +246,6 @@ public interface ICPPlannerInterface
    void getDesiredCenterOfMassPosition(FramePoint2D desiredCenterOfMassPositionToPack);
 
    /**
-    * Gets the current CoM position.
-    * <p>
-    * The ICP planner has to be updated every control tick using the method
-    * {@link #compute(double)}.
-    * </p>
-    *
-    * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
-    */
-   void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack);
-
-   /**
     * Gets the current ICP velocity.
     * <p>
     * The ICP planner has to be updated every control tick using the method
@@ -465,7 +454,7 @@ public interface ICPPlannerInterface
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCenterOfMassPosition(FramePoint2D finalDesiredCenterOfMassPositionToPack);
+   void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
 
    /**
     * Retrieves the position of the next exit CMP.

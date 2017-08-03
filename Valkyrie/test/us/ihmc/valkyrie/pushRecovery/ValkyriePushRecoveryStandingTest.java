@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.pushRecovery;
 
 import us.ihmc.avatar.DRCPushRecoveryStandingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -13,7 +14,7 @@ public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTes
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
 
    @Override

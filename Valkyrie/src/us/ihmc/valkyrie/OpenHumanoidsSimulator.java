@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
@@ -78,7 +78,7 @@ public class OpenHumanoidsSimulator
             simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, true);
             System.out.println("Added extra foot contact points.");
          }
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model, simulationContactPoints);
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, model, simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();

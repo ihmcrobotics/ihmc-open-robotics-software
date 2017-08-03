@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,7 +46,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FramePoint2D[] intersectionWithRay = new FramePoint2D[] {new FramePoint2D(), new FramePoint2D()};
 
    public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+                                             ToeOffParameters toeOffParameters, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -56,7 +57,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       }
 
       toeOffContactInterpolation = new YoDouble(namePrefix + "ToeOffContactInterpolation", registry);
-      toeOffContactInterpolation.set(walkingControllerParameters.getToeOffContactInterpolation());
+      toeOffContactInterpolation.set(toeOffParameters.getToeOffContactInterpolation());
 
       hasComputedToeOffContactPoint = new YoBoolean(namePrefix + "HasComputedToeOffContactPoint", registry);
       hasComputedToeOffContactLine = new YoBoolean(namePrefix + "HasComputedToeOffContactLine", registry);

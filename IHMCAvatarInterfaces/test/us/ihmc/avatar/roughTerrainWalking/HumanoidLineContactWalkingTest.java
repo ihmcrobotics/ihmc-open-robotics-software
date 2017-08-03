@@ -17,7 +17,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -85,7 +84,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>();
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>();
    private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
-   private SideDependentList<YoEnum<ExplorationMethod>> explorationMethods = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
@@ -110,7 +108,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -164,7 +161,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -220,7 +216,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -397,8 +392,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
          YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
-         YoEnum<ExplorationMethod> explorationMethod = (YoEnum<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
-         explorationMethods.put(robotSide, explorationMethod);
       }
       allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");

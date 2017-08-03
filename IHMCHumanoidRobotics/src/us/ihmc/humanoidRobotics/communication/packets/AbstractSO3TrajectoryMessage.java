@@ -61,6 +61,13 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
       }
+
+      frameInformation.setTrajectoryReferenceFrameId(random.nextLong());
+      frameInformation.setDataReferenceFrameId(random.nextLong());
+
+      useCustomControlFrame = random.nextBoolean();
+
+      controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
    }
 
    public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> so3TrajectoryMessage)

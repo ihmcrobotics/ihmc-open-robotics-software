@@ -30,6 +30,9 @@ public class ICPQPOptimizationSolver
 
    private static final double deltaInside = 0.0001;
 
+   private static final int maxNumberOfIterations = 3;
+   private static final double convergenceThreshold = 1.0e-100;
+
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final ICPQPIndexHandler indexHandler;
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
@@ -253,6 +256,8 @@ public class ICPQPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
+      solver.setConvergenceThreshold(convergenceThreshold);
+      solver.setMaxNumberOfIterations(maxNumberOfIterations);
       /*
       if (!useQuadProg)
          activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());

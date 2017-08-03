@@ -9,9 +9,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootRotationProcessor implements LogDataProcessorFunction
 {
@@ -50,9 +50,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       {
          PartialFootholdControlModule partialFootholdControlModule = partialFootholdControlModules.get(robotSide);
 
-         if (logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.FULL
-               || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.EXPLORE_POLYGON
-               || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.HOLD_POSITION)
+         if (logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.FULL)
          {
             logDataProcessorHelper.getMeasuredCoP(robotSide, measuredCoP2d);
             logDataProcessorHelper.getDesiredCoP(robotSide, desiredCoP2d);

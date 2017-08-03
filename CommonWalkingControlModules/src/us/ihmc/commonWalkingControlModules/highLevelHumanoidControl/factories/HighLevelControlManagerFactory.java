@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -30,9 +34,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class HighLevelControlManagerFactory
 {
@@ -42,7 +47,6 @@ public class HighLevelControlManagerFactory
 
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
-   private HeadOrientationManager headOrientationManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private LegConfigurationManager legConfigurationManager;
@@ -275,8 +279,6 @@ public class HighLevelControlManagerFactory
          balanceManager.initialize();
       if (centerOfMassHeightManager != null)
          centerOfMassHeightManager.initialize();
-      if (headOrientationManager != null)
-         headOrientationManager.initialize();
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.initialize();
 
@@ -299,11 +301,6 @@ public class HighLevelControlManagerFactory
             ret.addCommand(template.getCommand(i));
       }
 
-      if (headOrientationManager != null)
-      {
-         ret.addCommand(headOrientationManager.createFeedbackControlTemplate());
-      }
-
       Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
       for (RigidBodyControlManager bodyManager : bodyManagers)
       {
@@ -312,7 +309,7 @@ public class HighLevelControlManagerFactory
       }
 
       ret.addCommand(centerOfMassHeightManager.createFeedbackControlTemplate());
-      
+
       if (pelvisOrientationManager != null)
       {
          ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());

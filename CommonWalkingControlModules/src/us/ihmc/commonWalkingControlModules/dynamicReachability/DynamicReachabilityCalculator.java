@@ -44,8 +44,9 @@ public class DynamicReachabilityCalculator
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = false;
    private static final boolean VISUALIZE_REACHABILITY = false;
-   private static final double epsilon = 0.005;
 
+   private static final double epsilon = 0.005;
+   private static final double stanceLegLengthToeOffFactor = 1.1;
 
    private static final double gradientThresholdForConsideration = 0.005;
 
@@ -127,7 +128,7 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<ReferenceFrame> predictedHipFrames = new SideDependentList<>();
    private final SideDependentList<Vector2dZUpFrame> stepDirectionFrames = new SideDependentList<>();
 
-   private final FramePoint2D adjustedCoMPosition = new FramePoint2D();
+   private final FramePoint3D adjustedCoMPosition = new FramePoint3D();
    private final FramePoint3D predictedCoMPosition = new FramePoint3D();
 
    private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
@@ -138,8 +139,8 @@ public class DynamicReachabilityCalculator
    private final FrameVector3D tempVector = new FrameVector3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FramePoint2D tempPoint2d = new FramePoint2D();
-   private final FramePoint2D tempFinalCoM = new FramePoint2D();
+   private final FramePoint3D tempPoint3d = new FramePoint3D();
+   private final FramePoint3D tempFinalCoM = new FramePoint3D();
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final double thighLength;
@@ -403,7 +404,7 @@ public class DynamicReachabilityCalculator
    {
       FramePoint3D ankleLocation = ankleLocations.get(supportSide);
       ankleLocation.changeFrame(worldFrame);
-      tempPoint2d.setIncludingFrame(ankleLocation);
+      tempPoint3d.set(ankleLocation);
 
       // get the hip location in XY
       tempPoint.setToZero(predictedHipFrames.get(supportSide));
@@ -411,13 +412,13 @@ public class DynamicReachabilityCalculator
       tempFinalCoM.setIncludingFrame(tempPoint);
 
       tempFinalCoM.changeFrame(worldFrame);
-      hipMaximumLocations.get(supportSide).set(tempFinalCoM, 0.0);
-      hipMinimumLocations.get(supportSide).set(tempFinalCoM, 0.0);
+      hipMaximumLocations.get(supportSide).set(tempFinalCoM);
+      hipMinimumLocations.get(supportSide).set(tempFinalCoM);
 
-      double planarDistance = tempFinalCoM.distance(tempPoint2d);
+      double planarDistance = tempFinalCoM.distance(tempPoint3d);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance >= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumStanceLegLength)
       {
          minimumHeight = 0.0;
       }
@@ -426,7 +427,7 @@ public class DynamicReachabilityCalculator
          minimumHeight = Math.sqrt(Math.pow(minimumStanceLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
-      if (planarDistance >= maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumStanceLegLength)
       {
          maximumHeight = 0.0;
       }
@@ -450,22 +451,22 @@ public class DynamicReachabilityCalculator
 
       FramePoint3D ankleLocation = ankleLocations.get(swingSide);
       ankleLocation.changeFrame(worldFrame);
-      tempPoint2d.setIncludingFrame(ankleLocation);
+      tempPoint2d.set(ankleLocation);
 
       tempPoint.setToZero(predictedHipFrames.get(swingSide));
       tempPoint.changeFrame(worldFrame);
       tempFinalCoM.setIncludingFrame(tempPoint);
 
-      double planarDistance = tempFinalCoM.distance(tempPoint2d);
+      double planarDistance = tempFinalCoM.distance(tempPoint3d);
 
       tempFinalCoM.changeFrame(worldFrame);
       ankleLocation.changeFrame(worldFrame);
 
-      hipMaximumLocations.get(swingSide).set(tempFinalCoM, 0.0);
-      hipMinimumLocations.get(swingSide).set(tempFinalCoM, 0.0);
+      hipMaximumLocations.get(swingSide).set(tempFinalCoM);
+      hipMinimumLocations.get(swingSide).set(tempFinalCoM);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance >= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumStepLegLength)
       {
          minimumHeight = 0.0;
       }
@@ -474,7 +475,7 @@ public class DynamicReachabilityCalculator
          minimumHeight = Math.sqrt(Math.pow(minimumStepLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
-      if (planarDistance >= maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumStepLegLength)
       {
          maximumHeight = 0.0;
       }
@@ -717,7 +718,7 @@ public class DynamicReachabilityCalculator
          minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
 
-      computeHeightLineFromStance(supportSide, minimumStanceLegLength, maximumLegLength.getDoubleValue());
+      computeHeightLineFromStance(supportSide, minimumStanceLegLength, stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue());
       computeHeightLineFromStep(nextFootstep, minimumStepLegLength, maximumLegLength.getDoubleValue());
 
       return stanceHeightLine.isOverlappingExclusive(stepHeightLine);
@@ -805,14 +806,14 @@ public class DynamicReachabilityCalculator
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
                minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
       else
       {
          minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
                minimumStanceLegLength, maximumLegLength.getDoubleValue());
          maximumStepHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+               stanceLegLengthToeOffFactor * maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
 
       tempPoint.setToZero(predictedCoMFrame);
@@ -1180,7 +1181,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.setSwingDuration(stepNumber, duration);
    }
 
-   private void applyVariation(FramePoint2D comToPack)
+   private void applyVariation(FramePoint3D comToPack)
    {
       if (isInTransfer)
          icpPlanner.computeFinalCoMPositionInTransfer();
@@ -1190,7 +1191,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
    }
 
-   private void initializePlan(FramePoint2D comToPack)
+   private void initializePlan(FramePoint3D comToPack)
    {
       double currentInitialTime = icpPlanner.getInitialTime();
 
@@ -1203,7 +1204,7 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private void computeGradient(FramePoint3D originalPosition, FramePoint2D adjustedPosition, double variation, FrameVector3D gradientToPack)
+   private void computeGradient(FramePoint3D originalPosition, FramePoint3D adjustedPosition, double variation, FrameVector3D gradientToPack)
    {
       originalPosition.changeFrame(worldFrame);
       tempPoint.setToZero(worldFrame);

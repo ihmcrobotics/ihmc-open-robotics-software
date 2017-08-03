@@ -101,11 +101,17 @@ public class JavaQuadProgSolver implements ActiveSetQPSolver
    private int constraintIndexForMinimumStepLength;
 
    private int maxNumberOfIterations = 100;
+   private double convergenceThreshold = Double.MIN_VALUE;
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
 
 
+   @Override
+   public void setConvergenceThreshold(double convergenceThreshold)
+   {
+      this.convergenceThreshold = convergenceThreshold;
+   }
 
    @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
@@ -387,7 +393,7 @@ public class JavaQuadProgSolver implements ActiveSetQPSolver
                psi += Math.min(0.0, sum);
             }
 
-            if (Math.abs(psi) < numberOfInequalityConstraints * Double.MIN_VALUE * c1 * c2 * 100.0)
+            if (Math.abs(psi) < numberOfInequalityConstraints * convergenceThreshold * c1 * c2 * 100.0)
             { // numerically there are not infeasibilities anymore
                return numberOfIterations;
             }
