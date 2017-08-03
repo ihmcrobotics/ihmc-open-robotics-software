@@ -334,7 +334,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
       throw new RuntimeException("to implement"); //TODOLater
    }
