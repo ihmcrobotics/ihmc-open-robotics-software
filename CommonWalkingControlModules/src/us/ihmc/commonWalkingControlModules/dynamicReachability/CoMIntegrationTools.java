@@ -1,8 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -475,4 +480,5 @@ public class CoMIntegrationTools
 
       return position;
    }
+
 }

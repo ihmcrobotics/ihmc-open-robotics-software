@@ -13,7 +13,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,9 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,6 +34,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
@@ -53,7 +51,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>(); // old hold position
    private SideDependentList<YoBoolean> holdFlat = new SideDependentList<>(); // new supportState
    private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
-   private SideDependentList<YoEnum<ExplorationMethod>> explorationMethods = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
@@ -93,8 +90,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             holdFlatDuringExploration.get(robotSide).set(true);
          if (smartHoldPosition.get(robotSide) != null)
             smartHoldPosition.get(robotSide).set(false);
-         if (explorationMethods.get(robotSide) != null)
-            explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
 
          if (holdFlat.get(robotSide) != null)
             holdFlat.get(robotSide).set(true);
@@ -166,8 +161,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             holdFlatDuringExploration.get(robotSide).set(true);
          if (smartHoldPosition.get(robotSide) != null)
             smartHoldPosition.get(robotSide).set(false);
-         if (explorationMethods.get(robotSide) != null)
-            explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
 
          if (holdFlat.get(robotSide) != null)
             holdFlat.get(robotSide).set(true);
@@ -282,8 +275,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
          YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
-         YoEnum<ExplorationMethod> explorationMethod = (YoEnum<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
-         explorationMethods.put(robotSide, explorationMethod);
          YoBoolean requestExplorationForFoot = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, longFootName + "RequestExploration");
          requestExploration.put(robotSide, requestExplorationForFoot);
          YoBoolean doPartialDetectionForFoot = (YoBoolean) drcSimulationTestHelper.getYoVariable(partialfootControlNamespace, footName + "DoPartialFootholdDetection");
