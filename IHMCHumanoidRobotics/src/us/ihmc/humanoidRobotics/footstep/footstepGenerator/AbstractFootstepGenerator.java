@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.Overhead
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -53,7 +53,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
    //TODO: Fix so not specific to Atlas...
-   private final FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+   private final QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
    private final QuadTreeFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
    private SideDependentList<Footstep> priorStanceFeet;
