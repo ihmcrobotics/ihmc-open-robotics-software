@@ -154,6 +154,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
       if(!validStartNode)
          throw new RuntimeException("Start node doesn't snap");
 
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         boolean validGoalNode = snapper.snapFootstepNode(goalNodes.get(robotSide));
+         if(!validGoalNode)
+            throw new RuntimeException("Goal node doesn't snap to planar regions");
+      }
+      
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       goalNode = null;
