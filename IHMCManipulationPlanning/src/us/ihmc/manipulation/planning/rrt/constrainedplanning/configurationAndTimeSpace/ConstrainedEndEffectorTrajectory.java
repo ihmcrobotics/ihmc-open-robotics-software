@@ -9,6 +9,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
 {
+   protected CTTaskNodeRegion taskNodeRegion;
    protected ConfigurationBuildOrder configurationBuildOrder;
    protected SelectionMatrix6D controllableSelectionMatrix;
    protected double trajectoryTime;
@@ -21,6 +22,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       this.robotSide = defineRobotSide();
       this.controllableSelectionMatrix = defineControllableSelectionMatrix();
       this.configurationBuildOrder = defineConfigurationBuildOrder();
+      this.taskNodeRegion = defineTaskNodeRegion();
    }
 
    public void setTrajectoryTime(double trajectoryTime)
@@ -63,6 +65,11 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       pose3D = new Pose3D(translation, orientation);
 
       return pose3D;
+   }
+   
+   public CTTaskNodeRegion getTaskNodeRegion()
+   {
+      return this.taskNodeRegion;
    }
 
    protected abstract RobotSide defineRobotSide();

@@ -2,7 +2,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import java.awt.Color;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
@@ -31,7 +30,7 @@ public class CTNodeVisualizer
        */
       plotter.setPreferredSize(700, 700);
 
-      plotter.setViewRange(2.0);
+      plotter.setViewRange(1.5);
       plotter.setXYZoomEnabled(true);
       plotter.setShowLabels(true);   
       plotter.setFocusPointX(0.5);

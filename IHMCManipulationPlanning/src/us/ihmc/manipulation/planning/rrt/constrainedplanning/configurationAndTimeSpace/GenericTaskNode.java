@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.FramePose;
 public class GenericTaskNode extends CTTaskNode
 {
    public static double handCoordinateOffsetX = -0.2;
+   public static int nodeDimension = 11;
    
    public GenericTaskNode()
    {

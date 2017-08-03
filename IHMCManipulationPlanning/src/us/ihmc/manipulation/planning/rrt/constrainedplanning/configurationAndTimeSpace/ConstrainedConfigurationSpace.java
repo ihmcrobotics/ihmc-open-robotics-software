@@ -7,4 +7,6 @@ public interface ConstrainedConfigurationSpace
    abstract SelectionMatrix6D defineControllableSelectionMatrix();
 
    abstract ConfigurationBuildOrder defineConfigurationBuildOrder();
+   
+   abstract CTTaskNodeRegion defineTaskNodeRegion();
 }

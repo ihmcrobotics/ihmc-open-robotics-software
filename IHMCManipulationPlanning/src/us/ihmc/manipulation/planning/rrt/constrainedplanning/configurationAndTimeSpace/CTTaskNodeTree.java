@@ -19,7 +19,7 @@ public class CTTaskNodeTree
 
    private ArrayList<CTTaskNode> optimalPath = new ArrayList<CTTaskNode>();
 
-   private CTTaskNodeRegion nodeRegion;
+   private CTTaskNodeRegion nodeRegion = CTTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion();
 
    /*
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
@@ -41,7 +41,7 @@ public class CTTaskNodeTree
       this.rootNode = rootNode;
       this.wholeNodes.add(this.rootNode);
 
-      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
+//      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
 
       this.dimensionOfTask = rootNode.getDimensionOfNodeData() - 1;
 
@@ -56,7 +56,7 @@ public class CTTaskNodeTree
       this.rootNode = rootNode;
       this.wholeNodes.add(this.rootNode);
 
-      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
+//      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
 
       this.dimensionOfTask = rootNode.getDimensionOfNodeData() - 1;
 

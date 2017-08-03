@@ -3,19 +3,18 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.xbill.DNS.Update;
-
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,17 +26,17 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 {
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private YoInteger updateCount = new YoInteger("UpdateCount", registry);
+   private final YoInteger updateCount = new YoInteger("UpdateCount", registry);
    
    /*
     * check the current pose is valid or not.
     */
-   private YoBoolean currentIsValid = new YoBoolean("CurrentIsValid", registry);
+   private final YoBoolean currentIsValid = new YoBoolean("CurrentIsValid", registry);
    
    /*
     * check the tree reaching the normalized time from 0.0 to 1.0.
     */
-   private YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
+   private final YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
    
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
@@ -67,7 +66,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       
       this.startYoVariableServer = startYoVariableServer;
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
-      // this.treeVisualizer = new CTTreeVisualizer(tree);
    }
 
    @Override
@@ -194,19 +192,19 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       PrintTools.info("initial node is " + rootNode.isValidNode());
 
       tree = new CTTaskNodeTree(rootNode);
-      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, GenericTaskNode.constrainedEndEffectorTrajectory.getTrajectoryTime());
-      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-      tree.getTaskNodeRegion().setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
-      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-      tree.getTaskNodeRegion().setRandomRegion(10, -150.0/180*Math.PI, 0.0/180*Math.PI);
+//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, GenericTaskNode.constrainedEndEffectorTrajectory.getTrajectoryTime());
+//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
+//      tree.getTaskNodeRegion().setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
+//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+//      tree.getTaskNodeRegion().setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
+//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
+//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
+//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
+//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
+//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
+//      tree.getTaskNodeRegion().setRandomRegion(10, -150.0/180*Math.PI, 150.0/180*Math.PI);
 
-      rootNode.convertDataToNormalizedData(tree.getTaskNodeRegion());
+      rootNode.convertDataToNormalizedData(GenericTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
       
       if(startYoVariableServer)
       {
@@ -235,6 +233,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             latestRequestReference.set(packet);
          }
       };
+   }
+   
+   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult()
+   {
+      ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
+      
+      
+      return result;
    }
 
 }
