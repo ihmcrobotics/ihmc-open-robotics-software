@@ -281,18 +281,12 @@ public class FeetManager
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
          controllerToolbox.restorePreviousFootContactPoints(robotSide);
-
-      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
-      supportFootControlModule.setAllowFootholdAdjustments(true);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
-
-      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
-      supportFootControlModule.setAllowFootholdAdjustments(false);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
