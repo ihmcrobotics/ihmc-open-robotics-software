@@ -36,8 +36,6 @@ public class CTTaskNodeTreeVisualizer
    {
       int dimensionOfTask = taskNodeTree.getDimensionOfTask();      
       
-      
-      
       for(int i=1;i<dimensionOfTask+1;i++)
       {
          if(taskNodeTree.getTaskNodeRegion().isEnable(i))

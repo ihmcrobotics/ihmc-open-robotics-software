@@ -208,7 +208,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if(visulaizerOn)
-         ThreadTools.sleep(10000);
+         ThreadTools.sleep(1);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -221,6 +221,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
 
+      /*
+       * reaching initial configuration
+       */
+//      Quaternion initialOrientation = new Quaternion();
+//      initialOrientation.appendRollRotation(Math.PI*0.5);
+//      initialOrientation.appendYawRotation(Math.PI*0.5);
+//      initialOrientation.appendPitchRotation(-Math.PI*0.3);
+//      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+//      drcBehaviorTestHelper.send(handTrajectoryMessage);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+            
       System.out.println("Send wakeup " + drcBehaviorTestHelper.getYoTime());
       ToolboxStateMessage toolboxMessage;
       
@@ -240,7 +251,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningToolboxHelper.setFullRobotModelFactory(getRobotModel());
       
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
-      packet.setNumberOfExpanding(1000);   
+      packet.setNumberOfExpanding(5);   
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       
       toolboxCommunicator.send(packet);
@@ -362,18 +373,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       rootNode.isValidNode();
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
-      
-//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
-//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-//      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
             
       tree.testMonteCarlo(50);
 
@@ -442,18 +441,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       rootNode.isValidNode();
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
-      
-//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
-//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-//      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
             
       tree.expandTree(500);
 
@@ -463,7 +450,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-    //  @Test
+//      @Test
    public void testForPoseOfGenericTaskNode() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -494,56 +481,47 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * constrained end effector trajectory (WorldFrame).
        */
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
-
-      GenericTaskNode.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-
-      /*
-       * tester
-       */
-      sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-      referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-      referenceFrames.updateFrames();
-
-      sdfFullRobotModel.updateFrames();
-      referenceFrames.updateFrames();
-      WheneverWholeBodyKinematicsSolver wbikTester = new WheneverWholeBodyKinematicsSolver(getRobotModel(), sdfFullRobotModel);
-
-      GenericTaskNode.nodeTester = wbikTester;
-      GenericTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-
+      
+      ConstrainedWholeBodyPlanningToolboxHelper.setConstrainedEndEffectorTrajectory(endeffectorTrajectory);
+      ConstrainedWholeBodyPlanningToolboxHelper.setInitialFullRobotModel(drcBehaviorTestHelper.getControllerFullRobotModel());
+      ConstrainedWholeBodyPlanningToolboxHelper.setFullRobotModelFactory(getRobotModel());
+      
       /*
        * put on generic task node
        */
       double initialPelvisHeight = sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      GenericTaskNode rootNode = new GenericTaskNode(0.0, initialPelvisHeight-0.1, 0.0, 0.0, 0.0);
       rootNode.setConfigurationJoints(sdfFullRobotModel);
-      rootNode.setNodeData(10, -0.4 * Math.PI); // is selected
+      
+      rootNode.setNodeData(2, -5.0/180 * Math.PI);
+      rootNode.setNodeData(3, -0.0/180 * Math.PI);
+      rootNode.setNodeData(10, -30.0/180 * Math.PI); // is selected
+       
       rootNode.setNodeData(9, -0.25 * Math.PI); // will be ignored.
 
-      GenericTaskNode node1 = new GenericTaskNode(1.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node1.setNodeData(10, -70.0/180 * Math.PI);
-      node1.setParentNode(rootNode);
-      
-      
-      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node2.setNodeData(10, -70.0/180 * Math.PI);
-      node2.setParentNode(node1);
-      
-      GenericTaskNode node3 = new GenericTaskNode(3.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node3.setNodeData(10, -70.0/180 * Math.PI);
-      node3.setParentNode(node2);
-      
-      GenericTaskNode node4 = new GenericTaskNode(4.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
-      node4.setNodeData(10, -70.0/180 * Math.PI);
-      node4.setParentNode(node3);
+//      GenericTaskNode node1 = new GenericTaskNode(1.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
+//      node1.setNodeData(10, -70.0/180 * Math.PI);
+//      node1.setParentNode(rootNode);
+//      
+//      
+//      GenericTaskNode node2 = new GenericTaskNode(2.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
+//      node2.setNodeData(10, -70.0/180 * Math.PI);
+//      node2.setParentNode(node1);
+//      
+//      GenericTaskNode node3 = new GenericTaskNode(3.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
+//      node3.setNodeData(10, -70.0/180 * Math.PI);
+//      node3.setParentNode(node2);
+//      
+//      GenericTaskNode node4 = new GenericTaskNode(4.0, initialPelvisHeight, -20.0/180 * Math.PI, 0.0/180 * Math.PI, 0.0 * Math.PI);
+//      node4.setNodeData(10, -70.0/180 * Math.PI);
+//      node4.setParentNode(node3);
       
 
       System.out.println(rootNode.isValidNode());
-      System.out.println(node1.isValidNode());
-      System.out.println(node2.isValidNode());
-      System.out.println(node3.isValidNode());
-      System.out.println(node4.isValidNode());
+//      System.out.println(node1.isValidNode());
+//      System.out.println(node2.isValidNode());
+//      System.out.println(node3.isValidNode());
+//      System.out.println(node4.isValidNode());
 
       /*
        * show the ik result
@@ -551,16 +529,16 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       FullHumanoidRobotModel createdFullRobotModel;
       HumanoidReferenceFrames createdReferenceFrames;
 
-      createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
+      createdFullRobotModel = GenericTaskNode.nodeTester.getDesiredFullRobotModel();
       createdReferenceFrames = new HumanoidReferenceFrames(createdFullRobotModel);
 
-      wbikTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
+      GenericTaskNode.nodeTester.printOutRobotModel(createdFullRobotModel, createdReferenceFrames.getMidFootZUpGroundFrame());
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
 
-      scs.addStaticLinkGraphics(getXYZAxis(node4.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(node3.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(node2.getEndEffectorPose()));
-      scs.addStaticLinkGraphics(getXYZAxis(node1.getEndEffectorPose()));
+//      scs.addStaticLinkGraphics(getXYZAxis(node4.getEndEffectorPose()));
+//      scs.addStaticLinkGraphics(getXYZAxis(node3.getEndEffectorPose()));
+//      scs.addStaticLinkGraphics(getXYZAxis(node2.getEndEffectorPose()));
+//      scs.addStaticLinkGraphics(getXYZAxis(node1.getEndEffectorPose()));
       scs.addStaticLinkGraphics(getXYZAxis(rootNode.getEndEffectorPose()));
 
       System.out.println("End");

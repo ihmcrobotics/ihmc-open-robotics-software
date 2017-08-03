@@ -28,4 +28,9 @@ public class ConstrainedWholeBodyPlanningToolboxHelper
       else
          PrintTools.error("should be define initial robot model see 'GenericTaskNode.initialRobotModel' ");
    }
+   
+   public static void setMaximumUpdateOfTester(int value)
+   {
+      CTTaskNode.nodeTester.maximumCntForUpdateInternal = value;
+   }
 }
