@@ -79,11 +79,6 @@ public class AngularMomentumEstimationParameters
       return copPlannerParameters.getCoPPointsToPlan();
    }
    
-   public EnumMap<CoPPointName, Double> getSegmentTimes()
-   {
-      return copPlannerParameters.getSegmentTimes();
-   }
-   
    public double getCoMHeight()
    {
       return 0.33;

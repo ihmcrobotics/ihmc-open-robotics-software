@@ -78,7 +78,7 @@ public class CoPPointsInFootTest
       List<CoPPointName> pointsList = copPointsInFoot.getCoPPointList();
       for (int i = 0; i < pointsList.size(); i++)
       {
-         assert (copPointsInFoot.get(CoPPointName.values[i]).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
+         assert (copPointsInFoot.get(i).getPosition().epsilonEquals(testLocation, Epsilons.ONE_BILLIONTH));
       }
    }   
 }
