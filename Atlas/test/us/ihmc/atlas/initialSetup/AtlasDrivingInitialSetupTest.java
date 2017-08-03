@@ -12,7 +12,7 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -30,7 +30,7 @@ public class AtlasDrivingInitialSetupTest
    public void testLoadFile()
    {
 	   AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties(1);
-      AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
       

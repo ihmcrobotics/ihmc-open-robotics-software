@@ -5,13 +5,13 @@ import java.io.IOException;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.multisenseMocapExperiments.MultisenseHeadOnAStickManualTestNetworkProcessor;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 
 public class MultiSenseBlobDetector
 {
    public MultiSenseBlobDetector()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.HEAD_ON_A_STICK, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.HEAD_ON_A_STICK, false);
 
       try
       {

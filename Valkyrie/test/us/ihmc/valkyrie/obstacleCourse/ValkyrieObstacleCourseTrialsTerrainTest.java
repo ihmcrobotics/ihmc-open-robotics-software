@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.obstacleCourse;
 import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -17,7 +18,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
    private final AdditionalSimulationContactPoints footContactPoints = new AdditionalSimulationContactPoints(3, 4, true, true);
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, footContactPoints);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, footContactPoints);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -29,7 +30,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
       FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 4, true, true);
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, simulationContactPoints);
       return robotModel;
    }
 

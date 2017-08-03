@@ -8,6 +8,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class AtlasStatisticsDisplay
@@ -28,7 +29,7 @@ public class AtlasStatisticsDisplay
 
          if (config.success())
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.SCS, false);
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
          }
          else
          {

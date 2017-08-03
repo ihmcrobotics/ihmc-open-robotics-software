@@ -8,6 +8,7 @@ import javax.swing.JButton;
 
 import us.ihmc.avatar.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,7 +33,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
    public ValkyrieDiagnosticsWhenHangingSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
@@ -290,7 +291,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
    private class ValkyrieRobotModelWithHoist extends ValkyrieRobotModel
    {
 
-      public ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget target, boolean headless)
+      public ValkyrieRobotModelWithHoist(RobotTarget target, boolean headless)
       {
          super(target, headless);
       }

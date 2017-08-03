@@ -6,6 +6,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
+import java.util.Random;
+
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>
       implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
@@ -22,6 +24,11 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+   }
+
+   public ChestHybridJointspaceTaskspaceTrajectoryCommand(Random random)
+   {
+      this(new ChestTrajectoryCommand(random), new SpineTrajectoryCommand(random));
    }
 
    @Override

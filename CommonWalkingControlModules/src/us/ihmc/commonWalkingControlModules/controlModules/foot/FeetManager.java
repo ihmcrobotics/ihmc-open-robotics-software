@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
@@ -70,7 +71,7 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters, registry);
+      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters.getToeOffParameters(), registry);
       ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
       ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
 
@@ -91,18 +92,17 @@ public class FeetManager
       YoSE3PIDGainsInterface swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
       YoSE3PIDGainsInterface holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
       YoSE3PIDGainsInterface toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
-      YoSE3PIDGainsInterface edgeTouchdownFootControlGains = walkingControllerParameters.createEdgeTouchdownFootControlGains(registry);
 
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
 
-      blindFootstepsHeightOffset.set(walkingControllerParameters.getBlindFootstepsHeightOffset());
+      blindFootstepsHeightOffset.set(walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset());
 
       parentRegistry.addChild(registry);
    }
@@ -281,18 +281,12 @@ public class FeetManager
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
          controllerToolbox.restorePreviousFootContactPoints(robotSide);
-
-      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
-      supportFootControlModule.setAllowFootholdAdjustments(true);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
-
-      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
-      supportFootControlModule.setAllowFootholdAdjustments(false);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
@@ -341,7 +335,7 @@ public class FeetManager
     * </p>
     * <ol>
     *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
     *   <li>desiredICP location being within the leading foot base of support.</li>
     *   <li>currentICP location being within the leading foot base of support.</li>
     *   <li>needToSwitchToToeOffForAnkleLimit</li>
@@ -373,7 +367,7 @@ public class FeetManager
     * </p>
     * <ol>
     *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
     *   <li>desiredICP location being within the leading foot base of support.</li>
     *   <li>currentICP location being within the leading foot base of support.</li>
     *   <li>needToSwitchToToeOffForAnkleLimit</li>

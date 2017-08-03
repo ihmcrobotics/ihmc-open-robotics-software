@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataLogger.Announcement;
@@ -87,7 +88,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
       try
       {
-        DRCRobotModel.RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? DRCRobotModel.RobotTarget.REAL_ROBOT : DRCRobotModel.RobotTarget.SCS;
+        RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? RobotTarget.REAL_ROBOT : RobotTarget.SCS;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
         int oneInNPacketsValue = DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ;

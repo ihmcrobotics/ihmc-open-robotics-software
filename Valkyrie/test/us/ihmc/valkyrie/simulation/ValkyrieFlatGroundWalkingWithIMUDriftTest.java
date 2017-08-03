@@ -8,6 +8,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCFlatGroundWalkingWithIMUDriftTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -35,7 +36,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
       BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
       String runName = "ValkyrieFlatGroundWalkingTest";
-      robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
       YoVariable[] allVariables = track.getSimulationConstructionSet().getAllVariablesArray();

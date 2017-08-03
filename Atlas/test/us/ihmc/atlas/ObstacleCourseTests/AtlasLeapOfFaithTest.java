@@ -1,12 +1,14 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import org.junit.Test;
+
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarLeapOfFaithTest;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -17,14 +19,14 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {
-   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
@@ -33,7 +35,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
    }
 
@@ -42,17 +44,16 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.12;
+      double stepDownHeight = 0.10;
       super.testUnknownStepDownOneFootOnEachStepLong(stepDownHeight);
    }
 
-   // FIXME
    @ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = {IntegrationCategory.SLOW})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.12;
+      double stepDownHeight = 0.09;
       super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight);
    }
 
@@ -63,7 +64,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    {
       double maxStepIncrease = 0.07;
       double maxStepHeight = 0.04;
-      double minStepHeight = -0.12;
+      double minStepHeight = -0.10;
       super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
    }
 
@@ -72,7 +73,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.13;
+      double stepDownHeight = 0.10;
       super.testDropOffsWhileWalking(stepDownHeight);
    }
 
@@ -92,7 +93,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    {
       private final TestWalkingParameters walkingParameters;
 
-      public TestModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
+      public TestModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
       {
          super(atlasVersion, target, headless);
          walkingParameters = new TestWalkingParameters(target, getJointMap(), getContactPointParameters());
@@ -109,7 +110,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
       private final TestLeapOfFaithParameters leapOfFaithParameters;
-      public TestWalkingParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+      public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
 
@@ -160,10 +161,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
-      public double getPelvisReachingFractionOfSwing()
-      {
-         return 0.90;
-      }
    }
 
    public static void main(String[] args) throws Exception
