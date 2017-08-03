@@ -56,7 +56,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    {
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      planner = AStarFootstepPlanner.createDefaultPlanner(visualization);
+      planner = AStarFootstepPlanner.createFlatGroundPlanner(visualization);
    }
 
    @After
