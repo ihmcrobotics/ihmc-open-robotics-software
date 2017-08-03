@@ -71,26 +71,24 @@ public class SmoothCoMIntegrationToolbox
       }
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FramePoint desiredCenterOfMassPositionToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassPositionToPack);
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FrameVector desiredCenterOfMassVelocityToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassVelocityToPack);
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FrameVector desiredCenterOfMassAccelerationToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassAccelerationToPack);
    }  
+   
    
    public void calculateCoMQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int comDerivativeOrder, 
                                                                            YoFrameTrajectory3D cmpPolynomial3D, 
@@ -141,6 +139,27 @@ public class SmoothCoMIntegrationToolbox
                                     icpPositionDesiredFinal, comPositionDesiredInitial);
    }
    
+   /**
+    * /**
+    * Compute the i-th derivative of x<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
+    * <P>
+    * x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
+    * (&alpha;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    *  - &beta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
+    *  + &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) * x<sub>ref,&phi;</sub>(t<sub>0,&phi;</sub>)
+    *  + &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) * (&xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    *   - &alpha;<sup>(0)</sup><sub>ICP,&phi;</sub>(T<sub>&phi;</sub>) * p<sub>&phi;</sub>)
+    *   
+    * @param generalizedAlphaBetaCoMPrimeMatrix = &alpha;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    *  - &beta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param generalizedGammaCoMPrimeMatrix = &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param generalizedDeltaCoMPrimeMatrix = &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param generalizedAlphaPrimeTerminalMatrix = &alpha;<sup>(0)</sup><sub>ICP,&phi;</sub>(T<sub>&phi;</sub>)
+    * @param polynomialCoefficientCombinedVector = p<sub>&phi;</sub>
+    * @param icpPositionDesiredFinal = &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    * @param comPositionDesiredInitial = x<sub>ref,&phi;</sub>(t<sub>0,&phi;</sub>)
+    * @param comQuantityDesired = x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
+    */
    public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, DenseMatrix64F generalizedGammaCoMPrimeMatrix, DenseMatrix64F generalizedDeltaCoMPrimeMatrix, 
                                              DenseMatrix64F generalizedAlphaPrimeTerminalMatrix, DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple<?, ?> icpPositionDesiredFinal, 
                                              FrameTuple<?, ?> comPositionDesiredInitial, FrameTuple<?, ?> comQuantityDesired)
@@ -194,6 +213,18 @@ public class SmoothCoMIntegrationToolbox
       return M1.get(0, 0);
    }
    
+   /**
+    * Compute the i-th derivative of &alpha;<sub>CoM,&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &alpha;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>k=0</sub><sup>n</sup> &Sigma;<sub>j=k</sub><sup>n</sup> (-1)<sup>k</sup> * &omega;<sub>0</sub><sup>-j</sup> *
+    * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
+    * 
+    * @param omega0
+    * @param time
+    * @param generalizedAlphaCoMPrime
+    * @param alphaCoMDerivativeOrder
+    * @param cmpPolynomial3D
+    */
    public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, 
                                                                       int alphaCoMDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {
@@ -234,6 +265,18 @@ public class SmoothCoMIntegrationToolbox
       }
    }
    
+   /**
+    * Compute the i-th derivative of &beta;<sub>CoM,&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &beta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>k=0</sub><sup>n</sup> &Sigma;<sub>j=k</sub><sup>n</sup> (-1)<sup>k+i</sup> * &omega;<sub>0</sub><sup>-j+i</sup> *
+    * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
+    * 
+    * @param omega0
+    * @param time
+    * @param generalizedBetaCoMPrime
+    * @param betaCoMDerivativeOrder
+    * @param cmpPolynomial3D
+    */
    public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, 
                                                                      int betaCoMDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {                  
@@ -275,6 +318,18 @@ public class SmoothCoMIntegrationToolbox
       }
    }
    
+   /**
+    * Compute the i-th derivative of &gamma;<sub>CoM,&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = (-1)<sup>i</sup> * &omega;<sub>0</sub><sup>i</sup> * 
+    * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-t<sub>&phi;</sub>)</sup>
+    * 
+    * @param omega0
+    * @param time
+    * @param generalizedGammaCoMPrime
+    * @param gammaCoMDerivativeOrder
+    * @param cmpPolynomial3D
+    */
    public void calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, 
                                                                       int gammaCoMDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {      
@@ -291,6 +346,18 @@ public class SmoothCoMIntegrationToolbox
       generalizedGammaCoMPrime.set(0, 0, ddGamaPrimeValue);
    }
    
+   /**
+    * Compute the i-th derivative of &delta;<sub>CoM,&phi;</sub> at time t<sub>&phi;</sub>:
+    * <P>
+    * &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = 0.5 * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-T<sub>&phi;</sub>)</sup> * (&omega;<sub>0</sub><sup>i</sup> * 
+    * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-t<sub>0,&phi;</sub>)</sup> - (-1)<sup>i</sup> * &omega;<sub>0</sub><sup>i</sup> * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-t<sub>&phi;</sub>)</sup>)
+    * 
+    * @param omega0
+    * @param time
+    * @param generalizedDeltaCoMPrime
+    * @param deltaCoMDerivativeOrder
+    * @param cmpPolynomial3D
+    */
    public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, 
                                                                       int deltaCoMDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D)
    {                  

@@ -45,10 +45,10 @@ public class SmoothCapturePointToolbox
       
    }
    
+   //TODO: implement validity checks
    /**
     * Backward iteration to determine &xi;<sub>ref,&phi;</sub>(0) and &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>) for all segments &phi;
     */
-   //TODO: implement validity checks
    public void computeDesiredCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                  List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
@@ -72,7 +72,6 @@ public class SmoothCapturePointToolbox
       }
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCornerPointsDecoupled(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                           List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
@@ -96,7 +95,6 @@ public class SmoothCapturePointToolbox
       }
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FramePoint desiredCapturePointToPack)
    {         
@@ -104,7 +102,6 @@ public class SmoothCapturePointToolbox
                                                                                    desiredCapturePointToPack);
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointPositionDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D, 
                                                                   FramePoint desiredCapturePointToPack)
    {  
@@ -117,7 +114,6 @@ public class SmoothCapturePointToolbox
       }
    }  
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
                                                          FrameVector desiredCapturePointVelocityToPack)
    {
@@ -125,7 +121,6 @@ public class SmoothCapturePointToolbox
                                                                                    desiredCapturePointVelocityToPack);
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointVelocityDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
                                                                   FrameVector desiredCapturePointVelocityToPack)
    {
@@ -138,7 +133,6 @@ public class SmoothCapturePointToolbox
       }
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
                                                              FrameVector desiredCapturePointAccelerationToPack)
    {
@@ -146,7 +140,6 @@ public class SmoothCapturePointToolbox
                                                                                    desiredCapturePointAccelerationToPack);
    }
    
-   //TODO: implement validity checks
    public void computeDesiredCapturePointAccelerationDecoupled(double omega0, double time, FramePoint finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
                                                                       FrameVector desiredCapturePointAccelerationToPack)
    {
@@ -214,9 +207,9 @@ public class SmoothCapturePointToolbox
     * Compute the i-th derivative of &xi;<sub>ref,&phi;</sub> at time t<sub>&phi;</sub>: 
     * <P>
     * &xi;<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>) = 
-    * (&alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)
-    *  - &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
-    *  + &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
+    * (&alpha;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>)
+    *  - &beta;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>)) * p<sub>&phi;</sub>
+    *  + &gamma;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
     * 
     * @param generalizedAlphaBetaPrimeMatrix
     * @param generalizedGammaPrimeMatrix
@@ -260,9 +253,9 @@ public class SmoothCapturePointToolbox
    }
    
    /**
-    * Compute the i-th derivative of &alpha;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * Compute the i-th derivative of &alpha;<sub>ICP,&phi;</sub> at time t<sub>&phi;</sub>:
     * <P>
-    * &alpha;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
+    * &alpha;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-j</sup> *
     * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
     * 
     * @param generalizedAlphaPrime
@@ -308,9 +301,9 @@ public class SmoothCapturePointToolbox
    }
    
    /**
-    * Compute the i-th derivative of &beta;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * Compute the i-th derivative of &beta;<sub>ICP,&phi;</sub> at time t<sub>&phi;</sub>:
     * <P>
-    * &beta;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-(j-i)</sup> *
+    * &beta;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>j=0</sub><sup>n</sup> &omega;<sub>0</sub><sup>-(j-i)</sup> *
     * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
     * 
     * @param generalizedBetaPrime
@@ -357,9 +350,9 @@ public class SmoothCapturePointToolbox
    }
 
    /**
-    * Compute the i-th derivative of &gamma;<sub>&phi;</sub> at time t<sub>&phi;</sub>:
+    * Compute the i-th derivative of &gamma;<sub>ICP,&phi;</sub> at time t<sub>&phi;</sub>:
     * <P>
-    * &gamma;<sup>(i)</sup><sub>&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
+    * &gamma;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
     * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
     * 
     * @param generalizedGammaPrime
