@@ -34,7 +34,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final ReferenceICPTrajectoryGenerator referenceICPGenerator;
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
-   private final YoDouble defaultSwingDurationShiftFraction;;
+   private final YoDouble defaultSwingDurationShiftFraction;
 
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    int maxNumberOfFootstepsToConsider, int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -56,7 +56,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, transferDurationAlphas, registry);
 
-      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, useDecoupled, worldFrame,
+      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, useDecoupled, worldFrame,
                                                                   registry);
 
       parentRegistry.addChild(registry);
@@ -257,6 +257,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
       referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
       referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
+	   
+      referenceICPGenerator.getCoMPosition(desiredCoMPosition);
+      referenceICPGenerator.getCoMVelocity(desiredCoMVelocity);
+      referenceICPGenerator.getCoMAcceleration(desiredCoMAcceleration);
 
       decayDesiredVelocityIfNeeded();
 
@@ -317,10 +321,20 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
+   
+   public List<FramePoint> getInitialDesiredCenterOfMassPositions()
+   {
+      return referenceICPGenerator.getCoMPositionDesiredInitialList();
+   }
+   
+   public List<FramePoint> getFinalDesiredCenterOfMassPositions()
+   {
+      return referenceICPGenerator.getCoMPositionDesiredFinalList();
+   }
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
       throw new RuntimeException("to implement"); //TODOLater
    }
