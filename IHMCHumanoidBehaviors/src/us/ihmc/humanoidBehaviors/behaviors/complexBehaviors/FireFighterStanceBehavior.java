@@ -6,6 +6,8 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -25,10 +27,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -157,7 +157,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             FrameOrientation orientation = new FrameOrientation(referenceFrames.getPelvisFrame(), new Quaternion());
-            FramePoint p = new FramePoint(referenceFrames.getPelvisZUpFrame(), new double[] {0.075, 0.04, 0});
+            FramePoint3D p = new FramePoint3D(referenceFrames.getPelvisZUpFrame(), new double[] {0.075, 0.04, 0});
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
             p.changeFrame(ReferenceFrame.getWorldFrame());
             PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p.getPoint(), orientation.getQuaternion());

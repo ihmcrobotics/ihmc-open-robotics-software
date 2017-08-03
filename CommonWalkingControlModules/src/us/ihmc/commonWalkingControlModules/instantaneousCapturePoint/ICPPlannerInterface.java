@@ -243,7 +243,7 @@ public interface ICPPlannerInterface
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   void getDesiredCenterOfMassPosition(FramePoint2D desiredCenterOfMassPositionToPack);
+   void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack);
 
    /**
     * Gets the current ICP velocity.

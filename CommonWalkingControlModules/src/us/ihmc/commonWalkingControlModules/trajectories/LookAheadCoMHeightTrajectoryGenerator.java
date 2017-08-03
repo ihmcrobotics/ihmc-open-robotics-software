@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -335,11 +335,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final FramePoint3D tempFramePointForViz1 = new FramePoint3D();
    private final FramePoint3D tempFramePointForViz2 = new FramePoint3D();
 
-   private final FramePoint transferFromContactFramePosition = new FramePoint();
-   private final FramePoint transferToContactFramePosition = new FramePoint();
-   private final FramePoint transferFromDesiredContactFramePosition = new FramePoint();
+   private final FramePoint3D transferFromContactFramePosition = new FramePoint3D();
+   private final FramePoint3D transferToContactFramePosition = new FramePoint3D();
+   private final FramePoint3D transferFromDesiredContactFramePosition = new FramePoint3D();
 
-   private final FrameVector fromContactFrameDrift = new FrameVector();
+   private final FrameVector3D fromContactFrameDrift = new FrameVector3D();
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
    private final Point2D queryPoint = new Point2D();
 
@@ -552,7 +552,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
             tempFramePointForViz1.setToZero(transferFromContactFramePosition.getReferenceFrame());
             tempFramePointForViz1.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
-            tempFramePointForViz1.getPoint2d(queryPoint);
+            queryPoint.set(tempFramePointForViz1);
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
             coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());
