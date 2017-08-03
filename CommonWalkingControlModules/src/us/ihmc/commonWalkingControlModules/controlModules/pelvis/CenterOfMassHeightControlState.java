@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -194,6 +195,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final FramePoint pelvisPosition = new FramePoint();
    private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
    private final Twist currentPelvisTwist = new Twist();
+   
+   private boolean desiredCMPcontainedNaN = false;
 
    @Override
    public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
@@ -223,12 +226,15 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
       if (desiredICPVelocity.containsNaN())
       {
-         System.err.println("Desired ICP velocity contains NaN");
+         if (!desiredCMPcontainedNaN)
+            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
          comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
+         desiredCMPcontainedNaN = true;
       }
       else
       {
          comXYAcceleration.setIncludingFrame(desiredICPVelocity);
+         desiredCMPcontainedNaN = false;
       }
       comXYAcceleration.sub(comXYVelocity);
       comXYAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
