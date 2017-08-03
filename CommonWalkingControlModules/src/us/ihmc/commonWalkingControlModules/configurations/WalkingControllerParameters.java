@@ -783,9 +783,6 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    // remove: unused
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
 
-   // remove from interface and use getOrCreateTaskspaceOrientationControlGains instead
-   public abstract YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry);
-
    // remove: unused
    public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
 

@@ -309,8 +309,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -424,6 +423,9 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;
    }

@@ -776,12 +776,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
          public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
          {
             return null;
