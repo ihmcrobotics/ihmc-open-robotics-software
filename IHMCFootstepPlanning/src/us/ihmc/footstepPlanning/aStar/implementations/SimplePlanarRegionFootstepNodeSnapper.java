@@ -36,7 +36,7 @@ public class SimplePlanarRegionFootstepNodeSnapper implements FootstepNodeSnappe
       footstepPose.setTranslationX(footstepNode.getX());
       footstepPose.setTranslationY(footstepNode.getY());
 
-      ConvexPolygon2D footPolygon = footPolygons.get(footstepNode.getRobotSide());
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(footstepNode.getRobotSide()));
       RigidBodyTransform worldToSole = new RigidBodyTransform();
       worldToSole.setRotationYawAndZeroTranslation(footstepNode.getYaw());
       worldToSole.setTranslation(footstepNode.getX(), footstepNode.getY(), 0.0);
