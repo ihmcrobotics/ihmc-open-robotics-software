@@ -11,9 +11,9 @@ public class StepHeightBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
    {
-      RigidBodyTransform nodeToPreviousNodeTransform = new RigidBodyTransform(node.getSoleTransform());
-      nodeToPreviousNodeTransform.transform(previosNode.getSoleTransform());
-      double heightChange = Math.abs(nodeToPreviousNodeTransform.getTranslationZ());
+      double nodeHeight = node.getSoleTransform().getTranslationZ();
+      double previousNodeHeight = previosNode.getSoleTransform().getTranslationZ();
+      double heightChange = Math.abs(nodeHeight - previousNodeHeight);
       return heightChange < maxStepHeightChange;
    }
 }
