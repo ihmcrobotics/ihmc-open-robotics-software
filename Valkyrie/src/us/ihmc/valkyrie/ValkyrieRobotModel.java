@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -384,13 +383,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 	   return null;
       //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
    }
-
-   @Override
-   public FootstepPlanningParameters getFootstepPlanningParameters()
-   {
-      return new ValkyrieFootstepPlanningParameters();
-   }
-
+   
    @Override
    public LogModelProvider getLogModelProvider()
    {

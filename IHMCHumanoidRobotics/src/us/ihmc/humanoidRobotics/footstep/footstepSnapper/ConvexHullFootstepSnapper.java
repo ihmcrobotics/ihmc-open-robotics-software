@@ -82,14 +82,14 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    private List<Point3D> pointList = new ArrayList<Point3D>();
    private final PlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private FootstepValueFunction footstepValueFunction;
-   private FootstepSnappingParameters parameters;
+   private QuadTreeFootstepSnappingParameters parameters;
    private BasicFootstepMask footstepMask = null;
    private final SimpleFootstepSnapper simpleSnapper = new SimpleFootstepSnapper();
    private boolean useMask = false;
    private double maskBuffer = 0.0;
    private static PointWriter writer = null;
 
-   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, FootstepSnappingParameters parameters)
+   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, QuadTreeFootstepSnappingParameters parameters)
    {
       this.footstepValueFunction = valueFunction;
       this.parameters = parameters;
@@ -115,7 +115,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
    }
 
-   public void updateParameters(FootstepSnappingParameters newParameters)
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters)
    {
       parameters.updateParameters(newParameters);
       footstepValueFunction.updateFunction();
@@ -129,7 +129,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       return pointList;
    }
 
-   public FootstepSnappingParameters getParameters()
+   public QuadTreeFootstepSnappingParameters getParameters()
    {
       return parameters;
    }

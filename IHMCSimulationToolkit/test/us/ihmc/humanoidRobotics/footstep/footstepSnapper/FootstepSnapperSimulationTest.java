@@ -68,7 +68,7 @@ public class FootstepSnapperSimulationTest
    @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       double maskSafetyBuffer = 0.01;
       double boundingBoxDimension = 0.3;
@@ -130,7 +130,7 @@ public class FootstepSnapperSimulationTest
       ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromInputStream(resourceAsStream, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
 //    SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       double maskSafetyBuffer = 0.01;
       double boundingBoxDimension = 0.3;
@@ -450,7 +450,7 @@ public class FootstepSnapperSimulationTest
 
    private SimpleFootstepSnapper createSimpleFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       BasicFootstepMask footstepMask = new BasicFootstepMask(snappingParameters.getCollisionPolygon(), 0.0);
 
       SimpleFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
@@ -465,7 +465,7 @@ public class FootstepSnapperSimulationTest
 
    private ConvexHullFootstepSnapper createConvexHullFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
       return footstepSnapper;
@@ -473,7 +473,7 @@ public class FootstepSnapperSimulationTest
 
    private AdjustingFootstepSnapper createAdjustingFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       AdjustingFootstepSnapper footstepSnapper = new AdjustingFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
       return footstepSnapper;
