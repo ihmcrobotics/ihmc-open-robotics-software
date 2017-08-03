@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
@@ -571,20 +570,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getTimeToGetPreparedForLocomotion()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSwingHeightMaxForPushRecoveryTrajectory()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public double getSpineYawLimit()
       {
          // TODO Auto-generated method stub
@@ -710,21 +695,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getFoot_start_toetaper_from_back()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public FootSwitchType getFootSwitchType()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
       {
          // TODO Auto-generated method stub
          return null;
@@ -742,13 +713,6 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public String[] getDefaultChestOrientationControlJointNames()
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -780,13 +744,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean getCoMHeightDriftCompensation()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public double getAnkleHeight()
       {
          // TODO Auto-generated method stub
@@ -808,24 +765,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean doFancyOnToesControl()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public double defaultOffsetHeightAboveAnkle()
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -837,13 +780,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
@@ -864,13 +800,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
       public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
@@ -879,13 +808,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public boolean controlHeadAndHandsWithSliders()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean allowShrinkingSingleSupportFootPolygon()
       {
          // TODO Auto-generated method stub
          return false;

@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -735,15 +734,6 @@ public abstract class WalkingControllerParameters implements SteppingParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   // remove: unused
-   public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
-
-   // remove: unused
-   public abstract String[] getDefaultChestOrientationControlJointNames();
-
-   // move to UI specific parameters
-   public abstract double getAnkleHeight();
-
    // replace: just add shin and thigh length from the physical parameters in a default method instead of forcing an implementation for each robot
    public abstract double getLegLength();
 
@@ -760,31 +750,10 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    public abstract double defaultOffsetHeightAboveAnkle();
 
    // move to UI specific parameters
+   public abstract double getAnkleHeight();
+
+   // move to UI specific parameters
    public abstract double pelvisToAnkleThresholdForWalking();
-
-   // remove: unused
-   public abstract double getTimeToGetPreparedForLocomotion();
-
-   // remove: unused (was only used in dead code that needs to go away)
-   public abstract boolean getCoMHeightDriftCompensation();
-
-   // remove: unused
-   public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract boolean allowShrinkingSingleSupportFootPolygon();
-
-   // move to slider board specific parameters
-   public abstract boolean controlHeadAndHandsWithSliders();
-
-   // remove: unused
-   public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
    // move to UI specific parameters
    public abstract double getSpineYawLimit();
@@ -801,32 +770,23 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    // move to UI specific parameters
    public abstract boolean isSpinePitchReversed();
 
-   // remove: unused
-   public abstract double getFoot_start_toetaper_from_back();
-
    // move to UI specific parameters
    public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
-
-   // move to slider board specific parameters
-   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
-
-   // move to slider board specific parameters
-   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
-
-   // remove: unused
-   public abstract boolean doFancyOnToesControl();
-
-   // remove: unused
-   public boolean useSupportState()
-   {
-      return false;
-   }
 
    // move to UI specific parameters
    public double getDefaultTrajectoryTime()
    {
       return 3.0;
    }
+
+   // move to slider board specific parameters
+   public abstract boolean controlHeadAndHandsWithSliders();
+
+   // move to slider board specific parameters
+   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
+
+   // move to slider board specific parameters
+   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    // remove: exo specific
    public abstract void useInverseDynamicsControlCore();

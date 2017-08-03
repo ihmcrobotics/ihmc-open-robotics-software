@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -172,18 +171,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
       return new WalkingControllerParameters()
       {
          @Override
-         public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-         {
-            return null;
-         }
-
-         @Override
-         public String[] getDefaultChestOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
          public double getOmega0()
          {
             return 0;
@@ -232,18 +219,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean allowShrinkingSingleSupportFootPolygon()
-         {
-            return false;
-         }
-
-         @Override
          public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
          {
             return false;
@@ -280,25 +255,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
          public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public boolean getCoMHeightDriftCompensation()
-         {
-            return false;
-         }
-
-         @Override
-         public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
          {
             return null;
          }
@@ -319,18 +276,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
          {
             return null;
-         }
-
-         @Override
-         public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double getSwingHeightMaxForPushRecoveryTrajectory()
-         {
-            return 0;
          }
 
          @Override
@@ -388,12 +333,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double getFoot_start_toetaper_from_back()
-         {
-            return 0;
-         }
-
-         @Override
          public double getSideLengthOfBoundingBoxForFootstepHeight()
          {
             return 0;
@@ -445,12 +384,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
-         }
-
-         @Override
-         public boolean doFancyOnToesControl()
-         {
-            return false;
          }
 
          @Override
