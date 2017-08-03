@@ -25,11 +25,8 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,11 +37,9 @@ public class FootControlModule
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
-   private final boolean useNewSupportState;
-
    public enum ConstraintType
    {
-      FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS, EXPLORE_POLYGON
+      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -58,24 +53,14 @@ public class FootControlModule
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   private final YoBoolean holdPositionIfCopOnEdge;
-   /** For testing purpose only. */
-   private final YoBoolean alwaysHoldPosition;
-   private final YoBoolean neverHoldPosition;
-
-   private final HoldPositionState holdPositionState;
    private final SwingState swingState;
    private final MoveViaWaypointsState moveViaWaypointsState;
    private final OnToesState onToesState;
-   private final FullyConstrainedState supportState;
-   private final ExploreFootPolygonState exploreFootPolygonState;
-   private final SupportState supportStateNew;
+   private final SupportState supportState;
 
-   private final FootSwitchInterface footSwitch;
    private final YoDouble footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
-   private final ToeOffCalculator toeOffCalculator;
 
    private final YoBoolean requestExploration;
    private final YoBoolean resetFootPolygon;
@@ -84,8 +69,6 @@ public class FootControlModule
          YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this.toeOffCalculator = toeOffCalculator;
-
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
@@ -100,14 +83,8 @@ public class FootControlModule
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
 
-      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
-
-      holdPositionIfCopOnEdge = new YoBoolean(namePrefix + "HoldPositionIfCopOnEdge", registry);
-      holdPositionIfCopOnEdge.set(walkingControllerParameters.doFancyOnToesControl());
-      alwaysHoldPosition = new YoBoolean(namePrefix + "AlwaysHoldPosition", registry);
-      neverHoldPosition = new YoBoolean(namePrefix + "NeverHoldPosition", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -135,32 +112,8 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-      supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
-      useNewSupportState = walkingControllerParameters.useSupportState();
-
-      if (useNewSupportState)
-      {
-         states.add(supportStateNew);
-
-         supportState = null;
-         holdPositionState = null;
-         exploreFootPolygonState = null;
-      }
-      else
-      {
-         supportState = new FullyConstrainedState(footControlHelper, registry);
-         holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
-         states.add(supportState);
-         states.add(holdPositionState);
-
-         if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
-         {
-            exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
-            states.add(exploreFootPolygonState);
-         }
-         else
-            exploreFootPolygonState = null;
-      }
+      supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+      states.add(supportState);
 
       swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
@@ -184,8 +137,6 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
-      contactStatesMap.put(ConstraintType.EXPLORE_POLYGON, trues);
-      contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
       contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
    }
 
@@ -197,58 +148,6 @@ public class FootControlModule
          for (AbstractFootControlState toState : states)
          {
             StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
-      }
-
-      if (!useNewSupportState)
-      {
-         supportState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.HOLD_POSITION, new StateTransitionCondition()
-         {
-            @Override
-            public boolean checkCondition()
-            {
-               if (alwaysHoldPosition.getBooleanValue())
-                  return true;
-               if (neverHoldPosition.getBooleanValue())
-                  return false;
-
-               if (isFootBarelyLoaded())
-                  return true;
-               if (holdPositionIfCopOnEdge.getBooleanValue())
-                  return footControlHelper.isCoPOnEdge();
-               return false;
-            }
-         }));
-
-         holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
-         {
-            @Override
-            public boolean checkCondition()
-            {
-               if (useNewSupportState)
-                  return true;
-
-               if (alwaysHoldPosition.getBooleanValue())
-                  return false;
-               if (neverHoldPosition.getBooleanValue())
-                  return true;
-
-               if (isFootBarelyLoaded())
-                  return false;
-               return !footControlHelper.isCoPOnEdge();
-            }
-         }));
-
-         if (exploreFootPolygonState != null)
-         {
-            exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
-            {
-               @Override
-               public boolean checkCondition()
-               {
-                  return exploreFootPolygonState.isDoneExploring();
-               }
-            }));
          }
       }
 
@@ -264,14 +163,7 @@ public class FootControlModule
       swingState.setWeight(defaultFootWeight);
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
-      if (supportState != null)
-         supportState.setWeight(highFootWeight);
-      if (supportStateNew != null)
-         supportStateNew.setWeight(highFootWeight);
-      if (holdPositionState != null)
-         holdPositionState.setWeight(defaultFootWeight);
-      if (exploreFootPolygonState != null)
-         exploreFootPolygonState.setWeight(defaultFootWeight);
+      supportState.setWeight(highFootWeight);
    }
 
    public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
@@ -279,14 +171,7 @@ public class FootControlModule
       swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      if (supportState != null)
-         supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      if (supportStateNew != null)
-         supportStateNew.setWeights(highAngularFootWeight, highLinearFootWeight);
-      if (holdPositionState != null)
-         holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      if (exploreFootPolygonState != null)
-         exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
@@ -313,16 +198,8 @@ public class FootControlModule
 
    public void setContactState(ConstraintType constraintType, FrameVector normalContactVector)
    {
-      if (constraintType == ConstraintType.HOLD_POSITION || constraintType == ConstraintType.FULL)
+      if (constraintType == ConstraintType.FULL)
       {
-         if (constraintType == ConstraintType.HOLD_POSITION)
-            System.out.println("Warning: HOLD_POSITION state is handled internally.");
-
-         if (isFootBarelyLoaded() && !useNewSupportState)
-            constraintType = ConstraintType.HOLD_POSITION;
-         else
-            constraintType = ConstraintType.FULL;
-
          footControlHelper.setFullyConstrainedNormalContactVector(normalContactVector);
       }
 
@@ -332,11 +209,6 @@ public class FootControlModule
          return;
 
       requestedState.set(constraintType);
-   }
-
-   private boolean isFootBarelyLoaded()
-   {
-      return footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue();
    }
 
    public ConstraintType getCurrentConstraintType()
@@ -381,7 +253,7 @@ public class FootControlModule
    public boolean isInFlatSupportState()
    {
       ConstraintType currentConstraintType = getCurrentConstraintType();
-      return currentConstraintType == ConstraintType.FULL || currentConstraintType == ConstraintType.EXPLORE_POLYGON || currentConstraintType == ConstraintType.HOLD_POSITION;
+      return currentConstraintType == ConstraintType.FULL;
    }
 
    public boolean isInToeOff()
@@ -484,16 +356,7 @@ public class FootControlModule
 
    public void initializeFootExploration()
    {
-      if (useNewSupportState)
-         supportStateNew.requestFootholdExploration();
-      else
-         setContactState(ConstraintType.EXPLORE_POLYGON);
-   }
-
-   public void setAllowFootholdAdjustments(boolean allow)
-   {
-      if (holdPositionState != null)
-         holdPositionState.doFootholdAdjustments(allow);
+      supportState.requestFootholdExploration();
    }
 
    public boolean isFootToeingOffSlipping()

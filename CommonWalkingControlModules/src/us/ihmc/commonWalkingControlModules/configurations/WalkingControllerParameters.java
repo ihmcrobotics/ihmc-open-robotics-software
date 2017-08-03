@@ -819,10 +819,10 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    // move to slider board specific parameters
    public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
-   // remove this once the support state is used in all robots
+   // remove: unused
    public abstract boolean doFancyOnToesControl();
 
-   // remove this once the support state is used in all robots
+   // remove: unused
    public boolean useSupportState()
    {
       return false;
