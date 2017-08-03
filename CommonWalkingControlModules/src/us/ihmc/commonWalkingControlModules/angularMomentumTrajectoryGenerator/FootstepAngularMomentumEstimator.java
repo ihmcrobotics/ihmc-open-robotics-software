@@ -40,6 +40,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    private CoPPointName trajectoryFinalApproachReference;
    private CoPPointName exitCoP;
    private CoPPointName entryCoP;
+   private CoPPointName endCoP;
+   private CoPPointName[] transferCoPList;
    private final YoDouble swingLegMass;
    private final YoDouble supportLegMass;
    private final YoDouble comHeight;
@@ -156,6 +158,8 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       this.trajectoryFinalApproachReference = angularMomentumParameters.getFinalApproachReferenceName();
       this.entryCoP = angularMomentumParameters.getEntryCoPName();
       this.exitCoP = angularMomentumParameters.getExitCoPName();
+      this.endCoP = angularMomentumParameters.getEndCoPName();
+      this.transferCoPList = angularMomentumParameters.getCoPPlannerParameters().getTransferCoPPointsToPlan();
       this.swingLegMass.set(angularMomentumParameters.getSwingLegMass());
       this.supportLegMass.set(angularMomentumParameters.getSupportLegMass());
       this.comHeight.set(angularMomentumParameters.getCoMHeight());
@@ -265,12 +269,17 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       footstepIndex = 0;
       if (atAStop)
       {
-         upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryPointStart).getPosition(previousFinalReferenceCoP);
-         previousFirstTransferEndTime = 0.0;
+         upcomingCoPsInFootsteps.get(footstepIndex).get(0).getPosition(previousFinalReferenceCoP);
+         previousFirstTransferEndTime = 0.0; // upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
+         updateCurrentSegmentTimes(footstepIndex);
+         currentSecondTransferSegmentDuration += upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
+         computeAngularMomentumApproximationForFootstep();
+         footstepIndex++;
+
       }
       else
       {
-         upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryFinalApproachReference).getPosition(previousFinalReferenceCoP);
+         upcomingCoPsInFootsteps.get(footstepIndex).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex).getCoPPointList(), trajectoryFinalApproachReference)).getPosition(previousFinalReferenceCoP);
          // Use the previously planned trajectory from the single support
          transferAngularMomentumTrajectories.get(footstepIndex).set(previousEstimatedTransferTrajectory);
          previousFirstTransferEndTime = previousEstimatedTransferTrajectory.getFinalTime();
@@ -297,7 +306,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
 
    private void computeAngularMomentumApproximationForUpcomingFootsteps()
    {
-      for (; footstepIndex + 1 < upcomingCoPsInFootsteps.size() && !upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList().isEmpty(); footstepIndex++)
+      for (; footstepIndex + 2 < upcomingCoPsInFootsteps.size() && (upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList().size() > 1); footstepIndex++)
       {
          updateCurrentSegmentTimes(footstepIndex);
          //setCoMTrajectoryForFootstep(footstepIndex);
@@ -402,15 +411,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      if (swingStart)
-      {
-         //         swingFootVelocity.compute(0.0);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());
-         //         swingFootVelocity.compute(currentSwingSegmentDuration);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());   
-      }
    }
 
    private void updateSwingLiftTrajectory()
@@ -432,16 +432,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      if (!swingStart)
-      {
-         //         PrintTools.debug("First");
-         //         swingFootVelocity.compute(0.0);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());
-         //         swingFootVelocity.compute(currentFirstTransferSegmentDuration);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());
-      }
    }
 
    private void setSwingFootTrajectoryForSecondTransfer(int footstepIndex, double segmentStartTime)
@@ -455,16 +445,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
          swingTrajD.set(swingFootTrajectory);
          firstSwing = false;
       }
-      if (!swingStart)
-      {
-         //         PrintTools.debug("Second");
-         //         swingFootVelocity.compute(segmentStartTime);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());
-         //         swingFootVelocity.compute(segmentStartTime + currentSecondTransferSegmentDuration);
-         //         swingFootVelocity.getFramePosition(tempFramePoint1);
-         //         PrintTools.debug(tempFramePoint1.toString());
-      }
    }
 
    private void setCoMTrajectoryForSwing()
@@ -477,14 +457,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       segmentCoMTrajectory.setTime(0.0, currentSwingSegmentDuration);
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
      
-//      PrintTools.debug("Swing:");
-//      segmentCoMVelocity.compute(0.0);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-//      segmentCoMVelocity.compute(currentSwingSegmentDuration);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-      
       if (firstCoM && swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
@@ -502,14 +474,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       segmentCoMTrajectory.setTime(0.0, currentFirstTransferSegmentDuration);
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
       
-//      PrintTools.debug("FirstTransfer:");
-//      segmentCoMVelocity.compute(0.0);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-//      segmentCoMVelocity.compute(currentFirstTransferSegmentDuration);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-      
       if (firstCoM && !swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
@@ -525,14 +489,6 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       segmentCoMTrajectory.setTime(startTime, startTime + currentSecondTransferSegmentDuration);
       segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
       
-//      PrintTools.debug("SecondTransfer:");
-//      segmentCoMVelocity.compute(startTime);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-//      segmentCoMVelocity.compute(startTime + currentSecondTransferSegmentDuration);
-//      segmentCoMVelocity.getFramePosition(tempFramePoint1);
-//      PrintTools.debug(tempFramePoint1.toString());
-      
       if (firstCoM && !swingStart)
       {
          comTrajD.set(segmentCoMTrajectory);
@@ -540,51 +496,42 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       }
    }
 
-   /*private void getCoMEstimationWaypoints()
-   {
-      upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryPointStart).getPosition(tempFramePoint1);
-      tempFramePoint1.add(0, 0, comHeight.getDoubleValue());
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryInitialDepartureReference).getPosition(tempFramePoint2);
-      tempFramePoint2.add(0, 0, comHeight.getDoubleValue());
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryFinalApproachReference).getPosition(tempFramePoint3);
-      tempFramePoint3.add(0, 0, comHeight.getDoubleValue());
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryPointEnd).getPosition(tempFramePoint4);
-      tempFramePoint4.add(0, 0, comHeight.getDoubleValue());
-   }*/
-
    private void getCoMEstimationWaypoints()
    {
-      upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryPointStart).getPosition(tempFramePoint1);
-      upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryPointEnd).getPosition(tempFramePoint2);
+      upcomingCoPsInFootsteps.get(footstepIndex).getSwingFootLocation(tempFramePoint3);
+      upcomingCoPsInFootsteps.get(footstepIndex).getSupportFootLocation(tempFramePoint4);
+      tempFramePoint1.interpolate(tempFramePoint3, tempFramePoint4, 0.5);
+      upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint3);
+      upcomingCoPsInFootsteps.get(footstepIndex + 1).getSupportFootLocation(tempFramePoint4);
+      tempFramePoint2.interpolate(tempFramePoint3, tempFramePoint4, 0.5);
       
       if(footstepIndex == 0)
       {
-         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryInitialDepartureReference).getPosition(tempFramePoint3);
+         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList(), trajectoryInitialDepartureReference)).getPosition(tempFramePoint3);
          tempFrameVector1.sub(tempFramePoint3, previousFinalReferenceCoP);
       }
       else
       {
-         upcomingCoPsInFootsteps.get(footstepIndex).get(trajectoryFinalApproachReference).getPosition(tempFramePoint4);
-         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryInitialDepartureReference).getPosition(tempFramePoint3);
+         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList(), trajectoryInitialDepartureReference)).getPosition(tempFramePoint3);
+         upcomingCoPsInFootsteps.get(footstepIndex).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex).getCoPPointList(), trajectoryFinalApproachReference)).getPosition(tempFramePoint4);
          tempFrameVector1.sub(tempFramePoint3, tempFramePoint4);
       }
       
-      if(footstepIndex + 2 < upcomingCoPsInFootsteps.size() && !upcomingCoPsInFootsteps.get(footstepIndex + 2).getCoPPointList().isEmpty())
+      if(footstepIndex + 3 < upcomingCoPsInFootsteps.size() && !upcomingCoPsInFootsteps.get(footstepIndex + 3).getCoPPointList().isEmpty())
       {
-         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryFinalApproachReference).getPosition(tempFramePoint3);
-         upcomingCoPsInFootsteps.get(footstepIndex + 2).get(trajectoryInitialDepartureReference).getPosition(tempFramePoint4);
+         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList(), trajectoryFinalApproachReference)).getPosition(tempFramePoint3);
+         upcomingCoPsInFootsteps.get(footstepIndex + 2).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 2).getCoPPointList(), trajectoryInitialDepartureReference)).getPosition(tempFramePoint4);
          tempFrameVector2.sub(tempFramePoint4, tempFramePoint3);
       }
       else
       {         
-         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(trajectoryFinalApproachReference).getPosition(tempFramePoint3);
+         upcomingCoPsInFootsteps.get(footstepIndex + 1).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList(), trajectoryFinalApproachReference)).getPosition(tempFramePoint3);
          tempFrameVector2.sub(tempFramePoint2, tempFramePoint3);
       }
       tempFramePoint1.add(0, 0, comHeight.getDoubleValue());
       tempFramePoint2.add(0, 0, comHeight.getDoubleValue());
    }
 
-   
    private void updateCurrentSegmentTimes(int footstepIndex)
    {
       this.currentFootstepTime = 0.0;
@@ -593,18 +540,19 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       if (currentCoPListReference.isEmpty())
          return;
       currentSecondTransferSegmentDuration = 0.0;
-      for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != entryCoP; tempInt1++)
-         currentSecondTransferSegmentDuration += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
-      currentSecondTransferSegmentDuration += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
+      for (tempInt1 = CoPPlanningTools.getCoPPointIndex(currentCoPListReference, endCoP) + 1; currentCoPListReference.get(tempInt1) != entryCoP; tempInt1++)
+         currentSecondTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
+      currentSecondTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
       tempInt1++;
       currentSwingSegmentDuration = 0.0;
-      for (; currentCoPListReference.get(tempInt1) != exitCoP; tempInt1++)
-         currentSwingSegmentDuration += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
-      currentSwingSegmentDuration += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
-      tempInt1++;
-      currentFirstTransferSegmentDuration = 0.0;
       for (; tempInt1 < currentCoPListReference.size(); tempInt1++)
-         currentFirstTransferSegmentDuration += currentCoPPlanReference.get(currentCoPListReference.get(tempInt1)).getTime();
+         currentSwingSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
+      currentFirstTransferSegmentDuration = 0.0;
+      currentCoPPlanReference = upcomingCoPsInFootsteps.get(footstepIndex + 2);
+      currentCoPListReference = currentCoPPlanReference.getCoPPointList();
+      for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != endCoP; tempInt1++)
+         currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
+      currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
       currentFootstepTime = currentSecondTransferSegmentDuration + currentSwingSegmentDuration + currentFirstTransferSegmentDuration;
    }
 

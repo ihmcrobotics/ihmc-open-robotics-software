@@ -298,9 +298,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       if(isStanding.getBooleanValue())
       {
-         // TODO: replace by CMP  //TODO what dies this do ? 
+         // TODO: replace by CMP 
          int footstepIndex = 0;
-         referenceCoPGenerator.getWaypoints().get(footstepIndex).get(CoPPointName.MIDFEET_COP).getPosition(tempFinalICP);
+         referenceCoPGenerator.getWaypoints().get(footstepIndex).getFinalCoPPosition(tempFinalICP);
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
@@ -341,9 +341,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void getNextExitCMP(FramePoint exitCMPToPack)
    {
-      List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
-      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
-      copPointsInFoot.get(copPointsInFoot.getCoPPointList().get(copPointsInFoot.getCoPPointList().size())).getPosition(exitCMPToPack);
+      CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
+      nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);
+      
+//      List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
+//      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
+//      copPointsInFoot.get(copPointsInFoot.getCoPPointList().get(copPointsInFoot.getCoPPointList().size())).getPosition(exitCMPToPack);
    }
 
    @Override

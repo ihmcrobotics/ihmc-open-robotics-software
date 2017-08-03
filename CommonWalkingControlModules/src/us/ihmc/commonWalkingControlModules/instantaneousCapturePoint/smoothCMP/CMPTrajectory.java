@@ -59,4 +59,16 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
 
       return currentIsLast && currentIsDone;
    }
+   
+   public void getExitCMPLocation(FramePoint exitCMPLocationToPack)
+   {
+      segments.get(numberOfSegments.getIntegerValue() - 1).compute(segments.get(numberOfSegments.getIntegerValue() -1).getFinalTime());
+      exitCMPLocationToPack.setIncludingFrame(segments.get(numberOfSegments.getIntegerValue() - 1).getFramePosition());
+   }
+
+   public void getEntryCMPLocation(FramePoint entryCMPLocationToPack)
+   {
+      segments.get(0).compute(segments.get(0).getInitialTime());
+      entryCMPLocationToPack.setIncludingFrame(segments.get(0).getFramePosition());
+   }
 }

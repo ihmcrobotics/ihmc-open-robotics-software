@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.An
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TrajectoryMathTools;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -200,21 +201,25 @@ public class ReferenceCMPTrajectoryGenerator
       int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
       for (int i = 0; i < numberOfFootstepsToCopy; i++)
       {
+         //PrintTools.debug("Let us copy!!");
          cmpTrajectoryReference = transferCMPTrajectories.get(i);
          copTrajectoryReference = transferCoPTrajectories.get(i);
          for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
             cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
          cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+         //PrintTools.debug(copTrajectoryReference.toString());
          cmpTrajectoryReference = swingCMPTrajectories.get(i);
          copTrajectoryReference = swingCoPTrajectories.get(i);
          for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
             cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
          cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+         //PrintTools.debug(copTrajectoryReference.toString());
       }
       cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
       copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
       for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
          cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
       cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+      //PrintTools.debug(copTrajectoryReference.toString());
    }
 }
