@@ -17,7 +17,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
 
    public StaticFootstepPlanningEnvironment()
    {
-      combinedTerrainObject3D.addTerrainObject(new BoxTerrainObject(-20.0, -5.0, 20.0, 5.0, -0.5, 0.0,
+      combinedTerrainObject3D.addTerrainObject(new BoxTerrainObject(-1.0, -3.6576, 20.9456, 3.6576, -0.5, 0.0,
             YoAppearance.DarkGray()));
    }
 
