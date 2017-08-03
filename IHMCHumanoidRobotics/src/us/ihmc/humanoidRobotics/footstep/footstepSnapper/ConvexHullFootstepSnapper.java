@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/14/15.
  */
-public class ConvexHullFootstepSnapper implements FootstepSnapper
+public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 {
    public class PointWriter
    {

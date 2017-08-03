@@ -22,7 +22,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/28/15.
  */
-public class AdjustingFootstepSnapper implements FootstepSnapper
+public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 {
    private FootstepSnappingParameters footstepSnappingParameters;
    private double distanceAdjustment;

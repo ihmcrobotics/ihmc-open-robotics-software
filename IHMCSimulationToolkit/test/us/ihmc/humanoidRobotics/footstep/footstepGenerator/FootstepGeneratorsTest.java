@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -2176,7 +2176,7 @@ public class FootstepGeneratorsTest
    {
       double leftXFactor = initialDeltaFeetLocalX / 2 * Math.cos(startYaw) - initialDeltaFeetLocalY / 2 * Math.sin(startYaw);
       double leftYFactor = initialDeltaFeetLocalX / 2 * Math.sin(startYaw) + initialDeltaFeetLocalY / 2 * Math.cos(startYaw);
-      FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
       Point2D leftFootStartPoint = new Point2D(startX + leftXFactor, startY + leftYFactor);
       FramePose2d leftFootPose2d = new FramePose2d(WORLD_FRAME, leftFootStartPoint, startYaw + initialDeltaFeetYaw / 2);
