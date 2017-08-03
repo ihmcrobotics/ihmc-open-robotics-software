@@ -92,11 +92,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          goalNodePose.setY(side.negateIfRightSide(DEFAULT_STEP_WIDTH / 2.0));
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
-
-         boolean validGoalNode = snapper.snapFootstepNode(goalNode);
-//         if(!validGoalNode)
-//            throw new RuntimeException("Invalid goal node. Failed to snap to planar regions");
-
          goalNodes.put(side, goalNode);
       }
    }
