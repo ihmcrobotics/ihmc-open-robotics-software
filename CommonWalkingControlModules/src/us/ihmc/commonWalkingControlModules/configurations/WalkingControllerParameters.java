@@ -771,9 +771,6 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    // remove: unused
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
-   // remove from interface and nuke chest manager
-   public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
-
    // remove: unused
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 

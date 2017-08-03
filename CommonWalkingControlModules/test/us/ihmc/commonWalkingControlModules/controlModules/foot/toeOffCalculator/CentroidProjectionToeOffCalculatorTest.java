@@ -20,7 +20,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -296,12 +295,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
          {
             return null;
          }
