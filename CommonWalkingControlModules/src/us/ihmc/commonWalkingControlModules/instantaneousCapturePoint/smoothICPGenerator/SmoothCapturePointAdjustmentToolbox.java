@@ -66,13 +66,14 @@ public class SmoothCapturePointAdjustmentToolbox
       YoFrameTrajectory3D cmpPolynomial3DSegment1 = cmpPolynomials3D.get(0);
       YoFrameTrajectory3D cmpPolynomial3DSegment2 = cmpPolynomials3D.get(1);
       
-//      // this is very hack-ish
+////      // this is very hack-ish
 //      cmpPolynomial3DSegment1.getFramePositionInitial(cmp10);
 //      cmpPolynomial3DSegment1.getFramePositionFinal(cmp11);
 //      cmpPolynomial3DSegment2.getFramePositionInitial(cmp21);
 //      cmpPolynomial3DSegment2.getFramePositionFinal(cmp22);
 //      
-//      double tAdjusted1 = 0.9 * (cmpPolynomial3DSegment2.getFinalTime() - cmpPolynomial3DSegment1.getInitialTime());
+//      // WORKS ONLY FOR LINEAR CASE
+//      double tAdjusted1 = 0.3 * (cmpPolynomial3DSegment2.getFinalTime() - cmpPolynomial3DSegment1.getInitialTime());
 //      cmpPolynomial3DSegment1.setLinear(cmpPolynomial3DSegment1.getInitialTime(), tAdjusted1, cmp10, cmp11);
 //      cmpPolynomial3DSegment2.setLinear(tAdjusted1, cmpPolynomial3DSegment2.getFinalTime(), cmp21, cmp22);
 
