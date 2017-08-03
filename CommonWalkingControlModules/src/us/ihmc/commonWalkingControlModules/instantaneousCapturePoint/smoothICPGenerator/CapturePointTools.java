@@ -670,27 +670,6 @@ public class CapturePointTools
       }
    }
    
-   private static List<FrameTuple<?, ?>> icpQuantityInitialSegment1List = new ArrayList<FrameTuple<?, ?>>();
-   private static FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
-   
-   public static void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
-                                                                   List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
-   {
-      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
-      double tInitial = cmpPolynomial3D.getInitialTime();
-      
-      // TODO: check whether better ways of setting it exist
-      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-      {
-         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
-         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
-      }
-      
-      SmoothCapturePointAdjustmentTools.initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
-      SmoothCapturePointAdjustmentTools.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialSegment1List, 
-                                                                                       entryCornerPointsToPack, exitCornerPointsToPack);
-   }
-   
    //TODO: implement validity checks
    public static void computeDesiredCornerPointsDecoupled(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                           List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
