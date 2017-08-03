@@ -5,7 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +34,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int defaultSize = 1000;
    
-   private final List<FramePoint> cmpDesiredFinalPositions = new ArrayList<>();
+   private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
 
    private final List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>();
@@ -41,19 +42,19 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private FramePoint3D icpPositionDesiredCurrent = new FramePoint3D();
    private FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
    private FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
-   private FrameVector icpVelocityDynamicsCurrent = new FrameVector();
+   private FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
    
-   private final List<FramePoint> comDesiredInitialPositions = new ArrayList<>();
-   private final List<FramePoint> comDesiredFinalPositions = new ArrayList<>();
+   private final List<FramePoint3D> comDesiredInitialPositions = new ArrayList<>();
+   private final List<FramePoint3D> comDesiredFinalPositions = new ArrayList<>();
    
-   private FramePoint comPositionDesiredCurrent = new FramePoint();
-   private FrameVector comVelocityDesiredCurrent = new FrameVector();
-   private FrameVector comAccelerationDesiredCurrent = new FrameVector();
-   private FrameVector comVelocityDynamicsCurrent = new FrameVector();
+   private FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
+   private FrameVector3D comVelocityDesiredCurrent = new FrameVector3D();
+   private FrameVector3D comAccelerationDesiredCurrent = new FrameVector3D();
+   private FrameVector3D comVelocityDynamicsCurrent = new FrameVector3D();
    
-   private FramePoint icpPositionDesiredFinalCurrentSegment = new FramePoint();
-   private FramePoint comPositionDesiredInitialCurrentSegment = new FramePoint();
-   private FramePoint comPositionDesiredFinalCurrentSegment = new FramePoint();
+   private FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
+   private FramePoint3D comPositionDesiredInitialCurrentSegment = new FramePoint3D();
+   private FramePoint3D comPositionDesiredFinalCurrentSegment = new FramePoint3D();
    
    private FramePoint3D cmpPositionDesiredInitial = new FramePoint3D();
    private FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
@@ -119,8 +120,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpDesiredFinalPositions.add(new FramePoint3D());
          cmpDesiredFinalPositions.add(new FramePoint3D());
          
-         comDesiredInitialPositions.add(new FramePoint());
-         comDesiredFinalPositions.add(new FramePoint());
+         comDesiredInitialPositions.add(new FramePoint3D());
+         comDesiredFinalPositions.add(new FramePoint3D());
       }
    }
 
@@ -320,7 +321,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpCurrentTest.set(icpPositionDesiredCurrent);
    }
    
-   private void checkICPDynamics(double time, FrameVector icpVelocityDesiredCurrent, FramePoint icpPositionDesiredCurrent, YoFrameTrajectory3D cmpPolynomial3D)
+   private void checkICPDynamics(double time, FrameVector3D icpVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, YoFrameTrajectory3D cmpPolynomial3D)
    {
       cmpPolynomial3D.compute(time);
       
@@ -330,7 +331,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-6));
    }
    
-   private void checkCoMDynamics(double time, FrameVector comVelocityDesiredCurrent, FramePoint icpPositionDesiredCurrent, FramePoint comPositionDesiredCurrent)
+   private void checkCoMDynamics(double time, FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
    {      
       comVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
       comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
@@ -353,12 +354,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment));
    }
    
-   public void getCoMPositionDesiredInitialFromSegment(FramePoint comPositionDesiredInitial, int segment)
+   public void getCoMPositionDesiredInitialFromSegment(FramePoint3D comPositionDesiredInitial, int segment)
    {
       comPositionDesiredInitial.set(comDesiredInitialPositions.get(segment));
    }
    
-   public void getCoMPositionDesiredFinalFromSegment(FramePoint comPositionDesiredFinal, int segment)
+   public void getCoMPositionDesiredFinalFromSegment(FramePoint3D comPositionDesiredFinal, int segment)
    {
       comPositionDesiredFinal.set(comDesiredFinalPositions.get(segment));
    }
@@ -456,12 +457,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       return icpDesiredFinalPositions;
    }
    
-   public List<FramePoint> getCoMPositionDesiredInitialList()
+   public List<FramePoint3D> getCoMPositionDesiredInitialList()
    {
       return comDesiredInitialPositions;
    }
    
-   public List<FramePoint> getCoMPositionDesiredFinalList()
+   public List<FramePoint3D> getCoMPositionDesiredFinalList()
    {
       return comDesiredFinalPositions;
    }

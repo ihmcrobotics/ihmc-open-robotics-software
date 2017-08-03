@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -321,12 +320,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
    
-   public List<FramePoint> getInitialDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getInitialDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredInitialList();
    }
    
-   public List<FramePoint> getFinalDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getFinalDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }

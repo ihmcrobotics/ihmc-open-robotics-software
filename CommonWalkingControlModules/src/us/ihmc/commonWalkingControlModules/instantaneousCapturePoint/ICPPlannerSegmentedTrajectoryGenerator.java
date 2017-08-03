@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingConstantCMP;
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingCubicICP;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,14 +12,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -43,8 +41,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final YoFramePoint yoStartOfSplineICP;
    private final YoFramePoint yoEndOfSplineICP;
 
-   private final YoFramePoint2d yoStartOfSplineCoM;
-   private final YoFramePoint2d yoEndOfSplineCoM;
+   private final YoFramePoint yoStartOfSplineCoM;
+   private final YoFramePoint yoEndOfSplineCoM;
 
    private final YoInteger currentSegment;
 
@@ -126,8 +124,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       yoStartOfSplineICP = new YoFramePoint(namePrefix + "InitialICPSpline", trajectoryFrame, registry);
       yoEndOfSplineICP = new YoFramePoint(namePrefix + "FinalICPSpline", trajectoryFrame, registry);
 
-      yoStartOfSplineCoM = new YoFramePoint2d(namePrefix + "InitialCoMSpline", trajectoryFrame, registry);
-      yoEndOfSplineCoM = new YoFramePoint2d(namePrefix + "FinalCoMSpline", trajectoryFrame, registry);
+      yoStartOfSplineCoM = new YoFramePoint(namePrefix + "InitialCoMSpline", trajectoryFrame, registry);
+      yoEndOfSplineCoM = new YoFramePoint(namePrefix + "FinalCoMSpline", trajectoryFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -362,7 +360,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    {
       double segmentDuration = spline.getTrajectoryTime();
 
-      yoStartOfSplineCoM.getFrameTuple2d(startOfSplineCoM);
+      yoStartOfSplineCoM.getFrameTuple(startOfSplineCoM);
       integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
             spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, comToPack);
    }
@@ -390,7 +388,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    
    public void computeCenterOfMassThirdSegment(double timeInThirdSegment, FramePoint3D comToPack)
    {
-      yoEndOfSplineCoM.getFrameTuple2d(endOfSplineCoM);
+      yoEndOfSplineCoM.getFrameTuple(endOfSplineCoM);
       integrateCoMPositionUsingConstantCMP(timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame, endOfSplineCoM,
             comToPack);
    }
@@ -483,7 +481,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       accelerationToPack.setToZero();
    }
 
-   public void getCoMPosition(YoFramePoint2d positionToPack)
+   public void getCoMPosition(YoFramePoint positionToPack)
    {
       positionToPack.set(desiredCoMPosition);
    }

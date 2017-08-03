@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -197,7 +198,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       FramePoint3D location = computeSteppingLocation(direction, swingSide);
 
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleFrame(swingSide.getOppositeSide());
-      FrameVector directionStanceFootFrame = new FrameVector(direction);
+      FrameVector3D directionStanceFootFrame = new FrameVector3D(direction);
       directionStanceFootFrame.changeFrame(stanceSoleFrame);
       
       double yawAngleChange = Math.atan(directionStanceFootFrame.getY()/directionStanceFootFrame.getX());
@@ -259,8 +260,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       //MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
       FrameVector3D localDirection = new FrameVector3D(direction);
       localDirection.changeFrame(stanceSoleFrame);
-      FramePoint stanceLocation = new FramePoint(stanceSoleFrame);
-      FramePoint swingLocation = new FramePoint(referenceFrames.getFootFrame(stepSide));
+      FramePoint3D stanceLocation = new FramePoint3D(stanceSoleFrame);
+      FramePoint3D swingLocation = new FramePoint3D(referenceFrames.getFootFrame(stepSide));
       
       //System.out.println(swingLocation.toString());
       swingLocation.changeFrame(stanceSoleFrame);
@@ -287,7 +288,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       }
       
       FramePoint3D location = new FramePoint3D(stanceSoleFrame);
-      location.setXY(location2d[index]);
+      location.set(location2d[index], 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
 
       return location;

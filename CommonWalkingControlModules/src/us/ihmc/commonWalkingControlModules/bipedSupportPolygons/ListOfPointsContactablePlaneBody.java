@@ -20,7 +20,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    private final RigidBody rigidBody;
    private final ReferenceFrame soleFrame;
    private final List<Point2D> contactPoints = new ArrayList<Point2D>();
-   private final List<FramePoint2d> frameContactPoints = new ArrayList<FramePoint2d>();
+   private final List<FramePoint2D> frameContactPoints = new ArrayList<FramePoint2D>();
    private final int totalNumberOfContactPoints;
 
    public ListOfPointsContactablePlaneBody(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame)
@@ -32,7 +32,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       {
          Point2D point = new Point2D(contactPoint);
          this.contactPoints.add(point);
-         frameContactPoints.add(new FramePoint2d(soleFrame, point));
+         frameContactPoints.add(new FramePoint2D(soleFrame, point));
       }
       
 

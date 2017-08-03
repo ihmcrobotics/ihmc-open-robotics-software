@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -451,7 +450,7 @@ public class DynamicReachabilityCalculator
 
       FramePoint3D ankleLocation = ankleLocations.get(swingSide);
       ankleLocation.changeFrame(worldFrame);
-      tempPoint2d.set(ankleLocation);
+      tempPoint3d.set(ankleLocation);
 
       tempPoint.setToZero(predictedHipFrames.get(swingSide));
       tempPoint.changeFrame(worldFrame);
