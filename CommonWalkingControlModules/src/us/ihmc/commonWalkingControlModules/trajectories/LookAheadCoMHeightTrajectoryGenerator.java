@@ -334,11 +334,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint tempFramePointForViz1 = new FramePoint();
    private final FramePoint tempFramePointForViz2 = new FramePoint();
-   
+
    private final FramePoint transferFromContactFramePosition = new FramePoint();
    private final FramePoint transferToContactFramePosition = new FramePoint();
    private final FramePoint transferFromDesiredContactFramePosition = new FramePoint();
-   
+
    private final FrameVector fromContactFrameDrift = new FrameVector();
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
    private final Point2D queryPoint = new Point2D();
@@ -364,7 +364,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       else
          hasBeenInitializedWithNextStep.set(false);
 
-      
+
       transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
       transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
 
@@ -547,7 +547,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          bagOfBalls.reset();
          int numberOfPoints = 30;
-         
+
          for (int i = 0; i < numberOfPoints; i++)
          {
             tempFramePointForViz1.setToZero(transferFromContactFramePosition.getReferenceFrame());
@@ -635,7 +635,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       sF.set(stretchedStringWaypoints.get(3));
    }
 
-   
+
    private final Point2D nextPoint2d = new Point2D();
    private final Point2D projectedPoint = new Point2D();
    private final Line2D line2d = new Line2D();
@@ -654,7 +654,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          //need to double check this
          line2d.set(projectionSegment.getFirstEndpoint(), projectionSegment.getSecondEndpoint());
          nextPoint2d.set(nextContactFramePosition.getX(), nextContactFramePosition.getY());
-         line2d.orthogonalProjection(nextPoint2d, projectedPoint); 
+         line2d.orthogonalProjection(nextPoint2d, projectedPoint);
          xSNext = projectionSegment.percentageAlongLineSegment(projectedPoint) * projectionSegment.length();
       }
 
