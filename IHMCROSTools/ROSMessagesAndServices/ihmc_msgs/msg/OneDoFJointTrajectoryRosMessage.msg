@@ -3,6 +3,11 @@
 # go through with a one-dimensional trajectory. A third order polynomial function is used to
 # interpolate between trajectory points.
 
+# QP Weight, if Too low, in the event the qp can't achieve all of the objectives it may stop trying to
+# achieve the desireds, if too high, it will favor this joint over other objectives. If set to NaN it
+# will use the default weight for that joint
+float64 weight
+
 # List of trajectory points to go through while executing the trajectory.
 ihmc_msgs/TrajectoryPoint1DRosMessage[] trajectory_points
 

@@ -71,8 +71,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager = managerFactory.getOrCreateFeetManager();
       legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
 
-      fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToStraightenLeg());
-      fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getFractionOfSwingToCollapseStanceLeg());
+      fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
+      fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
@@ -126,7 +126,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
             balanceManager.updateCurrentICPPlan();
-            legConfigurationManager.setLegBracing(swingSide, true);
+            //legConfigurationManager.prepareForLegBracing(swingSide);
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -248,6 +248,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       feetManager.requestSwing(swingSide, nextFootstep, swingTime);
 
       legConfigurationManager.startSwing(swingSide);
+      legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
+      legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
 
       if (nextFootstepTiming != null)
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextFootstepTiming.getTransferTime(), nextFootstepTiming.getSwingTime());

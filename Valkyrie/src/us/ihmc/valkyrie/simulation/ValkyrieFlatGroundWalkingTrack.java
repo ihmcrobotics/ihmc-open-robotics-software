@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -20,7 +21,7 @@ public class ValkyrieFlatGroundWalkingTrack
 //      boolean USE_JOYSTICK_CONTROLLER = JoystickUpdater.isJoyStickConnected();
       boolean USE_JOYSTICK_CONTROLLER = false;
 
-      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);      
 
       final double groundHeight = 0.0;

@@ -9,13 +9,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -31,6 +24,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -90,7 +89,7 @@ public class PelvisICPBasedTranslationManager
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class);
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, BipedSupportPolygons bipedSupportPolygons, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
       frozenOffsetDecayAlpha.set(0.998);

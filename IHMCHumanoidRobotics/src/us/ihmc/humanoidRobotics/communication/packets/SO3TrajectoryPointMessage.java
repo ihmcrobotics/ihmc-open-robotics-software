@@ -116,7 +116,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       if (angularVelocity != null && other.angularVelocity == null)
          return false;
 
-      if (!MathTools.epsilonEquals(time, other.time, epsilon))
+      if (!MathTools.epsilonCompare(time, other.time, epsilon))
          return false;
       if (!orientation.epsilonEquals(other.orientation, epsilon))
          return false;

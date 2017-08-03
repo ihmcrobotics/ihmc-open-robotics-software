@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -14,7 +14,7 @@ public class AtlasWallWorldDemo
    public static void main(final String[] args) throws JSAPException
    {
       boolean createAdditionalContactPoints = true;
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false,
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false,
             createAdditionalContactPoints);
       CommonAvatarEnvironmentInterface environment = new WallWorldEnvironment(-10.0, 10.0);
 
