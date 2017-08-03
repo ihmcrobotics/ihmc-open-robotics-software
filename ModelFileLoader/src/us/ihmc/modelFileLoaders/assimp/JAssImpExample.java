@@ -1,21 +1,15 @@
 package us.ihmc.modelFileLoaders.assimp;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 
-import jassimp.AiBuiltInWrapperProvider;
-import jassimp.AiClassLoaderIOSystem;
-import jassimp.AiColor;
-import jassimp.AiMaterial;
-import jassimp.AiMesh;
-import jassimp.AiPostProcessSteps;
-import jassimp.AiScene;
-import jassimp.AiTextureType;
-import jassimp.IHMCJassimp;
+import jassimp.*;
 import javafx.application.Application;
+import javafx.scene.AmbientLight;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -44,8 +38,11 @@ public class JAssImpExample extends Application
 
       View3DFactory view3DFactory = new View3DFactory(1024, 768);
       view3DFactory.addCameraController();
+      view3DFactory.addNodeToView(new AmbientLight(Color.WHITE));
 
-      String meshFileName = "models/cinderblock1Meter.obj";
+      String meshFileName = "sampleMeshes/cinderblock1Meter.obj";
+
+      URL meshResource = getClass().getClassLoader().getResource(meshFileName);
 
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
       aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
@@ -62,6 +59,7 @@ public class JAssImpExample extends Application
       for (int i = 0; i < meshes.size(); i++)
       {
          AiMesh aiMesh = meshes.get(i);
+
          AiMaterial aiMaterial = null;
          int uvIndexToUse = 0;
 
@@ -83,9 +81,10 @@ public class JAssImpExample extends Application
             for (int j = 0; j < numDiffuseTextures; j++)
             {
                String textureFile = aiMaterial.getTextureFile(AiTextureType.DIFFUSE, j);
-               Path path = Paths.get(meshFileName);   // TODO: Do not use Path, gives weird slashes on windows
+               Path path = Paths.get(meshResource.toURI());   // TODO: Do not use Path, gives weird slashes on windows
                Path textureLocation = path.getParent().resolve(textureFile);
-               diffuseMap = new Image(getClass().getClassLoader().getResourceAsStream(textureLocation.toString()));
+
+               diffuseMap = new Image(textureLocation.toUri().toURL().openStream());
                uvIndexToUse = j;
             }
 
