@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import multisense_ros.RawImuData;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -41,7 +41,7 @@ public class IMUBasedHeadPoseCalculatorFactory
 		boolean USE_REAL_ROBOT_TRANSFORM=true;
 		if(USE_REAL_ROBOT_TRANSFORM)
 		{
-			calculator.setHeadIMUFrameWhenLevel(AtlasSensorInformation.getHeadIMUFramesWhenLevel().get(DRCRobotModel.RobotTarget.REAL_ROBOT));
+			calculator.setHeadIMUFrameWhenLevel(AtlasSensorInformation.getHeadIMUFramesWhenLevel().get(RobotTarget.REAL_ROBOT));
 		}
 		return calculator;
 	}

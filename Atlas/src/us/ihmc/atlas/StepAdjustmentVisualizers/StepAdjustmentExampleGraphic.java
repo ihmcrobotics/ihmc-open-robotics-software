@@ -9,10 +9,15 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -36,11 +41,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -57,6 +58,9 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StepAdjustmentExampleGraphic
 {
@@ -678,18 +682,6 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getMinLegLengthBeforeCollapsingSingleSupport()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinMechanicalLegLength()
-         {
-            return 0;
-         }
-
-         @Override
          public double minimumHeightAboveAnkle()
          {
             return 0;
@@ -721,66 +713,6 @@ public class StepAdjustmentExampleGraphic
 
          @Override
          public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMinStepLengthForToeOff()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffWhenHittingAnkleLimit()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMaximumToeOffAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getToeTouchdownAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doHeelTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getHeelTouchdownAngle()
          {
             return 0;
          }
@@ -955,24 +887,6 @@ public class StepAdjustmentExampleGraphic
 
          @Override
          public double getSideLengthOfBoundingBoxForFootstepHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownHeightOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownVelocity()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownAcceleration()
          {
             return 0;
          }
@@ -1200,66 +1114,6 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public String[] getDefaultHeadOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double[] getInitialHeadYawPitchRoll()
-         {
-            return new double[0];
-         }
-
-         @Override
-         public boolean isNeckPositionControlled()
-         {
-            return false;
-         }
-
-         @Override
-         public double getNeckPitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getNeckPitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTrajectoryTimeHeadOrientation()
-         {
-            return 0;
-         }
-
-         @Override
          public double getMinStepWidth()
          {
             return 0;
@@ -1275,6 +1129,55 @@ public class StepAdjustmentExampleGraphic
          public double getMaxStepDown()
          {
             return 0;
+         }
+
+         @Override
+         public ToeOffParameters getToeOffParameters()
+         {
+            return new ToeOffParameters()
+            {
+               @Override
+               public boolean doToeOffIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean doToeOffIfPossibleInSingleSupport()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMinStepLengthForToeOff()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doToeOffWhenHittingAnkleLimit()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMaximumToeOffAngle()
+               {
+                  return 0;
+               }
+            };
+         }
+
+         @Override
+         public SwingTrajectoryParameters getSwingTrajectoryParameters()
+         {
+            return null;
          }
       };
    }

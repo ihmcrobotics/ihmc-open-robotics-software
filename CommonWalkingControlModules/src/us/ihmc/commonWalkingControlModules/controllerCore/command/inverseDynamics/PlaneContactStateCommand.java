@@ -153,7 +153,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
    public double getMaxContactPointNormalForce(int pointIndex)
    {
-      return maxContactPointNormalForces.get(pointIndex).getValue();
+      return maxContactPointNormalForces.get(pointIndex).doubleValue();
    }
 
    @Override

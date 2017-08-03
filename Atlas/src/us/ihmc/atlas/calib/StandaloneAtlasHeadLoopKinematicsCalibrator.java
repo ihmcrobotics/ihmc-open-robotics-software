@@ -50,7 +50,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, DRCRobotModel.RobotTarget.SCS, false);
+	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, RobotTarget.SCS, false);
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
 

@@ -3,6 +3,7 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -22,7 +23,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    {
       final AtlasRobotVersion atlasVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
       FootContactPoints simulationContactPoints = new WobblySimulationContactPoints(footZWobbleForTests);
-      return new AtlasRobotModel(atlasVersion, DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
+      return new AtlasRobotModel(atlasVersion, RobotTarget.SCS, false, simulationContactPoints);
    }
 
    @Override

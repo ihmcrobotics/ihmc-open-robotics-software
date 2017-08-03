@@ -11,6 +11,8 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -129,6 +131,12 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       referenceFrame.checkReferenceFrameMatch(firstEndpoint.getReferenceFrame());
       referenceFrame.checkReferenceFrameMatch(vectorToSecondEndpoint.getReferenceFrame());
       frameLineSegment.set(firstEndpoint, vectorToSecondEndpoint);
+      getYoValuesFromFrameLineSegment();
+   }
+   
+   public void set(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
+   {
+      frameLineSegment.set(frameLineSegment.getReferenceFrame(), firstEndpoint, secondEndpoint);
       getYoValuesFromFrameLineSegment();
    }
 

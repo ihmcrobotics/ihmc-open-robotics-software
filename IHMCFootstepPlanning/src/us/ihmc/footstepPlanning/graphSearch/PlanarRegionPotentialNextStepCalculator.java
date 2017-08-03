@@ -739,7 +739,7 @@ public class PlanarRegionPotentialNextStepCalculator
          return null;
       }
 
-      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceNormalZ())
+      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
       {
          notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                          BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
@@ -859,7 +859,7 @@ public class PlanarRegionPotentialNextStepCalculator
                   double zPenetration = vertex3dInWorld.getZ() - planeZGivenXY;
                   //               System.out.println("zPenetration = " + zPenetration);
 
-                  if (zPenetration > parameters.getMaximumZPenetrationOnVRegions())
+                  if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
                      notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                                      BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);

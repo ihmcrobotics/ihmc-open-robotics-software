@@ -61,6 +61,9 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       {
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(random);
       }
+
+      useCustomControlFrame = random.nextBoolean();
+      controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
    }
 
    public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
@@ -102,7 +105,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * set a single point
     * @param trajectoryTime the duration of the trajectory
     * @param desiredPosition the desired end position
-    * @param trajectoryReferenceFrameId the frame the trajectory will be executed in
+    * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
    public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
    {
@@ -111,7 +114,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    /**
     * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
-    * @param the number of trajectory points in this message
+    * @param numberOfTrajectoryPoints number of trajectory points in this message
     */
    public AbstractEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
@@ -171,11 +174,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     *           the trajectory starts.
     * @param position define the desired 3D position to be reached at this trajectory point. It is
     *           expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
-    *           It is expressed in world frame.
     * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory
-    *           point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Vector3D linearVelocity,
@@ -194,11 +193,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     *           the trajectory starts.
     * @param position define the desired 3D position to be reached at this trajectory point. It is
     *           expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
-    *           It is expressed in world frame.
     * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory
-    *           point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Vector3D linearVelocity,
@@ -245,7 +240,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * frame if not defined otherwise.
     * </p>
     *
-    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    * @param selectionMatrix3D the selection matrix to use when executing this trajectory message. Not
     *           modified.
     */
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
@@ -397,7 +392,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          return false;
       }
 
-      if (linearSelectionMatrix != null && !linearSelectionMatrix.equals(other.linearSelectionMatrix))
+      if (linearSelectionMatrix != null && !linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
       {
          return false;
       }
@@ -407,7 +402,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          return false;
       }
 
-      if (linearWeightMatrix != null && !linearWeightMatrix.equals(other.linearWeightMatrix))
+      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(other.linearWeightMatrix, epsilon))
       {
          return false;
       }

@@ -182,17 +182,17 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public double getX()
    {
-      return this.getX();
+      return x.getDoubleValue();
    }
 
    public double getY()
    {
-      return this.getY();
+      return y.getDoubleValue();
    }
 
    public double getZ()
    {
-      return this.getZ();
+      return z.getDoubleValue();
    }
 
    public void setAppearance(AppearanceDefinition appearance)
@@ -362,5 +362,15 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
    public AppearanceDefinition getAppearance()
    {
       return appearance;
+   }
+
+   public YoVariable<?> getYoX()
+   {
+      return x;
+   }
+
+   public YoVariable<?> getYoY()
+   {
+      return y;
    }
 }

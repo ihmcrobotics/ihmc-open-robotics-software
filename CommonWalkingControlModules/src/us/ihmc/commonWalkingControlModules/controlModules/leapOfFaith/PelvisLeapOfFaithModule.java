@@ -33,8 +33,9 @@ public class PelvisLeapOfFaithModule
    private final YoDouble reachingMaxRoll = new YoDouble(yoNamePrefix + "PelvisReachingMaxRoll", registry);
    private final YoDouble reachingFractionOfSwing = new YoDouble(yoNamePrefix + "PelvisReachingFractionOfSwing", registry);
 
-   private final YoDouble relaxationRate = new YoDouble(yoNamePrefix + "RelaxationRate", registry);
-   private final YoDouble relaxationFraction = new YoDouble(yoNamePrefix + "RelaxationFraction", registry);
+   private final YoDouble relaxationRate = new YoDouble(yoNamePrefix + "PelvisRelaxationRate", registry);
+   private final YoDouble relaxationFraction = new YoDouble(yoNamePrefix + "PelvisRelaxationFraction", registry);
+   private final YoDouble minimumWeight = new YoDouble(yoNamePrefix + "PelvisMinimumWeight", registry);
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
@@ -58,6 +59,7 @@ public class PelvisLeapOfFaithModule
       reachingFractionOfSwing.set(parameters.getPelvisReachingFractionOfSwing());
 
       relaxationRate.set(parameters.getRelaxationRate());
+      minimumWeight.set(parameters.getMinimumPelvisWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -118,17 +120,28 @@ public class PelvisLeapOfFaithModule
 
    public void relaxAngularWeight(double currentTimeInState, Vector3D angularWeightToPack)
    {
+      relaxationFraction.set(0.0);
+
       if (isInSwing.getBooleanValue() && relaxPelvis.getBooleanValue())
       {
-         double exceededTime = Math.max(currentTimeInState - stateDuration, 0.0);
-         double relaxationFraction;
+         double exceededTime = Math.max(currentTimeInState - reachingFractionOfSwing.getDoubleValue() * stateDuration, 0.0);
+
+         if (exceededTime == 0.0)
+            return;
+
+         double relaxationFraction = relaxationRate.getDoubleValue() * exceededTime;
+
          if (exceededTime > 0.0)
-            relaxationFraction = MathTools.clamp(relaxationRate.getDoubleValue() * exceededTime + 0.2, 0.0, 1.0);
+            relaxationFraction = MathTools.clamp(relaxationFraction, 0.0, 1.0);
          else
             relaxationFraction = 0.0;
+
          this.relaxationFraction.set(relaxationFraction);
 
          angularWeightToPack.scale(1.0 - relaxationFraction);
+         angularWeightToPack.setX(Math.max(minimumWeight.getDoubleValue(), angularWeightToPack.getX()));
+         angularWeightToPack.setY(Math.max(minimumWeight.getDoubleValue(), angularWeightToPack.getY()));
+         angularWeightToPack.setZ(Math.max(minimumWeight.getDoubleValue(), angularWeightToPack.getZ()));
       }
    }
 

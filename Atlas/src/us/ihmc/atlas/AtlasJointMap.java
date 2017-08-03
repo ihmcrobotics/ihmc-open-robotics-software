@@ -45,6 +45,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -101,14 +102,14 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
    private final AtlasRobotVersion atlasVersion;
-   private final NewRobotPhysicalProperties atlasPhysicalProperties;
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
 
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, AtlasPhysicalProperties atlasPhysicalProperties)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;

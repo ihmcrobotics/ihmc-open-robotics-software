@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.Random;
+
 public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTrajectoryCommand, FootTrajectoryMessage>
 {
    private RobotSide robotSide;
@@ -11,6 +13,12 @@ public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTr
    public FootTrajectoryCommand()
    {
       super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+   }
+
+   public FootTrajectoryCommand(Random random)
+   {
+      super(ReferenceFrame.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            ReferenceFrame.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override
