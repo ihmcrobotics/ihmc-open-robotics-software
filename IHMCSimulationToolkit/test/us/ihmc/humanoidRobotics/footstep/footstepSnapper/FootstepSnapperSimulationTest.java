@@ -326,7 +326,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
-      FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
 
 
       double centerX = -3.5;
@@ -369,7 +369,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
-      FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
 
 
       double centerX = 0.5;
@@ -413,7 +413,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
-      FootstepSnapper footstepSnapper = createAdjustingFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createAdjustingFootstepSnapper();
 
 
       double centerX = 0.5;
@@ -597,7 +597,7 @@ public class FootstepSnapperSimulationTest
 
    protected class FootstepSnapperTestHelper
    {
-      private final FootstepSnapper footstepSnapper;
+      private final QuadTreeFootstepSnapper footstepSnapper;
       private final Random random = new Random(1776L);
 
       private QuadTreeForGroundHeightMap heightMap;
@@ -619,7 +619,7 @@ public class FootstepSnapperSimulationTest
       private BagOfBalls pointListBalls = null;
 
 
-      public FootstepSnapperTestHelper(String description, FootstepSnapper footstepSnapper, Graphics3DObject linkGraphics, boolean visualize)
+      public FootstepSnapperTestHelper(String description, QuadTreeFootstepSnapper footstepSnapper, Graphics3DObject linkGraphics, boolean visualize)
               throws InsufficientDataException
       {
          this.footstepSnapper = footstepSnapper;

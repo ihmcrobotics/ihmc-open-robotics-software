@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -316,7 +316,7 @@ public class FootstepVisualizer
       SimplePathParameters pathType = new SimplePathParameters(0.5, 0.2, 0.0, Math.PI / 6, Math.PI / 12, 0.3);
       
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
-      FootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
+      QuadTreeFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       
 //      FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
