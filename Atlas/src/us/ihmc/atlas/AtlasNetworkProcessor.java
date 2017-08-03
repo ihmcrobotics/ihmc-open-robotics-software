@@ -11,6 +11,7 @@ import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -67,6 +68,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableKinematicsToolboxVisualizer(true);
         networkModuleParams.enableFootstepPlanningToolbox(true);
         networkModuleParams.enableKinematicsToolbox(true);
+        networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
@@ -79,18 +81,18 @@ public class AtlasNetworkProcessor
         }
     	  try
     	  {
-    	     DRCRobotModel.RobotTarget target;
+    	     RobotTarget target;
     	     if(config.getBoolean(runningOnRealRobot.getID()))
     	     {
-    	        target = DRCRobotModel.RobotTarget.REAL_ROBOT;
+    	        target = RobotTarget.REAL_ROBOT;
     	     }
     	     else if(config.getBoolean(runningOnGazebo.getID()))
     	     {
-    	       target = DRCRobotModel.RobotTarget.GAZEBO;
+    	       target = RobotTarget.GAZEBO;
     	     }
     	     else
     	     {
-    	        target = DRCRobotModel.RobotTarget.SCS;
+    	        target = RobotTarget.SCS;
     	     }
     		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)

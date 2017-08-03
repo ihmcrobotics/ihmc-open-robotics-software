@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -22,10 +21,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Sta
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * WalkToLocation with path-planning algorithm to avoid keepout regions
@@ -67,17 +66,14 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private FootstepDataMessage predictedLocation;
    private FootstepPathPlanPacket currentPlan;
    private List<FootstepDataMessage> stepsRequested;
-   private double ankleHeight = 0;
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
-   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime,
-                             double ankleHeight)
+   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
       DEBUG.set(true);
       this.yoTime = yoTime;
-      this.ankleHeight = ankleHeight;
 
       isDone = new YoBoolean("isDone", registry);
       hasInputBeenSet = new YoBoolean("hasInputsBeenSet", registry);
@@ -174,7 +170,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
       for (int i = 0; i < size; i++)
       {
-         planVisualizationPacket.footstepData.add(adjustFootstepForAnkleHeight(plan.pathPlan.get(i)));
+         planVisualizationPacket.footstepData.add(plan.pathPlan.get(i));
          planVisualizationPacket.footstepOrder[i] = i;
          planVisualizationPacket.flag[i] = (byte) (plan.footstepUnknown.get(i) ? 0 : 2);
       }
@@ -341,12 +337,12 @@ public class WalkToGoalBehavior extends AbstractBehavior
       {
          if (executeUnknownFirstStep.getBooleanValue() && i == 0)
          {
-            outgoingFootsteps.footstepDataList.add(adjustFootstepForAnkleHeight(currentPlan.pathPlan.get(i)));
+            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
             executeUnknownFirstStep.set(false);
          }
          else if (!currentPlan.footstepUnknown.get(i))
          {
-            outgoingFootsteps.footstepDataList.add(adjustFootstepForAnkleHeight(currentPlan.pathPlan.get(i)));
+            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
          }
          else
          {
@@ -367,17 +363,6 @@ public class WalkToGoalBehavior extends AbstractBehavior
       allStepsCompleted.set(false);
       sendPacketToController(outgoingFootsteps);
       expectedIndex = 0;
-   }
-
-   private FootstepDataMessage adjustFootstepForAnkleHeight(FootstepDataMessage footstep)
-   {
-      FootstepDataMessage copy = new FootstepDataMessage(footstep);
-      Point3D ankleOffset = new Point3D(0, 0, ankleHeight);
-      RigidBodyTransform footTransform = new RigidBodyTransform();
-      footTransform.setRotationAndZeroTranslation(copy.getOrientation());
-      footTransform.transform(ankleOffset);
-      copy.getLocation().add(ankleOffset);
-      return copy;
    }
 
    private void checkForNewInputs()

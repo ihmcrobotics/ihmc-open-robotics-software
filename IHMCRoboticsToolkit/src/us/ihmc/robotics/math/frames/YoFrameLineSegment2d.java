@@ -2,8 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -11,6 +10,8 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -129,6 +130,12 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
       referenceFrame.checkReferenceFrameMatch(firstEndpoint.getReferenceFrame());
       referenceFrame.checkReferenceFrameMatch(vectorToSecondEndpoint.getReferenceFrame());
       frameLineSegment.set(firstEndpoint, vectorToSecondEndpoint);
+      getYoValuesFromFrameLineSegment();
+   }
+   
+   public void set(Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
+   {
+      frameLineSegment.set(frameLineSegment.getReferenceFrame(), firstEndpoint, secondEndpoint);
       getYoValuesFromFrameLineSegment();
    }
 

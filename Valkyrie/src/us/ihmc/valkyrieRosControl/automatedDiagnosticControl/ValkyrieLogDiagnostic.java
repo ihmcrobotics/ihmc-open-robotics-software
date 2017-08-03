@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 import java.io.IOException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.logProcessor.DRCLogProcessor;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.avatar.logProcessor.diagnostic.DiagnosticAnalysisProcessor;

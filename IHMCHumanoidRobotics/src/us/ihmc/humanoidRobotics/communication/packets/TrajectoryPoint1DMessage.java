@@ -143,11 +143,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
    @Override
    public boolean epsilonEquals(TrajectoryPoint1DMessage other, double epsilon)
    {
-      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+      if (!MathTools.epsilonCompare(getTime(), other.getTime(), epsilon))
          return false;
-      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
+      if (!MathTools.epsilonCompare(getPosition(), other.getPosition(), epsilon))
          return false;
-      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
+      if (!MathTools.epsilonCompare(getVelocity(), other.getVelocity(), epsilon))
          return false;
       return true;
    }

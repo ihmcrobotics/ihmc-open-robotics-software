@@ -10,6 +10,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -56,7 +57,7 @@ public class MultisenseHeadOnAStickManualTestNetworkProcessor
 
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.HEAD_ON_A_STICK, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.HEAD_ON_A_STICK, false);
       }
       catch (IllegalArgumentException e)
       {

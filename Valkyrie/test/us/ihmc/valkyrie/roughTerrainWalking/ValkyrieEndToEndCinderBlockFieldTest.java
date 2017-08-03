@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;

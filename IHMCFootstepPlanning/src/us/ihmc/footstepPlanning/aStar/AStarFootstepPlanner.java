@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -14,6 +16,8 @@ import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.aStar.implementations.SnapBasedNodeChecker;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -23,7 +27,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   public static final double DEFAULT_COST_PER_STEP = 0.0;
+   public static final double DEFAULT_COST_PER_STEP = 0.005;
    public static final double DEFAULT_YAW_WEIGHT = 0.1;
    public static final double DEFAULT_STEP_WIDTH = 0.25;
 
@@ -33,6 +37,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode goalNode;
+
+   private PlanarRegionsList planarRegionsList;
+   private SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
@@ -94,7 +101,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
+      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
+   }
+
+   public void setFootPolygons(SideDependentList<ConvexPolygon2D> footPolygons)
+   {
+      this.footPolygons = footPolygons;
    }
 
    @Override
@@ -120,11 +133,23 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private FramePose createPoseFromNode(FootstepNode node)
    {
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
-      pose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
-      pose.setX(node.getX());
-      pose.setY(node.getY());
-      return pose;
+      RigidBodyTransform footstepPose = new RigidBodyTransform();
+      footstepPose.setRotationYawAndZeroTranslation(node.getYaw());
+      footstepPose.setTranslationX(node.getX());
+      footstepPose.setTranslationY(node.getY());
+
+      if (footPolygons != null && planarRegionsList != null)
+      {
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(node.getRobotSide()));
+         RigidBodyTransform worldToSole = new RigidBodyTransform();
+         worldToSole.setRotationYawAndZeroTranslation(node.getYaw());
+         worldToSole.setTranslation(node.getX(), node.getY(), 0.0);
+         footPolygon.applyTransformAndProjectToXYPlane(worldToSole);
+         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList);
+         snapTransform.transform(footstepPose);
+      }
+
+      return new FramePose(ReferenceFrame.getWorldFrame(), footstepPose);
    }
 
    private void initialize()
@@ -178,7 +203,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
-            if (!nodeChecker.isNodeValid(neighbor))
+            if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
                continue;
 
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
@@ -228,5 +253,20 @@ public class AStarFootstepPlanner implements FootstepPlanner
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
 
       return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+   }
+
+   public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons)
+   {
+      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons);
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
+
+      heuristics.setWeight(1.5);
+
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+      planner.setFootPolygons(footPolygons);
+      return planner;
    }
 }

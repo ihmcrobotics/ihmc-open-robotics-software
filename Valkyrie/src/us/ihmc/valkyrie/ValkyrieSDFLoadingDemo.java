@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -30,7 +30,7 @@ public class ValkyrieSDFLoadingDemo
 
    public ValkyrieSDFLoadingDemo()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
       FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3D());
