@@ -844,13 +844,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
       public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub

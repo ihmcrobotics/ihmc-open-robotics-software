@@ -287,12 +287,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
          public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
          {
             return null;
