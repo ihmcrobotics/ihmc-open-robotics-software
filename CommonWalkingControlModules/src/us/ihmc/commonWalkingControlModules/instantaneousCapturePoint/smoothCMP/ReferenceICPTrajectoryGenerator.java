@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -70,6 +70,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
    private final List<YoFrameTrajectory3D> icpTrajectories = new ArrayList<>();
 
+   private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox();
+   
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding, YoBoolean isInitialTransfer,
                                           YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
@@ -220,8 +222,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       
       if(isInitialTransfer.getBooleanValue())
       {
-         SmoothCapturePointTools.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
-                                                                              cmpTrajectories, omega0.getDoubleValue());
+         icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
+                                                                           cmpTrajectories, omega0.getDoubleValue());
       }
    }
 

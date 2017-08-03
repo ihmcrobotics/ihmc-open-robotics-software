@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,33 +14,53 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 
-public class SmoothCapturePointAdjustmentTools
+public class SmoothCapturePointAdjustmentToolbox
 {
    private static final int defaultSize = 1000;
    
-   private static final DenseMatrix64F generalizedAlphaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedGammaPrimeMatrixSegment1 = new DenseMatrix64F(1, 1);
-   private static final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F generalizedAlphaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F generalizedBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F generalizedGammaPrimeMatrixSegment1 = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
    
-   private static final DenseMatrix64F alphaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F betaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F gammaPrimeMatrixSegment2 = new DenseMatrix64F(1, 1);
-   private static final DenseMatrix64F alphaBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F alphaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F betaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F gammaPrimeMatrixSegment2 = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F alphaBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
    
-   private static final DenseMatrix64F boundaryConditionMatrix = new DenseMatrix64F(defaultSize, defaultSize);
-   private static final DenseMatrix64F boundaryConditionMatrixInverse = new DenseMatrix64F(defaultSize, defaultSize);
-   private static final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
-   private static final DenseMatrix64F polynomialCoefficientCombinedVectorAdjustment = new DenseMatrix64F(defaultSize, 1);   
-   private static final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment1 = new DenseMatrix64F(defaultSize, 1); 
-   private static final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment2 = new DenseMatrix64F(defaultSize, 1); 
+   private final DenseMatrix64F boundaryConditionMatrix = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F boundaryConditionMatrixInverse = new DenseMatrix64F(defaultSize, defaultSize);
+   private final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
+   private final DenseMatrix64F polynomialCoefficientCombinedVectorAdjustment = new DenseMatrix64F(defaultSize, 1);   
+   private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment1 = new DenseMatrix64F(defaultSize, 1); 
+   private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment2 = new DenseMatrix64F(defaultSize, 1); 
    
-   private static final FramePoint cmp10 = new FramePoint();
-   private static final FramePoint cmp11 = new FramePoint();
-   private static final FramePoint cmp21 = new FramePoint();
-   private static final FramePoint cmp22 = new FramePoint();
+   private final FramePoint cmp10 = new FramePoint();
+   private final FramePoint cmp11 = new FramePoint();
+   private final FramePoint cmp21 = new FramePoint();
+   private final FramePoint cmp22 = new FramePoint();
    
-   public static void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<YoFrameTrajectory3D> cmpPolynomials3D, List<FrameTuple<?, ?>> icpQuantityInitialSegment1List,
+   private List<FrameTuple<?, ?>> icpQuantityInitialSegment1List = new ArrayList<FrameTuple<?, ?>>();
+   private FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
+   
+   public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
+                                                                   List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
+   {
+      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      double tInitial = cmpPolynomial3D.getInitialTime();
+      
+      // TODO: check whether better ways of setting it exist
+      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
+      {
+         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
+         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
+      }
+      
+      initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
+      adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialSegment1List, entryCornerPointsToPack, exitCornerPointsToPack);
+   }
+   
+   public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<YoFrameTrajectory3D> cmpPolynomials3D, List<FrameTuple<?, ?>> icpQuantityInitialSegment1List,
                                                                      List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack)
    {
       YoFrameTrajectory3D cmpPolynomial3DSegment1 = cmpPolynomials3D.get(0);
@@ -85,13 +106,13 @@ public class SmoothCapturePointAdjustmentTools
       PrintTools.debug("CMP22 = " + cmpPolynomial3DSegment2.getPosition().toString());
    }   
    
-   public static void adjustCMPPolynomials(YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
+   private void adjustCMPPolynomials(YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
    {
       cmpPolynomialSegment1.setDirectly(polynomialCoefficientVectorAdjustmentSegment1);
       cmpPolynomialSegment2.setDirectly(polynomialCoefficientVectorAdjustmentSegment2);
    }
    
-   public static void populateBoundaryConditionMatrices1D(double omega0, Direction direction, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2, 
+   private void populateBoundaryConditionMatrices1D(double omega0, Direction direction, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2, 
                                                           List<FrameTuple<?, ?>> icpQuantityInitialSegment1List, double icpPositionFinalSegment2Scalar)
    {    
       int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
@@ -109,13 +130,13 @@ public class SmoothCapturePointAdjustmentTools
       }
    }
    
-   private static double generalizedBoundaryConditionValue = Double.NaN;
-   private static final DenseMatrix64F generalizedBoundaryConditionSubMatrix1 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedBoundaryConditionSubMatrix2 = new DenseMatrix64F(1, defaultSize);
-   private static final DenseMatrix64F generalizedBoundaryConditionSubMatrix1Transpose = new DenseMatrix64F(defaultSize, 1);
-   private static final DenseMatrix64F generalizedBoundaryConditionSubMatrix2Transpose = new DenseMatrix64F(defaultSize, 1);
+   private  double generalizedBoundaryConditionValue = Double.NaN;
+   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2 = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1Transpose = new DenseMatrix64F(defaultSize, 1);
+   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2Transpose = new DenseMatrix64F(defaultSize, 1);
    
-   public static void setGeneralizedBoundaryConstraintICP0(int order, int numberOfCoefficients, double icpQuantityInitialSegment1, double icpPositionFinalSegment2,
+   private void setGeneralizedBoundaryConstraintICP0(int order, int numberOfCoefficients, double icpQuantityInitialSegment1, double icpPositionFinalSegment2,
                                                            DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1, DenseMatrix64F generalizedGammaPrimeMatrixSegment1,
                                                            DenseMatrix64F alphaBetaPrimeRowSegment2, DenseMatrix64F gammaPrimeMatrixSegment2)
    {
@@ -131,7 +152,7 @@ public class SmoothCapturePointAdjustmentTools
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order, numberOfCoefficients);
    }
    
-   public static void setGeneralizedBoundaryConstraintCMP0(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1)
+   private void setGeneralizedBoundaryConstraintCMP0(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1)
    {
       resetGeneralizedBoundaryConditionContainers();
       
@@ -149,7 +170,7 @@ public class SmoothCapturePointAdjustmentTools
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients/2, numberOfCoefficients);
    }
    
-   public static void setGeneralizedBoundaryConstraintCMP1(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
+   private void setGeneralizedBoundaryConstraintCMP1(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
    {
       resetGeneralizedBoundaryConditionContainers();
       
@@ -169,7 +190,7 @@ public class SmoothCapturePointAdjustmentTools
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients, numberOfCoefficients);
    }
    
-   public static void setGeneralizedBoundaryConstraintCMP2(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment2)
+   private void setGeneralizedBoundaryConstraintCMP2(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment2)
    {
       resetGeneralizedBoundaryConditionContainers();
       
@@ -187,7 +208,7 @@ public class SmoothCapturePointAdjustmentTools
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients + numberOfCoefficients/2, numberOfCoefficients);
    }
    
-   public static void computeAdjustedPolynomialCoefficientVectors1D()
+   private void computeAdjustedPolynomialCoefficientVectors1D()
    {
       // Uses the Moore-Penrose pseudo-inverse to counter bad conditioning of boundaryConditionMatrix
       CommonOps.pinv(boundaryConditionMatrix, boundaryConditionMatrixInverse);
@@ -204,21 +225,21 @@ public class SmoothCapturePointAdjustmentTools
       PrintTools.debug("");
    }
    
-   public static void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment2)
+   private void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment2)
    {
       double tInitial2 = cmpPolynomialSegment2.getInitialTime();
       SmoothCapturePointTools.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, alphaPrimeRowSegment2, betaPrimeRowSegment2, 
                                                                               gammaPrimeMatrixSegment2, alphaBetaPrimeRowSegment2);
    }
    
-   public static void calculateGeneralizedICPMatricesOnCMPSegment1(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment1)
+   private void calculateGeneralizedICPMatricesOnCMPSegment1(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment1)
    {
       double tInitial1 = cmpPolynomialSegment1.getInitialTime();
       SmoothCapturePointTools.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial1, derivativeOrder, cmpPolynomialSegment1, generalizedAlphaPrimeRowSegment1, 
                                                                               generalizedBetaPrimeRowSegment1, generalizedGammaPrimeMatrixSegment1, generalizedAlphaBetaPrimeRowSegment1);
    }
    
-   public static void setGeneralizedBoundaryConstraints(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2,
+   private void setGeneralizedBoundaryConstraints(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2,
                                                         double icpQuantityInitialSegment1Scalar, double icpPositionFinalSegment2Scalar)
    {
       setGeneralizedBoundaryConstraintICP0(order, numberOfCoefficients, icpQuantityInitialSegment1Scalar, icpPositionFinalSegment2Scalar,
@@ -229,7 +250,7 @@ public class SmoothCapturePointAdjustmentTools
       setGeneralizedBoundaryConstraintCMP2(order, numberOfCoefficients, cmpPolynomialSegment2);
    }
    
-   public static void initializeMatrices1D(int numberOfCoefficients)
+   private void initializeMatrices1D(int numberOfCoefficients)
    {  
       boundaryConditionMatrix.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
       boundaryConditionMatrixInverse.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
@@ -255,7 +276,7 @@ public class SmoothCapturePointAdjustmentTools
       alphaBetaPrimeRowSegment2.reshape(1, numberOfCoefficients);
    }
    
-   public static void resetGeneralizedBoundaryConditionContainers()
+   private void resetGeneralizedBoundaryConditionContainers()
    {
       generalizedBoundaryConditionValue = Double.NaN;
       generalizedBoundaryConditionSubMatrix1.zero();
