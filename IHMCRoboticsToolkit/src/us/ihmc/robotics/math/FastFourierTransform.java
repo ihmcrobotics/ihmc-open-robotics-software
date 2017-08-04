@@ -1,8 +1,8 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.math;
+
+import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 import java.util.List;
-
-import us.ihmc.commons.PrintTools;
 
 /**
  * Garbage free implementation of the FFT algorithm
@@ -96,15 +96,15 @@ public class FastFourierTransform
          {
             for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
             {
-               tempComplex1.multiply(tempComplex, transformedCoeffs[k + m / 2]);
+               tempComplex1.timesAndStore(tempComplex, transformedCoeffs[k + m / 2]);
                tempComplex2.set(transformedCoeffs[k]);
-               transformedCoeffs[k].add(tempComplex1, tempComplex2);
-               transformedCoeffs[k + m / 2].subtract(tempComplex2, tempComplex1);
+               transformedCoeffs[k].plusAndStore(tempComplex1, tempComplex2);
+               transformedCoeffs[k + m / 2].minusAndStore(tempComplex2, tempComplex1);
             }
             if (!inverse)
-               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
+               tempComplex.timesAndStore(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
             else
-               tempComplex.multiply(rootsOfUnity.get(maxNumberOfCoefficients / m));
+               tempComplex.timesAndStore(rootsOfUnity.get(maxNumberOfCoefficients / m));
          }
       }
       if (inverse)

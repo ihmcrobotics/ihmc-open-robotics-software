@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
+package us.ihmc.robotics.math.trajectories;
 
 import org.junit.Before;
 import org.junit.Test;

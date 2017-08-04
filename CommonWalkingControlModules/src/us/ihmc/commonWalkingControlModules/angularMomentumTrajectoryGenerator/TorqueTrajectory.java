@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.YoSegmentedFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
