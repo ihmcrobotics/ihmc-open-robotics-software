@@ -177,7 +177,9 @@ public class ComplexNumber
     */
    public ComplexNumber plus(ComplexNumber w)
    {
-      return new ComplexNumber(real + w.real(), imag + w.imag());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.plusAndStore(w);
+      return complexNumber;
    }
 
    public void plusAndStore(ComplexNumber c1, ComplexNumber c2)
@@ -199,7 +201,9 @@ public class ComplexNumber
 
    public ComplexNumber plus(double d)
    {
-      return new ComplexNumber(real + d, imag);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.plusAndStore(d, 0.0);
+      return complexNumber;
    }
 
    /**
@@ -210,12 +214,16 @@ public class ComplexNumber
     */
    public ComplexNumber minus(ComplexNumber w)
    {
-      return new ComplexNumber(real - w.real(), imag - w.imag());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.minusAndStore(w);
+      return complexNumber;
    }
 
    public ComplexNumber minus(double d)
    {
-      return new ComplexNumber(real - d, imag);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.minusAndStore(d, 0.0);
+      return complexNumber;
    }
 
    public void minusAndStore(ComplexNumber c1, ComplexNumber c2)
@@ -241,7 +249,9 @@ public class ComplexNumber
     */
    public ComplexNumber times(ComplexNumber w)
    {
-      return new ComplexNumber(real * w.real() - imag * w.imag(), real * w.imag() + imag * w.real());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.timesAndStore(w);
+      return complexNumber;
    }
 
 
@@ -252,7 +262,9 @@ public class ComplexNumber
     */
    public ComplexNumber times(double w)
    {
-      return new ComplexNumber(real * w, imag * w);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.timesAndStore(w, 0.0);
+      return complexNumber;
    }
 
 
