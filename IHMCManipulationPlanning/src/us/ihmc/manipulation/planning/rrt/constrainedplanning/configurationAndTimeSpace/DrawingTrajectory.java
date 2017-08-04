@@ -3,7 +3,11 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -61,7 +65,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
        */
       double arcAngle = time / getTrajectoryTime() * Math.PI * 2;
 
-      Point3D arcCenterPoint = new Point3D(0.6, 0.0, 1.1);
+      Point3D arcCenterPoint = new Point3D(0.6, 0.0, 1.2);
       Quaternion arcCenterOrientation = new Quaternion();
       arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
@@ -78,9 +82,9 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    }
 
    @Override
-   public CTTaskNodeRegion defineTaskNodeRegion()
+   public TaskRegion defineTaskRegion()
    {
-      CTTaskNodeRegion taskNodeRegion = new CTTaskNodeRegion(GenericTaskNode.nodeDimension);
+      TaskRegion taskNodeRegion = new TaskRegion(GenericTaskNode.nodeDimension);
       
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
       taskNodeRegion.setRandomRegion(1, 0.75, 0.90);

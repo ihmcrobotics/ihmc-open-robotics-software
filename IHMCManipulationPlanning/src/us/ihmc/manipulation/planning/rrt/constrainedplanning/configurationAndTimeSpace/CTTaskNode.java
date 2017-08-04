@@ -3,6 +3,8 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -134,7 +136,7 @@ public abstract class CTTaskNode
       isValid = value;
    }
    
-   public void convertDataToNormalizedData(CTTaskNodeRegion nodeRegion)
+   public void convertDataToNormalizedData(TaskRegion nodeRegion)
    {
       normalizedNodeData = new NodeData(getDimensionOfNodeData());
       for(int i=0;i<getDimensionOfNodeData();i++)
@@ -155,7 +157,7 @@ public abstract class CTTaskNode
       }
    }
    
-   public void convertNormalizedDataToData(CTTaskNodeRegion nodeRegion)
+   public void convertNormalizedDataToData(TaskRegion nodeRegion)
    {
       nodeData = new NodeData(getDimensionOfNodeData());
       for(int i=0;i<getDimensionOfNodeData();i++)

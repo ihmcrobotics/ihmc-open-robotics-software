@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -8,5 +8,5 @@ public interface ConstrainedConfigurationSpace
 
    abstract ConfigurationBuildOrder defineConfigurationBuildOrder();
    
-   abstract CTTaskNodeRegion defineTaskNodeRegion();
+   abstract TaskRegion defineTaskRegion();
 }

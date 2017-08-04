@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import us.ihmc.communication.packets.StatusPacket;
 

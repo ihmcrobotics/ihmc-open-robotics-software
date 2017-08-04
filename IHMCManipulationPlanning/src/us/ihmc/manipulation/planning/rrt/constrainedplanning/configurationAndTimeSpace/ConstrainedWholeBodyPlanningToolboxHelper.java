@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

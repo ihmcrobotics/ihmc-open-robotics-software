@@ -12,9 +12,9 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxController;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTrajectoryGenerator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -25,23 +25,24 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder.ConfigurationSpaceName;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationSpace;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConstrainedWholeBodyPlanningToolboxHelper;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.CTTaskNodeTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -214,13 +215,26 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      System.out.println("Start");
+      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
       
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-
+      /*
+       * reaching initial configuration
+       */
+      Quaternion initialOrientation = new Quaternion();
+      initialOrientation.appendRollRotation(Math.PI*0.5);
+      initialOrientation.appendYawRotation(Math.PI*0.5);
+      initialOrientation.appendPitchRotation(-Math.PI*0.3);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(handTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      
+      
+      System.out.println("Start");
+      
       System.out.println("Send wakeup " + drcBehaviorTestHelper.getYoTime());
       ToolboxStateMessage toolboxMessage;
       
@@ -235,12 +249,14 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
       
-      ConstrainedWholeBodyPlanningToolboxHelper.setConstrainedEndEffectorTrajectory(endeffectorTrajectory);
-      ConstrainedWholeBodyPlanningToolboxHelper.setInitialFullRobotModel(drcBehaviorTestHelper.getControllerFullRobotModel());
-      ConstrainedWholeBodyPlanningToolboxHelper.setFullRobotModelFactory(getRobotModel());
-      
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
-      packet.setNumberOfExpanding(1000);   
+      
+      //packet.setConstrainedEndEffectorTrajectory(endeffectorTrajectory);
+      ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      packet.setNumberOfExpanding(100);
+            
+      packet.setInitialRobotConfigration(drcBehaviorTestHelper.getControllerFullRobotModel());
+            
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       
       toolboxCommunicator.send(packet);

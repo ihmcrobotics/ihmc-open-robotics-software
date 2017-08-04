@@ -136,7 +136,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 100;
+   private static int maximumCntForUpdateInternal = 400;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
@@ -378,6 +378,11 @@ public class WheneverWholeBodyKinematicsSolver
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
+   
+   public boolean getIsSolved()
+   {
+      return isSolved;
+   }
 
    public boolean isSolved()
    {
@@ -493,6 +498,24 @@ public class WheneverWholeBodyKinematicsSolver
       privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
+   }
+   
+   public void updateRobotConfigurationData(OneDoFJoint[] joints, Vector3D translation, Quaternion rotation)
+   {
+      ForceSensorDefinition[] forceSensorDefinitions;
+      IMUDefinition[] imuDefinitions;
+
+      imuDefinitions = desiredFullRobotModel.getIMUDefinitions();
+      forceSensorDefinitions = desiredFullRobotModel.getForceSensorDefinitions();
+
+      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
+
+      currentRobotConfigurationData.setRootOrientation(new Quaternion(rotation));
+      currentRobotConfigurationData.setRootTranslation(new Vector3D(translation));
+
+      currentRobotConfigurationData.setJointState(joints);
+
+      updateRobotConfigurationData(currentRobotConfigurationData);
    }
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, FloatingInverseDynamicsJoint rootJoint)
