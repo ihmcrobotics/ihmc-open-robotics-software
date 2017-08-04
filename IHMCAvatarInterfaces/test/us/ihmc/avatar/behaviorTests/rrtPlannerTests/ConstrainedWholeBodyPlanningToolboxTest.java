@@ -208,7 +208,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if(visulaizerOn)
-         ThreadTools.sleep(1);
+         ThreadTools.sleep(10000);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);

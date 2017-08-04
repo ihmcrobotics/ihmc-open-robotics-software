@@ -214,13 +214,25 @@ public abstract class CTTaskNode
       
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
+      nodeCopy.isValid = this.getIsValidNode();
+      nodeCopy.setConfigurationJoints(this.getOneDoFJoints());
       
       return nodeCopy;
    }
    
    public void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);  
+      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
+//       for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(robot).length; i++)
+//       {
+//          double jointPosition = FullRobotModelUtils.getAllJointsExcludingHands(robot)[i].getQ();
+//          PrintTools.info(""+FullRobotModelUtils.getAllJointsExcludingHands(robot)[i].getName()+" "+jointPosition);
+//       }
+   }
+   
+   public void setConfigurationJoints(OneDoFJoint[] oneDoFJoints)
+   {
+      this.configurationJoints = oneDoFJoints;
    }
    
    public OneDoFJoint[] getOneDoFJoints()
