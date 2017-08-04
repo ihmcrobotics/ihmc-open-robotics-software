@@ -42,11 +42,9 @@ public class ICPControlPolygons
 
    private final ICPControlPlane icpControlPlane;
 
-   public ICPControlPolygons(YoDouble omega0, ReferenceFrame centerOfMassFrame, ReferenceFrame midFeetZUpFrame, double gravityZ, YoVariableRegistry parentRegistry,
-                             YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPControlPolygons(ICPControlPlane icpControlPlane, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.icpControlPlane = new ICPControlPlane(omega0, centerOfMassFrame, gravityZ, registry);
-
+      this.icpControlPlane = icpControlPlane;
       this.midFeetZUp = midFeetZUpFrame;
 
       controlPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
