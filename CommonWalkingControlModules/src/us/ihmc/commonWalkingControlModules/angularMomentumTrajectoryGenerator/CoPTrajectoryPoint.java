@@ -28,11 +28,9 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
    
    public void setIncludingFrame(CoPTrajectoryPoint other)
    {
-      setTime(other.getTime());
       registerReferenceFrame(other.getReferenceFrame());
       switchCurrentReferenceFrame(other.getReferenceFrame());
-      setPosition(other.getPosition().getFrameTuple());
-      setLinearVelocity(other.getLinearVelocity().getFrameTuple());
+      set(other.getTime(), other.getPosition(), other.getLinearVelocity());
       putYoValuesIntoFrameWaypoint();
    }
 
