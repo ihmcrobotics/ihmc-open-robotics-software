@@ -1,6 +1,6 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
-public class CTTaskNodeRegion
+public class TaskRegion
 {
    private double[] upperLimit;
    private double[] lowerLimit;
@@ -8,7 +8,7 @@ public class CTTaskNodeRegion
    
    private double trajectoryTime; 
    
-   public CTTaskNodeRegion(int size)
+   public TaskRegion(int size)
    {
       upperLimit = new double[size];
       lowerLimit = new double[size];

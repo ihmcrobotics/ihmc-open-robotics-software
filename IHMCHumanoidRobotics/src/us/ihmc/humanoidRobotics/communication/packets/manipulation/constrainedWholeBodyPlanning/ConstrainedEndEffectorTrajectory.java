@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -9,7 +9,10 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
 {
-   protected CTTaskNodeRegion taskNodeRegion;
+   /*
+    * TaskRegion = new TaskRegion(GenericTaskNode.nodeDimension);
+    */
+   protected TaskRegion taskNodeRegion;
    protected ConfigurationBuildOrder configurationBuildOrder;
    protected SelectionMatrix6D controllableSelectionMatrix;
    protected double trajectoryTime;
@@ -22,7 +25,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       this.robotSide = defineRobotSide();
       this.controllableSelectionMatrix = defineControllableSelectionMatrix();
       this.configurationBuildOrder = defineConfigurationBuildOrder();
-      this.taskNodeRegion = defineTaskNodeRegion();
+      this.taskNodeRegion = defineTaskRegion();
    }
 
    public void setTrajectoryTime(double trajectoryTime)
@@ -67,7 +70,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       return pose3D;
    }
    
-   public CTTaskNodeRegion getTaskNodeRegion()
+   public TaskRegion getTaskRegion()
    {
       return this.taskNodeRegion;
    }

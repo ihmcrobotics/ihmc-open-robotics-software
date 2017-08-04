@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

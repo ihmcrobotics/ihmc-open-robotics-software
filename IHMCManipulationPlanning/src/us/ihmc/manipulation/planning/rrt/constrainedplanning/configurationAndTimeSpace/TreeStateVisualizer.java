@@ -44,6 +44,8 @@ public class TreeStateVisualizer
    private final YoGraphicPosition currentTimeViz;
    private final YoGraphicPosition currentTimeInvalidViz;
    private final YoGraphicPosition treeReachingTimeViz;
+   
+   private final YoGraphicPosition temp;
 
    public TreeStateVisualizer(String name, String graphicsListName, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
@@ -89,6 +91,11 @@ public class TreeStateVisualizer
       treeReachingTimeViz = new YoGraphicPosition("treeReachingTime", yoFramePointTreeReachingTime, 0.05, YoAppearance.Black(), GraphicType.BALL);
       yoGraphicsList.add(treeReachingTimeViz);
 
+      
+      YoFramePoint tempYoPoint = new YoFramePoint(name + "temppoint", worldFrame, registry);
+      tempYoPoint.set(0.6, 0.35, 1.2);
+      temp = new YoGraphicPosition("temp", tempYoPoint, 0.03, YoAppearance.Black(), GraphicType.BALL);
+      yoGraphicsList.add(temp);
       /*
        * register YoGraphicsList
        */

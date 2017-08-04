@@ -11,8 +11,8 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
@@ -31,7 +31,7 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(fullRobotModel, statusOutputManager, registry, yoGraphicsListRegistry, startYoVariableServer);
+      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(drcRobotModel, fullRobotModel, statusOutputManager, registry, yoGraphicsListRegistry, startYoVariableServer);
       packetCommunicator.attachListener(ConstrainedWholeBodyPlanningRequestPacket.class, constrainedWholeBodyPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }

@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import java.util.ArrayList;
 

@@ -101,7 +101,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectric
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.BatchedDesiredSteeringAngleAndSingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
@@ -118,6 +117,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;

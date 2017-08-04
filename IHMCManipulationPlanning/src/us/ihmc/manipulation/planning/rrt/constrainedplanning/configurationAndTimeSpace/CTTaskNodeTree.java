@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 
 public class CTTaskNodeTree
 {
@@ -19,7 +20,7 @@ public class CTTaskNodeTree
 
    private ArrayList<CTTaskNode> optimalPath = new ArrayList<CTTaskNode>();
 
-   private CTTaskNodeRegion nodeRegion = CTTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion();
+   private TaskRegion nodeRegion;// = CTTaskNode.constrainedEndEffectorTrajectory.getTaskRegion();
 
    /*
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
@@ -67,6 +68,11 @@ public class CTTaskNodeTree
       else
          for (int i = 1; i < this.dimensionOfTask + 1; i++)
             this.taskNames.add("Task_" + i + "_" + taskNames[i - 1]);
+   }
+   
+   public void setTaskRegion(TaskRegion taskRegion)
+   {
+      this.nodeRegion = taskRegion;
    }
 
    public String getTaskName(int indexOfDimension)
@@ -398,7 +404,7 @@ public class CTTaskNodeTree
       }
    }
 
-   public CTTaskNodeRegion getTaskNodeRegion()
+   public TaskRegion getTaskNodeRegion()
    {
       return nodeRegion;
    }
