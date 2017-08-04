@@ -21,7 +21,9 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    public StaticFootstepPlanningEnvironment()
    {
       setupGround();
-      addCinderBlockField(2.0, 2.0);
+      addShortCinderBlockField(2.0, 2.0);
+
+
    }
 
    private void setupGround()
@@ -36,11 +38,17 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       combinedTerrainObject3D.addTerrainObject(groundTerrainObject);
    }
 
-   private void addCinderBlockField(double startDistanceX, double startDistanceY)
+   private void addShortCinderBlockField(double startDistanceX, double startDistanceY)
    {
       CombinedTerrainObject3D shortCinderBlockField = DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("ShortCinderBlockField",
            0.0, startDistanceX, startDistanceY);
       combinedTerrainObject3D.addTerrainObject(shortCinderBlockField);
+   }
+
+   private void addRampsWithSteppingStones(double startDistanceX, double startDistanceY, double courseAngleRadians)
+   {
+      double rampLengthInMeters = 3.0;
+      double rampWidthInMeters =
    }
 
    @Override
