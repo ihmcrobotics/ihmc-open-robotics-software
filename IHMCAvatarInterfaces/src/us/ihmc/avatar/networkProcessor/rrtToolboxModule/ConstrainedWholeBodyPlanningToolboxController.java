@@ -24,132 +24,137 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   private final FullHumanoidRobotModel fullRobotModel;
+   private static int terminateToolboxCondition = 100;
+   /*
+    * YoVariables
+    */
+   private final YoInteger updateCount = new YoInteger("updateCount", registry);
 
-   private final YoInteger updateCount = new YoInteger("UpdateCount", registry);
-   
-   /*
-    * check the current pose is valid or not.
-    */
-   private final YoBoolean currentIsValid = new YoBoolean("CurrentIsValid", registry);
-   
-   /*
-    * check the tree reaching the normalized time from 0.0 to 1.0.
-    */
-   private final YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
-   
+   private final YoInteger expandingCount = new YoInteger("expandingCount", registry);
+
+   // check the current pose is valid or not.   
+   private final YoBoolean currentIsValid = new YoBoolean("currentIsValid", registry);
+
+   // check the tree reaching the normalized time from 0.0 to 1.0.
+   private final YoDouble currentTrajectoryTime = new YoDouble("currentNormalizedTime", registry);
+
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
+   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
+
+   /*
+    * Visualizer
+    */
+   private boolean startYoVariableServer;
+
+   private CTTaskNode visualizedNode;
+
+   private final FullHumanoidRobotModel visualizedFullRobotModel;
+
+   private TreeStateVisualizer treeStateVisualizer;
+
+   private CTTreeVisualizer treeVisualizer;
+
+   /*
+    * Configuration and Time space Tree
+    */
+   private CTTaskNode rootNode;
+
+   private CTTaskNodeTree tree;
+
+   /*
+    * API
+    */
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
-   private GenericTaskNode rootNode;
-   
-   private CTTaskNodeTree tree;
-   
    private int numberOfExpanding;
-   
-   private boolean startYoVariableServer;
-   
+
    /*
-    * visualizer
+    * Toolbox state
     */
-   private TreeStateVisualizer treeStateVisualizer;
-   private CTTreeVisualizer treeVisualizer;
+   private CWBToolboxState state;
    
+   enum CWBToolboxState
+   {
+      DO_NOTHING,
+      FIND_INITIAL_GUESS,
+      EXPAND_TREE,
+      SHORTCUT_PATH,
+      GENERATE_MOTION
+   }
 
    public ConstrainedWholeBodyPlanningToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
                                                         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
       super(statusOutputManager, registry);
-      this.fullRobotModel = fullRobotModel;
+      this.visualizedFullRobotModel = fullRobotModel;
       this.isDone.set(false);
-      
+
       this.startYoVariableServer = startYoVariableServer;
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
+      this.state = CWBToolboxState.DO_NOTHING;
    }
 
    @Override
    protected void updateInternal()
    {
-      PrintTools.info("update toolbox " + updateCount.getIntegerValue());
-     
-      if(tree.expandingTree())
-      {         
-         ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-         CTTaskNode currentNode = tree.getNewNode();
-         revertedPath.add(currentNode);
-         
-         while (true)
-         {
-            currentNode = currentNode.getParentNode();
-            if (currentNode != null)
-            {
-               revertedPath.add(currentNode);
-            }
-            else
-               break;
-         }
+      PrintTools.info("update toolbox " + updateCount.getIntegerValue() +" "+ state);
 
-         int revertedPathSize = revertedPath.size();
-
-         tree.getPath().clear();
-         for (int j = 0; j < revertedPathSize; j++)
-            tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
-
-         PrintTools.info("Constructed Tree size is " + revertedPathSize);
-
-         /*
-          * shortcut.
-          */
-//            optimalPath.clear();
-//            for (int j = 0; j < path.size(); j++)
-//            {
-//               CTTaskNode node = path.get(i).createNodeCopy();
-//               optimalPath.add(node);
-//            }
-         isDone.set(true);         
-      }
-      else
+      // ************************************************************************************************************** //
+      switch(state)
       {
-         /*
-          * set Yovariables
-          */
-         currentIsValid.set(tree.getNewNode().getIsValidNode());
-         currentTrajectoryTime.set(tree.getNewNode().getNormalizedNodeData(0));
+      case DO_NOTHING:
          
-         /*
-          * set fullRobotModel
-          */
-         FullHumanoidRobotModel solverRobotModel = GenericTaskNode.nodeTester.getFullRobotModelCopy();
-         fullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
-         fullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
+         break;
+      case FIND_INITIAL_GUESS:
+         visualizedNode = new GenericTaskNode(0.02, 0.8, Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
+         visualizedNode.convertDataToNormalizedData(CTTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
+         break;
+      case EXPAND_TREE:
          
-         for(int i=0;i<FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel).length;i++)
-            FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
+         break;
+      case SHORTCUT_PATH:
+         
+         break;
+      case GENERATE_MOTION:
+         
+         break;
       }
+      // ************************************************************************************************************** //
       
+      
+      
+      
+      
+      // ************************************************************************************************************** //
       
       /*
-       * After get path node, show serial posture for serial path node.
+       * set fullRobotModel
        */
-      
-      
-      
+      FullHumanoidRobotModel solverRobotModel = CTTaskNode.nodeTester.getFullRobotModelCopy();
+      visualizedFullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
+      visualizedFullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
 
+      for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
+         FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
+      
       /*
        * update visualizer
        */
-      treeStateVisualizer.setCurrentNormalizedTime(tree.getNewNode().getNormalizedNodeData(0));
-      treeStateVisualizer.setCurrentCTTaskNodeValidity(tree.getNewNode().getIsValidNode());
-      treeStateVisualizer.updateVisualizer();
-      
-      if(startYoVariableServer)
-         treeVisualizer.update(tree.getNewNode());
+      if(visualizedNode != null)
+      {
+         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
+         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getIsValidNode());
+         treeStateVisualizer.updateVisualizer();
+         
+         currentIsValid.set(visualizedNode.getIsValidNode());
+         currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
+         if (startYoVariableServer)
+            treeVisualizer.update(visualizedNode);   
+      }
 
-      /*
-       * terminate condition.
-       */
-      if (updateCount.getIntegerValue() == numberOfExpanding)
+      // ************************************************************************************************************** //
+      if(updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
       updateCount.increment();
    }
@@ -163,55 +168,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          return false;
       }
-
+      
+      PrintTools.info("initialize()");
       /*
        * bring control parameters from request
        */
-      PrintTools.info("initialize");
-      
       numberOfExpanding = request.numberOfExpanding;
+
+      state = CWBToolboxState.FIND_INITIAL_GUESS;
       
-      /*
-       * 
-       */      
-
-      /*
-       * in near future, find initial posture algorithm is needed.
-       */
-
-      /*
-       * root node and tree define
-       */
-      double initialPelvisHeight = GenericTaskNode.initialRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      
-      rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      rootNode.setNodeData(2, -10.0/180 * Math.PI);
-      rootNode.setNodeData(10, -30.0/180 * Math.PI);
-      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);      
-
-      PrintTools.info("initial node is " + rootNode.isValidNode());
-
-      tree = new CTTaskNodeTree(rootNode);
-//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, GenericTaskNode.constrainedEndEffectorTrajectory.getTrajectoryTime());
-//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-//      tree.getTaskNodeRegion().setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(10, -150.0/180*Math.PI, 150.0/180*Math.PI);
-
-      rootNode.convertDataToNormalizedData(GenericTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
-      
-      if(startYoVariableServer)
-      {
-         treeVisualizer = new CTTreeVisualizer(tree);
-         treeVisualizer.initialize();
-      }
-         
       return true;
    }
 
@@ -234,13 +199,33 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          }
       };
    }
-   
+
    private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult()
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
-      
-      
+
       return result;
    }
 
+   private void treeInitialize()
+   {
+      double initialPelvisHeight = CTTaskNode.initialRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
+
+      rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
+      rootNode.setNodeData(2, -10.0 / 180 * Math.PI);
+      rootNode.setNodeData(10, -30.0 / 180 * Math.PI);
+      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);
+
+      PrintTools.info("initial node is " + rootNode.isValidNode());
+
+      tree = new CTTaskNodeTree(rootNode);
+
+      rootNode.convertDataToNormalizedData(CTTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
+
+      if (startYoVariableServer)
+      {
+         treeVisualizer = new CTTreeVisualizer(tree);
+         treeVisualizer.initialize();
+      }
+   }
 }
