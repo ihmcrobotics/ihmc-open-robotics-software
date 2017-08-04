@@ -19,11 +19,11 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    public AngularMomentumTrajectory(String namePrefix, int stepNumber, WalkingTrajectoryType type, YoVariableRegistry registry, ReferenceFrame referenceFrame,
                                     int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      super(namePrefix + stepNumber + type.toString() + "AngMom", maxNumberOfSegments, maxNumberOfCoefficients, registry);
-      momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Positon", referenceFrame, registry);
+      super(namePrefix + stepNumber + type.toString() + "AngularMomentum", maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Position", referenceFrame, registry);
       torque = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Velocity", referenceFrame, registry);
       rotatum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Acceleration", referenceFrame, registry);
-      torqueTrajectory = new YoFrameTrajectory3D(namePrefix + stepNumber + type.toString() + "TorqueTraj", maxNumberOfCoefficients - 1, referenceFrame,
+      torqueTrajectory = new YoFrameTrajectory3D(namePrefix + stepNumber + type.toString() + "TorqueTrajectory", maxNumberOfCoefficients - 1, referenceFrame,
                                                  registry);
    }
 
@@ -62,16 +62,12 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    {
       segments.get(getNumberOfSegments()).set(computedAngularMomentumTrajectory);
       numberOfSegments.increment();
-//      PrintTools.debug(name + ": " + getNumberOfSegments() + ", t0: " + segments.get(getNumberOfSegments() - 1).getInitialTime() + ", tF: "
-//            + segments.get(getNumberOfSegments() - 1).getFinalTime());
    }
 
    public void set(double t0, double tFinal, FramePoint z0, FramePoint zf)
    {
       segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
       numberOfSegments.increment();
-//      PrintTools.debug(name + "!!!: " + getNumberOfSegments() + ", t0: " + segments.get(getNumberOfSegments() - 1).getInitialTime() + ", tF: "
-//            + segments.get(getNumberOfSegments() - 1).getFinalTime());
    }
 
    public YoFrameTrajectory3D getTorqueTrajectory(int segmentIndex)

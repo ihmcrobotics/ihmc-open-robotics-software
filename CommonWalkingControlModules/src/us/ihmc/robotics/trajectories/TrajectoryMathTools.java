@@ -19,7 +19,6 @@ public class TrajectoryMathTools
    private static YoVariableRegistry testRegistry = new YoVariableRegistry("DummyRegistryForTrajectoryMath");
    private static YoTrajectory tempTraj1 = new YoTrajectory("TempTraj1", maxNumberOfCoefficients, testRegistry);
    private static YoTrajectory tempTraj2 = new YoTrajectory("TempTraj2", maxNumberOfCoefficients, testRegistry);
-   private static YoTrajectory3D tempTraj3 = new YoTrajectory3D("TempTraj3D", maxNumberOfCoefficients, testRegistry);
    private static List<Double> tempTimeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
    private static FastFourierTransform fft = new FastFourierTransform(maxNumberOfCoefficients);
    private static ComplexNumber[] tempComplex1 = ComplexNumber.getComplexArray(maxNumberOfCoefficients);
@@ -124,17 +123,17 @@ public class TrajectoryMathTools
       validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
       validateTrajectoryTimes(traj1, traj2);
       trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
-      setCoeffsByMultiplication(trajToPack, traj1, traj2);
+      setCoefficientsByMultiplication(trajToPack, traj1, traj2);
    }
 
    public static void multiplyByTrimming(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
    {
       validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
       setTimeIntervalByTrimming(trajToPack, traj1, traj2);
-      setCoeffsByMultiplication(trajToPack, traj1, traj2);
+      setCoefficientsByMultiplication(trajToPack, traj1, traj2);
    }
 
-   private static void setCoeffsByMultiplication(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
+   private static void setCoefficientsByMultiplication(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
    {
       int numberOfCoeffsToSet = traj1.getNumberOfCoefficients() + traj2.getNumberOfCoefficients() - 1;
 
@@ -234,43 +233,36 @@ public class TrajectoryMathTools
                              traj1.getYoTrajectoryY(), traj1.getYoTrajectoryZ(), traj2.getYoTrajectoryX(), traj2.getYoTrajectoryY(), traj2.getYoTrajectoryZ());
    }
 
-   public static void crossProduct(YoTrajectory trajToPackX, YoTrajectory trajToPackY, YoTrajectory trajToPackZ, YoTrajectory traj1X, YoTrajectory traj1Y,
+   public static void crossProduct(YoTrajectory xTrajectoryToPack, YoTrajectory yTrajectoryToPack, YoTrajectory zTrajectoryToPack, YoTrajectory traj1X, YoTrajectory traj1Y,
                                    YoTrajectory traj1Z, YoTrajectory traj2X, YoTrajectory traj2Y, YoTrajectory traj2Z)
    {
       multiply(tempTraj1, traj1Y, traj2Z);
       multiply(tempTraj2, traj1Z, traj2Y);
-      subtract(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
+      subtract(xTrajectoryToPack, tempTraj1, tempTraj2);
 
       multiply(tempTraj1, traj1X, traj2Z);
       multiply(tempTraj2, traj1Z, traj2X);
-      subtract(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
+      subtract(yTrajectoryToPack, tempTraj2, tempTraj1);
 
       multiply(tempTraj1, traj1X, traj2Y);
       multiply(tempTraj2, traj1Y, traj2X);
-      subtract(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
-
-      trajToPackX.set(tempTraj3.xTrajectory);
-      trajToPackY.set(tempTraj3.yTrajectory);
-      trajToPackZ.set(tempTraj3.zTrajectory);
+      subtract(zTrajectoryToPack, tempTraj1, tempTraj2);
    }
 
-   public static void crossProductByTrimming(YoTrajectory trajToPackX, YoTrajectory trajToPackY, YoTrajectory trajToPackZ, YoTrajectory traj1X,
+   public static void crossProductByTrimming(YoTrajectory xTrajectoryToPack, YoTrajectory yTrajectoryToPack, YoTrajectory zTrajectoryToPack, YoTrajectory traj1X,
                                              YoTrajectory traj1Y, YoTrajectory traj1Z, YoTrajectory traj2X, YoTrajectory traj2Y, YoTrajectory traj2Z)
    {
       multiplyByTrimming(tempTraj1, traj1Y, traj2Z);
       multiplyByTrimming(tempTraj2, traj1Z, traj2Y);
-      subtractByTrimming(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
+      subtractByTrimming(xTrajectoryToPack, tempTraj1, tempTraj2);
 
       multiplyByTrimming(tempTraj1, traj1X, traj2Z);
       multiplyByTrimming(tempTraj2, traj1Z, traj2X);
-      subtractByTrimming(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
+      subtractByTrimming(yTrajectoryToPack, tempTraj2, tempTraj1);
 
       multiplyByTrimming(tempTraj1, traj1X, traj2Y);
       multiplyByTrimming(tempTraj2, traj1Y, traj2X);
-      subtractByTrimming(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
-      trajToPackX.set(tempTraj3.xTrajectory);
-      trajToPackY.set(tempTraj3.yTrajectory);
-      trajToPackZ.set(tempTraj3.zTrajectory);
+      subtractByTrimming(zTrajectoryToPack, tempTraj1, tempTraj2);
    }
 
    public static void validateTrajectoryTimes(YoTrajectory traj1, YoTrajectory traj2)
