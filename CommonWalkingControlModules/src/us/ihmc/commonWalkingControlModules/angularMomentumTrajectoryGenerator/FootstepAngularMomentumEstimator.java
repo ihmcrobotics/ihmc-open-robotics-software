@@ -259,7 +259,7 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       initialTime = currentTime;
       activeTrajectory = swingAngularMomentumTrajectories.get(0);
    }
-
+   private double additionalInitialSwingTime = 0.0;
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
@@ -270,15 +270,17 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
       if (atAStop)
       {
          upcomingCoPsInFootsteps.get(footstepIndex).get(0).getPosition(previousFinalReferenceCoP);
-         previousFirstTransferEndTime = 0.0; // upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
+         previousFirstTransferEndTime = 0.0;
          updateCurrentSegmentTimes(footstepIndex);
          currentSecondTransferSegmentDuration += upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
+         currentFootstepTime += upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
+         additionalInitialSwingTime = upcomingCoPsInFootsteps.get(footstepIndex + 1).get(0).getTime();
          computeAngularMomentumApproximationForFootstep();
          footstepIndex++;
-
       }
       else
       {
+         additionalInitialSwingTime = 0.0;
          upcomingCoPsInFootsteps.get(footstepIndex).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex).getCoPPointList(), trajectoryFinalApproachReference)).getPosition(previousFinalReferenceCoP);
          // Use the previously planned trajectory from the single support
          transferAngularMomentumTrajectories.get(footstepIndex).set(previousEstimatedTransferTrajectory);
@@ -290,15 +292,14 @@ public class FootstepAngularMomentumEstimator implements AngularMomentumTrajecto
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
-//      PrintTools.debug("Single Support");
       firstSwing = firstCoM = true;
       swingStart = true;
       footstepIndex = 0;
       previousFirstTransferEndTime = 0.0;
       updateCurrentSegmentTimes(footstepIndex);
-      //setCoMTrajectoryForFootstep(footstepIndex);
+      currentSecondTransferSegmentDuration += additionalInitialSwingTime;
+      currentFootstepTime += additionalInitialSwingTime;
       computeAngularMomentumApproximationForFootstep();
-      // Save the EXIT_TO_END trajectory for the next planning cycle
       previousEstimatedTransferTrajectory.set(transferAngularMomentumTrajectories.get(footstepIndex + 1).getSegments().get(0));
       footstepIndex++;
       computeAngularMomentumApproximationForUpcomingFootsteps();
