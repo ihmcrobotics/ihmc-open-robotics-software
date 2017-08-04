@@ -12,8 +12,8 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.YoFrameTrajectory3D;
-import us.ihmc.robotics.trajectories.YoTrajectory;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,7 +32,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector zeroVector = new FrameVector();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final int maxNumberOfTrajectoryCoefficients = 6;
+   private final int maxNumberOfTrajectoryCoefficients = 7;
    private final int numberOfSwingSegments = 1;
    private final int numberOfTransferSegments = 2;
    private final int maxNumberOfFootstepsToConsider = 10;
@@ -92,6 +92,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final YoFrameVector anguMomTrajDebug;
    private final YoFramePoint comPosDebug;
    private final YoFramePoint swingFootTrajDebug;
+
+   private int tempInt1;
 
    public FootstepAngularMomentumPredictor(String namePrefix, YoVariableRegistry parentRegistry)
    {
@@ -421,7 +423,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint2);
       swingFootTrajectory.setPenticWithZeroTerminalAcceleration(0.0, currentSwingSegmentDuration, tempFramePoint1, zeroVector, tempFramePoint2, zeroVector);
       updateSwingLiftTrajectory();
-      //swingFootTrajectory.getYoTrajectoryZ().add(swingLiftTrajectory);
       swingFootTrajectory.getDerivative(swingFootVelocity);
 
       if (DEBUG && firstSwingDebug && swingStartDebug)
@@ -554,22 +555,21 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          return;
       currentSecondTransferSegmentDuration = 0.0;
 
-      int copStartIndex;
-      for (copStartIndex = CoPPlanningTools.getCoPPointIndex(currentCoPListReference, endCoPName) + 1; currentCoPListReference.get(copStartIndex) != entryCoPName; copStartIndex++)
-         currentSecondTransferSegmentDuration += currentCoPPlanReference.get(copStartIndex).getTime();
-      currentSecondTransferSegmentDuration += currentCoPPlanReference.get(copStartIndex).getTime();
+      for (tempInt1 = CoPPlanningTools.getCoPPointIndex(currentCoPListReference, endCoPName) + 1; currentCoPListReference.get(tempInt1) != entryCoPName; tempInt1++)
+         currentSecondTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
+      currentSecondTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
 
-      copStartIndex++;
+      tempInt1++;
       currentSwingSegmentDuration = 0.0;
-      for (; copStartIndex < currentCoPListReference.size(); copStartIndex++)
-         currentSwingSegmentDuration += currentCoPPlanReference.get(copStartIndex).getTime();
+      for (; tempInt1 < currentCoPListReference.size(); tempInt1++)
+         currentSwingSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
       currentFirstTransferSegmentDuration = 0.0;
       currentCoPPlanReference = upcomingCoPsInFootsteps.get(footstepIndex + 2);
       currentCoPListReference = currentCoPPlanReference.getCoPPointList();
-      for (copStartIndex = 0; currentCoPListReference.get(copStartIndex) != endCoPName; copStartIndex++)
-         currentFirstTransferSegmentDuration += currentCoPPlanReference.get(copStartIndex).getTime();
+      for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != endCoPName; tempInt1++)
+         currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
 
-      currentFirstTransferSegmentDuration += currentCoPPlanReference.get(copStartIndex).getTime();
+      currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
       currentFootstepTime = currentSecondTransferSegmentDuration + currentSwingSegmentDuration + currentFirstTransferSegmentDuration;
    }
 
