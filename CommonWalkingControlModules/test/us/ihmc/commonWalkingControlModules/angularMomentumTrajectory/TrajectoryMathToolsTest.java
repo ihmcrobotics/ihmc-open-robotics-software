@@ -8,9 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.trajectories.TrajectoryMathTools;
-import us.ihmc.robotics.trajectories.YoTrajectory;
-import us.ihmc.robotics.trajectories.YoTrajectory3D;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
+import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.YoSegmentedFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tuple3D.Point3D;

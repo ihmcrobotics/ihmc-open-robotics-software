@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

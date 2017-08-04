@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.trajectories.TrajectoryMathTools;
-import us.ihmc.robotics.trajectories.YoTrajectory;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
