@@ -1,19 +1,21 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import java.util.EnumMap;
-
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 
 public class AngularMomentumEstimationParameters
 {
-   double comHeight = 0.5;
-   private SmoothCMPPlannerParameters copPlannerParameters;
+   private final SmoothCMPPlannerParameters copPlannerParameters;
    public AngularMomentumEstimationParameters(SmoothCMPPlannerParameters cmpPlannerParameters)
    {
       this.copPlannerParameters = cmpPlannerParameters;
    }
-   
+
+   public boolean computePredictedAngularMomentum()
+   {
+      return true;
+   }
+
    public CoPPointName getEntryCoPName()
    {
       return this.copPlannerParameters.getEntryCoPName();
@@ -63,7 +65,7 @@ public class AngularMomentumEstimationParameters
    {
       return getExitCoPName();
    }
-   
+
    public int getNumberOfFootstepsToConsider()
    {
       return this.copPlannerParameters.getNumberOfFootstepsToConsider();
