@@ -787,10 +787,4 @@ public abstract class WalkingControllerParameters implements SteppingParameters
 
    // move to slider board specific parameters
    public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
-
-   // remove: exo specific
-   public abstract void useInverseDynamicsControlCore();
-
-   // remove: exo specific
-   public abstract void useVirtualModelControlCore();
 }

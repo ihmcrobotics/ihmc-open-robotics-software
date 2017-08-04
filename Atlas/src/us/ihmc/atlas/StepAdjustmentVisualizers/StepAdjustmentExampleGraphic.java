@@ -896,18 +896,6 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public void useInverseDynamicsControlCore()
-         {
-
-         }
-
-         @Override
-         public void useVirtualModelControlCore()
-         {
-
-         }
-
-         @Override
          public double getHighCoPDampingDurationToPreventFootShakies()
          {
             return 0;
