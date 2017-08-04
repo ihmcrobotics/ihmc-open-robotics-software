@@ -2,11 +2,8 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -36,9 +33,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
-import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
@@ -48,9 +42,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final ValkyrieJointMap jointMap;
-
-   private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
-   private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
 
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
@@ -90,28 +81,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
       handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
-
-      for(RobotSide side : RobotSide.values())
-      {
-         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
-         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
-         {
-            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
-                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
-         }
-      }
-
-      NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
-
-      for (int i = 0; i < sliderBoardControlledNeckJointNames.length; i++)
-      {
-         NeckJointName joint = sliderBoardControlledNeckJointNames[i];
-
-         sliderBoardControlledNeckJointNamesWithLimits.put(
-               joint,
-               new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
-                     .getFullyFlexedPositionLimit(joint)));
-      }
    }
 
    @Override
@@ -143,24 +112,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       return 0.70;
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return sliderBoardControlledNeckJointNamesWithLimits;
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return sliderBoardControlledFingerJointNamesWithLimits;
-   }
-
-   @Override
-   public boolean controlHeadAndHandsWithSliders()
-   {
-      return false;
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.

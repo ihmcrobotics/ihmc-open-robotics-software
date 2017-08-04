@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -30,7 +28,6 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -584,20 +581,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
       public double getSideLengthOfBoundingBoxForFootstepHeight()
       {
          // TODO Auto-generated method stub
@@ -790,13 +773,6 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return null;
-      }
-
-      @Override
-      public boolean controlHeadAndHandsWithSliders()
-      {
-         // TODO Auto-generated method stub
-         return false;
       }
 
       @Override
