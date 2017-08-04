@@ -12,13 +12,35 @@ import java.util.List;
 
 public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmentInterface
 {
+   private static final double ROBOT_AREA_WIDTH_IN_METERS = 7.3152;
+   private static final double ROBOT_AREA_LENGTH_IN_METERS = 21.9456;
+
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("StaticFootstepPlanningEnvironment");
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
    public StaticFootstepPlanningEnvironment()
    {
-      combinedTerrainObject3D.addTerrainObject(new BoxTerrainObject(-1.0, -3.6576, 20.9456, 3.6576, -0.5, 0.0,
-            YoAppearance.DarkGray()));
+      setupGround();
+      addCinderBlockField(2.0, 2.0);
+   }
+
+   private void setupGround()
+   {
+
+      double robotStartingPointX = 1.0;
+
+      BoxTerrainObject groundTerrainObject = new BoxTerrainObject(-robotStartingPointX, -ROBOT_AREA_WIDTH_IN_METERS / 2,
+            ROBOT_AREA_LENGTH_IN_METERS - robotStartingPointX, ROBOT_AREA_WIDTH_IN_METERS / 2,
+            -0.5, 0.0, YoAppearance.DarkGray());
+
+      combinedTerrainObject3D.addTerrainObject(groundTerrainObject);
+   }
+
+   private void addCinderBlockField(double startDistanceX, double startDistanceY)
+   {
+      CombinedTerrainObject3D shortCinderBlockField = DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("ShortCinderBlockField",
+           0.0, startDistanceX, startDistanceY);
+      combinedTerrainObject3D.addTerrainObject(shortCinderBlockField);
    }
 
    @Override

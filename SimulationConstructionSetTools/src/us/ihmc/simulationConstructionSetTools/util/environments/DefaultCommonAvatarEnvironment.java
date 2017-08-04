@@ -719,6 +719,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
    public static CombinedTerrainObject3D setUpShortCinderBlockField(String name, double courseAngle, double startDistance)
    {
+      return setUpShortCinderBlockField(name, courseAngle, startDistance, 0.0);
+   }
+
+   public static CombinedTerrainObject3D setUpShortCinderBlockField(String name, double courseAngle, double startDistanceX, double startDistanceY)
+   {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       int nBlocksWide = 4;
@@ -752,14 +757,14 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                   {0.0, 0.0, 0.0, 0.0},
             };
 
-      startDistance += cinderBlockLength / 2;
+      startDistanceX += cinderBlockLength / 2;
 
       for (int i = 0; i < nBlocksLong; i++)
       {
          for (int j = 0; j < nBlocksWide; j++)
          {
-            double xCenter = startDistance + i * cinderBlockLength;
-            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
+            double xCenter = startDistanceX + i * cinderBlockLength;
+            double yCenter = startDistanceY + (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
             double[] point = {xCenter, yCenter};
             double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
 
