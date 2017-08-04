@@ -41,7 +41,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -137,12 +136,52 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   public static int maximumCntForUpdateInternal = 300;
+   private static int maximumCntForUpdateInternal = 100;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
 
    private boolean isSolved = false;
+
+   public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
+   {
+      this.fullRobotModelFactory = fullRobotModelFactory;
+      outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+
+      this.desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+
+      referenceFrames = new HumanoidReferenceFrames(this.desiredFullRobotModel);
+      rootBody = this.desiredFullRobotModel.getElevator();
+      rootJoint = this.desiredFullRobotModel.getRootJoint();
+
+      populateJointLimitReductionFactors();
+      populateListOfControllableRigidBodies();
+
+      controllerCore = createControllerCore();
+      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
+
+      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(this.desiredFullRobotModel);
+      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+
+      inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
+      inverseKinematicsSolution.setDestination(-1);
+
+      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+
+      footWeight.set(200.0);
+      momentumWeight.set(1.0);
+      privilegedWeight.set(1.0);
+      privilegedConfigurationGain.set(50.0);
+      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String side = robotSide.getCamelCaseNameForMiddleOfExpression();
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+         initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
+      }
+   }
 
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, FullHumanoidRobotModel sdfFullRobotModel)
    {
@@ -248,10 +287,7 @@ public class WheneverWholeBodyKinematicsSolver
       solutionQualityOld.set(100);
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
-      
-      PrintTools.info("initialize");
-      System.out.println(robotConfigurationData.rootTranslation);      
-      
+
       if (robotConfigurationData == null)
          return false;
 
@@ -461,9 +497,6 @@ public class WheneverWholeBodyKinematicsSolver
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, FloatingInverseDynamicsJoint rootJoint)
    {
-      PrintTools.info("updateRobotConfigurationData");
-      System.out.println(rootJoint.getTranslationForReading());
-            
       ForceSensorDefinition[] forceSensorDefinitions;
       IMUDefinition[] imuDefinitions;
 
@@ -503,9 +536,6 @@ public class WheneverWholeBodyKinematicsSolver
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
 
       currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
-      
-      PrintTools.info("getFullRobotModelCopy");
-      System.out.println(rootJoint.getTranslationForReading());
 
       KinematicsToolboxOutputConverter currentOutputConverter;
       currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
@@ -744,49 +774,6 @@ public class WheneverWholeBodyKinematicsSolver
       feedbackControlCommand.set(chestFrameOrientation);
 
       userFeedbackCommands.put(desiredFullRobotModel.getChest().getName(), feedbackControlCommand);
-   }
-   
-   public double getScore(RobotSide robotSide)
-   {
-      double score = 0;
-      
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_YAW);
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_ROLL);
-      
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_PITCH);      
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_ROLL);
-      
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.FIRST_WRIST_PITCH);
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.WRIST_ROLL);
-      score = score + getArmJointLimitScore(robotSide, ArmJointName.SECOND_WRIST_PITCH);
-      
-      return score;
-   }
-   
-   private double getArmJointLimitScore(RobotSide robotSide, ArmJointName armJointName)
-   {      
-      OneDoFJoint armJoint = desiredFullRobotModel.getArmJoint(robotSide, armJointName);
-      
-      double jointLimitScore = 0;
-      
-      double jointValue = armJoint.getQ();
-      double upperValue = armJoint.getJointLimitUpper();
-      double lowerValue = armJoint.getJointLimitLower();   
-      
-      double diffUpper = Math.abs((upperValue - jointValue)*(upperValue - jointValue));
-      double diffLower = Math.abs((jointValue - lowerValue)*(jointValue - lowerValue));
-      
-      if(diffUpper > diffLower)
-         jointLimitScore = 1/diffLower;
-      else
-         jointLimitScore = 1/diffUpper;
-                  
-      return jointLimitScore;
-   }
-   
-   public double getSolutionQuality()
-   {
-      return solutionQuality.getDoubleValue();
    }
 
    public void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)

@@ -73,10 +73,10 @@ public class TreeStateVisualizer
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
       yoFramePointCurrentTimeInvalid.setPoint(pointCurrentTime);
 
-      currentTimeViz = new YoGraphicPosition("currentTime", yoFramePointCurrentTime, 0.06, YoAppearance.Blue(), GraphicType.BALL);
+      currentTimeViz = new YoGraphicPosition("currentTime", yoFramePointCurrentTime, 0.05, YoAppearance.Blue(), GraphicType.BALL);
       yoGraphicsList.add(currentTimeViz);
       
-      currentTimeInvalidViz = new YoGraphicPosition("currentTimeInvalid", yoFramePointCurrentTimeInvalid, 0.06, YoAppearance.Red(), GraphicType.BALL);
+      currentTimeInvalidViz = new YoGraphicPosition("currentTimeInvalid", yoFramePointCurrentTimeInvalid, 0.05, YoAppearance.Red(), GraphicType.BALL);
       yoGraphicsList.add(currentTimeInvalidViz);
 
       /*

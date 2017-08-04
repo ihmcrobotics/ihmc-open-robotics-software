@@ -83,7 +83,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       CTTaskNodeRegion taskNodeRegion = new CTTaskNodeRegion(GenericTaskNode.nodeDimension);
       
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
-      taskNodeRegion.setRandomRegion(1, 0.70, 0.88);
+      taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
       taskNodeRegion.setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
