@@ -670,6 +670,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       return isInitialTransfer.getBooleanValue();
    }
 
+   // This is a hack. Please remove in case of any issues.
+   public void setInInitialTransfer(boolean isInitialTransfer)
+   {
+      this.isInitialTransfer.set(isInitialTransfer);
+   }
+   
    @Override
    /** {@inheritDoc} */
    public boolean isDone()

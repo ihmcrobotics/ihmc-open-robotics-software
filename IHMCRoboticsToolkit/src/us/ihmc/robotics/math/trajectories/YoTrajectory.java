@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.math.trajectories;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.commons.Epsilons;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -10,9 +11,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoTrajectory
 {
    private String name;
-   protected YoPolynomial polynomial;
-   protected YoDouble tInitial;
-   protected YoDouble tFinal;
+   private YoPolynomial polynomial;
+   private YoDouble tInitial;
+   private YoDouble tFinal;
+   private double[] coefficients;
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
@@ -20,6 +22,7 @@ public class YoTrajectory
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
       polynomial = new YoPolynomial(name + "Poly", maximumNumberOfCoefficients, registry);
+      coefficients = new double[maximumNumberOfCoefficients];
    }
 
    public YoTrajectory(YoDouble[] coefficients, YoInteger numberOfCoefficients, YoDouble tInitial, YoDouble tFinal)
@@ -27,6 +30,7 @@ public class YoTrajectory
       polynomial = new YoPolynomial(coefficients, numberOfCoefficients);
       this.tInitial = tInitial;
       this.tFinal = tFinal;
+      this.coefficients = new double[numberOfCoefficients.getIntegerValue()];
    }
 
    public void setTime(double tInital, double tFinal)
@@ -55,6 +59,16 @@ public class YoTrajectory
       return tFinal.getDoubleValue();
    }
 
+   public boolean timeIntervalContains(double timeToCheck, double EPSILON)
+   {
+      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), EPSILON);
+   }
+   
+   public boolean timeIntervalContains(double timeToCheck)
+   {
+      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
+   }
+   
    public double getPosition()
    {
       return polynomial.getPosition();
@@ -89,7 +103,14 @@ public class YoTrajectory
 
    public double[] getCoefficients()
    {
-      return polynomial.getCoefficients();
+      int index = 0;
+      for(; index < polynomial.getNumberOfCoefficients(); index++)
+         coefficients[index] = polynomial.getCoefficient(index);
+      for(; index < coefficients.length; index++)
+         coefficients[index] = 0;
+//      for(index = 0; index < coefficients.length; index++)
+//         PrintTools.debug(coefficients[index] + "");      
+      return coefficients;
    }
 
    public int getNumberOfCoefficients()
@@ -110,8 +131,7 @@ public class YoTrajectory
 
    public void set(YoTrajectory other)
    {
-      reset();
-      polynomial.setDirectly(other.getCoefficients());
+      polynomial.set(other.polynomial);
       tInitial.set(other.getInitialTime());
       tFinal.set(other.getFinalTime());
    }
@@ -123,13 +143,11 @@ public class YoTrajectory
       tFinal.setToNaN();
    }
 
-   @Deprecated
-   public void setConstant(double z)
+   public void setDirectlyFast(int power, double coefficient)
    {
-      //FIXME
-      polynomial.setConstant(z);
+      this.polynomial.setDirectlyFast(power, coefficient);
    }
-
+   
    /**
     * Sets the coefficients to zero. Initial and final time are retained.
     */
@@ -191,7 +209,19 @@ public class YoTrajectory
       polynomial.setQuarticUsingOneIntermediateVelocity(t0, tIntermediate0, tIntermediate1, tFinal, z0, zIntermediate0, zIntermediate1, zFinal,
                                                         zdIntermediate1);
    }
-
+   
+   public void setPentic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal, double zddFinal)
+   {
+      setTime(t0, tFinal);
+      polynomial.setPentic(t0, tFinal, z0, zd0, zdd0, zFinal, zdFinal, zddFinal);
+   }
+   
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      setTime(t0, tFinal);
+      polynomial.setPenticWithZeroTerminalAcceleration(t0, tFinal, z0, zd0, zFinal, zdFinal);
+   }
+   
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
                                       double zdf, double zddf)
    {
@@ -353,16 +383,14 @@ public class YoTrajectory
 
    public void compute(double x)
    {
-      //FIXME if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
-      polynomial.compute(x);
+      //if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
+         polynomial.compute(x);
    }
 
    public double getIntegral(double from, double to)
    {
-      // FIXME
       //if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
       //   return Double.NaN;
-
       return polynomial.getIntegral(from, to);
    }
 
@@ -375,14 +403,14 @@ public class YoTrajectory
    public DenseMatrix64F getXPowersDerivativeVector(int order, double x)
    {
       //if (MathTools.intervalContains(x, tInitial.getDoubleValue(), tFinal.getDoubleValue()))
-      return polynomial.getXPowersDerivativeVector(order, x);
+         return polynomial.getXPowersDerivativeVector(order, x);
       //else
       //   return null;
    }
 
    public String toString()
    {
-      return polynomial.toString() + " TInitial: " + tInitial.getDoubleValue() + " TFinal: " + tFinal.getDoubleValue();
+      return name + ":\n" + polynomial.toString() + " TInitial: " + tInitial.getDoubleValue() + " TFinal: " + tFinal.getDoubleValue();
    }
 
    public void scale(double scalar)
@@ -404,7 +432,7 @@ public class YoTrajectory
    {
       add(this, addTraj);
    }
-   
+
    public void addByTrimming(YoTrajectory traj1, YoTrajectory traj2)
    {
       TrajectoryMathTools.addByTrimming(this, traj1, traj2);
@@ -429,12 +457,12 @@ public class YoTrajectory
    {
       TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
    }
-   
+
    public void subtractByTrimming(YoTrajectory subTraj)
    {
       subtractByTrimming(this, subTraj);
    }
-      
+
    public void multiply(YoTrajectory traj1, YoTrajectory traj2)
    {
       TrajectoryMathTools.multiply(this, traj1, traj2);
@@ -454,31 +482,43 @@ public class YoTrajectory
    {
       multiplyByTrimming(this, mulTraj);
    }
-   
+
    public void getDerivative(YoTrajectory dervTraj)
    {
-      if (dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - 1)
-         return;
-      dervTraj.polynomial.reshape(this.getNumberOfCoefficients() - 1);
-      for (int i = 1; i < this.getNumberOfCoefficients(); i++)
-      {
-         dervTraj.polynomial.setDirectlyFast(i - 1, i * this.polynomial.getCoefficient(i));
-      }
-      dervTraj.setInitialTime(this.getInitialTime());
-      dervTraj.setFinalTime(this.getFinalTime());
+      TrajectoryMathTools.getDerivative(dervTraj, this);
    }
 
    public void getDerivative(YoTrajectory dervTraj, int order)
    {
-      if(dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - order)
+      if (dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - order)
          return;
       dervTraj.polynomial.reshape(getNumberOfCoefficients() - order);
-      for(int i = order; i < this.getNumberOfCoefficients(); i++)
+      for (int i = order; i < this.getNumberOfCoefficients(); i++)
       {
-         dervTraj.polynomial.setDirectlyFast(i - order, this.polynomial.getDerivativeCoefficient(order, i) * this.polynomial.getCoefficient(i));         
+         dervTraj.polynomial.setDirectlyFast(i - order, this.polynomial.getDerivativeCoefficient(order, i) * this.polynomial.getCoefficient(i));
       }
       dervTraj.setInitialTime(this.getInitialTime());
       dervTraj.setFinalTime(this.getFinalTime());
    }
    
+   public void addTimeOffset(double deltaT)
+   {
+      TrajectoryMathTools.addTimeOffset(this, deltaT);
+   }
+   
+   public void addTimeOffset(YoTrajectory trajToCopy, double deltaT)
+   {
+      set(trajToCopy);
+      addTimeOffset(deltaT);
+   }   
+   
+   public void getIntegral(YoTrajectory trajToPack)
+   {
+      TrajectoryMathTools.getIntergal(trajToPack, this);
+   }
+
+   public YoPolynomial getPolynomial()
+   {
+      return polynomial;
+   }
 }
