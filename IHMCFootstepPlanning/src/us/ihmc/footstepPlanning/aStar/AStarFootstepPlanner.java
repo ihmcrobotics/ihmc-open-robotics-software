@@ -33,9 +33,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode goalNode;
 
-   private PlanarRegionsList planarRegionsList;
-   private SideDependentList<ConvexPolygon2D> footPolygons;
-
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
    private final CostToGoHeuristics heuristics;
@@ -99,13 +96,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
       snapper.setPlanarRegions(planarRegionsList);
-   }
-
-   public void setFootPolygons(SideDependentList<ConvexPolygon2D> footPolygons)
-   {
-      this.footPolygons = footPolygons;
    }
 
    @Override
@@ -266,7 +257,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
       heuristics.setWeight(1.5);
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz);
-      planner.setFootPolygons(footPolygons);
       return planner;
    }
 }
