@@ -3,13 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;

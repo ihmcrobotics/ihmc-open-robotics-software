@@ -6,11 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
-import cern.colt.Arrays;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ReferenceICPTrajectoryGeneratorTest
