@@ -13,6 +13,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameVector;
 
 public class SmoothCapturePointAdjustmentToolbox
 {
@@ -35,6 +36,7 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment1 = new DenseMatrix64F(defaultSize, 1); 
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment2 = new DenseMatrix64F(defaultSize, 1); 
    
+   private List<FrameTuple<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple<?, ?>>();
    private List<FrameTuple<?, ?>> icpQuantityInitialSegment1List = new ArrayList<FrameTuple<?, ?>>();
    private FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
    
@@ -43,26 +45,59 @@ public class SmoothCapturePointAdjustmentToolbox
    public SmoothCapturePointAdjustmentToolbox(SmoothCapturePointToolbox smoothCapturePointToolbox)
    {
       this.icpToolbox = smoothCapturePointToolbox;
+      
+      icpQuantityInitialConditionList.add(new FramePoint());
+      while(icpQuantityInitialConditionList.size() < defaultSize)
+      {
+         icpQuantityInitialConditionList.add(new FrameVector());
+      }
+   }
+   
+   public void setICPInitialConditions(List<FramePoint> exitCornerPointsToPack, List<YoFrameTrajectory3D> cmpPolynomials3D, 
+                                        int numberOfSegmentsSwing0, boolean isInitialTransfer, double omega0)
+   {
+      if(isInitialTransfer)
+      {
+         YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+         for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
+         {
+            FrameTuple<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
+            
+            cmpPolynomial3D.getDerivative(i, cmpPolynomial3D.getInitialTime(), icpQuantityInitialCondition);
+         }
+      }
+      else
+      {
+         YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(numberOfSegmentsSwing0 - 1);
+         for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
+         {
+            FrameTuple<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
+            
+            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, cmpPolynomial3D.getFinalTime(), i, cmpPolynomial3D, 
+                                                                            exitCornerPointsToPack.get(numberOfSegmentsSwing0 - 1), 
+                                                                            icpQuantityInitialCondition);
+         }         
+      }
    }
    
    public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
-                                                                   List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
+                                                            List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
       YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       double tInitial = cmpPolynomial3D.getInitialTime();
       
-      // TODO: check whether better ways of setting it exist
-      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-      {
-         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
-         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
-      }
+//      // TODO: check whether better ways of setting it exist
+//      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
+//      {
+//         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
+//         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
+//      }
       
       initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
-      adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialSegment1List, entryCornerPointsToPack, exitCornerPointsToPack);
+      adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialConditionList, entryCornerPointsToPack, exitCornerPointsToPack);
    }
    
-   public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<YoFrameTrajectory3D> cmpPolynomials3D, List<FrameTuple<?, ?>> icpQuantityInitialSegment1List,
+   public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<YoFrameTrajectory3D> cmpPolynomials3D, List<FrameTuple<?, ?>> icpInitialConditionsSegment1List,
                                                                      List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack)
    {
       YoFrameTrajectory3D cmpPolynomial3DSegment1 = cmpPolynomials3D.get(0);
@@ -77,7 +112,7 @@ public class SmoothCapturePointAdjustmentToolbox
          
          double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.get(direction);
          
-         populateBoundaryConditionMatrices1D(omega0, direction, cmpPolynomialSegment1, cmpPolynomialSegment2, icpQuantityInitialSegment1List, icpPositionFinalSegment2Scalar);
+         populateBoundaryConditionMatrices1D(omega0, direction, cmpPolynomialSegment1, cmpPolynomialSegment2, icpInitialConditionsSegment1List, icpPositionFinalSegment2Scalar);
          computeAdjustedPolynomialCoefficientVectors1D();
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
       }
@@ -91,7 +126,7 @@ public class SmoothCapturePointAdjustmentToolbox
    }
    
    private void populateBoundaryConditionMatrices1D(double omega0, Direction direction, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2, 
-                                                          List<FrameTuple<?, ?>> icpQuantityInitialSegment1List, double icpPositionFinalSegment2Scalar)
+                                                          List<FrameTuple<?, ?>> icpInitialConditionsSegment1List, double icpPositionFinalSegment2Scalar)
    {    
       int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
       int numberOfConstrainedDerivatives = numberOfCoefficients / 2;
@@ -101,7 +136,7 @@ public class SmoothCapturePointAdjustmentToolbox
       // TODO: check whether division always integer
       for(int i = 0; i < numberOfConstrainedDerivatives; i++)
       {
-         double icpQuantityInitialSegment1Scalar = icpQuantityInitialSegment1List.get(i).get(direction);
+         double icpQuantityInitialSegment1Scalar = icpInitialConditionsSegment1List.get(i).get(direction);
          calculateGeneralizedICPMatricesOnCMPSegment1(omega0, i, cmpPolynomialSegment1);
          setGeneralizedBoundaryConstraints(i, numberOfCoefficients, cmpPolynomialSegment1, cmpPolynomialSegment2,
                                            icpQuantityInitialSegment1Scalar, icpPositionFinalSegment2Scalar);
