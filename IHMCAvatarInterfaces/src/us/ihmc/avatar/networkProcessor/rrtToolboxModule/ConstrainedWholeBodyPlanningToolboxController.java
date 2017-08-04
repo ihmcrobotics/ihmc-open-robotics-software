@@ -13,10 +13,12 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ConstrainedWh
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConstrainedWholeBodyPlanningToolboxHelper;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,36 +28,50 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 {
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final YoInteger updateCount = new YoInteger("UpdateCount", registry);
-   
-   /*
-    * check the current pose is valid or not.
-    */
-   private final YoBoolean currentIsValid = new YoBoolean("CurrentIsValid", registry);
-   
-   /*
-    * check the tree reaching the normalized time from 0.0 to 1.0.
-    */
-   private final YoDouble currentTrajectoryTime = new YoDouble("CurrentNormalizedTime", registry);
-   
+   private final YoInteger expandingCount = new YoInteger("ExpandingCount", registry);
+
+   private final YoDouble solutionQuality = new YoDouble("sqNewNode", registry);
+   private final YoDouble scoreNewNode = new YoDouble("scoreNewNode", registry);
+   private final YoBoolean isValidNewNode = new YoBoolean("isValidNewNode", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
-   private GenericTaskNode rootNode;
+   private double bestInitialGuessScore;
    
+   private CTTaskNode visualizedNode;
+   private CTTaskNode initialGuess;
+   private CTTaskNode rootNode;
+
    private CTTaskNodeTree tree;
-   
+
    private int numberOfExpanding;
-   
+
+   private static int numberOfRandomTryForInitialGuess = 20;
+
+   private static int currentTryForInitialGuess = 0;
+
    private boolean startYoVariableServer;
    
+   
+   /*
+    * variables for output status
+    */
+   
+   private int toolboxSolutionState = 0;  // 0: not initiated, 1: cannot find initial guess, 2: cannot find path, 3: ?
+
    /*
     * visualizer
     */
    private TreeStateVisualizer treeStateVisualizer;
    private CTTreeVisualizer treeVisualizer;
-   
+
+   private CWBToolboxState currentCWBToolboxState;
+
+   enum CWBToolboxState
+   {
+      DO_NOTHING, FIND_INITIAL_GUESS, EXPANDING_TREE, SHORTCUT_PATH
+   };
 
    public ConstrainedWholeBodyPlanningToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
                                                         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
@@ -63,95 +79,146 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       super(statusOutputManager, registry);
       this.fullRobotModel = fullRobotModel;
       this.isDone.set(false);
-      
+
       this.startYoVariableServer = startYoVariableServer;
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
+      this.currentCWBToolboxState = CWBToolboxState.DO_NOTHING;
    }
 
    @Override
    protected void updateInternal()
    {
-      PrintTools.info("update toolbox " + updateCount.getIntegerValue());
-     
-      if(tree.expandingTree())
-      {         
-         ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-         CTTaskNode currentNode = tree.getNewNode();
-         revertedPath.add(currentNode);
+      PrintTools.info("updateInternal");
+      
+      switch (currentCWBToolboxState)
+      {
+      case DO_NOTHING:
+         toolboxSolutionState = 0;
          
-         while (true)
+         break;
+
+      case FIND_INITIAL_GUESS:
+         ConstrainedWholeBodyPlanningToolboxHelper.setMaximumUpdateOfTester(200);
+
+         tree.updateRandomInitialGuess();
+         
+         PrintTools.info("update new node with random node data done");
+
+         scoreNewNode.set(GenericTaskNode.nodeTester.getScore(RobotSide.LEFT));
+         solutionQuality.set(GenericTaskNode.nodeTester.getSolutionQuality());
+
+         if (bestInitialGuessScore > scoreNewNode.getDoubleValue())
          {
-            currentNode = currentNode.getParentNode();
-            if (currentNode != null)
-            {
-               revertedPath.add(currentNode);
-            }
-            else
-               break;
+            bestInitialGuessScore = scoreNewNode.getDoubleValue();
+            initialGuess = tree.getNewNode().createNodeCopy();
          }
 
-         int revertedPathSize = revertedPath.size();
-
-         tree.getPath().clear();
-         for (int j = 0; j < revertedPathSize; j++)
-            tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
-
-         PrintTools.info("Constructed Tree size is " + revertedPathSize);
-
-         /*
-          * shortcut.
-          */
-//            optimalPath.clear();
-//            for (int j = 0; j < path.size(); j++)
-//            {
-//               CTTaskNode node = path.get(i).createNodeCopy();
-//               optimalPath.add(node);
-//            }
-         isDone.set(true);         
-      }
-      else
-      {
-         /*
-          * set Yovariables
-          */
-         currentIsValid.set(tree.getNewNode().getIsValidNode());
-         currentTrajectoryTime.set(tree.getNewNode().getNormalizedNodeData(0));
+         currentTryForInitialGuess++;
+         if (currentTryForInitialGuess == numberOfRandomTryForInitialGuess)
+         {
+            if(initialGuess == null)
+            {
+               isDone.set(true);
+               toolboxSolutionState = 1;
+            }
+            else
+            {
+               isDone.set(true);
+//               currentCWBToolboxState = CWBToolboxState.EXPANDING_TREE;
+//               rootNode = initialGuess.createNodeCopy();
+//               treeInitialize();   
+            }
+         }
          
-         /*
-          * set fullRobotModel
-          */
-         FullHumanoidRobotModel solverRobotModel = GenericTaskNode.nodeTester.getFullRobotModelCopy();
-         fullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
-         fullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
-         
-         for(int i=0;i<FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel).length;i++)
-            FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
+         visualizedNode = tree.getNewNode().createNodeCopy();
+         break;
+
+      case EXPANDING_TREE:
+//         ConstrainedWholeBodyPlanningToolboxHelper.setMaximumUpdateOfTester(100);
+//
+//         PrintTools.info("expandingCount " + expandingCount.getIntegerValue());
+//         if (tree.expandingTree())
+//         {
+//            currentCWBToolboxState = CWBToolboxState.SHORTCUT_PATH;
+//
+//         }
+//
+//         
+//         visualizedNode = tree.getNewNode().createNodeCopy();
+//         
+//         /*
+//          * terminate condition.
+//          */
+//         if (expandingCount.getIntegerValue() == numberOfExpanding)
+//            isDone.set(true);
+//         expandingCount.increment();
+
+         break;
+
+      case SHORTCUT_PATH:
+
+         //       ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
+         //       CTTaskNode currentNode = tree.getNewNode();
+         //       revertedPath.add(currentNode);
+         //
+         //       while (true)
+         //       {
+         //          currentNode = currentNode.getParentNode();
+         //          if (currentNode != null)
+         //          {
+         //             revertedPath.add(currentNode);
+         //          }
+         //          else
+         //             break;
+         //       }
+         //       int revertedPathSize = revertedPath.size();
+         //
+         //       tree.getPath().clear();
+         //       for (int j = 0; j < revertedPathSize; j++)
+         //          tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
+         //
+         //       PrintTools.info("Constructed Tree size is " + revertedPathSize);
+         //
+         //       /*
+         //        * shortcut.
+         //        */
+         //       optimalPath.clear();
+         //       for (int j = 0; j < path.size(); j++)
+         //       {
+         //          CTTaskNode node = path.get(i).createNodeCopy();
+         //          optimalPath.add(node);
+         //       }
+
+         isDone.set(true);
+
+         break;
       }
-      
-      
-      /*
-       * After get path node, show serial posture for serial path node.
-       */
-      
-      
-      
 
       /*
        * update visualizer
        */
-      treeStateVisualizer.setCurrentNormalizedTime(tree.getNewNode().getNormalizedNodeData(0));
-      treeStateVisualizer.setCurrentCTTaskNodeValidity(tree.getNewNode().getIsValidNode());
-      treeStateVisualizer.updateVisualizer();
+      if (visualizedNode != null)
+      {
+         isValidNewNode.set(visualizedNode.getIsValidNode());
+         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
+         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getIsValidNode());
+         treeStateVisualizer.updateVisualizer();
       
-      if(startYoVariableServer)
-         treeVisualizer.update(tree.getNewNode());
+         if (startYoVariableServer)
+            treeVisualizer.update(visualizedNode);
+      }
+      
+      FullHumanoidRobotModel solverRobotModel = GenericTaskNode.nodeTester.getFullRobotModelCopy();
+      
+      PrintTools.info("solverRobotModel");
+      System.out.println(solverRobotModel.getRootJoint().getTranslationForReading());
+      
+      fullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
+      fullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
 
-      /*
-       * terminate condition.
-       */
-      if (updateCount.getIntegerValue() == numberOfExpanding)
-         isDone.set(true);
-      updateCount.increment();
+      for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel).length; i++)
+         FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
+
    }
 
    @Override
@@ -168,50 +235,22 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * bring control parameters from request
        */
       PrintTools.info("initialize");
-      
-      numberOfExpanding = request.numberOfExpanding;
-      
-      /*
-       * 
-       */      
 
-      /*
-       * in near future, find initial posture algorithm is needed.
-       */
+      numberOfExpanding = request.numberOfExpanding;
 
       /*
        * root node and tree define
        */
       double initialPelvisHeight = GenericTaskNode.initialRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-      
+
       rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-      rootNode.setNodeData(2, -10.0/180 * Math.PI);
-      rootNode.setNodeData(10, -30.0/180 * Math.PI);
-      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);      
-
-      PrintTools.info("initial node is " + rootNode.isValidNode());
-
-      tree = new CTTaskNodeTree(rootNode);
-//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, GenericTaskNode.constrainedEndEffectorTrajectory.getTrajectoryTime());
-//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-//      tree.getTaskNodeRegion().setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(10, -150.0/180*Math.PI, 150.0/180*Math.PI);
-
+      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);
       rootNode.convertDataToNormalizedData(GenericTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
       
-      if(startYoVariableServer)
-      {
-         treeVisualizer = new CTTreeVisualizer(tree);
-         treeVisualizer.initialize();
-      }
-         
+      treeInitialize();
+
+      bestInitialGuessScore = Double.MAX_VALUE;
+      currentCWBToolboxState = CWBToolboxState.FIND_INITIAL_GUESS;
       return true;
    }
 
@@ -234,13 +273,30 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          }
       };
    }
-   
+
    private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult()
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
-      
-      
+
       return result;
    }
 
+   private void treeInitialize()
+   {
+      /*
+       * tree initiate
+       */
+      tree = new CTTaskNodeTree(rootNode);
+
+      if (startYoVariableServer)
+      {
+         treeVisualizer = new CTTreeVisualizer(tree);
+         treeVisualizer.initialize();
+      }
+   }
+
+   private void tryRandomInitialGuess()
+   {
+
+   }
 }
