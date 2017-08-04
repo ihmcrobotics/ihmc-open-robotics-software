@@ -4,12 +4,12 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.W
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SwingAngMomTrajectory extends AngularMomentumTrajectory
+public class TransferAngularMomentumTrajectory extends AngularMomentumTrajectory
 {
-   private final static WalkingTrajectoryType type = WalkingTrajectoryType.SWING;
+   private final static WalkingTrajectoryType type = WalkingTrajectoryType.TRANSFER;
 
-   public SwingAngMomTrajectory(String namePrefix, int stepNumber, YoVariableRegistry registry, ReferenceFrame referenceFrame, int maxNumberOfSegments,
-                                         int maxNumberOfCoefficients)
+   public TransferAngularMomentumTrajectory(String namePrefix, int stepNumber, YoVariableRegistry registry, ReferenceFrame referenceFrame,
+                                            int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
       super(namePrefix, stepNumber, type, registry, referenceFrame, maxNumberOfSegments, maxNumberOfCoefficients);
    }
