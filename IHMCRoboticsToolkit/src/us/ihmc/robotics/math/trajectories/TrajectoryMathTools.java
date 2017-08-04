@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.ComplexNumber;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.FastFourierTransform;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.YoSegmentedFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.robotics.math.FastFourierTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TrajectoryMathTools
@@ -153,13 +152,13 @@ public class TrajectoryMathTools
       ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
 
       for (int i = 0; i < tempComplex1.length; i++)
-         tempComplex1[i].multiply(tempComplex2[i]);
+         tempComplex1[i].timesAndStore(tempComplex2[i]);
 
       fft.setCoefficients(tempComplex1);
       tempComplexReference = fft.getInverseTransform();
 
       for (int i = 0; i < numberOfCoeffsToSet; i++)
-         trajToPack.polynomial.setDirectlyFast(i, tempComplexReference[i].getRealPart());
+         trajToPack.polynomial.setDirectlyFast(i, tempComplexReference[i].real());
 
       trajToPack.polynomial.reshape(numberOfCoeffsToSet);
    }
@@ -474,7 +473,7 @@ public class TrajectoryMathTools
       ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
 
       for (int i = 0; i < tempComplex1.length; i++)
-         tempComplex1[i].multiply(tempComplex2[i]);
+         tempComplex1[i].timesAndStore(tempComplex2[i]);
 
       fft.setCoefficients(tempComplex1);
       tempComplexReference = fft.getInverseTransform();
@@ -482,7 +481,7 @@ public class TrajectoryMathTools
       factorial = 1;
       for (index = 1; index <= n; index++)
       {
-         trajectory.setDirectlyFast(index - 1, tempComplexReference[n - index].getRealPart() / factorial);
+         trajectory.setDirectlyFast(index - 1, tempComplexReference[n - index].real() / factorial);
          factorial *= index;
       }
       trajectory.setTime(trajectory.getInitialTime() + timeOffset, trajectory.getFinalTime() + timeOffset);
@@ -515,7 +514,6 @@ public class TrajectoryMathTools
    }
 
    private static YoFrameTrajectory3D segmentTraj1, segmentTraj2;
-   private static double[] tempArrayRef1, tempArrayRef2;
 
    public static void addSegmentedTrajectories(YoSegmentedFrameTrajectory3D trajToPack, YoSegmentedFrameTrajectory3D traj1, YoSegmentedFrameTrajectory3D traj2,
                                                double TIME_EPSILON)

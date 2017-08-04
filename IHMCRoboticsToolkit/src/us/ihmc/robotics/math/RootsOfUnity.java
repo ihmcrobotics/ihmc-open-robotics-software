@@ -1,10 +1,9 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.math;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.tools.ArrayTools;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 /**
  * Garbage free implementation for generating the nth roots of unity 

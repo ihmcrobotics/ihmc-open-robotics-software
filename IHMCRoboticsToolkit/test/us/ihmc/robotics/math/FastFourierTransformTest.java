@@ -1,11 +1,10 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
+package us.ihmc.robotics.math;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.ComplexNumber;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.FastFourierTransform;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.robotics.math.FastFourierTransform;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 
 public class FastFourierTransformTest
@@ -35,9 +34,9 @@ public class FastFourierTransformTest
       fft.setCoefficients(result);
       result = fft.getInverseTransform();
       for (int i = 0; i < 5; i++)
-         assert (MathTools.epsilonCompare(result[i].getRealPart(), 1, Epsilons.ONE_BILLIONTH));
+         assert (MathTools.epsilonCompare(result[i].real(), 1, Epsilons.ONE_BILLIONTH));
       for (int i = 5; i < result.length; i++)
-         assert (MathTools.epsilonCompare(result[i].getRealPart(), 0, Epsilons.ONE_BILLIONTH));
+         assert (MathTools.epsilonCompare(result[i].real(), 0, Epsilons.ONE_BILLIONTH));
 
    }
 
@@ -59,15 +58,15 @@ public class FastFourierTransformTest
       ComplexNumber[] result2 = fft.getForwardTransform();
 
       for (int i = 0; i < result1.length; i++)
-         saveVals[i].multiply(result2[i]);
+         saveVals[i].timesAndStore(result2[i]);
 
       fft.setCoefficients(saveVals);
       result1 = fft.getInverseTransform();
       
-      assert (MathTools.epsilonCompare(result1[0].getRealPart(), 1, Epsilons.ONE_BILLIONTH));
-      assert (MathTools.epsilonCompare(result1[1].getRealPart(), 2, Epsilons.ONE_BILLIONTH));
-      assert (MathTools.epsilonCompare(result1[2].getRealPart(), 2, Epsilons.ONE_BILLIONTH));
-      assert (MathTools.epsilonCompare(result1[3].getRealPart(), 1, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(result1[0].real(), 1, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(result1[1].real(), 2, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(result1[2].real(), 2, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(result1[3].real(), 1, Epsilons.ONE_BILLIONTH));
    }
 
 }

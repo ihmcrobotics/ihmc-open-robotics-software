@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3DInterface;
 
 public interface CoPTrajectoryInterface extends SegmentedFrameTrajectory3DInterface
 {
