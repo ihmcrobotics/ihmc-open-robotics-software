@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -69,6 +70,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
+   private final YoBoolean isDoubleSupport;
 
    private final YoBoolean areICPDynamicsSatisfied;
    private final YoBoolean areCoMDynamicsSatisfied;
@@ -85,24 +87,31 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
    
+   private final YoBoolean useContinuousICPAdjustment;
+   private List<FrameTuple<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple<?, ?>>();
+   
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding, YoBoolean isInitialTransfer,
-                                          YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
+                                          YoBoolean isDoubleSupport, YoBoolean useDecoupled, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.trajectoryFrame = trajectoryFrame;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
+      this.isDoubleSupport = isDoubleSupport;
       this.useDecoupled = useDecoupled;
       
       areICPDynamicsSatisfied = new YoBoolean("areICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
+      
+      useContinuousICPAdjustment = new YoBoolean("useContinuousICPAdjustment", registry);
+      useContinuousICPAdjustment.set(true);
       
       totalNumberOfSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
@@ -117,6 +126,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpTerminalLength = new YoInteger("ICPTerminalLength", registry);
       currentSegmentIndex = new YoInteger("CurrentSegment", registry);
       
+      icpQuantityInitialConditionList.add(new FramePoint());
       while(icpDesiredInitialPositions.size() < defaultSize)
       {
          icpDesiredInitialPositions.add(new FramePoint());
@@ -125,6 +135,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          
          comDesiredInitialPositions.add(new FramePoint());
          comDesiredFinalPositions.add(new FramePoint());
+         
+         icpQuantityInitialConditionList.add(new FrameVector());
       }
    }
 
@@ -177,6 +189,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       initialize();
    }
 
+   private int numberOfSegmentsSwing0;
    public void initializeForSwing(double initialTime, List<CMPTrajectory> transferCMPTrajectories, List<CMPTrajectory> swingCMPTrajectories)
    {
       reset();
@@ -219,6 +232,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          totalNumberOfSegments.increment();
       }
       
+      numberOfSegmentsSwing0 = swingCMPTrajectories.get(0).getNumberOfSegments();
       initialize();
    }
 
@@ -241,8 +255,13 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          if(useDecoupled.getBooleanValue())
          {
             icpToolbox.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
-            
-            if(isInitialTransfer.getBooleanValue())
+
+            if(!isDoubleSupport.getBooleanValue())
+            {
+               icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
+                                                            isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());               
+            }
+            if(isInitialTransfer.getBooleanValue() || (useContinuousICPAdjustment.getBooleanValue() && isDoubleSupport.getBooleanValue()))
             {
                icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
                                                                                  cmpTrajectories, omega0.getDoubleValue());
@@ -258,7 +277,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          {
             icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
             
-            if(isInitialTransfer.getBooleanValue())
+            if(!isDoubleSupport.getBooleanValue())
+            {
+               icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
+                                                            isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());               
+            }
+            if(isInitialTransfer.getBooleanValue() || (useContinuousICPAdjustment.getBooleanValue() && isDoubleSupport.getBooleanValue()))
             {
                icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
                                                                                  cmpTrajectories, omega0.getDoubleValue());
@@ -361,6 +385,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       while(timeInCurrentPhase > cmpTrajectories.get(currentSegmentIndex).getFinalTime() && Math.abs(cmpTrajectories.get(currentSegmentIndex).getFinalTime() - cmpTrajectories.get(currentSegmentIndex+1).getInitialTime()) < 1.0e-5)
       {
          currentSegmentIndex++;
+         if(currentSegmentIndex + 1 > cmpTrajectories.size())
+         {
+            return currentSegmentIndex;
+         }
       }
       return currentSegmentIndex;
    }
