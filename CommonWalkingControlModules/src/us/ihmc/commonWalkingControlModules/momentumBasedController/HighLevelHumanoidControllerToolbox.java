@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -137,6 +138,7 @@ public class HighLevelHumanoidControllerToolbox
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
    private final BipedSupportPolygons bipedSupportPolygons;
+   private final ICPControlPolygons icpControlPolygons;
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
@@ -171,6 +173,8 @@ public class HighLevelHumanoidControllerToolbox
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(this.omega0, referenceFrames.getCenterOfMassFrame(), midFeetZUpFrame,
+                                                  gravityZ, registry, yoGraphicsListRegistry);
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
@@ -453,6 +457,7 @@ public class HighLevelHumanoidControllerToolbox
    public void updateBipedSupportPolygons()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
+      icpControlPolygons.updateUsingContactStates(footContactStates);
    }
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
@@ -855,6 +860,11 @@ public class HighLevelHumanoidControllerToolbox
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
+   }
+
+   public ICPControlPolygons getICPControlPolygons()
+   {
+      return icpControlPolygons;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
