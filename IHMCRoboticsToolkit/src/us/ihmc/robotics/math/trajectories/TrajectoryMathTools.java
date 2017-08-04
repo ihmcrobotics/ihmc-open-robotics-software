@@ -31,10 +31,11 @@ public class TrajectoryMathTools
    private static ComplexNumber[] tempComplexReference;
    private static List<ComplexNumber> tempComplexList;
 
-   public static void scale(YoTrajectory trajToPack, YoTrajectory traj, double scalar)
+   public static void scale(YoTrajectory scaledTrajectoryToPack, YoTrajectory trajectoryToScale, double scalar)
    {
-      for (int i = 0; i < traj.getNumberOfCoefficients(); i++)
-         trajToPack.polynomial.setDirectlyFast(i, traj.getCoefficient(i) * scalar);
+      YoPolynomial polynomial = scaledTrajectoryToPack.getPolynomial();
+      for (int i = 0; i < trajectoryToScale.getNumberOfCoefficients(); i++)
+         polynomial.setDirectlyFast(i, trajectoryToScale.getCoefficient(i) * scalar);
    }
 
    /**
@@ -66,19 +67,21 @@ public class TrajectoryMathTools
       setCoeffsByAddition(trajToPack, traj1, traj2);
    }
 
-   private static void setCoeffsByAddition(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
+   private static void setCoeffsByAddition(YoTrajectory trajectoryToPack, YoTrajectory trajectory1, YoTrajectory trajectory2)
    {
-      int numberOfCoeffsToSet = Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients());
+      int numberOfCoeffsToSet = Math.max(trajectory1.getNumberOfCoefficients(), trajectory2.getNumberOfCoefficients());
+      YoPolynomial polynomial = trajectoryToPack.getPolynomial();
+
       for (int i = 0; i < numberOfCoeffsToSet; i++)
       {
          tempVal = 0.0;
-         if (i < traj1.getNumberOfCoefficients())
-            tempVal += traj1.getCoefficient(i);
-         if (i < traj2.getNumberOfCoefficients())
-            tempVal += traj2.getCoefficient(i);
-         trajToPack.polynomial.setDirectlyFast(i, tempVal);
+         if (i < trajectory1.getNumberOfCoefficients())
+            tempVal += trajectory1.getCoefficient(i);
+         if (i < trajectory2.getNumberOfCoefficients())
+            tempVal += trajectory2.getCoefficient(i);
+         polynomial.setDirectlyFast(i, tempVal);
       }
-      trajToPack.polynomial.reshape(numberOfCoeffsToSet);
+      polynomial.reshape(numberOfCoeffsToSet);
    }
 
    /**
@@ -109,19 +112,20 @@ public class TrajectoryMathTools
       setCoeffsBySubtraction(trajToPack, traj1, traj2);
    }
 
-   private static void setCoeffsBySubtraction(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
+   private static void setCoeffsBySubtraction(YoTrajectory trajectoryToPack, YoTrajectory trajectory1, YoTrajectory trajectory2)
    {
-      int numberOfCoeffsToSet = Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients());
+      int numberOfCoeffsToSet = Math.max(trajectory1.getNumberOfCoefficients(), trajectory2.getNumberOfCoefficients());
+      YoPolynomial polynomial = trajectoryToPack.getPolynomial();
       for (int i = 0; i < numberOfCoeffsToSet; i++)
       {
          tempVal = 0.0;
-         if (i < traj1.getNumberOfCoefficients())
-            tempVal += traj1.getCoefficient(i);
-         if (i < traj2.getNumberOfCoefficients())
-            tempVal -= traj2.getCoefficient(i);
-         trajToPack.polynomial.setDirectlyFast(i, tempVal);
+         if (i < trajectory1.getNumberOfCoefficients())
+            tempVal += trajectory1.getCoefficient(i);
+         if (i < trajectory2.getNumberOfCoefficients())
+            tempVal -= trajectory2.getCoefficient(i);
+         polynomial.setDirectlyFast(i, tempVal);
       }
-      trajToPack.polynomial.reshape(numberOfCoeffsToSet);
+      polynomial.reshape(numberOfCoeffsToSet);
    }
 
    public static void multiply(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
@@ -139,15 +143,15 @@ public class TrajectoryMathTools
       setCoeffsByMultiplication(trajToPack, traj1, traj2);
    }
 
-   private static void setCoeffsByMultiplication(YoTrajectory trajToPack, YoTrajectory traj1, YoTrajectory traj2)
+   private static void setCoeffsByMultiplication(YoTrajectory trajectoryToPack, YoTrajectory trajectory1, YoTrajectory trajectory2)
    {
-      int numberOfCoeffsToSet = traj1.getNumberOfCoefficients() + traj2.getNumberOfCoefficients() - 1;
+      int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
 
-      fft.setCoefficients(traj1.getCoefficients());
+      fft.setCoefficients(trajectory1.getCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
 
-      fft.setCoefficients(traj2.getCoefficients());
+      fft.setCoefficients(trajectory2.getCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
 
@@ -157,10 +161,10 @@ public class TrajectoryMathTools
       fft.setCoefficients(tempComplex1);
       tempComplexReference = fft.getInverseTransform();
 
+      YoPolynomial polynomial = trajectoryToPack.getPolynomial();
       for (int i = 0; i < numberOfCoeffsToSet; i++)
-         trajToPack.polynomial.setDirectlyFast(i, tempComplexReference[i].real());
-
-      trajToPack.polynomial.reshape(numberOfCoeffsToSet);
+         polynomial.setDirectlyFast(i, tempComplexReference[i].real());
+      polynomial.reshape(numberOfCoeffsToSet);
    }
 
    public static void scale(YoTrajectory3D trajToPack, YoTrajectory3D traj, double scalarX, double scalarY, double scalarZ)
@@ -487,30 +491,35 @@ public class TrajectoryMathTools
       trajectory.setTime(trajectory.getInitialTime() + timeOffset, trajectory.getFinalTime() + timeOffset);
    }
 
-   public static void getIntergal(YoTrajectory trajToPack, YoTrajectory trajToIntegrate)
+   public static void getIntergal(YoTrajectory trajectoryToPack, YoTrajectory trajectoryToIntegrate)
    {
-      if (trajToPack.getMaximumNumberOfCoefficients() < trajToIntegrate.getNumberOfCoefficients() + 1)
+      if (trajectoryToPack.getMaximumNumberOfCoefficients() < trajectoryToIntegrate.getNumberOfCoefficients() + 1)
          throw new InvalidParameterException("Not enough coefficients to store result of trajectory integration");
-      for (int i = trajToIntegrate.getNumberOfCoefficients(); i > 0; i--)
-         trajToPack.polynomial.setDirectlyFast(i, trajToIntegrate.getCoefficient(i - 1) / (i));
-      trajToIntegrate.compute(trajToIntegrate.getInitialTime());
-      tempVal = trajToIntegrate.getPosition();
-      trajToPack.polynomial.setDirectly(0, -tempVal);
-      trajToPack.reshape(trajToIntegrate.getNumberOfCoefficients() + 1);
-      trajToPack.setTime(trajToIntegrate.getInitialTime(), trajToIntegrate.getFinalTime());
+
+      YoPolynomial polynomial = trajectoryToPack.getPolynomial();
+      for (int i = trajectoryToIntegrate.getNumberOfCoefficients(); i > 0; i--)
+         polynomial.setDirectlyFast(i, trajectoryToIntegrate.getCoefficient(i - 1) / (i));
+      trajectoryToIntegrate.compute(trajectoryToIntegrate.getInitialTime());
+      double position = trajectoryToIntegrate.getPosition();
+      polynomial.setDirectly(0, -position);
+      trajectoryToPack.reshape(trajectoryToIntegrate.getNumberOfCoefficients() + 1);
+      trajectoryToPack.setTime(trajectoryToIntegrate.getInitialTime(), trajectoryToIntegrate.getFinalTime());
    }
 
-   public static void getDerivative(YoTrajectory trajToPack, YoTrajectory trajToDifferentiate)
+   public static void getDerivative(YoTrajectory derivativeToPack, YoTrajectory trajectoryToDifferentiate)
    {
-      if (trajToPack.getMaximumNumberOfCoefficients() < trajToDifferentiate.getNumberOfCoefficients() - 1)
+      if (derivativeToPack.getMaximumNumberOfCoefficients() < trajectoryToDifferentiate.getNumberOfCoefficients() - 1)
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
 
-      trajToPack.polynomial.reshape(Math.max(trajToDifferentiate.getNumberOfCoefficients() - 1, 1));
-      if (trajToDifferentiate.getNumberOfCoefficients() == 1)
-         trajToPack.polynomial.setConstant(0);
-      for (int i = trajToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
-         trajToPack.polynomial.setDirectlyFast(i - 1, i * trajToDifferentiate.polynomial.getCoefficient(i));
-      trajToPack.setTime(trajToDifferentiate.getInitialTime(), trajToDifferentiate.getFinalTime());
+      YoPolynomial derivative = derivativeToPack.getPolynomial();
+      YoPolynomial original = trajectoryToDifferentiate.getPolynomial();
+
+      derivative.reshape(Math.max(trajectoryToDifferentiate.getNumberOfCoefficients() - 1, 1));
+      if (trajectoryToDifferentiate.getNumberOfCoefficients() == 1)
+         derivative.setConstant(0);
+      for (int i = trajectoryToDifferentiate.getNumberOfCoefficients() - 1; i > 0; i--)
+         derivative.setDirectlyFast(i - 1, i * original.getCoefficient(i));
+      derivativeToPack.setTime(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime());
    }
 
    private static YoFrameTrajectory3D segmentTraj1, segmentTraj2;

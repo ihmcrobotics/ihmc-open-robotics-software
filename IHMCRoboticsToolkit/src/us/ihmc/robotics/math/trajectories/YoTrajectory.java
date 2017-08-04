@@ -11,9 +11,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoTrajectory
 {
    private String name;
-   protected YoPolynomial polynomial;
-   protected YoDouble tInitial;
-   protected YoDouble tFinal;
+   private YoPolynomial polynomial;
+   private YoDouble tInitial;
+   private YoDouble tFinal;
    private double[] coefficients;
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
