@@ -32,16 +32,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
+         ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
          double gravityZ, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime,
+      this(referenceFrames, bipedSupportPolygons, icpControlPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime,
             totalMass, gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
+         ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
          YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
@@ -66,12 +66,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       if (icpOptimizationParameters.useTimingOptimization())
       {
          icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+               bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
          icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+               bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
    }
 
