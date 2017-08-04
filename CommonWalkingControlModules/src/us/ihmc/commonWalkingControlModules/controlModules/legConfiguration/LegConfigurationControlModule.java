@@ -359,6 +359,11 @@ public class LegConfigurationControlModule
       useBracingAngle.set(true);
    }
 
+   public void doNotBrace()
+   {
+      useBracingAngle.set(false);
+   }
+
    public void setLegControlWeight(LegControlWeight legControlWeight)
    {
       this.legControlWeight.set(legControlWeight);
