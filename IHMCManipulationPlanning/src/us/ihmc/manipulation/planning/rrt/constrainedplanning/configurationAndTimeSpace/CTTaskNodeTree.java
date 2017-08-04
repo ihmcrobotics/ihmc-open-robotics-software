@@ -3,8 +3,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.vividsolutions.jts.operation.valid.IsValidOp;
-
 import us.ihmc.commons.PrintTools;
 
 public class CTTaskNodeTree
@@ -29,7 +27,7 @@ public class CTTaskNodeTree
     */
    private double matricRatioTimeToTask = 0.5;
 
-   private double maximumDisplacementOfStep = 0.1;
+   private double maximumDisplacementOfStep = 0.7;
    private double maximumTimeGapOfStep = 0.02;
 
    private int dimensionOfTask;
@@ -87,7 +85,7 @@ public class CTTaskNodeTree
       return trajectoryTime;
    }
 
-   private void setIntentionalRandomNormalizedNodeData(CTTaskNode node, int index)
+   private void setRandomNormalizedNodeData(CTTaskNode node, int index)
    {
       Random randomManager = new Random();
 
@@ -108,26 +106,11 @@ public class CTTaskNodeTree
       
       node.setNormalizedNodeData(index, value);
    }
-   
-   private void setRandomNormalizedNodeData(CTTaskNode node, int index)
-   {
-      Random randomManager = new Random();
 
-      double value = randomManager.nextDouble();
-      
-      node.setNormalizedNodeData(index, value);
-   }
-
-   private void setRandomNormalizedNodeData(CTTaskNode node, boolean intentionOn)
+   private void setRandomNormalizedNodeData(CTTaskNode node)
    {
       for (int i = 0; i < node.getDimensionOfNodeData(); i++)
-      {
-         if(intentionOn)
-            setIntentionalRandomNormalizedNodeData(node, i);
-         else
-            setRandomNormalizedNodeData(node, i);
-      }
-         
+         setRandomNormalizedNodeData(node, i);
    }
 
    public void setMatricRatioTimeToTask(double ratio)
@@ -266,24 +249,12 @@ public class CTTaskNodeTree
          return false;
       }
    }
-   
-   public void updateRandomInitialGuess()
-   {
-      CTTaskNode randomNode = createNode();
-      setRandomNormalizedNodeData(randomNode, false);
-      randomNode.setNormalizedNodeData(0, 0);
-      this.newNode = randomNode;
-      
-      this.newNode.convertNormalizedDataToData(nodeRegion);
-      
-      this.newNode.isValidNode();
-   }
 
    private void updateRandomConfiguration()
    {
       CTTaskNode randomNode = createNode();
-      setRandomNormalizedNodeData(randomNode, true);
-      this.randomNode = randomNode;      
+      setRandomNormalizedNodeData(randomNode);
+      this.randomNode = randomNode;
    }
 
    private void updateNearestNode()
