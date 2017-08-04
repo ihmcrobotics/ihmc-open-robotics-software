@@ -585,7 +585,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    public void getPredictedSwingFootPosition(YoFramePoint pointToPack, double time)
    {
-      if (DEBUG)
+      if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
          if (!swingStartDebug)
             transferAngularMomentumTrajectories.get(0).update(time - initialTime, tempFramePoint1);
