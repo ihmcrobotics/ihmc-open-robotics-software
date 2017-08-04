@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 import java.util.List;

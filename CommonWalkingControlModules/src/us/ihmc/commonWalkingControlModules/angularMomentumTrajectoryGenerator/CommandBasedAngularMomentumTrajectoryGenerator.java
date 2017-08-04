@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -33,8 +32,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final List<YoDouble> transferDurations;
    private final List<YoDouble> swingDurations;
 
-   private final List<TransferAngMomTrajectory> transferTrajectories;
-   private final List<SwingAngMomTrajectory> swingTrajectories;
+   private final List<TransferAngularMomentumTrajectory> transferTrajectories;
+   private final List<SwingAngularMomentumTrajectory> swingTrajectories;
 
    private double initialTime;
    private AngularMomentumTrajectory activeTrajectory;
@@ -71,23 +70,23 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       this.transferDurations = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue() + 1);
       this.swingDurations = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue());
-      this.transferTrajectories = new ArrayList<TransferAngMomTrajectory>(numberOfFootstepsToPlan.getIntegerValue() + 1);
-      this.swingTrajectories = new ArrayList<SwingAngMomTrajectory>(numberOfFootstepsToPlan.getIntegerValue());
+      this.transferTrajectories = new ArrayList<TransferAngularMomentumTrajectory>(numberOfFootstepsToPlan.getIntegerValue() + 1);
+      this.swingTrajectories = new ArrayList<SwingAngularMomentumTrajectory>(numberOfFootstepsToPlan.getIntegerValue());
 
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue() + 1; i++)
       {
-         TransferAngMomTrajectory transferTrajectory = new TransferAngMomTrajectory(namePrefix, i, registry, worldFrame,
-                                                                                    numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
-                                                                                    trajectoryType.getEnumValue().getNumberOfCoefficients());
+         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(namePrefix, i, registry, worldFrame,
+                                                                                                      numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
+                                                                                                      trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDurationStep" + i, registry);
          transferTrajectories.add(transferTrajectory);
          transferDurations.add(transferDuration);
       }
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue(); i++)
       {
-         SwingAngMomTrajectory swingTrajectory = new SwingAngMomTrajectory(namePrefix, i, registry, worldFrame,
-                                                                           numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
-                                                                           trajectoryType.getEnumValue().getNumberOfCoefficients());
+         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(namePrefix, i, registry, worldFrame,
+                                                                                             numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
+                                                                                             trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDurationStep" + i, registry);
          swingTrajectories.add(swingTrajectory);
          swingDurations.add(swingDuration);

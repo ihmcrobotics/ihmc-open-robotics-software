@@ -1,17 +1,13 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoTrajectory3D
 {

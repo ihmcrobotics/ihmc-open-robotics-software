@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SegmentedFrameTrajectory3DInterface;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.trajectories.YoFrameTrajectory3D;
 
 public interface AngularMomentumTrajectoryInterface extends SegmentedFrameTrajectory3DInterface
 {

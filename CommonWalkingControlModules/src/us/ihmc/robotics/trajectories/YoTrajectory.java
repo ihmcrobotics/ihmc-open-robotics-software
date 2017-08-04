@@ -1,9 +1,8 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.trajectories;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -518,6 +517,9 @@ public class YoTrajectory
    {
       TrajectoryMathTools.getIntergal(trajToPack, this);
    }
-   
-   
+
+   public YoPolynomial getPolynomial()
+   {
+      return polynomial;
+   }
 }
