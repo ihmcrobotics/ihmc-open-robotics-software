@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SmoothCapturePointToolsTest
+public class SmoothCapturePointToolboxTest
 {
    private static final int nTests = 20;
    private static final double omega0 = 3.4;
@@ -30,7 +30,7 @@ public class SmoothCapturePointToolsTest
    private Random random = new Random();
    
    YoVariableRegistry registry = new YoVariableRegistry("");
-   String namePrefix = "SmoothCapturePointToolsTest";
+   String namePrefix = "SmoothCapturePointToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    
@@ -97,7 +97,7 @@ public class SmoothCapturePointToolsTest
          {
             double time = 0.0;
             FramePoint newEntryICP = new FramePoint(ReferenceFrame.getWorldFrame());
-            SmoothCapturePointToolsTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
+            SmoothCapturePointToolboxTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
             entryCornerPointsByHandToPack.set(i, newEntryICP);
             if(i > 0)
             {

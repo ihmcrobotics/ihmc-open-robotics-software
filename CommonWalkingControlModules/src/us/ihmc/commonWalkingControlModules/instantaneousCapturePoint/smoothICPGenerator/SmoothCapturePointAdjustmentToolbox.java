@@ -83,17 +83,7 @@ public class SmoothCapturePointAdjustmentToolbox
    public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
                                                             List<YoFrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
-      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
-      double tInitial = cmpPolynomial3D.getInitialTime();
-      
-//      // TODO: check whether better ways of setting it exist
-//      for(int i = 0; i < cmpPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-//      {
-//         cmpPolynomial3D.getDerivative(i, tInitial, icpQuantityInitialSegment1);
-//         icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
-//      }
-      
-      initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
+      initializeMatrices(cmpPolynomials3D.get(0).getNumberOfCoefficients());
       adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialConditionList, entryCornerPointsToPack, exitCornerPointsToPack);
    }
    
@@ -231,11 +221,11 @@ public class SmoothCapturePointAdjustmentToolbox
       polynomialCoefficientVectorAdjustmentSegment1.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, 0, numberOfCoefficients, 0, 1));
       polynomialCoefficientVectorAdjustmentSegment2.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, numberOfCoefficients, 2*numberOfCoefficients, 0, 1));
       
-      PrintTools.debug("BC Matrix = " + boundaryConditionMatrix.toString());
-      PrintTools.debug("BC MInver = " + boundaryConditionMatrixInverse.toString());
-      PrintTools.debug("BC Vector = " + boundaryConditionVector.toString());
-      PrintTools.debug("PC adjust = " + polynomialCoefficientCombinedVectorAdjustment.toString());
-      PrintTools.debug("");
+//      PrintTools.debug("BC Matrix = " + boundaryConditionMatrix.toString());
+//      PrintTools.debug("BC MInver = " + boundaryConditionMatrixInverse.toString());
+//      PrintTools.debug("BC Vector = " + boundaryConditionVector.toString());
+//      PrintTools.debug("PC adjust = " + polynomialCoefficientCombinedVectorAdjustment.toString());
+//      PrintTools.debug("");
    }
    
    private void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment2)
@@ -263,7 +253,7 @@ public class SmoothCapturePointAdjustmentToolbox
       setGeneralizedBoundaryConstraintCMP2(order, numberOfCoefficients, cmpPolynomialSegment2);
    }
    
-   private void initializeMatrices1D(int numberOfCoefficients)
+   private void initializeMatrices(int numberOfCoefficients)
    {  
       boundaryConditionMatrix.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
       boundaryConditionMatrixInverse.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
