@@ -8,10 +8,10 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Yo
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;

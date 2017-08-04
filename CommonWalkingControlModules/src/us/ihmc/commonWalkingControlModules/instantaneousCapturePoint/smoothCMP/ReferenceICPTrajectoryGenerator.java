@@ -5,7 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -152,7 +153,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          int cmpSegments = transferCMPTrajectory.getNumberOfSegments();
          for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
          {
-            cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+            cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
             totalNumberOfSegments.increment();
          }
 
@@ -161,7 +162,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpSegments = swingCMPTrajectory.getNumberOfSegments();
          for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
          {
-            cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+            cmpTrajectories.add(swingCMPTrajectory.getSegment(cmpSegment));
             totalNumberOfSegments.increment();
          }
       }
@@ -170,7 +171,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       int cmpSegments = transferCMPTrajectory.getNumberOfSegments();
       for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
       {
-         cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+         cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfSegments.increment();
       }
       
@@ -186,7 +187,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       int cmpSegments = swingCMPTrajectory.getNumberOfSegments();
       for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
       {
-         cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+         cmpTrajectories.add(swingCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfSegments.increment();
       }
 
@@ -198,7 +199,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpSegments = transferCMPTrajectory.getNumberOfSegments();
          for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
          {
-            cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+            cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
             totalNumberOfSegments.increment();
          }
 
@@ -206,7 +207,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpSegments = swingCMPTrajectory.getNumberOfSegments();
          for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
          {
-            cmpTrajectories.add(swingCMPTrajectory.getPolynomials().get(cmpSegment));
+            cmpTrajectories.add(swingCMPTrajectory.getSegment(cmpSegment));
             totalNumberOfSegments.increment();
          }
       }
@@ -215,10 +216,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       cmpSegments = transferCMPTrajectory.getNumberOfSegments();
       for (int cmpSegment = 0; cmpSegment < cmpSegments; cmpSegment++)
       {
-         cmpTrajectories.add(transferCMPTrajectory.getPolynomials().get(cmpSegment));
+         cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfSegments.increment();
       }
-      
       initialize();
    }
 
