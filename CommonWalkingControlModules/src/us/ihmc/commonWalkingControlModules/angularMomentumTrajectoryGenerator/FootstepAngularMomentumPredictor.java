@@ -329,7 +329,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       for (; footstepIndex + 2 < upcomingCoPsInFootsteps.size() && (upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList().size() > 1); footstepIndex++)
       {
          updateCurrentSegmentTimes(footstepIndex);
-         //setCoMTrajectoryForFootstep(footstepIndex);
          computeAngularMomentumApproximationForFootstep(footstepIndex);
       }
    }
