@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -153,7 +154,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean useOptimizationBasedICPController()
       {
-         return true;
+         return false;
       }
 
       @Override
@@ -197,6 +198,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return new TestToeOffParameters(jointMap);
       }
+
    }
 
    private class TestToeOffParameters extends AtlasToeOffParameters
@@ -338,7 +340,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedMediumWeight()
       {
-         return 25.0;
+         return 50.0;
       }
 
       @Override
@@ -359,6 +361,12 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public double getJointAccelerationWeight()
       {
          return 0.05;
+      }
+
+      @Override
+      public Vector3D getPelvisAngularWeight()
+      {
+         return new Vector3D(7.0, 5.0, 5.0);
       }
    }
 
