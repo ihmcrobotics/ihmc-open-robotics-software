@@ -514,24 +514,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public void useVirtualModelControlCore()
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      @Override
       public boolean useOptimizationBasedICPController()
       {
          // TODO Auto-generated method stub
          return false;
-      }
-
-      @Override
-      public void useInverseDynamicsControlCore()
-      {
-         // TODO Auto-generated method stub
-
       }
 
       @Override
