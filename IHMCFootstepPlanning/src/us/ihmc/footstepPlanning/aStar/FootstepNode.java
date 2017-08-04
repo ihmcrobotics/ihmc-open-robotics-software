@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.aStar;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -14,7 +13,6 @@ public class FootstepNode
    private final int yIndex;
    private final int yawIndex;
    private final RobotSide robotSide;
-   private final RigidBodyTransform soleTransform;
 
    public FootstepNode(double x, double y)
    {
@@ -27,9 +25,6 @@ public class FootstepNode
       yIndex = (int) Math.round(y / gridSizeY);
       yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
       this.robotSide = robotSide;
-
-      soleTransform = new RigidBodyTransform();
-      soleTransform.setToNaN();
    }
 
    public double getX()
@@ -50,16 +45,6 @@ public class FootstepNode
    public RobotSide getRobotSide()
    {
       return robotSide;
-   }
-
-   public RigidBodyTransform getSoleTransform()
-   {
-      return soleTransform;
-   }
-
-   public void setSoleTransform(RigidBodyTransform soleTransform)
-   {
-      this.soleTransform.set(soleTransform);
    }
 
    public double euclideanDistance(FootstepNode other)

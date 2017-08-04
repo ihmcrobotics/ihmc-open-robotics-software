@@ -14,7 +14,6 @@ import java.util.ArrayList;
 public class SimplePlanarRegionFootstepNodeSnapper implements FootstepNodeSnapper
 {
    private PlanarRegionsList planarRegionsList = null;
-   private static final double minPercentageOfFoothold = 0.95;
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final RigidBodyTransform footstepPose = new RigidBodyTransform();
@@ -31,34 +30,29 @@ public class SimplePlanarRegionFootstepNodeSnapper implements FootstepNodeSnappe
    }
 
    @Override
-   public boolean snapFootstepNode(FootstepNode footstepNode)
+   public RigidBodyTransform snapFootstepNode(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
    {
       if (planarRegionsList == null)
-         return false;
+         return null;
 
-      PlanarRegion region = new PlanarRegion();
-
+      PlanarRegion planarRegionToPack = new PlanarRegion();
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(footstepNode.getRobotSide()));
       footstepPose.setRotationYawAndZeroTranslation(footstepNode.getYaw());
       footstepPose.setTranslation(footstepNode.getX(), footstepNode.getY(), 0.0);
       footPolygon.applyTransformAndProjectToXYPlane(footstepPose);
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, region);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
-         return false;
+         return null;
 
       ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
-      region.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
+      planarRegionToPack.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
       if (intersections.size() != 1)
-         return false;
+         return null;
 
-      double area = intersections.get(0).getArea();
-      double footArea = footPolygon.getArea();
-      if (area < minPercentageOfFoothold * footArea)
-         return false;
+      if(footholdIntersectionToPack != null)
+         footholdIntersectionToPack.set(intersections.get(0));
 
-      snapTransform.transform(footstepPose);
-      footstepNode.setSoleTransform(footstepPose);
-      return true;
+      return snapTransform;
    }
 }
