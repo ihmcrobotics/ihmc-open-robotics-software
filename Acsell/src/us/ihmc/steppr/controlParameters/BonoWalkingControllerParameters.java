@@ -1,10 +1,7 @@
 package us.ihmc.steppr.controlParameters;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -640,24 +637,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0;
-   }
-
-   @Override
-   public boolean controlHeadAndHandsWithSliders()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return new SideDependentList<LinkedHashMap<String, ImmutablePair<Double,Double>>>();
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
    }
 
    /** {@inheritDoc} */

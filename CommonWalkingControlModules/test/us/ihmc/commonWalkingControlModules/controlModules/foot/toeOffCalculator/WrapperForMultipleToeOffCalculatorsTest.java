@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +23,6 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -285,12 +282,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public boolean controlHeadAndHandsWithSliders()
-         {
-            return false;
-         }
-
-         @Override
          public double getDefaultTransferTime()
          {
             return 0;
@@ -348,18 +339,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public double getSecondContactThresholdForceIgnoringCoP()
          {
             return 0;
-         }
-
-         @Override
-         public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-         {
-            return null;
-         }
-
-         @Override
-         public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-         {
-            return null;
          }
 
          @Override

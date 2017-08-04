@@ -2,11 +2,8 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
@@ -25,8 +22,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -778,13 +773,4 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    {
       return 3.0;
    }
-
-   // move to slider board specific parameters
-   public abstract boolean controlHeadAndHandsWithSliders();
-
-   // move to slider board specific parameters
-   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
-
-   // move to slider board specific parameters
-   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 }

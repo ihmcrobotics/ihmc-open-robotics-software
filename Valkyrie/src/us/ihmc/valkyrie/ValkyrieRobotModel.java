@@ -20,6 +20,7 @@ import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOf
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -59,6 +60,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
@@ -503,5 +505,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().setM11(0.00208115); // i_yy
       linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
       linkHolder.getInertia().setM22(0.00178402); // i_zz
+   }
+
+   @Override
+   public SliderBoardParameters getSliderBoardParameters()
+   {
+      return new ValkyrieSliderBoardParameters();
    }
 }

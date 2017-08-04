@@ -6,6 +6,7 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -54,6 +55,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract String getSimpleRobotName();
 
    public abstract CollisionBoxProvider getCollisionBoxProvider();
+
+   public default SliderBoardParameters getSliderBoardParameters()
+   {
+      return new SliderBoardParameters();
+   }
 
    /**
     * Override this method to create a custom output writer to be used with this robot.
