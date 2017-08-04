@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
+package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -74,7 +73,7 @@ public class YoTrajectory3D
       {
          return zTrajectory.getPosition();
       }
-      
+
       @Override
       public String toString()
       {
@@ -221,7 +220,7 @@ public class YoTrajectory3D
    {
       add(this, addTraj);
    }
-   
+
    public void addByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.addByTrimming(this, traj1, traj2);
@@ -231,17 +230,17 @@ public class YoTrajectory3D
    {
       addByTrimming(this, addTraj);
    }
-   
+
    public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.subtract(this, traj1, traj2);
    }
-   
+
    public void subtract(YoTrajectory3D subTraj)
    {
       subtract(this, subTraj);
    }
-   
+
    public void subtractByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
@@ -251,22 +250,22 @@ public class YoTrajectory3D
    {
       subtractByTrimming(this, subTraj);
    }
-   
+
    public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.dotProduct(this, traj1, traj2);
    }
-   
+
    public void dotProduct(YoTrajectory3D dotPTraj)
    {
       dotProduct(this, dotPTraj);
    }
-   
+
    public void dotProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.dotProductByTrimming(this, traj1, traj2);
    }
-   
+
    public void dotProductByTrimming(YoTrajectory3D dotPTraj)
    {
       dotProductByTrimming(this, dotPTraj);
@@ -276,22 +275,22 @@ public class YoTrajectory3D
    {
       TrajectoryMathTools.crossProduct(this, traj1, traj2);
    }
-   
+
    public void crossProduct(YoTrajectory3D crossPTraj)
    {
       crossProduct(this, crossPTraj);
    }
-   
+
    public void crossProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
    {
       TrajectoryMathTools.crossProductByTrimming(this, traj1, traj2);
    }
-   
+
    public void crossProductByTrimming(YoFrameTrajectory3D crossPTraj)
    {
       crossProduct(this, crossPTraj);
    }
-   
+
    public Point3DReadOnly getPosition()
    {
       return position;
@@ -350,27 +349,92 @@ public class YoTrajectory3D
       return zTrajectory;
    }
 
+   public void setTime(double tInital, double tFinal)
+   {
+      setInitialTime(tInital);
+      setFinalTime(tFinal);
+   }
+
+   public void setInitialTime(double tInitial)
+   {
+      for (int i = 0; i < 3; i++)
+         getYoTrajectory(i).setInitialTime(tInitial);
+   }
+
+   public void setFinalTime(double tFinal)
+   {
+      for (int i = 0; i < 3; i++)
+         getYoTrajectory(i).setFinalTime(tFinal);
+   }
+
    public double getInitialTime()
    {
-      return xTrajectory.getInitialTime();
+      if (xTrajectory.getInitialTime() == yTrajectory.getInitialTime() && xTrajectory.getInitialTime() == zTrajectory.getInitialTime())
+         return xTrajectory.getInitialTime();
+      else
+         return xTrajectory.getInitialTime();
    }
 
    public double getFinalTime()
    {
-      return xTrajectory.getFinalTime();
+      if (xTrajectory.getFinalTime() == yTrajectory.getFinalTime() && xTrajectory.getFinalTime() == zTrajectory.getFinalTime())
+         return xTrajectory.getFinalTime();
+      else
+         return xTrajectory.getFinalTime();
+   }
+
+   public double getInitialTime(Direction dir)
+   {
+      return getYoTrajectory(dir).getInitialTime();
+   }
+
+   public double getInitialTime(int index)
+   {
+      return getYoTrajectory(index).getInitialTime();
+   }
+
+   public double getFinalTime(Direction dir)
+   {
+      return getYoTrajectory(dir).getFinalTime();
+   }
+
+   public double getFinalTime(int index)
+   {
+      return getYoTrajectory(index).getFinalTime();
+   }
+
+   public boolean timeIntervalContains(double timeToCheck, double EPSILON)
+   {
+      return (xTrajectory.timeIntervalContains(timeToCheck, EPSILON) && yTrajectory.timeIntervalContains(timeToCheck, EPSILON)
+            && zTrajectory.timeIntervalContains(timeToCheck, EPSILON));
    }
 
    public boolean timeIntervalContains(double timeToCheck)
    {
-      return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
+      return (xTrajectory.timeIntervalContains(timeToCheck) && yTrajectory.timeIntervalContains(timeToCheck) && zTrajectory.timeIntervalContains(timeToCheck));
    }
-   
+
+   /**
+    * Returns the number of coefficients for the trajectory if it is the same for all axes. If not then returns -1
+    * @return
+    */
    public int getNumberOfCoefficients()
    {
-      if(xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients() && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
+      if (xTrajectory.getNumberOfCoefficients() == yTrajectory.getNumberOfCoefficients()
+            && xTrajectory.getNumberOfCoefficients() == zTrajectory.getNumberOfCoefficients())
          return xTrajectory.getNumberOfCoefficients();
       else
          return -1;
+   }
+
+   public int getNumberOfCoefficients(Direction dir)
+   {
+      return getYoTrajectory(dir).getNumberOfCoefficients();
+   }
+
+   public int getNumberOfCoefficients(int index)
+   {
+      return getYoTrajectory(index).getNumberOfCoefficients();
    }
 
    public void reset()
@@ -386,20 +450,19 @@ public class YoTrajectory3D
       zTrajectory.set(other.getYoTrajectoryZ());
    }
 
-   @Deprecated
-   public void setConstant(Point3DReadOnly z)
+   public void setZero()
    {
-      xTrajectory.setConstant(z.getX());
-      yTrajectory.setConstant(z.getY());
-      zTrajectory.setConstant(z.getZ());
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setZero();
+      ;
    }
 
-   public void setConstant(double t0, double tFinal, Point3DReadOnly z0)
+   public void setConstant(double t0, double tFinal, Point3DReadOnly z)
    {
-      for(int index = 0; index < 3; index ++)
-         getYoTrajectory(index).setConstant(t0, tFinal, z0.getElement(index));
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setConstant(t0, tFinal, z.getElement(index));
    }
-   
+
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
@@ -646,6 +709,22 @@ public class YoTrajectory3D
 
    }
 
+   public void setPentic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zFinal,
+                         Vector3DReadOnly zdFinal, Vector3DReadOnly zddFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setPentic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
+                                          zdFinal.getElement(index), zddFinal.getElement(index));
+   }
+
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
+                                                     Vector3DReadOnly zdFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
+                                                                      zdFinal.getElement(index));
+   }
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                       Point3DReadOnly zIntermediate, Point3DReadOnly zf, Vector3DReadOnly zdf, Vector3DReadOnly zddf)
    {
@@ -671,21 +750,39 @@ public class YoTrajectory3D
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
    }
-   
+
    public void getDerivative(int order, double x, Tuple3d dTrajectory)
    {
       dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }
-   
+
    public void getDerivative(YoTrajectory3D dervTraj)
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index));
    }
-   
+
    public void getDerivative(YoTrajectory3D dervTraj, int order)
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
+   }
+
+   public void getIntegral(YoTrajectory3D integralTraj)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).getIntegral(integralTraj.getYoTrajectory(index));
+   }
+
+   public void addTimeOffset(double deltaT)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).addTimeOffset(deltaT);
+   }
+
+   public void addTimeOffset(YoTrajectory3D trajToCopy, double deltaT)
+   {
+      set(trajToCopy);
+      addTimeOffset(deltaT);
    }
 }
