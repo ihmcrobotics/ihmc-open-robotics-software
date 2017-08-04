@@ -96,6 +96,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
+      nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
    }
 
@@ -118,8 +119,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          RobotSide robotSide = path.get(i).getRobotSide();
-         RigidBodyTransform soleTransform = path.get(i).getSoleTransform();
-         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), soleTransform));
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
+
+         RigidBodyTransform footstepPose = new RigidBodyTransform();
+         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+         footstepPose.setTranslationX(path.get(i).getX());
+         footstepPose.setTranslationY(path.get(i).getY());
+         snapTransform.transform(footstepPose);
+
+         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
       }
 
       return plan;
@@ -136,15 +144,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      boolean validStartNode = snapper.snapFootstepNode(startNode);
+      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
       if(!validStartNode)
-         throw new RuntimeException("Start node doesn't snap");
+         throw new RuntimeException("Start node isn't valid");
 
       for(RobotSide robotSide : RobotSide.values)
       {
-         boolean validGoalNode = snapper.snapFootstepNode(goalNodes.get(robotSide));
+         boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
          if(!validGoalNode)
-            throw new RuntimeException("Goal node doesn't snap to planar regions");
+            throw new RuntimeException("Goal node isn't valid");
       }
       
       stack.add(startNode);
@@ -188,10 +196,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
-            boolean successfulSnap = snapper.snapFootstepNode(neighbor);
-            if(!successfulSnap)
-               continue;
-
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
                continue;
 
@@ -247,9 +251,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      StepHeightBasedNodeChecker nodeChecker = new StepHeightBasedNodeChecker();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons, snapper);
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);

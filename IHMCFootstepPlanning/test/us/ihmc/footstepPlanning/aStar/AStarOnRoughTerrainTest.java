@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean visualizePlanner = false;
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
