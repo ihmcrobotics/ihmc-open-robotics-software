@@ -162,4 +162,9 @@ public class ICPControlPolygons
             footPolygonViz.setFrameConvexPolygon2d(footPolygon);
       }
    }
+
+   public FrameConvexPolygon2d getFootControlPolygonInWorldFrame(RobotSide robotSide)
+   {
+      return footControlPolygonsInWorldFrame.get(robotSide);
+   }
 }
