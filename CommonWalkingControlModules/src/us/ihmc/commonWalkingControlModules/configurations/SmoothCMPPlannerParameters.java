@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumEstimationParameters;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -60,7 +61,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    private final CoPPointName entryCoPName = CoPPointName.HEEL_COP;
    /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
    private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
-   
+
    public SmoothCMPPlannerParameters()
    {
       this(1.0);

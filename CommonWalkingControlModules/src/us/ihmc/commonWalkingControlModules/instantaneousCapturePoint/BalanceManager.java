@@ -185,7 +185,7 @@ public class BalanceManager
       }
       else
       {
-         icpPlanner = new SmoothCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
+         icpPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                    icpPlannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, yoGraphicsListRegistry);
       }
 

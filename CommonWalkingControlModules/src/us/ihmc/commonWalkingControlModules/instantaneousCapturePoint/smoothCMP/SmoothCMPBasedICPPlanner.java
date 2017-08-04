@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity;
 
+import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -38,14 +40,17 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
-
-   public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   private final FullHumanoidRobotModel fullRobotModel;
+   
+   public SmoothCMPBasedICPPlanner(FullHumanoidRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    int maxNumberOfFootstepsToConsider, int numberOfPointsPerFoot, YoVariableRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
+      this.fullRobotModel = fullRobotModel;
+      
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
@@ -80,7 +85,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
 
          referenceCoPGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters);
-         angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters((SmoothCMPPlannerParameters) icpPlannerParameters));
+         referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * 9.81);
+         //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
+         angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters(fullRobotModel, (SmoothCMPPlannerParameters) icpPlannerParameters));
          defaultSwingDurationShiftFraction.set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
       }
       else
