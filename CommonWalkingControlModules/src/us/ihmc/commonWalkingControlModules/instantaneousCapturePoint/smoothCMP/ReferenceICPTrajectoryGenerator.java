@@ -256,12 +256,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          {
             icpToolbox.computeDesiredCornerPointsDecoupled(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
 
-            if(!isDoubleSupport.getBooleanValue())
+            if(isInitialTransfer.getBooleanValue() || !isDoubleSupport.getBooleanValue())
             {
                icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
                                                             isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());               
             }
-            if(isInitialTransfer.getBooleanValue() || (useContinuousICPAdjustment.getBooleanValue() && isDoubleSupport.getBooleanValue()))
+            if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && useContinuousICPAdjustment.getBooleanValue()))
             {
                icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
                                                                                  cmpTrajectories, omega0.getDoubleValue());
@@ -277,12 +277,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          {
             icpToolbox.computeDesiredCornerPoints(icpDesiredInitialPositions, icpDesiredFinalPositions, cmpTrajectories, omega0.getDoubleValue());
             
-            if(!isDoubleSupport.getBooleanValue())
+            if(isInitialTransfer.getBooleanValue() || !isDoubleSupport.getBooleanValue())
             {
                icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
                                                             isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());               
             }
-            if(isInitialTransfer.getBooleanValue() || (useContinuousICPAdjustment.getBooleanValue() && isDoubleSupport.getBooleanValue()))
+            if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && useContinuousICPAdjustment.getBooleanValue()))
             {
                icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
                                                                                  cmpTrajectories, omega0.getDoubleValue());
