@@ -126,7 +126,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final FramePoint2d currentICP = new FramePoint2d();
    protected final FramePoint2d desiredICP = new FramePoint2d();
-   protected final FramePoint2d perfectCMP = new FramePoint2d();
+   final FramePoint2d perfectCMP = new FramePoint2d();
    protected final FrameVector2d desiredICPVelocity = new FrameVector2d();
 
    protected final SimpleICPOptimizationQPSolver solver;
