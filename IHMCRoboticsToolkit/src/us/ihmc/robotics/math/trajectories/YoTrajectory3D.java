@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
