@@ -146,7 +146,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
 
-      icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 

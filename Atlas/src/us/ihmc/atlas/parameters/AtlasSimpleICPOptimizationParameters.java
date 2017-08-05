@@ -100,7 +100,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public boolean scaleStepRegularizationWeightWithTime()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -220,12 +220,5 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    public double getBackwardReachabilityLimit()
    {
       return -0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useWarmStartInSolver()
-   {
-      return true;
    }
 }
