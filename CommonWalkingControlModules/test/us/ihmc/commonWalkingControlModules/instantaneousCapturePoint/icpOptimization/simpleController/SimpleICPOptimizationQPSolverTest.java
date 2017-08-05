@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
@@ -396,7 +396,6 @@ public class SimpleICPOptimizationQPSolverTest
       footstepLocationExpected.setX(desiredFootstepLocation.getX() + solution.get(2));
       footstepLocationExpected.setY(desiredFootstepLocation.getY() + solution.get(3));
 
-
       Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
       Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
@@ -544,153 +543,5 @@ public class SimpleICPOptimizationQPSolverTest
 
       return supportPolygon;
    }
-
-
-   private class TestICPOptimizationParameters extends ICPOptimizationParameters
-   {
-      @Override
-      public int numberOfFootstepsToConsider()
-      {
-         return 1;
-      }
-
-      @Override
-      public double getForwardFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getLateralFootstepWeight()
-      {
-         return 10.0;
-      }
-
-      @Override
-      public double getFootstepRegularizationWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getFeedbackForwardWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackLateralWeight()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getFeedbackRegularizationWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getFeedbackParallelGain()
-      {
-         return 3.0;
-      }
-
-      @Override
-      public double getFeedbackOrthogonalGain()
-      {
-         return 2.5;
-      }
-
-      @Override
-      public double getDynamicRelaxationWeight()
-      {
-         return 500.0;
-      }
-
-      @Override
-      public double getDynamicRelaxationDoubleSupportWeightModifier()
-      {
-         return 1.0;
-      }
-
-      @Override
-      public double getAngularMomentumMinimizationWeight()
-      {
-         return 50;
-      }
-
-      @Override
-      public boolean scaleStepRegularizationWeightWithTime()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean scaleFeedbackWeightWithGain()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean scaleUpcomingStepWeights()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFeedbackRegularization()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useStepAdjustment()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useAngularMomentum()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useTimingOptimization()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useFootstepRegularization()
-      {
-         return false;
-      }
-
-      @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumTimeRemaining()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getAdjustmentDeadband()
-      {
-         return 0.03;
-      }
-   }
-
 }
+
