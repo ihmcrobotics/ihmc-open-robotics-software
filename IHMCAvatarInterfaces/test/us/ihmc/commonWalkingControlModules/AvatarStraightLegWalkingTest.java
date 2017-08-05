@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -24,6 +23,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.StairsUpAndDownEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -139,6 +139,35 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      assertTrue(success);
+
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
+   @Test(timeout = 840000)
+   public void testWalkingOverStairs() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      StairsUpAndDownEnvironment stairsEnvironment = new StairsUpAndDownEnvironment();
+      //FootstepDataListMessage footsteps = generateFootstepsForStairs(stairsEnvironment.getCinderBlockPoses());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stairsEnvironment, "EndToEndCinderBlockFieldTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      //drcSimulationTestHelper.send(footsteps);
+
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+      double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
+
+      //success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10 * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
@@ -506,6 +535,33 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       SideDependentList<List<FramePose>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
 
       for (int row = 0; row < cinderBlockPoses.size(); row++)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePose cinderBlockPose = columns.get(robotSide).get(row);
+            Point3D location = new Point3D();
+            Quaternion orientation = new Quaternion();
+            cinderBlockPose.getPose(location, orientation);
+            location.setZ(location.getZ() + 0.02);
+            FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+            footsteps.add(footstep);
+         }
+      }
+
+      return footsteps;
+   }
+
+   private static FootstepDataListMessage generateFootstepsForStairs(List<List<FramePose>> stepPoses)
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      int numberOfColumns = stepPoses.get(0).size();
+
+      int indexForLeftSide = (numberOfColumns - 1) / 2;
+      int indexForRightSide = indexForLeftSide + 1;
+      SideDependentList<List<FramePose>> columns = extractColumns(stepPoses, indexForLeftSide, indexForRightSide);
+
+      for (int row = 0; row < stepPoses.size(); row++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {

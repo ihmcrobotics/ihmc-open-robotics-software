@@ -59,6 +59,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testWalkingOverCinderBlockField();
    }
 
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test(timeout = 120000)
+   public void testWalkingOverStairs() throws Exception
+   {
+      super.testWalkingOverStairs();
+   }
+
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
    public void testDropOffsWhileWalking() throws Exception
@@ -154,7 +162,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public boolean useOptimizationBasedICPController()
       {
-         return false;
+         return true;
       }
 
       @Override
@@ -407,6 +415,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testWalkingOverCinderBlockField();
+      test.testWalkingOverStairs();
    }
 }
