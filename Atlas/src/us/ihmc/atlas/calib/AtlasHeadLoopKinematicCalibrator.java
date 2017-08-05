@@ -40,6 +40,7 @@ import georegression.struct.se.Se3_F64;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -492,7 +493,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 	  
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.REAL_ROBOT, true);
 	  
       AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(robotModel);
       calib.loadData("data/armCalibratoin20131209/calibration_right");

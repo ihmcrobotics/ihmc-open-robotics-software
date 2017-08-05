@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -17,7 +18,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
 
    @Override

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -171,15 +171,15 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
          }
       }
    }
-      
+
    public DRCInverseDynamicsCalculatorTestHelper createInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
    {
       DRCRobotModel drcRobotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = drcRobotModel.createFullRobotModel();
 
       boolean createCollisionMeshes = false;
-      drcRobotModel.setEnableJointDamping(false);
-      HumanoidFloatingRootJointRobot robot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
+      boolean enableJointDamping = false;
+      HumanoidFloatingRootJointRobot robot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes, enableJointDamping);
       robot.setGravity(gravityZ);
 
       return new DRCInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);

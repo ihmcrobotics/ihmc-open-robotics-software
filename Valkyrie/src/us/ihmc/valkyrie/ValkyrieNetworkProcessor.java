@@ -6,13 +6,14 @@ import java.net.URISyntaxException;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
 
 public class ValkyrieNetworkProcessor
 {
-   private static final DRCRobotModel model = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+   private static final DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
 
    
    public static void main(String[] args) throws URISyntaxException, JSAPException

@@ -1,117 +1,78 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
+import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 
-public class AngularMomentumTrajectory implements AngularMomentumTrajectoryInterface
+public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D implements AngularMomentumTrajectoryInterface
 {
-   private List<AngularMomentumTrajectoryPoint> waypoints;
-   private List<YoFrameTrajectory3D> trajectories;
-   private YoInteger numberOfSegments;
-   private YoInteger currentSegment;
-   private int maximumNumberOfCoefficients = 4;
    private YoFrameVector momentum;
    private YoFrameVector torque;
    private YoFrameVector rotatum;
+   private YoFrameTrajectory3D torqueTrajectory;
 
    public AngularMomentumTrajectory(String namePrefix, int stepNumber, WalkingTrajectoryType type, YoVariableRegistry registry, ReferenceFrame referenceFrame,
-                                    int maxNumberOfWaypoints)
+                                    int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      trajectories = new ArrayList<>(maxNumberOfWaypoints - 1);
-      waypoints = new ArrayList<>(maxNumberOfWaypoints);
-      momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Positon", referenceFrame, registry);
+      super(namePrefix + stepNumber + type.toString() + "AngularMomentum", maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Position", referenceFrame, registry);
       torque = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Velocity", referenceFrame, registry);
       rotatum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Acceleration", referenceFrame, registry);
-      numberOfSegments = new YoInteger(namePrefix + stepNumber + type.toString() + "NumberOfSegments", registry);
-      currentSegment = new YoInteger(namePrefix + stepNumber + type.toString() + "CuurentSegment", registry);
-
-      for (int i = 0; i < maxNumberOfWaypoints; i++)
-      {
-         AngularMomentumTrajectoryPoint waypoint = new AngularMomentumTrajectoryPoint(namePrefix + "Waypoint" + i, registry, referenceFrame);
-         waypoints.add(waypoint);
-      }
-      for (int i = 0; i < maxNumberOfWaypoints - 1; i++)
-      {
-         YoFrameTrajectory3D trajectory = new YoFrameTrajectory3D(namePrefix, maximumNumberOfCoefficients, referenceFrame, registry);
-         trajectories.add(trajectory);
-      }
+      torqueTrajectory = new YoFrameTrajectory3D(namePrefix + stepNumber + type.toString() + "TorqueTrajectory", maxNumberOfCoefficients - 1, referenceFrame,
+                                                 registry);
    }
 
    @Override
    public void reset()
    {
-      momentum.setToZero();
-      torque.setToZero();
-      rotatum.setToZero();
-      for (int i = 0; i < waypoints.size(); i++)
-         waypoints.get(i).reset();
-      for (int i = 0; i < trajectories.size(); i++)
-         trajectories.get(i).reset();
-   }
-
-   @Override
-   public void update(double timeInState)
-   {
-      getCurrentSegmentFromTimeInState(timeInState);
-      trajectories.get(currentSegment.getIntegerValue()).compute(timeInState);
-   }
-
-   private void getCurrentSegmentFromTimeInState(double timeInState)
-   {
-      int index = 0;
-      for (; index < getNumberOfSegments(); index++)
-         if (trajectories.get(index).timeIntervalContains(timeInState))
-            break;
-      if(index == getNumberOfSegments())
-         currentSegment.set(-1);
-      else
-         currentSegment.set(index);
+      super.reset();
+      momentum.setToNaN();
+      torque.setToNaN();
+      rotatum.setToNaN();
    }
 
    @Override
    public void update(double timeInState, FrameVector desiredAngularMomentumToPack)
    {
       update(timeInState);
-      desiredAngularMomentumToPack.setIncludingFrame(trajectories.get(currentSegment.getIntegerValue()).getFramePosition());
+      desiredAngularMomentumToPack.setIncludingFrame(currentSegment.getFramePosition());
    }
 
    @Override
    public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack)
    {
       update(timeInState, desiredAngularMomentumToPack);
-      desiredTorqueToPack.setIncludingFrame(trajectories.get(currentSegment.getIntegerValue()).getFrameVelocity());
+      desiredTorqueToPack.setIncludingFrame(currentSegment.getFrameVelocity());
    }
 
    @Override
-   public List<YoFrameTrajectory3D> getPolynomials()
+   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
    {
-      return trajectories;
-   }
-
-   public void set(List<AngularMomentumTrajectoryPoint> samplePoints)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   public void computeFromCoPWaypoints(double t0, double tFinal, FramePoint zInitial, FramePoint zRefPoint1, FramePoint zRefPoint2, FramePoint zFinal)
-   {
-      trajectories.get(0).setCubicBezier(t0, tFinal, zInitial, zRefPoint1, zRefPoint2, zFinal);
-      numberOfSegments.set(1);
+      update(timeInState, desiredAngularMomentumToPack, desiredTorqueToPack);
+      desiredRotatumToPack.setIncludingFrame(currentSegment.getFrameAcceleration());
    }
 
    @Override
-   public int getNumberOfSegments()
+   public void set(YoFrameTrajectory3D computedAngularMomentumTrajectory)
    {
-      return numberOfSegments.getIntegerValue();
+      segments.get(getNumberOfSegments()).set(computedAngularMomentumTrajectory);
+      numberOfSegments.increment();
    }
 
+   public void set(double t0, double tFinal, FramePoint z0, FramePoint zf)
+   {
+      segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
+      numberOfSegments.increment();
+   }
+
+   public YoFrameTrajectory3D getTorqueTrajectory(int segmentIndex)
+   {
+      segments.get(segmentIndex).getDerivative(torqueTrajectory);
+      return torqueTrajectory;
+   }
 }

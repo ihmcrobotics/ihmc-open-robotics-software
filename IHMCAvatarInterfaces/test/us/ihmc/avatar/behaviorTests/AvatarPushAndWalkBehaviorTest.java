@@ -46,7 +46,7 @@ public abstract class AvatarPushAndWalkBehaviorTest implements MultiRobotTestInt
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      PushAndWalkBehavior pushAndWalkBehavior = new PushAndWalkBehavior(communicationBridge, referenceFrames, walkingControllerParameters, null);
+      PushAndWalkBehavior pushAndWalkBehavior = new PushAndWalkBehavior(communicationBridge, referenceFrames, fullRobotModel, walkingControllerParameters, null);
       scs.addYoVariableRegistry(pushAndWalkBehavior.getYoVariableRegistry());
 
       drcBehaviorTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 1.0), new Point3D(10.0, 10.0, 3.0));
