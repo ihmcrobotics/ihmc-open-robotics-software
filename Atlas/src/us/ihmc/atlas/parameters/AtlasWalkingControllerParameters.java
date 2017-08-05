@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -82,6 +83,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final LeapOfFaithParameters leapOfFaithParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
 
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -103,6 +105,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       leapOfFaithParameters = new LeapOfFaithParameters();
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
+      icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1274,4 +1277,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return swingTrajectoryParameters;
    }
 
+   @Override
+   public ICPOptimizationParameters getSimpleICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
+   }
 }

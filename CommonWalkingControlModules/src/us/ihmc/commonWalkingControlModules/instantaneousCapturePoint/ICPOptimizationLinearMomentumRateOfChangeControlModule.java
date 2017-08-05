@@ -68,12 +68,17 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
       else
       {
-         /*
-         icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-               */
-         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-                                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         if (walkingControllerParameters.getSimpleICPOptimizationParameters() != null && icpOptimizationParameters.useSimpleOptimization())
+         {
+            icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, contactableFeet,
+                                                                                      controlDT, registry, yoGraphicsListRegistry);
+         }
+         else
+         {
+            icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+                                                                                bipedSupportPolygons, contactableFeet, controlDT, registry,
+                                                                                yoGraphicsListRegistry);
+         }
       }
    }
 

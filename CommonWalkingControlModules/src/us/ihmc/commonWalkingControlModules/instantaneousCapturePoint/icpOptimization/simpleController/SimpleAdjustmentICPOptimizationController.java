@@ -20,17 +20,21 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
+   public SimpleAdjustmentICPOptimizationController(WalkingControllerParameters walkingControllerParameters,
+                                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                                    double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSimpleICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, contactableFeet, controlDT,
+           parentRegistry, yoGraphicsListRegistry);
+   }
+
    public SimpleAdjustmentICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
                                                     BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                                     double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
 
-      if (walkingControllerParameters != null)
-         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
-      else
-         swingSpeedUpEnabled.set(false);
-
+      swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
       parentRegistry.addChild(registry);
    }
 
