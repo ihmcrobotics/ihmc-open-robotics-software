@@ -2,6 +2,8 @@ package us.ihmc.robotics.dataStructures;
 
 import us.ihmc.robotics.MathTools;
 
+import java.util.List;
+
 /**
  *   Complex implements a complex number and defines complex
  *   arithmetic and mathematical functions
@@ -12,7 +14,33 @@ import us.ihmc.robotics.MathTools;
  */
 public class ComplexNumber
 {
-   private final double real, imag;
+   private static final double TAU = Math.PI * 2.0;
+   private double real, imag;
+
+   public static ComplexNumber[] getComplexArray(int n)
+   {
+      ComplexNumber[] tempComplex = new ComplexNumber[n];
+      for (int i = 0; i < tempComplex.length; i++)
+         tempComplex[i] = new ComplexNumber();
+      return tempComplex;
+   }
+
+   public static void copyComplexArray(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
+   {
+      if (arrayToPack.length < arrayToCopy.length)
+         throw new RuntimeException("Insufficient size for copying complex number array");
+      int index = 0;
+      for (; index < arrayToCopy.length; index++)
+         arrayToPack[index].set(arrayToCopy[index]);
+
+      for (; index < arrayToPack.length; index++)
+         arrayToPack[index].set(0.0, 0.0);
+   }
+
+   public ComplexNumber()
+   {
+      this(0, 0);
+   }
 
    /**
     *   Constructs the complex number z = u + i*v
@@ -30,6 +58,46 @@ public class ComplexNumber
       this.real = complexNumber.real;
       this.imag = complexNumber.imag;
    }
+
+   public void set(double real, double imag)
+   {
+      this.real = real;
+      this.imag = imag;
+   }
+
+   public void set(ComplexNumber other)
+   {
+      set(other.real, other.imag);
+   }
+
+   public void setReal(double real)
+   {
+      this.real = real;
+   }
+
+   public void setImaginary(double imag)
+   {
+      this.imag = imag;
+   }
+
+   public void setToPurelyReal(double real)
+   {
+      this.real = real;
+      this.imag = 0;
+   }
+
+   public void setFromEuler(double magnitude, double argument)
+   {
+      this.real = magnitude * Math.cos(argument);
+      this.imag = magnitude * Math.sin(argument);
+   }
+
+   public void setToZero()
+   {
+      this.real = 0.0;
+      this.imag = 0.0;
+   }
+
 
    /**
     *      Real part of this Complex number
@@ -109,12 +177,33 @@ public class ComplexNumber
     */
    public ComplexNumber plus(ComplexNumber w)
    {
-      return new ComplexNumber(real + w.real(), imag + w.imag());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.plusAndStore(w);
+      return complexNumber;
+   }
+
+   public void plusAndStore(ComplexNumber c1, ComplexNumber c2)
+   {
+      set(c1);
+      plusAndStore(c2);
+   }
+
+   public void plusAndStore(ComplexNumber other)
+   {
+      plusAndStore(other.real, other.imag);
+   }
+
+   public void plusAndStore(double real, double imag)
+   {
+      this.real += real;
+      this.imag += imag;
    }
 
    public ComplexNumber plus(double d)
    {
-      return new ComplexNumber(real + d, imag);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.plusAndStore(d, 0.0);
+      return complexNumber;
    }
 
    /**
@@ -125,14 +214,34 @@ public class ComplexNumber
     */
    public ComplexNumber minus(ComplexNumber w)
    {
-      return new ComplexNumber(real - w.real(), imag - w.imag());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.minusAndStore(w);
+      return complexNumber;
    }
 
    public ComplexNumber minus(double d)
    {
-      return new ComplexNumber(real - d, imag);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.minusAndStore(d, 0.0);
+      return complexNumber;
    }
 
+   public void minusAndStore(ComplexNumber c1, ComplexNumber c2)
+   {
+      set(c1);
+      minusAndStore(c2);
+   }
+
+   public void minusAndStore(ComplexNumber other)
+   {
+      minusAndStore(other.real, other.imag);
+   }
+
+   public void minusAndStore(double real, double imag)
+   {
+      this.real -= real;
+      this.imag -= imag;
+   }
    /**
     *   ComplexNumber multiplication (doesn't change this ComplexNumber).
     *   @param w is the number to multiply by.
@@ -140,7 +249,9 @@ public class ComplexNumber
     */
    public ComplexNumber times(ComplexNumber w)
    {
-      return new ComplexNumber(real * w.real() - imag * w.imag(), real * w.imag() + imag * w.real());
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.timesAndStore(w);
+      return complexNumber;
    }
 
 
@@ -151,7 +262,33 @@ public class ComplexNumber
     */
    public ComplexNumber times(double w)
    {
-      return new ComplexNumber(real * w, imag * w);
+      ComplexNumber complexNumber = new ComplexNumber(this);
+      complexNumber.timesAndStore(w, 0.0);
+      return complexNumber;
+   }
+
+
+   /**
+    *   ComplexNumber multiplication.
+    *   @param w is the number to multiply by.
+    *   @return z*w where z is this ComplexNumber.
+    */
+   public void timesAndStore(ComplexNumber other)
+   {
+      this.timesAndStore(other.real, other.imag);
+   }
+
+   public void timesAndStore(double real, double imag)
+   {
+      double tempVal1 = this.real * real - this.imag * imag;
+      this.imag = this.real * imag + real * this.imag;
+      this.real = tempVal1;
+   }
+
+   public void timesAndStore(ComplexNumber c1, ComplexNumber c2)
+   {
+      set(c1);
+      timesAndStore(c2);
    }
 
    /**
@@ -165,6 +302,12 @@ public class ComplexNumber
       double den = MathTools.square(w.magnitude());
       
       return new ComplexNumber((real * w.real() + imag * w.imag()) / den, (imag * w.real() - real * w.imag()) / den);
+   }
+
+   public void scale(double scalar)
+   {
+      this.real *= scalar;
+      this.imag *= scalar;
    }
 
    /**
@@ -297,6 +440,22 @@ public class ComplexNumber
       return true;
    }
 
+   public void getRoots(ComplexNumber root1, ComplexNumber root2)
+   {
+      double tempVal1 = Math.sqrt(magnitude());
+      double tempVal2 = angle();
+      root1.setFromEuler(tempVal1, tempVal2 / 2.0);
+      root2.setFromEuler(tempVal1, (tempVal2 + 2.0 * Math.PI) / 2.0);
+   }
+
+   public void getRoots(List<ComplexNumber> rootsToPack, int n)
+   {
+      double tempVal1 = Math.pow(magnitude(), 1.0 / n);
+      double tempVal2 = angle() / n;
+      for (int i = 0; i < n; i++)
+         rootsToPack.get(i).setFromEuler(tempVal1, tempVal2 + ((double) TAU * i) / (double) n);
+   }
+
    /**
     *   String representation of this ComplexNumber.
     *   @return x+i*y, x-i*y, x, or i*y as appropriate.
@@ -327,8 +486,4 @@ public class ComplexNumber
       return real + " + i*" + imag;
 
    }
-
-
-
-
 }

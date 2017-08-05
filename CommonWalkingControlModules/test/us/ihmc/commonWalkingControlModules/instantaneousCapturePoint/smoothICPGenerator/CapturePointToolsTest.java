@@ -3,13 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -381,94 +378,6 @@ public class CapturePointToolsTest
             p1.set(capturePointsToPack.get(i + 1).getFramePoint2dCopy());
             boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
             assertTrue(isPointOnLine);
-         }
-      }
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testComputeDesiredCornerPointsFromCMPPolynomials()
-   {
-      double omega0 = 3.4;
-      int numberOfCoPWaypoints = 8;
-      int numberOfCoefficients = 2;
-      String namePrefix = "cmpPolynomial";
-      
-      double t0 = 0.0;
-      double tFinal = 0.8;    
-
-      ArrayList<FramePoint> copsToPack = new ArrayList<FramePoint>();
-      List<YoFrameTrajectory3D> cmpPolynomials3D = new ArrayList<YoFrameTrajectory3D>();
-      
-      ArrayList<FramePoint> entryCornerPointsToPack = new ArrayList<FramePoint>();
-      ArrayList<FramePoint> exitCornerPointsToPack = new ArrayList<FramePoint>();
-      
-      ArrayList<FramePoint> entryCornerPointsToPackDecoupled = new ArrayList<FramePoint>();
-      ArrayList<FramePoint> exitCornerPointsToPackDecoupled = new ArrayList<FramePoint>();
-      
-      ArrayList<FramePoint> entryCornerPointsByHandToPack = new ArrayList<FramePoint>();
-      ArrayList<FramePoint> exitCornerPointsByHandToPack = new ArrayList<FramePoint>();
-
-      for (int i = 0; i < numberOfCoPWaypoints; i++)
-      {
-         copsToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-      }
-      for (int i = 0; i < numberOfCoPWaypoints-1; i++)
-      {
-         entryCornerPointsToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         
-         entryCornerPointsToPackDecoupled.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsToPackDecoupled.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         
-         entryCornerPointsByHandToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         exitCornerPointsByHandToPack.add(new FramePoint(ReferenceFrame.getWorldFrame()));
-         
-         cmpPolynomials3D.add(new YoFrameTrajectory3D(namePrefix + Integer.toString(i), numberOfCoefficients, ReferenceFrame.getWorldFrame(), registry));
-      }
-
-      for (int j = 0; j < nTests; j++)
-      {
-         for (int i = 0; i < numberOfCoPWaypoints; i++)
-         {
-            FramePoint cop = new FramePoint(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-            copsToPack.set(i, cop);
-         }
-         for (int i = 0; i < numberOfCoPWaypoints-1; i++)
-         {
-            YoFrameTrajectory3D cmpPolynomial3D = new YoFrameTrajectory3D(namePrefix + j + i, numberOfCoefficients, ReferenceFrame.getWorldFrame(), registry);
-            cmpPolynomial3D.setLinear(t0, tFinal, copsToPack.get(i), copsToPack.get(i+1));
-            cmpPolynomials3D.set(i, cmpPolynomial3D);
-         }
-         CapturePointTools.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
-         CapturePointTools.computeDesiredCornerPointsDecoupled(entryCornerPointsToPackDecoupled, exitCornerPointsToPackDecoupled, cmpPolynomials3D, omega0);
-         
-         exitCornerPointsByHandToPack.set(exitCornerPointsByHandToPack.size()-1, copsToPack.get(copsToPack.size()-1));
-         for(int i = numberOfCoPWaypoints-2; i >= 0; i--)
-         {
-            double time = 0.0;
-            FramePoint newEntryICP = new FramePoint(ReferenceFrame.getWorldFrame());
-            SmoothCapturePointToolsTest.calculateICPPositionByHand3DLinear(omega0, time, cmpPolynomials3D.get(i), exitCornerPointsByHandToPack.get(i), newEntryICP);
-            entryCornerPointsByHandToPack.set(i, newEntryICP);
-            if(i > 0)
-            {
-               exitCornerPointsByHandToPack.set(i-1, newEntryICP);
-            }
-         }
-//         PrintTools.debug("Test " + j + ":");
-//         PrintTools.debug("Entry Calc: " + entryCornerPointsToPack.toString());
-//         PrintTools.debug("Entry Hand: " + entryCornerPointsByHandToPack.toString());
-//         PrintTools.debug("Exit Calc: " + exitCornerPointsToPack.toString());
-//         PrintTools.debug("Exit Hand: " + exitCornerPointsByHandToPack.toString());
-//         PrintTools.debug("");
-         
-         for(int i = 0; i < numberOfCoefficients-1; i++)
-         {
-            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsByHandToPack.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
-            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsByHandToPack.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
-            
-            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsToPackDecoupled.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
-            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsToPackDecoupled.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
          }
       }
    }
