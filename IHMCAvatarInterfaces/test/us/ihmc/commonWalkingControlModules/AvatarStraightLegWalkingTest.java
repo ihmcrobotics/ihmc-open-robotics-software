@@ -641,8 +641,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
 
       // closing step
-      yPosition = stepWidth / 2.0;
-      yPosition = robotSide.negateIfRightSide(yPosition);
+      yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
       FramePose landingPose = new FramePose();
       double forwardLocation = footsteps.get(footsteps.size() - 1).getLocation().getX();
@@ -686,19 +685,33 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          stepPosition += stepLength;
          yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-         stepPose = new FramePose();
-         stepPose.setX(stepPosition);
-         stepPose.setY(yPosition);
-         stepPose.setZ(0.0);
+         FramePose exitPose = new FramePose();
+         exitPose.setX(stepPosition);
+         exitPose.setY(yPosition);
+         exitPose.setZ(0.0);
 
-         location = new Point3D();
-         orientation = new Quaternion();
-         stepPose.getPose(location, orientation);
-         footstep = new FootstepDataMessage(robotSide, location, orientation);
-         footsteps.add(footstep);
+         Point3D exitLocation = new Point3D();
+         Quaternion exitOrientation = new Quaternion();
+         exitPose.getPose(exitLocation, exitOrientation);
+         FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitLocation, exitOrientation);
+         footsteps.add(exitFootstep);
 
          robotSide = robotSide.getOppositeSide();
       }
+
+      // closing footstep
+      yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+
+      FramePose exitPose = new FramePose();
+      double exitLocation = footsteps.get(footsteps.size() - 1).getLocation().getX();
+      exitPose.setX(exitLocation);
+      exitPose.setY(yPosition);
+
+      Point3D exitPosition = new Point3D();
+      Quaternion exitOrientation = new Quaternion();
+      exitPose.getPose(exitPosition, exitOrientation);
+      FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitPosition, exitOrientation);
+      footsteps.add(exitFootstep);
 
       return footsteps;
    }
