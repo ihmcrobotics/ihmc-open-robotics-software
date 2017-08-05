@@ -25,6 +25,9 @@ public class SimpleICPOptimizationQPSolver
 
    private static final double deltaInside = 0.0001;
 
+   private static final int maxNumberOfIterations = 3;
+   private static final double convergenceThreshold = 1.0e-34;
+
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final SimpleICPQPIndexHandler indexHandler;
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
@@ -220,6 +223,14 @@ public class SimpleICPOptimizationQPSolver
       footstepCostToGo = new DenseMatrix64F(1, 1);
       feedbackCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
+
+      solver.setConvergenceThreshold(convergenceThreshold);
+      solver.setMaxNumberOfIterations(maxNumberOfIterations);
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      solver.setMaxNumberOfIterations(maxNumberOfIterations);
    }
 
    /**
@@ -352,6 +363,18 @@ public class SimpleICPOptimizationQPSolver
       footstepWeight.zero();
 
       hasFootstepRegularizationTerm = false;
+   }
+
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
+    *
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param weight weight on tracking the reference footstep location in the solver.
+    */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint2d referenceFootstepLocation)
+   {
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
    }
 
    /**
