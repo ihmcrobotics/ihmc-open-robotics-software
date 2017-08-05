@@ -150,24 +150,24 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       StairsUpAndDownEnvironment stairsEnvironment = new StairsUpAndDownEnvironment();
-      //FootstepDataListMessage footsteps = generateFootstepsForStairs(stairsEnvironment.getCinderBlockPoses());
+      FootstepDataListMessage footsteps = generateFootstepsForStairs(stairsEnvironment.getStairPoses());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(stairsEnvironment, "EndToEndCinderBlockFieldTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       assertTrue(success);
 
-      //drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.send(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      //success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10 * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      //success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10 * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
@@ -555,24 +555,149 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      int numberOfColumns = stepPoses.get(0).size();
+      double stepWidth = 0.275;
+      int numberOfStartingSteps = 7;
+      double firstStepPosition = stepPoses.get(0).get(0).getX();
+      double startingLength = (firstStepPosition - 0.35)  / numberOfStartingSteps;
 
-      int indexForLeftSide = (numberOfColumns - 1) / 2;
-      int indexForRightSide = indexForLeftSide + 1;
-      SideDependentList<List<FramePose>> columns = extractColumns(stepPoses, indexForLeftSide, indexForRightSide);
-
-      for (int row = 0; row < stepPoses.size(); row++)
+      // approach the stairs
+      RobotSide robotSide = RobotSide.LEFT;
+      for (int stepIndex = 0; stepIndex < numberOfStartingSteps; stepIndex++)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            FramePose cinderBlockPose = columns.get(robotSide).get(row);
+            double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+
+            FramePose stepPose = new FramePose();
+            stepPose.setX(startingLength * (stepIndex + 1));
+            stepPose.setY(yPosition);
+
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
-            cinderBlockPose.getPose(location, orientation);
-            location.setZ(location.getZ() + 0.02);
+            stepPose.getPose(location, orientation);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      // closing step
+      double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+
+      FramePose stepPose = new FramePose();
+      stepPose.setX(startingLength * numberOfStartingSteps);
+      stepPose.setY(yPosition);
+
+      Point3D location = new Point3D();
+      Quaternion orientation = new Quaternion();
+      stepPose.getPose(location, orientation);
+      FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+      footsteps.add(footstep);
+
+      // ascend the stairs
+      List<FramePose> stepUpPoses = stepPoses.get(0);
+      for (int row = 0; row < stepUpPoses.size(); row++)
+      {
+         for (RobotSide stepSide : RobotSide.values)
+         {
+            yPosition = stepSide.negateIfRightSide(stepWidth / 2.0);
+            FramePose stairPose = stepUpPoses.get(row);
+            stairPose.setY(yPosition);
+
+            Point3D stairLocation = new Point3D();
+            Quaternion stairOrientation = new Quaternion();
+            stairPose.getPose(stairLocation, stairOrientation);
+
+            FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
+            footsteps.add(stepFootstep);
          }
+      }
+
+      FramePose lastStepGoingUpStairs = stepPoses.get(0).get(stepPoses.get(0).size() - 1);
+      double topOfStairs = lastStepGoingUpStairs.getX();
+      double startOfAscent = stepPoses.get(1).get(0).getX() - 0.35;
+      double platformWidth = startOfAscent - topOfStairs;
+
+      int numberOfPlatformSteps = 3;
+      double platformStepLength = (platformWidth)  / numberOfPlatformSteps;
+
+      // approach the top of the stairs
+      robotSide = RobotSide.LEFT;
+      for (int stepIndex = 0; stepIndex < numberOfPlatformSteps; stepIndex++)
+      {
+         yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+
+         FramePose landingPose = new FramePose();
+         landingPose.setX(platformStepLength * (stepIndex + 1) + topOfStairs);
+         landingPose.setY(yPosition);
+         landingPose.setZ(lastStepGoingUpStairs.getZ());
+
+         Point3D stepLocation = new Point3D();
+         Quaternion stepOrientation = new Quaternion();
+         landingPose.getPose(stepLocation, stepOrientation);
+         FootstepDataMessage stepMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
+         footsteps.add(stepMessage);
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+
+      // closing step
+      yPosition = stepWidth / 2.0;
+      yPosition = robotSide.negateIfRightSide(yPosition);
+
+      FramePose landingPose = new FramePose();
+      double forwardLocation = footsteps.get(footsteps.size() - 1).getLocation().getX();
+      landingPose.setX(forwardLocation);
+      landingPose.setY(yPosition);
+      landingPose.setZ(lastStepGoingUpStairs.getZ());
+
+      Point3D stepLocation = new Point3D();
+      Quaternion stepOrientation = new Quaternion();
+      landingPose.getPose(stepLocation, stepOrientation);
+      FootstepDataMessage landingMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
+      footsteps.add(landingMessage);
+
+      // descend the stairs
+      List<FramePose> stepDownPoses = stepPoses.get(1);
+      for (int row = 0; row < stepDownPoses.size(); row++)
+      {
+         for (RobotSide stepSide : RobotSide.values)
+         {
+            yPosition = stepSide.negateIfRightSide(stepWidth / 2.0);
+            FramePose stairPose = stepDownPoses.get(row);
+            stairPose.setY(yPosition);
+
+            Point3D stairLocation = new Point3D();
+            Quaternion stairOrientation = new Quaternion();
+            stairPose.getPose(stairLocation, stairOrientation);
+
+            FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
+            footsteps.add(stepFootstep);
+         }
+      }
+
+      // exit steps
+      double stepLength = 0.35;
+      int numberOfExitSteps = 4;
+      double stepPosition = footsteps.get(footsteps.size() - 1).getLocation().getX();
+
+      robotSide = RobotSide.LEFT;
+      for (int stepIndex = 0; stepIndex < numberOfExitSteps; stepIndex++)
+      {
+         stepPosition += stepLength;
+         yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
+
+         stepPose = new FramePose();
+         stepPose.setX(stepPosition);
+         stepPose.setY(yPosition);
+         stepPose.setZ(0.0);
+
+         location = new Point3D();
+         orientation = new Quaternion();
+         stepPose.getPose(location, orientation);
+         footstep = new FootstepDataMessage(robotSide, location, orientation);
+         footsteps.add(footstep);
+
+         robotSide = robotSide.getOppositeSide();
       }
 
       return footsteps;

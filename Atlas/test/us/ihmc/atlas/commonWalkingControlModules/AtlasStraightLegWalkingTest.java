@@ -342,7 +342,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 5.0;
+         return 3.0;
       }
 
       @Override
@@ -374,7 +374,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public Vector3D getPelvisAngularWeight()
       {
-         return new Vector3D(7.0, 5.0, 5.0);
+         return new Vector3D(5.0, 5.0, 5.0);
       }
    }
 
