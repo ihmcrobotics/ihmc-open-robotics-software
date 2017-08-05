@@ -49,7 +49,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final YoBoolean scaleUpcomingStepWeights = new YoBoolean(yoNamePrefix + "ScaleUpcomingStepWeights", registry);
 
    protected final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
-   protected final YoBoolean isInTransfer = new YoBoolean(yoNamePrefix + "IsInTransfer", registry);
+   protected final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
 
    protected final ArrayList<YoDouble> swingDurations = new ArrayList<>();
    protected final ArrayList<YoDouble> transferDurations = new ArrayList<>();
@@ -291,65 +291,12 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    @Override
    public abstract void initializeForStanding(double initialTime);
-   /*
-   @Override
-   public void initializeForStanding(double initialTime)
-   {
-      this.initialTime.set(initialTime);
-      isStanding.set(true);
-      isInTransfer.set(false);
-
-      localUseStepAdjustment = useStepAdjustment.getBooleanValue();
-      localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
-
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
-
-      transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
-
-      speedUpTime.set(0.0);
-   }
-   */
 
    @Override
    public abstract void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0);
 
-   /*
-   @Override
-   public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
-   {
-      this.transferToSide.set(transferToSide);
-      isInTransfer.set(true);
-
-      int numberOfFootstepRegistered = upcomingFootsteps.size();
-      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-
-      initializeOnContactChange(initialTime);
-
-      copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
-   }
-   */
-
    @Override
    public abstract void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0);
-   /*
-   @Override
-   public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
-   {
-      this.supportSide.set(supportSide);
-      isStanding.set(false);
-      isInTransfer.set(false);
-
-      int numberOfFootstepRegistered = upcomingFootsteps.size();
-      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-
-      initializeOnContactChange(initialTime);
-
-      copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
-   }
-   */
 
    protected void initializeOnContactChange(double initialTime)
    {
@@ -371,7 +318,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    {
       int numberOfFootstepsToConsider = Math.min(1, upcomingFootsteps.size());
 
-      if (!localUseStepAdjustment || isInTransfer.getBooleanValue() || isStanding.getBooleanValue())
+      if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
          numberOfFootstepsToConsider = 0;
 
       return numberOfFootstepsToConsider;
@@ -412,44 +359,6 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    @Override
    public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
-   /*
-   {
-      controllerTimer.startMeasurement();
-
-      desiredICP.changeFrame(worldFrame);
-      desiredICPVelocity.changeFrame(worldFrame);
-      currentICP.changeFrame(worldFrame);
-
-      this.currentICP.set(currentICP);
-      this.desiredICP.set(desiredICP);
-      this.desiredICPVelocity.set(desiredICPVelocity);
-
-      this.icpError.set(currentICP);
-      this.icpError.sub(desiredICP);
-
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, perfectCMP);
-
-      computeTimeInCurrentState(currentTime);
-      computeTimeRemainingInState();
-
-      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem();
-
-      scaleStepRegularizationWeightWithTime();
-      scaleFeedbackWeightWithGain();
-
-      submitSolverTaskConditions(numberOfFootstepsToConsider, omega0);
-
-      qpSolverTimer.startMeasurement();
-      NoConvergenceException noConvergenceException = solveQP();
-      qpSolverTimer.stopMeasurement();
-
-      extractSolutionsFromSolver(numberOfFootstepsToConsider, noConvergenceException);
-
-      modifyAngularMomentumWeightUsingIntegral();
-
-      controllerTimer.stopMeasurement();
-   }
-   */
 
    @Override
    public void setFinalTransferSplitFractionToDefault()
@@ -469,7 +378,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected int submitSolverTaskConditions(int numberOfFootstepsToConsider, double omega0)
    {
-      if (isInTransfer.getBooleanValue())
+      if (isInDoubleSupport.getBooleanValue())
       {
          copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       }
@@ -480,7 +389,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
       solver.resetFootstepConditions();
 
-      if (localUseStepAdjustment && !isInTransfer.getBooleanValue())
+      if (localUseStepAdjustment && !isInDoubleSupport.getBooleanValue())
       {
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider, omega0);
          reachabilityConstraintHandler.updateReachabilityConstraint(solver);
@@ -524,7 +433,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          if (localScaleUpcomingStepWeights)
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-         double footstepMultiplier = Math.exp(-omega0 * timeRemainingInState.getDoubleValue());
+         double recursionTime = timeRemainingInState.getDoubleValue() + 0.5 * transferDurations.get(1).getDoubleValue();
+         double footstepMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(footstepMultiplier);
 
          solver.setFootstepAdjustmentConditions(footstepMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
@@ -608,7 +518,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       }
       else
       {
-         if (isInTransfer.getBooleanValue())
+         if (isInDoubleSupport.getBooleanValue())
             timeRemainingInState.set(transferDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue());
          else
             timeRemainingInState.set(swingDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue());

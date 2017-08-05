@@ -39,7 +39,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    {
       this.initialTime.set(initialTime);
       isStanding.set(true);
-      isInTransfer.set(false);
+      isInDoubleSupport.set(true);
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
@@ -56,7 +56,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
    {
       this.transferToSide.set(transferToSide);
-      isInTransfer.set(true);
+      isInDoubleSupport.set(true);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
@@ -72,7 +72,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    {
       this.supportSide.set(supportSide);
       isStanding.set(false);
-      isInTransfer.set(false);
+      isInDoubleSupport.set(false);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
@@ -141,8 +141,8 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    {
       if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
       {
-         //double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         //this.speedUpTime.add(speedUpTime);
+         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
+         this.speedUpTime.add(speedUpTime);
       }
    }
 
