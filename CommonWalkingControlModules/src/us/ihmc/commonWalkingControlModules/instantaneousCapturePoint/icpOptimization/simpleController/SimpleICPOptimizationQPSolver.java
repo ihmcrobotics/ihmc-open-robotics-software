@@ -163,7 +163,20 @@ public class SimpleICPOptimizationQPSolver
       this(icpOptimizationParameters, maximumNumberOfCMPVertices, computeCostToGo, true);
    }
 
+
    public SimpleICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+                                        boolean autoSetPreviousSolution)
+   {
+      this(icpOptimizationParameters.getMinimumFootstepWeight(), icpOptimizationParameters.getMinimumFeedbackWeight(), maximumNumberOfCMPVertices,
+           computeCostToGo, autoSetPreviousSolution);
+   }
+
+   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   {
+      this(minimumFootstepWeight, minimumFeedbackWeight, maximumNumberOfCMPVertices, computeCostToGo, true);
+   }
+
+   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo,
                                         boolean autoSetPreviousSolution)
    {
       this.computeCostToGo = computeCostToGo;
@@ -172,8 +185,8 @@ public class SimpleICPOptimizationQPSolver
       indexHandler = new SimpleICPQPIndexHandler();
       inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
 
-      minimumFootstepWeight = icpOptimizationParameters.getMinimumFootstepWeight();
-      minimumFeedbackWeight = icpOptimizationParameters.getMinimumFeedbackWeight();
+      this.minimumFootstepWeight = minimumFootstepWeight;
+      this.minimumFeedbackWeight = minimumFeedbackWeight;
 
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
@@ -512,6 +525,11 @@ public class SimpleICPOptimizationQPSolver
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
    public void compute(YoFrameVector2d currentICPError, FramePoint2d perfectCMP) throws NoConvergenceException
+   {
+      compute(currentICPError.getFrameTuple2d(), perfectCMP);
+   }
+
+   public void compute(FrameVector2d currentICPError, FramePoint2d perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
