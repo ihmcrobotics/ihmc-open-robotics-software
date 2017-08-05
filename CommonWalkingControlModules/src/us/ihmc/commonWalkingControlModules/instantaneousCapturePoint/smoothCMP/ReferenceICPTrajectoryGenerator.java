@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -275,20 +276,18 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    public void adjustDesiredTrajectoriesForInitialSmoothing()
    {
-      if(isInitialTransfer.getBooleanValue())
+      if(isInitialTransfer.getBooleanValue() || !isDoubleSupport.getBooleanValue())
       {
-         if(isInitialTransfer.getBooleanValue() || !isDoubleSupport.getBooleanValue())
-         {
-            icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
-                                                         isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());               
-         }
-         if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && useContinuousICPAdjustment.getBooleanValue()))
-         {
-            icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
-                                                                              cmpTrajectories, omega0.getDoubleValue());
-         }
-         reset();
+         icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
+                                                      isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());       
+         PrintTools.debug("Hello");
       }
+      if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && useContinuousICPAdjustment.getBooleanValue()))
+      {
+         icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
+                                                                           cmpTrajectories, omega0.getDoubleValue());
+      }
+      reset();
    }
    
    public void initializeCenterOfMass()
