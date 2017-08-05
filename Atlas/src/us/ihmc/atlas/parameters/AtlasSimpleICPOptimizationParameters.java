@@ -3,11 +3,11 @@ package us.ihmc.atlas.parameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
+public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
 
-   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   public AtlasSimpleICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
@@ -23,14 +23,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 10.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 10.0;
    }
 
    /** {@inheritDoc} */
@@ -44,7 +44,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.05;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */

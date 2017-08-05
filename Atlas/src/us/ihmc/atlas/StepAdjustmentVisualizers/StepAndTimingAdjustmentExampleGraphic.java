@@ -1444,30 +1444,6 @@ public class StepAndTimingAdjustmentExampleGraphic
             return 0.001;
          }
 
-         @Override
-         public double getDoubleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
          @Override public double getAdjustmentDeadband()
          {
             return 0.03;
