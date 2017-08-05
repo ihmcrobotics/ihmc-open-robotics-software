@@ -121,7 +121,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.008;
 

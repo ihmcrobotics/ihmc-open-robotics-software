@@ -3,7 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -63,8 +66,9 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
    private final YoDouble minimumTimeRemaining = new YoDouble(yoNamePrefix + "MinimumTimeRemaining", registry);
 
-   protected final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "IcpError", "", worldFrame, registry);
+   protected final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
    protected final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   protected final YoFramePoint2d endOfStateICP = new YoFramePoint2d(yoNamePrefix + "EndOfStateICP", worldFrame, registry);
 
    protected final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    protected final YoFrameVector2d cmpCoPDifferenceSolution = new YoFrameVector2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
@@ -132,6 +136,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final SimpleICPOptimizationQPSolver solver;
 
    protected final double controlDT;
+   protected final double dynamicRelaxationDoubleSupportWeightModifier;
 
    public AbstractSimpleICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
                                                   SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
@@ -141,6 +146,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       this.contactableFeet = contactableFeet;
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
+      dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
       useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
@@ -189,11 +195,28 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       boolean updateRegularizationAutomatically = true;
       solver = new SimpleICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
-      solutionHandler = new SimpleICPOptimizationSolutionHandler(icpOptimizationParameters, DEBUG, yoNamePrefix, registry, yoGraphicsListRegistry);
+      solutionHandler = new SimpleICPOptimizationSolutionHandler(icpOptimizationParameters, DEBUG, yoNamePrefix, registry);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
+
+      setupVisualizers(yoGraphicsListRegistry);
+   }
+
+   public void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", endOfStateICP, 0.01, YoAppearance.MidnightBlue(),
+                                                                       YoGraphicPosition.GraphicType.SOLID_BALL);
+      solutionHandler.setupVisualizers(artifactList);
+
+      artifactList.add(predictedEndOfStateICP.createArtifact());
+      artifactList.setVisible(VISUALIZE);
+
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+
    }
 
    @Override
@@ -376,7 +399,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    @Override
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   protected int submitSolverTaskConditions(int numberOfFootstepsToConsider, double omega0)
+   protected int submitSolverTaskConditions(FramePoint2d desiredICP, FramePoint2d perfectCMP, int numberOfFootstepsToConsider, double omega0)
    {
       if (isInDoubleSupport.getBooleanValue())
       {
@@ -406,6 +429,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
+      if (isInDoubleSupport.getBooleanValue())
+         dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.resetFeedbackConditions();
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), tempVector2d.getX(), tempVector2d.getY(), dynamicRelaxationWeight);
@@ -434,8 +459,14 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
          double recursionTime = timeRemainingInState.getDoubleValue() + 0.5 * transferDurations.get(1).getDoubleValue();
-         double footstepMultiplier = Math.exp(-omega0 * recursionTime);
-         this.footstepMultiplier.set(footstepMultiplier);
+         double recursionMultiplier = Math.exp(-omega0 * recursionTime);
+         this.footstepMultiplier.set(recursionMultiplier);
+
+         double footstepMultiplier = Math.exp(omega0 * timeRemainingInState.getDoubleValue());
+         endOfStateICP.set(desiredICP);
+         endOfStateICP.sub(perfectCMP);
+         endOfStateICP.scale(footstepMultiplier);
+         endOfStateICP.add(perfectCMP);
 
          solver.setFootstepAdjustmentConditions(footstepMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
@@ -479,6 +510,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
             solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps,
                                                      numberOfFootstepsToConsider, solver);
+         solutionHandler.updateVisualizers(desiredICP, footstepMultiplier.getDoubleValue());
 
          solver.getCoPFeedbackDifference(tempVector2d);
          feedbackCoPDelta.set(tempVector2d);
