@@ -1,18 +1,17 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 
 public class SmoothCapturePointAdjustmentToolbox
 {
@@ -58,7 +57,6 @@ public class SmoothCapturePointAdjustmentToolbox
          icpQuantityInitialSegment1List.add(icpQuantityInitialSegment1);
       }
       
-      initializeMatrices1D(cmpPolynomials3D.get(0).getNumberOfCoefficients());
       adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, cmpPolynomials3D, icpQuantityInitialSegment1List, entryCornerPointsToPack, exitCornerPointsToPack);
    }
    
@@ -76,9 +74,14 @@ public class SmoothCapturePointAdjustmentToolbox
          YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(direction);
          
          double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.get(direction);
+                 
+         int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
+         int numberOfConstrainedDerivatives = cmpPolynomialSegment1.getNumberOfCoefficients() / 2;
          
-         populateBoundaryConditionMatrices1D(omega0, direction, cmpPolynomialSegment1, cmpPolynomialSegment2, icpQuantityInitialSegment1List, icpPositionFinalSegment2Scalar);
-         computeAdjustedPolynomialCoefficientVectors1D();
+         initializeMatrices1D(numberOfCoefficients, numberOfConstrainedDerivatives);
+         
+         populateBoundaryConditionMatrices1D(omega0, direction, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2, icpQuantityInitialSegment1List, icpPositionFinalSegment2Scalar);
+         computeAdjustedPolynomialCoefficientVectors1D(numberOfCoefficients);
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
       }
       icpToolbox.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
@@ -90,12 +93,9 @@ public class SmoothCapturePointAdjustmentToolbox
       cmpPolynomialSegment2.setDirectly(polynomialCoefficientVectorAdjustmentSegment2);
    }
    
-   private void populateBoundaryConditionMatrices1D(double omega0, Direction direction, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2, 
+   private void populateBoundaryConditionMatrices1D(double omega0, Direction direction, int numberOfCoefficients, int numberOfConstrainedDerivatives, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2, 
                                                           List<FrameTuple<?, ?>> icpQuantityInitialSegment1List, double icpPositionFinalSegment2Scalar)
    {    
-      int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
-      int numberOfConstrainedDerivatives = numberOfCoefficients / 2;
-      
       calculateGeneralizedICPMatricesOnCMPSegment2(omega0, 0, cmpPolynomialSegment2);
       
       // TODO: check whether division always integer
@@ -103,7 +103,7 @@ public class SmoothCapturePointAdjustmentToolbox
       {
          double icpQuantityInitialSegment1Scalar = icpQuantityInitialSegment1List.get(i).get(direction);
          calculateGeneralizedICPMatricesOnCMPSegment1(omega0, i, cmpPolynomialSegment1);
-         setGeneralizedBoundaryConstraints(i, numberOfCoefficients, cmpPolynomialSegment1, cmpPolynomialSegment2,
+         setGeneralizedBoundaryConstraints(i, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2,
                                            icpQuantityInitialSegment1Scalar, icpPositionFinalSegment2Scalar);
       }
    }
@@ -114,7 +114,7 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1Transpose = new DenseMatrix64F(defaultSize, 1);
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2Transpose = new DenseMatrix64F(defaultSize, 1);
    
-   private void setGeneralizedBoundaryConstraintICP0(int order, int numberOfCoefficients, double icpQuantityInitialSegment1, double icpPositionFinalSegment2,
+   private void setGeneralizedBoundaryConstraintICP0(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives, double icpQuantityInitialSegment1, double icpPositionFinalSegment2,
                                                            DenseMatrix64F generalizedAlphaBetaPrimeRowSegment1, DenseMatrix64F generalizedGammaPrimeMatrixSegment1,
                                                            DenseMatrix64F alphaBetaPrimeRowSegment2, DenseMatrix64F gammaPrimeMatrixSegment2)
    {
@@ -130,25 +130,25 @@ public class SmoothCapturePointAdjustmentToolbox
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order, numberOfCoefficients);
    }
    
-   private void setGeneralizedBoundaryConstraintCMP0(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1)
+   private void setGeneralizedBoundaryConstraintCMP0(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives, YoTrajectory cmpPolynomialSegment1)
    {
       resetGeneralizedBoundaryConditionContainers();
       
       double tInitial1 = cmpPolynomialSegment1.getInitialTime();
       
       generalizedBoundaryConditionValue = cmpPolynomialSegment1.getDerivative(order, tInitial1);
-      boundaryConditionVector.set(order + numberOfCoefficients/2, 0, generalizedBoundaryConditionValue);
+      boundaryConditionVector.set(order + numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
       generalizedBoundaryConditionSubMatrix1Transpose.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tInitial1));
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + numberOfCoefficients/2, 0);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + numberOfConstrainedDerivatives, 0);
       
       generalizedBoundaryConditionSubMatrix2Transpose.zero();
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients/2, numberOfCoefficients);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfConstrainedDerivatives, numberOfCoefficients);
    }
    
-   private void setGeneralizedBoundaryConstraintCMP1(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
+   private void setGeneralizedBoundaryConstraintCMP1(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives,  YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
    {
       resetGeneralizedBoundaryConditionContainers();
       
@@ -156,43 +156,42 @@ public class SmoothCapturePointAdjustmentToolbox
       double tInitial2 = cmpPolynomialSegment2.getInitialTime();
       
       generalizedBoundaryConditionValue = 0.0;
-      boundaryConditionVector.set(order + numberOfCoefficients, 0, generalizedBoundaryConditionValue);
+      boundaryConditionVector.set(order + 2 * numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
       generalizedBoundaryConditionSubMatrix1Transpose.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tFinal1));
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
       CommonOps.scale(-1.0, generalizedBoundaryConditionSubMatrix1);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + numberOfCoefficients, 0);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + 2 * numberOfConstrainedDerivatives, 0);
       
       generalizedBoundaryConditionSubMatrix2Transpose.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tInitial2));
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients, numberOfCoefficients);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + 2 * numberOfConstrainedDerivatives, numberOfCoefficients);
    }
    
-   private void setGeneralizedBoundaryConstraintCMP2(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment2)
+   private void setGeneralizedBoundaryConstraintCMP2(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives, YoTrajectory cmpPolynomialSegment2)
    {
       resetGeneralizedBoundaryConditionContainers();
       
       double tFinal2 = cmpPolynomialSegment2.getFinalTime();
       
       generalizedBoundaryConditionValue = cmpPolynomialSegment2.getDerivative(order, tFinal2);
-      boundaryConditionVector.set(order + numberOfCoefficients + numberOfCoefficients/2, 0, generalizedBoundaryConditionValue);
+      boundaryConditionVector.set(order + 3 * numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
       generalizedBoundaryConditionSubMatrix1Transpose.zero();
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + numberOfCoefficients + numberOfCoefficients/2, 0);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + 3 * numberOfConstrainedDerivatives, 0);
       
       generalizedBoundaryConditionSubMatrix2Transpose.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tFinal2));
       CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
-      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfCoefficients + numberOfCoefficients/2, numberOfCoefficients);
+      CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + 3 * numberOfConstrainedDerivatives, numberOfCoefficients);
    }
    
-   private void computeAdjustedPolynomialCoefficientVectors1D()
+   private void computeAdjustedPolynomialCoefficientVectors1D(int numberOfCoefficients)
    {
       // Uses the Moore-Penrose pseudo-inverse to counter bad conditioning of boundaryConditionMatrix
       CommonOps.pinv(boundaryConditionMatrix, boundaryConditionMatrixInverse);
       CommonOps.mult(boundaryConditionMatrixInverse, boundaryConditionVector, polynomialCoefficientCombinedVectorAdjustment);
       
-      int numberOfCoefficients = polynomialCoefficientCombinedVectorAdjustment.numRows / 2; 
       polynomialCoefficientVectorAdjustmentSegment1.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, 0, numberOfCoefficients, 0, 1));
       polynomialCoefficientVectorAdjustmentSegment2.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, numberOfCoefficients, 2*numberOfCoefficients, 0, 1));
       
@@ -217,22 +216,22 @@ public class SmoothCapturePointAdjustmentToolbox
                                                                               generalizedBetaPrimeRowSegment1, generalizedGammaPrimeMatrixSegment1, generalizedAlphaBetaPrimeRowSegment1);
    }
    
-   private void setGeneralizedBoundaryConstraints(int order, int numberOfCoefficients, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2,
+   private void setGeneralizedBoundaryConstraints(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives, YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2,
                                                         double icpQuantityInitialSegment1Scalar, double icpPositionFinalSegment2Scalar)
    {
-      setGeneralizedBoundaryConstraintICP0(order, numberOfCoefficients, icpQuantityInitialSegment1Scalar, icpPositionFinalSegment2Scalar,
+      setGeneralizedBoundaryConstraintICP0(order, numberOfCoefficients, numberOfConstrainedDerivatives,  icpQuantityInitialSegment1Scalar, icpPositionFinalSegment2Scalar,
                                            generalizedAlphaBetaPrimeRowSegment1, generalizedGammaPrimeMatrixSegment1,
                                            alphaBetaPrimeRowSegment2, gammaPrimeMatrixSegment2);
-      setGeneralizedBoundaryConstraintCMP0(order, numberOfCoefficients, cmpPolynomialSegment1);
-      setGeneralizedBoundaryConstraintCMP1(order, numberOfCoefficients, cmpPolynomialSegment1, cmpPolynomialSegment2);
-      setGeneralizedBoundaryConstraintCMP2(order, numberOfCoefficients, cmpPolynomialSegment2);
+      setGeneralizedBoundaryConstraintCMP0(order, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1);
+      setGeneralizedBoundaryConstraintCMP1(order, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2);
+      setGeneralizedBoundaryConstraintCMP2(order, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment2);
    }
    
-   private void initializeMatrices1D(int numberOfCoefficients)
+   private void initializeMatrices1D(int numberOfCoefficients, int numberOfConstrainedDerivatives)
    {  
-      boundaryConditionMatrix.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
-      boundaryConditionMatrixInverse.reshape(2 * numberOfCoefficients, 2 * numberOfCoefficients);
-      boundaryConditionVector.reshape(2 * numberOfCoefficients, 1);
+      boundaryConditionMatrix.reshape(4 * numberOfConstrainedDerivatives, 2 * numberOfCoefficients);
+      boundaryConditionMatrixInverse.reshape(2 * numberOfCoefficients, 4 * numberOfConstrainedDerivatives);
+      boundaryConditionVector.reshape(4 * numberOfConstrainedDerivatives, 1);
       polynomialCoefficientCombinedVectorAdjustment.reshape(2 * numberOfCoefficients, 1);
       
       polynomialCoefficientVectorAdjustmentSegment1.reshape(numberOfCoefficients, 1);
