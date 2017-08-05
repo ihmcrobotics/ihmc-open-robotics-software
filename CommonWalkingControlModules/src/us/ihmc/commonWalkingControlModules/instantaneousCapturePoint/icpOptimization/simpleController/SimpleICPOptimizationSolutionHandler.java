@@ -2,7 +2,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -16,6 +19,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.AbstractSimpleICPOptimizationController.yoNamePrefix;
 
 public class SimpleICPOptimizationSolutionHandler
 {
@@ -34,6 +39,8 @@ public class SimpleICPOptimizationSolutionHandler
    private final YoDouble dynamicRelaxationCostToGo;
    private final YoDouble angularMomentumMinimizationCostToGo;
 
+   private final YoFramePoint2d adjustedICPReferenceLocation;
+
    private final boolean debug;
 
    private final FramePoint2d locationSolution = new FramePoint2d();
@@ -47,8 +54,7 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final FrameVector tempVector = new FrameVector();
 
-   public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix,
-                                               YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
       this.debug = debug;
 
@@ -77,21 +83,18 @@ public class SimpleICPOptimizationSolutionHandler
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2d(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
 
+      adjustedICPReferenceLocation = new YoFramePoint2d(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
+
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
    }
 
-   public void updateCostsToGo(ICPQPOptimizationSolver solver)
+   public void setupVisualizers(ArtifactList artifactList)
    {
-      if (debug)
-      {
-         residualCostToGo.set(solver.getCostToGo());
-         costToGo.set(solver.getCostToGo());
-         footstepCostToGo.set(solver.getFootstepCostToGo());
-         feedbackCostToGo.set(solver.getFeedbackCostToGo());
-         dynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
-         angularMomentumMinimizationCostToGo.set(solver.getAngularMomentumMinimizationCostToGo());
-      }
+      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "AdjustedICPReferencedLocation", adjustedICPReferenceLocation, 0.01, YoAppearance.LightYellow(),
+                                                                       YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+
+      artifactList.add(predictedEndOfStateICP.createArtifact());
    }
 
    public void updateCostsToGo(SimpleICPOptimizationQPSolver solver)
@@ -137,6 +140,12 @@ public class SimpleICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(firstStepAdjusted);
    }
 
+   public void updateVisualizers(FramePoint2d desiredICP, double footstepMultiplier)
+   {
+      adjustedICPReferenceLocation.set(footstepAdjustment);
+      adjustedICPReferenceLocation.scale(footstepMultiplier);
+      adjustedICPReferenceLocation.add(desiredICP);
+   }
 
    private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
