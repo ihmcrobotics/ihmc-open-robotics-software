@@ -1,19 +1,21 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import java.util.EnumMap;
-
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 
 public class AngularMomentumEstimationParameters
 {
-   double comHeight = 0.5;
-   SmoothCMPPlannerParameters copPlannerParameters;
+   private final SmoothCMPPlannerParameters copPlannerParameters;
    public AngularMomentumEstimationParameters(SmoothCMPPlannerParameters cmpPlannerParameters)
    {
       this.copPlannerParameters = cmpPlannerParameters;
    }
-   
+
+   public boolean computePredictedAngularMomentum()
+   {
+      return true;
+   }
+
    public CoPPointName getEntryCoPName()
    {
       return this.copPlannerParameters.getEntryCoPName();
@@ -44,34 +46,29 @@ public class AngularMomentumEstimationParameters
       return 0.5;
    }
    
-   public CoPPointName getInitialCoPPoint()
+   public CoPPointName getInitialCoPPointName()
    {
       return getEndCoPName();
    }
 
-   public CoPPointName getEndCoPPoint()
+   public CoPPointName getEndCoPPointName()
    {
       return getEndCoPName();
    }
 
-   public CoPPointName getInitialReferencePoint()
+   public CoPPointName getInitialDepartureReferenceName()
    {
       return getEntryCoPName();
    }
    
-   public CoPPointName getFinalReferencePoint()
+   public CoPPointName getFinalApproachReferenceName()
    {
       return getExitCoPName();
    }
-   
+
    public int getNumberOfFootstepsToConsider()
    {
       return this.copPlannerParameters.getNumberOfFootstepsToConsider();
-   }
-   
-   public int getMaximumNumberOfAngularMomentumPointsToPlan()
-   {
-      return 100;
    }
    
    public SmoothCMPPlannerParameters getCoPPlannerParameters()
@@ -84,8 +81,33 @@ public class AngularMomentumEstimationParameters
       return copPlannerParameters.getCoPPointsToPlan();
    }
    
-   public EnumMap<CoPPointName, Double> getSegmentTimes()
+   public double getCoMHeight()
    {
-      return copPlannerParameters.getSegmentTimes();
+      return 0.33;
+   }
+
+   public double getSwingFootMaxLift()
+   {
+      return 0.10;
+   }
+   
+   public int getNumberOfPointsToSampleForTransfer()
+   {
+      return 20;
+   }
+
+   public int getNumberOfPointsToSampleForSwing()
+   {
+      return 20;
+   }
+
+   public AngularMomentumSplineType getSplineType()
+   {
+      return AngularMomentumSplineType.LINEAR;
+   }
+   
+   public String getYoTimeVariableName()
+   {
+      return "t";
    }
 }
