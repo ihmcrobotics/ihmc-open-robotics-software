@@ -104,7 +104,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.initializeForSingleSupport(0.0);
       icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
