@@ -22,6 +22,10 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  */
 public class ICPQPOptimizationSolver
 {
+   private static final boolean ADD_ANGULAR_MOMENTUM_MAX = true;
+   private static final double angularMomentumLimit = 0.05;
+
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double deltaInside = 0.0001;
@@ -393,6 +397,9 @@ public class ICPQPOptimizationSolver
       reachabilityConstraint.setPolygon();
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
+      if (indexHandler.useAngularMomentum() && ADD_ANGULAR_MOMENTUM_MAX)
+         numberOfInequalityConstraints += 4;
+
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
 
@@ -696,7 +703,12 @@ public class ICPQPOptimizationSolver
          addStepAdjustmentTask();
 
       if (indexHandler.useAngularMomentum())
+      {
          addAngularMomentumMinimizationTask();
+
+         if (ADD_ANGULAR_MOMENTUM_MAX)
+            addAngularMomentumLimits();
+      }
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -781,6 +793,23 @@ public class ICPQPOptimizationSolver
    {
       inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
       inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
+   }
+
+   private void addAngularMomentumLimits()
+   {
+      // upper limit
+      solverInput_Aineq.set(currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), 1.0);
+      solverInput_Aineq.set(currentInequalityConstraintIndex + 1, indexHandler.getAngularMomentumIndex() + 1, 1.0);
+      solverInput_bineq.set(currentInequalityConstraintIndex, 0, angularMomentumLimit);
+      solverInput_bineq.set(currentInequalityConstraintIndex + 1, 0, angularMomentumLimit);
+      currentInequalityConstraintIndex += 2;
+
+      // lower limit
+      solverInput_Aineq.set(currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), -1.0);
+      solverInput_Aineq.set(currentInequalityConstraintIndex + 1, indexHandler.getAngularMomentumIndex() + 1, -1.0);
+      solverInput_bineq.set(currentInequalityConstraintIndex, 0, angularMomentumLimit);
+      solverInput_bineq.set(currentInequalityConstraintIndex + 1, 0, angularMomentumLimit);
+      currentInequalityConstraintIndex += 2;
    }
 
    /**

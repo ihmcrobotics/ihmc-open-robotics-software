@@ -39,7 +39,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    private static final double footstepAdjustmentSafetyFactor = 1.0;
 
    private static final boolean useAngularMomentumIntegrator = true;
-   private static final double angularMomentumIntegratorGain = 100.0;
+   private static final double angularMomentumIntegratorGain = 50.0;
    private static final double angularMomentumIntegratorLeakRatio = 0.92;
 
    protected static final String yoNamePrefix = "controller";
