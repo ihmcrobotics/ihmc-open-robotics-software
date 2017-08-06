@@ -28,7 +28,6 @@ public class ICPQPOptimizationSolver
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double deltaInside = 0.0001;
 
    private static final int maxNumberOfIterations = 3;
    private static final double convergenceThreshold = 1.0e-100;
@@ -83,6 +82,8 @@ public class ICPQPOptimizationSolver
    private final ICPEqualityConstraintInput dynamicsConstraintInput;
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
+   /** Constraint on the CMP location within some value */
+   private final ConstraintToConvexRegion cmpLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
    private final ConstraintToConvexRegion reachabilityConstraint;
 
@@ -176,6 +177,8 @@ public class ICPQPOptimizationSolver
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
 
+   private double copSafeDistanceToEdge = 0.0001;
+   private static final double maxCMPOutside = 0.0001;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPQPOptimizationSolver}.
@@ -217,6 +220,7 @@ public class ICPQPOptimizationSolver
 
       dynamicsConstraintInput = new ICPEqualityConstraintInput(maximumNumberOfFreeVariables);
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
+      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
@@ -270,8 +274,13 @@ public class ICPQPOptimizationSolver
    public void resetCoPLocationConstraint()
    {
       copLocationConstraint.reset();
+      cmpLocationConstraint.reset();
    }
 
+   public void setCopSafeDistanceToEdge(double copSafeDistanceToEdge)
+   {
+      this.copSafeDistanceToEdge = copSafeDistanceToEdge;
+   }
 
    /**
     * Adds a vertex of the support polygon to the CoP location constraint. The CoP is constrained to the inside of the convex hull described
@@ -301,6 +310,7 @@ public class ICPQPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       copLocationConstraint.addVertex(tmpPoint);
+      cmpLocationConstraint.addVertex(tmpPoint);
    }
 
    /**
@@ -313,6 +323,7 @@ public class ICPQPOptimizationSolver
    {
       polygon.changeFrame(worldFrame);
       copLocationConstraint.addPolygon(polygon);
+      cmpLocationConstraint.addPolygon(polygon);
    }
 
    /**
@@ -394,6 +405,7 @@ public class ICPQPOptimizationSolver
       int numberOfInequalityConstraints;
 
       copLocationConstraint.setPolygon();
+      cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
@@ -822,7 +834,7 @@ public class ICPQPOptimizationSolver
    private void addCoPLocationConstraint()
    {
       copLocationConstraint.setPositionOffset(perfectCMP);
-      copLocationConstraint.setDeltaInside(deltaInside);
+      copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
@@ -844,7 +856,7 @@ public class ICPQPOptimizationSolver
     */
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setDeltaInside(deltaInside);
+      reachabilityConstraint.setDeltaInside(copSafeDistanceToEdge);
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
