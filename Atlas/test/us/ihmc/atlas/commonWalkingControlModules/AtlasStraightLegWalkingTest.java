@@ -60,7 +60,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 120000)
    public void testWalkingOverStairs() throws Exception
    {
@@ -145,12 +145,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
          this.jointMap = jointMap;
          this.contactPointParameters = contactPointParameters;
-      }
-
-      @Override
-      public boolean rampUpAllowableToeLoadAfterContact()
-      {
-         return true;
       }
 
       @Override
@@ -249,7 +243,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getECMPProximityForToeOff()
       {
-         return 0.02;
+         return 0.01;
       }
 
       @Override
@@ -324,6 +318,16 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return true;
       }
+
+      public double getRelaxationRate()
+      {
+         return 2.0;
+      }
+
+      public double getMinimumPelvisWeight()
+      {
+         return 0.5;
+      }
    }
 
    private class TestLegConfigurationParameters extends AtlasLegConfigurationParameters
@@ -342,13 +346,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getLegPrivilegedLowWeight()
       {
-         return 3.0;
+         return 5.0;
       }
 
       @Override
       public double getLegPrivilegedMediumWeight()
       {
-         return 50.0;
+         return 75.0;
       }
 
       @Override
@@ -415,6 +419,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testWalkingOverStairs();
+      test.testSteppingDown();
    }
 }
