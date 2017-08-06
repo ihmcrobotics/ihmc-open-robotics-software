@@ -121,7 +121,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
-      submitSolverTaskConditions(desiredICP, perfectCMP, numberOfFootstepsToConsider, omega0);
+      submitSolverTaskConditions(numberOfFootstepsToConsider, omega0);
 
       qpSolverTimer.startMeasurement();
       NoConvergenceException noConvergenceException = solveQP();
