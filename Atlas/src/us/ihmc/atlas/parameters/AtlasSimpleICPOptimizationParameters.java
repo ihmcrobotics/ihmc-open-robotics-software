@@ -28,14 +28,14 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 5.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 5.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
@@ -63,7 +63,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.0001 : 0.00005;
+      return runningOnRealRobot ? 0.0001 : 0.00001;
    }
 
    /** {@inheritDoc} */
@@ -91,14 +91,14 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getDynamicRelaxationDoubleSupportWeightModifier()
    {
-      return runningOnRealRobot ? 1.0 : 10.0;
+      return runningOnRealRobot ? 1.0 : 4.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getAngularMomentumMinimizationWeight()
    {
-      return 25.0;
+      return 10.0;
    }
 
    /** {@inheritDoc} */
@@ -140,7 +140,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public boolean useAngularMomentum()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -182,7 +182,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.01;
+      return 0.05;
    }
 
    /** {@inheritDoc} */

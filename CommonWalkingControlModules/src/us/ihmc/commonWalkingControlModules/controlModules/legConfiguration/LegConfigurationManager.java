@@ -127,7 +127,10 @@ public class LegConfigurationManager
          if (isNextStepTooLow)
          {
             prepareForLegBracing(swingSide);
-            //useMediumWeight(swingSide);
+         }
+         else
+         {
+            doNotBrace(swingSide);
          }
       }
    }
@@ -145,6 +148,11 @@ public class LegConfigurationManager
    public void prepareForLegBracing(RobotSide robotSide)
    {
       legConfigurationControlModules.get(robotSide).prepareForLegBracing();
+   }
+
+   public void doNotBrace(RobotSide robotSide)
+   {
+      legConfigurationControlModules.get(robotSide).doNotBrace();
    }
 
    public void useLowWeight(RobotSide robotSide)
