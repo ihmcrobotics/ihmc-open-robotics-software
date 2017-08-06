@@ -25,7 +25,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ICPTimingOptimizationController extends ICPOptimizationController
+public class ICPTimingOptimizationController extends AbstractICPOptimizationController
 {
    private static final double footVelocityScalarWeight = 0.0;
 
