@@ -17,7 +17,7 @@ public class ICPOptimizationControllerHelper
    private static final Matrix3D matrix = new Matrix3D();
    private static final Matrix3D matrixTransformed = new Matrix3D();
 
-   public static void transformFeedbackGains(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
+   public static void transformFromDynamicsFrame(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -54,7 +54,7 @@ public class ICPOptimizationControllerHelper
    private static final RotationMatrix rotation = new RotationMatrix();
    private static final RotationMatrix rotationTranspose = new RotationMatrix();
 
-   public static void transformWeightsToWorldFrame(FrameVector2d weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
+   public static void transformToWorldFrame(FrameVector2d weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
    {
       RigidBodyTransform transformToWorldFrame = frame.getTransformToWorldFrame();
 
