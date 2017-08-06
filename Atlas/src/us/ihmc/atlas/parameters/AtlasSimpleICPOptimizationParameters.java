@@ -12,6 +12,11 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
+   public boolean useSimpleOptimization()
+   {
+      return true;
+   }
+
    /** {@inheritDoc} */
    @Override
    public int numberOfFootstepsToConsider()

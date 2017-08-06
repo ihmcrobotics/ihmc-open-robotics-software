@@ -609,6 +609,12 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
+         public boolean useSimpleOptimization()
+         {
+            return false;
+         }
+
+         @Override
          public int numberOfFootstepsToConsider()
          {
             return 4;
