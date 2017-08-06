@@ -143,8 +143,8 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+//   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+//   @Test(timeout = 30000)
    public void testAdjustICPDuringRegularTransfer3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
