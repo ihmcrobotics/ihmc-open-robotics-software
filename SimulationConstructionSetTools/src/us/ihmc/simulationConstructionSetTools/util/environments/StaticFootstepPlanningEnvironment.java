@@ -48,7 +48,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    private void addRampsWithSteppingStones(double startDistanceX, double startDistanceY, double courseAngleRadians)
    {
       double rampLengthInMeters = 3.0;
-      double rampWidthInMeters =
+//      double rampWidthInMeters =
    }
 
    @Override
