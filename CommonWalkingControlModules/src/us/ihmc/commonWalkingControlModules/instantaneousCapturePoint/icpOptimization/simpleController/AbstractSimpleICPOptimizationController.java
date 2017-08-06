@@ -10,6 +10,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -396,10 +399,11 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    @Override
    public abstract double getOptimizedTimeRemaining();
 
+
    @Override
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   protected int submitSolverTaskConditions(FramePoint2d desiredICP, FramePoint2d perfectCMP, int numberOfFootstepsToConsider, double omega0)
+   protected int submitSolverTaskConditions(int numberOfFootstepsToConsider, double omega0)
    {
       if (isInDoubleSupport.getBooleanValue())
       {
