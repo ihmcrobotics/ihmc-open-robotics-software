@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -92,7 +92,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
    }
 
    @Override
-   public ICPOptimizationController getICPOptimizationController()
+   public AbstractICPOptimizationController getICPOptimizationController()
    {
       return null;
    }

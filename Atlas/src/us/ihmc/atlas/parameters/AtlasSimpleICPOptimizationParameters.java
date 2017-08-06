@@ -3,18 +3,18 @@ package us.ihmc.atlas.parameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
-public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
+public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
 
-   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   public AtlasSimpleICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
    public boolean useSimpleOptimization()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -28,14 +28,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 5.0;
    }
 
    /** {@inheritDoc} */
@@ -49,7 +49,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.05;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
@@ -91,14 +91,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDynamicRelaxationDoubleSupportWeightModifier()
    {
-      return runningOnRealRobot ? 1.0 : 1.0;
+      return runningOnRealRobot ? 1.0 : 10.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getAngularMomentumMinimizationWeight()
    {
-      return 50.00;
+      return 25.0;
    }
 
    /** {@inheritDoc} */
@@ -154,7 +154,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFootstepRegularization()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -182,7 +182,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.05;
+      return 0.01;
    }
 
    /** {@inheritDoc} */
@@ -225,12 +225,5 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getBackwardReachabilityLimit()
    {
       return -0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useWarmStartInSolver()
-   {
-      return true;
    }
 }

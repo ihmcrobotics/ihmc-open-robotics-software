@@ -7,6 +7,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
  */
 public abstract class ICPOptimizationParameters
 {
+   public abstract boolean useSimpleOptimization();
+
    /**
     * The maximum number of footsteps that can be considered by the controller. The variable {@link #numberOfFootstepsToConsider()} is clipped to this value.
     * It is also used to instantiate all the yo variable lists.
@@ -151,38 +153,6 @@ public abstract class ICPOptimizationParameters
     * This makes sure the problem maintains a "nice" form.
     */
    public abstract double getMinimumTimeRemaining();
-
-   /**
-    * Maximum forward distance the CoP is allowed to exit the support polygon.
-    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
-    * Exiting the support polygon is achieved by using angular momentum.
-    * This should be used sparingly.
-    */
-   public abstract double getDoubleSupportMaxCoPForwardExit();
-
-   /**
-    * Maximum lateral distance the CoP is allowed to exit the support polygon.
-    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
-    * Exiting the support polygon is achieved by using angular momentum.
-    * This should be used sparingly.
-    */
-   public abstract double getDoubleSupportMaxCoPLateralExit();
-
-   /**
-    * Maximum forward distance the CoP is allowed to exit the support polygon.
-    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
-    * Exiting the support polygon is achieved by using angular momentum.
-    * This should be used sparingly.
-    */
-   public abstract double getSingleSupportMaxCoPForwardExit();
-
-   /**
-    * Maximum lateral distance the CoP is allowed to exit the support polygon.
-    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
-    * Exiting the support polygon is achieved by using angular momentum.
-    * This should be used sparingly.
-    */
-   public abstract double getSingleSupportMaxCoPLateralExit();
 
    /**
     * Deadband on the step adjustment.

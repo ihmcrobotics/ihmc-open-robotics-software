@@ -5,15 +5,7 @@ import java.util.List;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -96,7 +88,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
 
@@ -154,7 +145,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
 
-      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 
@@ -349,12 +339,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
       return capturePointPlannerParameters;
-   }
-
-   @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return icpOptimizationParameters;
    }
 
    @Override

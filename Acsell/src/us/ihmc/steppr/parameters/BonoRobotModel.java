@@ -226,12 +226,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
-
-   @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          HumanoidGlobalDataProducer globalDataProducers, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
