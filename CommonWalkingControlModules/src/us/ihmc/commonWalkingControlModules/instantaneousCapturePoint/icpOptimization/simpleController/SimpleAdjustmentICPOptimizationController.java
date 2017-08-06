@@ -24,7 +24,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
                                                     BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                                     double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getSimpleICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, contactableFeet, controlDT,
+      this(walkingControllerParameters.getICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, contactableFeet, controlDT,
            parentRegistry, yoGraphicsListRegistry);
    }
 

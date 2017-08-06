@@ -421,6 +421,12 @@ public class SimpleAdjustmentICPOptimizationControllerTest
    private class TestICPOptimizationParameters extends ICPOptimizationParameters
    {
       @Override
+      public boolean useSimpleOptimization()
+      {
+         return true;
+      }
+
+      @Override
       public int numberOfFootstepsToConsider()
       {
          return 1;
@@ -1028,6 +1034,12 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       public double getFootstepArea()
       {
          return 0;
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return new TestICPOptimizationParameters();
       }
    }
 }

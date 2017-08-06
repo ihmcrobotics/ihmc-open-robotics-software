@@ -176,6 +176,11 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final ICPOptimizationParameters icpOptimizationParameters = new ICPOptimizationParameters()
    {
+      @Override public boolean useSimpleOptimization()
+      {
+         return false;
+      }
+
       @Override public int getMaximumNumberOfFootstepsToConsider()
       {
          return 5;
@@ -340,7 +345,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final WalkingControllerParameters walkingControllerParameters = new WalkingControllerParameters()
    {
-
       @Override
       public double getToeWidth()
       {
@@ -996,6 +1000,12 @@ public class ICPAdjustmentOptimizationControllerTest
                return 0;
             }
          };
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
       }
    };
 }

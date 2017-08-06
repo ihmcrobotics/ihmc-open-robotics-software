@@ -736,7 +736,7 @@ public abstract class WalkingControllerParameters implements SteppingParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public ICPOptimizationParameters getSimpleICPOptimizationParameters()
+   public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return null;
    }

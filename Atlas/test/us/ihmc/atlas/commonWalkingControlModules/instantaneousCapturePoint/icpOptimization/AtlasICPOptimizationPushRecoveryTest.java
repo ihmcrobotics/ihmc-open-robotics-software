@@ -30,18 +30,11 @@ public class AtlasICPOptimizationPushRecoveryTest extends AvatarICPOptimizationP
                {
                   return true;
                }
-            };
-         }
 
-         @Override
-         public ICPOptimizationParameters getICPOptimizationParameters()
-         {
-            return new AtlasICPOptimizationParameters(true)
-            {
                @Override
-               public boolean useSimpleOptimization()
+               public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return false;
+                  return new AtlasICPOptimizationParameters(false);
                }
             };
          }

@@ -18,6 +18,14 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
+   public ICPAdjustmentOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+                                              BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                              double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(icpPlannerParameters, walkingControllerParameters.getICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, contactableFeet,
+            controlDT, parentRegistry, yoGraphicsListRegistry);
+   }
+
    public ICPAdjustmentOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                               WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
                                               SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,

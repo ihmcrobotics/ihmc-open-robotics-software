@@ -54,6 +54,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
+   private static final boolean USE_SIMPLE_ICP_OPTIMIZATION = true;
+
    // Limits
    private final double spineYawLimit = Math.PI / 4.0;
    private final double spinePitchUpperLimit = 0.4;
@@ -105,7 +107,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       leapOfFaithParameters = new LeapOfFaithParameters();
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
-      icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+
+      if (USE_SIMPLE_ICP_OPTIMIZATION)
+         icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+      else
+         icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1278,7 +1284,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPOptimizationParameters getSimpleICPOptimizationParameters()
+   public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
    }

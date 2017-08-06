@@ -3,6 +3,7 @@ package us.ihmc.atlas.commonWalkingControlModules.instantaneousCapturePoint.icpO
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -13,7 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimizationPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
@@ -30,18 +31,11 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
                {
                   return true;
                }
-            };
-         }
 
-         @Override
-         public ICPOptimizationParameters getICPOptimizationParameters()
-         {
-            return new AtlasICPOptimizationParameters(true)
-            {
                @Override
-               public boolean useSimpleOptimization()
+               public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return true;
+                  return new AtlasSimpleICPOptimizationParameters(false);
                }
             };
          }
