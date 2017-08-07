@@ -38,6 +38,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
+   private static final double transferSplitFraction = 0.5;
 
    private static final boolean useAngularMomentumIntegrator = true;
    private static final double angularMomentumIntegratorGain = 50.0;
@@ -60,6 +61,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final ArrayList<YoDouble> swingDurations = new ArrayList<>();
    protected final ArrayList<YoDouble> transferDurations = new ArrayList<>();
+   protected final YoDouble transferDurationSplitFraction = new YoDouble(yoNamePrefix + "TransferDurationSplitFraction", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
 
    protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
@@ -73,7 +75,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
    protected final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    protected final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
-   protected final YoFramePoint2d endOfStateICP = new YoFramePoint2d(yoNamePrefix + "EndOfStateICP", worldFrame, registry);
+   protected final YoFramePoint2d predictedEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
    protected final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    protected final YoFrameVector2d cmpCoPDifferenceSolution = new YoFrameVector2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
@@ -207,6 +209,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
       }
+      transferDurationSplitFraction.set(transferSplitFraction);
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -228,8 +231,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", endOfStateICP, 0.01, YoAppearance.MidnightBlue(),
-                                                                       YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
+                                                                       YoGraphicPosition.GraphicType.BALL);
       solutionHandler.setupVisualizers(artifactList);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
@@ -332,6 +335,16 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       }
    }
 
+   protected void updateYoFootsteps()
+   {
+      for (int footstepIndex = 0; footstepIndex < upcomingFootsteps.size(); footstepIndex++)
+      {
+         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
+         upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
+      }
+
+   }
+
    @Override
    public abstract void initializeForStanding(double initialTime);
 
@@ -351,7 +364,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       if (useFootstepRegularization)
       {
          int stepIndex = 0;
-         solver.resetFootstepRegularization(upcomingFootstepLocations.get(stepIndex).getFrameTuple2d());
+         upcomingFootsteps.get(stepIndex).getPosition2d(tempPoint2d);
+         solver.resetFootstepRegularization(tempPoint2d);
       }
 
       solver.resetOnContactChange();
@@ -438,6 +452,10 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          submitFootstepTaskConditionsToSolver(numberOfFootstepsToConsider, omega0);
          reachabilityConstraintHandler.updateReachabilityConstraint(solver);
       }
+      else
+      {
+         predictedEndOfStateICP.setToNaN();
+      }
 
       submitFeedbackTaskConditionsToSolver();
       submitAngularMomentumTaskConditionsToSolver();
@@ -481,18 +499,18 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          if (localScaleUpcomingStepWeights)
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + 0.5 * transferDurations.get(1).getDoubleValue();
+         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * transferDurations.get(1).getDoubleValue();
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
-         double footstepMultiplier = Math.exp(omega0 * timeRemainingInState.getDoubleValue());
-         endOfStateICP.set(desiredICP);
-         endOfStateICP.sub(perfectCMP);
-         endOfStateICP.scale(footstepMultiplier);
-         endOfStateICP.add(perfectCMP);
+         predictedEndOfStateICP.set(desiredICP);
+         predictedEndOfStateICP.sub(perfectCMP);
+         predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
+         predictedEndOfStateICP.add(perfectCMP);
 
+         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
-                                                upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
+                                                tempPoint2d);
       }
 
       if (useFootstepRegularization)
@@ -531,8 +549,11 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
-            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps,
-                                                     numberOfFootstepsToConsider, solver);
+            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider, solver);
+
+         if (isInDoubleSupport.getBooleanValue())
+            solutionHandler.zeroAdjustment();
+
          solutionHandler.updateVisualizers(desiredICP, footstepMultiplier.getDoubleValue());
 
          solver.getCoPFeedbackDifference(tempVector2d);
@@ -558,7 +579,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps, unclippedFootstepSolutions, wasFootstepAdjusted());
    }
 
    protected void computeTimeInCurrentState(double currentTime)

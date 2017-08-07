@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = true;
+   private final boolean useAngularMomentum = false;
 
    public AtlasSimpleICPOptimizationParameters(boolean runningOnRealRobot)
    {
@@ -190,7 +190,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.05;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
