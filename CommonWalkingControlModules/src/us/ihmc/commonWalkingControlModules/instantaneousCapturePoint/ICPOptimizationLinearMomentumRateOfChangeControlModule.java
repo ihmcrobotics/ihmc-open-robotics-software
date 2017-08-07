@@ -65,8 +65,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
       if (useSimpleAdjustment)
       {
-         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                   controlDT, registry, yoGraphicsListRegistry);
+         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
