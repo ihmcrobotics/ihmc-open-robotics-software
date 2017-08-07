@@ -5,8 +5,7 @@ import java.util.ArrayList;
 
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticSimulationFactory;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
@@ -43,7 +42,7 @@ public class ValkyrieAutomatedDiagnosticSimulation
    private class ValkyrieRobotModelWithHoist extends ValkyrieRobotModel
    {
 
-      public ValkyrieRobotModelWithHoist(DRCRobotModel.RobotTarget target, boolean headless)
+      public ValkyrieRobotModelWithHoist(RobotTarget target, boolean headless)
       {
          super(target, headless);
       }

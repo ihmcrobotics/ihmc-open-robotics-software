@@ -10,11 +10,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
@@ -23,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -35,34 +38,29 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final DRCRobotModel.RobotTarget target;
+   private final RobotTarget target;
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
+   private static final boolean USE_SIMPLE_ICP_OPTIMIZATION = true;
+
    // Limits
-   private final double neckPitchUpperLimit = 1.14494;    // 0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
-   private final double neckPitchLowerLimit = -0.602139;    // -0.610865;    // -math.pi/2.0;
-   private final double headYawLimit = Math.PI / 4.0;
-   private final double headRollLimit = Math.PI / 4.0;
    private final double spineYawLimit = Math.PI / 4.0;
    private final double spinePitchUpperLimit = 0.4;
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
    private final double spineRollLimit = Math.PI / 4.0;
-
-   private final double min_leg_length_before_collapsing_single_support;// = 0.53;    // corresponds to q_kny = 1.70 rad
-   private final double min_mechanical_leg_length;// = 0.420;    // corresponds to a q_kny that is close to knee limit
 
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
@@ -83,10 +81,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final StraightLegWalkingParameters straightLegWalkingParameters;
+   private final LegConfigurationParameters legConfigurationParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
+   private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
 
-   public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+   public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       this.target = target;
       this.jointMap = jointMap;
@@ -95,18 +96,22 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
       angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
-      min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
-      min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
-
       minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );
       nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
 
-      runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
-      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
+      legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       leapOfFaithParameters = new LeapOfFaithParameters();
+      toeOffParameters = new AtlasToeOffParameters(jointMap);
+      swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
+
+      if (USE_SIMPLE_ICP_OPTIMIZATION)
+         icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+      else
+         icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -152,54 +157,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-  @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return getFootLength();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getAnkleLowerLimitToTriggerToeOff()
-   {
-      return -1.0;
-   }
-
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean enableToeOffSlippingDetection()
    {
       return true;
@@ -214,30 +171,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double slippageDistanceThreshold = 0.04;
       double filterBreakFrequency = 10.0;
       toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
    }
 
    @Override
@@ -273,21 +206,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          return 0.6;
       else
          return 0.3;
-   }
-
-   @Override
-   public boolean isNeckPositionControlled()
-   {
-      if (runningOnRealRobot)
-         return true;
-      else
-         return false;
-   }
-
-   @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-         return new String[] {jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH)};
    }
 
    @Override
@@ -347,30 +265,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return neckPitchUpperLimit;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return neckPitchLowerLimit;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return headYawLimit;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return headRollLimit;
-   }
-
-   @Override
    public double getFootForwardOffset()
    {
       return jointMap.getPhysicalProperties().getFootForward();
@@ -392,18 +286,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getLegLength()
    {
       return jointMap.getPhysicalProperties().getShinLength()  + jointMap.getPhysicalProperties().getThighLength();
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      return min_leg_length_before_collapsing_single_support;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return min_mechanical_leg_length;
    }
 
    @Override
@@ -565,8 +447,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
@@ -584,8 +465,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
    {
       YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
 
@@ -601,18 +481,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 3.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] {0.0, 0.67, 0.0};
    }
 
    @Override
@@ -1183,31 +1051,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return jointMap.getModelScale() * -0.3;
-   }
-
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      switch (target)
-      {
-         case SCS:
-            return jointMap.getModelScale() * -2.0;
-
-         default :
-            return jointMap.getModelScale() * -1.0;
-      }
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       switch (target)
@@ -1400,13 +1243,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean controlToeDuringSwing()
    {
       return true;
@@ -1421,9 +1257,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   public LegConfigurationParameters getLegConfigurationParameters()
    {
-      return straightLegWalkingParameters;
+      return legConfigurationParameters;
    }
 
    /** {@inheritDoc} */
@@ -1435,8 +1271,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getICPPercentOfStanceForDSToeOff()
+   public ToeOffParameters getToeOffParameters()
    {
-      return 0.05; // JCarff ToeOff
+      return toeOffParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
+   }
+
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
    }
 }

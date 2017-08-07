@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.logProcessor;
 import java.io.IOException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.logProcessor.DRCLogProcessor;
 import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
@@ -27,6 +28,6 @@ public class ValkyrieDiagnosticLogProcessor extends DRCLogProcessor
    @Override
    public DRCRobotModel createDRCRobotModel()
    {
-      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
 }

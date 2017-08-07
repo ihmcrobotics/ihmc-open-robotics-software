@@ -161,7 +161,7 @@ public interface ICPPlannerInterface
     * modified from the outside. i.e. when dealing with push recovery via step adjustment.
     * </p>
     */
-   void updateCurrentPlan();
+   void updateCurrentPlan(boolean updateUpcomingCoPs);
 
    /**
     * Given the location of the actual ICP {@code actualCapturePointPosition}, this method estimates
@@ -243,18 +243,7 @@ public interface ICPPlannerInterface
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   void getDesiredCenterOfMassPosition(FramePoint2d desiredCenterOfMassPositionToPack);
-
-   /**
-    * Gets the current CoM position.
-    * <p>
-    * The ICP planner has to be updated every control tick using the method
-    * {@link #compute(double)}.
-    * </p>
-    *
-    * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
-    */
-   void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack);
+   void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -465,7 +454,7 @@ public interface ICPPlannerInterface
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack);
+   void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack);
 
    /**
     * Retrieves the position of the next exit CMP.
