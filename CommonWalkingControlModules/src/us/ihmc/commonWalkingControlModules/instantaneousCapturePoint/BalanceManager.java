@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
@@ -57,6 +58,7 @@ public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
+   private static final boolean UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -131,15 +133,15 @@ public class BalanceManager
    private final boolean useICPTimingOptimization;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                         ICPAngularMomentumModifierParameters angularMomentumModifierParameters, YoVariableRegistry parentRegistry)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, icpOptimizationParameters, angularMomentumModifierParameters, parentRegistry, true);
+      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, angularMomentumModifierParameters, parentRegistry, true);
    }
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                         ICPAngularMomentumModifierParameters angularMomentumModifierParameters, YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -160,14 +162,15 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
+      ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
       useICPTimingOptimization = useICPOptimizationControl && icpOptimizationParameters.useTimingOptimization();
 
       if (useICPOptimizationControl)
       {
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-               registry, yoGraphicsListRegistry);
+               controllerToolbox.getICPControlPolygons(), contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ,
+               controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
@@ -777,7 +780,7 @@ public class BalanceManager
 
    public void updateCurrentICPPlan()
    {
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING);
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
+package us.ihmc.robotics.math;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,20 +8,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TrajectoryMathTools;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory3D;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
+import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TrajectoryMathToolsTest
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static YoVariableRegistry registry = new YoVariableRegistry("TrajectoryMathTestRegistry");
-   private static final double EPSILON = Epsilons.ONE_THOUSANDTH;
-   
+
    @Before
    public void setupTest()
    {
@@ -346,6 +348,20 @@ public class TrajectoryMathToolsTest
    }
 
    @Test
+   public void testTrajectoryMultiplication2()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 8, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 8, registry);
+      traj1.setLinear(0, 10, 1, 2);
+      traj2.setLinear(0, 10, 2, 3);
+      TrajectoryMathTools.multiply(traj1, traj1, traj2);
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 2, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), 0.3, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 0.01, Epsilons.ONE_BILLIONTH));
+
+   }
+
+   @Test
    public void testTrajectoryMultiplication()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
@@ -493,7 +509,7 @@ public class TrajectoryMathToolsTest
       assert (traj.getFinalTime() == 1);
       assert (traj.getNumberOfCoefficients() == 3);
       assert (MathTools.epsilonCompare(traj.getCoefficient(0), 30, Epsilons.ONE_THOUSANDTH));
-      assert (MathTools.epsilonCompare(traj.getCoefficient(1),-43, Epsilons.ONE_THOUSANDTH));      
+      assert (MathTools.epsilonCompare(traj.getCoefficient(1), -43, Epsilons.ONE_THOUSANDTH));
       assert (MathTools.epsilonCompare(traj.getCoefficient(2), 15, Epsilons.ONE_THOUSANDTH));
    }
 
@@ -511,7 +527,7 @@ public class TrajectoryMathToolsTest
       assert (traj.getFinalTime() == 1);
       assert (traj.getNumberOfCoefficients() == 3);
       assert (MathTools.epsilonCompare(traj.getCoefficient(0), -2, Epsilons.ONE_THOUSANDTH));
-      assert (MathTools.epsilonCompare(traj.getCoefficient(1),  8, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj.getCoefficient(1), 8, Epsilons.ONE_THOUSANDTH));
       assert (MathTools.epsilonCompare(traj.getCoefficient(2), -8, Epsilons.ONE_THOUSANDTH));
 
       traj = traj1.getYoTrajectoryY();
@@ -526,8 +542,78 @@ public class TrajectoryMathToolsTest
       assert (traj.getInitialTime() == 0);
       assert (traj.getFinalTime() == 1);
       assert (traj.getNumberOfCoefficients() == 3);
-      assert (MathTools.epsilonCompare(traj.getCoefficient(0),-2, Epsilons.ONE_THOUSANDTH));
-      assert (MathTools.epsilonCompare(traj.getCoefficient(1), 8, Epsilons.ONE_THOUSANDTH));      
-      assert (MathTools.epsilonCompare(traj.getCoefficient(2),-8, Epsilons.ONE_THOUSANDTH));      
+      assert (MathTools.epsilonCompare(traj.getCoefficient(0), -2, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj.getCoefficient(1), 8, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj.getCoefficient(2), -8, Epsilons.ONE_THOUSANDTH));
+   }
+
+   @Test
+   public void testIntegration()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 2, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 3, registry);
+      traj1.setLinear(1, 11, 4, 5);
+      TrajectoryMathTools.getIntergal(traj2, traj1);
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(0), -4.00, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(1), 3.90, Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(2), 0.05, Epsilons.ONE_THOUSANDTH));
+   }
+
+   @Test
+   public void testDifferentiation()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
+      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 2, registry);
+      traj1.setQuadratic(1, 11, 4, 0, 5);
+      TrajectoryMathTools.getDerivative(traj2, traj1);
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(0), traj1.getCoefficient(1), Epsilons.ONE_THOUSANDTH));
+      assert (MathTools.epsilonCompare(traj2.getCoefficient(1), 2 * traj1.getCoefficient(2), Epsilons.ONE_THOUSANDTH));
+   }
+
+   @Test
+   public void testShifting()
+   {
+      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
+      traj1.setDirectlyFast(0, 1);
+      traj1.setDirectlyFast(1, 2);
+      traj1.setDirectlyFast(2, 3);
+      traj1.setTime(2, 4);
+      TrajectoryMathTools.addTimeOffset(traj1, 2);
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 9, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), -10, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 3, Epsilons.ONE_BILLIONTH));
+      TrajectoryMathTools.addTimeOffset(traj1, -4);
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(0), 17, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(1), 14, Epsilons.ONE_BILLIONTH));
+      assert (MathTools.epsilonCompare(traj1.getCoefficient(2), 3, Epsilons.ONE_BILLIONTH));
+   }
+
+   private class DummySegmentedTrajectory extends YoSegmentedFrameTrajectory3D
+   {
+
+      public DummySegmentedTrajectory(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
+      {
+         super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      }
+
+      public void setSegment(double t0, double tFinal, FramePoint z0, FramePoint zf)
+      {
+         segments.get(numberOfSegments.getIntegerValue()).setLinear(t0, tFinal, z0, zf);
+         numberOfSegments.increment();
+      }
+   }
+
+   @Test
+   public void testSegmentedAddition()
+   {
+      DummySegmentedTrajectory traj1 = new DummySegmentedTrajectory("TestTraj1", 4, 2, registry);
+      DummySegmentedTrajectory traj2 = new DummySegmentedTrajectory("TestTraj2", 4, 2, registry);
+      DummySegmentedTrajectory traj3 = new DummySegmentedTrajectory("TestTraj3", 10, 2, registry);
+      traj1.setSegment(0, 1, new FramePoint(worldFrame, 10, 11, 12), new FramePoint(worldFrame, 13, 14, 15));
+      traj1.setSegment(1, 2, new FramePoint(worldFrame, 15, 20, 25), new FramePoint(worldFrame, 20, 25, 30));
+      traj1.setSegment(2, 3, new FramePoint(worldFrame, 25, 28, 31), new FramePoint(worldFrame, 35, 38, 41));
+      traj2.setSegment(0.5, 0.6, new FramePoint(worldFrame, 1, 2, 3), new FramePoint(worldFrame, 3, 2, 1));
+      traj2.setSegment(1.2, 2.2, new FramePoint(worldFrame, 3, 2, 1), new FramePoint(worldFrame, 4, 5, 6));
+      TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, Epsilons.ONE_BILLIONTH);
    }
 }

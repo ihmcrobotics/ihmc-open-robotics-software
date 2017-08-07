@@ -5,9 +5,8 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoTrajectory;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -376,6 +375,26 @@ public class SmoothCapturePointToolbox
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
    }
    
+   public void calculateGeneralizedMatricesPrimeOnCMPSegment3D(double omega0, double time, int derivativeOrder, YoFrameTrajectory3D cmpPolynomial, 
+                                                               DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
+                                                               DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
+   {
+      calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
+      CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
+   }
+   
+   public void calculateGeneralizedMatricesPrimeOnCMPSegment1D(double omega0, double time, int derivativeOrder, YoTrajectory cmpPolynomial,
+                                                               DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
+                                                               DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
+   {
+      calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
+      calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
+      CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
+   }
+
    private void initializeMatrices3D(int numberOfCoefficients)
    {
       initializeMatrices(3, numberOfCoefficients);
