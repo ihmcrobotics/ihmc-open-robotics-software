@@ -653,7 +653,7 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getLegLength()
+         public double getMaximumLegLengthForSingularityAvoidance()
          {
             return 0;
          }

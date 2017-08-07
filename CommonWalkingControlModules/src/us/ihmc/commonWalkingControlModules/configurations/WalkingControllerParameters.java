@@ -735,18 +735,28 @@ public abstract class WalkingControllerParameters implements SteppingParameters
       return null;
    }
 
-   // replace: just add shin and thigh length from the physical parameters in a default method instead of forcing an implementation for each robot
-   public abstract double getLegLength();
+   /**
+    * Get the maximum leg length for the singularity avoidance control module.
+    */
+   public abstract double getMaximumLegLengthForSingularityAvoidance();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double minimumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double nominalHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double maximumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double defaultOffsetHeightAboveAnkle();
 }
