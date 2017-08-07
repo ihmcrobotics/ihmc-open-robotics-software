@@ -31,16 +31,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final boolean useSimpleAdjustment;
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
+         ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
                                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-           parentRegistry, yoGraphicsListRegistry, true);
+      this(referenceFrames, bipedSupportPolygons, icpControlPolygons, contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass,
+           gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
+         ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
@@ -65,20 +65,22 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
       if (useSimpleAdjustment)
       {
-         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, contactableFeet,
-                                                                                   controlDT, registry, yoGraphicsListRegistry);
+         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
          if (icpOptimizationParameters.useTimingOptimization())
          {
             icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-                                                                            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+                                                                            bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry,
+                                                                            yoGraphicsListRegistry);
          }
          else
          {
-            icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, walkingControllerParameters, bipedSupportPolygons,
-                                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+                                                                                bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT,
+                                                                                registry, yoGraphicsListRegistry);
          }
       }
    }

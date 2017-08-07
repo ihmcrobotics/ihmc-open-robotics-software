@@ -169,7 +169,8 @@ public class BalanceManager
       if (useICPOptimizationControl)
       {
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT, registry, yoGraphicsListRegistry);
+               controllerToolbox.getICPControlPolygons(), contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ,
+               controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {

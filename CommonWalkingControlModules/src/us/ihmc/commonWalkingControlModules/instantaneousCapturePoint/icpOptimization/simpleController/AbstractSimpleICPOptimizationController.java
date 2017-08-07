@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -149,15 +150,17 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final double dynamicRelaxationDoubleSupportWeightModifier;
 
    public AbstractSimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                                  SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                  ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                                  double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
+      this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet,
+           controlDT, yoGraphicsListRegistry);
    }
 
    public AbstractSimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                                                  BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                                  double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                  BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
+                                                  SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
@@ -220,7 +223,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
       solutionHandler = new SimpleICPOptimizationSolutionHandler(icpOptimizationParameters, DEBUG, yoNamePrefix, registry);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
 

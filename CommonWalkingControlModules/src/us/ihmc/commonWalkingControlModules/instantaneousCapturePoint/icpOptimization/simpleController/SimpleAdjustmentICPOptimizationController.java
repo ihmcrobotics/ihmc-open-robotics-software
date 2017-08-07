@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -20,19 +20,20 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
-   public SimpleAdjustmentICPOptimizationController(WalkingControllerParameters walkingControllerParameters,
-                                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public SimpleAdjustmentICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
+                                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                                     double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, contactableFeet, controlDT,
-           parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getICPOptimizationParameters(), walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet,
+           controlDT, parentRegistry, yoGraphicsListRegistry);
    }
 
    public SimpleAdjustmentICPOptimizationController(ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
-                                                    BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                                    double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                    BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
+                                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
+      super(walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
       parentRegistry.addChild(registry);
