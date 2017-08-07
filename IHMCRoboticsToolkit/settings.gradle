@@ -13,4 +13,7 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
-includeBuild "../IHMCJavaExtensions"
+if (startParameter.searchUpwards)
+{
+   includeBuild "../IHMCJavaExtensions"
+}
