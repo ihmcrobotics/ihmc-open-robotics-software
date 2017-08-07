@@ -76,7 +76,6 @@ public class SmoothCapturePointAdjustmentToolbox
                                                                             icpQuantityInitialCondition);
          }         
       }
-      PrintTools.debug("ICP BC = " + icpQuantityInitialConditionList.subList(0, 2).toString());
    }
    
    public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
