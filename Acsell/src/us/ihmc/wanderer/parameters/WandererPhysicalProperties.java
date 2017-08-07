@@ -1,13 +1,12 @@
 package us.ihmc.wanderer.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WandererPhysicalProperties implements DRCRobotPhysicalProperties
+public class WandererPhysicalProperties
 {
 
    public static final double ankleHeight   = 2.625 * 0.0254 + 0.016;

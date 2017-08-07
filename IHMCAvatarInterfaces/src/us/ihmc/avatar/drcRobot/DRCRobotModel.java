@@ -25,8 +25,6 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters
 {
-   public abstract DRCRobotPhysicalProperties getPhysicalProperties();
-
    public abstract DRCRobotJointMap getJointMap();
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);

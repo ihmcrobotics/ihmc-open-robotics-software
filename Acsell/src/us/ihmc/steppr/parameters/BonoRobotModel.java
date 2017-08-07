@@ -7,7 +7,6 @@ import com.jme3.math.Transform;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -106,12 +105,6 @@ public class BonoRobotModel implements DRCRobotModel
    {
       BonoStateEstimatorParameters stateEstimatorParameters = new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
       return stateEstimatorParameters;
-   }
-
-   @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return new BonoPhysicalProperties();
    }
 
    @Override

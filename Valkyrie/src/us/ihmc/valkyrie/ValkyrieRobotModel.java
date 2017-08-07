@@ -12,7 +12,6 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -57,7 +56,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
@@ -78,7 +76,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
-   private final DRCRobotPhysicalProperties physicalProperties;
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
    private final ValkyrieContactPointParameters contactPointParameters;
@@ -121,7 +118,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this.target = target;
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
-      physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
       InputStream sdf = null;
 
@@ -222,12 +218,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       return stateEstimatorParamaters;
-   }
-
-   @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return physicalProperties;
    }
 
    @Override

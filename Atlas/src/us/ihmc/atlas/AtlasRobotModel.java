@@ -188,7 +188,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return stateEstimatorParameters;
    }
 
-   @Override
    public AtlasPhysicalProperties getPhysicalProperties()
    {
       return atlasPhysicalProperties;
