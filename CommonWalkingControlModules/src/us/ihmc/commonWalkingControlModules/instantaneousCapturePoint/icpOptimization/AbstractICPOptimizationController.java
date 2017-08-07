@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -38,8 +39,6 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected static final boolean DEBUG = true;
 
    protected static final String yoNamePrefix = "controller";
-
-   private static final  double maxICPVelocityAtTransferStart = 0.4;
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -97,6 +96,9 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected final YoDouble feedbackForwardWeight = new YoDouble(yoNamePrefix + "FeedbackForwardWeight", registry);
    protected final YoDouble feedbackLateralWeight = new YoDouble(yoNamePrefix + "FeedbackLateralWeight", registry);
    protected final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
+
+   private final YoDouble maxAllowedDistanceCMPSupport = new YoDouble(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry);
+   private final YoDouble safeCoPDistanceToEdge = new YoDouble(yoNamePrefix + "SafeCoPDistanceToEdge", registry);
 
    protected final YoDouble footstepRegularizationWeight = new YoDouble(yoNamePrefix + "FootstepRegularizationWeight", registry);
    protected final YoDouble feedbackRegularizationWeight = new YoDouble(yoNamePrefix + "FeedbackRegularizationWeight", registry);
@@ -160,8 +162,17 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected boolean useDifferentSplitRatioForBigAdjustment;
    protected double minimumTimeOnInitialCMPForBigAdjustment;
 
-   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                                            BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+                                            BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                            double controlDT, boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(icpPlannerParameters, walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons,
+            contactableFeet, controlDT, updateRegularizationAutomatically, yoGraphicsListRegistry);
+   }
+
+   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+                                            ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
+                                            SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                             boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
@@ -221,6 +232,12 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
+      safeCoPDistanceToEdge.set(icpOptimizationParameters.getSafeCoPDistanceToEdge());
+      if (walkingControllerParameters != null)
+         maxAllowedDistanceCMPSupport.set(walkingControllerParameters.getMaxAllowedDistanceCMPSupport());
+      else
+         maxAllowedDistanceCMPSupport.setToNaN();
 
       limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
 

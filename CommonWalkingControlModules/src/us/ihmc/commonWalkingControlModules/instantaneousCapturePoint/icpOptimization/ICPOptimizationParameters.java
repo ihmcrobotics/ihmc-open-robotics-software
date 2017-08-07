@@ -207,6 +207,14 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Sets the minimum distance inside the support polygon for the CoP to be located.
+    */
+   public double getSafeCoPDistanceToEdge()
+   {
+      return 0.002;
+   }
+
+   /**
     * @return The maximum lateral limit that the swing foot can reach w.r.t. the stance foot.
     */
    public double getLateralReachabilityOuterLimit()

@@ -31,7 +31,7 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
                                               SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, true, yoGraphicsListRegistry);
+      super(icpPlannerParameters, walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, true, yoGraphicsListRegistry);
 
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
