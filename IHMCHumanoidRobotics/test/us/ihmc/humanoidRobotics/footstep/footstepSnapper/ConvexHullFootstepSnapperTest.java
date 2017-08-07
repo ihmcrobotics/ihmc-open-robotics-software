@@ -26,7 +26,7 @@ public class ConvexHullFootstepSnapperTest
 	@Test(timeout = 30000)
 	public void testBasicCropping()
 	{
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       List<Point2D> pointsToCrop = new ArrayList<Point2D>();
       pointsToCrop.add(new Point2D(1,1));
@@ -45,7 +45,7 @@ public class ConvexHullFootstepSnapperTest
 	@Test(timeout = 30000)
 	public void testRandomCropping()
 	{
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       List<Point2D> pointsToCrop = new ArrayList<Point2D>();
       Random random = new Random(82368L);
