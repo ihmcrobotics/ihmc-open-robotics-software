@@ -332,6 +332,16 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       }
    }
 
+   protected void updateYoFootsteps()
+   {
+      for (int footstepIndex = 0; footstepIndex < upcomingFootsteps.size(); footstepIndex++)
+      {
+         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
+         upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
+      }
+
+   }
+
    @Override
    public abstract void initializeForStanding(double initialTime);
 
@@ -351,7 +361,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       if (useFootstepRegularization)
       {
          int stepIndex = 0;
-         solver.resetFootstepRegularization(upcomingFootstepLocations.get(stepIndex).getFrameTuple2d());
+         upcomingFootsteps.get(stepIndex).getPosition2d(tempPoint2d);
+         solver.resetFootstepRegularization(tempPoint2d);
       }
 
       solver.resetOnContactChange();
@@ -491,8 +502,9 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          endOfStateICP.scale(footstepMultiplier);
          endOfStateICP.add(perfectCMP);
 
+         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
-                                                upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
+                                                tempPoint2d);
       }
 
       if (useFootstepRegularization)
@@ -531,8 +543,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
-            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps,
-                                                     numberOfFootstepsToConsider, solver);
+            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider, solver);
          solutionHandler.updateVisualizers(desiredICP, footstepMultiplier.getDoubleValue());
 
          solver.getCoPFeedbackDifference(tempVector2d);
@@ -558,7 +569,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps, unclippedFootstepSolutions, wasFootstepAdjusted());
    }
 
    protected void computeTimeInCurrentState(double currentTime)

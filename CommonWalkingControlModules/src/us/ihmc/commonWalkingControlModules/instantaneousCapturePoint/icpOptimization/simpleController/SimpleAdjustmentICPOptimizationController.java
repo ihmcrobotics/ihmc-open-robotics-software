@@ -113,6 +113,8 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
 
+      updateYoFootsteps();
+
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
