@@ -1,5 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -10,6 +12,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -24,8 +27,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       setupGround();
       addShortCinderBlockField(2.0, 2.0);
       addRampsWithSteppingStones(5.0 , 2.0);
-
-
+      addRocks(2.0, -3.0);
    }
 
    private void setupGround()
@@ -122,6 +124,39 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
 
       combinedTerrainObject3D.addRamp(startDistanceX + rampLength, startDistanceY - rampWidth/2, startDistanceX, startDistanceY + rampWidth/2,
             rampHeight, color);
+   }
+
+   private void addRocks(double startDistanceX, double startDistanceY)
+   {
+      Random random = new Random(34782L);
+      int numberOfRocksToAdd = 80;
+      double maxRockHeightInMeters = 0.2;
+      double maxRockWidth = 0.5;
+
+      double rockFieldLength = 8.0;
+      double rockFieldWidth = 2.0;
+
+      for (int i = 0; i < numberOfRocksToAdd; i++)
+      {
+         double centroidHeight = random.nextDouble() * maxRockHeightInMeters;
+         Vector3D normal = new Vector3D(0.0, 0.0, 1.0);
+
+         double[] approximateCentroid = new double[2];
+
+         approximateCentroid[0] = startDistanceX + random.nextDouble() * rockFieldLength;
+         approximateCentroid[1] = startDistanceY + random.nextDouble() * rockFieldWidth;
+
+         int verticesPerRock = 21;
+         double[][] vertices = new double[verticesPerRock][2];
+
+         for (int j = 0; j < verticesPerRock; j++)
+         {
+            vertices[j][0] = random.nextDouble() * maxRockWidth + approximateCentroid[0] - maxRockWidth / 2.0;
+            vertices[j][1] = random.nextDouble() * maxRockWidth + approximateCentroid[1] - maxRockWidth / 2.0;
+         }
+
+         DefaultCommonAvatarEnvironment.addRock3D(combinedTerrainObject3D, normal, centroidHeight, vertices);
+      }
    }
 
    @Override

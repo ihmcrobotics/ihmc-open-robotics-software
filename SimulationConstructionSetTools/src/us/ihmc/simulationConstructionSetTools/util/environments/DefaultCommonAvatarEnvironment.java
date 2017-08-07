@@ -1438,7 +1438,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       return vertices;
    }
 
-   private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
+   public static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
    {
       //      AppearanceDefinition rockAppearance = YoAppearance.DarkGray();
       YoAppearanceMaterial rockAppearance = new YoAppearanceMaterial();
@@ -1459,23 +1459,6 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, rockAppearance);
-      combinedTerrainObject.addTerrainObject(rock);
-   }
-
-   private static void addRock(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
-   {
-      AppearanceDefinition color = YoAppearance.DarkGray();
-
-      ArrayList<Point2D> vertexPoints = new ArrayList<Point2D>();
-
-      for (double[] point : vertices)
-      {
-         Point2D point2d = new Point2D(point);
-         vertexPoints.add(point2d);
-      }
-
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
       combinedTerrainObject.addTerrainObject(rock);
    }
 
