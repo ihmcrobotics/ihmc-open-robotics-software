@@ -35,7 +35,7 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 	@Override
 	public double getStepWidth()
 	{
-		return 0.50;
+		return 0.35;
 	}
 
 	@Override

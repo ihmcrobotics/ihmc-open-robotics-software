@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -67,6 +68,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
    public void update(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
+      timeInState = Math.min(timeInState, currentSegment.getFinalTime());
       currentSegment.compute(timeInState);
    }
 
@@ -91,11 +93,14 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
    private void setCurrentSegmentIndexFromStateTime(double timeInState)
    {
       int segmentIndex = 0;
-      for (; segmentIndex < segments.size(); segmentIndex++)
-         if (segments.get(segmentIndex).timeIntervalContains(timeInState, Epsilons.ONE_THOUSANDTH))
-            break;
-      if (segmentIndex == segments.size())
-         throw new RuntimeException(name + ": Unable to locate suitable segment for given time:" + timeInState);
+      if (MathTools.isGreaterThanOrEqualToWithPrecision(timeInState, segments.get(0).getInitialTime(), Epsilons.ONE_TEN_THOUSANDTH))
+      {
+         for (; segmentIndex < segments.size() - 1; segmentIndex++)
+            if (segments.get(segmentIndex).timeIntervalContains(timeInState, Epsilons.ONE_TEN_THOUSANDTH))
+               break;
+      }
+      else
+         throw new RuntimeException("Unable to find suitable segment at time " + timeInState + ", InitialTime: " + segments.get(0).getInitialTime());
       currentSegment = segments.get(segmentIndex);
       currentSegmentIndex.set(segmentIndex);
    }
@@ -142,32 +147,32 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
          nodeTime[i + 1] = Double.NaN;
       return nodeTime;
    }
-   
+
    public int getMaxNumberOfSegments()
    {
       return maxNumberOfSegments;
    }
-   
+
    public void setNumberOfSegments(int numberOfSegments)
    {
       this.numberOfSegments.set(numberOfSegments);
    }
-   
+
    @Override
    public String toString()
    {
       String ret = "";
       ret += name;
-      for(int i = 0 ; i < numberOfSegments.getIntegerValue(); i++)
+      for (int i = 0; i < numberOfSegments.getIntegerValue(); i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }
-   
+
    public String toString2()
    {
       String ret = "";
       ret += name;
-      for(int i = 0 ; i < segments.size(); i++)
+      for (int i = 0; i < segments.size(); i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }
