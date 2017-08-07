@@ -9,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -17,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -88,7 +90,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       double controlDT = 0.001;
       SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
                                                                                                            bipedSupportPolygons, contactableFeet, controlDT,
-                                                                                                           registry, null);
+                                                                                                           registry, new YoGraphicsListRegistry());
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -161,7 +163,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       double controlDT = 0.001;
       SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
                                                                                                            bipedSupportPolygons, contactableFeet, controlDT,
-                                                                                                           registry, null);
+                                                                                                           registry, new YoGraphicsListRegistry());
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -234,7 +236,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       double controlDT = 0.001;
       SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
                                                                                                            bipedSupportPolygons, contactableFeet, controlDT,
-                                                                                                           registry, null);
+                                                                                                           registry, new YoGraphicsListRegistry());
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -324,7 +326,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       double controlDT = 0.001;
       SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
                                                                                                            bipedSupportPolygons, contactableFeet, controlDT,
-                                                                                                           registry, null);
+                                                                                                           registry, new YoGraphicsListRegistry());
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -747,141 +749,15 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public double getMaxStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getToeWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootstepArea()
-      {
-         return 0;
-      }
-
-      @Override
       public ICPOptimizationParameters getICPOptimizationParameters()
       {
          return new TestICPOptimizationParameters();
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return null;
       }
    }
 }

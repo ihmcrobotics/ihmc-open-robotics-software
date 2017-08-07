@@ -58,9 +58,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -91,6 +88,12 @@ import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DiagnosticBehavior extends AbstractBehavior
 {
@@ -1709,7 +1712,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       else
       {
          footstepPose.setToZero(fullRobotModel.getEndEffectorFrame(robotSide.getOppositeSide(), LimbName.LEG));
-         footstepPose.setY(robotSide.getOppositeSide().negateIfLeftSide(walkingControllerParameters.getInPlaceWidth()));
+         footstepPose.setY(robotSide.getOppositeSide().negateIfLeftSide(walkingControllerParameters.getSteppingParameters().getInPlaceWidth()));
          footstepPose.changeFrame(worldFrame);
 
          Point3D footLocation = new Point3D();

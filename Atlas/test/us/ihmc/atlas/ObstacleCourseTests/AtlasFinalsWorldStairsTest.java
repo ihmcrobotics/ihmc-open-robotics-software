@@ -166,12 +166,12 @@ public class AtlasFinalsWorldStairsTest
    private ArrayList<Point2D> createPartialSupportPolygonForFoot(WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Point2D> footSupportPolygon = new ArrayList<>();
-      double rearOfFoot = -walkingControllerParameters.getFootLength() / 2.0;
-      double frontOfFoot = walkingControllerParameters.getFootLength() / 2.0;
+      double rearOfFoot = -walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0;
+      double frontOfFoot = walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0;
       double cropPercentage = 0.5;
       double adjustedRearOfFoot = rearOfFoot + cropPercentage * (frontOfFoot - rearOfFoot);
-      double frontWidth = walkingControllerParameters.getToeWidth() / 2.0;
-      double rearWidth = (1 - cropPercentage) * walkingControllerParameters.getFootWidth() / 2.0 + cropPercentage * frontWidth;
+      double frontWidth = walkingControllerParameters.getSteppingParameters().getToeWidth() / 2.0;
+      double rearWidth = (1 - cropPercentage) * walkingControllerParameters.getSteppingParameters().getFootWidth() / 2.0 + cropPercentage * frontWidth;
 
       footSupportPolygon.add(new Point2D(frontOfFoot, frontWidth));
       footSupportPolygon.add(new Point2D(frontOfFoot, -frontWidth));

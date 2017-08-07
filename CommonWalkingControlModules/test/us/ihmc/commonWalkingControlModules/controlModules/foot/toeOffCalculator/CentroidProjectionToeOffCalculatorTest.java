@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -357,138 +358,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double getFootForwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootBackwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getToeWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootstepArea()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDefaultStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getInPlaceWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredStepForward()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepUp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepDown()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnOutwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnInwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
          public ToeOffParameters getToeOffParameters()
          {
             return new ToeOffParameters()
@@ -588,6 +457,12 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public ICPOptimizationParameters getICPOptimizationParameters()
+         {
+            return null;
+         }
+
+         @Override
+         public SteppingParameters getSteppingParameters()
          {
             return null;
          }

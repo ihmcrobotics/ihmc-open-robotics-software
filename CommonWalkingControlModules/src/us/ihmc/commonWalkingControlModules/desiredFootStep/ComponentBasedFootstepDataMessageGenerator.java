@@ -23,15 +23,15 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ComponentBasedFootstepDataMessageGenerator implements Updatable
 {
@@ -140,7 +140,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       return footsteps;
    }
 
-   public ComponentBasedDesiredFootstepCalculator createComponentBasedDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters, HeadingAndVelocityEvaluationScriptParameters scriptParameters, 
+   public ComponentBasedDesiredFootstepCalculator createComponentBasedDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters, HeadingAndVelocityEvaluationScriptParameters scriptParameters,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
          boolean useHeadingAndVelocityScript)
    {
@@ -173,21 +173,22 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(pelvisZUpFrame, bipedFeet,
             desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
+      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
+      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
+      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
       return desiredFootstepCalculator;
    }
-   
+
+   @Override
    public void update(double time)
    {
       for(int i = 0; i < updatables.size(); i++)
       {
          updatables.get(i).update(time);
       }
-      
+
       if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
       {
          if (walk.getBooleanValue())
@@ -200,7 +201,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
             commandInputManager.submitMessage(new PauseWalkingMessage(true));
          }
       }
-      
+
       walkPrevious.set(walk.getBooleanValue());
    }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -35,6 +36,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    private final DRCRobotJointMap jointMap;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final BonoSteppingParameters steppingParameters;
 
    public BonoWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
@@ -42,6 +44,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       this.runningOnRealRobot = runningOnRealRobot;
       this.toeOffParameters = new BonoToeOffParameters();
       this.swingTrajectoryParameters = new BonoSwingTrajectoryParameters(runningOnRealRobot);
+      this.steppingParameters = new BonoSteppingParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -112,109 +115,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
-   public double getFootForwardOffset()
-   {
-      return BonoPhysicalProperties.footForward;
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return BonoPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getMaximumLegLengthForSingularityAvoidance()
-   {
-      return BonoPhysicalProperties.legLength;
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      return 0.35;
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.3; //0.5; //0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      return runningOnRealRobot ? 0.5 : 0.4;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.4;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      // TODO The smallest the best in terms of control.
-      return 0.35;//0.375;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.5; //0.5; //0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -479,39 +379,9 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public double getFootWidth()
+   public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return BonoPhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return BonoPhysicalProperties.toeWidth;
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return getFootWidth();
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return getFootLength();
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
+      return BonoPhysicalProperties.legLength;
    }
 
    @Override
@@ -616,5 +486,12 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SteppingParameters getSteppingParameters()
+   {
+      return steppingParameters;
    }
 }

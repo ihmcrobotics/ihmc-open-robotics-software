@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -340,159 +341,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final WalkingControllerParameters walkingControllerParameters = new WalkingControllerParameters()
    {
-      @Override
-      public double getToeWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootstepArea()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
 
       @Override
       public boolean useOptimizationBasedICPController()
@@ -819,6 +667,13 @@ public class ICPAdjustmentOptimizationControllerTest
       public ICPOptimizationParameters getICPOptimizationParameters()
       {
          return icpOptimizationParameters;
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         // TODO Auto-generated method stub
+         return null;
       }
    };
 }
