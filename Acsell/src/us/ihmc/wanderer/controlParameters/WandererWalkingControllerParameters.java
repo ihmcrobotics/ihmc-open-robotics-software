@@ -127,7 +127,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getLegLength()
+   public double getMaximumLegLengthForSingularityAvoidance()
    {
       return WandererPhysicalProperties.legLength;
    }

@@ -717,7 +717,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public double getLegLength()
+      public double getMaximumLegLengthForSingularityAvoidance()
       {
          return 0;
       }

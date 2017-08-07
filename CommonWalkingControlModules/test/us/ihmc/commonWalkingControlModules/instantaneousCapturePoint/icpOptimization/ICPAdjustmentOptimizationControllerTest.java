@@ -571,7 +571,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getLegLength()
+      public double getMaximumLegLengthForSingularityAvoidance()
       {
          // TODO Auto-generated method stub
          return 0;
