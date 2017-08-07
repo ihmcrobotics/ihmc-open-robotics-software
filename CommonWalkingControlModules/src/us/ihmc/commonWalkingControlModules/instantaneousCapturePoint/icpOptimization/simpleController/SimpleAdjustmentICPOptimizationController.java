@@ -32,7 +32,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
                                                     BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                                     double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
+      super(walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, yoGraphicsListRegistry);
 
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
       parentRegistry.addChild(registry);

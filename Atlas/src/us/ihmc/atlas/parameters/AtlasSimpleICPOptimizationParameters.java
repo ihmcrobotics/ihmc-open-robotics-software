@@ -145,6 +145,13 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
 
    /** {@inheritDoc} */
    @Override
+   public double getSafeCoPDistanceToEdge()
+   {
+      return 0.002;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useTimingOptimization()
    {
       return false;
