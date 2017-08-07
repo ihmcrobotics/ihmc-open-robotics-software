@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -48,6 +49,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final RobotTarget target;
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
+
+   private static final boolean USE_SIMPLE_ICP_OPTIMIZATION = true;
 
    // Limits
    private final double spineYawLimit = Math.PI / 4.0;
@@ -77,6 +80,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
 
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -97,6 +101,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
+
+      if (USE_SIMPLE_ICP_OPTIMIZATION)
+         icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+      else
+         icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1122,4 +1131,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return swingTrajectoryParameters;
    }
 
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
+   }
 }
