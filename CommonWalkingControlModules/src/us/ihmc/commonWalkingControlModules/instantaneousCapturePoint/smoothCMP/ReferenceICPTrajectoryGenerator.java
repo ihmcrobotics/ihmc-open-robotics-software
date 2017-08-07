@@ -89,7 +89,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    private final List<YoFrameTrajectory3D> cmpTrajectories = new ArrayList<>();
    
-   private final YoBoolean useContinuousICPAdjustment;
+   private final YoBoolean continuouslyAdjustForICPContinuity;
    private List<FrameTuple<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple<?, ?>>();
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
@@ -112,8 +112,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
       
-      useContinuousICPAdjustment = new YoBoolean("useContinuousICPAdjustment", registry);
-      useContinuousICPAdjustment.set(true);
+      continuouslyAdjustForICPContinuity = new YoBoolean("continuouslyAdjustForICPContinuity", registry);
+      continuouslyAdjustForICPContinuity.set(true);
 
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
@@ -280,9 +280,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       {
          icpAdjustmentToolbox.setICPInitialConditions(icpDesiredFinalPositions, cmpTrajectories, numberOfSegmentsSwing0, 
                                                       isInitialTransfer.getBooleanValue(), omega0.getDoubleValue());       
-         PrintTools.debug("Hello");
       }
-      if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && useContinuousICPAdjustment.getBooleanValue()))
+      if(isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && continuouslyAdjustForICPContinuity.getBooleanValue()))
       {
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositions, icpDesiredFinalPositions,
                                                                            cmpTrajectories, omega0.getDoubleValue());
