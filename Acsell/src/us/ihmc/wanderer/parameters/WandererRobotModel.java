@@ -227,12 +227,6 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
-
-   @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          HumanoidGlobalDataProducer globalDataProducersw, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {

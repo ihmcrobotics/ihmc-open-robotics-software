@@ -206,12 +206,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
-
-   @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;

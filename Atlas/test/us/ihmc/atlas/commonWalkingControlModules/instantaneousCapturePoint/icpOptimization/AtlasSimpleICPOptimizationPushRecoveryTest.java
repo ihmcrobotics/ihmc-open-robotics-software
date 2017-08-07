@@ -2,17 +2,20 @@ package us.ihmc.atlas.commonWalkingControlModules.instantaneousCapturePoint.icpO
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.AvatarICPOptimizationPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
-public class AtlasAvatarICPOptimizationPushRecoveryTest extends AvatarICPOptimizationPushRecoveryTest
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimizationPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
    {
@@ -28,6 +31,12 @@ public class AtlasAvatarICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
                {
                   return true;
                }
+
+               @Override
+               public ICPOptimizationParameters getICPOptimizationParameters()
+               {
+                  return new AtlasSimpleICPOptimizationParameters(false);
+               }
             };
          }
       };
@@ -37,7 +46,7 @@ public class AtlasAvatarICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    public static void main(String[] args)
    {
-      AtlasAvatarICPOptimizationPushRecoveryTest test = new AtlasAvatarICPOptimizationPushRecoveryTest();
+      AtlasSimpleICPOptimizationPushRecoveryTest test = new AtlasSimpleICPOptimizationPushRecoveryTest();
       try
       {
          test.testPushICPOptimizationOutwardPushInSwing();
