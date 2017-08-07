@@ -3,10 +3,12 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -34,6 +36,8 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F polynomialCoefficientCombinedVectorAdjustment = new DenseMatrix64F(defaultSize, 1);   
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment1 = new DenseMatrix64F(defaultSize, 1); 
    private final DenseMatrix64F polynomialCoefficientVectorAdjustmentSegment2 = new DenseMatrix64F(defaultSize, 1); 
+   
+   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new SolvePseudoInverseSvd();
    
    private List<FrameTuple<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple<?, ?>>();
    private FrameTuple<?, ?> icpQuantityInitialSegment1 = new FramePoint();
@@ -213,17 +217,11 @@ public class SmoothCapturePointAdjustmentToolbox
    private void computeAdjustedPolynomialCoefficientVectors1D(int numberOfCoefficients)
    {
       // Uses the Moore-Penrose pseudo-inverse to counter bad conditioning of boundaryConditionMatrix
-      CommonOps.pinv(boundaryConditionMatrix, boundaryConditionMatrixInverse);
-      CommonOps.mult(boundaryConditionMatrixInverse, boundaryConditionVector, polynomialCoefficientCombinedVectorAdjustment);
+      pseudoInverseSolver.setA(boundaryConditionMatrix);
+      pseudoInverseSolver.solve(boundaryConditionVector, polynomialCoefficientCombinedVectorAdjustment);
       
       polynomialCoefficientVectorAdjustmentSegment1.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, 0, numberOfCoefficients, 0, 1));
       polynomialCoefficientVectorAdjustmentSegment2.set(CommonOps.extract(polynomialCoefficientCombinedVectorAdjustment, numberOfCoefficients, 2*numberOfCoefficients, 0, 1));
-      
-//      PrintTools.debug("BC Matrix = " + boundaryConditionMatrix.toString());
-//      PrintTools.debug("BC MInver = " + boundaryConditionMatrixInverse.toString());
-//      PrintTools.debug("BC Vector = " + boundaryConditionVector.toString());
-//      PrintTools.debug("PC adjust = " + polynomialCoefficientCombinedVectorAdjustment.toString());
-//      PrintTools.debug("");
    }
    
    private void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, int derivativeOrder, YoTrajectory cmpPolynomialSegment2)
