@@ -3,10 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleAdjustmentICPOptimizationController;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -33,22 +31,21 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
-         double gravityZ, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
+                                                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime,
-            totalMass, gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, true);
+      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
+           parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
-         YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
+         WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
-      this.bipedSupportPolygons = bipedSupportPolygons;
 
+      this.bipedSupportPolygons = bipedSupportPolygons;
       this.yoTime = yoTime;
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -63,15 +60,24 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
 
-      if (icpOptimizationParameters.useTimingOptimization())
+      ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
+      if (icpOptimizationParameters.useSimpleOptimization())
       {
-         icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, contactableFeet,
+                                                                                   controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
-         icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-               bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         if (icpOptimizationParameters.useTimingOptimization())
+         {
+            icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+                                                                            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         }
+         else
+         {
+            icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, walkingControllerParameters, bipedSupportPolygons,
+                                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         }
       }
    }
 
@@ -115,7 +121,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    @Override
    public void computeCMPInternal(FramePoint2d desiredCMPPreviousValue)
    {
-      icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, capturePoint, omega0);
+      icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
       icpOptimizationController.getDesiredCMP(desiredCMP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
