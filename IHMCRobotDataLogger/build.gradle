@@ -9,13 +9,22 @@ buildscript {
    }
 }
 
-buildscript{repositories{maven{url = "https://repo.gradle.org/gradle/libs-snapshots-local"}}}
-
+buildscript {
+   repositories {
+      maven { url = "https://repo.gradle.org/gradle/libs-releases-local" }
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.10"
+      classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
+   }
+}
 plugins {
-   id "us.ihmc.build.ihmc-build" version "0.3.34"
    id "org.hidetake.ssh" version "2.9.0"
    id "application"
 }
+apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
@@ -37,29 +46,17 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.3.4'
    compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.3'
    compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
-<<<<<<< HEAD
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
    compile ihmc.getBuildVersion("us.ihmc", "model-file-loader", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-description", dependencyMode)
+}
 
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-   testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-=======
-   compile group: 'net.jpountz.lz4', name: 'lz4', version: '1.3.0'
-   
-   compile ihmc.getProjectDependency(":ModelFileLoader")
-   compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-    compile ihmc.getProjectDependency(":IHMCRobotDescription")
-    
-        testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-    
->>>>>>> refs/heads/develop
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
 }
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
