@@ -104,7 +104,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.initializeForSingleSupport(0.0);
       icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
@@ -113,7 +113,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       icpOptimizationController.getDesiredCMP(desiredCMP);
@@ -176,6 +176,11 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final ICPOptimizationParameters icpOptimizationParameters = new ICPOptimizationParameters()
    {
+      @Override public boolean useSimpleOptimization()
+      {
+         return false;
+      }
+
       @Override public int getMaximumNumberOfFootstepsToConsider()
       {
          return 5;
@@ -297,26 +302,6 @@ public class ICPAdjustmentOptimizationControllerTest
          return 0.001;
       }
 
-      @Override public double getDoubleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getDoubleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
-      @Override public double getSingleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getSingleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
       @Override public double getAdjustmentDeadband()
       {
          return 0.0;
@@ -360,7 +345,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final WalkingControllerParameters walkingControllerParameters = new WalkingControllerParameters()
    {
-
       @Override
       public double getToeWidth()
       {
@@ -1016,6 +1000,12 @@ public class ICPAdjustmentOptimizationControllerTest
                return 0;
             }
          };
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
       }
    };
 }

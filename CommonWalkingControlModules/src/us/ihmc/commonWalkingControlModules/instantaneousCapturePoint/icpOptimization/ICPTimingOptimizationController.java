@@ -25,7 +25,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ICPTimingOptimizationController extends ICPOptimizationController
+public class ICPTimingOptimizationController extends AbstractICPOptimizationController
 {
    private static final double footVelocityScalarWeight = 0.0;
 
@@ -74,7 +74,8 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, false, yoGraphicsListRegistry);
+      super(icpPlannerParameters, walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, false,
+            yoGraphicsListRegistry);
 
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
@@ -158,7 +159,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
