@@ -572,6 +572,15 @@ public class YoPolynomial
       solver.solve(constraintVector, coefficientVector);
    }
 
+   public void setDirectly(DenseMatrix64F coefficients)
+   {
+      reshape(coefficients.getNumRows());
+      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         this.a[i].set(coefficients.get(i, 0));
+      }
+   }
+   
    public void setDirectly(double[] coefficients)
    {
       reshape(coefficients.length);

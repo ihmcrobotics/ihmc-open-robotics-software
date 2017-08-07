@@ -357,6 +357,11 @@ public class Footstep
       footstepPose.getPositionIncludingFrame(positionToPack);
    }
 
+   public void getPosition2d(FramePoint2d positionToPack)
+   {
+      footstepPose.getPosition2dIncludingFrame(positionToPack);
+   }
+
    public void getOrientation(FrameOrientation orientationToPack)
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);

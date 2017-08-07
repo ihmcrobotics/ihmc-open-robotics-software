@@ -18,6 +18,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -126,6 +128,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final YoBoolean usePointFeet;
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
    private FootstepTestHelper footstepTestHelper;
 
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
@@ -177,7 +180,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
       icpOptimizationController = new ICPTimingOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfFootstepsToCreate; i++)
@@ -297,6 +300,9 @@ public class StepAndTimingAdjustmentExampleGraphic
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
 
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega0, worldFrame, 9.81, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
    }
@@ -319,6 +325,8 @@ public class StepAndTimingAdjustmentExampleGraphic
       for (RobotSide robotSide : RobotSide.values)
          contactStates.get(robotSide).setFullyConstrained();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
+
 
       icpPlanner.clearPlan();
       timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
@@ -338,9 +346,10 @@ public class StepAndTimingAdjustmentExampleGraphic
       icpPlanner.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue());
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
+      icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
 
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
-      icpOptimizationController.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue(), desiredICP, desiredICPVelocity, desiredICP, omega0.getDoubleValue());
+      icpOptimizationController.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue(), desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0.getDoubleValue());
 
       /** do single support **/
 
@@ -356,6 +365,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       else
          contactStates.get(supportSide.getOppositeSide()).setContactPoints(plannedFootsteps.get(0).getPredictedContactPoints());
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
 
       icpPlanner.clearPlan();
       timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
@@ -465,6 +475,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final FramePoint2d desiredICP = new FramePoint2d();
    private final FrameVector2d desiredICPVelocity = new FrameVector2d();
    private final FramePoint2d currentICP = new FramePoint2d();
+   private final FramePoint2d perfectCMP = new FramePoint2d();
 
    public void updateGraphic()
    {
@@ -489,7 +500,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       //updateCurrentICPPosition();
 
       yoCurrentICP.getFrameTuple2d(currentICP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, currentICP, omega0.getDoubleValue());
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega0.getDoubleValue());
       icpOptimizationController.getDesiredCMP(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
 
@@ -1287,6 +1298,12 @@ public class StepAndTimingAdjustmentExampleGraphic
    {
       return new ICPOptimizationParameters()
       {
+         @Override
+         public boolean useSimpleOptimization()
+         {
+            return false;
+         }
+
          @Override public int getMaximumNumberOfFootstepsToConsider()
          {
             return 5;
@@ -1442,30 +1459,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          @Override public double getMinimumTimeRemaining()
          {
             return 0.001;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPLateralExit()
-         {
-            return 0;
          }
 
          @Override public double getAdjustmentDeadband()

@@ -380,6 +380,11 @@ public class YoTrajectory
       setTime(t0, tFinal);
       polynomial.setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0, zFinal, zdFinal, zddFinal);
    }
+   
+   public void setDirectly(DenseMatrix64F coefficients)
+   {
+      polynomial.setDirectly(coefficients);
+   }
 
    public void compute(double x)
    {
@@ -392,6 +397,11 @@ public class YoTrajectory
       //if (from < tInitial.getDoubleValue() || to > tFinal.getDoubleValue())
       //   return Double.NaN;
       return polynomial.getIntegral(from, to);
+   }
+   
+   public double getDerivative(int order, double x)
+   {
+      return polynomial.getDerivative(order, x);
    }
 
    /**
