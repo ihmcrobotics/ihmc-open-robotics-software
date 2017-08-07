@@ -38,6 +38,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
+   private static final double transferSplitFraction = 0.5;
 
    private static final boolean useAngularMomentumIntegrator = true;
    private static final double angularMomentumIntegratorGain = 50.0;
@@ -60,6 +61,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final ArrayList<YoDouble> swingDurations = new ArrayList<>();
    protected final ArrayList<YoDouble> transferDurations = new ArrayList<>();
+   protected final YoDouble transferDurationSplitFraction = new YoDouble(yoNamePrefix + "TransferDurationSplitFraction", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
 
    protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
@@ -207,6 +209,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
       }
+      transferDurationSplitFraction.set(transferSplitFraction);
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -496,7 +499,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          if (localScaleUpcomingStepWeights)
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + 0.5 * transferDurations.get(1).getDoubleValue();
+         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * transferDurations.get(1).getDoubleValue();
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
