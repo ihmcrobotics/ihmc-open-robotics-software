@@ -5,27 +5,34 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.ArrayList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SnapBasedNodeChecker implements FootstepNodeChecker
 {
-   private static final double maxStepHeightChange = 0.2;
-   private static final double minPercentageOfFoothold = 0.95;
+   private static final double defaultMaxStepHeightChange = 0.2;
+   private static final double defaultMinPercentageOfFoothold = 0.95;
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
    private final ConvexPolygon2D footholdAfterSnap;
 
-   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
+   private final YoDouble maxStepHeightChange;
+   private final YoDouble minPercentageFoothold;
+
+   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, YoVariableRegistry registry)
    {
       this.footPolygons = footPolygons;
       this.snapper = snapper;
       this.footholdAfterSnap = new ConvexPolygon2D();
+
+      maxStepHeightChange = new YoDouble("maxStepHeightChange", registry);
+      minPercentageFoothold = new YoDouble("minPercentageFoothold", registry);
+
+      maxStepHeightChange.set(defaultMaxStepHeightChange);
+      minPercentageFoothold.set(defaultMinPercentageOfFoothold);
    }
 
    @Override
@@ -43,7 +50,7 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
-      if (area < minPercentageOfFoothold * footArea)
+      if (area < minPercentageFoothold.getDoubleValue() * footArea)
          return false;
 
       if(previousNode == null)
@@ -51,7 +58,7 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
       RigidBodyTransform previousSnapTransform = snapper.snapFootstepNode(previousNode, null);
       double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
-      if (heightChange > maxStepHeightChange)
+      if (heightChange > maxStepHeightChange.getDoubleValue())
          return false;
 
       return true;

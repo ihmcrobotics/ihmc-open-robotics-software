@@ -8,6 +8,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
@@ -19,8 +20,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
    private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeX, 0.1, 0.2, 0.4};
    private double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeY, defaultStepWidth + FootstepNode.gridSizeY};
    private double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
-
-
+   
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
