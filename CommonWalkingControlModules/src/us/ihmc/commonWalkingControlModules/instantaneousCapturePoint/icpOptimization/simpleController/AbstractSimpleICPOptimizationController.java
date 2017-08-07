@@ -490,7 +490,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          endOfStateICP.scale(footstepMultiplier);
          endOfStateICP.add(perfectCMP);
 
-         solver.setFootstepAdjustmentConditions(footstepMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
+         solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
       }
 
