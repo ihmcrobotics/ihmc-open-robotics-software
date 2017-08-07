@@ -8,6 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
@@ -19,6 +22,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryMathToolsTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -36,7 +40,8 @@ public class TrajectoryMathToolsTest
 
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryAddition()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
@@ -53,7 +58,8 @@ public class TrajectoryMathToolsTest
       assert (traj1.getCoefficient(3) == 0.03566529492455418);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleAddition()
    {
       List<YoTrajectory> resultTrajectoryList = new ArrayList<>(3);
@@ -97,7 +103,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj5.getCoefficient(3), 0.0640, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMultiTimeScaleOperation()
    {
       List<Double> timeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
@@ -286,7 +293,8 @@ public class TrajectoryMathToolsTest
       assert (timeList.get(1) == 10);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectorySubtraction()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
@@ -303,7 +311,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj1.getCoefficient(3), 1.5 - 0.025, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleSubtraction()
    {
       List<YoTrajectory> resultTrajectoryList = new ArrayList<>(3);
@@ -347,7 +356,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj5.getCoefficient(3), 0.0469, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryMultiplication2()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 8, registry);
@@ -361,7 +371,8 @@ public class TrajectoryMathToolsTest
 
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryMultiplication()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
@@ -381,7 +392,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj1.getCoefficient(6), -0.397256515775002, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleMultiplication()
    {
       List<YoTrajectory> resultTrajectoryList = new ArrayList<>(2);
@@ -417,7 +429,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj4.getCoefficient(3), 0, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test3DTrajectoryAddition()
    {
       YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
@@ -448,7 +461,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj.getCoefficient(1), -4, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test3DTrajectorySubtraction()
    {
       YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
@@ -479,7 +493,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj.getCoefficient(1), 15.26, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test3DTrajectoryDotProducts()
    {
       YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
@@ -513,7 +528,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj.getCoefficient(2), 15, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test3DTrajectoryCrossProduct()
    {
       YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
@@ -547,7 +563,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj.getCoefficient(2), -8, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIntegration()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 2, registry);
@@ -559,7 +576,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj2.getCoefficient(2), 0.05, Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testDifferentiation()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
@@ -570,7 +588,8 @@ public class TrajectoryMathToolsTest
       assert (MathTools.epsilonCompare(traj2.getCoefficient(1), 2 * traj1.getCoefficient(2), Epsilons.ONE_THOUSANDTH));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testShifting()
    {
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
@@ -603,7 +622,8 @@ public class TrajectoryMathToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSegmentedAddition()
    {
       DummySegmentedTrajectory traj1 = new DummySegmentedTrajectory("TestTraj1", 4, 2, registry);
