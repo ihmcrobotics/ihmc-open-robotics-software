@@ -1,8 +1,15 @@
-buildscript{repositories{maven{url = "https://repo.gradle.org/gradle/libs-snapshots-local"}
-                         maven {url "https://plugins.gradle.org/m2/"}
-                         mavenLocal()}
-            dependencies{classpath "us.ihmc.build:ihmc-build:0.3.34"}}
-apply plugin: "us.ihmc.build.ihmc-build"
+buildscript {
+   repositories {
+      maven { url = "https://repo.gradle.org/gradle/libs-releases-local" }
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.10"
+      classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
+   }
+}
+apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
@@ -26,11 +33,13 @@ dependencies {
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-jmonkey-engine-toolkit", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-state-estimation", dependencyMode)
+}
 
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-   testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   testCompile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
 }

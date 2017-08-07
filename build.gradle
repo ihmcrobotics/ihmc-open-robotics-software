@@ -1,0 +1,5 @@
+task generateSettings {
+   gradle.includedBuilds.each {
+      dependsOn it.task(":generateSettings")
+   }
+}

@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.8"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.10"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -37,7 +37,6 @@ dependencies {
 }
 
 testDependencies {
-   compile rootProject
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
    compile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
