@@ -192,7 +192,7 @@ public class AStarPlanarRegionsPlannerTest
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
-      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+      EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(registry);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
       FootstepNodeVisualization viz = null;
       if (visualize)
