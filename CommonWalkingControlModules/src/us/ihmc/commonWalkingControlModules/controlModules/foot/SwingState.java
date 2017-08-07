@@ -360,7 +360,6 @@ public class SwingState extends AbstractUnconstrainedState
          // make the foot orientation better for avoidance
          if (addOrientationMidpointForClearance.getBooleanValue() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
          {
-            swingTrajectoryOptimizer.getWaypointData(0, tempPositionTrajectoryPoint);
             tmpOrientation.setToZero(worldFrame);
             tmpVector.setToZero(worldFrame);
             tmpOrientation.interpolate(initialOrientation, finalOrientation, midpointOrientationInterpolationForClearance.getDoubleValue());

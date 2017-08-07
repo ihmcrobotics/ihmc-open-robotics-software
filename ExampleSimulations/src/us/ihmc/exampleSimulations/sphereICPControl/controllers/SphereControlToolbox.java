@@ -609,6 +609,12 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
+         public boolean useSimpleOptimization()
+         {
+            return false;
+         }
+
+         @Override
          public int numberOfFootstepsToConsider()
          {
             return 4;
@@ -744,30 +750,6 @@ public class SphereControlToolbox
          public double getMinimumTimeRemaining()
          {
             return 0.0001;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPLateralExit()
-         {
-            return 0;
          }
 
          @Override
