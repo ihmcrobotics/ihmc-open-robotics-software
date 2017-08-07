@@ -749,34 +749,4 @@ public abstract class WalkingControllerParameters implements SteppingParameters
 
    // move to CoM height parameters
    public abstract double defaultOffsetHeightAboveAnkle();
-
-   // move to UI specific parameters
-   public abstract double getAnkleHeight();
-
-   // move to UI specific parameters
-   public abstract double pelvisToAnkleThresholdForWalking();
-
-   // move to UI specific parameters
-   public abstract double getSpineYawLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchUpperLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchLowerLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpineRollLimit();
-
-   // move to UI specific parameters
-   public abstract boolean isSpinePitchReversed();
-
-   // move to UI specific parameters
-   public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
-
-   // move to UI specific parameters
-   public double getDefaultTrajectoryTime()
-   {
-      return 3.0;
-   }
 }

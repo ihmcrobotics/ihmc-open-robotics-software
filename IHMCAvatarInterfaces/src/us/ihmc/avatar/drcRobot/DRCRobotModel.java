@@ -19,6 +19,7 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
+import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
@@ -71,6 +72,14 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return the custom output writer.
     */
    public default DRCOutputWriter getCustomSimulationOutputWriter(DRCOutputWriter parentOutputWriter)
+   {
+      return null;
+   }
+
+   /**
+    * @return parameters used in the user interface only.
+    */
+   public default UIParameters getUIParameters()
    {
       return null;
    }

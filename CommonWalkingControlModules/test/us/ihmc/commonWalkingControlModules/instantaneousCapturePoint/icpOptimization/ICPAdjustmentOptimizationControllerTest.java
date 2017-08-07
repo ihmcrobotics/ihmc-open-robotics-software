@@ -502,13 +502,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double pelvisToAnkleThresholdForWalking()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public double nominalHeightAboveAnkle()
       {
          // TODO Auto-generated method stub
@@ -524,48 +517,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public double maximumHeightAboveAnkle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public boolean isSpinePitchReversed()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getSpineYawLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpineRollLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchUpperLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchLowerLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSideLengthOfBoundingBoxForFootstepHeight()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -691,13 +642,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public double getCoPErrorThresholdForHighCoPDamping()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getAnkleHeight()
       {
          // TODO Auto-generated method stub
          return 0;

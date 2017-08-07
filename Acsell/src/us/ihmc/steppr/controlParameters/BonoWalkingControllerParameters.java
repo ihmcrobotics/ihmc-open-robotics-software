@@ -127,12 +127,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public double getAnkleHeight()
-   {
-      return BonoPhysicalProperties.ankleHeight;
-   }
-
-   @Override
    public double getLegLength()
    {
       return BonoPhysicalProperties.legLength;
@@ -484,41 +478,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return 0.6; // 1.5; //
    }
 
-   /** @inheritDoc */
-   @Override
-   public double getSpineYawLimit()
-   {
-      return 0.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return false;
-   }
-
    @Override
    public double getFootWidth()
    {
@@ -553,12 +512,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public double getFootstepArea()
    {
       return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return 0;
    }
 
    @Override
@@ -631,12 +584,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
       return true;
-   }
-
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0;
    }
 
    /** {@inheritDoc} */

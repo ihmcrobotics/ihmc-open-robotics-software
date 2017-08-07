@@ -156,12 +156,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getAnkleHeight()
-   {
-      return ValkyriePhysicalProperties.ankleHeight;
-   }
-
-   @Override
    public double getLegLength()
    {
       return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
@@ -788,41 +782,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return (target == RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
    }
 
-   /** @inheritDoc */
-   @Override
-   public double getSpineYawLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return -0.13;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return 0.666;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return true;
-   }
-
    @Override
    public double getFootWidth()
    {
@@ -857,12 +816,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getFootstepArea()
    {
       return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
 
    @Override
@@ -969,12 +922,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return false;
    }
 
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0.8157;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
@@ -1023,12 +970,5 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDefaultTrajectoryTime()
-   {
-      return 2.0;
    }
 }
