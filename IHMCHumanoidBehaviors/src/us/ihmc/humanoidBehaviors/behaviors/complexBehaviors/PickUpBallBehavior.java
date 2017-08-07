@@ -40,8 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -51,6 +50,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PickUpBallBehavior extends AbstractBehavior
 {
@@ -86,15 +87,15 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ReferenceFrame chestCoMFrame;
    private final ReferenceFrame pelvisZUpFrame;
 
-
    public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
+         FullHumanoidRobotModelFactory robotModelFactory)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      
+
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       this.referenceFrames = referenceFrames;
 
@@ -120,7 +121,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(robotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
 
       behaviors.add(wholeBodyBehavior);
 
@@ -282,7 +283,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       desiredAxisAngle.set(axis, rotationDownAngle);
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
-      
+
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
@@ -523,7 +524,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
-      
+
       ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
 
@@ -545,7 +546,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
 //      pipeLine.submitSingleTaskStage(validateBallTask);
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
-      //RECENTER BODY      
+      //RECENTER BODY
       pipeLine.submitSingleTaskStage(walkToBallTask);
 
       pipeLine.requestNewStage();
@@ -604,11 +605,11 @@ public class PickUpBallBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //
       pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
-      //      
+      //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
-      //      
-      //      
+      //
+      //
       //      pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //      pipeLine.submitSingleTaskStage(lookUp);
    }
@@ -698,7 +699,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    {
    }
 
-  
+
 
 
 }

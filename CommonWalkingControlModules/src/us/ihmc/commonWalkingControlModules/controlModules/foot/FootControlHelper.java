@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -117,6 +119,16 @@ public class FootControlHelper
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   public ToeOffParameters getToeOffParameters()
+   {
+      return walkingControllerParameters.getToeOffParameters();
+   }
+
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return walkingControllerParameters.getSwingTrajectoryParameters();
    }
 
    public PartialFootholdControlModule getPartialFootholdControlModule()

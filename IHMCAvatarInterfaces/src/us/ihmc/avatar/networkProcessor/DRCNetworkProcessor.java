@@ -217,7 +217,7 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
       }
    }
-   
+
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
@@ -226,15 +226,15 @@ public class DRCNetworkProcessor
         MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
         mocapVizPacketCommunicator.attachListener(PlanarRegionsListMessage.class, planarRegionsListManager);
         mocapVizPacketCommunicator.connect();
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE_VIZ, mocapVizPacketCommunicator);        
-        
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE_VIZ, mocapVizPacketCommunicator);
+
         new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
         PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
         packetCommunicator.connect();
-        
+
         String methodName = "setupMocapModule";
-        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);        
+        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
      }
    }
 
@@ -265,11 +265,11 @@ public class DRCNetworkProcessor
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
+            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation);
+            new IHMCHumanoidBehaviorManager(robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation);
          }
 
          PacketCommunicator behaviorModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);

@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -237,7 +237,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
    private SimpleFootstepSnapper createSimpleFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       BasicFootstepMask footstepMask = new BasicFootstepMask(snappingParameters.getCollisionPolygon(), 0.0);
 
       SimpleFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();

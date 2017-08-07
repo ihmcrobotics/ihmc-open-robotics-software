@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.controllerAPI;
 
 import us.ihmc.avatar.controllerAPI.EndToEndAdjustFootstepMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 

@@ -205,6 +205,12 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
+      public FramePoint getPosition()
+      {
+         return groundContactPoint.getYoPosition().getFrameTuple();
+      }
+
+      @Override
       public void getPosition(FramePoint framePointToPack)
       {
          framePointToPack.set(groundContactPoint.getPositionPoint());

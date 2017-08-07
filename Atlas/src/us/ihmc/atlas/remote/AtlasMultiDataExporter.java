@@ -23,6 +23,7 @@ import org.apache.batik.dom.util.HashTable;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -76,7 +77,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    {
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
       int numberOfEntries = 0;
-      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
+      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.SCS, false);
       DRCRobotJointMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
       FullHumanoidRobotModel robotModel = model.createFullRobotModel();
