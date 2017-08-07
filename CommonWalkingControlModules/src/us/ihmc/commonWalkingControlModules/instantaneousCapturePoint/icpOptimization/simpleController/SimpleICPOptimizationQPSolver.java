@@ -252,9 +252,9 @@ public class SimpleICPOptimizationQPSolver
       this.copSafeDistanceToEdge = copSafeDistanceToEdge;
    }
 
-   public void setMaxCMPDifference(double maxCMPDifference)
+   public void setMaxCMPDistanceFromEdge(double maxCMPDistance)
    {
-      this.cmpSafeDistanceFromEdge = maxCMPDifference;
+      this.cmpSafeDistanceFromEdge = maxCMPDistance;
    }
 
    /**
@@ -326,7 +326,7 @@ public class SimpleICPOptimizationQPSolver
       reachabilityConstraint.setPolygon();
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
-      if (Double.isFinite(cmpSafeDistanceFromEdge))
+      if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
       solverInput_H.reshape(problemSize, problemSize);
@@ -709,13 +709,13 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addCMPLocationConstraint()
    {
-      // FIXME
       cmpLocationConstraint.setPositionOffset(perfectCMP);
       cmpLocationConstraint.setDeltaInside(-cmpSafeDistanceFromEdge);
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
