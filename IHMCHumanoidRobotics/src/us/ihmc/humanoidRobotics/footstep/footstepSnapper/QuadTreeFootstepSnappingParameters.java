@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 /**
  * Created by agrabertilton on 1/20/15.
  */
-public class FootstepSnappingParameters
+public class QuadTreeFootstepSnappingParameters
 {
    protected ConvexPolygon2D collisionPolygon;
    protected ConvexPolygon2D supportPolygon;
@@ -20,11 +20,11 @@ public class FootstepSnappingParameters
    private double distanceAdjustment = 0;
    private double angleAdjustment = 0;
 
-   public FootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance){
+   public QuadTreeFootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance){
       this(collisionPolygon, supportPolygon, boundingSquareSizeLength, maxAngle, minArea, zDistanceTolerance, 0.0, 0.0, 1);
    }
 
-   public FootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance, double distanceAdjustment, double angleAdjustment, int badnumberOfPointsthreshold){
+   public QuadTreeFootstepSnappingParameters(ConvexPolygon2D collisionPolygon, ConvexPolygon2D supportPolygon, double boundingSquareSizeLength, double maxAngle, double minArea, double zDistanceTolerance, double distanceAdjustment, double angleAdjustment, int badnumberOfPointsthreshold){
       this.collisionPolygon = collisionPolygon;
       this.supportPolygon = supportPolygon;
       this.boundingSquareSizeLength = boundingSquareSizeLength;
@@ -74,7 +74,7 @@ public class FootstepSnappingParameters
    }
 
 
-   public void updateParameters(FootstepSnappingParameters newParameters){
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters){
       collisionPolygon = newParameters.getCollisionPolygon();
       supportPolygon = newParameters.getSupportPolygon();
       boundingSquareSizeLength = newParameters.getBoundingSquareSizeLength();
