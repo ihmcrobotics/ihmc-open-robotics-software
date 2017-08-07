@@ -17,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -64,6 +66,7 @@ public class ICPAdjustmentOptimizationControllerTest
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -82,7 +85,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.clearPlan();
 
       ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
-            walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.001, registry, null);
+            walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet, 0.001, registry, null);
       icpOptimizationController.clearPlan();
 
       double stepLength = 0.2;
@@ -104,7 +107,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.initializeForSingleSupport(0.0);
       icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
@@ -113,7 +116,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       icpOptimizationController.getDesiredCMP(desiredCMP);
@@ -172,10 +175,18 @@ public class ICPAdjustmentOptimizationControllerTest
 
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, ReferenceFrame.getWorldFrame(), 9.81, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, null);
    }
 
    private static final ICPOptimizationParameters icpOptimizationParameters = new ICPOptimizationParameters()
    {
+      @Override public boolean useSimpleOptimization()
+      {
+         return false;
+      }
+
       @Override public int getMaximumNumberOfFootstepsToConsider()
       {
          return 5;
@@ -297,26 +308,6 @@ public class ICPAdjustmentOptimizationControllerTest
          return 0.001;
       }
 
-      @Override public double getDoubleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getDoubleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
-      @Override public double getSingleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getSingleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
       @Override public double getAdjustmentDeadband()
       {
          return 0.0;
@@ -360,7 +351,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final WalkingControllerParameters walkingControllerParameters = new WalkingControllerParameters()
    {
-
       @Override
       public double getToeWidth()
       {
@@ -1016,6 +1006,12 @@ public class ICPAdjustmentOptimizationControllerTest
                return 0;
             }
          };
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
       }
    };
 }
