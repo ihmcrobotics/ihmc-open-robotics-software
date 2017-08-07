@@ -113,7 +113,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       icpOptimizationController.getDesiredCMP(desiredCMP);

@@ -96,22 +96,22 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
       desiredICP.changeFrame(worldFrame);
       desiredICPVelocity.changeFrame(worldFrame);
+      perfectCMP.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
 
       this.currentICP.set(currentICP);
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
+      this.perfectCMP.set(perfectCMP);
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
-
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, perfectCMP);
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();

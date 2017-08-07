@@ -109,7 +109,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       controller.getDesiredCMP(desiredCMP);
@@ -182,7 +182,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForTransfer(0.0, RobotSide.LEFT, omega);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       controller.getDesiredCMP(desiredCMP);
@@ -255,7 +255,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-         controller.compute(0.04, desiredICP, desiredICPVelocity, currentICP, omega);
+         controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       controller.getDesiredCMP(desiredCMP);
@@ -345,7 +345,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-      controller.compute(0.04, desiredICP, desiredICPVelocity, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       controller.getDesiredCMP(desiredCMP);
