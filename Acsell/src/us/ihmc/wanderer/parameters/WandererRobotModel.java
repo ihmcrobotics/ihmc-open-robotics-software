@@ -6,7 +6,6 @@ import com.jme3.math.Transform;
 
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -106,12 +105,6 @@ public class WandererRobotModel implements DRCRobotModel
    {
       WandererStateEstimatorParameters stateEstimatorParameters = new WandererStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
       return stateEstimatorParameters;
-   }
-
-   @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return new WandererPhysicalProperties();
    }
 
    @Override

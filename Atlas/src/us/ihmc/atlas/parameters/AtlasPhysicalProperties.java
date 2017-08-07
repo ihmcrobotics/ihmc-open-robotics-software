@@ -1,12 +1,12 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
+public class AtlasPhysicalProperties implements RobotPhysicalProperties
 {
    private final static double ATLAS_HEIGHT = 2.0;
    private final static double ATLAS_WEIGHT = 155.944174;

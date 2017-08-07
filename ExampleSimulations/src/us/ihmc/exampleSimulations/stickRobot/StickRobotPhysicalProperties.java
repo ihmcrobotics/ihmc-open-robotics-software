@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.stickRobot;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,7 +12,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * This class defines the physical properties of the robot foot dimensions and other supporting parameters
  * It can be used to add more physical robot specific parameters
  */
-public class StickRobotPhysicalProperties implements DRCRobotPhysicalProperties
+public class StickRobotPhysicalProperties
 {
    public static final double footsizeReduction = 0.01;
 
