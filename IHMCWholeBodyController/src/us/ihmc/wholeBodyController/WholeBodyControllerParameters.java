@@ -23,8 +23,6 @@ public interface WholeBodyControllerParameters
 
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
 
-	public ICPOptimizationParameters getICPOptimizationParameters();
-
 	public WalkingControllerParameters getWalkingControllerParameters();
 
 	public RobotContactPointParameters getContactPointParameters();

@@ -543,11 +543,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
    }
 
-   public void setICPOptimizationControllerParameters(ICPOptimizationParameters icpOptimizationParameters)
-   {
-      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
-   }
-
    public HighLevelState getCurrentHighLevelState()
    {
       return highLevelHumanoidControllerManager.getCurrentHighLevelState();

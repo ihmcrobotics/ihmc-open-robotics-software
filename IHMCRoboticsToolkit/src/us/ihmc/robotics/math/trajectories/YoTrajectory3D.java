@@ -3,6 +3,8 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Tuple3d;
+
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -14,7 +16,7 @@ public class YoTrajectory3D
    protected final YoTrajectory xTrajectory;
    protected final YoTrajectory yTrajectory;
    protected final YoTrajectory zTrajectory;
-
+   
    public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
       xTrajectory = new YoTrajectory(name + "X", maximumNumberOfCoefficients, registry);
@@ -313,17 +315,7 @@ public class YoTrajectory3D
 
    public YoTrajectory getYoTrajectory(Direction direction)
    {
-      switch (direction)
-      {
-      case X:
-         return getYoTrajectoryX();
-      case Y:
-         return getYoTrajectoryY();
-      case Z:
-         return getYoTrajectoryZ();
-      default:
-         throw new IndexOutOfBoundsException(direction.toString());
-      }
+      return getYoTrajectory(direction.ordinal());
    }
 
    public YoTrajectory getYoTrajectory(int index)
@@ -756,6 +748,11 @@ public class YoTrajectory3D
    public String toString()
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
+   }
+
+   public void getDerivative(int order, double x, Tuple3d dTrajectory)
+   {
+      dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }
 
    public void getDerivative(YoTrajectory3D dervTraj)
