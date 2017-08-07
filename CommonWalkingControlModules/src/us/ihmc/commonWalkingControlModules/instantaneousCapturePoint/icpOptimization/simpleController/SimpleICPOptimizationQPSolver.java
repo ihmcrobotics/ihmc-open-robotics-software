@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -23,7 +24,6 @@ public class SimpleICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double deltaInside = 0.0001;
 
    private static final int maxNumberOfIterations = 3;
    private static final double convergenceThreshold = 1.0e-34;
@@ -71,6 +71,8 @@ public class SimpleICPOptimizationQPSolver
 
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
+   /** Constraint on the CMP location to the bounds. */
+   private final ConstraintToConvexRegion cmpLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
    private final ConstraintToConvexRegion reachabilityConstraint;
 
@@ -153,6 +155,8 @@ public class SimpleICPOptimizationQPSolver
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
 
+   private double copSafeDistanceToEdge = 0.0001;
+   private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link SimpleICPOptimizationQPSolver}.
@@ -204,6 +208,7 @@ public class SimpleICPOptimizationQPSolver
       dynamicsTaskInput = new ICPQPInput(6);
 
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
+      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
       solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
@@ -239,6 +244,17 @@ public class SimpleICPOptimizationQPSolver
    public void resetCoPLocationConstraint()
    {
       copLocationConstraint.reset();
+      cmpLocationConstraint.reset();
+   }
+
+   public void setCopSafeDistanceToEdge(double copSafeDistanceToEdge)
+   {
+      this.copSafeDistanceToEdge = copSafeDistanceToEdge;
+   }
+
+   public void setMaxCMPDistanceFromEdge(double maxCMPDistance)
+   {
+      this.cmpSafeDistanceFromEdge = maxCMPDistance;
    }
 
    /**
@@ -251,6 +267,7 @@ public class SimpleICPOptimizationQPSolver
    {
       polygon.changeFrame(worldFrame);
       copLocationConstraint.addPolygon(polygon);
+      cmpLocationConstraint.addPolygon(polygon);
    }
 
    /**
@@ -305,8 +322,12 @@ public class SimpleICPOptimizationQPSolver
       int numberOfInequalityConstraints;
 
       copLocationConstraint.setPolygon();
+      cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
+
+      if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
+         numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
@@ -580,6 +601,9 @@ public class SimpleICPOptimizationQPSolver
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
+      if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
+         addCMPLocationConstraint();
+
       if (reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
@@ -666,12 +690,33 @@ public class SimpleICPOptimizationQPSolver
    private void addCoPLocationConstraint()
    {
       copLocationConstraint.setPositionOffset(perfectCMP);
-      copLocationConstraint.setDeltaInside(deltaInside);
+      copLocationConstraint.setDeltaInside(copSafeDistanceToEdge);
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
+
+      currentInequalityConstraintIndex += constraintSize;
+   }
+
+   /**
+    * Adds the convex CMP location constraint that requires the CMP to be within some distance of in the support polygon.
+    *
+    * <p>
+    * Takes the form Ax <= b.
+    * </p>
+    */
+   private void addCMPLocationConstraint()
+   {
+      cmpLocationConstraint.setPositionOffset(perfectCMP);
+      cmpLocationConstraint.setDeltaInside(-cmpSafeDistanceFromEdge);
+      cmpLocationConstraint.formulateConstraint();
+
+      int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
    }
@@ -685,7 +730,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setDeltaInside(deltaInside);
+      reachabilityConstraint.setDeltaInside(copSafeDistanceToEdge);
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();

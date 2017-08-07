@@ -121,7 +121,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    @Override
    public void computeCMPInternal(FramePoint2d desiredCMPPreviousValue)
    {
-      icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, capturePoint, omega0);
+      icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
       icpOptimizationController.getDesiredCMP(desiredCMP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);

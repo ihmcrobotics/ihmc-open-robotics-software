@@ -28,7 +28,7 @@ public interface ICPOptimizationController
    public boolean wasFootstepAdjusted();
    public boolean useAngularMomentum();
 
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
+   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0);
 
    public void setFinalTransferSplitFractionToDefault();
    public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity);
