@@ -190,7 +190,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.05;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
