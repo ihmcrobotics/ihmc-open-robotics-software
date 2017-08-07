@@ -29,6 +29,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenerator
 {
+   private final static boolean CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY = true;
+   
    private final YoDouble omega0;
    private ReferenceFrame trajectoryFrame;
    
@@ -113,7 +115,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areCoMDynamicsSatisfied.set(false);
       
       continuouslyAdjustForICPContinuity = new YoBoolean("continuouslyAdjustForICPContinuity", registry);
-      continuouslyAdjustForICPContinuity.set(true);
+      continuouslyAdjustForICPContinuity.set(CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY);
 
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
       
