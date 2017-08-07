@@ -25,9 +25,10 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    public StaticFootstepPlanningEnvironment()
    {
       setupGround();
-      addShortCinderBlockField(2.0, 2.0);
-      addRampsWithSteppingStones(5.0 , 2.0);
-      addRocks(2.0, -3.0);
+      addShortCinderBlockField(1.0, 2.0);
+      addRampsWithSteppingStones(4.0 , 2.0);
+      addRocks(1.0, -3.0);
+      addStairs(11.0, -2.0);
    }
 
    private void setupGround()
@@ -156,6 +157,35 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
          }
 
          DefaultCommonAvatarEnvironment.addRock3D(combinedTerrainObject3D, normal, centroidHeight, vertices);
+      }
+   }
+
+   private void addStairs(double startDistanceX, double startDistanceY)
+   {
+      AppearanceDefinition color = YoAppearance.LightGray();
+
+      int numberOfSteps = 3;
+      double stairLength = 0.4;
+      double stairWidth = 3.0;
+      double stairHeight = 0.2;
+
+      for(int i = 1; i < numberOfSteps + 1; i++)
+      {
+         combinedTerrainObject3D.addBox(startDistanceX, startDistanceY - stairWidth/2, startDistanceX + stairLength, startDistanceY + stairWidth/2,
+               stairHeight * i, color);
+         startDistanceX += stairLength;
+      }
+
+      double platformLength = 1.0;
+      combinedTerrainObject3D.addBox(startDistanceX, startDistanceY - stairWidth/2, startDistanceX + platformLength, startDistanceY + stairWidth/2,
+            stairHeight * numberOfSteps, color);
+      startDistanceX += platformLength;
+
+      for(int i = numberOfSteps; i > 0; i--)
+      {
+         combinedTerrainObject3D.addBox(startDistanceX, startDistanceY - stairWidth/2, startDistanceX + stairLength, startDistanceY + stairWidth/2,
+               stairHeight * i, color);
+         startDistanceX += stairLength;
       }
    }
 
