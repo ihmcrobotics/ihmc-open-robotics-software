@@ -42,6 +42,12 @@ public class ContactPoint implements ContactPointInterface
    }
 
    @Override
+   public FramePoint getPosition()
+   {
+      return position;
+   }
+
+   @Override
    public void getPosition(FramePoint framePointToPack)
    {
       framePointToPack.setIncludingFrame(position);

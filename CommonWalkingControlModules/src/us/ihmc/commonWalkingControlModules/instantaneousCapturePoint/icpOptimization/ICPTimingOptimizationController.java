@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlanne
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
@@ -71,11 +72,11 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
 
    public ICPTimingOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                           WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+                                          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(icpPlannerParameters, walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, false,
-            yoGraphicsListRegistry);
+      super(icpPlannerParameters, walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT,
+            false, yoGraphicsListRegistry);
 
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
