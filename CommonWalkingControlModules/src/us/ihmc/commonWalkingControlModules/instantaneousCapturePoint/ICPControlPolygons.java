@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -26,7 +24,7 @@ public class ICPControlPolygons
    private static final Color rightFootColor = new Color(255, 160, 122);
    private static final SideDependentList<Color> feetColors = new SideDependentList<>(leftFootColor, rightFootColor);
 
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    private static final int maxNumberOfContactPointsPerFoot = 6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPControlPolygons");
