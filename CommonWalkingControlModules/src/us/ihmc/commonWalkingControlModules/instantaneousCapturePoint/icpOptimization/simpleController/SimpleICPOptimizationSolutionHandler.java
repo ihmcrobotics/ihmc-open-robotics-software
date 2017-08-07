@@ -31,6 +31,7 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final YoBoolean footstepWasAdjusted;
    private final YoFrameVector2d footstepAdjustment;
+   private final YoFrameVector2d clippedFootstepAdjustment;
 
    private final YoDouble residualCostToGo;
    private final YoDouble costToGo;
@@ -82,6 +83,7 @@ public class SimpleICPOptimizationSolutionHandler
 
       footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2d(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
+      clippedFootstepAdjustment = new YoFrameVector2d(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
 
       adjustedICPReferenceLocation = new YoFramePoint2d(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
 
@@ -91,10 +93,10 @@ public class SimpleICPOptimizationSolutionHandler
 
    public void setupVisualizers(ArtifactList artifactList)
    {
-      YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "AdjustedICPReferencedLocation", adjustedICPReferenceLocation, 0.01, YoAppearance.LightYellow(),
+      YoGraphicPosition adjustedICP = new YoGraphicPosition(yoNamePrefix + "AdjustedICPReferencedLocation", adjustedICPReferenceLocation, 0.01, YoAppearance.LightYellow(),
                                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
-      artifactList.add(predictedEndOfStateICP.createArtifact());
+      artifactList.add(adjustedICP.createArtifact());
    }
 
    public void updateCostsToGo(SimpleICPOptimizationQPSolver solver)
@@ -109,9 +111,9 @@ public class SimpleICPOptimizationSolutionHandler
       }
    }
 
+   private final FramePoint2d referenceFootstepLocation = new FramePoint2d();
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
-         ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
-         SimpleICPOptimizationQPSolver solver)
+         ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
@@ -120,10 +122,11 @@ public class SimpleICPOptimizationSolutionHandler
 
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
+         //referenceFootstepLocations.get(i).getFrameTuple2d(referenceFootstepLocation);
+         upcomingFootsteps.get(i).getPosition2d(referenceFootstepLocation);
          footstepSolutionsToPack.get(i).getFrameTuple2d(previousLocationSolution);
          clippedLocationSolution.set(locationSolution);
-         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocations.get(i).getFrameTuple2d(),
+         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation,
                deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
@@ -131,6 +134,8 @@ public class SimpleICPOptimizationSolutionHandler
             firstStepAdjusted = footstepWasAdjusted;
             footstepAdjustment.set(locationSolution);
             footstepAdjustment.sub(referenceFootstepLocation);
+            clippedFootstepAdjustment.set(clippedLocationSolution);
+            clippedFootstepAdjustment.sub(referenceFootstepLocation);
          }
 
          footstepSolutionsToPack.get(i).set(clippedLocationSolution);
@@ -140,9 +145,16 @@ public class SimpleICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(firstStepAdjusted);
    }
 
+   public void zeroAdjustment()
+   {
+      footstepAdjustment.setToZero();
+      clippedFootstepAdjustment.setToZero();
+      footstepWasAdjusted.set(false);
+   }
+
    public void updateVisualizers(FramePoint2d desiredICP, double footstepMultiplier)
    {
-      adjustedICPReferenceLocation.set(footstepAdjustment);
+      adjustedICPReferenceLocation.set(clippedFootstepAdjustment);
       adjustedICPReferenceLocation.scale(footstepMultiplier);
       adjustedICPReferenceLocation.add(desiredICP);
    }

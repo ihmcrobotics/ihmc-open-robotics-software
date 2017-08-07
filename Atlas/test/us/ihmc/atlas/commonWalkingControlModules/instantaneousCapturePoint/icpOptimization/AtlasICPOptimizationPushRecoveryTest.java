@@ -13,7 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW})
 public class AtlasICPOptimizationPushRecoveryTest extends AvatarICPOptimizationPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()

@@ -28,6 +28,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final BipedSupportPolygons bipedSupportPolygons;
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
+   private final boolean useSimpleAdjustment;
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
@@ -61,7 +62,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
 
       ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
-      if (icpOptimizationParameters.useSimpleOptimization())
+      useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
+      if (useSimpleAdjustment)
       {
          icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, contactableFeet,
                                                                                    controlDT, registry, yoGraphicsListRegistry);
@@ -149,12 +151,22 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    {
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
-         RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepToPack.getRobotSide());
-         
-         footstepToPack.getAnklePose(footstepPose, ankleToSole);
-         icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
-         footstepPose.setXYFromPosition2d(footstepPositionSolution);
-         footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
+         if (useSimpleAdjustment)
+         {
+            footstepToPack.getPose(footstepPose);
+            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
+            footstepPose.setXYFromPosition2d(footstepPositionSolution);
+            footstepToPack.setPose(footstepPose);
+         }
+         else
+         {
+            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepToPack.getRobotSide());
+
+            footstepToPack.getAnklePose(footstepPose, ankleToSole);
+            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
+            footstepPose.setXYFromPosition2d(footstepPositionSolution);
+            footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
+         }
       }
 
       return icpOptimizationController.wasFootstepAdjusted();
