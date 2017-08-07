@@ -231,7 +231,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFootForwardOffset()
    {
-      return jointMap.getPhysicalProperties().getFootForward();
+      return jointMap.getPhysicalProperties().getFootForwardForControl();
    }
 
    @Override

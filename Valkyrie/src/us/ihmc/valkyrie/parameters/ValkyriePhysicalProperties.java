@@ -43,12 +43,6 @@ public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
       }
    }
 
-   @Override
-   public double getAnkleHeight()
-   {
-      return ankleHeight;
-   }
-
    public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);

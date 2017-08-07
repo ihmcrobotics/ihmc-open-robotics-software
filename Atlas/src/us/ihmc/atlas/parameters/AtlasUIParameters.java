@@ -1,5 +1,6 @@
 package us.ihmc.atlas.parameters;
 
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.UIParameters;
 
 public class AtlasUIParameters implements UIParameters
@@ -25,7 +26,7 @@ public class AtlasUIParameters implements UIParameters
    @Override
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
-      return (1 + 0.3) * 2 * Math.sqrt(physicalProperties.getFootForward() * physicalProperties.getFootForward()
+      return (1 + 0.3) * 2 * Math.sqrt(physicalProperties.getFootForwardForControl() * physicalProperties.getFootForwardForControl()
             + 0.25 * physicalProperties.getFootWidthForControl() * physicalProperties.getFootWidthForControl());
    }
 
@@ -62,6 +63,6 @@ public class AtlasUIParameters implements UIParameters
    @Override
    public double getAnkleHeight()
    {
-      return physicalProperties.getAnkleHeight();
+      return Math.abs(physicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.LEFT).getTranslationZ());
    }
 }

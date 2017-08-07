@@ -9,17 +9,18 @@ public interface NewRobotPhysicalProperties extends DRCRobotPhysicalProperties
 
    SideDependentList<RigidBodyTransform> getSoleToAnkleFrameTransforms();
 
+
    double getThighLength();
 
    double getShinLength();
 
-   double getFootForward();
-
-   double getFootStartToetaperFromBack();
 
    double getActualFootLength();
 
    double getActualFootWidth();
+
+
+   double getFootForwardForControl();
 
    double getFootBackForControl();
 
@@ -28,10 +29,4 @@ public interface NewRobotPhysicalProperties extends DRCRobotPhysicalProperties
    double getToeWidthForControl();
 
    double getFootWidthForControl();
-
-   double getPelvisToFoot();
-
-   @Override
-   double getAnkleHeight();
-
 }
