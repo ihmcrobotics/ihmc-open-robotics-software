@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -75,6 +76,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
+   private final AtlasSteppingParameters steppingParameters;
 
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -95,6 +97,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
+      steppingParameters = new AtlasSteppingParameters(jointMap);
 
       if (USE_SIMPLE_ICP_OPTIMIZATION)
          icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
@@ -129,12 +132,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       // TODO probably need to be tuned.
       return (runningOnRealRobot ? 3.4 : 3.0) / Math.sqrt(jointMap.getModelScale()); // 3.0 seems more appropriate.
 //      return 3.0;
-   }
-
-   @Override
-   public double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.10 * jointMap.getModelScale();
    }
 
    /** {@inheritDoc} */
@@ -229,105 +226,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getFootForwardOffset()
-   {
-      return jointMap.getPhysicalProperties().getFootForwardForControl();
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return jointMap.getPhysicalProperties().getFootBackForControl();
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return jointMap.getPhysicalProperties().getShinLength()  + jointMap.getPhysicalProperties().getThighLength();
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      return 0.25 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.5 * jointMap.getModelScale();    // 0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      return 0.6 * jointMap.getModelScale();    // 0.5; //0.35;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      return 0.15 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.6 * jointMap.getModelScale();    // 0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.6 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.25 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.2 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.30 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -853,42 +754,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getFootWidth()
-   {
-      return jointMap.getPhysicalProperties().getFootWidthForControl();
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return jointMap.getPhysicalProperties().getToeWidthForControl();
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return jointMap.getPhysicalProperties().getFootLengthForControl();
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return jointMap.getPhysicalProperties().getActualFootWidth();
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return jointMap.getPhysicalProperties().getActualFootLength();
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       switch (target)
@@ -1072,9 +937,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return swingTrajectoryParameters;
    }
 
+   /** {@inheritDoc} */
    @Override
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SteppingParameters getSteppingParameters()
+   {
+      return steppingParameters;
    }
 }

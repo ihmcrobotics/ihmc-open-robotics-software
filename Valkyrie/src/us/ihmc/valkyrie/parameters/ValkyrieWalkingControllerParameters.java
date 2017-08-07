@@ -9,6 +9,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -54,6 +55,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ValkyrieSteppingParameters steppingParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -69,6 +71,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new ValkyrieToeOffParameters();
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
+      steppingParameters = new ValkyrieSteppingParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -144,114 +147,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getFootForwardOffset()
-   {
-      return ValkyriePhysicalProperties.footForward;
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return ValkyriePhysicalProperties.footBack;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
    }
 
    @Override
-   public double getInPlaceWidth()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.5; // 0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      if (target == RobotTarget.SCS)
-         return 0.6; // 0.5; //0.35;
-
-      return 0.4;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      return (target == RobotTarget.REAL_ROBOT) ? 0.165 : 0.15;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.6; // 0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.3;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.3;
-   }
-
-   @Override
    public boolean controlToeDuringSwing()
    {
       return true;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -783,42 +687,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getFootWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return ValkyriePhysicalProperties.footLength;
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return ValkyriePhysicalProperties.footLength;
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       switch(target)
@@ -970,5 +838,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SteppingParameters getSteppingParameters()
+   {
+      return steppingParameters;
    }
 }

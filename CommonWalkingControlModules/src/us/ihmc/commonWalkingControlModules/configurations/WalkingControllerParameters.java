@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class WalkingControllerParameters implements SteppingParameters
+public abstract class WalkingControllerParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
@@ -623,16 +623,6 @@ public abstract class WalkingControllerParameters implements SteppingParameters
       return new String[0];
    }
 
-   @Override
-   /**
-    * Returns the minimum swing height from the stance foot for this robot. It is also the default swing height
-    * used in the controller unless a different value is specified.
-    */
-   public double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.1;
-   }
-
    /**
     * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
     * (new feature to be tested with Atlas)
@@ -759,4 +749,9 @@ public abstract class WalkingControllerParameters implements SteppingParameters
     * Parameter for the CoM height trajectory generation.
     */
    public abstract double defaultOffsetHeightAboveAnkle();
+
+   /**
+    * Returns parameters related to stepping such as maximum step length etc.
+    */
+   public abstract SteppingParameters getSteppingParameters();
 }

@@ -31,7 +31,8 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
@@ -39,7 +40,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
       boolean assertPointConditions = false;
       boolean visualizeAndKeepUp = false;
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
-      FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters();
+      FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       FootSpoof footSpoof = new FootSpoof("footSpoof", 0.0, 0.0, 0.0, atlasFootstepParameters.getFootForwardOffset(), atlasFootstepParameters.getFootBackwardOffset(), atlasFootstepParameters.getToeWidth()/2.0, 0.0);
 
