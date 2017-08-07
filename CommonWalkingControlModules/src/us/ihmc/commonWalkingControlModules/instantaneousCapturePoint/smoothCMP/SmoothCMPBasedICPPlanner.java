@@ -59,8 +59,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, swingDurations,
                                                                   transferDurations, swingDurationAlphas, transferDurationAlphas, registry);
 
-      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, useDecoupled, worldFrame,
-                                                                  registry);
+      referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport, useDecoupled, 
+                                                                  worldFrame, registry);
 
       angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, registry);
       parentRegistry.addChild(registry);
@@ -252,6 +252,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
       referenceCoPGenerator.initializeForSwing(this.initialTime.getDoubleValue());
+      referenceICPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
+                                                  referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
       angularMomentumGenerator.initializeForSwing(this.initialTime.getDoubleValue());
       referenceCMPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
                                                referenceCoPGenerator.getSwingCoPTrajectories(), angularMomentumGenerator.getTransferAngularMomentumTrajectories(),
