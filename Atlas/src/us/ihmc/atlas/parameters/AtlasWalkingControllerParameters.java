@@ -52,12 +52,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private static final boolean USE_SIMPLE_ICP_OPTIMIZATION = true;
 
-   // Limits
-   private final double spineYawLimit = Math.PI / 4.0;
-   private final double spinePitchUpperLimit = 0.4;
-   private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
-   private final double spineRollLimit = Math.PI / 4.0;
-
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
    private double       nominalHeightAboveGround;// = 0.705;
@@ -244,12 +238,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getFootBackwardOffset()
    {
       return jointMap.getPhysicalProperties().getFootBackForControl();
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return jointMap.getPhysicalProperties().getAnkleHeight();
    }
 
    @Override
@@ -864,41 +852,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return (runningOnRealRobot ? 1.2 : 0.60); //Math.sqrt(jointMap.getModelScale()) *
    }
 
-   /** @inheritDoc */
-   @Override
-   public double getSpineYawLimit()
-   {
-      return spineYawLimit;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return spinePitchUpperLimit;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return spinePitchLowerLimit;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return spineRollLimit;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return false;
-   }
-
    @Override
    public double getFootWidth()
    {
@@ -933,12 +886,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getFootstepArea()
    {
       return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
 
    @Override
@@ -1018,12 +965,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
       return false;
-   }
-
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0.623;
    }
 
    /** {@inheritDoc} */

@@ -653,12 +653,6 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getAnkleHeight()
-         {
-            return 0;
-         }
-
-         @Override
          public double getLegLength()
          {
             return 0;
@@ -684,12 +678,6 @@ public class StepAdjustmentExampleGraphic
 
          @Override
          public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
-         public double pelvisToAnkleThresholdForWalking()
          {
             return 0;
          }
@@ -768,42 +756,6 @@ public class StepAdjustmentExampleGraphic
 
          @Override
          public double getDefaultSwingTime()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpineYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpineRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean isSpinePitchReversed()
-         {
-            return false;
-         }
-
-         @Override
-         public double getSideLengthOfBoundingBoxForFootstepHeight()
          {
             return 0;
          }

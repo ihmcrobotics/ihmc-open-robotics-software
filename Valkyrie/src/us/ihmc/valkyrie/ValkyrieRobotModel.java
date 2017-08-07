@@ -22,7 +22,6 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
@@ -62,12 +61,14 @@ import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
@@ -203,6 +204,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
 	   return capturePointPlannerParameters;
+   }
+
+   @Override
+   public UIParameters getUIParameters()
+   {
+      return new ValkyrieUIParameters();
    }
 
    @Override
