@@ -155,7 +155,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan();    
+
+      updateTransferPlan(true);
    }
 
    @Override
@@ -171,8 +172,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
 
-      updateTransferPlan();
-
+      updateTransferPlan(true);
    }
 
    @Override
@@ -197,7 +197,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-      updateSingleSupportPlan();
+
+      updateSingleSupportPlan(true);
    }
 
    @Override
@@ -209,34 +210,41 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   protected void updateTransferPlan()
+   protected void updateTransferPlan(boolean computeUpcomingFootstep)
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
 
+      // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide);
       angularMomentumGenerator.addFootstepCoPsToPlan(referenceCoPGenerator.getWaypoints());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getBooleanValue());
-
+      referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
+      referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
+      
       referenceCoPGenerator.initializeForTransfer(this.initialTime.getDoubleValue());
+      referenceICPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
+                                                  referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
       angularMomentumGenerator.initializeForTransfer(this.initialTime.getDoubleValue());
       referenceCMPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
-                                                  referenceCoPGenerator.getSwingCoPTrajectories(),
-                                                  angularMomentumGenerator.getTransferAngularMomentumTrajectories(),
+                                                  referenceCoPGenerator.getSwingCoPTrajectories(), angularMomentumGenerator.getTransferAngularMomentumTrajectories(),
                                                   angularMomentumGenerator.getSwingAngularMomentumTrajectories());
       referenceICPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCMPGenerator.getTransferCMPTrajectories(),
                                                   referenceCMPGenerator.getSwingCMPTrajectories());
+      referenceICPGenerator.initializeCenterOfMass();
       // TODO implement requested hold position
       // TODO implement is done walking
    }
 
    @Override
    /** {@inheritDoc} */
-   protected void updateSingleSupportPlan()
+   protected void updateSingleSupportPlan(boolean computeUpcomingFootstep)
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
 
+      // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
       angularMomentumGenerator.addFootstepCoPsToPlan(referenceCoPGenerator.getWaypoints());
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
@@ -250,6 +258,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                                angularMomentumGenerator.getSwingAngularMomentumTrajectories());
       referenceICPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCMPGenerator.getTransferCMPTrajectories(),
                                                referenceCMPGenerator.getSwingCMPTrajectories());
+      referenceICPGenerator.initializeCenterOfMass();
    }
 
    @Override
