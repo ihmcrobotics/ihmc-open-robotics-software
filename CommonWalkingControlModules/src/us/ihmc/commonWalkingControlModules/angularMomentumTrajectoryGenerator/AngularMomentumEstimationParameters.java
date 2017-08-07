@@ -15,9 +15,6 @@ public class AngularMomentumEstimationParameters
     */
    private double percentageSupportLegMass = 0.1;
    
-   /**
-    * Define the percentage the 
-    */
    private final SmoothCMPPlannerParameters copPlannerParameters;
    private final FullHumanoidRobotModel robotModel;
 
@@ -29,7 +26,7 @@ public class AngularMomentumEstimationParameters
 
    public boolean computePredictedAngularMomentum()
    {
-      return true;
+      return false;
    }
 
    public CoPPointName getEntryCoPName()

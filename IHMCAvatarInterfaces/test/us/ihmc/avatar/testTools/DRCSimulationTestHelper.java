@@ -112,13 +112,13 @@ public class DRCSimulationTestHelper
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-		   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-		   DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
+                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+                                  DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
    {
-	   this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
-			   false, false, automaticallySimulate, null);
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+           false, false, automaticallySimulate, null);
    }
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters)
@@ -138,7 +138,7 @@ public class DRCSimulationTestHelper
            highLevelBehaviorFactoryToAdd, initialSetup, addFootstepMessageGenerator, useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep,
            automaticallySpawnSimulation, walkingScriptParameters, true);
    }
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
@@ -268,7 +268,7 @@ public class DRCSimulationTestHelper
    {
       return (FullHumanoidRobotModel) fullRobotModel;
    }
-   
+
    public CommonHumanoidReferenceFrames getReferenceFrames()
    {
       MomentumBasedControllerFactory momentumBasedControllerFactory = avatarSimulation.getMomentumBasedControllerFactory();

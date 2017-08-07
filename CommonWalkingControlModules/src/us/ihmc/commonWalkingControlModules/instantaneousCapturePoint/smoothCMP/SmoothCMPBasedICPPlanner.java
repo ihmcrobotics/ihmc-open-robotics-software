@@ -7,6 +7,8 @@ import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.rules.TemporaryFolder;
+
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.FootstepAngularMomentumPredictor;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -14,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -41,16 +44,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
    private final FullHumanoidRobotModel fullRobotModel;
-   
-   public SmoothCMPBasedICPPlanner(FullHumanoidRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                   int maxNumberOfFootstepsToConsider, int numberOfPointsPerFoot, YoVariableRegistry parentRegistry,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry)
+
+   public SmoothCMPBasedICPPlanner(FullHumanoidRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
+                                   SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
+                                   int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
       this.fullRobotModel = fullRobotModel;
-      
+
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
@@ -87,7 +90,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          referenceCoPGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters);
          referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * 9.81);
          //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
-         angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters(fullRobotModel, (SmoothCMPPlannerParameters) icpPlannerParameters));
+         angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters(fullRobotModel,
+                                                                                               (SmoothCMPPlannerParameters) icpPlannerParameters));
          defaultSwingDurationShiftFraction.set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
       }
       else
@@ -154,7 +158,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void initializeForStanding(double initialTime)
    {
-      //clearPlan();
+      clearPlan();
 
       this.initialTime.set(initialTime);
 
@@ -162,7 +166,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-
       updateTransferPlan(true);
    }
 
@@ -212,7 +215,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void computeFinalCoMPositionInSwing()
    {
-      throw new RuntimeException("to implement"); //TODOLater
+      throw new RuntimeException("to implement"); //TODO Later
    }
 
    @Override
@@ -264,7 +267,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
       angularMomentumGenerator.initializeForSwing(this.initialTime.getDoubleValue());
       referenceCMPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
-                                               referenceCoPGenerator.getSwingCoPTrajectories(), angularMomentumGenerator.getTransferAngularMomentumTrajectories(),
+                                               referenceCoPGenerator.getSwingCoPTrajectories(),
+                                               angularMomentumGenerator.getTransferAngularMomentumTrajectories(),
                                                angularMomentumGenerator.getSwingAngularMomentumTrajectories());
       referenceICPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCMPGenerator.getTransferCMPTrajectories(),
                                                referenceCMPGenerator.getSwingCMPTrajectories());
@@ -277,19 +281,37 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       timeInCurrentState.set(time - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
+      if (!isInStanding())
+      {
+         referenceICPGenerator.compute(time);
+         referenceCoPGenerator.update(time);
+         referenceCMPGenerator.update(time);
 
-      referenceICPGenerator.compute(time);
-      referenceCoPGenerator.update(time);
-      referenceCMPGenerator.update(time);
+         referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
+         referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
+         referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
 
-      referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
-      referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
-      referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
-	   
-      referenceICPGenerator.getCoMPosition(desiredCoMPosition);
-      referenceICPGenerator.getCoMVelocity(desiredCoMVelocity);
-      referenceICPGenerator.getCoMAcceleration(desiredCoMAcceleration);
+         referenceICPGenerator.getCoMPosition(desiredCoMPosition);
+         referenceICPGenerator.getCoMVelocity(desiredCoMVelocity);
+         referenceICPGenerator.getCoMAcceleration(desiredCoMAcceleration);
+      }
+      else
+      {
+         referenceCoPGenerator.update(time);
+         referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition);
+         desiredCoPVelocity.setToZero();
 
+         desiredCMPPosition.set(desiredCoPPosition);
+         desiredCMPVelocity.setToZero();
+
+         desiredICPPosition.set(desiredCoPPosition);
+         desiredICPVelocity.setToZero();
+         desiredICPAcceleration.setToZero();
+
+         desiredCoMPosition.set(desiredCoPPosition);
+         desiredCoMVelocity.setToZero();
+         desiredCoMAcceleration.setToZero();
+      }
       decayDesiredVelocityIfNeeded();
 
       // done to account for the delayed velocity
@@ -310,22 +332,25 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    }
 
    private final FramePoint tempFinalICP = new FramePoint();
-   
+
    @Override
    /** {@inheritDoc} */
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
-      if(isStanding.getBooleanValue())
+      if (isStanding.getBooleanValue())
       {
-         // TODO: replace by CMP 
-         int footstepIndex = 0;
-         referenceCoPGenerator.getWaypoints().get(footstepIndex).getFinalCoPPosition(tempFinalICP);
+         // TODO: replace by CMP generator
+         referenceCoPGenerator.getFinalCoPLocation(finalDesiredCapturePointPositionToPack);
+      }
+      else if (!isInDoubleSupport())
+      {
+         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
       else
       {
-         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
@@ -338,22 +363,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       getFinalDesiredCapturePointPosition(tempFinalICP);
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
-   
+
    public List<FramePoint> getInitialDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredInitialList();
    }
-   
+
    public List<FramePoint> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
-   
+
    public List<FramePoint> getInitialDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredInitialList();
    }
-   
+
    public List<FramePoint> getFinalDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
@@ -363,30 +388,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
-      throw new RuntimeException("to implement"); //TODOLater
+      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(referenceICPGenerator.getCoMPositionDesiredFinalList().get(0));
    }
 
    @Override
    /** {@inheritDoc} */
    public void getNextExitCMP(FramePoint exitCMPToPack)
    {
-      CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
-      nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);
-      
-//      List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
-//      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
-//      copPointsInFoot.get(copPointsInFoot.getCoPPointList().get(copPointsInFoot.getCoPPointList().size())).getPosition(exitCMPToPack);
+      //CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
+      //nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);
+
+      List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
+      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
+      copPointsInFoot.get(copPointsInFoot.getCoPPointList().size() - 1).getPosition(exitCMPToPack);
    }
 
    @Override
    /** {@inheritDoc} */
    public boolean isOnExitCMP()
    {
-//      if(isInDoubleSupport())
-//         return false;
-//      else
-//         return referenceCMPGenerator.isOnExitCMP();
-      throw new RuntimeException("to implement"); //TODO
+      return referenceCoPGenerator.isOnExitCoP();
    }
 
    @Override
@@ -407,12 +428,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       angularMomentumGenerator.getPredictedCenterOfMassPosition(estimatedCenterOfMassPositionToPack, time);
    }
-   
+
    public void getPredictedSwingFootPosition(YoFramePoint predictedSwingFootPositionToPack, double time)
    {
       angularMomentumGenerator.getPredictedSwingFootPosition(predictedSwingFootPositionToPack, time);
    }
-   
+
    public int getTotalNumberOfSegments()
    {
       return referenceICPGenerator.getTotalNumberOfSegments();
