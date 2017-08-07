@@ -863,7 +863,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
+   public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0);
 
    public abstract double getOptimizedTimeRemaining();
 }

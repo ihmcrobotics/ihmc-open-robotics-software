@@ -72,6 +72,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
    protected final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   protected final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
    protected final YoFramePoint2d endOfStateICP = new YoFramePoint2d(yoNamePrefix + "EndOfStateICP", worldFrame, registry);
 
    protected final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
@@ -137,7 +138,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final FramePoint2d currentICP = new FramePoint2d();
    protected final FramePoint2d desiredICP = new FramePoint2d();
-   final FramePoint2d perfectCMP = new FramePoint2d();
+   protected final FramePoint2d perfectCMP = new FramePoint2d();
    protected final FrameVector2d desiredICPVelocity = new FrameVector2d();
 
    protected final SimpleICPOptimizationQPSolver solver;
@@ -400,7 +401,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    }
 
    @Override
-   public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0);
+   public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0);
 
    @Override
    public void setFinalTransferSplitFractionToDefault()
@@ -547,6 +548,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       feedbackCMPDelta.set(feedbackCoPDelta);
       feedbackCMPDelta.add(cmpCoPDifferenceSolution);
 
+      yoPerfectCMP.set(perfectCMP);
       feedbackCMP.set(perfectCMP);
       feedbackCMP.add(feedbackCMPDelta);
 
