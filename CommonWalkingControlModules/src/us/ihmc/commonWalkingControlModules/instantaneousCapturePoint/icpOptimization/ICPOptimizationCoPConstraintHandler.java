@@ -26,7 +26,7 @@ public class ICPOptimizationCoPConstraintHandler
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons)
+         if (useControlPolygons && icpControlPolygons != null)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
@@ -50,7 +50,7 @@ public class ICPOptimizationCoPConstraintHandler
       solver.resetCoPLocationConstraint();
 
       FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons)
+      if (useControlPolygons && icpControlPolygons != null)
          supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
       else
          supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
