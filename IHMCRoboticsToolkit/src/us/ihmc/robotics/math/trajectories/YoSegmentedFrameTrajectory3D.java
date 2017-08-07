@@ -110,7 +110,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       return numberOfSegments.getIntegerValue();
    }
 
-   protected int getCurrentSegmentIndex()
+   public int getCurrentSegmentIndex()
    {
       return currentSegmentIndex.getIntegerValue();
    }
@@ -159,6 +159,15 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       String ret = "";
       ret += name;
       for(int i = 0 ; i < numberOfSegments.getIntegerValue(); i++)
+         ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
+      return ret;
+   }
+   
+   public String toString2()
+   {
+      String ret = "";
+      ret += name;
+      for(int i = 0 ; i < segments.size(); i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }

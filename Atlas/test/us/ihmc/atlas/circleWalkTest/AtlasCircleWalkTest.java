@@ -55,5 +55,4 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 	{
 		return jointMap.getArmJointNames();
 	}
-
 }

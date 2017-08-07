@@ -66,7 +66,6 @@ public class SmoothCapturePointToolbox
          exitCornerPoint.set(nextEntryCornerPoint);
          
          computeDesiredCapturePointPosition(omega0, cmpPolynomial3D.getInitialTime(), exitCornerPoint, cmpPolynomial3D, entryCornerPoint);
-
          nextEntryCornerPoint = entryCornerPoint;
       }
    }

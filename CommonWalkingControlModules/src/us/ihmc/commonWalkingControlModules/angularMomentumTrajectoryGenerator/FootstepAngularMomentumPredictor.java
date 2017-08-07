@@ -277,7 +277,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
-      if (!computePredictedAngularMomentum.getBooleanValue())
+      if (!computePredictedAngularMomentum.getBooleanValue() || upcomingCoPsInFootsteps.get(0).isEmpty())
          return;
 
       firstSwingDebug = firstCoMDebug = true;
