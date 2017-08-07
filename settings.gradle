@@ -1,12 +1,13 @@
-rootProject.name = 'IHMCOpenRoboticsSoftware'
-def siblingDirs = rootProject.dir.list(new FilenameFilter() {
-  @Override
-  boolean accept(File dir, String name) {
-    File f = new File(dir, name).getCanonicalFile();
-    return f.isDirectory() && new File(f, "build.gradle").exists();
-  }
-})
+rootProject.name = hyphenatedName
 
-siblingDirs.each {
-  include it
+println 'Evaluating ' + pascalCasedName + ' settings.gradle'
+
+if (startParameter.searchUpwards)
+{
+   settingsDir.list().each { childDir ->
+      if (new File(settingsDir, childDir + "/build.gradle").exists())
+      {
+         includeBuild childDir
+      }
+   }
 }
