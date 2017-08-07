@@ -60,6 +60,12 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
+   public FramePoint getPosition()
+   {
+      return yoPosition.getFrameTuple();
+   }
+
+   @Override
    public void getPosition(FramePoint framePointToPack)
    {
       yoPosition.getFrameTupleIncludingFrame(framePointToPack);
