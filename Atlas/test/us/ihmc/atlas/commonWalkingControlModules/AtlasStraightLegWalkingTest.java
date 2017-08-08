@@ -394,7 +394,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public double getExitCoPForwardSafetyMarginOnToes()
       {
-         return 0.005;
+         return 0.015;
       }
 
       @Override
