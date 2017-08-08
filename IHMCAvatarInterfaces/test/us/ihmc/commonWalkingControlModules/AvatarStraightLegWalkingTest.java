@@ -618,7 +618,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double startOfAscent = stepPoses.get(1).get(0).getX() - 0.35;
       double platformWidth = startOfAscent - topOfStairs;
 
-      int numberOfPlatformSteps = 3;
+      int numberOfPlatformSteps = 1;
       double platformStepLength = (platformWidth)  / numberOfPlatformSteps;
 
       // approach the top of the stairs
@@ -678,7 +678,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       // exit steps
       double stepLength = 0.35;
-      int numberOfExitSteps = 4;
+      int numberOfExitSteps = 2;
       double stepPosition = footsteps.get(footsteps.size() - 1).getLocation().getX();
 
       robotSide = RobotSide.LEFT;
