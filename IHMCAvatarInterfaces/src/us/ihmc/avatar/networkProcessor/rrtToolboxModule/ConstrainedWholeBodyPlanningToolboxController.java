@@ -40,8 +40,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   private static int terminateToolboxCondition = 100;
-   
    public static double handCoordinateOffsetX = -0.2;
    
    /*
@@ -77,6 +75,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private final YoBoolean isGoodkinematicSolution = new YoBoolean("isGoodkinematicSolution", registry);
    
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
+   
+   private double bestScoreInitialGuess = 0;
 
    private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
    
@@ -118,6 +118,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    
    private int numberOfInitialGuess = 30;
 
+   private static int terminateToolboxCondition = 40;
    /*
     * Toolbox state
     */
@@ -164,19 +165,29 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          
          break;
       case FIND_INITIAL_GUESS:
-         
-//         visualizedNode = new GenericTaskNode(0.0, 0.75, -Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
-//         visualizedNode.setNodeData(10, -Math.PI*40/180);
-         
+                  
          GenericTaskNode initialGuessNode = new GenericTaskNode();
          
-         tree.setRandomNormalizedNodeData(initialGuessNode);
+         tree.setRandomNormalizedNodeData(initialGuessNode, true);
          initialGuessNode.setNormalizedNodeData(0, 0);
          initialGuessNode.convertNormalizedDataToData(constrainedEndEffectorTrajectory.getTaskRegion());
          
          visualizedNode = initialGuessNode;
          
+         isValidNode(visualizedNode);         
+         double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
+         if(!visualizedNode.getIsValidNode())
+            scoreInitialGuess = 0.0;
          
+         jointlimitScore.set(scoreInitialGuess);
+         
+         if(bestScoreInitialGuess < scoreInitialGuess)
+         {
+            bestScoreInitialGuess = scoreInitialGuess;
+            rootNode = visualizedNode.createNodeCopy();
+         }
+         
+            
          /*
           * terminate finding initial guess.
           */
@@ -184,10 +195,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if(numberOfInitialGuess == 0)
             state = CWBToolboxState.EXPAND_TREE;
          
-         isValidNode(visualizedNode);
-         
          break;
       case EXPAND_TREE:
+         
+         visualizedNode = rootNode;
+         isValidNode(visualizedNode);
+         
+         
          
          break;
       case SHORTCUT_PATH:
@@ -212,7 +226,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       // ************************************************************************************************************** //
       
       /*
-       * set fullRobotModel
+       * set fullRobotModel.
        */
       FullHumanoidRobotModel solverRobotModel = kinematicsSolver.getFullRobotModelCopy();
       visualizedFullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
@@ -222,7 +236,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
       
       /*
-       * update visualizer
+       * update visualizer.
        */
       if(visualizedNode != null)
       {
@@ -236,11 +250,16 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             treeVisualizer.update(visualizedNode);   
       }
       
+      /*
+       * YoVariables.
+       */
       isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
 
+      
+      
       // ************************************************************************************************************** //
       updateCount.increment();
       if(updateCount.getIntegerValue() == terminateToolboxCondition)

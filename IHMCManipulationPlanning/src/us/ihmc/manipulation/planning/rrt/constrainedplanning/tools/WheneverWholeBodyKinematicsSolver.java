@@ -41,6 +41,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -290,8 +291,8 @@ public class WheneverWholeBodyKinematicsSolver
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
       wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
       //---------------------------------------------                        
-      desiredFullRobotModel.updateFrames();      
-      
+      desiredFullRobotModel.updateFrames();
+
       for (RobotSide robotSide : RobotSide.values)
          isFootInSupport.get(robotSide).set(true);
 
@@ -304,10 +305,10 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
-            
+
       return true;
    }
-   
+
    public boolean initialize()
    {
       userFeedbackCommands.clear();
@@ -322,7 +323,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-      
+
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double jointPosition = oneDoFJoints[i].getQ();
@@ -342,18 +343,18 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
-//      if (DEBUG)
-//         PrintTools.info("Initial posture ");
-//      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-//      desiredReferenceFrames.updateFrames();
-//      if (DEBUG)
-//         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
-            
+      //      if (DEBUG)
+      //         PrintTools.info("Initial posture ");
+      //      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
+      //      desiredReferenceFrames.updateFrames();
+      //      if (DEBUG)
+      //         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
+
       return true;
    }
 
    private void updateInternal()
-   {      
+   {
       // Updating the reference frames and twist calculator.
       updateTools();
 
@@ -407,7 +408,7 @@ public class WheneverWholeBodyKinematicsSolver
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
-   
+
    public boolean getIsSolved()
    {
       return isSolved;
@@ -416,7 +417,7 @@ public class WheneverWholeBodyKinematicsSolver
    public boolean isSolved()
    {
       numberOfTest++;
-      
+
       for (int i = 0; i < maximumCntForUpdateInternal; i++)
       {
          updateInternal();
@@ -424,15 +425,15 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal "+cntForUpdateInternal);
-                        
+            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal);
+
             return isSolved;
          }
       }
-      PrintTools.info("cntForUpdateInternal "+cntForUpdateInternal);
+      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal);
       return false;
    }
-   
+
    public int getCntForUpdateInternal()
    {
       return cntForUpdateInternal;
@@ -535,7 +536,7 @@ public class WheneverWholeBodyKinematicsSolver
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
-   
+
    public void updateRobotConfigurationData(OneDoFJoint[] joints, Vector3D translation, Quaternion rotation)
    {
       ForceSensorDefinition[] forceSensorDefinitions;
@@ -619,7 +620,7 @@ public class WheneverWholeBodyKinematicsSolver
    {
       return inverseKinematicsSolution;
    }
-   
+
    public CommonHumanoidReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
@@ -632,7 +633,7 @@ public class WheneverWholeBodyKinematicsSolver
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
 
       currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
-      
+
       KinematicsToolboxOutputConverter currentOutputConverter;
       currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
@@ -724,11 +725,11 @@ public class WheneverWholeBodyKinematicsSolver
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
 
       desiredOrientationToWorld.multiply(preMultipliedOrientation);
-      
+
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-      
+
       desiredPoseToWorld.changeFrame(worldFrame);
-            
+
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
    }
 
@@ -743,7 +744,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
       desiredPoseToWorld.changeFrame(worldFrame);
-      
+
       pelvisFramePose.set(desiredPoseToWorld);
    }
 
@@ -759,7 +760,7 @@ public class WheneverWholeBodyKinematicsSolver
       double chestWeight = 10.0;
       chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
       chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
-      
+
       chestFrameOrientation.set(desiredOrientationToWorld);
    }
 
@@ -842,6 +843,57 @@ public class WheneverWholeBodyKinematicsSolver
       userFeedbackCommands.put(desiredFullRobotModel.getChest().getName(), feedbackControlCommand);
    }
 
+   public double getArmJointLimitScore(RobotSide robotSide)
+   {
+      double jointLimitScore = 0;
+
+      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkz");
+      jointLimitScore = jointLimitScore + getJointLimitScore("back_bky");
+      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkx");
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_YAW);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_ROLL);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_PITCH);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.FIRST_WRIST_PITCH);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.WRIST_ROLL);
+
+      return jointLimitScore;
+   }
+
+   private double getArmJointLimitScore(RobotSide robotSide, ArmJointName armJointName)
+   {
+      String jointName = desiredFullRobotModel.getArmJoint(robotSide, armJointName).getName();
+
+      return getJointLimitScore(jointName);
+   }
+
+   private double getJointLimitScore(String jointName)
+   {
+      OneDoFJoint aJoint = desiredFullRobotModel.getOneDoFJointByName(jointName);
+
+      double jointLimitScore = 0;      
+      double aJointValue = aJoint.getQ();
+      double upperValue = aJoint.getJointLimitUpper();
+      double lowerValue = aJoint.getJointLimitLower();
+      
+      double limitSize = upperValue - lowerValue;
+      aJointValue = aJointValue/limitSize;
+      upperValue = upperValue/limitSize;
+      lowerValue = lowerValue/limitSize;
+
+      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue));
+      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue));
+
+      if (diffUpper > diffLower)
+         jointLimitScore = diffLower;
+      else
+         jointLimitScore = diffUpper;
+
+      if (true)
+         PrintTools.info(""+jointName+" " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
+
+      return jointLimitScore;
+   }
+
    public void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
    {
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(printFullRobotModel);
@@ -850,7 +902,7 @@ public class WheneverWholeBodyKinematicsSolver
       PrintTools.info("root Joint");
       System.out.println(rootJoint.getTranslationForReading());
       System.out.println(rootJoint.getRotationForReading());
-      
+
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double jointPosition = printFullRobotModel.getOneDoFJoints()[i].getQ();
