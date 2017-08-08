@@ -172,7 +172,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
-
+      
       this.numberOfPointsPerFoot = new YoInteger(namePrefix + "NumberOfPointsPerFootstep", registry);
       this.orderOfSplineInterpolation = new YoEnum<>(namePrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
       this.isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
@@ -670,12 +670,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private double getTransferSegmentTimes(int segmentIndex)
    {
-      // Temp hack
-      if (transferDurations.get(footstepIndex).isNaN())
-         transferDurations.get(footstepIndex).set(0.5);
-      if (transferSplitFractions.get(footstepIndex).isNaN())
-         transferSplitFractions.get(footstepIndex).set(0.5);
-
       switch (segmentIndex)
       {
       case 0:
