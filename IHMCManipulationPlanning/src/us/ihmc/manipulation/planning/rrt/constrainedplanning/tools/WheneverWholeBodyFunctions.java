@@ -47,13 +47,14 @@ public class WheneverWholeBodyFunctions
 
    public void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
-   {
+   {      
       float[] newJointAngles = robotConfigurationData.getJointAngles();
-
+      
       for (int i = 0; i < newJointAngles.length; i++)
       {
          oneDoFJoints[i].setQ(newJointAngles[i]);
          oneDoFJoints[i].setQd(0.0);
+         oneDoFJoints[i].setqDesired(newJointAngles[i]);
       }
 
       Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
@@ -63,6 +64,7 @@ public class WheneverWholeBodyFunctions
       desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();
+      
    }
 
    public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)

@@ -3,6 +3,8 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
@@ -22,6 +24,9 @@ public abstract class CTTaskNode
    protected boolean isValid = true;  
    
    protected OneDoFJoint[] configurationJoints;   
+   protected Vector3D configurationTranslation;
+   protected Quaternion configurationRotation;
+   
    
    public static WheneverWholeBodyKinematicsSolver nodeTester;
    public static FullHumanoidRobotModel initialRobotModel;
@@ -222,12 +227,24 @@ public abstract class CTTaskNode
    
    public void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);  
+      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
+      this.configurationTranslation = new Vector3D(robot.getRootJoint().getTranslationForReading());
+      this.configurationRotation = new Quaternion(robot.getRootJoint().getRotationForReading());
    }
    
    public OneDoFJoint[] getOneDoFJoints()
    {
       return configurationJoints;
+   }
+   
+   public Vector3D getRootTranslation()
+   {
+      return configurationTranslation;
+   }
+
+   public Quaternion getRootRotation()
+   {
+      return configurationRotation;
    }
    
    public boolean getIsValidNode()

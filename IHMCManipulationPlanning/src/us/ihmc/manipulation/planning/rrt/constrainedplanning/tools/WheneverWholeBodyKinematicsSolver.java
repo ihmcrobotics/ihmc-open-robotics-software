@@ -279,12 +279,41 @@ public class WheneverWholeBodyKinematicsSolver
       return command;
    }
 
+   public boolean initialize2()
+   {
+      controllerCore.initialize();
+      userFeedbackCommands.clear();
+      isSolved = false;
+      cntForUpdateInternal = 0;
+      solutionQualityOld.setToNaN();
+      //---------------------------------------------      
+      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+      wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+      //---------------------------------------------                        
+      desiredFullRobotModel.updateFrames();      
+      
+      for (RobotSide robotSide : RobotSide.values)
+         isFootInSupport.get(robotSide).set(true);
+
+      // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
+      updateCoMPositionAndFootPoses();
+
+      // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
+      holdSupportFootPose.set(true);
+      holdCenterOfMassXYPosition.set(true);
+
+      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+      snapPrivilegedConfigurationToCurrent();
+            
+      return true;
+   }
+   
    public boolean initialize()
    {
       userFeedbackCommands.clear();
       isSolved = false;
       cntForUpdateInternal = 0;
-      solutionQualityOld.set(100);
+      solutionQualityOld.setToNaN();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
@@ -293,7 +322,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-
+      
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double jointPosition = oneDoFJoints[i].getQ();
@@ -313,18 +342,18 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
-      if (DEBUG)
-         PrintTools.info("Initial posture ");
-      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      desiredReferenceFrames.updateFrames();
-      if (DEBUG)
-         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
-
+//      if (DEBUG)
+//         PrintTools.info("Initial posture ");
+//      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
+//      desiredReferenceFrames.updateFrames();
+//      if (DEBUG)
+//         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
+            
       return true;
    }
 
    private void updateInternal()
-   {
+   {      
       // Updating the reference frames and twist calculator.
       updateTools();
 
@@ -387,6 +416,7 @@ public class WheneverWholeBodyKinematicsSolver
    public boolean isSolved()
    {
       numberOfTest++;
+      
       for (int i = 0; i < maximumCntForUpdateInternal; i++)
       {
          updateInternal();
@@ -395,6 +425,7 @@ public class WheneverWholeBodyKinematicsSolver
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
             PrintTools.info("cntForUpdateInternal "+cntForUpdateInternal);
+                        
             return isSolved;
          }
       }
@@ -543,6 +574,8 @@ public class WheneverWholeBodyKinematicsSolver
 
    private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
+      System.out.println(newConfigurationData.rootTranslation);
+      System.out.println(newConfigurationData.rootOrientation);
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 
@@ -581,6 +614,11 @@ public class WheneverWholeBodyKinematicsSolver
    {
       return inverseKinematicsSolution;
    }
+   
+   public CommonHumanoidReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
 
    public void holdCurrentTrajectoryMessages()
    {
@@ -589,7 +627,7 @@ public class WheneverWholeBodyKinematicsSolver
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
 
       currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
-
+      
       KinematicsToolboxOutputConverter currentOutputConverter;
       currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
@@ -599,10 +637,10 @@ public class WheneverWholeBodyKinematicsSolver
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
       currentReferenceFrames.updateFrames();
 
-      //      if(DEBUG)
-      //         PrintTools.info("Posture to be hold is ");      
-      //      if(DEBUG)
-      //         printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
+      if (DEBUG)
+         PrintTools.info("Posture to be hold is ");
+      if (DEBUG)
+         printOutRobotModel(currentFullRobotModel, currentReferenceFrames.getMidFootZUpGroundFrame());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -681,12 +719,12 @@ public class WheneverWholeBodyKinematicsSolver
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
 
       desiredOrientationToWorld.multiply(preMultipliedOrientation);
-
+      
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-
+      
       desiredPoseToWorld.changeFrame(worldFrame);
+            
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
-
    }
 
    public void setDesiredPelvisHeight(double desiredHeightToMidZUp)
@@ -700,7 +738,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
       desiredPoseToWorld.changeFrame(worldFrame);
-
+      
       pelvisFramePose.set(desiredPoseToWorld);
    }
 
@@ -804,6 +842,10 @@ public class WheneverWholeBodyKinematicsSolver
       HumanoidReferenceFrames currentReferenceFrames = new HumanoidReferenceFrames(printFullRobotModel);
       currentReferenceFrames.updateFrames();
 
+      PrintTools.info("root Joint");
+      System.out.println(rootJoint.getTranslationForReading());
+      System.out.println(rootJoint.getRotationForReading());
+      
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double jointPosition = printFullRobotModel.getOneDoFJoints()[i].getQ();

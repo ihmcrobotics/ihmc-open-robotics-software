@@ -31,6 +31,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,8 +39,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   private static int terminateToolboxCondition = 10;
+   private static int terminateToolboxCondition = 5;
    
+   public static double handCoordinateOffsetX = -0.2;
    /*
     * essential classes
     */
@@ -79,7 +81,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTaskNode visualizedNode;
 
-   private FullHumanoidRobotModel initialRobotModel;
+   private OneDoFJoint[] initialOneDoFJoints;
+   
+   private Vector3D initialTranslationOfRootJoint;
+   private Quaternion initialRotationOfRootJoint;
    
    private FullHumanoidRobotModel visualizedFullRobotModel;
 
@@ -132,12 +137,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.state = CWBToolboxState.DO_NOTHING;
       
       this.endeffectorPose = new YoFramePose("endeffectorFramePose", ReferenceFrame.getWorldFrame(), registry);
-      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPose", this.endeffectorPose, 0.5);
+      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPose", this.endeffectorPose, 0.15);
       this.endeffectorFrame.setVisible(true);
       
       yoGraphicsRegistry.registerYoGraphic("endeffectorPoseViz", this.endeffectorFrame);
    }
 
+   
+   int temp = 0;
    @Override
    protected void updateInternal()
    {
@@ -150,12 +157,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          
          break;
       case FIND_INITIAL_GUESS:
-//         visualizedNode = new GenericTaskNode(0.02, 0.8, Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
          
          visualizedNode = new GenericTaskNode(0.0, 0.75, -Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
+         visualizedNode.setNodeData(10, -Math.PI*10/180 * temp);
+         
+         temp++;
          
          PrintTools.info(""+isValidNode(visualizedNode));
-//         visualizedFullRobotModel = initialRobotModel;
          
          break;
       case EXPAND_TREE:
@@ -209,12 +217,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       
       isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
+      endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
 
       // ************************************************************************************************************** //
+      updateCount.increment();
       if(updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
-      updateCount.increment();
    }
 
    @Override
@@ -227,32 +236,50 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          return false;
       }
       
-      PrintTools.info("initialize()");
+      PrintTools.info("initialize CWB toolbox");
       
       /*
-       * bring control parameters from request
+       * bring control parameters from request.
        */
       numberOfExpanding = request.numberOfExpanding;
 
-//      constrainedEndEffectorTrajectory = request.constrainedEndEffectorTrajectory;
-            
-      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory, visualizedFullRobotModel);
+      initialOneDoFJoints = request.initialOneDoFJoints;
+      initialTranslationOfRootJoint = request.initialTranslationOfRootJoint;
+      initialRotationOfRootJoint = request.initialRotationOfRootJoint;
       
-      kinematicsSolver.updateRobotConfigurationData(request.initialOneDoFJoints, request.initialTranslationOfRootJoint, request.initialRotationOfRootJoint);
+      /*
+       * initialize kinematicsSolver.
+       */      
+      PrintTools.info("initial root joint translation");
+      System.out.println(initialTranslationOfRootJoint);
       
+      PrintTools.info("initial root joint rotation");
+      System.out.println(initialRotationOfRootJoint);
+      
+      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
+      
+      kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+                  
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       kinematicsSolver.putTrajectoryMessages();
-      kinematicsSolver.isSolved();
       
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(kinematicsSolver.getDesiredFullRobotModel());
+      PrintTools.info("initial isSolved Result");
+      System.out.println(kinematicsSolver.isSolved());
+           
+      
+      HumanoidReferenceFrames referenceFrames = (HumanoidReferenceFrames) kinematicsSolver.getReferenceFrames();
       
       referenceFrames.updateFrames();
       midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();      
       worldFrame = referenceFrames.getWorldFrame();
+                        
+      PrintTools.info("worldFrame in kinematics Solver ");
+      System.out.println(worldFrame.getTransformToWorldFrame());
       
-      initialRobotModel = kinematicsSolver.getFullRobotModelCopy();
-            
+      PrintTools.info("midZUpFrame in kinematics Solver ");
+      System.out.println(midZUpFrame.getTransformToWorldFrame());
+      
       /*
        * start toolbox
        */
@@ -300,13 +327,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return result;
    }
    
-   public static double handCoordinateOffsetX = -0.2;
+   
    
    private boolean isValidNode(CTTaskNode node)
-   {
+   {      
+      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
+      
       if (node.getParentNode() != null)
       {
-         kinematicsSolver.updateRobotConfigurationDataJointsOnly(node.getParentNode().getOneDoFJoints());
+         kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(), node.getParentNode().getRootRotation());
          for (int i = 0; i < node.getParentNode().getOneDoFJoints().length; i++)
          {
             double jointPosition = node.getParentNode().getOneDoFJoints()[i].getQ();
@@ -314,10 +343,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
       else
       {
-         PrintTools.warn("parentNode is required.");
-         //kinematicsSolver.updateRobotConfigurationDataJointsOnly(FullRobotModelUtils.getAllJointsExcludingHands(initialRobotModel));         
-         kinematicsSolver.updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(initialRobotModel), new Vector3D(initialRobotModel.getRootJoint().getTranslationForReading())
-                                                       , new Quaternion(initialRobotModel.getRootJoint().getRotationForReading()));
+         PrintTools.warn("parentNode is required.");       
+         kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+         
       }
 
       kinematicsSolver.initialize();
@@ -325,33 +353,26 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.holdCurrentTrajectoryMessages();
       /*
        * set whole body tasks.
-       */      
+       */
       ConfigurationSpace configurationSpace = new ConfigurationSpace();
       configurationSpace.setTranslation(node.getNodeData(5), node.getNodeData(6), node.getNodeData(7));
       configurationSpace.setRotation(node.getNodeData(8), node.getNodeData(9), node.getNodeData(10));
       
+      /*
+       * pose from 'constrainedEndEffectorTrajectory' is considered as in MidZUp frame.
+       */
       Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), configurationSpace);
-//      desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
       
-      FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
-      FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
-
-      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-     
-      desiredPoseToWorld.changeFrame(midZUpFrame);
-
-      Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);      
-      
-      kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
+      endeffectorPose.setPosition(desiredPose.getPosition());
+      endeffectorPose.setOrientation(desiredPose.getOrientation());
+      /*
+       * for kinematics solver, append offset
+       */
+      desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+                
+      kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPose);
 //      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
       
-      
-
-      desiredPoseToWorld.changeFrame(worldFrame);
-      endeffectorPose.set(desiredPoseToWorld);
-      endeffectorFrame.setPose(desiredPoseToWorld);
-      System.out.println(desiredPoseToWorld);
       
 
       Quaternion desiredChestOrientation = new Quaternion();
@@ -367,9 +388,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       boolean result = kinematicsSolver.isSolved();
       
-      PrintTools.info(""+result);
-
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
+//      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
             
       return result;
    }

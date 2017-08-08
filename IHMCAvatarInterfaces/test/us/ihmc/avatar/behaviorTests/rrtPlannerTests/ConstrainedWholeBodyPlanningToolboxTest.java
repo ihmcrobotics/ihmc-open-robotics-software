@@ -209,7 +209,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if(visulaizerOn)
-         ThreadTools.sleep(10000);
+         ThreadTools.sleep(5000);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -221,6 +221,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
+      
       /*
        * reaching initial configuration
        */
@@ -231,7 +232,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(handTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
       
       System.out.println("Start");
       
@@ -244,7 +244,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("Send wakeup done " + drcBehaviorTestHelper.getYoTime());
       
       /*
-       * constrained end effector trajectory (WorldFrame).
+       * constrained end effector trajectory.
        */
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
@@ -255,7 +255,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfExpanding(100);
             
-      packet.setInitialRobotConfigration(drcBehaviorTestHelper.getControllerFullRobotModel());
+      packet.setInitialRobotConfigration(sdfFullRobotModel);
             
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
       
