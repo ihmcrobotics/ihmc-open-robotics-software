@@ -369,7 +369,10 @@ public class QuadrupedSimulationFactory
       for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
       {
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.get().getOneDegreeOfFreedomJoint(modelFactory.get().getSDFNameForJointName(quadrupedJointName));
-         oneDegreeOfFreedomJoint.setQ(initialPositionParameters.get().getInitialJointPosition(quadrupedJointName));
+         if(oneDegreeOfFreedomJoint != null)
+         {
+            oneDegreeOfFreedomJoint.setQ(initialPositionParameters.get().getInitialJointPosition(quadrupedJointName));
+         }
       }
       try
       {

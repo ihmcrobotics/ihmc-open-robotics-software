@@ -127,10 +127,10 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final YoBoolean useTwoConstantCMPsPerSupport = new YoBoolean(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
 
-   private final YoFramePoint2d yoSingleSupportInitialCoM;
-   private final YoFramePoint2d yoSingleSupportFinalCoM;
-   private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
-   private final FramePoint2d singleSupportFinalCoM = new FramePoint2d();
+   private final YoFramePoint yoSingleSupportInitialCoM;
+   private final YoFramePoint yoSingleSupportFinalCoM;
+   private final FramePoint singleSupportInitialCoM = new FramePoint();
+   private final FramePoint singleSupportFinalCoM = new FramePoint();
 
    private final List<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final List<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
@@ -141,7 +141,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
-   private final FramePoint2d tempCoM = new FramePoint2d();
+   private final FramePoint tempCoM = new FramePoint();
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
@@ -170,8 +170,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
                                                                                         numberOfFootstepsToConsider, registry);
 
-      yoSingleSupportInitialCoM = new YoFramePoint2d(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
-      yoSingleSupportFinalCoM = new YoFramePoint2d(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
+      yoSingleSupportInitialCoM = new YoFramePoint(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
+      yoSingleSupportFinalCoM = new YoFramePoint(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT),
             soleZUpFrames.get(RobotSide.RIGHT)};
@@ -311,7 +311,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan();
+      updateTransferPlan(true);
    }
 
    @Override
@@ -328,7 +328,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
-      updateTransferPlan();
+      updateTransferPlan(true);
    }
 
 
@@ -371,14 +371,14 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
-      desiredCoMPosition.getFrameTuple2d(singleSupportInitialCoM);
-      updateSingleSupportPlan();
+      desiredCoMPosition.getFrameTuple(singleSupportInitialCoM);
+      updateSingleSupportPlan(true);
    }
 
 
    @Override
    /** {@inheritDoc} */
-   protected void updateTransferPlan()
+   protected void updateTransferPlan(boolean computeUpcomingCMPs)
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
@@ -387,7 +387,11 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       icpSingleSupportTrajectoryGenerator.hideVisualization();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+      if (computeUpcomingCMPs)
+         referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+      else
+         referenceCMPsCalculator.computeSupportFeetReferenceCMPsDuringDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+
       referenceCMPsCalculator.update();
 
       initializeTransferTrajectory(transferToSide);
@@ -398,12 +402,15 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   protected void updateSingleSupportPlan()
+   protected void updateSingleSupportPlan(boolean computeUpcomingCMPs)
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
+      if (computeUpcomingCMPs)
+         referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
+      else
+         referenceCMPsCalculator.computeSupportFootReferenceCMPsDuringSingleSupport(supportSide);
       referenceCMPsCalculator.update();
 
       ReferenceFrame supportSoleFrame = initializeSwingTrajectory();
@@ -460,7 +467,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
-         yoSingleSupportInitialCoM.getFrameTuple2d(singleSupportInitialCoM);
+         yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
          tempICP.changeFrame(worldFrame);
          double swingDuration = swingDurations.get(0).getDoubleValue();
          time = MathTools.clamp(time, 0.0, swingDuration);
@@ -471,6 +478,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          integrateCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
          desiredCoMPosition.set(tempCoM);
       }
+      // TODO: possible set this
+//      desiredCoMPosition.setZ(0.0);
 
       decayDesiredVelocityIfNeeded();
 
@@ -521,7 +530,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          desiredICPPosition.set(icpPositionToHold);
          desiredICPVelocity.setToZero();
-         desiredCoMPosition.set(icpPositionToHold.getX(), icpPositionToHold.getY());
+         desiredCoMPosition.set(icpPositionToHold.getX(), icpPositionToHold.getY(), 0.0);
          singleSupportInitialICP.setIncludingFrame(icpPositionToHold);
          singleSupportFinalICP.setIncludingFrame(icpPositionToHold);
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
@@ -655,7 +664,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       switchCornerPointsToWorldFrame();
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
-      yoSingleSupportInitialCoM.getFrameTuple2d(singleSupportInitialCoM);
+      yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
 
       ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide.getEnumValue());
       double omega0 = this.omega0.getDoubleValue();
@@ -810,16 +819,16 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   private final FramePoint2d tempFinalCoM = new FramePoint2d();
+   private final FramePoint tempFinalCoM = new FramePoint();
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
-         tempFinalCoM.setByProjectionOntoXYPlane(tempFinalICP);
+         tempFinalCoM.set(tempFinalICP);
       }
       else
       {
