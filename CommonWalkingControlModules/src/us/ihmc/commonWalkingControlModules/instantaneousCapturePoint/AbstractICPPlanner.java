@@ -45,7 +45,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** Desired velocity for the Center of Pressure (CoP) */
    protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
    /** Desired Centroidal Angular Momentum (CAM) */
-   protected final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAmgularMomentum", worldFrame, registry);
+   protected final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
    /** Desired Centroidal Torque (CT) */
    protected final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
