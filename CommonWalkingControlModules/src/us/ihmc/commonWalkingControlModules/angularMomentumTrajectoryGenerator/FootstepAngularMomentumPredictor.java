@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -35,6 +36,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final int numberOfSwingSegments = 1;
    private final int numberOfTransferSegments = 2;
    private final int maxNumberOfFootstepsToConsider = 10;
+   private final TrajectoryMathTools trajMathTools;
 
    private final YoBoolean computePredictedAngularMomentum;
    private final YoInteger numberOfFootstepsToConsider;
@@ -98,6 +100,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    public FootstepAngularMomentumPredictor(String namePrefix, YoVariableRegistry parentRegistry)
    {
       String fullPrefix = namePrefix + "AngularMomentum";
+      this.trajMathTools = new TrajectoryMathTools(fullPrefix, 2 * maxNumberOfTrajectoryCoefficients, parentRegistry);
       this.computePredictedAngularMomentum = new YoBoolean(fullPrefix + "ComputePredictedAngularMomentum", registry);
       this.numberOfFootstepsToConsider = new YoInteger(fullPrefix + "MaxFootsteps", registry);
       this.swingLegMass = new YoDouble(fullPrefix + "SwingFootMass", registry);
@@ -395,16 +398,17 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private void calculateAngularMomentumTrajectory()
    {
-      swingFootTrajectory.subtract(segmentCoMTrajectory);
-      swingFootVelocity.subtract(segmentCoMVelocity);
-      supportFootTrajectory.subtract(segmentCoMTrajectory);
-      supportFootVelocity.subtract(segmentCoMVelocity);
+      trajMathTools.subtract(swingFootTrajectory, swingFootTrajectory, segmentCoMTrajectory);
+      trajMathTools.subtract(swingFootVelocity, swingFootVelocity, segmentCoMVelocity);
+      trajMathTools.subtract(supportFootTrajectory, supportFootTrajectory, segmentCoMTrajectory);
+      trajMathTools.subtract(supportFootVelocity, supportFootTrajectory, segmentCoMVelocity);
 
-      swingFootTrajectory.crossProduct(swingFootVelocity);
-      swingFootTrajectory.scale(swingLegMass.getDoubleValue());
-      supportFootTrajectory.crossProduct(supportFootVelocity);
-      supportFootTrajectory.scale(supportLegMass.getDoubleValue());
-      estimatedAngularMomentumTrajectory.add(supportFootTrajectory, swingFootTrajectory);
+      trajMathTools.crossProduct(swingFootTrajectory, swingFootTrajectory, swingFootVelocity);
+      trajMathTools.scale(swingFootTrajectory, swingFootTrajectory, swingLegMass.getDoubleValue());
+      trajMathTools.crossProduct(supportFootTrajectory, supportFootTrajectory, supportFootVelocity);
+      trajMathTools.scale(supportFootTrajectory, supportFootTrajectory, supportLegMass.getDoubleValue());
+
+      trajMathTools.add(estimatedAngularMomentumTrajectory, supportFootTrajectory, swingFootTrajectory);
    }
 
    private void setSupportFootTrajectoryForSwing(int footstepIndex)
@@ -426,7 +430,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSupportFootLocation(tempFramePoint1);
       supportFootTrajectory.setConstant(startTime, endTime, tempFramePoint1);
-      supportFootTrajectory.getDerivative(supportFootVelocity);
+      trajMathTools.getDerivative(supportFootVelocity, supportFootTrajectory);
    }
 
    private void setSwingFootTrajectoryForSwing(int footstepIndex)
@@ -435,7 +439,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint2);
       swingFootTrajectory.setPenticWithZeroTerminalAcceleration(0.0, currentSwingSegmentDuration, tempFramePoint1, zeroVector, tempFramePoint2, zeroVector);
       updateSwingLiftTrajectory();
-      swingFootTrajectory.getDerivative(swingFootVelocity);
+      trajMathTools.getDerivative(swingFootVelocity, swingFootTrajectory);
 
       if (DEBUG && firstSwingDebug && swingStartDebug)
       {
@@ -456,7 +460,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint1);
       swingFootTrajectory.setConstant(0.0, currentFirstTransferSegmentDuration, tempFramePoint1);
-      swingFootTrajectory.getDerivative(swingFootVelocity);
+      trajMathTools.getDerivative(swingFootVelocity, swingFootTrajectory);
 
       if (DEBUG && firstSwingDebug && !swingStartDebug)
       {
@@ -469,7 +473,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       upcomingCoPsInFootsteps.get(footstepIndex).getSupportFootLocation(tempFramePoint1);
       swingFootTrajectory.setConstant(segmentStartTime, segmentStartTime + currentSecondTransferSegmentDuration, tempFramePoint1);
-      swingFootTrajectory.getDerivative(swingFootVelocity);
+      trajMathTools.getDerivative(swingFootVelocity, swingFootTrajectory);
 
       if (DEBUG && firstSwingDebug && !swingStartDebug)
       {
@@ -484,8 +488,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(-currentSecondTransferSegmentDuration, -currentSecondTransferSegmentDuration + currentFootstepTime, tempFramePoint1,
                                     tempFrameVector1, tempFramePoint2, tempFrameVector2);
       segmentCoMTrajectory.setTime(0.0, currentSwingSegmentDuration);
-      segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
-     
+      trajMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
+      
       if (DEBUG && firstCoMDebug && swingStartDebug)
       {
          comTrajDebug.set(segmentCoMTrajectory);
@@ -499,7 +503,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(-(currentSecondTransferSegmentDuration + currentSwingSegmentDuration), currentFirstTransferSegmentDuration, tempFramePoint1,
                                                                         tempFrameVector1, tempFramePoint2, tempFrameVector2);                                          
       segmentCoMTrajectory.setTime(0.0, currentFirstTransferSegmentDuration);
-      segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
+      trajMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
       
       if (DEBUG && firstCoMDebug && !swingStartDebug)
       {
@@ -513,7 +517,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       getCoMEstimationWaypoints(footstepIndex);
       segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(startTime, startTime + currentFootstepTime, tempFramePoint1, tempFrameVector1, tempFramePoint2, tempFrameVector2);
       segmentCoMTrajectory.setTime(startTime, startTime + currentSecondTransferSegmentDuration);
-      segmentCoMTrajectory.getDerivative(segmentCoMVelocity);
+      trajMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
       
       if (DEBUG && firstCoMDebug && !swingStartDebug)
       {
