@@ -7,6 +7,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
+import us.ihmc.footstepPlanning.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -78,6 +79,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return parameters used in the user interface only.
     */
    public default UIParameters getUIParameters()
+   {
+      return null;
+   }
+   
+   public default FootstepPlannerParameters getFootstepPlannerParameters()
    {
       return null;
    }
