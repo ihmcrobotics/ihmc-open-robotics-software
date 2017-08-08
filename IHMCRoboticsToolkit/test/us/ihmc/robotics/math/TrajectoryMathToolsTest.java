@@ -13,6 +13,7 @@ import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -611,10 +612,9 @@ public class TrajectoryMathToolsTest
       DummySegmentedTrajectory traj2 = new DummySegmentedTrajectory("TestTraj2", 4, 2, registry);
       DummySegmentedTrajectory traj3 = new DummySegmentedTrajectory("TestTraj3", 10, 2, registry);
       traj1.setSegment(0, 1, new FramePoint(worldFrame, 10, 11, 12), new FramePoint(worldFrame, 13, 14, 15));
-      traj1.setSegment(1, 2, new FramePoint(worldFrame, 15, 20, 25), new FramePoint(worldFrame, 20, 25, 30));
-      traj1.setSegment(2, 3, new FramePoint(worldFrame, 25, 28, 31), new FramePoint(worldFrame, 35, 38, 41));
-      traj2.setSegment(0.5, 0.6, new FramePoint(worldFrame, 1, 2, 3), new FramePoint(worldFrame, 3, 2, 1));
-      traj2.setSegment(1.2, 2.2, new FramePoint(worldFrame, 3, 2, 1), new FramePoint(worldFrame, 4, 5, 6));
+      traj1.setSegment(1, 2, new FramePoint(worldFrame, 15, 20, 25), new FramePoint(worldFrame, 20, 25, 30));      traj1.setSegment(2, 3, new FramePoint(worldFrame, 25, 28, 31), new FramePoint(worldFrame, 35, 38, 41));
+      traj2.setSegment(0, 3, new FramePoint(worldFrame, 1, 2, 3), new FramePoint(worldFrame, 3, 2, 1));
+      //traj2.setSegment(1.2, 2.2, new FramePoint(worldFrame, 3, 2, 1), new FramePoint(worldFrame, 4, 5, 6));
       trajMathSolver.addSegmentedTrajectories(traj3, traj1, traj2, Epsilons.ONE_BILLIONTH);
    }
 }
