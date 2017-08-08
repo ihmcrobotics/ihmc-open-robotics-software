@@ -17,17 +17,18 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   private static final int totalStepsUp = 4;
-   private static final int totalStepsDown = 6;
-   private static final double stepUpHeight = 0.18;
+   private static final int totalStepsUp = 3;
+   private static final int totalStepsDown = 3;
+   private static final double stepUpHeight = 0.19685;
    private static final double totalHeightUp = totalStepsUp * stepUpHeight;
    private static final double stepDownHeight = totalHeightUp / totalStepsDown;
 
    private static final double stairUpDepth = 0.2921;
    private static final double stairDownDepth = 0.38;
-   private static final double startingPosition = 2.0;
+   private static final double startingPosition = 1.0;
 
-   private static final double landingDepth = 1.27;
+   private static final double landingDepth = 0.85;
+   private static final double landingWidth = 2.1;
 
    private final List<List<FramePose>> stairPoses = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
       AdjustableStairsEnvironment environment = new AdjustableStairsEnvironment();
       environment.setStairsParameters(totalStepsUp, 1.016, stepUpHeight, stairUpDepth);
       environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
-      environment.setLandingPlatformParameters(landingDepth, 3, 1.143, 2);
+      environment.setLandingPlatformParameters(landingDepth, landingWidth, 1.143, 2);
       environment.setCourseStartDistance(startingPosition);
 
       environment.generateTerrains();
@@ -86,7 +87,7 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
       AdjustableStairsEnvironment environment = new AdjustableStairsEnvironment();
       environment.setStairsParameters(totalStepsDown, 1.016, stepDownHeight, stairDownDepth);
       environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
-      environment.setLandingPlatformParameters(0.1, 0.1, 0.0,2);
+      environment.setLandingPlatformParameters(landingDepth, landingWidth, 1.143, 2);
       environment.setCourseStartDistance(-(startingPosition + totalStepsUp * stairUpDepth + totalStepsDown * stairDownDepth + landingDepth));
       environment.setCourseAngle(180);
 

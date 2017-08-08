@@ -16,7 +16,7 @@ public class LeapOfFaithParameters
     */
    public double getFractionOfSwingToScaleFootWeight()
    {
-      return 0.95;
+      return 0.92;
    }
 
    /**
@@ -24,7 +24,7 @@ public class LeapOfFaithParameters
     */
    public double getHorizontalFootWeightScaleFactor()
    {
-      return -0.5;
+      return 0.0;
    }
 
    /**
