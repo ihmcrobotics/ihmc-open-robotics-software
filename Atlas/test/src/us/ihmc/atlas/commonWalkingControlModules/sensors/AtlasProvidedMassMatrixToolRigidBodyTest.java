@@ -1,28 +1,32 @@
 package us.ihmc.atlas.commonWalkingControlModules.sensors;
 
+import java.util.Random;
+import java.util.stream.DoubleStream;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 
 public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrixToolRigidBodyTest
 {
    AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
-   AtlasDefaultArmConfigurations config = new AtlasDefaultArmConfigurations();
    RobotSide side = RobotSide.LEFT;
-   AtlasRobotModel atlasRobotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
+   AtlasRobotModel atlasRobotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
 
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
       FullHumanoidRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
 
-      fullRobotModel.setJointAngles(side, LimbName.ARM, config.getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, side));
+      int numberOfJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
+      Random random = new Random(945298L);
+      double[] randomAngles = DoubleStream.generate(() -> random.nextDouble()).limit(numberOfJoints).toArray();
+
+      fullRobotModel.setJointAngles(side, LimbName.ARM, randomAngles);
       fullRobotModel.updateFrames();
 
       return fullRobotModel;
