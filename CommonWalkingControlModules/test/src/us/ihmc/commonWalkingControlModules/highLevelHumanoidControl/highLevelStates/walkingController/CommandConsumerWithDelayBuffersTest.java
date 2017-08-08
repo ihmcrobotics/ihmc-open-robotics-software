@@ -517,10 +517,4 @@ public class CommandConsumerWithDelayBuffersTest
       }
       return null;
    }
-
-   public static void main(String[] args)
-   {
-      MutationTestFacilitator.facilitateMutationTestForClass(CommandConsumerWithDelayBuffers.class, CommandConsumerWithDelayBuffersTest.class);
-   }
-
 }

@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -22,7 +23,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 	@Test(timeout = 1400000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       super.testFlatGroundWalking(robotModel, true);
    }
 
