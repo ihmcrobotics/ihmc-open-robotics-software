@@ -13,32 +13,39 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../CommonWalkingControlModules",
+   "../IHMCAvatarInterfaces",
+   "../IHMCCommunication",
+   "../IHMCGraphicsDescription",
+   "../IHMCHumanoidBehaviors",
+   "../IHMCHumanoidRobotics",
+   "../IHMCJMonkeyEngineToolkit",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaToolkit",
+   "../IHMCManipulationPlanning",
+   "../IHMCPerception",
+   "../IHMCROSTools",
+   "../IHMCRobotDataLogger",
+   "../IHMCRobotDataVisualizer",
+   "../IHMCRobotDescription",
+   "../IHMCRobotModels",
+   "../IHMCRoboticsToolkit",
+   "../IHMCSimulationToolkit",
+   "../IHMCWholeBodyController",
+   "../ModelFileLoader",
+   "../RobotiqHandDrivers",
+   "../SensorProcessing",
+   "../SimulationConstructionSet",
+   "../SimulationConstructionSetTools",
+   "../Vicon",
+   "../vicon",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../CommonWalkingControlModules"
-   includeBuild "../IHMCAvatarInterfaces"
-   includeBuild "../IHMCCommunication"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCHumanoidBehaviors"
-   includeBuild "../IHMCHumanoidRobotics"
-   includeBuild "../IHMCJMonkeyEngineToolkit"
-   includeBuild "../IHMCJavaExtensions"
-   includeBuild "../IHMCJavaToolkit"
-   includeBuild "../IHMCManipulationPlanning"
-   includeBuild "../IHMCPerception"
-   includeBuild "../IHMCROSTools"
-   includeBuild "../IHMCRobotDataLogger"
-   includeBuild "../IHMCRobotDataVisualizer"
-   includeBuild "../IHMCRobotDescription"
-   includeBuild "../IHMCRobotModels"
-   includeBuild "../IHMCRoboticsToolkit"
-   includeBuild "../IHMCSimulationToolkit"
-   includeBuild "../IHMCWholeBodyController"
-   includeBuild "../ModelFileLoader"
-   includeBuild "../RobotiqHandDrivers"
-   includeBuild "../SensorProcessing"
-   includeBuild "../SimulationConstructionSet"
-   includeBuild "../SimulationConstructionSetTools"
-   includeBuild "../Vicon"
-   includeBuild "../vicon"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }

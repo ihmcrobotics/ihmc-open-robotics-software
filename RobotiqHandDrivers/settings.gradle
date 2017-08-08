@@ -13,14 +13,21 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../IHMCAvatarInterfaces",
+   "../IHMCCommunication",
+   "../IHMCGraphicsDescription",
+   "../IHMCHumanoidRobotics",
+   "../IHMCJavaToolkit",
+   "../IHMCRoboticsToolkit",
+   "../IHMCWholeBodyController",
+   "../SimulationConstructionSet",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../IHMCAvatarInterfaces"
-   includeBuild "../IHMCCommunication"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCHumanoidRobotics"
-   includeBuild "../IHMCJavaToolkit"
-   includeBuild "../IHMCRoboticsToolkit"
-   includeBuild "../IHMCWholeBodyController"
-   includeBuild "../SimulationConstructionSet"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }

@@ -13,25 +13,32 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../CommonWalkingControlModules",
+   "../IHMCAvatarInterfaces",
+   "../IHMCCommunication",
+   "../IHMCGraphicsDescription",
+   "../IHMCHumanoidRobotics",
+   "../IHMCJMonkeyEngineToolkit",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaToolkit",
+   "../IHMCPerception",
+   "../IHMCRobotDataLogger",
+   "../IHMCRobotDataVisualizer",
+   "../IHMCRobotDescription",
+   "../IHMCRobotModels",
+   "../IHMCRoboticsToolkit",
+   "../IHMCStateEstimation",
+   "../IHMCWholeBodyController",
+   "../ModelFileLoader",
+   "../SensorProcessing",
+   "../SimulationConstructionSet",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../CommonWalkingControlModules"
-   includeBuild "../IHMCAvatarInterfaces"
-   includeBuild "../IHMCCommunication"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCHumanoidRobotics"
-   includeBuild "../IHMCJMonkeyEngineToolkit"
-   includeBuild "../IHMCJavaExtensions"
-   includeBuild "../IHMCJavaToolkit"
-   includeBuild "../IHMCPerception"
-   includeBuild "../IHMCRobotDataLogger"
-   includeBuild "../IHMCRobotDataVisualizer"
-   includeBuild "../IHMCRobotDescription"
-   includeBuild "../IHMCRobotModels"
-   includeBuild "../IHMCRoboticsToolkit"
-   includeBuild "../IHMCStateEstimation"
-   includeBuild "../IHMCWholeBodyController"
-   includeBuild "../ModelFileLoader"
-   includeBuild "../SensorProcessing"
-   includeBuild "../SimulationConstructionSet"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }

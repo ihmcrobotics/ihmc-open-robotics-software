@@ -13,31 +13,38 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../CommonWalkingControlModules",
+   "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGraphicsDescription",
+   "../IHMCHumanoidBehaviors",
+   "../IHMCHumanoidRobotics",
+   "../IHMCJMonkeyEngineToolkit",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaToolkit",
+   "../IHMCPerception",
+   "../IHMCROSTools",
+   "../IHMCRobotBehaviors",
+   "../IHMCRobotDataLogger",
+   "../IHMCRobotDataVisualizer",
+   "../IHMCRobotModels",
+   "../IHMCRoboticsToolkit",
+   "../IHMCSimulationToolkit",
+   "../IHMCStateEstimation",
+   "../IHMCWholeBodyController",
+   "../ModelFileLoader",
+   "../SensorProcessing",
+   "../SimulationConstructionSet",
+   "../SimulationConstructionSetTools",
+   "../Vicon",
+   "../vicon",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../CommonWalkingControlModules"
-   includeBuild "../IHMCCommunication"
-   includeBuild "../IHMCFootstepPlanning"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCHumanoidBehaviors"
-   includeBuild "../IHMCHumanoidRobotics"
-   includeBuild "../IHMCJMonkeyEngineToolkit"
-   includeBuild "../IHMCJavaExtensions"
-   includeBuild "../IHMCJavaToolkit"
-   includeBuild "../IHMCPerception"
-   includeBuild "../IHMCROSTools"
-   includeBuild "../IHMCRobotBehaviors"
-   includeBuild "../IHMCRobotDataLogger"
-   includeBuild "../IHMCRobotDataVisualizer"
-   includeBuild "../IHMCRobotModels"
-   includeBuild "../IHMCRoboticsToolkit"
-   includeBuild "../IHMCSimulationToolkit"
-   includeBuild "../IHMCStateEstimation"
-   includeBuild "../IHMCWholeBodyController"
-   includeBuild "../ModelFileLoader"
-   includeBuild "../SensorProcessing"
-   includeBuild "../SimulationConstructionSet"
-   includeBuild "../SimulationConstructionSetTools"
-   includeBuild "../Vicon"
-   includeBuild "../vicon"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }

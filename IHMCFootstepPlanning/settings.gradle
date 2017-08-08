@@ -13,9 +13,16 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../ConvexOptimizationAdapter",
+   "../IHMCGraphicsDescription",
+   "../IHMCRoboticsToolkit",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../ConvexOptimizationAdapter"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCRoboticsToolkit"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }
