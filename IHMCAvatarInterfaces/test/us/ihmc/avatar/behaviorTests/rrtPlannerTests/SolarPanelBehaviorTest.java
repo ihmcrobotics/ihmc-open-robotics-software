@@ -86,26 +86,26 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
-   
+
    private PacketCommunicator reaModuleCommunicator;
-   
+
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    SolarPanel solarPanel;
-   
+
    public class SolarPanelCleaningEnvironment implements CommonAvatarEnvironmentInterface
    {
       private final CombinedTerrainObject3D EnvSet;
-      
+
       public SolarPanelCleaningEnvironment()
       {
          setUpSolarPanel();
-         
+
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
-                  
+
          EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeW(), YoAppearance.Aqua());
       }
-      
+
       @Override
       public TerrainObject3D getTerrainObject3D()
       {
@@ -140,11 +140,11 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
          // TODO Auto-generated method stub
       }
    }
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");      
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
    @After
@@ -192,7 +192,7 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
 
       setupKinematicsToolboxModule();
    }
-    
+
    //@Test
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -202,50 +202,48 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      for(int i=0;i<sdfFullRobotModel.getOneDoFJoints().length;i++)
+      for (int i = 0; i < sdfFullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint aJoint = sdfFullRobotModel.getOneDoFJoints()[i];
-         PrintTools.info(""+aJoint.getName()+" "+aJoint.getJointLimitLower()+" "+aJoint.getJointLimitUpper());
-      }            
-            
+         PrintTools.info("" + aJoint.getName() + " " + aJoint.getJointLimitLower() + " " + aJoint.getJointLimitUpper());
+      }
+
       setUpSolarPanel();
-            
-      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(getRobotModel(), 
-                                                                                drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+
+      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(getRobotModel(), drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                 sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
-      
+
       RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
-      
+
       drcBehaviorTestHelper.dispatchBehavior(RRTNode1DTimeDomain.nodeValidityTester);
-      
+
       // ********** Planning *** //      
       double motionTime = 0;
-      
-      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      
-      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
-          
-      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
-      {
-         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-         motionTime = solarPanelPlanner.getMotionTime();
-         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);         
-      }      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+
+      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
+
+      if (solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
       {
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
          motionTime = solarPanelPlanner.getMotionTime();
          drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-      }      
+      }
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      if (solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
+      {
+         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+         motionTime = solarPanelPlanner.getMotionTime();
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      }
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+
       scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode1DTimeDomain.cleaningPath));
 
       if (visualize)
@@ -257,7 +255,6 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
          DrawPanel drawPanel;
          Dimension dim;
 
-
          frame = new JFrame("RRTTest");
          drawPanel = new DrawPanel(solarPanelPlanner.rrtPlanner);
          dim = new Dimension(1600, 800);
@@ -268,110 +265,108 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
          frame.pack();
          frame.setVisible(true);
       }
-      
+
       // ************************************* //
       // show
       // ************************************* //
-      PrintTools.info("END");     
-   }   
-   
-   //@Test
+      PrintTools.info("END");
+   }
+
+   @Test
    public void showUpRobotCollisionModel() throws SimulationExceededMaximumTimeException, IOException
-   {  
+   {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
+
       RobotCollisionModel robotCollisionModel;
       robotCollisionModel = new RobotCollisionModel(sdfFullRobotModel);
-      
+
       scs.addStaticLinkGraphics(robotCollisionModel.getCollisionGraphics());
-      
-      PrintTools.info("cur Height is "+ sdfFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23());
-      
-      PrintTools.info("cur Height is "+ sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23());
-      
-      
-      PrintTools.info("Out " );      
+
+      PrintTools.info("cur Height is " + sdfFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame().getM23());
+
+      PrintTools.info("cur Height is " + sdfFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23());
+
+      PrintTools.info("Out ");
    }
-   
+
    //@Test
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
-      if(isKinematicsToolboxVisualizerEnabled)
+      if (isKinematicsToolboxVisualizerEnabled)
          ThreadTools.sleep(13000);
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
+
       setUpSolarPanel();
-      
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI * 0.2);
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-      
+
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI * 0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI * 0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI * 0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI * 0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI * 0.3), 4.0);
+
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
-      
+
       ArrayList<RRTNode> nodes1D = new ArrayList<RRTNode>();
-      
-      nodes1D.add(new TimeDomain1DNode(0.0, 0.0));            // true
-      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI*0.1));    // true
-      nodes1D.add(new TimeDomain1DNode(0.4, -Math.PI*0.2));   // false
-      nodes1D.add(new TimeDomain1DNode(1.7, Math.PI*0.2));    // ture
-      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI*0.2));    // ture
+
+      nodes1D.add(new TimeDomain1DNode(0.0, 0.0)); // true
+      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI * 0.1)); // true
+      nodes1D.add(new TimeDomain1DNode(0.4, -Math.PI * 0.2)); // false
+      nodes1D.add(new TimeDomain1DNode(1.7, Math.PI * 0.2)); // ture
+      nodes1D.add(new TimeDomain1DNode(0.3, Math.PI * 0.2)); // ture
       nodes1D.add(new TimeDomain1DNode(0.0, 0.0));
-      
+
       ArrayList<RRTNode> nodes3D = new ArrayList<RRTNode>();
-      
-      nodes3D.add(new TimeDomain3DNode(0.0, 0.7, Math.PI*0.1, Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(3.0, 0.75, -Math.PI*0.1, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(5.0, 0.73, Math.PI*0.15, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(2.0, 0.70, Math.PI*0.0, Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(5.0, 0.78, -Math.PI*0.1, -Math.PI*0.1));            // true
-      nodes3D.add(new TimeDomain3DNode(1.0, 0.60, Math.PI*0.13, Math.PI*0.1));            // true
-//      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
-//      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
-//      nodes3D.add(new TimeDomain3DNode(13.6363, 0.88741055727005, Math.PI*-0.008876263572709467, Math.PI*0.0447894649324294));
-//      nodes3D.add(new TimeDomain3DNode(4.6666, 0.88741055727005, Math.PI*0.0189915162899471, Math.PI*0.07676682998650916));
-//      nodes3D.add(new TimeDomain3DNode(2.90909, 0.8601378299973228, Math.PI*-0.04484725263727767, Math.PI*-0.016660109836832714));
-//      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.011037102032582896, Math.PI*0.033562347578461264));
-//      nodes3D.add(new TimeDomain3DNode(3.6363, 0.8783196481791409, Math.PI*-0.03202401766345228, Math.PI*0.007099954451470068));
-//      nodes3D.add(new TimeDomain3DNode(14.0, 0.88741055727005, Math.PI*-0.0375297411695563, Math.PI*0.1006749515083037));
-//      
-//      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*0.0026458019986451225, Math.PI*0.10201097518861175));
-//      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.04747080426433124, Math.PI*0.09189569454291491));
-      
+
+      nodes3D.add(new TimeDomain3DNode(0.0, 0.7, Math.PI * 0.1, Math.PI * 0.1)); // true
+      nodes3D.add(new TimeDomain3DNode(3.0, 0.75, -Math.PI * 0.1, -Math.PI * 0.1)); // true
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.73, Math.PI * 0.15, -Math.PI * 0.1)); // true
+      nodes3D.add(new TimeDomain3DNode(2.0, 0.70, Math.PI * 0.0, Math.PI * 0.1)); // true
+      nodes3D.add(new TimeDomain3DNode(5.0, 0.78, -Math.PI * 0.1, -Math.PI * 0.1)); // true
+      nodes3D.add(new TimeDomain3DNode(1.0, 0.60, Math.PI * 0.13, Math.PI * 0.1)); // true
+      //      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
+      //      nodes3D.add(new TimeDomain3DNode(4.666, 0.88741055727005, Math.PI*0.01288023875600466, Math.PI*0.01566326415185304));
+      //      nodes3D.add(new TimeDomain3DNode(13.6363, 0.88741055727005, Math.PI*-0.008876263572709467, Math.PI*0.0447894649324294));
+      //      nodes3D.add(new TimeDomain3DNode(4.6666, 0.88741055727005, Math.PI*0.0189915162899471, Math.PI*0.07676682998650916));
+      //      nodes3D.add(new TimeDomain3DNode(2.90909, 0.8601378299973228, Math.PI*-0.04484725263727767, Math.PI*-0.016660109836832714));
+      //      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.011037102032582896, Math.PI*0.033562347578461264));
+      //      nodes3D.add(new TimeDomain3DNode(3.6363, 0.8783196481791409, Math.PI*-0.03202401766345228, Math.PI*0.007099954451470068));
+      //      nodes3D.add(new TimeDomain3DNode(14.0, 0.88741055727005, Math.PI*-0.0375297411695563, Math.PI*0.1006749515083037));
+      //      
+      //      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*0.0026458019986451225, Math.PI*0.10201097518861175));
+      //      nodes3D.add(new TimeDomain3DNode(5.0, 0.88741055727005, Math.PI*-0.04747080426433124, Math.PI*0.09189569454291491));
+
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       SolarPanelCleaningInfo.setDegreesOfRedundancy(DegreesOfRedundancy.THREE);
-      
+
       ValidNodesStateMachineBehavior testNodesBehavior = new ValidNodesStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                                    drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
+                                                                                            drcBehaviorTestHelper.getYoTime(), getRobotModel(),
+                                                                                            sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
       testNodesBehavior.setNodes(nodes3D);
       testNodesBehavior.setSolarPanel(solarPanel);
-      
+
       drcBehaviorTestHelper.dispatchBehavior(testNodesBehavior);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       PrintTools.info("behavior Out " + testNodesBehavior.getNodesValdity());
    }
-         
+
    //@Test
    public void wholebodyTrajectoryBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -379,27 +374,29 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-                  
+
       //HandTrajectoryBehavior handBehavior = new HandTrajectoryBehavior("rigthHand", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
-      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                      drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.35, 1.2), new Quaternion(), ReferenceFrame.getWorldFrame());
+      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.35, 1.2), new Quaternion(),
+                                                                    ReferenceFrame.getWorldFrame());
       Quaternion chestOrientation = new Quaternion();
-      chestOrientation.appendYawRotation(Math.PI*0.3);
+      chestOrientation.appendYawRotation(Math.PI * 0.3);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(3.0, chestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       //PelvisHeightTrajectoryMessage pelvisHeightMessage = new PelvisHeightTrajectoryMessage(3.0, 0.6);
-      
+
       wholebodyMessage.setHandTrajectoryMessage(handMessage);
       wholebodyMessage.setChestTrajectoryMessage(chestMessage);
       wholebodyBehavior.setInput(wholebodyMessage);
-            
+
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
-      
-      PrintTools.info("behavior Out " );      
+
+      PrintTools.info("behavior Out ");
    }
-   
+
    //@Test
    public void threeDimensionalNodeBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -407,25 +404,26 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      
-      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());      
+
+      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                      drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-      
+
       SolarPanelWholeBodyTrajectoryMessageFactory motionFactory = new SolarPanelWholeBodyTrajectoryMessageFactory(sdfFullRobotModel);
-      motionFactory.setMessage(new SolarPanelCleaningPose(solarPanel, 0.4, 0.2, 0.0), 0.65, Math.PI*0.0, -Math.PI*0.1, 3.0);
-      
+      motionFactory.setMessage(new SolarPanelCleaningPose(solarPanel, 0.4, 0.2, 0.0), 0.65, Math.PI * 0.0, -Math.PI * 0.1, 3.0);
+
       wholebodyMessage = motionFactory.getWholeBodyTrajectoryMessage();
       wholebodyBehavior.setInput(wholebodyMessage);
-            
+
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
-      
-      PrintTools.info("behavior Out " );      
+
+      PrintTools.info("behavior Out ");
    }
-   
+
    //@Test
    public void controlPointOptimizationStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -433,61 +431,66 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
+
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI * 0.2);
       SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-      
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
-      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
-      
+
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI * 0.3), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI * 0.3), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI * 0.2), 4.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI * 0.2), 1.0);
+      cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI * 0.3), 4.0);
+
       SolarPanelCleaningInfo.setCleaningPath(cleaningPath);
       TimeDomain1DNode rootNode = new TimeDomain1DNode(cleaningPath.getArrivalTime().get(0), 0);
-            
-      ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior
-      = new ControlPointOptimizationStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
-      
+
+      ControlPointOptimizationStateMachineBehavior controlPointOptimizationBehavior = new ControlPointOptimizationStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                                                       drcBehaviorTestHelper.getYoTime(),
+                                                                                                                                       getRobotModel(),
+                                                                                                                                       sdfFullRobotModel,
+                                                                                                                                       drcBehaviorTestHelper.getReferenceFrames());
+
       controlPointOptimizationBehavior.setRootNode(rootNode);
-      
+
       drcBehaviorTestHelper.dispatchBehavior(controlPointOptimizationBehavior);
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15);
-      
-      PrintTools.info("behavior Out " );      
+
+      PrintTools.info("behavior Out ");
    }
-   
-   @Test
+
+   //   @Test
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
-      if(isKinematicsToolboxVisualizerEnabled)
+      if (isKinematicsToolboxVisualizerEnabled)
          ThreadTools.sleep(13000);
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       drcBehaviorTestHelper.updateRobotModel();
-            
+
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-            
-      CleaningMotionStateMachineBehavior cleaningStateMachineBehavior
-      = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(), getRobotModel(), sdfFullRobotModel, drcBehaviorTestHelper.getReferenceFrames());
-            
-      PrintTools.info("behavior In " );  
+
+      CleaningMotionStateMachineBehavior cleaningStateMachineBehavior = new CleaningMotionStateMachineBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                               drcBehaviorTestHelper.getYoTime(),
+                                                                                                               getRobotModel(), sdfFullRobotModel,
+                                                                                                               drcBehaviorTestHelper.getReferenceFrames());
+
+      PrintTools.info("behavior In ");
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
-      
-      scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));      
-      
+
+      scs.addStaticLinkGraphics(getPrintCleaningPath(SolarPanelCleaningInfo.getCleaningPath()));
+
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10000);
-      
-      PrintTools.info("behavior Out " );      
+
+      PrintTools.info("behavior Out ");
    }
-   
+
    //@Test
    public void dancingBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -495,164 +498,152 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      
+
       // A. step out
-      
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
+
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                           getRobotModel().getWalkingControllerParameters());
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -0.4, 0.0), new Quaternion());
-      
+
       footstepDataList.add(footstepDataMessage);
       footstepListBehavior.set(footstepDataList);
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(footstepListBehavior, 2.0);
-      
-      
+
       drcBehaviorTestHelper.updateRobotModel();
       drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
-      
+
       drcBehaviorTestHelper.getReferenceFrames().updateFrames();
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
 
       // B. phase 1 ready
-      
+
       ReferenceFrame midFeetFrame = drcBehaviorTestHelper.getReferenceFrames().getMidFootZUpGroundFrame();
-                  
-      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      WholeBodyTrajectoryBehavior wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                      drcBehaviorTestHelper.getYoTime());
       WholeBodyTrajectoryMessage wholebodyMessage = new WholeBodyTrajectoryMessage();
-      
+
       Quaternion rightHandOrientation = new Quaternion();
-      rightHandOrientation.appendYawRotation(50*Math.PI/180);
+      rightHandOrientation.appendYawRotation(50 * Math.PI / 180);
       Quaternion leftHandOrientation = new Quaternion();
-      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
-      
-      HandTrajectoryMessage rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.00, 1.25), rightHandOrientation, midFeetFrame);
+      leftHandOrientation.appendYawRotation(-50 * Math.PI / 180);
+
+      HandTrajectoryMessage rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.00, 1.25), rightHandOrientation,
+                                                                         midFeetFrame);
       HandTrajectoryMessage leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.7, 0.00, 1.0), leftHandOrientation, midFeetFrame);
-      
+
       PelvisTrajectoryMessage pelvisMessage = new PelvisTrajectoryMessage(3.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
-      SelectionMatrix6D selectionMatrixPelvis =  new SelectionMatrix6D();
+      SelectionMatrix6D selectionMatrixPelvis = new SelectionMatrix6D();
       selectionMatrixPelvis.clearSelection();
       selectionMatrixPelvis.selectLinearZ(true);
       pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
-            
+
       wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
       wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
       wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
       wholebodyBehavior.setInput(wholebodyMessage);
-            
+
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 3.0);
 
-      
       // C. phase 1
-      
-      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                          drcBehaviorTestHelper.getYoTime());
       wholebodyMessage = new WholeBodyTrajectoryMessage();
-      
+
       rightHandOrientation = new Quaternion();
-      rightHandOrientation.appendPitchRotation(-90*Math.PI/180);
+      rightHandOrientation.appendPitchRotation(-90 * Math.PI / 180);
       leftHandOrientation = new Quaternion();
-      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
-      
+      leftHandOrientation.appendYawRotation(-50 * Math.PI / 180);
+
       rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 8);
       leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 8);
-      
+
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-      for(int i=0;i<8;i++)
+      for (int i = 0; i < 8; i++)
       {
-//         rightHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
-//         leftHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
+         //         rightHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
+         //         leftHandMessage.setTrajectoryPoint(i, 0.5, position, orientation, linearVelocity, new Vector3D(), midFeetFrame);
       }
-      
+
       pelvisMessage = new PelvisTrajectoryMessage(5.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
-      selectionMatrixPelvis =  new SelectionMatrix6D();
+      selectionMatrixPelvis = new SelectionMatrix6D();
       selectionMatrixPelvis.clearSelection();
       selectionMatrixPelvis.selectLinearZ(true);
       pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
-            
+
       wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
       wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
       wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
       wholebodyBehavior.setInput(wholebodyMessage);
-            
+
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 5.0);
-      
-      
-      
-      
+
       // D. phase 2 ready     
 
-      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      wholebodyBehavior = new WholeBodyTrajectoryBehavior("wholebody", drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                          drcBehaviorTestHelper.getYoTime());
       wholebodyMessage = new WholeBodyTrajectoryMessage();
-      
+
       rightHandOrientation = new Quaternion();
-      rightHandOrientation.appendPitchRotation(-90*Math.PI/180);
+      rightHandOrientation.appendPitchRotation(-90 * Math.PI / 180);
       leftHandOrientation = new Quaternion();
-      leftHandOrientation.appendYawRotation(-50*Math.PI/180);
-      
+      leftHandOrientation.appendYawRotation(-50 * Math.PI / 180);
+
       rightHandMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 5.0, new Point3D(0.1, -0.5, 1.8), rightHandOrientation, midFeetFrame);
       leftHandMessage = new HandTrajectoryMessage(RobotSide.LEFT, 5.0, new Point3D(0.7, 0.00, 1.1), leftHandOrientation, midFeetFrame);
-      
+
       pelvisMessage = new PelvisTrajectoryMessage(5.0, new Point3D(0.0, 0.0, 0.8), new Quaternion());
-      selectionMatrixPelvis =  new SelectionMatrix6D();
+      selectionMatrixPelvis = new SelectionMatrix6D();
       selectionMatrixPelvis.clearSelection();
       selectionMatrixPelvis.selectLinearZ(true);
       pelvisMessage.setSelectionMatrix(selectionMatrixPelvis);
-            
+
       wholebodyMessage.setHandTrajectoryMessage(rightHandMessage);
       wholebodyMessage.setHandTrajectoryMessage(leftHandMessage);
       wholebodyMessage.setPelvisTrajectoryMessage(pelvisMessage);
       wholebodyBehavior.setInput(wholebodyMessage);
-            
+
       drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(wholebodyBehavior, 5.0);
-      
-      
-      
+
       // D. phase 2
-      
-      
-      
+
       // E. phase 3 ready
-      
-      
-      
-      
+
       // F. phase 3
-      
-      
-      PrintTools.info("behavior Out " );      
+
+      PrintTools.info("behavior Out ");
    }
-   
 
    private void setupKinematicsToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, isKinematicsToolboxVisualizerEnabled);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
+                                                                                   PacketDestination.KINEMATICS_TOOLBOX_MODULE);
    }
-   
-   
+
    private void setUpSolarPanel()
    {
       Pose3D poseSolarPanel = new Pose3D();
       Quaternion quaternionSolarPanel = new Quaternion();
       poseSolarPanel.setPosition(0.71, -0.2, 1.03);
-      quaternionSolarPanel.appendYawRotation(Math.PI*0.00);
+      quaternionSolarPanel.appendYawRotation(Math.PI * 0.00);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-0.380);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
-      
-      solarPanel = new SolarPanel(poseSolarPanel, 0.7, 0.7);      
+
+      solarPanel = new SolarPanel(poseSolarPanel, 0.7, 0.7);
    }
-   
-   
-// ************************************* //
+
+   // ************************************* //
    class DrawPanel extends JPanel
    {
       int timeScale = 70;
       int pelvisYawScale = 300;
       RRTPlannerSolarPanelCleaning planner;
-      
+
       DrawPanel(RRTPlannerSolarPanelCleaning plannerTimeDomain)
       {
          this.planner = plannerTimeDomain;
@@ -661,58 +652,57 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       @Override
       public void paint(Graphics g)
       {
-         super.paint(g);       
-         
-         for(int j =0;j<planner.getNumberOfPlanners();j++)
+         super.paint(g);
+
+         for (int j = 0; j < planner.getNumberOfPlanners(); j++)
          {
             RRTTreeTimeDomain tree = planner.getPlanner(j).getTree();
             ArrayList<RRTNode> wholeNode = tree.getWholeNodes();
             g.setColor(Color.BLACK);
-            for(int i =1;i<wholeNode.size();i++)
+            for (int i = 1; i < wholeNode.size(); i++)
             {
                RRTNode rrtNode1 = wholeNode.get(i);
                RRTNode rrtNode2 = rrtNode1.getParentNode();
                branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
             }
-            
-            
+
             g.setColor(Color.BLUE);
             ArrayList<RRTNode> nodePath = tree.getPathNodes();
-            for(int i =1;i<nodePath.size();i++)
+            for (int i = 1; i < nodePath.size(); i++)
             {
                RRTNode rrtNode1 = nodePath.get(i);
                RRTNode rrtNode2 = rrtNode1.getParentNode();
                branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
             }
-            
-             g.setColor(Color.CYAN);
-             ArrayList<RRTNode> nodeShort = planner.getPlanner(j).getOptimalPath();
-             for(int i =1;i<nodeShort.size();i++)
-             {
-                RRTNode rrtNode1 = nodeShort.get(i);
-                RRTNode rrtNode2 = nodeShort.get(i-1);
-                branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-             }
-             
-             g.setColor(Color.RED);
-             ArrayList<RRTNode> nodeFail = tree.failNodes;
-             PrintTools.info("whole "+ j +" "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
-             for(int i =0;i<nodeFail.size();i++)
-             {
-                RRTNode rrtNode1 = nodeFail.get(i);
-                point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
-             }
+
+            g.setColor(Color.CYAN);
+            ArrayList<RRTNode> nodeShort = planner.getPlanner(j).getOptimalPath();
+            for (int i = 1; i < nodeShort.size(); i++)
+            {
+               RRTNode rrtNode1 = nodeShort.get(i);
+               RRTNode rrtNode2 = nodeShort.get(i - 1);
+               branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+            }
+
+            g.setColor(Color.RED);
+            ArrayList<RRTNode> nodeFail = tree.failNodes;
+            PrintTools.info("whole " + j + " " + wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
+            for (int i = 0; i < nodeFail.size(); i++)
+            {
+               RRTNode rrtNode1 = nodeFail.get(i);
+               point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
+            }
          }
 
-         
-
-         
          g.setColor(Color.yellow);
-         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), Math.PI*0.4, 4);
-         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2), Math.PI*0.4, 4);
-         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), Math.PI*0.4, 4);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), -Math.PI * 0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1),
+                Math.PI * 0.4, 4);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2), -Math.PI * 0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2),
+                Math.PI * 0.4, 4);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), -Math.PI * 0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3),
+                Math.PI * 0.4, 4);
       }
-      
+
       public int t2u(double time)
       {
          return (int) Math.round((time * timeScale) + 50);
@@ -722,62 +712,65 @@ public abstract class SolarPanelBehaviorTest implements MultiRobotTestInterface
       {
          return (int) Math.round(((-yaw)) * pelvisYawScale + 400);
       }
-      
+
       public void point(Graphics g, double time, double yaw, int size)
       {
          int diameter = size;
          g.drawOval(t2u(time) - diameter / 2, y2v(yaw) - diameter / 2, diameter, diameter);
       }
-      
+
       public void branch(Graphics g, double time1, double yaw1, double time2, double yaw2, int size)
       {
          point(g, time1, yaw1, size);
          point(g, time2, yaw2, size);
-         
+
          g.drawLine(t2u(time1), y2v(yaw1), t2u(time2), y2v(yaw2));
       }
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintCleaningPath(SolarPanelPath cleaningPath)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
-      for(int i=0;i<cleaningPath.getLinearPath().size();i++)
+
+      for (int i = 0; i < cleaningPath.getLinearPath().size(); i++)
       {
          ret.addAll(getPrintLinearPath(cleaningPath.getLinearPath().get(i)));
       }
-      
+
       return ret;
    }
-   
+
    private ArrayList<Graphics3DObject> getPrintLinearPath(SolarPanelLinearPath linearPath)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-      
+
       Graphics3DObject nodeOneSphere = new Graphics3DObject();
       Graphics3DObject nodeTwoSphere = new Graphics3DObject();
-      
+
       Graphics3DObject lineCapsule = new Graphics3DObject();
-      
+
       Point3D translationNodeOne = linearPath.getStartPose().getDesiredHandPosition();
       nodeOneSphere.translate(translationNodeOne);
       nodeOneSphere.addSphere(0.02, YoAppearance.DarkGray());
-      
+
       Point3D translationNodeTwo = linearPath.getEndPose().getDesiredHandPosition();
       nodeTwoSphere.translate(translationNodeTwo);
       nodeTwoSphere.addSphere(0.02, YoAppearance.DarkGray());
-      
-      Point3D translationLine = new Point3D((translationNodeOne.getX()+translationNodeTwo.getX())/2, (translationNodeOne.getY()+translationNodeTwo.getY())/2, (translationNodeOne.getZ()+translationNodeTwo.getZ())/2);
-      AxisAngle rotationLine = new AxisAngle(-(translationNodeOne.getY()-translationNodeTwo.getY()), (translationNodeOne.getX()-translationNodeTwo.getX()), 0, Math.PI/2);
-      lineCapsule.translate(translationLine);      
+
+      Point3D translationLine = new Point3D((translationNodeOne.getX() + translationNodeTwo.getX()) / 2,
+                                            (translationNodeOne.getY() + translationNodeTwo.getY()) / 2,
+                                            (translationNodeOne.getZ() + translationNodeTwo.getZ()) / 2);
+      AxisAngle rotationLine = new AxisAngle(-(translationNodeOne.getY() - translationNodeTwo.getY()), (translationNodeOne.getX() - translationNodeTwo.getX()),
+                                             0, Math.PI / 2);
+      lineCapsule.translate(translationLine);
       lineCapsule.rotate(rotationLine);
       lineCapsule.addCapsule(0.02, translationNodeOne.distance(translationNodeTwo), YoAppearance.Gray());
-            
+
       ret.add(nodeOneSphere);
       ret.add(nodeTwoSphere);
 
       return ret;
    }
-   
+
    // ************************************* //
 }
