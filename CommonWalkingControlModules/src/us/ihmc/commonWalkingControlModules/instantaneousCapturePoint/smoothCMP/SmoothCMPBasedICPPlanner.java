@@ -179,7 +179,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void computeFinalCoMPositionInTransfer()
    {
-      throw new RuntimeException("to implement"); //TODOLater
+      throw new RuntimeException("to implement"); //TODO
    }
 
    @Override
@@ -205,7 +205,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void computeFinalCoMPositionInSwing()
    {
-      throw new RuntimeException("to implement"); //TODOLater
+      throw new RuntimeException("to implement"); //TODO
    }
 
    @Override
@@ -316,6 +316,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
+      else if(isInDoubleSupport())
+      {
+         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
+         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
+      }
       else
       {
          tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getSwingCMPTrajectories().get(0).getNumberOfSegments() - 1));
@@ -356,7 +362,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
-      throw new RuntimeException("to implement"); //TODOLater
+      throw new RuntimeException("to implement"); //TODO
    }
 
    @Override
