@@ -572,6 +572,11 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       {
          return 0.03;
       }
+
+      public double getSafeCoPDistanceToEdge()
+      {
+         return 0.0;
+      }
    }
 
    private class TestWalkingControllerParameters extends WalkingControllerParameters
