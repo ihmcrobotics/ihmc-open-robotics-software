@@ -8,18 +8,21 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DistanceAndYawBasedCost implements FootstepCost
 {
    private static final double defaultStepWidth = 0.25;
 
-   private final double costPerStep;
-   private final double yawWeight;
+   private final double costPerStep = 0.005;
+   private final YoDouble yawWeight;
 
-   public DistanceAndYawBasedCost(double costPerStep, double yawWeight)
+   public DistanceAndYawBasedCost(double yawWeight, YoVariableRegistry registry)
    {
-      this.costPerStep = costPerStep;
-      this.yawWeight = yawWeight;
+      String namePrefix = getClass().getSimpleName();
+      this.yawWeight = new YoDouble(namePrefix + "_YawWeight", registry);
+      this.yawWeight.set(yawWeight);
    }
 
    @Override
@@ -29,7 +32,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
       Point2D endPoint = computeMidFootPoint(endNode);
       double euclideanDistance = startPoint.distance(endPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-      return euclideanDistance + yawWeight * Math.abs(yaw) + costPerStep;
+      return euclideanDistance + yawWeight.getDoubleValue() * Math.abs(yaw) + costPerStep;
    }
 
    public static Point2D computeMidFootPoint(FootstepNode node)

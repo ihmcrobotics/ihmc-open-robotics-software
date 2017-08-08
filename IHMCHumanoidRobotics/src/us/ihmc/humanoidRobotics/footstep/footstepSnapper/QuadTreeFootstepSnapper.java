@@ -14,7 +14,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public interface FootstepSnapper
+public interface QuadTreeFootstepSnapper
 {
    public abstract Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap);
    /**

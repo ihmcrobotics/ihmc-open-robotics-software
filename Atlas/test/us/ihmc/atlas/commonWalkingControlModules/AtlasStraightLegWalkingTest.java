@@ -92,6 +92,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       super.testSteppingDown(stepDownHeight, stepLength, 0);
    }
 
+   /*
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 120000)
    public void testRandomHeightField() throws Exception
@@ -101,6 +102,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       double minStepHeight = -0.12;
       super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
    }
+   */
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -419,6 +421,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testSteppingDown();
+      test.testWalkingOverStairs();
    }
 }
