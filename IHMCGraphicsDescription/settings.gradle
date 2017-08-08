@@ -9,6 +9,7 @@ rootProject.name = hyphenatedName
 println "Evaluating " + pascalCasedName + " settings.gradle"
 
 Eval.me(extraSourceSets).each {
+   new File(rootProject.projectDir, it).mkdir()
    include it
    project(":" + it).name = hyphenatedName + "-" + it
 }
