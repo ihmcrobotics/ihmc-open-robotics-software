@@ -2,11 +2,8 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
@@ -21,19 +18,16 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class WalkingControllerParameters implements SteppingParameters
+public abstract class WalkingControllerParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
@@ -629,16 +623,6 @@ public abstract class WalkingControllerParameters implements SteppingParameters
       return new String[0];
    }
 
-   @Override
-   /**
-    * Returns the minimum swing height from the stance foot for this robot. It is also the default swing height
-    * used in the controller unless a different value is specified.
-    */
-   public double getMinSwingHeightFromStanceFoot()
-   {
-      return 0.1;
-   }
-
    /**
     * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
     * (new feature to be tested with Atlas)
@@ -741,108 +725,33 @@ public abstract class WalkingControllerParameters implements SteppingParameters
       return null;
    }
 
-   // remove: unused
-   public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
+   /**
+    * Get the maximum leg length for the singularity avoidance control module.
+    */
+   public abstract double getMaximumLegLengthForSingularityAvoidance();
 
-   // remove: unused
-   public abstract String[] getDefaultChestOrientationControlJointNames();
-
-   // move to UI specific parameters
-   public abstract double getAnkleHeight();
-
-   // replace: just add shin and thigh length from the physical parameters in a default method instead of forcing an implementation for each robot
-   public abstract double getLegLength();
-
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double minimumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double nominalHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double maximumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double defaultOffsetHeightAboveAnkle();
 
-   // move to UI specific parameters
-   public abstract double pelvisToAnkleThresholdForWalking();
-
-   // remove: unused
-   public abstract double getTimeToGetPreparedForLocomotion();
-
-   // remove: unused (was only used in dead code that needs to go away)
-   public abstract boolean getCoMHeightDriftCompensation();
-
-   // remove: unused
-   public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
-
-   // remove from interface and nuke chest manager
-   public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract boolean allowShrinkingSingleSupportFootPolygon();
-
-   // move to slider board specific parameters
-   public abstract boolean controlHeadAndHandsWithSliders();
-
-   // remove: unused
-   public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
-
-   // remove from interface and use getOrCreateTaskspaceOrientationControlGains instead
-   public abstract YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
-
-   // move to UI specific parameters
-   public abstract double getSpineYawLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchUpperLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchLowerLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpineRollLimit();
-
-   // move to UI specific parameters
-   public abstract boolean isSpinePitchReversed();
-
-   // remove: unused
-   public abstract double getFoot_start_toetaper_from_back();
-
-   // move to UI specific parameters
-   public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
-
-   // move to slider board specific parameters
-   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
-
-   // move to slider board specific parameters
-   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
-
-   // remove: unused
-   public abstract boolean doFancyOnToesControl();
-
-   // remove: unused
-   public boolean useSupportState()
-   {
-      return false;
-   }
-
-   // move to UI specific parameters
-   public double getDefaultTrajectoryTime()
-   {
-      return 3.0;
-   }
-
-   // remove: exo specific
-   public abstract void useInverseDynamicsControlCore();
-
-   // remove: exo specific
-   public abstract void useVirtualModelControlCore();
+   /**
+    * Returns parameters related to stepping such as maximum step length etc.
+    */
+   public abstract SteppingParameters getSteppingParameters();
 }

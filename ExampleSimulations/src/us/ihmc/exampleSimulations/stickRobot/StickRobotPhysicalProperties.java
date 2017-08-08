@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.stickRobot;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -8,16 +7,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 
 /**
- * 
+ *
  * @author Shlok Agarwal
  * This class defines the physical properties of the robot foot dimensions and other supporting parameters
  * It can be used to add more physical robot specific parameters
  */
-public class StickRobotPhysicalProperties implements DRCRobotPhysicalProperties
+public class StickRobotPhysicalProperties
 {
    public static final double footsizeReduction = 0.01;
 
-   
+
    public static final double ankleHeight = 0.02; // modified: 0.09; // Should be 0.075 + 0.015 (sole thickness)
    public static final double footLength = 0.25 - footsizeReduction;
    public static final double footBack = 0.073 - footsizeReduction/2.0;
@@ -49,12 +48,6 @@ public class StickRobotPhysicalProperties implements DRCRobotPhysicalProperties
          controlFrameToWristTransform.setTranslation(0.0, robotSide.negateIfRightSide(0.10), 0.0);
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return ankleHeight;
    }
 
    public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)
