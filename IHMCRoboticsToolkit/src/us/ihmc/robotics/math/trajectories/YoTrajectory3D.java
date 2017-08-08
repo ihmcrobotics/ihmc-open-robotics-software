@@ -209,86 +209,6 @@ public class YoTrajectory3D
       zTrajectory.compute(t);
    }
 
-   public void add(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.add(this, traj1, traj2);
-   }
-
-   public void add(YoTrajectory3D addTraj)
-   {
-      add(this, addTraj);
-   }
-
-   public void addByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.addByTrimming(this, traj1, traj2);
-   }
-
-   public void addByTrimming(YoTrajectory3D addTraj)
-   {
-      addByTrimming(this, addTraj);
-   }
-
-   public void subtract(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.subtract(this, traj1, traj2);
-   }
-
-   public void subtract(YoTrajectory3D subTraj)
-   {
-      subtract(this, subTraj);
-   }
-
-   public void subtractByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
-   }
-
-   public void subtractByTrimming(YoTrajectory3D subTraj)
-   {
-      subtractByTrimming(this, subTraj);
-   }
-
-   public void dotProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.dotProduct(this, traj1, traj2);
-   }
-
-   public void dotProduct(YoTrajectory3D dotPTraj)
-   {
-      dotProduct(this, dotPTraj);
-   }
-
-   public void dotProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.dotProductByTrimming(this, traj1, traj2);
-   }
-
-   public void dotProductByTrimming(YoTrajectory3D dotPTraj)
-   {
-      dotProductByTrimming(this, dotPTraj);
-   }
-
-   public void crossProduct(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.crossProduct(this, traj1, traj2);
-   }
-
-   public void crossProduct(YoTrajectory3D crossPTraj)
-   {
-      crossProduct(this, crossPTraj);
-   }
-
-   public void crossProductByTrimming(YoTrajectory3D traj1, YoTrajectory3D traj2)
-   {
-      TrajectoryMathTools.crossProductByTrimming(this, traj1, traj2);
-   }
-
-   public void crossProductByTrimming(YoFrameTrajectory3D crossPTraj)
-   {
-      crossProduct(this, crossPTraj);
-   }
-
    public Point3DReadOnly getPosition()
    {
       return position;
@@ -754,33 +674,9 @@ public class YoTrajectory3D
       dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }
 
-   public void getDerivative(YoTrajectory3D dervTraj)
-   {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index));
-   }
-
    public void getDerivative(YoTrajectory3D dervTraj, int order)
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
-   }
-
-   public void getIntegral(YoTrajectory3D integralTraj)
-   {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).getIntegral(integralTraj.getYoTrajectory(index));
-   }
-
-   public void addTimeOffset(double deltaT)
-   {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).addTimeOffset(deltaT);
-   }
-
-   public void addTimeOffset(YoTrajectory3D trajToCopy, double deltaT)
-   {
-      set(trajToCopy);
-      addTimeOffset(deltaT);
    }
 }

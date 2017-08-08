@@ -216,9 +216,9 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
    }
 
-   private boolean keepSCSUp()
+   protected boolean keepSCSUp()
    {
-      return true;
+      return false;
    }
 
    private void setupCameraBackView()
