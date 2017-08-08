@@ -183,7 +183,7 @@ public class PlanningTestTools
       PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
 
       FootstepPlan footstepPlan = planner.getPlan();
-      if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
+      if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result. Result: " + result, result.validForExecution());
       return footstepPlan;
    }
 

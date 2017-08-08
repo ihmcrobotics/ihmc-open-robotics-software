@@ -16,6 +16,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -121,6 +123,7 @@ public class StepAndTimingAdjustmentExampleGraphic
    private final YoBoolean usePointFeet;
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
    private FootstepTestHelper footstepTestHelper;
 
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
@@ -172,7 +175,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       icpPlanner.setOmega0(omega0.getDoubleValue());
 
       icpOptimizationController = new ICPTimingOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+            bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       RobotSide currentSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfFootstepsToCreate; i++)
@@ -292,6 +295,9 @@ public class StepAndTimingAdjustmentExampleGraphic
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
 
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega0, worldFrame, 9.81, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
    }
@@ -314,6 +320,8 @@ public class StepAndTimingAdjustmentExampleGraphic
       for (RobotSide robotSide : RobotSide.values)
          contactStates.get(robotSide).setFullyConstrained();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
+
 
       icpPlanner.clearPlan();
       timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
@@ -352,6 +360,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       else
          contactStates.get(supportSide.getOppositeSide()).setContactPoints(plannedFootsteps.get(0).getPredictedContactPoints());
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
 
       icpPlanner.clearPlan();
       timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());

@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -163,16 +164,17 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected double minimumTimeOnInitialCMPForBigAdjustment;
 
    public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
-                                            BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                            double controlDT, boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                            BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
+                                            SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                            boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(icpPlannerParameters, walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons,
+      this(icpPlannerParameters, walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons,
             contactableFeet, controlDT, updateRegularizationAutomatically, yoGraphicsListRegistry);
    }
 
    public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
                                             ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
-                                            SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                            ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                             boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
@@ -200,7 +202,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
       solver = new ICPQPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
-      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons);
+      copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, transformsFromAnkleToSole, VISUALIZE, DEBUG, yoNamePrefix, registry,
