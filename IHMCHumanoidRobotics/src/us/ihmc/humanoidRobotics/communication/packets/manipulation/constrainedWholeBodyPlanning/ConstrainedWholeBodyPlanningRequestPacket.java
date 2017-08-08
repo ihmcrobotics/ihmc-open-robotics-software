@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -28,7 +29,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
    
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      initialOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      initialOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);      
       initialTranslationOfRootJoint = new Vector3D(fullRobotModel.getRootJoint().getTranslationForReading());
       initialRotationOfRootJoint = new Quaternion(fullRobotModel.getRootJoint().getRotationForReading());
    }
