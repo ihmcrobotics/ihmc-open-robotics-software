@@ -2,16 +2,14 @@ package us.ihmc.atlas.StepAdjustmentVisualizers;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -23,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -37,7 +34,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -49,7 +45,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -673,31 +668,13 @@ public class StepAndTimingAdjustmentExampleGraphic
       return new WalkingControllerParameters()
       {
          @Override
-         public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-         {
-            return null;
-         }
-
-         @Override
-         public String[] getDefaultChestOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
          public double getOmega0()
          {
             return 0;
          }
 
          @Override
-         public double getAnkleHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getLegLength()
+         public double getMaximumLegLengthForSingularityAvoidance()
          {
             return 0;
          }
@@ -724,24 +701,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          public double defaultOffsetHeightAboveAnkle()
          {
             return 0;
-         }
-
-         @Override
-         public double pelvisToAnkleThresholdForWalking()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean allowShrinkingSingleSupportFootPolygon()
-         {
-            return false;
          }
 
          @Override
@@ -781,37 +740,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
          public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public boolean getCoMHeightDriftCompensation()
-         {
-            return false;
-         }
-
-         @Override
-         public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
          {
             return null;
          }
@@ -835,25 +764,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double getSwingHeightMaxForPushRecoveryTrajectory()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean doPrepareManipulationForLocomotion()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean controlHeadAndHandsWithSliders()
          {
             return false;
          }
@@ -871,48 +782,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public double getSpineYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpineRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean isSpinePitchReversed()
-         {
-            return false;
-         }
-
-         @Override
-         public double getFoot_start_toetaper_from_back()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSideLengthOfBoundingBoxForFootstepHeight()
-         {
-            return 0;
-         }
-
-         @Override
          public double getContactThresholdForce()
          {
             return 0;
@@ -922,18 +791,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          public double getSecondContactThresholdForceIgnoringCoP()
          {
             return 0;
-         }
-
-         @Override
-         public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-         {
-            return null;
-         }
-
-         @Override
-         public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-         {
-            return null;
          }
 
          @Override
@@ -958,12 +815,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
-         }
-
-         @Override
-         public boolean doFancyOnToesControl()
-         {
-            return false;
          }
 
          @Override
@@ -997,18 +848,6 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public void useInverseDynamicsControlCore()
-         {
-
-         }
-
-         @Override
-         public void useVirtualModelControlCore()
-         {
-
-         }
-
-         @Override
          public double getHighCoPDampingDurationToPreventFootShakies()
          {
             return 0;
@@ -1016,138 +855,6 @@ public class StepAndTimingAdjustmentExampleGraphic
 
          @Override
          public double getCoPErrorThresholdForHighCoPDamping()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDefaultStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getInPlaceWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredStepForward()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepUp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnOutwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnInwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootForwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootBackwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getToeWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootstepArea()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepDown()
          {
             return 0;
          }
@@ -1248,6 +955,12 @@ public class StepAndTimingAdjustmentExampleGraphic
                   return 0;
                }
             };
+         }
+
+         @Override
+         public SteppingParameters getSteppingParameters()
+         {
+            return null;
          }
       };
    }
