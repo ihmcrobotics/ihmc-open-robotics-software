@@ -247,15 +247,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion, YoVariableRegistry registry)
    {
       double yawWeight = 0.1;
 
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      //      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      ReachableFootstepsBasedExpansion expansion = new ReachableFootstepsBasedExpansion();
+      //SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
-
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);
@@ -264,13 +262,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
    }
 
    public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons,
-                                                                YoVariableRegistry registry)
+                                                                FootstepNodeExpansion expansion, YoVariableRegistry registry)
    {
       double yawWeight = 0.1;
 
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons, snapper, registry);
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      //SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);

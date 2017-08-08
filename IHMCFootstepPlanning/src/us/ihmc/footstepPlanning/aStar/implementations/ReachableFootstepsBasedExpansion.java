@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * @author Shlok Agarwal
  *
  */
-public class ReachableFootstepsBasedExpansion implements FootstepNodeExpansion
+public abstract class ReachableFootstepsBasedExpansion implements FootstepNodeExpansion
 {
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -39,9 +39,8 @@ public class ReachableFootstepsBasedExpansion implements FootstepNodeExpansion
 
       /** Get swing leg side */
       stepSide = node.getRobotSide().getOppositeSide();
-
-      //addNeighborsForValkyrie();
-      addNeighborsForAtlas();
+      
+      addNeighbors();
 
       return neighbors;
    }
@@ -66,134 +65,10 @@ public class ReachableFootstepsBasedExpansion implements FootstepNodeExpansion
    }
 
    /**
-    * Adds footstep offsets for Atlas robot
+    * This function adds footstep neighbors specific to the robot.
+    * You can find implementation in AtlasReachableFootstepExpansion & ValkyrieReachableFootstepExpansion
     */
-   public void addNeighborsForAtlas()
-   {
-
-      /** Side Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/    
-      addOffset(0.0     ,      0.25     ,      0.0);
-      addOffset(0.0     ,      0.25     ,      0.174);
-      addOffset(0.0     ,      0.25     ,      0.392);
-
-      addOffset(0.0     ,      0.15     ,      0.0);
-      addOffset(0.0     ,      0.20     ,      0.0);
-      addOffset(0.0     ,      0.30     ,      0.0);
-
-      /** Forward Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/ 
-
-      addOffset(0.05     ,      0.25     ,      0.0);
-      addOffset(0.05     ,      0.25     ,      0.174);
-      addOffset(0.05     ,      0.25     ,      0.392);
-
-      addOffset(0.1     ,      0.25     ,      0.0);
-      addOffset(0.1     ,      0.25     ,      0.174);
-      addOffset(0.1     ,      0.25     ,      0.392);
-
-      addOffset(0.2     ,      0.25     ,      0.0);
-      addOffset(0.2     ,      0.25     ,      0.174);
-      addOffset(0.2     ,      0.25     ,      0.392);
-
-      addOffset(0.3     ,      0.25     ,      0.0);
-      addOffset(0.3     ,      0.25     ,      0.174);
-      addOffset(0.3     ,      0.25     ,      0.392);
-
-      addOffset(0.4     ,      0.25     ,      0.0);
-      addOffset(0.4     ,      0.25     ,      0.174);
-      addOffset(0.4     ,      0.25     ,      0.392);
-
-      /** Backward Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/ 
-
-      addOffset(-0.05     ,      0.25     ,      0.0);
-      addOffset(-0.05     ,      0.25     ,      0.174);
-      addOffset(-0.05     ,      0.25     ,      0.392);
-
-      addOffset(-0.1     ,      0.25     ,      0.0);
-      addOffset(-0.1     ,      0.25     ,      0.174);
-      addOffset(-0.1     ,      0.25     ,      0.392);
-
-      addOffset(-0.2     ,      0.25     ,      0.0);
-      addOffset(-0.2     ,      0.25     ,      0.174);
-      addOffset(-0.2     ,      0.25     ,      0.392);
-
-      addOffset(-0.3     ,      0.25     ,      0.0);
-      addOffset(-0.3     ,      0.25     ,      0.174);
-      addOffset(-0.3     ,      0.25     ,      0.392);
-
-      addOffset(-0.4     ,      0.25     ,      0.0);
-      addOffset(-0.4     ,      0.25     ,      0.174);
-      addOffset(-0.4     ,      0.25     ,      0.392);
-
-      /** Turn Step*/
-      addOffset(-0.047     ,      0.25     ,      0.392);
-
-   }
-
-   /**
-    * Adds footstep offsets for Valkyrie robot
-    * Note: These values have been rigourously tested in simulation but not on real robot.
-    */
-   public void addNeighborsForValkyrie()
-   {
-      /** Backward Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/    
-      addOffset(-0.2     ,     0.3     ,     -0.1);
-      addOffset(-0.2     ,     0.3     ,     -0.2);
-      addOffset(-0.2     ,     0.3     ,     -0.4);
-      addOffset(-0.2     ,     0.2     ,        0);
-      addOffset(-0.2     ,     0.3     ,      0.1);
-      addOffset(-0.2     ,     0.3     ,      0.2);
-      addOffset(-0.2     ,     0.3     ,      0.4);
-      addOffset(-0.1     ,     0.3     ,        0);
-      addOffset(-0.1     ,     0.3     ,     -0.1);
-      addOffset(-0.1     ,     0.3     ,     -0.2);
-      addOffset(-0.1     ,     0.3     ,     -0.3);
-      addOffset(-0.1     ,     0.35    ,     -0.4);
-      addOffset(-0.1     ,     0.3     ,      0.1);
-      addOffset(-0.1     ,     0.3     ,      0.2);
-      addOffset(-0.1     ,     0.3     ,      0.3);
-      addOffset(-0.1     ,     0.35    ,      0.4);
-
-      /** Side Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/ 
-      addOffset(0        ,     0.3     ,        0);
-      addOffset(0        ,     0.35    ,     -0.2);
-      addOffset(0        ,     0.35    ,     -0.4);
-      addOffset(0        ,     0.35    ,     -0.6);
-      addOffset(0        ,     0.35    ,     -0.7);
-      addOffset(0        ,     0.35    ,      0.2);
-      addOffset(0        ,     0.35    ,      0.4);
-      addOffset(0        ,     0.35    ,      0.6);
-      addOffset(0        ,     0.35    ,      0.7);
-      addOffset(0        ,     0.3     ,        0);
-
-      /** Forward Steps*/
-      /** x offset*/ /** y offset*/ /** yaw offset*/ 
-      addOffset(0.1      ,     0.3     ,     -0.1);
-      addOffset(0.1      ,     0.3     ,     -0.2);
-      addOffset(0.1      ,     0.3     ,     -0.3);
-      addOffset(0.1      ,     0.35    ,     -0.4);
-      addOffset(0.1      ,     0.3     ,      0.1);
-      addOffset(0.1      ,     0.3     ,      0.2);
-      addOffset(0.1      ,     0.3     ,      0.3);
-      addOffset(0.1      ,     0.3     ,      0.4);
-      addOffset(0.2      ,     0.2     ,        0);
-      addOffset(0.2      ,     0.3     ,     -0.1);
-      addOffset(0.2      ,     0.3     ,     -0.2);
-      addOffset(0.2      ,     0.3     ,     -0.4);
-      addOffset(0.2      ,     0.3     ,      0.1);
-      addOffset(0.2      ,     0.3     ,      0.2);
-      addOffset(0.2      ,     0.3     ,      0.4);
-      addOffset(0.3      ,     0.2     ,        0);
-      addOffset(0.3      ,     0.3     ,     -0.1);
-      addOffset(0.3      ,     0.3     ,     -0.2);
-      addOffset(0.3      ,     0.3     ,      0.1);
-      addOffset(0.3      ,     0.3     ,      0.2);
-   }
-
+   public abstract void addNeighbors();
 
 }
 
