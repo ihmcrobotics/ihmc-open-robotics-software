@@ -26,7 +26,7 @@ public class AngularMomentumEstimationParameters
 
    public boolean computePredictedAngularMomentum()
    {
-      return false;
+      return true;
    }
 
    public CoPPointName getEntryCoPName()
