@@ -195,6 +195,9 @@ public class RobotCollisionModel
    
    public boolean getCollisionResult()
    {       
+      /*
+       * false is collision detected.
+       */
       collisionDetectionResult.clear();
       collisionDetector.performCollisionDetection(collisionDetectionResult);
       

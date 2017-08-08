@@ -95,7 +95,7 @@ public class TreeStateVisualizer
       YoFramePoint tempYoPoint = new YoFramePoint(name + "temppoint", worldFrame, registry);
       tempYoPoint.set(0.6, 0.35, 1.2);
       temp = new YoGraphicPosition("temp", tempYoPoint, 0.03, YoAppearance.Black(), GraphicType.BALL);
-      yoGraphicsList.add(temp);
+//      yoGraphicsList.add(temp);
       /*
        * register YoGraphicsList
        */

@@ -113,7 +113,7 @@ public class CTTaskNodeTree
       node.setNormalizedNodeData(index, value);
    }
 
-   private void setRandomNormalizedNodeData(CTTaskNode node)
+   public void setRandomNormalizedNodeData(CTTaskNode node)
    {
       for (int i = 0; i < node.getDimensionOfNodeData(); i++)
          setRandomNormalizedNodeData(node, i);
