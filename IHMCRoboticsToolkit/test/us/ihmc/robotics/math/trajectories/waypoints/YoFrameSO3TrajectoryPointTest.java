@@ -417,7 +417,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertTrue(yoFrameSO3TrajectoryPoint.epsilonEquals(yoFrameSO3TrajectoryPointTwo, 1e-7));
       
       String string = yoFrameSO3TrajectoryPoint.toString();
-      String expectedString = "SO3 trajectory point: (time =  9.90, SO3 trajectory point: (time =  9.90, SO3 waypoint: [orientation = ( 0.47,  0.30, -0.07,  0.83), angular velocity = ( 7.10,  2.20,  3.33)].)World)";
+      String expectedString = "SO3 trajectory point: (time =  9.90, SO3 trajectory point: (time =  9.90, SO3 waypoint: [orientation = ( 0.472,  0.301, -0.072,  0.826), angular velocity = ( 7.100,  2.200,  3.330)].)World)";
       
       assertEquals(expectedString, string);
    }

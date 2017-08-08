@@ -7,8 +7,8 @@ import java.util.HashSet;
 
 import us.ihmc.affinity.Affinity;
 import us.ihmc.avatar.DRCEstimatorThread;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -28,6 +28,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
@@ -130,15 +131,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
-      CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
-      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
@@ -223,11 +222,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ValkyrieRobotModel robotModel;
       if(isGazebo)
       {
-         robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, true);
+         robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, true);
       }
       else
       {
-         robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+         robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
       }
 
       ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
@@ -237,7 +236,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        */
       PacketCommunicator controllerPacketCommunicator = PacketCommunicator
             .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-      PeriodicRealtimeThreadScheduler yoVariableServerScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY);
+      PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();

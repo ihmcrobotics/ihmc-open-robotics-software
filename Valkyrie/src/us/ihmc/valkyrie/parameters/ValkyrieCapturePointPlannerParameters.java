@@ -1,12 +1,19 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.euclid.tuple2D.Vector2D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** {@inheritDoc} */
-public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerParameters
+public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlannerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
+
+   private List<Vector2D> copOffsets;
+   private List<Vector2D> copForwardOffsetBounds;
 
    public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
@@ -16,72 +23,52 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public double getAdditionalTimeForSingleSupport()
+   public int getNumberOfCoPWayPointsPerFoot()
    {
-      return 0.1;
+      if (useTwoCMPsPerSupport)
+         return 2;
+      else
+         return 1;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getEntryCMPInsideOffset()
+   public List<Vector2D> getCoPOffsets()
    {
-      return runningOnRealRobot ? 0.02 : 0.006;
+      if (copOffsets != null)
+         return copOffsets;
+
+      Vector2D entryOffset, exitOffset;
+      if (runningOnRealRobot)
+         entryOffset = new Vector2D(0.01, 0.02);
+      else
+         entryOffset = new Vector2D(0.0, 0.006);
+
+      exitOffset = new Vector2D(0.0, 0.025);
+
+      copOffsets = new ArrayList<>();
+      copOffsets.add(entryOffset);
+      copOffsets.add(exitOffset);
+
+      return copOffsets;
    }
+
 
    /** {@inheritDoc} */
    @Override
-   public double getExitCMPInsideOffset()
+   public List<Vector2D> getCoPForwardOffsetBounds()
    {
-      return 0.025;
-   }
+      if (copForwardOffsetBounds != null)
+         return copForwardOffsetBounds;
 
-   /** {@inheritDoc} */
-   @Override
-   public double getEntryCMPForwardOffset()
-   {
-      return runningOnRealRobot ? 0.01 : 0.0;
-   }
+      Vector2D entryBounds = new Vector2D(0.0, 0.03);
+      Vector2D exitBounds = new Vector2D(-0.04, 0.06);
 
-   /** {@inheritDoc} */
-   @Override
-   public double getExitCMPForwardOffset()
-   {
-      return 0.0;
-   }
+      copForwardOffsetBounds = new ArrayList<>();
+      copForwardOffsetBounds.add(entryBounds);
+      copForwardOffsetBounds.add(exitBounds);
 
-   /** {@inheritDoc} */
-   @Override
-   public boolean useTwoCMPsPerSupport()
-   {
-      return useTwoCMPsPerSupport;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxEntryCMPForwardOffset()
-   {
-      return 0.03;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinEntryCMPForwardOffset()
-   {
-      return 0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxExitCMPForwardOffset()
-   {
-      return 0.06;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinExitCMPForwardOffset()
-   {
-      return -0.04;
+      return copForwardOffsetBounds;
    }
 
    /** {@inheritDoc} */

@@ -72,7 +72,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test(timeout = 210000)
+   @Test
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -201,7 +201,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 46.8)
-   @Test(timeout = 230000)
+   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -346,7 +346,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 108.9)
-   @Test(timeout = 540000)
+   @Test
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -531,7 +531,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 32.1)
-   @Test(timeout = 160000)
+   @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -675,7 +675,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test(timeout = 190000)
+   @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

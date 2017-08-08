@@ -21,7 +21,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -335,8 +335,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       final HighLevelState initialBehavior;
       initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
 
@@ -346,7 +345,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, initialBehavior);
-      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
 

@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -174,12 +174,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final String[] imuSensorsToUse = {rearPelvisIMUSensor, leftTrunkIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
 
-   public ValkyrieSensorInformation(DRCRobotModel.RobotTarget target)
+   public ValkyrieSensorInformation(RobotTarget target)
    {
 //      cameraParamaters[LEFT_HAZARD_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
 //      cameraParamaters[RIGHT_HAZARD_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
 
-      if(target == DRCRobotModel.RobotTarget.REAL_ROBOT)
+      if(target == RobotTarget.REAL_ROBOT)
       {
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_near_Scan, multisense_height_map,
                lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);

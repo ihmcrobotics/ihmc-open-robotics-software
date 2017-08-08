@@ -14,6 +14,7 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -113,7 +114,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
    public static void main(String[] args) throws JSAPException, IOException
    {
       boolean headless = false;
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.HEAD_ON_A_STICK, headless);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.HEAD_ON_A_STICK, headless);
       new MultisenseHeadOnAStickManualTestMinimalNetworkProcessor(robotModel);
    }
 }

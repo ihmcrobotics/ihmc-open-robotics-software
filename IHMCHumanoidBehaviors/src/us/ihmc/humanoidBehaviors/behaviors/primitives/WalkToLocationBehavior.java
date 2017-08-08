@@ -16,8 +16,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFoots
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -33,6 +31,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToLocationBehavior extends AbstractBehavior
 {
@@ -85,8 +85,9 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
 
-      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength() / 2, walkingControllerParameters.getInPlaceWidth(), 0.0,
-            Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength() / 2,
+                                               walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0, Math.toRadians(20.0),
+                                               Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)

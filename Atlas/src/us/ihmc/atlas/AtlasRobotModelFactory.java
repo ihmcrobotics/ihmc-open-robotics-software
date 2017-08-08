@@ -14,6 +14,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasRobotModelFactory
@@ -29,30 +30,30 @@ public class AtlasRobotModelFactory
 
    public static AtlasRobotModel createDefaultRobotModel()
    {
-      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false, null);
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), RobotTarget.SCS, false, null);
    }
 
    public static AtlasRobotModel createDefaultRobotModel(FootContactPoints simulationContactPoints)
    {
-      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), RobotTarget.SCS, false, simulationContactPoints);
    }
 
    public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion)
    {
-      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false, null);
+      return createDRCRobotModel(robotVersion.toString(), RobotTarget.SCS, false, null);
    }
 
    public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion, FootContactPoints simulationContactPoints)
    {
-      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
+      return createDRCRobotModel(robotVersion.toString(), RobotTarget.SCS, false, simulationContactPoints);
    }
 
-   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless)
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, RobotTarget runningOnRealRobot, boolean headless)
    {
       return createDRCRobotModel(robotModelAsString, runningOnRealRobot, headless, null);
    }
 
-   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless,
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, RobotTarget runningOnRealRobot, boolean headless,
          FootContactPoints simulationContactPoints)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
@@ -96,7 +97,7 @@ public class AtlasRobotModelFactory
 
    public static AtlasRobotModel selectModelFromGraphicSelector()
    {
-      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false));
+      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false));
    }
 
    public static AtlasRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)
@@ -125,7 +126,7 @@ public class AtlasRobotModelFactory
       else if (selectedOption == JOptionPane.OK_OPTION)
       {
          String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         AtlasRobotModel model = createDRCRobotModel(groundTypeString, DRCRobotModel.RobotTarget.SCS, false);
+         AtlasRobotModel model = createDRCRobotModel(groundTypeString, RobotTarget.SCS, false);
          return model;
       }
       else
@@ -147,7 +148,7 @@ public class AtlasRobotModelFactory
          JSAPResult config = jsap.parse(args);
 
          if (config.success())
-            return createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.SCS, false);
+            return createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
       }
       catch (JSAPException e)
       {

@@ -1,12 +1,13 @@
 package us.ihmc.wanderer.controlParameters;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,6 +25,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.wanderer.parameters.WandererPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WandererWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -33,11 +34,17 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
+   private final ToeOffParameters toeOffParameters;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final WandererSteppingParameters steppingParameters;
 
    public WandererWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
+      this.toeOffParameters = new WandererToeOffParameters();
+      this.swingTrajectoryParameters = new WandererSwingTrajectoryParameters(runningOnRealRobot);
+      this.steppingParameters = new WandererSteppingParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -49,87 +56,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getOmega0()
    {
       return 3.4;
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-   {
-      return handPosesWithRespectToChestFrame;
-   }
-
-   @Override
-   public double getTimeToGetPreparedForLocomotion()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public boolean doToeOffIfPossible()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean doToeOffIfPossibleInSingleSupport()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean checkECMPLocationToTriggerToeOff()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMinStepLengthForToeOff()
-   {
-      return 0.20;
-   }
-
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required.
-    */
-   @Override
-   public boolean doToeOffWhenHittingAnkleLimit()
-   {
-      return false;
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   @Override
-   public boolean doToeTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getToeTouchdownAngle()
-   {
-      return Math.toRadians(20.0);
-   }
-
-   @Override
-   public boolean doHeelTouchdownIfPossible()
-   {
-      return false;
-   }
-
-   @Override
-   public double getHeelTouchdownAngle()
-   {
-      return Math.toRadians(-20.0);
-   }
-
-   @Override
-   public boolean allowShrinkingSingleSupportFootPolygon()
-   {
-      return false;
    }
 
    @Override
@@ -154,30 +80,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       return getDefaultSwingTime();
-   }
-
-   @Override
-   public boolean isNeckPositionControlled()
-   {
-      return false;
-   }
-
-   @Override
-   public String[] getDefaultHeadOrientationControlJointNames()
-   {
-      return new String[0];
-   }
-
-   @Override
-   public String[] getDefaultChestOrientationControlJointNames()
-   {
-//      if (runningOnRealRobot)
-         return new String[] {};
-
-//      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-//            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
-//
-//      return defaultChestOrientationControlJointNames;
    }
 
    private final double minimumHeightAboveGround = 0.695;
@@ -216,148 +118,9 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getNeckPitchUpperLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getNeckPitchLowerLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getHeadYawLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getHeadRollLimit()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getFootForwardOffset()
-   {
-      return WandererPhysicalProperties.footForward;
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return WandererPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return WandererPhysicalProperties.ankleHeight;
-   }
-
-   @Override
-   public double getLegLength()
+   public double getMaximumLegLengthForSingularityAvoidance()
    {
       return WandererPhysicalProperties.legLength;
-   }
-
-   @Override
-   public double getMinLegLengthBeforeCollapsingSingleSupport()
-   {
-      //TODO: Useful values
-      return 0.1;
-   }
-
-   @Override
-   public double getMinMechanicalLegLength()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      return 0.16; //This is about the minimum width for the feet to not touch.
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.3; //0.5; //0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      return runningOnRealRobot ? 0.5 : 0.4;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.4;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      return 0.22;//0.35;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.5; //0.5; //0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -397,25 +160,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public boolean getCoMHeightDriftCompensation()
-   {
-      return false;
-   }
-
-   @Override
-   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("PelvisXY", registry);
-
-      gains.setKp(4.0);
-      gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -437,51 +182,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
-   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
-   @Override
-   public double getTrajectoryTimeHeadOrientation()
-   {
-      return 3.0;
-   }
-
-   @Override
-   public double[] getInitialHeadYawPitchRoll()
-   {
-      return new double[] { 0.0, 0.0, 0.0 };
-   }
-
-   @Override
-   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
-
-      double kp = runningOnRealRobot ? 80.0 : 500.0;
-      double zeta = runningOnRealRobot ? 0.25 : 0.8;
-      double maxAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 60.0 : Double.POSITIVE_INFINITY;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAcceleration);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
@@ -538,10 +239,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       for (SpineJointName name : jointMap.getSpineJointNames())
          jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
 
-      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
-
       return jointspaceGains;
    }
 
@@ -558,8 +255,8 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
 
-      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
+      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;
    }
@@ -666,32 +363,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-   {
-      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
-
-      double kp = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
-      double kpXYOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
-      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      gains.setPositionProportionalGains(kp, kp);
-      gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
@@ -711,113 +382,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       if (runningOnRealRobot)
          return 1.0;//0.7; //1.0
       return 0.6; // 1.5; //
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineYawLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return false;
-   }
-
-   @Override
-   public double getFootWidth()
-   {
-      return WandererPhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return WandererPhysicalProperties.toeWidth;
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return WandererPhysicalProperties.footForward + WandererPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return getFootWidth();
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return getFootLength();
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getFoot_start_toetaper_from_back()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getSwingHeightMaxForPushRecoveryTrajectory()
-   {
-      return 0.15;
-   }
-
-   @Override
-   public double getDesiredTouchdownHeightOffset()
-   {
-      return -0.02;
-   }
-
-   @Override
-   public double getDesiredTouchdownVelocity()
-   {
-      return -0.1;
-   }
-
-   @Override
-   public double getDesiredTouchdownAcceleration()
-   {
-      return 0;
    }
 
    @Override
@@ -858,9 +422,9 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean doFancyOnToesControl()
+   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
    {
-      return true;
+      return null;
    }
 
    @Override
@@ -893,30 +457,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return true;
    }
 
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0;
-   }
-
-   @Override
-   public boolean controlHeadAndHandsWithSliders()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return new SideDependentList<LinkedHashMap<String, ImmutablePair<Double,Double>>>();
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
@@ -938,14 +478,21 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public void useInverseDynamicsControlCore()
+   public ToeOffParameters getToeOffParameters()
    {
-      // once another mode is implemented, use this to change the default gains for inverse dynamics
+      return toeOffParameters;
    }
 
    @Override
-   public void useVirtualModelControlCore()
+   public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
-      // once another mode is implemented, use this to change the default gains for virtual model control
+      return swingTrajectoryParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SteppingParameters getSteppingParameters()
+   {
+      return steppingParameters;
    }
 }

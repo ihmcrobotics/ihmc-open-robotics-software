@@ -53,7 +53,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 
 	@ContinuousIntegrationTest(estimatedDuration = 18.4)
-	@Test(timeout = 92000)
+	@Test
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
          BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

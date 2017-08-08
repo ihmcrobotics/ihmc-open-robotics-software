@@ -16,8 +16,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -37,11 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -61,6 +56,10 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
@@ -85,7 +84,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>();
    private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>();
    private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
-   private SideDependentList<YoEnum<ExplorationMethod>> explorationMethods = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
@@ -110,7 +108,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -164,7 +161,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -220,7 +216,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          holdFlatDuringExploration.get(robotSide).set(true);
          holdFlatDuringHoldPosition.get(robotSide).set(true);
          smartHoldPosition.get(robotSide).set(false);
-         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
       }
 
       doFootExplorationInTransferToStanding.set(true);
@@ -259,9 +254,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    {
       double angle = RandomNumbers.nextDouble(random, Math.PI);
 
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footLengthForLineOrigin = 0.5 * walkingControllerParameters.getFootLength();
-      double footWidthForLineOrigin = 0.5 * walkingControllerParameters.getFootWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footLengthForLineOrigin = 0.5 * steppingParameters.getFootLength();
+      double footWidthForLineOrigin = 0.5 * steppingParameters.getFootWidth();
 
       double x = RandomNumbers.nextDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
       double y = RandomNumbers.nextDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
@@ -274,11 +269,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       double lineWidth = 0.01;
 
       // build default foot polygon:
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> soleVertices = new ArrayList<Point2D>();
       soleVertices.add(new Point2D(footForwardOffset, toeWidth / 2.0));
@@ -290,8 +285,8 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
       // shrink polygon and project line origin inside
       ConvexPolygon2D shrunkSolePolygon = new ConvexPolygon2D();
-      ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
-      shrinker.shrinkConstantDistanceInto(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
+      ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
+      shrinker.scaleConvexPolygon(solePolygon, lineWidth/2.0 + (footWidth-toeWidth)/2.0, shrunkSolePolygon);
 
       Point2D lineOrigin = new Point2D(xLine, yLine);
       shrunkSolePolygon.orthogonalProjection(lineOrigin);
@@ -397,8 +392,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
          YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
-         YoEnum<ExplorationMethod> explorationMethod = (YoEnum<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
-         explorationMethods.put(robotSide, explorationMethod);
       }
       allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");

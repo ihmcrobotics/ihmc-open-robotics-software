@@ -63,7 +63,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 11.1)
-   @Test(timeout = 55000)
+   @Test
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       doATest();

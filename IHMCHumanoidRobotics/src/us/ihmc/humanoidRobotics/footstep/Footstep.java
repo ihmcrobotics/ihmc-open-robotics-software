@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -356,6 +357,11 @@ public class Footstep
       footstepPose.getPositionIncludingFrame(positionToPack);
    }
 
+   public void getPosition2d(FramePoint2d positionToPack)
+   {
+      footstepPose.getPosition2dIncludingFrame(positionToPack);
+   }
+
    public void getOrientation(FrameOrientation orientationToPack)
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
@@ -463,6 +469,24 @@ public class Footstep
       tempTransform.setTranslation(anklePose.getPosition());
       tempTransform.multiplyInvertOther(transformFromAnkleToSole);
       footstepPose.setPoseIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
+   }
+
+   public void addOffset(FrameVector offset)
+   {
+      footstepPose.prependTranslation(offset.getVector());
+
+      for (int pointIdx = 0; pointIdx < customPositionWaypoints.size(); pointIdx++)
+      {
+         customPositionWaypoints.get(pointIdx).add(offset);
+      }
+
+      for (int pointIdx = 0; pointIdx < swingTrajectory.size(); pointIdx++)
+      {
+         FrameSE3TrajectoryPoint trajectoryPoint = swingTrajectory.get(pointIdx);
+         trajectoryPoint.getPoseIncludingFrame(tempPose);
+         tempPose.prependTranslation(offset.getVector());
+         trajectoryPoint.setPosition(tempPose.getPosition());
+      }
    }
 
 }

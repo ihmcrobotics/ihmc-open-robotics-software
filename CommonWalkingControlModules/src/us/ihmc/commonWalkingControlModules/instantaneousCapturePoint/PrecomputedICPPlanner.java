@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -42,68 +44,78 @@ public class PrecomputedICPPlanner
 
    private final FramePoint desiredICPPosition = new FramePoint();
    private final FrameVector desiredICPVelocity = new FrameVector();
+   private final FramePoint desiredCoMPosition = new FramePoint();
 
    private final CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler;
 
-   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, YoVariableRegistry parentRegistry,
+                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
-      blendingDuration.set(2.0);
+      blendingDuration.set(0.5);
 
       parentRegistry.addChild(registry);
 
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("precomputedICPTrajPosition", yoDesiredICPPosition, 0.008,
-            YoAppearance.Blue(), GraphicType.SOLID_BALL);
+      YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("Desired ICP Precomputed", yoDesiredICPPosition, 0.005, Yellow(),
+                                                                          GraphicType.BALL_WITH_ROTATED_CROSS);
       yoGraphicsList.add(desiredICPPositionGraphic);
       artifactList.add(desiredICPPositionGraphic.createArtifact());
 
-      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("precomputedCoMTrajPosition", yoDesiredCoMPosition, 0.004, YoAppearance.YellowGreen(),
-            GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("Desired CoM Precomputed", yoDesiredCoMPosition, 0.003, Black(),
+                                                                               GraphicType.BALL_WITH_ROTATED_CROSS);
       yoGraphicsList.add(desiredCenterOfMassPositionViz);
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
-      YoGraphicPosition desiredCMPPositionViz = new YoGraphicPosition("precomputedCMPTrajPosition", yoDesiredCMPPosition, 0.008, YoAppearance.CornflowerBlue(),
-            GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredCMPPositionViz = new YoGraphicPosition("Perfect CMP Precomputed", yoDesiredCMPPosition, 0.005, BlueViolet());
+
       yoGraphicsList.add(desiredCMPPositionViz);
       artifactList.add(desiredCMPPositionViz.createArtifact());
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
+
+      hideViz();
    }
 
    private void compute(double time)
    {
       double omega0 = this.omega0.getDoubleValue();
-      centerOfMassTrajectoryHandler.packDesiredICPAtTime(time, omega0, desiredICPPosition, desiredICPVelocity);
+      centerOfMassTrajectoryHandler.packDesiredICPAtTime(time, omega0, desiredICPPosition, desiredICPVelocity, desiredCoMPosition);
       computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, yoDesiredCMPPosition);
 
       precomputedDesiredCapturePoint2d.setByProjectionOntoXYPlane(desiredICPPosition);
       precomputedDesiredCapturePointVelocity2d.setByProjectionOntoXYPlane(desiredICPVelocity);
+
       yoDesiredICPPosition.set(desiredICPPosition);
       yoDesiredICPVelocity.set(desiredICPVelocity);
+      yoDesiredCoMPosition.set(desiredCoMPosition);
    }
 
    public void compute(double time, FramePoint2d desiredCapturePoint2dToPack, FrameVector2d desiredCapturePointVelocity2dToPack, FramePoint2d desiredCMPToPack)
    {
-      if(isWithinInterval(time))
+      if (isWithinInterval(time))
       {
          compute(time);
          yoDesiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePoint2dToPack);
          yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocity2dToPack);
          yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCMPToPack);
       }
+      else
+      {
+         hideViz();
+      }
       currentlyBlendingICPTrajectories.set(false);
    }
 
    public void computeAndBlend(double time, FramePoint2d desiredCapturePoint2d, FrameVector2d desiredCapturePointVelocity2d, FramePoint2d desiredCMP)
    {
-      if(isWithinInterval(time))
+      if (isWithinInterval(time))
       {
          compute(time);
-         if(!currentlyBlendingICPTrajectories.getBooleanValue())
+         if (!currentlyBlendingICPTrajectories.getBooleanValue())
          {
             blendingStartTime.set(time);
             currentlyBlendingICPTrajectories.set(true);
@@ -121,6 +133,7 @@ public class PrecomputedICPPlanner
       {
          isBlending.set(false);
          currentlyBlendingICPTrajectories.set(false);
+         hideViz();
       }
    }
 
@@ -184,5 +197,13 @@ public class PrecomputedICPPlanner
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
    {
       yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+   }
+
+   private void hideViz()
+   {
+      yoDesiredICPPosition.setToNaN();
+      yoDesiredICPVelocity.setToNaN();
+      yoDesiredCoMPosition.setToNaN();
+      yoDesiredCMPPosition.setToNaN();
    }
 }

@@ -11,6 +11,7 @@ import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -24,7 +25,6 @@ public class AtlasNetworkProcessor
 {
    private static final boolean ENABLE_BEHAVIOR_MODULE = true;
    private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
-   private static final boolean ENABLE_CONSTRAINED_WHOLE_BODY_TOOLBOX_SERVER = true;   
    private static final boolean ENABLE_MOCAP_MODULE = false;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
 
@@ -63,13 +63,12 @@ public class AtlasNetworkProcessor
         networkModuleParams.setDrillDetectionModuleEnabled(true);
         networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
         networkModuleParams.enableHeightQuadTreeToolbox(true);
-        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);        
+        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
         networkModuleParams.enableKinematicsToolboxVisualizer(true);
         networkModuleParams.enableFootstepPlanningToolbox(true);
         networkModuleParams.enableKinematicsToolbox(true);
-        networkModuleParams.enableConstrainedWholeBodyPlanningToolboxVisualizer(ENABLE_CONSTRAINED_WHOLE_BODY_TOOLBOX_SERVER);
-        networkModuleParams.enableConstrainedWholeBodyPlanningToolbox(true);
+        networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
@@ -82,18 +81,18 @@ public class AtlasNetworkProcessor
         }
     	  try
     	  {
-    	     DRCRobotModel.RobotTarget target;
+    	     RobotTarget target;
     	     if(config.getBoolean(runningOnRealRobot.getID()))
     	     {
-    	        target = DRCRobotModel.RobotTarget.REAL_ROBOT;
+    	        target = RobotTarget.REAL_ROBOT;
     	     }
     	     else if(config.getBoolean(runningOnGazebo.getID()))
     	     {
-    	       target = DRCRobotModel.RobotTarget.GAZEBO;
+    	       target = RobotTarget.GAZEBO;
     	     }
     	     else
     	     {
-    	        target = DRCRobotModel.RobotTarget.SCS;
+    	        target = RobotTarget.SCS;
     	     }
     		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)

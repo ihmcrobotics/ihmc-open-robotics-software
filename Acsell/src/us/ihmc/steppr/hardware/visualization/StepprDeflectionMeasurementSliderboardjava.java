@@ -105,7 +105,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprDeflectionMeasurementSliderboardjava(64000);
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
       client.start();
    }
 }

@@ -9,15 +9,18 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,8 +36,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -56,11 +58,12 @@ public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
+   private static final boolean UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final ICPPlannerWithAngularMomentumOffset icpPlanner;
+   private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final PrecomputedICPPlanner precomputedICPPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
@@ -109,7 +112,7 @@ public class BalanceManager
 
    private final FrameVector2d icpError2d = new FrameVector2d();
 
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
 
    private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
@@ -130,14 +133,15 @@ public class BalanceManager
    private final boolean useICPTimingOptimization;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, parentRegistry, true);
+      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, angularMomentumModifierParameters, parentRegistry, true);
    }
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry,
-         boolean use2DCMPProjection)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -158,14 +162,15 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
+      ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
       useICPTimingOptimization = useICPOptimizationControl && icpOptimizationParameters.useTimingOptimization();
 
       if (useICPOptimizationControl)
       {
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               contactableFeet, capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-               registry, yoGraphicsListRegistry);
+               controllerToolbox.getICPControlPolygons(), contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ,
+               controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
@@ -174,16 +179,38 @@ public class BalanceManager
       }
       ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
-      //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
-      icpPlanner = new ICPPlannerWithAngularMomentumOffset(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry,
-                                                           yoGraphicsListRegistry);
-      icpPlanner.setOmega0(controllerToolbox.getOmega0());
-      icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+      ICPPlannerInterface icpPlanner;
+      //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, yoGraphicsListRegistry);
+      if (!icpPlannerParameters.useSmoothCMPPlanner())
+      {
+         icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
+                                                                           registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         icpPlanner = new SmoothCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
+                                                   icpPlannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, yoGraphicsListRegistry);
+      }
+
+      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, bipedSupportPolygons.getSoleZUpFrames());
+      parentRegistry.addChild(icpWrapper.getYoVariableRegistry());
+
+      this.icpPlanner = icpWrapper;
+      this.icpPlanner.initializeParameters(icpPlannerParameters, angularMomentumModifierParameters);
+      this.icpPlanner.setOmega0(controllerToolbox.getOmega0());
+      this.icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
-      precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
-      precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      if (walkingMessageHandler != null)
+      {
+         CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
+         precomputedICPPlanner = new PrecomputedICPPlanner(comTrajectoryHandler, registry, yoGraphicsListRegistry);
+         precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
+      }
+      else
+      {
+         precomputedICPPlanner = null;
+      }
       blendICPTrajectories.set(true);
 
       if (ENABLE_DYN_REACHABILITY)
@@ -203,8 +230,7 @@ public class BalanceManager
       maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
       maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
-      YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, pelvisXYControlGains, registry);
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -356,7 +382,9 @@ public class BalanceManager
       controllerToolbox.getCoP(copEstimate);
 
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
-      icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
+
+      if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
+         icpPlanner.modifyDesiredICPForAngularMomentum(copEstimate, supportLeg);
 
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
@@ -377,13 +405,16 @@ public class BalanceManager
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
 
-      if(blendICPTrajectories.getBooleanValue())
+      if (precomputedICPPlanner != null)
       {
-         precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
-      }
-      else
-      {
-         precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         if (blendICPTrajectories.getBooleanValue())
+         {
+            precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         }
+         else
+         {
+            precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP);
+         }
       }
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
@@ -689,7 +720,7 @@ public class BalanceManager
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
       centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
@@ -749,7 +780,7 @@ public class BalanceManager
 
    public void updateCurrentICPPlan()
    {
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING);
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

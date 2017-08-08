@@ -45,7 +45,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -101,14 +102,14 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
    private final AtlasRobotVersion atlasVersion;
-   private final NewRobotPhysicalProperties atlasPhysicalProperties;
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
 
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, AtlasPhysicalProperties atlasPhysicalProperties)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
@@ -473,7 +474,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       return atlasPhysicalProperties.getMassScalePower();
    }
 
-   public NewRobotPhysicalProperties getPhysicalProperties()
+   public RobotPhysicalProperties getPhysicalProperties()
    {
       return atlasPhysicalProperties;
    }

@@ -6,7 +6,7 @@ import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -48,8 +48,7 @@ public class DRCFlatGroundWalkingTrack
 
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
-      CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = model.getICPOptimizationParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -58,7 +57,6 @@ public class DRCFlatGroundWalkingTrack
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
-      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 

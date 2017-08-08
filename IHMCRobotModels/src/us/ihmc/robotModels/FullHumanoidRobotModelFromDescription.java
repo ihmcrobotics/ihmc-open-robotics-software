@@ -67,12 +67,12 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame);
 
-         RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
+         RigidBodyTransform handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
 
-         if (handAttachmentPlaeToWristTransform != null)
+         if (handControlFrameToWristTransform != null)
          {
             MovingReferenceFrame attachmentPlateFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM),
-                  handAttachmentPlaeToWristTransform);
+                  handControlFrameToWristTransform);
             handControlFrames.put(robotSide, attachmentPlateFrame);
          }
          else

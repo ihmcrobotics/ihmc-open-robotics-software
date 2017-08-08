@@ -9,10 +9,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -23,6 +19,13 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class UserDesiredFootstepDataMessageGenerator
 {
@@ -92,8 +95,9 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredOrientation = new FrameOrientation(stanceFootFrame);
 
       firstStepSide.set(supportSide);
-      minimumWidth.set(walkingControllerParameters.getMinStepWidth());
-      stepWidth.set((walkingControllerParameters.getMaxStepWidth() + walkingControllerParameters.getMinStepWidth()) / 2);
+      minimumWidth.set(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      stepWidth.set((walkingControllerParameters.getSteppingParameters().getMaxStepWidth()
+            + walkingControllerParameters.getSteppingParameters().getMinStepWidth()) / 2);
       swingHeight.set(0.0);
 
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());

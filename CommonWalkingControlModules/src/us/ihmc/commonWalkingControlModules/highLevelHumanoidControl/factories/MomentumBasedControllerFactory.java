@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -82,7 +80,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
-   private final CapturePointPlannerParameters capturePointPlannerParameters;
+   private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
    private final HighLevelState initialBehavior;
 
@@ -118,7 +116,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
-                                         WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
+                                         WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
                                          HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
@@ -543,11 +541,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public void setFallbackControllerForFailure(HighLevelState fallbackController)
    {
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
-   }
-
-   public void setICPOptimizationControllerParameters(ICPOptimizationParameters icpOptimizationParameters)
-   {
-      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
    }
 
    public HighLevelState getCurrentHighLevelState()

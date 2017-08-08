@@ -1,37 +1,36 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -39,6 +38,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPAdjustmentOptimizationControllerTest
 {
@@ -61,6 +62,7 @@ public class ICPAdjustmentOptimizationControllerTest
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
@@ -72,12 +74,14 @@ public class ICPAdjustmentOptimizationControllerTest
       double omega0 = 0.3;
       omega.set(omega0);
 
-      ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
-      ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
-            walkingControllerParameters, bipedSupportPolygons, contactableFeet, 0.001, registry, null);
+      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet,
+                                                                                 icpPlannerParameters.getNumberOfFootstepsToConsider(), registry, null);
+      icpPlanner.initializeParameters(icpPlannerParameters);
       icpPlanner.setOmega0(omega.getDoubleValue());
-
       icpPlanner.clearPlan();
+
+      ICPAdjustmentOptimizationController icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters,
+            walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet, 0.001, registry, null);
       icpOptimizationController.clearPlan();
 
       double stepLength = 0.2;
@@ -99,7 +103,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.initializeForSingleSupport(0.0);
       icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
@@ -108,7 +112,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       icpOptimizationController.getDesiredCMP(desiredCMP);
@@ -167,10 +171,18 @@ public class ICPAdjustmentOptimizationControllerTest
 
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, ReferenceFrame.getWorldFrame(), 9.81, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, null);
    }
 
    private static final ICPOptimizationParameters icpOptimizationParameters = new ICPOptimizationParameters()
    {
+      @Override public boolean useSimpleOptimization()
+      {
+         return false;
+      }
+
       @Override public int getMaximumNumberOfFootstepsToConsider()
       {
          return 5;
@@ -292,77 +304,44 @@ public class ICPAdjustmentOptimizationControllerTest
          return 0.001;
       }
 
-      @Override public double getDoubleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getDoubleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
-      @Override public double getSingleSupportMaxCoPForwardExit()
-      {
-         return 0.05;
-      }
-
-      @Override public double getSingleSupportMaxCoPLateralExit()
-      {
-         return 0.03;
-      }
-
       @Override public double getAdjustmentDeadband()
       {
          return 0.0;
       }
    };
 
-   private static final CapturePointPlannerParameters icpPlannerParameters = new CapturePointPlannerParameters()
+   private static final ContinuousCMPICPPlannerParameters icpPlannerParameters = new ContinuousCMPICPPlannerParameters()
    {
-      @Override public double getEntryCMPInsideOffset()
+      @Override
+      public int getNumberOfCoPWayPointsPerFoot()
       {
-         return 0;
+         return 1;
       }
 
-      @Override public double getExitCMPInsideOffset()
+      @Override
+      public List<Vector2D> getCoPOffsets()
       {
-         return 0;
+         Vector2D entryOffset = new Vector2D();
+         Vector2D exitOffset = new Vector2D();
+
+         List<Vector2D> copOffsets = new ArrayList<>();
+         copOffsets.add(entryOffset);
+         copOffsets.add(exitOffset);
+
+         return copOffsets;
       }
 
-      @Override public double getEntryCMPForwardOffset()
+      @Override
+      public List<Vector2D> getCoPForwardOffsetBounds()
       {
-         return 0;
-      }
+         Vector2D entryOffset = new Vector2D();
+         Vector2D exitOffset = new Vector2D();
 
-      @Override public double getExitCMPForwardOffset()
-      {
-         return 0;
-      }
+         List<Vector2D> copOffsets = new ArrayList<>();
+         copOffsets.add(entryOffset);
+         copOffsets.add(exitOffset);
 
-      @Override public boolean useTwoCMPsPerSupport()
-      {
-         return false;
-      }
-
-      @Override public double getMaxEntryCMPForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override public double getMinEntryCMPForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override public double getMaxExitCMPForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override public double getMinExitCMPForwardOffset()
-      {
-         return 0;
+         return copOffsets;
       }
    };
 
@@ -370,255 +349,10 @@ public class ICPAdjustmentOptimizationControllerTest
    {
 
       @Override
-      public double getToeWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootstepArea()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public boolean isNeckPositionControlled()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getTrajectoryTimeHeadOrientation()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getNeckPitchUpperLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getNeckPitchLowerLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double[] getInitialHeadYawPitchRoll()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public double getHeadYawLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getHeadRollLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public String[] getDefaultHeadOrientationControlJointNames()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public void useVirtualModelControlCore()
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      @Override
       public boolean useOptimizationBasedICPController()
       {
          // TODO Auto-generated method stub
          return false;
-      }
-
-      @Override
-      public void useInverseDynamicsControlCore()
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public double pelvisToAnkleThresholdForWalking()
-      {
-         // TODO Auto-generated method stub
-         return 0;
       }
 
       @Override
@@ -637,83 +371,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public double maximumHeightAboveAnkle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public boolean isSpinePitchReversed()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getToeTouchdownAngle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getTimeToGetPreparedForLocomotion()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSwingHeightMaxForPushRecoveryTrajectory()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpineYawLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpineRollLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchUpperLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchLowerLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public double getSideLengthOfBoundingBoxForFootstepHeight()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -741,35 +398,13 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
+      public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+      {
+         return null;
+      }
+
+      @Override
       public double getMinimumSwingTimeForDisturbanceRecovery()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinStepLengthForToeOff()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinMechanicalLegLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinLegLengthBeforeCollapsingSingleSupport()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaximumToeOffAngle()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -790,7 +425,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getLegLength()
+      public double getMaximumLegLengthForSingularityAvoidance()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -818,49 +453,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getHeelTouchdownAngle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFoot_start_toetaper_from_back()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public FootSwitchType getFootSwitchType()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public double getDesiredTouchdownVelocity()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredTouchdownHeightOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredTouchdownAcceleration()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
       {
          // TODO Auto-generated method stub
          return null;
@@ -878,13 +471,6 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public String[] getDefaultChestOrientationControlJointNames()
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -916,49 +502,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean getCoMHeightDriftCompensation()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getAnkleHeight()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public boolean finishSingleSupportWhenICPPlannerIsDone()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeTouchdownIfPossible()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffWhenHittingAnkleLimit()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffIfPossibleInSingleSupport()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doToeOffIfPossible()
       {
          // TODO Auto-generated method stub
          return false;
@@ -972,31 +516,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean doHeelTouchdownIfPossible()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doFancyOnToesControl()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public double defaultOffsetHeightAboveAnkle()
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -1008,20 +531,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
@@ -1042,45 +551,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
       public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public boolean controlHeadAndHandsWithSliders()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean checkECMPLocationToTriggerToeOff()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean allowShrinkingSingleSupportFootPolygon()
-      {
-         // TODO Auto-generated method stub
-         return false;
       }
 
       @Override
@@ -1095,6 +569,117 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return false;
+      }
+
+      @Override
+      public ToeOffParameters getToeOffParameters()
+      {
+         return new ToeOffParameters()
+         {
+            @Override
+            public boolean doToeOffIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public boolean doToeOffIfPossibleInSingleSupport()
+            {
+               return false;
+            }
+
+            @Override
+            public boolean checkECMPLocationToTriggerToeOff()
+            {
+               return false;
+            }
+
+            @Override
+            public double getMinStepLengthForToeOff()
+            {
+               return 0;
+            }
+
+            @Override
+            public boolean doToeOffWhenHittingAnkleLimit()
+            {
+               return false;
+            }
+
+            @Override
+            public double getMaximumToeOffAngle()
+            {
+               return 0;
+            }
+         };
+      }
+
+      @Override
+      public SwingTrajectoryParameters getSwingTrajectoryParameters()
+      {
+         return new SwingTrajectoryParameters()
+         {
+            @Override
+            public boolean doToeTouchdownIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public double getToeTouchdownAngle()
+            {
+               return 0;
+            }
+
+            @Override
+            public boolean doHeelTouchdownIfPossible()
+            {
+               return false;
+            }
+
+            @Override
+            public double getHeelTouchdownAngle()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownHeightOffset()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownVelocity()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getDesiredTouchdownAcceleration()
+            {
+               return 0;
+            }
+
+            @Override
+            public double getMinMechanicalLegLength()
+            {
+               return 0;
+            }
+         };
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         // TODO Auto-generated method stub
+         return null;
       }
    };
 }
