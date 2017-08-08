@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
@@ -23,7 +26,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ICPTimingOptimizationController extends ICPOptimizationController
+public class ICPTimingOptimizationController extends AbstractICPOptimizationController
 {
    private static final double footVelocityScalarWeight = 0.0;
 
@@ -67,17 +70,18 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    private double previousSwingDurationSolution;
 
-   public ICPTimingOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPTimingOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
+                                          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet, controlDT, false, yoGraphicsListRegistry);
+      super(icpPlannerParameters, walkingControllerParameters, icpOptimizationParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT,
+            false, yoGraphicsListRegistry);
 
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
-      defaultSwingSplitFraction.set(icpPlannerParameters.getSwingDurationAlpha());
-      defaultTransferSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
+      defaultSwingSplitFraction.set(icpPlannerParameters.getSwingSplitFraction());
+      defaultTransferSplitFraction.set(icpPlannerParameters.getTransferSplitFraction());
 
       transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
@@ -156,7 +160,7 @@ public class ICPTimingOptimizationController extends ICPOptimizationController
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 

@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 
@@ -24,9 +25,9 @@ import us.ihmc.robotics.geometry.Direction;
  */
 public class YoPolynomial3D
 {
-   private final YoPolynomial xPolynomial;
-   private final YoPolynomial yPolynomial;
-   private final YoPolynomial zPolynomial;
+   protected final YoPolynomial xPolynomial;
+   protected final YoPolynomial yPolynomial;
+   protected final YoPolynomial zPolynomial;
 
    private final Point3DReadOnly position = new Point3DReadOnly()
    {
@@ -273,10 +274,29 @@ public class YoPolynomial3D
       return zPolynomial;
    }
 
+   public void reset()
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).reset();
+   }
+
+   public void set(YoPolynomial3D other)
+   {
+      xPolynomial.set(other.getYoPolynomialX());
+      yPolynomial.set(other.getYoPolynomialY());
+      zPolynomial.set(other.getYoPolynomialZ());
+   }
+
    public void setConstant(Point3DReadOnly z)
    {
       for (int index = 0; index < 3; index++)
          getYoPolynomial(index).setConstant(z.getElement(index));
+   }
+
+   public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setCubic(t0, tFinal, z0.getElement(index), zFinal.getElement(index));
    }
 
    public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
@@ -317,6 +337,14 @@ public class YoPolynomial3D
                                                                 zIntermediate1.getElement(index), zIntermediate2.getElement(index), zFinal.getElement(index));
    }
 
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Point3DReadOnly zIntermediate1,
+                                              Point3DReadOnly zFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getElement(index), zIntermediate1.getElement(index),
+                                                               zFinal.getElement(index));
+   }
+
    public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0,
                                                                           Point3DReadOnly zIntermediate, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
@@ -333,6 +361,12 @@ public class YoPolynomial3D
          getYoPolynomial(index).setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0, tIntermediate, tFinal, z0.getElement(index),
                                                                                              zd0.getElement(index), zIntermediate.getElement(index),
                                                                                              zFinal.getElement(index));
+   }
+
+   public void setCubicBezier(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zR1, Point3DReadOnly zR2, Point3DReadOnly zFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setCubicBezier(t0, tFinal, z0.getElement(index), zR1.getElement(index), zR2.getElement(index), zFinal.getElement(index));
    }
 
    public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -505,6 +539,22 @@ public class YoPolynomial3D
 
    }
 
+   public void setPentic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zFinal,
+                         Vector3DReadOnly zdFinal, Vector3DReadOnly zddFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setPentic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
+                                          zdFinal.getElement(index), zddFinal.getElement(index));
+   }
+
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
+                                                     Vector3DReadOnly zdFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoPolynomial(index).setPentic(t0, tFinal, z0.getElement(index), zd0.getElement(index), 0.0, zFinal.getElement(index),
+                                          zdFinal.getElement(index), 0.0);
+   }
+   
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                       Point3DReadOnly zIntermediate, Point3DReadOnly zf, Vector3DReadOnly zdf, Vector3DReadOnly zddf)
    {
@@ -524,5 +574,10 @@ public class YoPolynomial3D
                                                                               zddIntermediate.getElement(index), zFinal.getElement(index),
                                                                               zdFinal.getElement(index));
 
+   }
+
+   public String toString()
+   {
+      return "X: " + xPolynomial.toString() + "\n" + "Y: " + yPolynomial.toString() + "\n" + "Z: " + zPolynomial.toString();
    }
 }

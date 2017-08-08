@@ -1,28 +1,34 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.SCSAction;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-@SuppressWarnings("serial")
-public class SetInPointAction extends SCSAction
+import javax.swing.AbstractAction;
+
+import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AbstractActionTools;
+
+public class SetInPointAction extends AbstractAction
 {
+   private static final long serialVersionUID = 1396893923616884444L;
+
    private SetInPointCommandExecutor executor;
 
    public SetInPointAction(SetInPointCommandExecutor executor)
    {
-      super("Set In Point",
-              "icons/SetInPoint.png",
-              KeyEvent.VK_N,
-              "Set In Point",
-              "Set the current In point in the data buffer."
-      );
-
+      super("Set In Point");
       this.executor = executor;
+
+      String iconFilename = "icons/YoSetInPoint24.gif";
+      int shortKey = KeyEvent.VK_N;
+      String longDescription = "Set In Point";
+      String shortDescription = "Set In Point";
+      
+      AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
    @Override
-   public void doAction()
+   public void actionPerformed(ActionEvent actionEvent)
    {
       executor.setInPoint();
    }

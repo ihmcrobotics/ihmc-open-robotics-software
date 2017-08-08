@@ -4,44 +4,63 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeSnapper;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SnapBasedNodeChecker implements FootstepNodeChecker
 {
-   private PlanarRegionsList planarRegions;
-   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private static final double defaultMaxStepHeightChange = 0.2;
+   private static final double defaultMinPercentageOfFoothold = 0.95;
 
-   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons)
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final FootstepNodeSnapper snapper;
+   private final ConvexPolygon2D footholdAfterSnap;
+
+   private final YoDouble maxStepHeightChange;
+   private final YoDouble minPercentageFoothold;
+
+   public SnapBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, YoVariableRegistry registry)
    {
       this.footPolygons = footPolygons;
+      this.snapper = snapper;
+      this.footholdAfterSnap = new ConvexPolygon2D();
+
+      maxStepHeightChange = new YoDouble("maxStepHeightChange", registry);
+      minPercentageFoothold = new YoDouble("minPercentageFoothold", registry);
+
+      maxStepHeightChange.set(defaultMaxStepHeightChange);
+      minPercentageFoothold.set(defaultMinPercentageOfFoothold);
    }
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
-      this.planarRegions = planarRegions;
+      snapper.setPlanarRegions(planarRegions);
    }
 
    @Override
-   public boolean isNodeValid(FootstepNode node)
+   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (planarRegions == null)
+      RigidBodyTransform snapTransform = snapper.snapFootstepNode(node, footholdAfterSnap);
+      if (snapTransform == null)
+         return false;
+
+      double area = footholdAfterSnap.getArea();
+      double footArea = footPolygons.get(node.getRobotSide()).getArea();
+      if (area < minPercentageFoothold.getDoubleValue() * footArea)
+         return false;
+
+      if(previousNode == null)
          return true;
 
-      footPolygon.setAndUpdate(footPolygons.get(node.getRobotSide()));
-      RigidBodyTransform worldToSole = new RigidBodyTransform();
-      worldToSole.setRotationYawAndZeroTranslation(node.getYaw());
-      worldToSole.setTranslation(node.getX(), node.getY(), 0.0);
-      footPolygon.applyTransformAndProjectToXYPlane(worldToSole);
-
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegions);
-      if (snapTransform == null)
+      RigidBodyTransform previousSnapTransform = snapper.snapFootstepNode(previousNode, null);
+      double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
+      if (heightChange > maxStepHeightChange.getDoubleValue())
          return false;
 
       return true;
    }
-
 }

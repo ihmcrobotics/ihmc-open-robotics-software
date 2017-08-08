@@ -12,7 +12,7 @@ import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -56,8 +56,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = model.getICPOptimizationParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames,
@@ -65,7 +64,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);
-      momentumBasedControllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 

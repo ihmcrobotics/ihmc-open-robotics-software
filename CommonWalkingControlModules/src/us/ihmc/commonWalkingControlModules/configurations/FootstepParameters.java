@@ -19,5 +19,8 @@ public interface FootstepParameters
 
    public abstract double getActualFootLength();
 
-   public abstract double getFootstepArea();
+   public default double getFootstepArea()
+   {
+      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
+   }
 }

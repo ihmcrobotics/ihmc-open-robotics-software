@@ -42,6 +42,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatus
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 
@@ -91,6 +92,7 @@ public abstract class ControllerAPIDefinition
       List<Class<? extends StatusPacket<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
       statusMessages.add(FootstepStatus.class);
+      statusMessages.add(PlanOffsetStatus.class);
       statusMessages.add(WalkingStatusMessage.class);
       statusMessages.add(WalkingControllerFailureStatusMessage.class);
       statusMessages.add(ManipulationAbortedStatus.class);

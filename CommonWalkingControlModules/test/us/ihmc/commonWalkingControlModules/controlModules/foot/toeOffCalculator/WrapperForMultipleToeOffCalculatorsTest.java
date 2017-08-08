@@ -1,33 +1,36 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-
-import java.util.*;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WrapperForMultipleToeOffCalculatorsTest
 {
@@ -77,7 +80,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters(), parentRegistry);
+      ToeOffCalculator toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getWalkingControllerParameters().getToeOffParameters(), parentRegistry);
       toeOffCalculators.put(toeOffCalculator.getEnum(), toeOffCalculator);
    }
 
@@ -167,43 +170,13 @@ public class WrapperForMultipleToeOffCalculatorsTest
       return new WalkingControllerParameters()
       {
          @Override
-         public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-         {
-            return null;
-         }
-
-         @Override
-         public String[] getDefaultChestOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
          public double getOmega0()
          {
             return 0;
          }
 
          @Override
-         public double getAnkleHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getLegLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinLegLengthBeforeCollapsingSingleSupport()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinMechanicalLegLength()
+         public double getMaximumLegLengthForSingularityAvoidance()
          {
             return 0;
          }
@@ -230,84 +203,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public double defaultOffsetHeightAboveAnkle()
          {
             return 0;
-         }
-
-         @Override
-         public double pelvisToAnkleThresholdForWalking()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMinStepLengthForToeOff()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeOffWhenHittingAnkleLimit()
-         {
-            return false;
-         }
-
-         @Override
-         public double getMaximumToeOffAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doToeTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getToeTouchdownAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean doHeelTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getHeelTouchdownAngle()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean allowShrinkingSingleSupportFootPolygon()
-         {
-            return false;
          }
 
          @Override
@@ -347,37 +242,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
          public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public boolean getCoMHeightDriftCompensation()
-         {
-            return false;
-         }
-
-         @Override
-         public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
          {
             return null;
          }
@@ -401,25 +266,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double getSwingHeightMaxForPushRecoveryTrajectory()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean doPrepareManipulationForLocomotion()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean controlHeadAndHandsWithSliders()
          {
             return false;
          }
@@ -437,66 +284,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double getSpineYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpineRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean isSpinePitchReversed()
-         {
-            return false;
-         }
-
-         @Override
-         public double getFoot_start_toetaper_from_back()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSideLengthOfBoundingBoxForFootstepHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownHeightOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownVelocity()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredTouchdownAcceleration()
-         {
-            return 0;
-         }
-
-         @Override
          public double getContactThresholdForce()
          {
             return 0;
@@ -506,18 +293,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public double getSecondContactThresholdForceIgnoringCoP()
          {
             return 0;
-         }
-
-         @Override
-         public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-         {
-            return null;
-         }
-
-         @Override
-         public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-         {
-            return null;
          }
 
          @Override
@@ -539,9 +314,9 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public boolean doFancyOnToesControl()
+         public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
-            return false;
+            return null;
          }
 
          @Override
@@ -575,18 +350,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public void useInverseDynamicsControlCore()
-         {
-
-         }
-
-         @Override
-         public void useVirtualModelControlCore()
-         {
-
-         }
-
-         @Override
          public double getHighCoPDampingDurationToPreventFootShakies()
          {
             return 0;
@@ -599,195 +362,113 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double getFootForwardOffset()
+         public ToeOffParameters getToeOffParameters()
          {
-            return 0;
+            return new ToeOffParameters()
+            {
+               @Override
+               public boolean doToeOffIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean doToeOffIfPossibleInSingleSupport()
+               {
+                  return false;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMinStepLengthForToeOff()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doToeOffWhenHittingAnkleLimit()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getMaximumToeOffAngle()
+               {
+                  return 0;
+               }
+            };
          }
 
          @Override
-         public double getFootBackwardOffset()
+         public SwingTrajectoryParameters getSwingTrajectoryParameters()
          {
-            return 0;
+            return new SwingTrajectoryParameters()
+            {
+               @Override
+               public boolean doToeTouchdownIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getToeTouchdownAngle()
+               {
+                  return 0;
+               }
+
+               @Override
+               public boolean doHeelTouchdownIfPossible()
+               {
+                  return false;
+               }
+
+               @Override
+               public double getHeelTouchdownAngle()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownHeightOffset()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownVelocity()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getDesiredTouchdownAcceleration()
+               {
+                  return 0;
+               }
+
+               @Override
+               public double getMinMechanicalLegLength()
+               {
+                  return 0;
+               }
+            };
          }
 
          @Override
-         public double getFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getToeWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootstepArea()
-         {
-            return 0;
-         }
-
-         @Override
-         public String[] getDefaultHeadOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+         public ICPOptimizationParameters getICPOptimizationParameters()
          {
             return null;
          }
 
          @Override
-         public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+         public SteppingParameters getSteppingParameters()
          {
             return null;
-         }
-
-         @Override
-         public double[] getInitialHeadYawPitchRoll()
-         {
-            return new double[0];
-         }
-
-         @Override
-         public boolean isNeckPositionControlled()
-         {
-            return false;
-         }
-
-         @Override
-         public double getNeckPitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getNeckPitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTrajectoryTimeHeadOrientation()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDefaultStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getInPlaceWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredStepForward()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepUp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepDown()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnOutwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnInwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
-         {
-            return 0;
          }
       };
    }

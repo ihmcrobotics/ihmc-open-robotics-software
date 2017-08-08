@@ -15,8 +15,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpandingStates>
@@ -41,16 +41,15 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    }
 
    public ValidNodesStateMachineBehavior(ArrayList<RRTNode> nodes, CommunicationBridge communicationBridge, YoDouble yoTime,
-                                         WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
-                                         HumanoidReferenceFrames referenceFrames)
+                                         FullHumanoidRobotModelFactory robotModelFactory, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("RRTExpandingStateMachineBehavior", RRTExpandingStates.class, yoTime, communicationBridge);
 
-      if (DEBUG)
-         PrintTools.info("number Of nodes " + nodes.size());
+      if(DEBUG)
+         PrintTools.info("number Of nodes "+nodes.size());
       this.nodes = nodes;
 
-      testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel, referenceFrames);
+      testValidityBehavior = new SolarPanelPoseValidityTester(robotModelFactory, communicationBridge, fullRobotModel, referenceFrames);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
       testDoneBehavior = new TestDoneBehavior(communicationBridge);
 
@@ -89,8 +88,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
 
    private void setUpStateMachine()
    {
-      BehaviorAction<RRTExpandingStates> intializePrivilegedConfigurationAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.INITIALIZE,
-                                                                                                                         testValidityBehavior)
+      BehaviorAction<RRTExpandingStates> intializePrivilegedConfigurationAction = new BehaviorAction<RRTExpandingStates>(RRTExpandingStates.INITIALIZE, testValidityBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -112,10 +110,10 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
             /*
              * override suitable node data for node.
              */
-            if (DEBUG)
+            if(DEBUG)
                PrintTools.info("Check :: Tester Set Behavior Input ");
 
-            if (indexOfCurrentNode < nodes.size())
+            if(indexOfCurrentNode < nodes.size())
             {
                testValidityBehavior.setWholeBodyPose(SolarPanelCleaningInfo.getCleaningPath(), nodes.get(indexOfCurrentNode));
                testValidityBehavior.setUpHasBeenDone();
@@ -136,12 +134,12 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          public boolean checkCondition()
          {
             boolean b;
-            if (NONSTOP)
+            if(NONSTOP)
                b = waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size());
             else
                b = (waitingResultBehavior.isDone() && (indexOfCurrentNode < nodes.size()) && nodesValidity == true);
 
-            if (DEBUG && b)
+            if(DEBUG && b)
                PrintTools.info("Check :: keepDoingCondition " + b);
             return b;
          }
@@ -153,12 +151,13 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
          public boolean checkCondition()
          {
             boolean b;
-            if (NONSTOP)
+            if(NONSTOP)
                b = waitingResultBehavior.isDone() && (indexOfCurrentNode == nodes.size());
             else
                b = ((waitingResultBehavior.isDone() && (indexOfCurrentNode == nodes.size())) || nodesValidity == false);
 
-            if (DEBUG && b)
+
+            if(DEBUG && b)
                PrintTools.info("Check :: doneCondition " + b);
             return b;
          }
@@ -180,7 +179,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub      
+      // TODO Auto-generated method stub
    }
 
    private class WaitingResultBehavior extends AbstractBehavior
@@ -205,14 +204,14 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
 
          nodesScore = nodesScore + curScore;
 
-         if (DEBUG)
-            PrintTools.info(" " + nodesScore + " " + curScore + " " + testValidityBehavior.isValid() + " cur nodes " + nodesValidity);
-         if (DEBUG)
+         if(DEBUG)
+            PrintTools.info(" "+ nodesScore +" "+curScore +" "+testValidityBehavior.isValid() +" cur nodes "+nodesValidity);
+         if(DEBUG)
             PrintTools.info("Check :: Waiting Behavior ");
-         if (DEBUG)
-            PrintTools.info(" " + nodes.size() + " " + (indexOfCurrentNode - 1) + " result get " + testValidityBehavior.isValid());
+         if(DEBUG)
+            PrintTools.info(" "+ nodes.size() +" "+(indexOfCurrentNode-1)+" result get "+ testValidityBehavior.isValid());
 
-         if (testValidityBehavior.isValid() == false)
+         if(testValidityBehavior.isValid() == false)
          {
             nodesValidity = false;
          }
@@ -264,7 +263,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       @Override
       public void onBehaviorEntered()
       {
-         if (DEBUG)
+         if(DEBUG)
             PrintTools.info("Check :: Done Behavior ");
       }
 
@@ -286,7 +285,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       @Override
       public void onBehaviorExited()
       {
-         if (true)
+         if(true)
             PrintTools.info("Check :: Exit Behavior ");
       }
 

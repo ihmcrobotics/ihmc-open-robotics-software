@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.pushRecovery;
 import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -15,7 +16,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
 
    @Override

@@ -134,7 +134,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
-      double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getMinStepLengthForToeOff();
+      double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getToeOffParameters().getMinStepLengthForToeOff();
       Vector2D walkDirection = new Vector2D(-1, 0);
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
       int randomZeroOrOne = RandomNumbers.nextInt(new Random(), 0, 1);
@@ -172,7 +172,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
       int numberOfFootstepsBetweenStartAndTarget = 4;
-      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       Vector2D walkDirection = new Vector2D(0.5, 0.5);
       FramePose2d startMidFeetPose2d = getCurrentMidFeetPose2dCopy();
       FramePose2d targetMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
@@ -204,7 +204,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
       int numberOfFootstepsBetweenStartAndTarget = 4;
-      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       Vector2D walkDirection = new Vector2D(-0.5, -0.5);
       double walkDirectionYaw = Math.atan2(walkDirection.getY(), walkDirection.getX());
       FramePose2d targetMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, walkDirectionYaw);
@@ -240,7 +240,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
       int numberOfFootstepsBetweenStartAndTarget = 4;
-      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       Vector2D walkDirection = new Vector2D(0.5, 0.5);
       double walkDirectionYaw = Math.atan2(walkDirection.getY(), walkDirection.getX());
       FramePose2d startMidFeetPose2d = getCurrentMidFeetPose2dCopy();
@@ -344,7 +344,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       // Position and orientation may change after stop command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually stopping
-      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPose2dAtStop, midFeetPose2dFinal, positionThreshold, orientationThreshold);
       assertTrue(!walkToLocationBehavior.isDone());
@@ -378,7 +378,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       // Position and orientation may change after pause command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually pausing
-      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPoseAtPause, midFeetPoseAtResume, positionThreshold, orientationThreshold);
       assertTrue(walkToLocationBehavior.isDone());
@@ -416,7 +416,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       // Position and orientation may change after pause command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually pausing
-      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPoseAtPause, midFeetPoseAtResume, positionThreshold, orientationThreshold);
       assertTrue(walkToLocationBehavior.isDone());
@@ -450,7 +450,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       // Position and orientation may change after stop command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually stopping
-      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPose2dAtStop, midFeetPose2dFinal, positionThreshold, orientationThreshold);
       assertTrue(!walkToLocationBehavior.isDone());

@@ -14,10 +14,11 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithAngularMomentumOffset;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
@@ -65,8 +66,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       int steps = 20;
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double stepWidth = (walkingControllerParameters.getMinStepWidth() + walkingControllerParameters.getMaxStepWidth()) / 2.0;
-      double stepLength = walkingControllerParameters.getDefaultStepLength() / 2.0;
+      double stepWidth = (walkingControllerParameters.getSteppingParameters().getMinStepWidth()
+            + walkingControllerParameters.getSteppingParameters().getMaxStepWidth()) / 2.0;
+      double stepLength = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
       double swingTime = walkingControllerParameters.getDefaultSwingTime();
       double transferTime = walkingControllerParameters.getDefaultTransferTime();
       double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
@@ -196,7 +198,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithAngularMomentumOffset.class.getSimpleName());
+      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ContinuousCMPBasedICPPlanner.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 
@@ -228,9 +230,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
       public TestingEnvironment()
       {
-         WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-         double flatArea = walkingControllerParameters.getDefaultStepLength() * 0.5;
-         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.25;
+         SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+         double flatArea = steppingParameters.getDefaultStepLength() * 0.5;
+         double maxElevation = steppingParameters.getMinSwingHeightFromStanceFoot() * 0.25;
 
          terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
          terrain.addBox(-0.5 - flatArea / 2.0, -1.0, flatArea / 2.0, 1.0, -0.01, 0.0);

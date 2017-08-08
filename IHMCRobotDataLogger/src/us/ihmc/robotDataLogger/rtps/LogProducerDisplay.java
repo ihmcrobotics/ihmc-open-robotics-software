@@ -43,7 +43,7 @@ public class LogProducerDisplay extends JFrame
       dataConsumerParticipant.listenForAnnouncements(new LogSessionCallback());
       JScrollPane scroller = new JScrollPane();
 
-      String[] columnNames = { "Controller", "Hostname", "Identifier", "Data IP", "Data port" };
+      String[] columnNames = { "Controller", "Hostname", "Identifier"};
       model = new DefaultTableModel(columnNames, 0)
       {
          private static final long serialVersionUID = 7807098301637938830L;
@@ -181,8 +181,6 @@ public class LogProducerDisplay extends JFrame
          final String name = description.getNameAsString();
          final String hostname = description.getHostNameAsString();
          final String sessionId = description.getIdentifierAsString();
-         final String group = ipToString(description.getDataIP());
-         final int dataPort = description.getDataPort();
          
          sessions.put(sessionId, description);
          SwingUtilities.invokeLater(new Runnable()
@@ -192,7 +190,7 @@ public class LogProducerDisplay extends JFrame
             public void run()
             {
                PrintTools.info(description.getNameAsString() + " came online");
-               model.addRow(new Object[] { name, hostname, sessionId, group, dataPort });
+               model.addRow(new Object[] { name, hostname, sessionId });
 
             }
          });

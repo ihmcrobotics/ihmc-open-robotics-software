@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,7 +47,7 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
       if(DEBUG)
          PrintTools.info("number Of nodes "+nodes.size());
                   
-      testValidityBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, communicationBridge, fullRobotModel, referenceFrames);
+      testValidityBehavior = new SolarPanelPoseValidityTester((FullHumanoidRobotModelFactory) wholeBodyControllerParameters, communicationBridge, fullRobotModel, referenceFrames);
       waitingResultBehavior = new WaitingResultBehavior(communicationBridge);
       testDoneBehavior = new TestDoneBehavior(communicationBridge);
             

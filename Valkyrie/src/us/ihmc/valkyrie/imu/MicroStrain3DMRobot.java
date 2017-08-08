@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.imu;
 
 import java.io.IOException;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -118,7 +118,7 @@ public class MicroStrain3DMRobot extends Robot
    
    public static void main(String[] args) throws IOException
    {
-      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(DRCRobotModel.RobotTarget.REAL_ROBOT);
+      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(RobotTarget.REAL_ROBOT);
       final MicrostrainUDPPacketListener listener = MicrostrainUDPPacketListener.createNonRealtimeListener(sensorInformation.getImuUSBSerialIds().get("v1Pelvis_leftIMU"));
       
       final MicroStrain3DMRobot robot = new MicroStrain3DMRobot();
