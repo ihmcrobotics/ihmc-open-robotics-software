@@ -19,29 +19,31 @@ task generateSettings {
 }
 
 task copyTests {
-   gradle.includedBuilds.each {
-      def testFolder = it.projectDir.toPath().resolve("test")
-      if (Files.exists(testFolder))
-      {
-         def testSrcFolder = testFolder.resolve("src")
-         def testSrcUsFolder = testSrcFolder.resolve("us")
-         def testUsFolder = testFolder.resolve("us")
-
-         if (Files.exists(testUsFolder))
+   doLast {
+      gradle.includedBuilds.each {
+         def testFolder = it.projectDir.toPath().resolve("test")
+         if (Files.exists(testFolder))
          {
-            println testSrcFolder
-            println testSrcUsFolder
-            println testUsFolder
+            def testSrcFolder = testFolder.resolve("src")
+            def testSrcUsFolder = testSrcFolder.resolve("us")
+            def testUsFolder = testFolder.resolve("us")
 
-            FileTools.deleteQuietly(testSrcUsFolder)
+            if (Files.exists(testUsFolder))
+            {
+               println testSrcFolder
+               println testSrcUsFolder
+               println testUsFolder
 
-            try
-            {
-               FileUtils.copyDirectory(testUsFolder.toFile(), testSrcUsFolder.toFile())
-            }
-            catch (Exception e)
-            {
-               println "Failed: " + e.printStackTrace()
+               FileTools.deleteQuietly(testSrcUsFolder)
+
+               try
+               {
+                  FileUtils.copyDirectory(testUsFolder.toFile(), testSrcUsFolder.toFile())
+               }
+               catch (Exception e)
+               {
+                  println "Failed: " + e.printStackTrace()
+               }
             }
          }
       }

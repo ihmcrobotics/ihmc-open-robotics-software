@@ -13,7 +13,14 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../SimulationConstructionSet",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../SimulationConstructionSet"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }

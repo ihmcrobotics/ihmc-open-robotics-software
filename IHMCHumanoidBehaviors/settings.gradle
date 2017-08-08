@@ -13,22 +13,29 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
+def includes = [
+   "../CommonWalkingControlModules",
+   "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGraphicsDescription",
+   "../IHMCHumanoidBehaviors",
+   "../IHMCHumanoidRobotics",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaToolkit",
+   "../IHMCManipulationPlanning",
+   "../IHMCPerception",
+   "../IHMCRobotDataLogger",
+   "../IHMCRobotModels",
+   "../IHMCRoboticsToolkit",
+   "../IHMCWholeBodyController",
+   "../SensorProcessing",
+   "../SimulationConstructionSet",
+]
+
 if (startParameter.searchUpwards)
 {
-   includeBuild "../CommonWalkingControlModules"
-   includeBuild "../IHMCCommunication"
-   includeBuild "../IHMCFootstepPlanning"
-   includeBuild "../IHMCGraphicsDescription"
-   includeBuild "../IHMCHumanoidBehaviors"
-   includeBuild "../IHMCHumanoidRobotics"
-   includeBuild "../IHMCJavaExtensions"
-   includeBuild "../IHMCJavaToolkit"
-   includeBuild "../IHMCManipulationPlanning"
-   includeBuild "../IHMCPerception"
-   includeBuild "../IHMCRobotDataLogger"
-   includeBuild "../IHMCRobotModels"
-   includeBuild "../IHMCRoboticsToolkit"
-   includeBuild "../IHMCWholeBodyController"
-   includeBuild "../SensorProcessing"
-   includeBuild "../SimulationConstructionSet"
+   includes.each { include ->
+      if (new File(rootProject.projectDir, include).exists())
+         includeBuild include
+   }
 }
