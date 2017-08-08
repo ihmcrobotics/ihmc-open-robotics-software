@@ -26,6 +26,6 @@ testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
+   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
 }
