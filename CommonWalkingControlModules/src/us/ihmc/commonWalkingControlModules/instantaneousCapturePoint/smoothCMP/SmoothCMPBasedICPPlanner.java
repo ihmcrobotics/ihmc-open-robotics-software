@@ -286,10 +286,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          referenceICPGenerator.compute(time);
          referenceCoPGenerator.update(time);
          referenceCMPGenerator.update(time);
+         angularMomentumGenerator.update(time);
 
          referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
          referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
          referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
+         angularMomentumGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
 
          referenceICPGenerator.getCoMPosition(desiredCoMPosition);
          referenceICPGenerator.getCoMVelocity(desiredCoMVelocity);

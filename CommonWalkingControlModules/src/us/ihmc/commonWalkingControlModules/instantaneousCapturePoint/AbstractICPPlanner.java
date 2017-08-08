@@ -40,20 +40,24 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
-   /** Desired position for the Instantaneous Capture Point (ICP) */
-   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
-   /** Desired velocity for the Instantaneous Capture Point (ICP) */
-   protected final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
-   /** Desired acceleration for the Instantaneous Capture Point (ICP) */
-   protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
-   /** Desired position for the Centroidal Momentum Pivot (CMP) */
-   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
-   /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
-   protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    /** Desired position for the Center of Pressure (CoP) */
-   protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCenterOfPressurePosition", worldFrame, registry);
+   protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCoPPosition", worldFrame, registry);
    /** Desired velocity for the Center of Pressure (CoP) */
-   protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
+   protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
+   /** Desired Centroidal Angular Momentum (CAM) */
+   protected final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAmgularMomentum", worldFrame, registry);
+   /** Desired Centroidal Torque (CT) */
+   protected final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
+   /** Desired position for the Centroidal Momentum Pivot (CMP) */
+   protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCMPPosition", worldFrame, registry);
+   /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
+   protected final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCMPVelocity", worldFrame, registry);
+   /** Desired position for the Instantaneous Capture Point (ICP) */
+   protected final YoFramePoint desiredICPPosition = new YoFramePoint(namePrefix + "DesiredICPPosition", worldFrame, registry);
+   /** Desired velocity for the Instantaneous Capture Point (ICP) */
+   protected final YoFrameVector desiredICPVelocity = new YoFrameVector(namePrefix + "DesiredICPVelocity", worldFrame, registry);
+   /** Desired acceleration for the Instantaneous Capture Point (ICP) */
+   protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredICPAcceleration", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM)*/
    protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
    /** Desired velocity for the Center of Mass (CoM) */
@@ -523,6 +527,18 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void getDesiredCenterOfPressureVelocity(YoFrameVector desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.set(desiredCoPVelocity);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCentroidalAngularMomentum(FrameVector desiredCentroidalAngularMomentumToPack)
+   {
+      desiredCentroidalAngularMomentum.getFrameTupleIncludingFrame(desiredCentroidalAngularMomentumToPack);
+   }
+   
+   /** {@inheritDoc} */
+   public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
+   {
+      desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
    }
 
    @Override
