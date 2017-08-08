@@ -564,14 +564,17 @@ public class TrajectoryMathTools
             segmentTraj2 = traj1.getSegment(i);
             segmentTraj1 = traj2.getSegment(j);
          }
+         
          if (segmentTraj1.getInitialTime() < segmentTraj2.getInitialTime() - TIME_EPSILON && currentTime - TIME_EPSILON < segmentTraj1.getInitialTime())
+         {
             setCurrentSegmentPolynomial(trajToPack.getSegment(k++), segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
+         }
 
          addByTrimming(trajToPack.getSegment(k), segmentTraj1, segmentTraj2);
          currentTime = Math.min(segmentTraj1.getFinalTime(), segmentTraj2.getFinalTime());
-         if (traj1.getSegment(i).getFinalTime() < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
+         if (currentTime < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
             i++;
-         else if (traj2.getSegment(i).getFinalTime() < traj1.getSegment(j).getFinalTime() - TIME_EPSILON)
+         else if (currentTime < traj1.getSegment(j).getFinalTime() - TIME_EPSILON)
             j++;
          else
          {
