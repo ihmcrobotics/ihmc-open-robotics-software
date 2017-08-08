@@ -24,7 +24,7 @@ public class LeapOfFaithParameters
     */
    public double getHorizontalFootWeightScaleFactor()
    {
-      return 1.0;
+      return 0.0;
    }
 
    /**
