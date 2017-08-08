@@ -27,7 +27,6 @@ public abstract class CTTaskNode
    protected Vector3D configurationTranslation;
    protected Quaternion configurationRotation;
    
-   
    public static WheneverWholeBodyKinematicsSolver nodeTester;
    public static FullHumanoidRobotModel initialRobotModel;
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
@@ -221,7 +220,7 @@ public abstract class CTTaskNode
       
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
-      
+            
       return nodeCopy;
    }
    

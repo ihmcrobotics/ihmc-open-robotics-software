@@ -91,13 +91,19 @@ public class CTTaskNodeTree
       return trajectoryTime;
    }
 
-   private void setRandomNormalizedNodeData(CTTaskNode node, int index)
+   private void setRandomNormalizedNodeData(CTTaskNode node, int index, boolean isUniform)
    {
       Random randomManager = new Random();
 
       double exceedIntentionalRatio = 1.0;
+      
+      if(isUniform)
+         exceedIntentionalRatio = 0.0;
+      else
+         exceedIntentionalRatio = 1.0;
+      
       double value = randomManager.nextDouble() * (1.0 + exceedIntentionalRatio);
-
+      
       if(index == 0)
          ;
       else
@@ -113,10 +119,10 @@ public class CTTaskNodeTree
       node.setNormalizedNodeData(index, value);
    }
 
-   public void setRandomNormalizedNodeData(CTTaskNode node)
+   public void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform)
    {
       for (int i = 0; i < node.getDimensionOfNodeData(); i++)
-         setRandomNormalizedNodeData(node, i);
+         setRandomNormalizedNodeData(node, i, isUniform);
    }
 
    public void setMatricRatioTimeToTask(double ratio)
@@ -259,7 +265,7 @@ public class CTTaskNodeTree
    private void updateRandomConfiguration()
    {
       CTTaskNode randomNode = createNode();
-      setRandomNormalizedNodeData(randomNode);
+      setRandomNormalizedNodeData(randomNode, false);
       this.randomNode = randomNode;
    }
 
