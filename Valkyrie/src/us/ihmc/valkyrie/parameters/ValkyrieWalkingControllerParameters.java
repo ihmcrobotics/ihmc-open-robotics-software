@@ -2,16 +2,14 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -36,9 +34,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
-import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
@@ -48,9 +43,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final ValkyrieJointMap jointMap;
-
-   private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
-   private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
 
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
@@ -63,6 +55,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ValkyrieSteppingParameters steppingParameters;
 
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
@@ -78,6 +71,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new ValkyrieToeOffParameters();
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
+      steppingParameters = new ValkyrieSteppingParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
       RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
@@ -90,28 +84,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
       handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
-
-      for(RobotSide side : RobotSide.values())
-      {
-         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
-         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
-         {
-            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
-                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
-         }
-      }
-
-      NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
-
-      for (int i = 0; i < sliderBoardControlledNeckJointNames.length; i++)
-      {
-         NeckJointName joint = sliderBoardControlledNeckJointNames[i];
-
-         sliderBoardControlledNeckJointNamesWithLimits.put(
-               joint,
-               new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
-                     .getFullyFlexedPositionLimit(joint)));
-      }
    }
 
    @Override
@@ -119,24 +91,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       // TODO probably need to be tuned.
       return target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3; // 3.3 seems more appropriate.
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-   {
-      return handPosesWithRespectToChestFrame;
-   }
-
-   @Override
-   public double getTimeToGetPreparedForLocomotion()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public boolean allowShrinkingSingleSupportFootPolygon()
-   {
-      return false;
    }
 
    @Override
@@ -161,33 +115,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       return 0.70;
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return sliderBoardControlledNeckJointNamesWithLimits;
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return sliderBoardControlledFingerJointNamesWithLimits;
-   }
-
-   @Override
-   public String[] getDefaultChestOrientationControlJointNames()
-   {
-      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
-
-      return defaultChestOrientationControlJointNames;
-   }
-
-   @Override
-   public boolean controlHeadAndHandsWithSliders()
-   {
-      return false;
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
@@ -220,126 +147,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getFootForwardOffset()
-   {
-      return ValkyriePhysicalProperties.footForward;
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return ValkyriePhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return ValkyriePhysicalProperties.ankleHeight;
-   }
-
-   @Override
-   public double getLegLength()
+   public double getMaximumLegLengthForSingularityAvoidance()
    {
       return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
-   }
-
-   @Override
-   public double getSwingHeightMaxForPushRecoveryTrajectory()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.5; // 0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      if (target == RobotTarget.SCS)
-         return 0.6; // 0.5; //0.35;
-
-      return 0.4;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      return (target == RobotTarget.REAL_ROBOT) ? 0.165 : 0.15;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.6; // 0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.3;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.3;
    }
 
    @Override
    public boolean controlToeDuringSwing()
    {
       return true;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -386,27 +202,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public boolean getCoMHeightDriftCompensation()
-   {
-      return true;
-   }
-
-   @Override
-   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("pelvisXY", registry);
-
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      gains.setKp(4.0);
-      gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("pelvisOrientation", registry);
 
@@ -468,29 +264,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   @Override
-   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
-
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = runningOnRealRobot ? 80.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.6 : 0.8;
-      double maxAcceleration = runningOnRealRobot ? 18.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAcceleration);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
@@ -649,6 +423,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       YoOrientationPIDGainsInterface handAngularGains = createHandOrientationControlGains(registry);
       for (RobotSide robotSide : RobotSide.values)
          taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
+
+      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;
    }
@@ -885,34 +662,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-   {
-      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
-
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
-      double kpXYOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
-      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      gains.setPositionProportionalGains(kp, kp);
-      gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
@@ -935,90 +684,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getDefaultInitialTransferTime()
    {
       return (target == RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineYawLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return -0.13;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return 0.666;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return true;
-   }
-
-   @Override
-   public double getFootWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return ValkyriePhysicalProperties.footLength;
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return ValkyriePhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return ValkyriePhysicalProperties.footLength;
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getFoot_start_toetaper_from_back()
-   {
-      // TODO Auto-generated method stub
-      return 0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset() + 0.25 * getFootWidth() * getFootWidth());
    }
 
    @Override
@@ -1095,12 +760,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean doFancyOnToesControl()
-   {
-      return !(target == RobotTarget.REAL_ROBOT);
-   }
-
-   @Override
    public double getContactThresholdHeight()
    {
       return 0.05;
@@ -1131,12 +790,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return false;
    }
 
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0.8157;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
@@ -1157,18 +810,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return false;
    }
 
-   @Override
-   public void useInverseDynamicsControlCore()
-   {
-      // once another mode is implemented, use this to change the default gains for inverse dynamics
-   }
-
-   @Override
-   public void useVirtualModelControlCore()
-   {
-      // once another mode is implemented, use this to change the default gains for virtual model control
-   }
-
    /** {@inheritDoc} */
    @Override
    public LegConfigurationParameters getLegConfigurationParameters()
@@ -1187,13 +828,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public boolean useSupportState()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public ToeOffParameters getToeOffParameters()
    {
       return toeOffParameters;
@@ -1208,8 +842,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public double getDefaultTrajectoryTime()
+   public SteppingParameters getSteppingParameters()
    {
-      return 2.0;
+      return steppingParameters;
    }
 }

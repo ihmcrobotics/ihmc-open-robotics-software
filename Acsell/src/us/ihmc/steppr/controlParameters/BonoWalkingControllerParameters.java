@@ -1,13 +1,11 @@
 package us.ihmc.steppr.controlParameters;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -38,6 +36,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    private final DRCRobotJointMap jointMap;
    private final ToeOffParameters toeOffParameters;
    private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final BonoSteppingParameters steppingParameters;
 
    public BonoWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
@@ -45,6 +44,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       this.runningOnRealRobot = runningOnRealRobot;
       this.toeOffParameters = new BonoToeOffParameters();
       this.swingTrajectoryParameters = new BonoSwingTrajectoryParameters(runningOnRealRobot);
+      this.steppingParameters = new BonoSteppingParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -56,24 +56,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public double getOmega0()
    {
       return 3.4;
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-   {
-      return handPosesWithRespectToChestFrame;
-   }
-
-   @Override
-   public double getTimeToGetPreparedForLocomotion()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public boolean allowShrinkingSingleSupportFootPolygon()
-   {
-      return false;
    }
 
    @Override
@@ -98,18 +80,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       return getDefaultSwingTime();
-   }
-
-   @Override
-   public String[] getDefaultChestOrientationControlJointNames()
-   {
-//      if (runningOnRealRobot)
-         return new String[] {};
-
-//      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-//            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
-//
-//      return defaultChestOrientationControlJointNames;
    }
 
    private final double minimumHeightAboveGround = 0.595;
@@ -145,115 +115,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
-   public double getFootForwardOffset()
-   {
-      return BonoPhysicalProperties.footForward;
-   }
-
-   @Override
-   public double getFootBackwardOffset()
-   {
-      return BonoPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return BonoPhysicalProperties.ankleHeight;
-   }
-
-   @Override
-   public double getLegLength()
-   {
-      return BonoPhysicalProperties.legLength;
-   }
-
-   @Override
-   public double getInPlaceWidth()
-   {
-      return 0.35;
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.3; //0.5; //0.35;
-   }
-
-   @Override
-   public double getMaxStepLength()
-   {
-      return runningOnRealRobot ? 0.5 : 0.4;
-   }
-
-   @Override
-   public double getDefaultStepLength()
-   {
-      return 0.4;
-   }
-
-   @Override
-   public double getMinStepWidth()
-   {
-      // TODO The smallest the best in terms of control.
-      return 0.35;//0.375;
-   }
-
-   @Override
-   public double getMaxStepWidth()
-   {
-      return 0.5; //0.5; //0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getMaxStepUp()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxStepDown()
-   {
-      return 0.1;
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getMaxAngleTurnOutwards()
-   {
-      return Math.PI / 4.0;
-   }
-
-   @Override
-   public double getMaxAngleTurnInwards()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override
@@ -293,25 +154,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return gains;
    }
 
-   @Override
-   public boolean getCoMHeightDriftCompensation()
-   {
-      return false;
-   }
-
-   @Override
-   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("PelvisXY", registry);
-
-      gains.setKp(4.0);
-      gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -333,27 +176,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return gains;
    }
 
-   @Override
-   public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-   {
-      YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
-
-      double kp = runningOnRealRobot ? 80.0 : 500.0;
-      double zeta = runningOnRealRobot ? 0.25 : 0.8;
-      double maxAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 60.0 : Double.POSITIVE_INFINITY;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAcceleration);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
-   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
+   private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
@@ -425,6 +248,9 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
 
       YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;
    }
@@ -531,32 +357,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-   {
-      YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
-
-      double kp = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.0 : 0.0;
-      double kpXYOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 40.0 : 300.0;
-      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
-      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      gains.setPositionProportionalGains(kp, kp);
-      gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
-   @Override
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
@@ -578,93 +378,10 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return 0.6; // 1.5; //
    }
 
-   /** @inheritDoc */
    @Override
-   public double getSpineYawLimit()
+   public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return 0.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchUpperLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpinePitchLowerLimit()
-   {
-      return 0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getSpineRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public boolean isSpinePitchReversed()
-   {
-      return false;
-   }
-
-   @Override
-   public double getFootWidth()
-   {
-      return BonoPhysicalProperties.footWidth;
-   }
-
-   @Override
-   public double getToeWidth()
-   {
-      return BonoPhysicalProperties.toeWidth;
-   }
-
-   @Override
-   public double getFootLength()
-   {
-      return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
-   }
-
-   @Override
-   public double getActualFootWidth()
-   {
-      return getFootWidth();
-   }
-
-   @Override
-   public double getActualFootLength()
-   {
-      return getFootLength();
-   }
-
-   @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
-   public double getFoot_start_toetaper_from_back()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getSideLengthOfBoundingBoxForFootstepHeight()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getSwingHeightMaxForPushRecoveryTrajectory()
-   {
-      return 0.15;
+      return BonoPhysicalProperties.legLength;
    }
 
    @Override
@@ -710,12 +427,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public boolean doFancyOnToesControl()
-   {
-      return true;
-   }
-
-   @Override
    public double getContactThresholdHeight()
    {
       return 0.05;
@@ -745,30 +456,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return true;
    }
 
-   @Override
-   public double pelvisToAnkleThresholdForWalking()
-   {
-      return 0;
-   }
-
-   @Override
-   public boolean controlHeadAndHandsWithSliders()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return new SideDependentList<LinkedHashMap<String, ImmutablePair<Double,Double>>>();
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getHighCoPDampingDurationToPreventFootShakies()
@@ -790,18 +477,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public void useInverseDynamicsControlCore()
-   {
-      // once another mode is implemented, use this to change the default gains for inverse dynamics
-   }
-
-   @Override
-   public void useVirtualModelControlCore()
-   {
-      // once another mode is implemented, use this to change the default gains for virtual model control
-   }
-
-   @Override
    public ToeOffParameters getToeOffParameters()
    {
       return toeOffParameters;
@@ -811,5 +486,12 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    public SwingTrajectoryParameters getSwingTrajectoryParameters()
    {
       return swingTrajectoryParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public SteppingParameters getSteppingParameters()
+   {
+      return steppingParameters;
    }
 }

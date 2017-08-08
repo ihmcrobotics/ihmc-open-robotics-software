@@ -1,11 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -15,14 +19,14 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -30,10 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class SimpleAdjustmentICPOptimizationControllerTest
 {
@@ -721,25 +721,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-      {
-         return null;
-      }
-
-      @Override
-      public String[] getDefaultChestOrientationControlJointNames()
-      {
-         return new String[0];
-      }
-
-      @Override
-      public double getAnkleHeight()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getLegLength()
+      public double getMaximumLegLengthForSingularityAvoidance()
       {
          return 0;
       }
@@ -769,279 +751,15 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public double pelvisToAnkleThresholdForWalking()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getTimeToGetPreparedForLocomotion()
-      {
-         return 0;
-      }
-
-      @Override
-      public boolean getCoMHeightDriftCompensation()
-      {
-         return false;
-      }
-
-      @Override
-      public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-      {
-         return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
-      {
-         return null;
-      }
-
-      @Override
-      public boolean allowShrinkingSingleSupportFootPolygon()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean controlHeadAndHandsWithSliders()
-      {
-         return false;
-      }
-
-      @Override
-      public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
-      {
-         return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-      {
-         return null;
-      }
-
-      @Override
-      public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-      {
-         return null;
-      }
-
-      @Override
-      public double getSwingHeightMaxForPushRecoveryTrajectory()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getSpineYawLimit()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchUpperLimit()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchLowerLimit()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getSpineRollLimit()
-      {
-         return 0;
-      }
-
-      @Override
-      public boolean isSpinePitchReversed()
-      {
-         return false;
-      }
-
-      @Override
-      public double getFoot_start_toetaper_from_back()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getSideLengthOfBoundingBoxForFootstepHeight()
-      {
-         return 0;
-      }
-
-      @Override
-      public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-      {
-         return null;
-      }
-
-      @Override
-      public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-      {
-         return null;
-      }
-
-      @Override
-      public boolean doFancyOnToesControl()
-      {
-         return false;
-      }
-
-      @Override
-      public void useInverseDynamicsControlCore()
-      {
-
-      }
-
-      @Override
-      public void useVirtualModelControlCore()
-      {
-
-      }
-
-      @Override
-      public double getMaxStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getToeWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootstepArea()
-      {
-         return 0;
-      }
-
-      @Override
       public ICPOptimizationParameters getICPOptimizationParameters()
       {
          return new TestICPOptimizationParameters();
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return null;
       }
    }
 }

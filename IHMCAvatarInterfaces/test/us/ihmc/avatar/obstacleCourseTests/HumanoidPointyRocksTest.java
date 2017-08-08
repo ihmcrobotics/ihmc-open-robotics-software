@@ -37,9 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -62,6 +59,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
@@ -977,10 +977,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForSlightlyPulledInAnkleFrame(WalkingControllerParameters walkingControllerParameters, double widthPercentage, double lengthPercentage)
    {
-      double footForwardOffset = lengthPercentage * walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = lengthPercentage * walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = widthPercentage * walkingControllerParameters.getFootWidth();
-      double toeWidth = widthPercentage * walkingControllerParameters.getToeWidth();
+      double footForwardOffset = lengthPercentage * walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = lengthPercentage * walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = widthPercentage * walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = widthPercentage * walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1095,10 +1095,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private ArrayList<Point2D> generateContactPointsForAllOfFoot()
    {
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1111,10 +1111,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForUniformFootShrinkage(WalkingControllerParameters walkingControllerParameters, double lengthPercent, double widthPercent)
    {
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1141,10 +1141,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForLeftOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1158,10 +1158,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForRightOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1175,10 +1175,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForFrontOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
    {
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
-      double footLength = walkingControllerParameters.getFootLength();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
+      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1193,10 +1193,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForBackOfFoot(WalkingControllerParameters walkingControllerParameters, double percentToKeep)
    {
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
-      double footLength = walkingControllerParameters.getFootLength();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
+      double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
@@ -1231,10 +1231,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       rightLine.applyTransform(transform);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double toeWidth = walkingControllerParameters.getSteppingParameters().getToeWidth();
 
       ArrayList<Point2D> soleVertices = new ArrayList<Point2D>();
       soleVertices.add(new Point2D(footForwardOffset, toeWidth / 2.0));
