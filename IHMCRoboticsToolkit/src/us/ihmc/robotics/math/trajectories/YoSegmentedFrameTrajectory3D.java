@@ -95,7 +95,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       int segmentIndex = 0;
       if (MathTools.isGreaterThanOrEqualToWithPrecision(timeInState, segments.get(0).getInitialTime(), Epsilons.ONE_TEN_THOUSANDTH))
       {
-         for (; segmentIndex < segments.size() - 1; segmentIndex++)
+         for (; segmentIndex < getNumberOfSegments() - 1; segmentIndex++)
             if (segments.get(segmentIndex).timeIntervalContains(timeInState, Epsilons.ONE_TEN_THOUSANDTH))
                break;
       }
