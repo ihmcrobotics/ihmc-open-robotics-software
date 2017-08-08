@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -22,19 +21,16 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -351,186 +347,12 @@ public class ICPAdjustmentOptimizationControllerTest
 
    private static final WalkingControllerParameters walkingControllerParameters = new WalkingControllerParameters()
    {
-      @Override
-      public double getToeWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootstepArea()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public void useVirtualModelControlCore()
-      {
-         // TODO Auto-generated method stub
-
-      }
 
       @Override
       public boolean useOptimizationBasedICPController()
       {
          // TODO Auto-generated method stub
          return false;
-      }
-
-      @Override
-      public void useInverseDynamicsControlCore()
-      {
-         // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public double pelvisToAnkleThresholdForWalking()
-      {
-         // TODO Auto-generated method stub
-         return 0;
       }
 
       @Override
@@ -549,76 +371,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public double maximumHeightAboveAnkle()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public boolean isSpinePitchReversed()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getTimeToGetPreparedForLocomotion()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSwingHeightMaxForPushRecoveryTrajectory()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpineYawLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpineRollLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchUpperLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public double getSpinePitchLowerLimit()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
-      public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public double getSideLengthOfBoundingBoxForFootstepHeight()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -673,7 +425,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getLegLength()
+      public double getMaximumLegLengthForSingularityAvoidance()
       {
          // TODO Auto-generated method stub
          return 0;
@@ -701,21 +453,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public double getFoot_start_toetaper_from_back()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public FootSwitchType getFootSwitchType()
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
       {
          // TODO Auto-generated method stub
          return null;
@@ -733,13 +471,6 @@ public class ICPAdjustmentOptimizationControllerTest
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public String[] getDefaultChestOrientationControlJointNames()
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -771,20 +502,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean getCoMHeightDriftCompensation()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public double getAnkleHeight()
-      {
-         // TODO Auto-generated method stub
-         return 0;
-      }
-
-      @Override
       public boolean finishSingleSupportWhenICPPlannerIsDone()
       {
          // TODO Auto-generated method stub
@@ -799,24 +516,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean doFancyOnToesControl()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public double defaultOffsetHeightAboveAnkle()
       {
          // TODO Auto-generated method stub
          return 0;
-      }
-
-      @Override
-      public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
       }
 
       @Override
@@ -828,20 +531,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
@@ -862,38 +551,10 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
       public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
-      }
-
-      @Override
-      public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
-      {
-         // TODO Auto-generated method stub
-         return null;
-      }
-
-      @Override
-      public boolean controlHeadAndHandsWithSliders()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean allowShrinkingSingleSupportFootPolygon()
-      {
-         // TODO Auto-generated method stub
-         return false;
       }
 
       @Override
@@ -1012,6 +673,13 @@ public class ICPAdjustmentOptimizationControllerTest
       public ICPOptimizationParameters getICPOptimizationParameters()
       {
          return icpOptimizationParameters;
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         // TODO Auto-generated method stub
+         return null;
       }
    };
 }

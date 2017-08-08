@@ -1,6 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -11,7 +11,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -25,8 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -44,6 +42,8 @@ import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
 {
@@ -75,7 +75,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       final SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
       findWalkingStateVariables(scs, singleSupportStartConditions, doubleSupportStartConditions);
-      
+
       final AtomicBoolean hasControllerAdjustedFootstep = new AtomicBoolean(false);
 
       scs.addScript(new Script()
@@ -156,9 +156,9 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
       int numberOfFootsteps = 6;
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double stepLength = walkingControllerParameters.getDefaultStepLength();
-      double stepWidth = walkingControllerParameters.getMinStepWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double stepLength = steppingParameters.getDefaultStepLength();
+      double stepWidth = steppingParameters.getMinStepWidth();
       RobotSide side = RobotSide.LEFT;
       FramePoint framePosition = new FramePoint();
       framePosition.setToZero(soleFrames.get(RobotSide.RIGHT));

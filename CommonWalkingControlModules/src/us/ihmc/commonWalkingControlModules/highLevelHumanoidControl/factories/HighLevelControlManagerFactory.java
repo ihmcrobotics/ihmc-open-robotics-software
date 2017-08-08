@@ -219,7 +219,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
-      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
+      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
