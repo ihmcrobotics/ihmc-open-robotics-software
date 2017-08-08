@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SnapBasedNodeChecker;
@@ -24,7 +25,9 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
+/**
+ * This class implements the Astar footstep planner which is a graph based search planner. 
+ */
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    public static final double DEFAULT_COST_PER_STEP = 0.005;
@@ -193,7 +196,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          RobotSide nodeSide = nodeToExpand.getRobotSide();
-         if (nodeToExpand.equals(goalNodes.get(nodeSide)))
+         if (nodeToExpand.equals(goalNodes.get(nodeSide))) // ?
          {
             goalNode = goalNodes.get(nodeSide.getOppositeSide());
             graph.checkAndSetEdge(nodeToExpand, goalNode, 0.0);
@@ -203,6 +206,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
+            /** Checks if the footstep (center of the foot) is on a planar region*/
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
                continue;
 
@@ -247,7 +251,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public static AStarFootstepPlanner createDefaultPlanner(GraphVisualization viz)
    {
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+
+      //      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      ReachableFootstepsBasedExpansion expansion = new ReachableFootstepsBasedExpansion();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
