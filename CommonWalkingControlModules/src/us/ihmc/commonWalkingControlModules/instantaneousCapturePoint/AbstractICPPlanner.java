@@ -54,8 +54,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCenterOfPressurePosition", worldFrame, registry);
    /** Desired velocity for the Center of Pressure (CoP) */
    protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCenterOfPressureVelocity", worldFrame, registry);
-   /** Desired position for the Center of Mass (CoM) */
-   protected final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   /** Desired position for the Center of Mass (CoM)*/
+   protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   /** Desired velocity for the Center of Mass (CoM) */
+   protected final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
+   /** Desired acceleration for the Center of Mass (CoM) */
+   protected final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -246,17 +250,17 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void updateCurrentPlan()
+   public void updateCurrentPlan(boolean updateUpcomingCMPLocations)
    {
       if (isDoubleSupport.getBooleanValue())
       {
          if (isHoldingPosition.getBooleanValue())
             requestedHoldPosition.set(true);
-         updateTransferPlan();
+         updateTransferPlan(updateUpcomingCMPLocations);
       }
       else
       {
-         updateSingleSupportPlan();
+         updateSingleSupportPlan(updateUpcomingCMPLocations);
       }
    }
 
@@ -313,7 +317,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public abstract void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack);
+   public abstract void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack);
 
    @Override
    /** {@inheritDoc} */
@@ -331,8 +335,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public abstract int getNumberOfFootstepsRegistered();
 
-   protected abstract void updateTransferPlan();
-   protected abstract void updateSingleSupportPlan();
+   protected abstract void updateTransferPlan(boolean updateUpcomingCMPs);
+   protected abstract void updateSingleSupportPlan(boolean updateUpcomingCMPs);
 
    private final FramePoint2d desiredICP2d = new FramePoint2d();
    private final FramePoint2d finalICP2d = new FramePoint2d();
@@ -400,19 +404,22 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       desiredCoMPosition.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
    }
 
-   @Override
    /** {@inheritDoc} */
-   public void getDesiredCenterOfMassPosition(FramePoint2d desiredCenterOfMassPositionToPack)
-   {
-      desiredCoMPosition.getFrameTuple2dIncludingFrame(desiredCenterOfMassPositionToPack);
-   }
-
-   @Override
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
+   
+   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+   
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
+   }
+
 
    @Override
    /** {@inheritDoc} */
@@ -663,6 +670,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       return isInitialTransfer.getBooleanValue();
    }
 
+   // This is a hack. Please remove in case of any issues.
+   public void setInInitialTransfer(boolean isInitialTransfer)
+   {
+      this.isInitialTransfer.set(isInitialTransfer);
+   }
+   
    @Override
    /** {@inheritDoc} */
    public boolean isDone()

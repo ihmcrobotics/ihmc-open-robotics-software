@@ -57,7 +57,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = model.getICPOptimizationParameters();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames,
@@ -65,7 +64,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);
-      momentumBasedControllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 

@@ -9,12 +9,15 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
@@ -33,7 +36,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -56,6 +58,7 @@ public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
+   private static final boolean UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -130,15 +133,15 @@ public class BalanceManager
    private final boolean useICPTimingOptimization;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                         ICPAngularMomentumModifierParameters angularMomentumModifierParameters, YoVariableRegistry parentRegistry)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, icpOptimizationParameters, angularMomentumModifierParameters, parentRegistry, true);
+      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, angularMomentumModifierParameters, parentRegistry, true);
    }
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                         ICPAngularMomentumModifierParameters angularMomentumModifierParameters, YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
+                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                         YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -159,14 +162,15 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
+      ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
       useICPTimingOptimization = useICPOptimizationControl && icpOptimizationParameters.useTimingOptimization();
 
       if (useICPOptimizationControl)
       {
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
-               registry, yoGraphicsListRegistry);
+               controllerToolbox.getICPControlPolygons(), contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ,
+               controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
@@ -226,8 +230,7 @@ public class BalanceManager
       maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
       maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
-      YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, pelvisXYControlGains, registry);
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -777,7 +780,7 @@ public class BalanceManager
 
    public void updateCurrentICPPlan()
    {
-      icpPlanner.updateCurrentPlan();
+      icpPlanner.updateCurrentPlan(UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING);
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

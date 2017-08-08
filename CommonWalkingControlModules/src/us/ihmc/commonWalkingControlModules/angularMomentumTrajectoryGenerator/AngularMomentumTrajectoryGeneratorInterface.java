@@ -18,12 +18,6 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void clear();
 
-   void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations);
-   
-   void addAngularMomentumWaypointsToPlan(List<AngularMomentumTrajectoryPoint> waypointList);
-
-   void addAngularMomentumWaypointToPlan(AngularMomentumTrajectoryPoint waypoint);
-   
    void update(double currentTime);
 
    void getDesiredAngularMomentum(FrameVector desiredAngMomToPack);
@@ -38,13 +32,11 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void initializeForSwing(double currentTime);
 
-   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide);
+   void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop);
 
-   void computeReferenceAngularMomentumStartingFromSingleSupport(RobotSide supportSide);
+   void computeReferenceAngularMomentumStartingFromSingleSupport();
 
-   List<TrajectoryPoint3D> getWaypoints();
+   List<? extends AngularMomentumTrajectoryInterface> getTransferAngularMomentumTrajectories();
 
-   List<? extends AngularMomentumTrajectoryInterface> getTransferCoPTrajectories();
-
-   List<? extends AngularMomentumTrajectoryInterface> getSwingCoPTrajectories();
+   List<? extends AngularMomentumTrajectoryInterface> getSwingAngularMomentumTrajectories();
 }

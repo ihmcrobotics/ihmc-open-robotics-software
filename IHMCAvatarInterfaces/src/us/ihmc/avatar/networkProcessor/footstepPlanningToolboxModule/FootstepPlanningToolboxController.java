@@ -100,7 +100,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame));
+      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, registry));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);

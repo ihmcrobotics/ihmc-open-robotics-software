@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import java.util.EnumMap;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.convexOptimization.qpOASES.returnValue;
 
 public class CoPPlanningTools
 {
@@ -77,4 +77,13 @@ public class CoPPlanningTools
          tempDouble += segmentTimes.get(copPointList[counter]);
       return tempDouble;
    }
+
+   public static int getCoPPointIndex(List<CoPPointName> copPointList, CoPPointName copPointToSearch)
+   {
+      for (counter = 0; counter < copPointList.size(); counter ++)
+         if (copPointList.get(counter) == copPointToSearch)
+            return counter;
+      return -1;
+   }
 }
+
