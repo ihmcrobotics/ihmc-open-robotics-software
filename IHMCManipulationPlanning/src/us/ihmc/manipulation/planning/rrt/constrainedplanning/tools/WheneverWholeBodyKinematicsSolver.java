@@ -853,6 +853,7 @@ public class WheneverWholeBodyKinematicsSolver
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_YAW);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_ROLL);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_PITCH);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_ROLL);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.FIRST_WRIST_PITCH);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.WRIST_ROLL);
 
