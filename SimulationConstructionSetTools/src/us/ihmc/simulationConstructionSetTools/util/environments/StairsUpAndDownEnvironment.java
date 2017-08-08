@@ -18,14 +18,15 @@ public class StairsUpAndDownEnvironment implements CommonAvatarEnvironmentInterf
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
    private static final int totalStepsUp = 4;
-   private static final int totalStepsDown = 6;
-   private static final double stepUpHeight = 0.18;
+   private static final int totalStepsDown = 5;
+   //private static final double stepUpHeight = 0.18;
+   private static final double stepUpHeight = 0.2286;
    private static final double totalHeightUp = totalStepsUp * stepUpHeight;
    private static final double stepDownHeight = totalHeightUp / totalStepsDown;
 
    private static final double stairUpDepth = 0.2921;
-   private static final double stairDownDepth = 0.38;
-   private static final double startingPosition = 2.0;
+   private static final double stairDownDepth = 0.35;
+   private static final double startingPosition = 1.0;
 
    private static final double landingDepth = 1.27;
 
