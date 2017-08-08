@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
@@ -39,9 +40,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   private static int terminateToolboxCondition = 5;
+   private static int terminateToolboxCondition = 100;
    
    public static double handCoordinateOffsetX = -0.2;
+   
    /*
     * essential classes
     */
@@ -73,7 +75,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
    
    private final YoBoolean isGoodkinematicSolution = new YoBoolean("isGoodkinematicSolution", registry);
+   
+   private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
 
+   private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
+   
    /*
     * Visualizer
     */
@@ -109,6 +115,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
    private int numberOfExpanding;
+   
+   private int numberOfInitialGuess = 30;
 
    /*
     * Toolbox state
@@ -144,7 +152,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    }
 
    
-   int temp = 0;
    @Override
    protected void updateInternal()
    {
@@ -158,12 +165,26 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          break;
       case FIND_INITIAL_GUESS:
          
-         visualizedNode = new GenericTaskNode(0.0, 0.75, -Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
-         visualizedNode.setNodeData(10, -Math.PI*10/180 * temp);
+//         visualizedNode = new GenericTaskNode(0.0, 0.75, -Math.PI*20/180, Math.PI*10/180, Math.PI*5/180);
+//         visualizedNode.setNodeData(10, -Math.PI*40/180);
          
-         temp++;
+         GenericTaskNode initialGuessNode = new GenericTaskNode();
          
-         PrintTools.info(""+isValidNode(visualizedNode));
+         tree.setRandomNormalizedNodeData(initialGuessNode);
+         initialGuessNode.setNormalizedNodeData(0, 0);
+         initialGuessNode.convertNormalizedDataToData(constrainedEndEffectorTrajectory.getTaskRegion());
+         
+         visualizedNode = initialGuessNode;
+         
+         
+         /*
+          * terminate finding initial guess.
+          */
+         numberOfInitialGuess--;
+         if(numberOfInitialGuess == 0)
+            state = CWBToolboxState.EXPAND_TREE;
+         
+         isValidNode(visualizedNode);
          
          break;
       case EXPAND_TREE:
@@ -327,8 +348,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return result;
    }
    
-   
-   
    private boolean isValidNode(CTTaskNode node)
    {      
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
@@ -371,10 +390,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
                 
       kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPose);
-//      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
-      
-      
-
+      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
+            
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));
 
@@ -386,15 +403,35 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       kinematicsSolver.putTrajectoryMessages();
 
-      boolean result = kinematicsSolver.isSolved();
+      /*
+       * result
+       */
+      boolean ikResult = kinematicsSolver.isSolved();
+      boolean colResult = isCollisionFree();
+      boolean result = false;
+      
+      if(ikResult && colResult)
+         result = true;
       
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
 //      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
-            
+                        
+      node.setIsValidNode(result);
+      
+      cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
+      
       return result;
    }
 
-   
+   private boolean isCollisionFree()
+   {
+      RobotCollisionModel robotCollisionModel = new RobotCollisionModel(kinematicsSolver.getDesiredFullRobotModel());
+      
+      robotCollisionModel.update();
+      boolean isCollisionFree = robotCollisionModel.getCollisionResult();
+      
+      return isCollisionFree;
+   }
    
    
    

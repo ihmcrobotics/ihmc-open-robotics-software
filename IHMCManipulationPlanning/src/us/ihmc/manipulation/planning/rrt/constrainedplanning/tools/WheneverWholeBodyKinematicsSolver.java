@@ -136,7 +136,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 400;
+   private static int maximumCntForUpdateInternal = 150;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
@@ -431,6 +431,11 @@ public class WheneverWholeBodyKinematicsSolver
       }
       PrintTools.info("cntForUpdateInternal "+cntForUpdateInternal);
       return false;
+   }
+   
+   public int getCntForUpdateInternal()
+   {
+      return cntForUpdateInternal;
    }
 
    public void updateTools()
