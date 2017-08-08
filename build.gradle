@@ -1,5 +1,49 @@
+import org.apache.commons.io.FileUtils
+import us.ihmc.commons.nio.FileTools
+
+import java.nio.file.Files
+
+buildscript {
+   repositories {
+      jcenter()
+   }
+   dependencies {
+      classpath 'us.ihmc:ihmc-commons:0.11.2'
+   }
+}
+
 task generateSettings {
    gradle.includedBuilds.each {
       dependsOn it.task(":generateSettings")
+   }
+}
+
+task copyTests {
+   gradle.includedBuilds.each {
+      def testFolder = it.projectDir.toPath().resolve("test")
+      if (Files.exists(testFolder))
+      {
+         def testSrcFolder = testFolder.resolve("src")
+         def testSrcUsFolder = testSrcFolder.resolve("us")
+         def testUsFolder = testFolder.resolve("us")
+
+         if (Files.exists(testUsFolder))
+         {
+            println testSrcFolder
+            println testSrcUsFolder
+            println testUsFolder
+
+            FileTools.deleteQuietly(testSrcUsFolder)
+
+            try
+            {
+               FileUtils.copyDirectory(testUsFolder.toFile(), testSrcUsFolder.toFile())
+            }
+            catch (Exception e)
+            {
+               println "Failed: " + e.printStackTrace()
+            }
+         }
+      }
    }
 }
