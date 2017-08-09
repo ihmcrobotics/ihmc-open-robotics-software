@@ -9,24 +9,27 @@ public class AngularMomentumEstimationParameters
    /**
     * Defines the percentage of the total robot mass that is to be considered as the swing leg
     */
-   private double percentageSwingLegMass = 0.1;
+   private double percentageSwingLegMass = 0.10;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
-   private double percentageSupportLegMass = 0.1;
+   private double percentageSupportLegMass = 0.10;
    
    private final SmoothCMPPlannerParameters copPlannerParameters;
    private final FullHumanoidRobotModel robotModel;
+   
+   private final boolean computePredictedAngularMomentum;
 
-   public AngularMomentumEstimationParameters(FullHumanoidRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters)
+   public AngularMomentumEstimationParameters(FullHumanoidRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum)
    {
       this.copPlannerParameters = cmpPlannerParameters;
       this.robotModel = robotModel;
+      this.computePredictedAngularMomentum = computePredictedAngularMomentum;
    }
 
    public boolean computePredictedAngularMomentum()
    {
-      return true;
+      return computePredictedAngularMomentum;
    }
 
    public CoPPointName getEntryCoPName()
