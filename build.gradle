@@ -1,51 +1,61 @@
-import org.apache.commons.io.FileUtils
+import us.ihmc.commons.exception.DefaultExceptionHandler
 import us.ihmc.commons.nio.FileTools
-
-import java.nio.file.Files
 
 buildscript {
    repositories {
+      maven { url = "https://repo.gradle.org/gradle/libs-releases-local" }
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
       jcenter()
    }
    dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
+apply plugin: "us.ihmc.ihmc-build"
 
-task generateSettings {
+task generateSubprojectSettings {
    gradle.includedBuilds.each {
-      dependsOn it.task(":generateSettings")
+      dependsOn it.task(":printDependenciesFile")
+   }
+
+   doLast {
+      gradle.includedBuilds.each {
+
+         def dependencies = settings.findTransitiveProjectDependencies(it)
+
+         settings.generateSettingsFile(it.projectDir, dependencies)
+         println(it.name + ": " + dependencies)
+      }
+
+      gradle.includedBuilds.each {
+         settings.deleteDependenciesFile(it.projectDir)
+      }
+   }
+}
+
+task deleteTests {
+   gradle.includedBuilds.each {
+      dependsOn it.task(":deleteTests")
    }
 }
 
 task copyTests {
-   doLast {
-      gradle.includedBuilds.each {
-         def testFolder = it.projectDir.toPath().resolve("test")
-         if (Files.exists(testFolder))
-         {
-            def testSrcFolder = testFolder.resolve("src")
-            def testSrcUsFolder = testSrcFolder.resolve("us")
-            def testUsFolder = testFolder.resolve("us")
+   gradle.includedBuilds.each {
+      dependsOn it.task(":copyTests")
+   }
+}
 
-            if (Files.exists(testUsFolder))
-            {
-               println testSrcFolder
-               println testSrcUsFolder
-               println testUsFolder
+task printDependenciesFiles {
+   gradle.includedBuilds.each {
+      dependsOn it.task(":printDependenciesFile")
+   }
+}
 
-               FileTools.deleteQuietly(testSrcUsFolder)
-
-               try
-               {
-                  FileUtils.copyDirectory(testUsFolder.toFile(), testSrcUsFolder.toFile())
-               }
-               catch (Exception e)
-               {
-                  println "Failed: " + e.printStackTrace()
-               }
-            }
-         }
-      }
+task deleteDependenciesFiles {
+   gradle.includedBuilds.each {
+      dependsOn it.task(":deleteDependenciesFile")
    }
 }
