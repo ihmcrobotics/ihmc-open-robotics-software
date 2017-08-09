@@ -232,7 +232,7 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+         public ICPControlGains createICPControlGains()
          {
             return null;
          }

@@ -172,10 +172,8 @@ public abstract class WalkingControllerParameters
    /**
     * The desired position of the CMP is computed based on a feedback control law on the ICP. This method returns
     * the gains used in this controller.
-    *
-    * TODO: remove registry
     */
-   public abstract ICPControlGains createICPControlGains(YoVariableRegistry registry);
+   public abstract ICPControlGains createICPControlGains();
 
    /**
     * This method returns the gains used in the controller to regulate the center of mass height.
