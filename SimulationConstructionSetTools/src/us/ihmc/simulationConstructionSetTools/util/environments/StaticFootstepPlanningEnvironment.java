@@ -1,9 +1,9 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSphereRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.BoxTerrainObject;
@@ -22,6 +22,8 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("StaticFootstepPlanningEnvironment");
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
+   private final ArrayList<Robot> environmentRobots = new ArrayList<>();
+
    public StaticFootstepPlanningEnvironment()
    {
       setupGround();
@@ -29,6 +31,11 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       addRampsWithSteppingStones(4.0 , 2.0);
       addRocks(1.0, -3.0);
       addStairs(11.0, -2.0);
+
+      ContactableSphereRobot goalMarker = new ContactableSphereRobot("FootstepPlannerGoalMarker", 0.1, 1.0, YoAppearance.Green());
+      goalMarker.setGravity(0.0);
+      goalMarker.setPosition(10.0, 0.0, 1.0);
+      environmentRobots.add(goalMarker);
    }
 
    private void setupGround()
@@ -198,7 +205,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
-      return null;
+      return environmentRobots;
    }
 
    @Override
