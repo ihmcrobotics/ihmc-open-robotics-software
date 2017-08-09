@@ -15,13 +15,17 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../ConvexOptimizationAdapter",
    "../IHMCCommunication",
    "../IHMCFootstepPlanning",
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
    "../IHMCJavaExtensions",
    "../IHMCJavaToolkit",
+   "../IHMCRobotDescription",
    "../IHMCRobotModels",
    "../IHMCRoboticsToolkit",
+   "../KalmanProject",
    "../SensorProcessing",
 ]
 

@@ -15,15 +15,22 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../CommonWalkingControlModules",
+   "../ConvexOptimizationAdapter",
    "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
    "../IHMCHumanoidRobotics",
    "../IHMCJavaExtensions",
    "../IHMCJavaToolkit",
    "../IHMCQuadrupedRobotics",
+   "../IHMCRobotDataLogger",
    "../IHMCRobotDescription",
    "../IHMCRobotModels",
+   "../IHMCRoboticsToolkit",
    "../IHMCStateEstimation",
+   "../KalmanProject",
    "../ModelFileLoader",
    "../SensorProcessing",
 ]

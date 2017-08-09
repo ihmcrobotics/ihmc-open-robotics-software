@@ -15,16 +15,25 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../ConvexOptimizationAdapter",
    "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
    "../IHMCHumanoidRobotics",
+   "../IHMCJMonkeyEngineToolkit",
    "../IHMCJavaExtensions",
    "../IHMCJavaFXToolkit",
    "../IHMCJavaToolkit",
    "../IHMCRobotDataLogger",
    "../IHMCRobotDescription",
+   "../IHMCRobotModels",
    "../IHMCRoboticsToolkit",
+   "../IHMCSwingPlotting",
+   "../KalmanProject",
    "../ModelFileLoader",
+   "../ParameterOptimization",
+   "../SensorProcessing",
    "../SimulationConstructionSet",
 ]
 

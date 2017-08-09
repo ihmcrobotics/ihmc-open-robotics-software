@@ -15,8 +15,17 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../IHMCCommunication",
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
+   "../IHMCJMonkeyEngineToolkit",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaFXToolkit",
+   "../IHMCJavaToolkit",
+   "../IHMCRobotDescription",
    "../IHMCRoboticsToolkit",
+   "../IHMCSwingPlotting",
+   "../ParameterOptimization",
    "../SimulationConstructionSet",
 ]
 

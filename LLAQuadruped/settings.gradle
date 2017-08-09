@@ -15,16 +15,33 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../CommonWalkingControlModules",
+   "../ConvexOptimizationAdapter",
    "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGeometry",
+   "../IHMCGraphicsDescription",
    "../IHMCHumanoidRobotics",
+   "../IHMCJMonkeyEngineToolkit",
    "../IHMCJavaExtensions",
+   "../IHMCJavaFXToolkit",
+   "../IHMCJavaToolkit",
    "../IHMCQuadrupedRobotics",
+   "../IHMCRobotDataLogger",
+   "../IHMCRobotDescription",
    "../IHMCRobotModels",
    "../IHMCRoboticsToolkit",
    "../IHMCSimulationToolkit",
+   "../IHMCStateEstimation",
+   "../IHMCSwingPlotting",
+   "../IHMCWholeBodyController",
+   "../KalmanProject",
    "../LLAQuadrupedController",
+   "../ModelFileLoader",
+   "../ParameterOptimization",
    "../SensorProcessing",
    "../SimulationConstructionSet",
+   "../SimulationConstructionSetTools",
 ]
 
 if (startParameter.searchUpwards)
