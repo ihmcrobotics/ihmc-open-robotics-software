@@ -33,7 +33,6 @@ dependencies {
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-manipulation-planning", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-models", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-behaviors", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
    compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
