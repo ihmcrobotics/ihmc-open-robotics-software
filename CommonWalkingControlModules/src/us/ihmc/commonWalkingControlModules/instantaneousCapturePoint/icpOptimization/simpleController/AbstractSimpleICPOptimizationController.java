@@ -227,7 +227,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
 
-      setupVisualizers(yoGraphicsListRegistry);
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry);
    }
 
    public void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -242,7 +243,6 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
-
    }
 
    @Override
