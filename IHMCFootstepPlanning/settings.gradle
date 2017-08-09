@@ -17,6 +17,8 @@ Eval.me(extraSourceSets).each {
 def includes = [
    "../ConvexOptimizationAdapter",
    "../IHMCGraphicsDescription",
+   "../IHMCJavaExtensions",
+   "../IHMCJavaToolkit",
    "../IHMCRoboticsToolkit",
 ]
 

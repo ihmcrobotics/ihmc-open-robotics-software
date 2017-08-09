@@ -15,6 +15,7 @@ Eval.me(extraSourceSets).each {
 }
 
 def includes = [
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
    "../IHMCJavaExtensions",
    "../IHMCRobotDescription",

@@ -18,6 +18,8 @@ def includes = [
    "../CommonWalkingControlModules",
    "../ConvexOptimizationAdapter",
    "../IHMCCommunication",
+   "../IHMCFootstepPlanning",
+   "../IHMCGeometry",
    "../IHMCGraphicsDescription",
    "../IHMCHumanoidRobotics",
    "../IHMCJavaExtensions",
@@ -27,6 +29,8 @@ def includes = [
    "../IHMCRobotModels",
    "../IHMCRoboticsToolkit",
    "../IHMCStateEstimation",
+   "../KalmanProject",
+   "../ModelFileLoader",
    "../SensorProcessing",
 ]
 
