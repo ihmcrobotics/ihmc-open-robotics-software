@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -132,12 +133,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double tempDouble;
    private FootstepData currentFootstepData;
    private FrameConvexPolygon2d framePolygonReference;
-   private FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
-   private ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-   private FramePoint tempFramePoint1 = new FramePoint();
-   private FramePoint tempFramePoint2 = new FramePoint();
-   private FramePoint2d tempFramePoint2d = new FramePoint2d();
-   private FramePoint tempPointForCoPCalculation = new FramePoint();
+   private final ConvexPolygon2D polygonReference = new ConvexPolygon2D();
+   private final FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
+   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
+   private final FramePoint tempFramePoint1 = new FramePoint();
+   private final FramePoint tempFramePoint2 = new FramePoint();
+   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
+   private final FramePoint tempPointForCoPCalculation = new FramePoint();
 
    // Planner level overrides (the planner knows better!)
    private static final int maxNumberOfFootstepsToConsider = 4;
@@ -793,7 +795,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       else if (MathTools.isGreaterThanWithPrecision(-supportToSwingStepHeight, footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
                                                     Epsilons.ONE_HUNDREDTH)
-            && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(), Epsilons.ONE_HUNDREDTH))
+            && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
+                                                    Epsilons.ONE_HUNDREDTH))
       {
          PrintTools.debug("Putting exit CoP on toes for stepping down, height:" + supportToSwingStepHeight + ", threshold: "
                + footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue() + "\n stepLength: " + supportToSwingStepLength + ", threshold: "
@@ -1010,7 +1013,16 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void setFootPolygonFromFootstep(FrameConvexPolygon2d framePolygonToPack, int footstepIndex)
    {
       framePolygonToPack.clear(upcomingFootstepsData.get(footstepIndex).getFootstep().getSoleReferenceFrame());
-      framePolygonToPack.addVertices(defaultFootPolygons.get(upcomingFootstepsData.get(footstepIndex).getSwingSide()));
+      if(footstepIndex < upcomingFootstepsData.size() && upcomingFootstepsData.get(footstepIndex).getFootstep()!= null && upcomingFootstepsData.get(footstepIndex).getFootstep().getPredictedContactPoints() != null && upcomingFootstepsData.get(footstepIndex).getFootstep().getPredictedContactPoints().size() > 0)
+      {
+         polygonReference.clear();
+         polygonReference.addVertices(upcomingFootstepsData.get(footstepIndex).getFootstep().getPredictedContactPoints(),
+                                      upcomingFootstepsData.get(footstepIndex).getFootstep().getPredictedContactPoints().size());
+         polygonReference.update();
+         framePolygonToPack.addVertices(polygonReference);
+      }
+      else
+         framePolygonToPack.addVertices(defaultFootPolygons.get(upcomingFootstepsData.get(footstepIndex).getSwingSide()));
       framePolygonToPack.update();
    }
 
