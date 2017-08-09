@@ -39,13 +39,20 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
 
+   private final YoFramePoint yoSingleSupportFinalCoM;
+   private final FramePoint singleSupportFinalCoM = new FramePoint();
+
    public SmoothCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    int maxNumberOfFootstepsToConsider, int numberOfPointsPerFoot, YoVariableRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
+      
+      yoSingleSupportFinalCoM = new YoFramePoint(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
+
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
@@ -179,7 +186,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void computeFinalCoMPositionInTransfer()
    {
-      throw new RuntimeException("to implement"); //TODO
+      referenceICPGenerator.getFinalCoMPositionInTransfer(singleSupportFinalCoM);
+      yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
    @Override
@@ -205,7 +213,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void computeFinalCoMPositionInSwing()
    {
-      throw new RuntimeException("to implement"); //TODO
+      referenceICPGenerator.getFinalCoMPositionInSwing(singleSupportFinalCoM);
+      yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
    @Override
@@ -358,15 +367,28 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }
 
+   private final FramePoint tempFinalCoM = new FramePoint();
+   
    @Override
    /** {@inheritDoc} */
    public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
    {
-      throw new RuntimeException("to implement"); //TODO
+      if (isStanding.getBooleanValue())
+      {
+         referenceCoPGenerator.getWaypoints().get(1).get(0).getPosition(tempFinalCoM);
+      }
+      else
+      {
+         tempFinalCoM.set(singleSupportFinalCoM);
+      }
+
+      tempFinalCoM.changeFrame(worldFrame);
+      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(tempFinalCoM);    
    }
 
    @Override
    /** {@inheritDoc} */
+   //FIXME: to be changed
    public void getNextExitCMP(FramePoint exitCMPToPack)
    {
       CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
@@ -379,6 +401,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
+   //FIXME: to be changed
    public boolean isOnExitCMP()
    {
 //      if(isInDoubleSupport())
