@@ -63,4 +63,17 @@ public class YoPIDGains extends YoPDGains
       maxIntegralError.set(other.maxIntegralError.getDoubleValue());
       integralLeakRatio.set(other.integralLeakRatio.getDoubleValue());
    }
+
+   public void set(PIDGains pidGains)
+   {
+      setKp(pidGains.getKp());
+      setKd(pidGains.getKd());
+      setKi(pidGains.getKi());
+      setZeta(pidGains.getZeta());
+      setMaximumOutput(pidGains.getMaximumOutput());
+      setMaximumFeedback(pidGains.getMaximumFeedback());
+      setPositionDeadband(pidGains.getPositionDeadband());
+      setMaximumIntegralError(pidGains.getMaxIntegralError());
+      setIntegralLeakRatio(pidGains.getIntegralLeakRatio());
+   }
 }

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
@@ -18,9 +20,9 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -185,18 +187,15 @@ public abstract class WalkingControllerParameters
    public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
 
    /**
-    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
-    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
-    * map, jointspace control is not supported for that joint.
+    * Returns a list with pairs of joint control gains and the names of the joints that the gain will
+    * be used for. The names of the joints are defined in the robots joint map. If a joint is not
+    * contained in one of the pairs, jointspace control is not supported for that joint.
     *
-    * @param registry used to create the gains the first time this function is called during a run
-    * @return map containing jointspace PID gains by joint name
-    *
-    * TODO: remove registry
+    * @return list containing jointspace PID gains and the corresponding joints
     */
-   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   public List<ImmutablePair<PIDGains, List<String>>> getOrCreateJointSpaceControlGains()
    {
-      return new HashMap<String, YoPIDGains>();
+      return new ArrayList<>();
    }
 
    /**
