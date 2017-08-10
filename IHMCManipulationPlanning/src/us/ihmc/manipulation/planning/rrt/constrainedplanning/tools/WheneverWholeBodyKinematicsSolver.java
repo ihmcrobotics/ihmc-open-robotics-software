@@ -137,7 +137,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 150;
+   private static int maximumCntForUpdateInternal = 200;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
@@ -889,7 +889,7 @@ public class WheneverWholeBodyKinematicsSolver
       else
          jointLimitScore = diffUpper;
 
-      if (true)
+      if (DEBUG)
          PrintTools.info(""+jointName+" " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
 
       return jointLimitScore;

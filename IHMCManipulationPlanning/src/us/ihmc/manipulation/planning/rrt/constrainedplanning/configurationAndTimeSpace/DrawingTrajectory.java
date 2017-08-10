@@ -65,7 +65,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
        */
       double arcAngle = time / getTrajectoryTime() * Math.PI * 2;
 
-      Point3D arcCenterPoint = new Point3D(0.6, 0.0, 1.2);
+      Point3D arcCenterPoint = new Point3D(0.55, 0.0, 1.2);
       Quaternion arcCenterOrientation = new Quaternion();
       arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
@@ -96,7 +96,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
-      taskNodeRegion.setRandomRegion(10, -150.0/180*Math.PI, 0.0/180*Math.PI);
+      taskNodeRegion.setRandomRegion(10, -180.0/180*Math.PI, 0.0/180*Math.PI);
       
       return taskNodeRegion;
    }
