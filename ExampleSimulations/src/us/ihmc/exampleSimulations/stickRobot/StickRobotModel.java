@@ -9,7 +9,6 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -18,7 +17,6 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -62,7 +60,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
-   private final DRCRobotPhysicalProperties physicalProperties;
    private final StickRobotJointMap jointMap;
    private final StickRobotContactPointParameters contactPointParameters;
    private final String robotName = "STICK_BOT";
@@ -106,7 +103,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
       contactPointParameters = new StickRobotContactPointParameters(jointMap, simulationContactPoints);
 
       // physical robot dimensions required for calculations
-      physicalProperties = new StickRobotPhysicalProperties();
       InputStream sdf = null;
 
       if(model.equalsIgnoreCase("DEFAULT"))
@@ -247,12 +243,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       return stateEstimatorParamaters;
-   }
-
-   @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return physicalProperties;
    }
 
    @Override

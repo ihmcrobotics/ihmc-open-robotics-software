@@ -6,7 +6,6 @@ import com.jme3.math.Transform;
 
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -14,7 +13,6 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -38,9 +36,11 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
+import us.ihmc.wanderer.controlParameters.WandererUIParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class WandererRobotModel implements DRCRobotModel
@@ -105,12 +105,6 @@ public class WandererRobotModel implements DRCRobotModel
    {
       WandererStateEstimatorParameters stateEstimatorParameters = new WandererStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
       return stateEstimatorParameters;
-   }
-
-   @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return new WandererPhysicalProperties();
    }
 
    @Override
@@ -224,6 +218,12 @@ public class WandererRobotModel implements DRCRobotModel
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
       return capturePointPlannerParameters;
+   }
+
+   @Override
+   public UIParameters getUIParameters()
+   {
+      return new WandererUIParameters();
    }
 
    @Override

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -14,6 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class OneStepCaptureRegionCalculator
 {
@@ -42,8 +42,10 @@ public class OneStepCaptureRegionCalculator
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters.getFootForwardOffset() - walkingControllerParameters.getFootLength() / 2.0, walkingControllerParameters.getFootWidth(),
-            walkingControllerParameters.getMaxStepLength(), referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, yoGraphicsListRegistry);
+      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
+            - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
+           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
@@ -75,7 +77,7 @@ public class OneStepCaptureRegionCalculator
 
          for (int i = 0; i < MAX_CAPTURE_REGION_POLYGON_POINTS - 1; i++)
          {
-            double angle = sign * reachableRegionCutoffAngle * Math.PI * ((double) i) / ((double) (MAX_CAPTURE_REGION_POLYGON_POINTS - 2));
+            double angle = sign * reachableRegionCutoffAngle * Math.PI * (i) / (MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
             double x = kinematicStepRange * Math.cos(angle) + midFootAnkleXOffset;
             double y = kinematicStepRange * Math.sin(angle);
             if (Math.abs(y) < footWidth / 2.0)

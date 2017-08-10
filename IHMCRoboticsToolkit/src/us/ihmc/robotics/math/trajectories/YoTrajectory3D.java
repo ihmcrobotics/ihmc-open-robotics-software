@@ -15,7 +15,7 @@ public class YoTrajectory3D
    protected final YoTrajectory xTrajectory;
    protected final YoTrajectory yTrajectory;
    protected final YoTrajectory zTrajectory;
-   
+
    public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
       xTrajectory = new YoTrajectory(name + "X", maximumNumberOfCoefficients, registry);
@@ -744,6 +744,7 @@ public class YoTrajectory3D
 
    }
 
+   @Override
    public String toString()
    {
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
