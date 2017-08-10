@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;

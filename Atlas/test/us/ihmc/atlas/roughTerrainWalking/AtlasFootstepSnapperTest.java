@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperSimulationTest;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.quadTree.Box;
@@ -31,7 +31,8 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
@@ -39,8 +40,8 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
       boolean assertPointConditions = false;
       boolean visualizeAndKeepUp = false;
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
-      FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters();
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       FootSpoof footSpoof = new FootSpoof("footSpoof", 0.0, 0.0, 0.0, atlasFootstepParameters.getFootForwardOffset(), atlasFootstepParameters.getFootBackwardOffset(), atlasFootstepParameters.getToeWidth()/2.0, 0.0);
 
       int maxSameHeightPointsPerNode = 20;

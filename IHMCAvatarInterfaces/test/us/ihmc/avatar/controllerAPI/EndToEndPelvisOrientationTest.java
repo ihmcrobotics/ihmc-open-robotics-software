@@ -306,7 +306,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double swingDuration = walkingControllerParameters.getDefaultSwingTime();
       double transferDuration = walkingControllerParameters.getDefaultTransferTime();
-      double stepLength = 0.6 * walkingControllerParameters.getDefaultStepLength();
+      double stepLength = 0.6 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength();
       double stepWidth = stepLength / 2.0;
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();

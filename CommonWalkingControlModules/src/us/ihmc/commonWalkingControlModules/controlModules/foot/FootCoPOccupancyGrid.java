@@ -9,12 +9,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -25,6 +19,12 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class FootCoPOccupancyGrid
 {
@@ -66,8 +66,8 @@ public class FootCoPOccupancyGrid
          int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getFootLength();
-      this.footWidth = walkingControllerParameters.getFootWidth();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
+      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);
@@ -278,12 +278,12 @@ public class FootCoPOccupancyGrid
 
    private double getXCoordinateInSoleFrame(int xIndex)
    {
-      return ((double) xIndex + 0.5) * cellSize.getX() + gridOrigin.getX();
+      return (xIndex + 0.5) * cellSize.getX() + gridOrigin.getX();
    }
 
    private double getYCoordinateInSoleFrame(int yIndex)
    {
-      return ((double) yIndex + 0.5) * cellSize.getY() + gridOrigin.getY();
+      return (yIndex + 0.5) * cellSize.getY() + gridOrigin.getY();
    }
 
    public boolean findCenterOfClosestCell(FramePoint2d centerOfClosestCellToPack, FramePoint2d closestToPoint)

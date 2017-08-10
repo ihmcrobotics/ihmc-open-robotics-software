@@ -8,8 +8,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
+import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
@@ -56,7 +60,8 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    {
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      planner = AStarFootstepPlanner.createDefaultPlanner(visualization);
+      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
+      planner = AStarFootstepPlanner.createFlatGroundPlanner(visualization, footPolygons, new YoVariableRegistry("TestRegistry"));
    }
 
    @After
