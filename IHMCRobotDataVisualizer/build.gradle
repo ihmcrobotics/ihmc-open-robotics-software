@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -25,17 +25,17 @@ dependencies {
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "model-file-loader", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-javafx-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-description", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-logger", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "model-file-loader", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-description", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: dependencyMode
 }
 
 testDependencies {

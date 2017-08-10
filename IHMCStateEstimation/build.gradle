@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -20,20 +20,20 @@ dependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "sensor-processing", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
 }

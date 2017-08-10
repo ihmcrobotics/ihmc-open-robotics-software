@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -26,30 +26,30 @@ dependencies {
    compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-models", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "sensor-processing", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "convex-optimization-adapter", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "convex-optimization-adapter", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set-tools-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "convex-optimization-adapter-test", dependencyMode)
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: dependencyMode
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
+   compile group: "us.ihmc", name: "convex-optimization-adapter-test", version: dependencyMode
 }
 
-extraDependencies {
-   compile("visualizers", rootProject)
-   compile("visualizers", ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode))
+visualizersDependencies {
+   compile rootProject
+   compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
 }

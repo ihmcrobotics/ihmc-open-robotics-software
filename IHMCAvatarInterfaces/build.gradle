@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -37,39 +37,39 @@ dependencies {
    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
    compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.4.6'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-ros-tools", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-jmonkey-engine-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-logger", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "model-file-loader", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "sensor-processing", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-behaviors", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-perception", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-whole-body-controller", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-state-estimation", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-behaviors", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "vicon", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-models", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-simulation-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-visualizer", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-footstep-planning", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set-tools", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-ros-tools", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "model-file-loader", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-perception", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-state-estimation", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-behaviors", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "vicon", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-footstep-planning", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "simulation-construction-set-tools", version: dependencyMode
 }
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-footstep-planning-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set-tools-test", dependencyMode)
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: dependencyMode
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: dependencyMode
 }
