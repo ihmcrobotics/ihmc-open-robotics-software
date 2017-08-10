@@ -79,6 +79,12 @@ public class InverseKinematicsOptimizationControlModule
          activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       qpSolver = new InverseKinematicsQPSolver(activeSetQPSolver, numberOfDoFs, registry);
 
+      if (optimizationSettings != null)
+      {
+         qpSolver.setVelocityRegularizationWeight(optimizationSettings.getJointVelocityWeight());
+         qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
+      }
+
       parentRegistry.addChild(registry);
    }
 
