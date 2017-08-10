@@ -151,6 +151,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       StairsUpAndDownEnvironment stairsEnvironment = new StairsUpAndDownEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForStairs(stairsEnvironment.getStairPoses());
+      //footsteps.setDefaultTransferDuration(0.5);
+      //footsteps.setDefaultSwingDuration(1.0);
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -556,7 +558,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
       double stepWidth = 0.275;
-      int numberOfStartingSteps = 7;
+      int numberOfStartingSteps = 3;
       double firstStepPosition = stepPoses.get(0).get(0).getX();
       double startingLength = (firstStepPosition - 0.35)  / numberOfStartingSteps;
 
@@ -616,7 +618,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double startOfAscent = stepPoses.get(1).get(0).getX() - 0.35;
       double platformWidth = startOfAscent - topOfStairs;
 
-      int numberOfPlatformSteps = 3;
+      int numberOfPlatformSteps = 1;
       double platformStepLength = (platformWidth)  / numberOfPlatformSteps;
 
       // approach the top of the stairs
@@ -676,7 +678,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       // exit steps
       double stepLength = 0.35;
-      int numberOfExitSteps = 4;
+      int numberOfExitSteps = 2;
       double stepPosition = footsteps.get(footsteps.size() - 1).getLocation().getX();
 
       robotSide = RobotSide.LEFT;

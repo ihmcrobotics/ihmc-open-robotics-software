@@ -16,7 +16,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -254,9 +254,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    {
       double angle = RandomNumbers.nextDouble(random, Math.PI);
 
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footLengthForLineOrigin = 0.5 * walkingControllerParameters.getFootLength();
-      double footWidthForLineOrigin = 0.5 * walkingControllerParameters.getFootWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footLengthForLineOrigin = 0.5 * steppingParameters.getFootLength();
+      double footWidthForLineOrigin = 0.5 * steppingParameters.getFootWidth();
 
       double x = RandomNumbers.nextDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
       double y = RandomNumbers.nextDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
@@ -269,11 +269,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       double lineWidth = 0.01;
 
       // build default foot polygon:
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> soleVertices = new ArrayList<Point2D>();
       soleVertices.add(new Point2D(footForwardOffset, toeWidth / 2.0));

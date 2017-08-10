@@ -118,7 +118,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
       sliderBoardConfigurationManager.clearControls();
 
-      if (drcRobotModel != null && drcRobotModel.getWalkingControllerParameters().controlHeadAndHandsWithSliders())
+      if (drcRobotModel != null && drcRobotModel.getSliderBoardParameters().controlHeadAndHandsWithSliders())
       {
          setupHeadAndHandSliders(sliderBoardConfigurationManager, sliderBoardMode, drcRobotModel, registry);
          setupIndividualHandControl(sliderBoardConfigurationManager, sliderBoardMode, drcRobotModel, registry);
@@ -146,7 +146,7 @@ public class WalkControllerSliderBoard
          final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
       sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length - 1);
-      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getWalkingControllerParameters().getSliderBoardControlledFingerJointsWithLimits();
+      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardParameters().getSliderBoardControlledFingerJointsWithLimits();
       //This currently assumes you don't have more than 8 actuatable finger joints per hand because the sliderboard only has 8 sliders.
       for (RobotSide side : RobotSide.values())
       {
@@ -183,7 +183,7 @@ public class WalkControllerSliderBoard
       final AlphaFilteredYoVariable alphaFilteredUpperHeadPitchPercentage = new AlphaFilteredYoVariable("AlphaFilteredUpperHeadPitchPercentage",registry,alpha,upperHeadPitchPercentage);
       final AlphaFilteredYoVariable alphaFilteredLowerHeadPitchYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredLowerHeadPitchPercentage",registry,alpha,lowerHeadPitchPercentage);
       final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointsWithLimits = drcRobotModel
-            .getWalkingControllerParameters().getSliderBoardControlledNeckJointsWithLimits();
+            .getSliderBoardParameters().getSliderBoardControlledNeckJointsWithLimits();
       int sliderNumber = 0;
 
       if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))

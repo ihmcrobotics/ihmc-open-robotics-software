@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 /**
  * Created by agrabertilton on 1/20/15.
  */
-public class GenericFootstepSnappingParameters extends FootstepSnappingParameters
+public class GenericFootstepSnappingParameters extends QuadTreeFootstepSnappingParameters
 {
    public GenericFootstepSnappingParameters(){
       super(null, null, 0.3, Math.PI/4, 0.0, 0.01, 0.025, Math.PI/24, 1);
