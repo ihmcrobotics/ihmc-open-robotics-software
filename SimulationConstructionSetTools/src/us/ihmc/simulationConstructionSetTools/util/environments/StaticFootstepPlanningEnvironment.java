@@ -47,13 +47,16 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    private static final double RAMPS_WITH_STEPPING_STONES_START_X = 4.0;
    private static final double RAMPS_WITH_STEPPING_STONES_START_Y = 2.0;
 
-   private static final double ROCK_FIELD_START_X = 1.0;
+   private static final double ROCK_FIELD_START_X = 7.0;
    private static final double ROCK_FIELD_START_Y = -3.0;
    private static final double ROCK_FIELD_LENGTH = 8.0;
    private static final double ROCK_FIELD_WIDTH = 2.0;
 
-   private static final double STAIRS_START_X = 11.0;
-   private static final double STAIRS_START_Y = -2.0;
+   private static final double STAIRS_START_X = 1.0;
+   private static final double STAIRS_START_Y = -1.5;
+
+   private static final double SHORT_BARRIER_START_X = 3.3;
+   private static final double SHORT_BARRIER_START_Y = -2.8;
 
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("StaticFootstepPlanningEnvironment");
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -69,6 +72,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       addRampsWithSteppingStones(RAMPS_WITH_STEPPING_STONES_START_X, RAMPS_WITH_STEPPING_STONES_START_Y);
       addRocks(ROCK_FIELD_START_X, ROCK_FIELD_START_Y, ROCK_FIELD_LENGTH, ROCK_FIELD_WIDTH);
       addStairs(STAIRS_START_X, STAIRS_START_Y);
+      addShortBarrier(SHORT_BARRIER_START_X, SHORT_BARRIER_START_Y);
 
       addGoalMarkerRobot();
    }
@@ -203,9 +207,9 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    {
       AppearanceDefinition color = YoAppearance.LightGray();
 
-      int numberOfSteps = 3;
+      int numberOfSteps = 4;
       double stairLength = 0.4;
-      double stairWidth = 3.0;
+      double stairWidth = 1.5;
       double stairHeight = 0.2;
 
       for(int i = 1; i < numberOfSteps + 1; i++)
@@ -226,6 +230,18 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
                stairHeight * i, color);
          startDistanceX += stairLength;
       }
+   }
+
+   private void addShortBarrier(double startDistanceX, double startDistanceY)
+   {
+      AppearanceDefinition color = YoAppearance.LightGray();
+
+      double barrierLength = 0.1;
+      double barrierWidth = 1.0;
+      double barrierHeight = 0.5;
+
+      combinedTerrainObject3D.addBox(startDistanceX, startDistanceY - barrierWidth/2, startDistanceX + barrierLength, startDistanceY + barrierWidth/2,
+            barrierHeight, color);
    }
 
    private void addGoalMarkerRobot()
