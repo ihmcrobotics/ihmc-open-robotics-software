@@ -69,7 +69,7 @@ dependencies {
     compile group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.3.0'
     compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
     
 	compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
