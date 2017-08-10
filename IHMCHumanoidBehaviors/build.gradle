@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -30,27 +30,27 @@ dependencies {
    compile "org.boofcv:recognition:0.24.1"
    compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-manipulation-planning", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-models", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "common-walking-control-modules", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "simulation-construction-set", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robot-data-logger", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "sensor-processing", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-whole-body-controller", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-perception", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-footstep-planning", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-perception", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-footstep-planning", version: dependencyMode
 }
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
 }

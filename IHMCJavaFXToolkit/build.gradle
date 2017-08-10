@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -21,11 +21,11 @@ dependencies {
    compile("org.fxyz3d:fxyz3d:0.1.1") {
       exclude group: 'java3d', module: 'vecmath'
    }
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-graphics-description", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
 }
 
-extraDependencies {
-   compile("visualizers", rootProject)
+visualizersDependencies {
+   compile rootProject
 }

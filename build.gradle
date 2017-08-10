@@ -1,6 +1,8 @@
 import us.ihmc.commons.exception.DefaultExceptionHandler
 import us.ihmc.commons.nio.FileTools
 
+import java.nio.file.Files
+
 buildscript {
    repositories {
       maven { url = "https://repo.gradle.org/gradle/libs-releases-local" }
@@ -9,7 +11,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
@@ -17,23 +19,27 @@ buildscript {
 apply plugin: "us.ihmc.ihmc-build"
 
 task generateSubprojectSettings {
-   gradle.includedBuilds.each {
-      dependsOn it.task(":printDependenciesFile")
-   }
 
-   doLast {
-      gradle.includedBuilds.each {
-
-         def dependencies = settings.findTransitiveProjectDependencies(it)
-
-         settings.generateSettingsFile(it.projectDir, dependencies)
-         println(it.name + ": " + dependencies)
-      }
-
-      gradle.includedBuilds.each {
-         settings.deleteDependenciesFile(it.projectDir)
+   project.projectDir.list().each { childDir ->
+      if (new File(project.projectDir, childDir + "/build.gradle").exists())
+      {
+         settings.writeSettingsFileToProject(new File(project.projectDir, childDir))
       }
    }
+
+//   doLast {
+//      gradle.includedBuilds.each {
+//
+//         def dependencies = settings.findTransitiveProjectDependencies(it)
+//
+//         settings.generateSettingsFile(it.projectDir, dependencies)
+//         println(it.name + ": " + dependencies)
+//      }
+//
+//      gradle.includedBuilds.each {
+//         settings.deleteDependenciesFile(it.projectDir)
+//      }
+//   }
 }
 
 task deleteTests {

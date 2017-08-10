@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.13"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.14"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -18,16 +18,16 @@ dependencies {
    compile group: 'us.ihmc.thirdparty.org.kc7bfi', name: 'jflac', version: '1.4.0'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-communication", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-humanoid-robotics", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-toolkit", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions", dependencyMode)
+   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
 }
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-java-extensions-test", dependencyMode)
-   compile ihmc.getBuildVersion("us.ihmc", "ihmc-robotics-toolkit-test", dependencyMode)
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
 }
