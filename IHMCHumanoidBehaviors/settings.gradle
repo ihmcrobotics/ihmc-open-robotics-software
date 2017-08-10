@@ -3,10 +3,18 @@
  * To disable auto-generation, set "disableSettingsGeneration = false"
  * in the gradle.properties file.
  */
+import org.codehaus.groovy.ast.ASTNode
+import org.codehaus.groovy.ast.CodeVisitorSupport
+import org.codehaus.groovy.ast.builder.AstBuilder
+import org.codehaus.groovy.ast.expr.*
+import org.codehaus.groovy.control.MultipleCompilationErrorsException
+
+import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 
 rootProject.name = hyphenatedName
 
-println "Evaluating " + pascalCasedName + " settings.gradle"
+println "[ihmc-build] Evaluating " + pascalCasedName + " settings.gradle"
 
 Eval.me(extraSourceSets).each {
    new File(rootProject.projectDir, it).mkdir()
@@ -14,40 +22,195 @@ Eval.me(extraSourceSets).each {
    project(":" + it).name = hyphenatedName + "-" + it
 }
 
-def includes = [
-   "../CommonWalkingControlModules",
-   "../ConvexOptimizationAdapter",
-   "../IHMCCommunication",
-   "../IHMCFootstepPlanning",
-   "../IHMCGeometry",
-   "../IHMCGraphicsDescription",
-   "../IHMCHumanoidBehaviors",
-   "../IHMCHumanoidRobotics",
-   "../IHMCJMonkeyEngineToolkit",
-   "../IHMCJavaExtensions",
-   "../IHMCJavaFXToolkit",
-   "../IHMCJavaToolkit",
-   "../IHMCManipulationPlanning",
-   "../IHMCPerception",
-   "../IHMCROSTools",
-   "../IHMCRobotDataLogger",
-   "../IHMCRobotDescription",
-   "../IHMCRobotModels",
-   "../IHMCRoboticsToolkit",
-   "../IHMCSwingPlotting",
-   "../IHMCWholeBodyController",
-   "../KalmanProject",
-   "../ModelFileLoader",
-   "../ParameterOptimization",
-   "../SensorProcessing",
-   "../SimulationConstructionSet",
-   "../SimulationConstructionSetTools",
-]
-
 if (startParameter.searchUpwards)
 {
-   includes.each { include ->
-      if (new File(rootProject.projectDir, include).exists())
-         includeBuild include
+   Map<String, String> projectNameReplacements = new HashMap<>();
+   projectNameReplacements.put("ihmc", "IHMC");
+   projectNameReplacements.put("vt", "VT");
+   projectNameReplacements.put("javafx", "JavaFX");
+   projectNameReplacements.put("jmonkey", "JMonkey");
+   projectNameReplacements.put("ros", "ROS");
+   projectNameReplacements.put("ros1", "ROS1");
+   projectNameReplacements.put("ros2", "ROS2");
+   projectNameReplacements.put("lla", "LLA");
+   projectNameReplacements.put("devops", "DevOps");
+   projectNameReplacements.put("ejml", "EJML");
+   projectNameReplacements.put("icub", "ICub");
+   projectNameReplacements.put("dds", "DDS");
+   projectNameReplacements.put("rtps", "RTPS");
+   projectNameReplacements.put("sri", "SRI");
+   projectNameReplacements.put("ethercat", "EtherCAT");
+   projectNameReplacements.put("imu", "IMU");
+   projectNameReplacements.put("icp", "ICP");
+   projectNameReplacements.put("it", "IT");
+   projectNameReplacements.put("ipxe", "IPXE");
+   projectNameReplacements.put("aot", "AOT");
+   projectNameReplacements.put("joctomap", "JOctoMap");
+   projectNameReplacements.put("mav", "MAV");
+   projectNameReplacements.put("megabots", "MegaBots");
+   projectNameReplacements.put("megabot", "MegaBot");
+
+   findTransitivesRecursive(rootProject.projectDir.toPath(), pascalCasedName, new TreeSet<String>(), projectNameReplacements).each {
+      if (Files.exists(rootProject.projectDir.toPath().parent.resolve(it).resolve("build.gradle")))
+      {
+         println("[ihmc-build] Including build: ../" + it)
+         includeBuild "../" + it
+      }
    }
+}
+
+public TreeSet<String> findTransitivesRecursive(java.nio.file.Path projectDir, String name, TreeSet<String> set, Map<String, String> projectNameReplacements)
+{
+   SortedSet<String> lines = parseDependenciesFromGradleFile(projectDir.resolve("build.gradle"), projectNameReplacements)
+
+   lines.each {
+      if (!set.contains(it))
+      {
+         set.add(it)
+
+         findTransitivesRecursive(projectDir.parent.resolve(it), it, set, projectNameReplacements)
+      }
+   }
+
+   return set
+}
+
+SortedSet<String> parseDependenciesFromGradleFile(java.nio.file.Path buildFile, Map<String, String> projectNameReplacements)
+{
+   SortedSet<String> dependencySet = new TreeSet<String>()
+   try
+   {
+      AstBuilder builder = new AstBuilder();
+      def bytesInFile = new String(Files.readAllBytes(buildFile))
+      println("[ihmc-build] Parsing for dependencies: " + buildFile)
+      List<ASTNode> nodes = builder.buildFromString(bytesInFile);
+      def visitor = new FindDependenciesVisitor()
+      for (ASTNode node : nodes)
+      {
+         node.visit(visitor);
+      }
+
+      visitor.dependencies.each {
+         if (it[0] == "us.ihmc")
+         {
+            dependencySet.add(it[1])
+            dependencySet.add(hyphenatedToPascalCased(it[1], projectNameReplacements))
+
+            if (it[1].contains("-"))
+            {
+               def possibleMainProject = it[1].substring(0, it[1].lastIndexOf("-"))
+               dependencySet.add(possibleMainProject)
+               dependencySet.add(hyphenatedToPascalCased(possibleMainProject, projectNameReplacements))
+            }
+         }
+      }
+   }
+   catch (NoSuchFileException e)
+   {
+      println("[ihmc-build] Build not found on disk: " + e.getMessage())
+   }
+   catch (GradleScriptException e)
+   {
+      println("[ihmc-build] Cannot evaluate " + buildFile + ": " + e.getMessage())
+   }
+   catch (MultipleCompilationErrorsException e)
+   {
+      println("[ihmc-build] Cannot evaluate " + buildFile + ": " + e.getMessage())
+   }
+   catch (IOException e)
+   {
+      println(e.printStackTrace())
+   }
+   return dependencySet
+}
+
+class FindDependenciesVisitor extends CodeVisitorSupport
+{
+   private List<String[]> dependencies = new ArrayList<>();
+
+   @Override
+   public void visitArgumentlistExpression(ArgumentListExpression ale)
+   {
+      List<Expression> expressions = ale.getExpressions();
+
+      if (expressions.size() == 1 && expressions.get(0) instanceof ConstantExpression)
+      {
+         String dependencyString = expressions.get(0).getText();
+         if (dependencyString.contains(":"))
+         {
+            String[] split = dependencyString.split(":");
+
+            if (split.length >= 3)
+            {
+               dependencies.add([split[0], split[1], split[2]]);
+            }
+         }
+      }
+
+      super.visitArgumentlistExpression(ale);
+   }
+
+   @Override
+   public void visitMapExpression(MapExpression expression)
+   {
+      List<MapEntryExpression> mapEntryExpressions = expression.getMapEntryExpressions();
+      if (mapEntryExpressions.size() >= 3)
+      {
+         Map<String, String> dependencyMap = new HashMap<String, String>();
+
+         for (MapEntryExpression mapEntryExpression : mapEntryExpressions)
+         {
+            String key = mapEntryExpression.getKeyExpression().getText();
+            String value = mapEntryExpression.getValueExpression().getText();
+            dependencyMap.put(key, value);
+         }
+
+         dependencies.add([dependencyMap.get("group"), dependencyMap.get("name"), dependencyMap.get("version")]);
+      }
+
+      super.visitMapExpression(expression);
+   }
+
+   public List<String[]> getDependencies()
+   {
+      return dependencies;
+   }
+}
+
+String hyphenatedToPascalCased(String hyphenated, Map<String, String> projectNameReplacements)
+{
+   String[] split = hyphenated.split("-");
+   String pascalCased = "";
+   for (String section : split)
+   {
+      if (projectNameReplacements.containsKey(section))
+      {
+         pascalCased += projectNameReplacements.get(section);
+      } else
+      {
+         pascalCased += capitalize(section);
+      }
+   }
+   return pascalCased;
+}
+
+String capitalize(final String str)
+{
+   int strLen;
+   if (str == null || (strLen = str.length()) == 0)
+   {
+      return str;
+   }
+
+   final char firstChar = str.charAt(0);
+   if (Character.isTitleCase(firstChar))
+   {
+      // already capitalized
+      return str;
+   }
+
+   return new StringBuilder(strLen)
+         .append(Character.toTitleCase(firstChar))
+         .append(str.substring(1))
+         .toString();
 }
