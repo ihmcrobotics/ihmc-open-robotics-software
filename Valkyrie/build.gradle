@@ -108,29 +108,30 @@ remotes {
    }
 }
 
-jar {
-   List depend = []
-   configurations.runtime.each {
-      if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-      {
-         depend.add('lib/' + it.name)
-      }
-   }
-
-   manifest {
-      attributes(
-            "Created-By": "IHMC Gradle Build Script",
-            "Implementation-Title": project.name,
-            "Implementation-Version": project.version,
-            "Implementation-Vendor": "IHMC",
-
-            "Bundle-Name": project.name,
-            "Bundle-Version": project.version,
-            "Bundle-License": "${project.ext.licenseURL}",
-            "Bundle-Vendor": "IHMC",
-            'Class-Path': depend.join(' '))
-   }
-}
+//jar {
+////   List depend = []
+////   configurations.runtime.each {
+////      if (!it.name.contains("IHMCHumanoidOperatorInterface"))
+////      {
+////         depend.add('lib/' + it.name)
+////      }
+////   }
+//
+//   manifest {
+//      attributes(
+//            "Created-By": "IHMC Gradle Build Script",
+//            "Implementation-Title": project.name,
+//            "Implementation-Version": project.version,
+//            "Implementation-Vendor": "IHMC",
+//
+//            "Bundle-Name": project.name,
+//            "Bundle-Version": project.version,
+//            "Bundle-License": "${project.ext.licenseURL}",
+//            "Bundle-Vendor": "IHMC",
+//            //'Class-Path': depend.join(' '))
+//      )
+//   }
+//}
 
 task deployLocal(dependsOn: jar) {
    def directory = 'valkyrie'
@@ -219,32 +220,32 @@ task deploy(dependsOn: ['jar']) {
    }
 }
 
-task createRosJar(type: Jar) {
-   def gitRepo;
-   if (!project.parent.hasProperty("repo"))
-   {
-      gitRepo = Grgit.open(projectDir.canonicalFile.parent)
-   } else
-   {
-      gitRepo = project.parent.repo
-   }
-   version = gitRepo.head().abbreviatedId;
-   manifest {
-      attributes 'Implementation-Title': 'ROSAPI',
-            'Implementation-Version': version,
-            'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
-   }
+//task createRosJar(type: Jar) {
+//   def gitRepo;
+//   if (!project.parent.hasProperty("repo"))
+//   {
+//      gitRepo = Grgit.open(projectDir.canonicalFile.parent)
+//   } else
+//   {
+//      gitRepo = project.parent.repo
+//   }
+//   version = gitRepo.head().abbreviatedId;
+//   manifest {
+//      attributes 'Implementation-Title': 'ROSAPI',
+//            'Implementation-Version': version,
+//            'Main-Class': 'us.ihmc.valkyrie.OpenHumanoidsSimulator'
+//   }
+//
+//   baseName = 'OpenHumanoidsSimulator'
+//   from({ configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }) {
+//      exclude "META-INF/*.SF"
+//      exclude "META-INF/*.DSA"
+//      exclude "META-INF/*.RSA"
+//      with jar
+//   }
+//}
 
-   baseName = 'OpenHumanoidsSimulator'
-   from({ configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }) {
-      exclude "META-INF/*.SF"
-      exclude "META-INF/*.DSA"
-      exclude "META-INF/*.RSA"
-      with jar
-   }
-}
-
-task OH(type: Copy, dependsOn: [createRosJar]) {
-   from createRosJar
-   into "lib/"
-}
+//task OH(type: Copy, dependsOn: [createRosJar]) {
+//   from createRosJar
+//   into "lib/"
+//}
