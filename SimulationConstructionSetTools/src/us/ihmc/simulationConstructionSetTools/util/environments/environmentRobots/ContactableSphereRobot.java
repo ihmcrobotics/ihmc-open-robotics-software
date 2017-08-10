@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -28,16 +29,16 @@ public class ContactableSphereRobot extends ContactableRobot
 
    public ContactableSphereRobot(String name)
    {
-      this(name, DEFAULT_RADIUS, DEFAULT_MASS);
+      this(name, DEFAULT_RADIUS, DEFAULT_MASS, YoAppearance.EarthTexture());
    }
 
-   public ContactableSphereRobot(String name, double radius, double mass)
+   public ContactableSphereRobot(String name, double radius, double mass, AppearanceDefinition color)
    {
       super(name);
 
       floatingJoint = new FloatingJoint("base", new Vector3D(0.0, 0.0, 0.0), this);
 
-      sphereLink = ball(radius, mass);
+      sphereLink = ball(radius, mass, color);
       floatingJoint.setLink(sphereLink);
       this.addRootJoint(floatingJoint);
 
@@ -45,7 +46,7 @@ public class ContactableSphereRobot extends ContactableRobot
       currentSphere3d = new Sphere3D(radius);
    }
 
-   private Link ball(double radius, double mass)
+   private Link ball(double radius, double mass, AppearanceDefinition color)
    {
       Link ret = new Link("ball");
 
@@ -56,7 +57,7 @@ public class ContactableSphereRobot extends ContactableRobot
       ret.setComOffset(0.0, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addSphere(radius, YoAppearance.EarthTexture());
+      linkGraphics.addSphere(radius, color);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;

@@ -10,17 +10,45 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 public interface ControllerCoreOptimizationSettings
 {
    /**
-    * Gets the weight specifying how much high joint acceleration values should be penalized in the
+    * Gets the weight specifying how much high joint velocity values should be penalized in the
     * optimization problem.
     * <p>
-    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is
+    * This parameter is used in {@link InverseKinematicsOptimizationControlModule} which itself is
     * used when running the {@link WholeBodyControllerCore} in the
-    * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
+    * {@link WholeBodyControllerCoreMode#INVERSE_KINEMATICS} mode.
     * </p>
     * <p>
     * A non-zero positive value should be used to ensure the Hessian matrix in the optimization is
     * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the
-    * system to become too 'lazy'. A value of {@code 0.005} is used for Atlas' simulations.
+    * system to become too 'lazy'.
+    * </p>
+    * 
+    * @return the weight to use for joint acceleration regularization.
+    */
+   default double getJointVelocityWeight()
+   {
+      return 1.0e-8;
+   }
+
+   /**
+    * Gets the weight specifying how much high joint acceleration values should be penalized in the
+    * optimization problem.
+    * <p>
+    * This parameter is used in:
+    * <ul>
+    * <li>{@link InverseDynamicsOptimizationControlModule} which itself is used when running the
+    * {@link WholeBodyControllerCore} in the {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS}
+    * mode.
+    * <li>{@link InverseKinematicsOptimizationControlModule} which itself is used when running the
+    * {@link WholeBodyControllerCore} in the {@link WholeBodyControllerCoreMode#INVERSE_KINEMATICS}
+    * mode.
+    * </ul>
+    * </p>
+    * <p>
+    * When used for the inverse dynamics mode, a non-zero positive value should be used to ensure
+    * the Hessian matrix in the optimization is invertible. It is should preferably be above
+    * {@code 1.0e-8}. A high value will cause the system to become too 'lazy'. A value of
+    * {@code 0.005} is used for Atlas' simulations.
     * </p>
     * 
     * @return the weight to use for joint acceleration regularization.
