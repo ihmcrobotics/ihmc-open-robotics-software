@@ -26,9 +26,9 @@ public class CTTaskNodeTree
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
     * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
     */
-   private double matricRatioTimeToTask = 0.5;
+   private double matricRatioTimeToTask = 0.4;
 
-   private double maximumDisplacementOfStep = 0.7;
+   private double maximumDisplacementOfStep = 0.25;
    private double maximumTimeGapOfStep = 0.02;
 
    private int dimensionOfTask;
@@ -262,14 +262,14 @@ public class CTTaskNodeTree
       }
    }
 
-   private void updateRandomConfiguration()
+   public void updateRandomConfiguration()
    {
       CTTaskNode randomNode = createNode();
       setRandomNormalizedNodeData(randomNode, false);
       this.randomNode = randomNode;
    }
 
-   private void updateNearestNode()
+   public void updateNearestNode()
    {
       CTTaskNode nearNode = this.rootNode;
       CTTaskNode curNode;
@@ -291,7 +291,7 @@ public class CTTaskNodeTree
       this.nearNode = nearNode;
    }
 
-   private void updateNewConfiguration()
+   public void updateNewConfiguration()
    {
       CTTaskNode newNode = createNode();
 
@@ -388,6 +388,20 @@ public class CTTaskNodeTree
          failNodes.add(this.newNode);
          //         PrintTools.info("this new Configuration cannot be added on tree");
          return false;
+      }
+   }
+   
+   public void connectNewNode(boolean connect)
+   {
+      if(connect)
+      {
+         this.nearNode.addChildNode(this.newNode);
+         this.wholeNodes.add(this.newNode);   
+      }
+      else
+      {
+         this.newNode.clearParentNode();
+         this.failNodes.add(this.newNode);
       }
    }
 

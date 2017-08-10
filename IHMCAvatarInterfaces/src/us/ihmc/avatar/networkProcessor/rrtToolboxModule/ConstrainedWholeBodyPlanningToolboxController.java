@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -17,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
@@ -48,7 +50,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private DRCRobotModel drcRobotModelFactory;
    
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
-   
+      
    private WheneverWholeBodyKinematicsSolver kinematicsSolver;
    
    private static ReferenceFrame midZUpFrame;
@@ -114,11 +116,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
-   private int numberOfExpanding;
+   private int numberOfExpanding = 500;
    
    private int numberOfInitialGuess = 30;
 
-   private static int terminateToolboxCondition = 40;
+   private static int terminateToolboxCondition = 700;
    /*
     * Toolbox state
     */
@@ -152,13 +154,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       yoGraphicsRegistry.registerYoGraphic("endeffectorPoseViz", this.endeffectorFrame);
    }
 
-   
    @Override
    protected void updateInternal()
    {
       PrintTools.info("update toolbox " + updateCount.getIntegerValue() +" "+ state);
 
       // ************************************************************************************************************** //
+      TaskRegion taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
       switch(state)
       {
       case DO_NOTHING:
@@ -170,7 +172,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          
          tree.setRandomNormalizedNodeData(initialGuessNode, true);
          initialGuessNode.setNormalizedNodeData(0, 0);
-         initialGuessNode.convertNormalizedDataToData(constrainedEndEffectorTrajectory.getTaskRegion());
+         initialGuessNode.convertNormalizedDataToData(taskRegion);
          
          visualizedNode = initialGuessNode;
          
@@ -193,18 +195,97 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           */
          numberOfInitialGuess--;
          if(numberOfInitialGuess == 0)
+         {
+            PrintTools.info("initial guess terminate");
             state = CWBToolboxState.EXPAND_TREE;
+            
+            if (startYoVariableServer)
+            {
+               tree = new CTTaskNodeTree(rootNode);
+               tree.setTaskRegion(taskRegion);
+
+               rootNode.convertDataToNormalizedData(taskRegion);
+               
+//               treeVisualizer = new CTTreeVisualizer(tree);
+//               treeVisualizer.initialize();
+            }
+         }
+            
          
          break;
       case EXPAND_TREE:
          
-         visualizedNode = rootNode;
-         isValidNode(visualizedNode);
+         
+         tree.updateRandomConfiguration();
+         tree.updateNearestNode();
+         tree.updateNewConfiguration();
+         
+         tree.getNewNode().convertNormalizedDataToData(taskRegion);
+                  
+         if(isValidNode(tree.getNewNode()))
+         {
+            tree.connectNewNode(true);    
+            if(tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
+            {
+               numberOfExpanding = 1;  // for terminate
+            }
+         }
+         else
+         {
+            tree.connectNewNode(false);
+         }         
+
+         visualizedNode = tree.getNewNode().createNodeCopy();
+         visualizedNode.setIsValidNode(tree.getNewNode().getIsValidNode());
          
          
+         
+         /*
+          * terminate expanding tree.
+          */
+         numberOfExpanding--;
+         if(numberOfExpanding == 0)
+         {
+            state = CWBToolboxState.SHORTCUT_PATH;
+            
+         }
          
          break;
       case SHORTCUT_PATH:
+         
+
+         
+         ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
+         CTTaskNode currentNode = tree.getNewNode();
+         revertedPath.add(currentNode);
+
+         while (true)
+         {
+            currentNode = currentNode.getParentNode();
+            if (currentNode != null)
+            {
+               revertedPath.add(currentNode);
+            }
+            else
+               break;
+         }
+         
+         int revertedPathSize = revertedPath.size();
+
+         tree.getPath().clear();
+         for (int j = 0; j < revertedPathSize; j++)
+            tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
+         
+         
+         /*
+          * terminate toolbox
+          */
+         isDone.set(true);
+         state = CWBToolboxState.SHORTCUT_PATH;
+         
+         
+         PrintTools.info("the size of the path is "+tree.getPath().size());         
+         
          
          break;
       case GENERATE_MOTION:
@@ -289,13 +370,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       
       /*
        * initialize kinematicsSolver.
-       */      
-      PrintTools.info("initial root joint translation");
-      System.out.println(initialTranslationOfRootJoint);
-      
-      PrintTools.info("initial root joint rotation");
-      System.out.println(initialRotationOfRootJoint);
-      
+       */            
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
       
       kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
@@ -303,10 +378,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       kinematicsSolver.putTrajectoryMessages();
-      
-      PrintTools.info("initial isSolved Result");
-      System.out.println(kinematicsSolver.isSolved());
-           
       
       HumanoidReferenceFrames referenceFrames = (HumanoidReferenceFrames) kinematicsSolver.getReferenceFrames();
       
@@ -409,7 +480,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
                 
       kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPose);
-      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
+//      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
             
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));
@@ -435,7 +506,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
 //      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
                         
-      node.setIsValidNode(result);
+      node.setIsValidNode(result);      
       
       cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
       
@@ -473,26 +544,4 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    
    
    
-   
-//   private void treeInitialize()
-//   {
-//      double initialPelvisHeight = CTTaskNode.initialRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getM23();
-//
-//      rootNode = new GenericTaskNode(0.0, initialPelvisHeight, 0.0, 0.0, 0.0);
-//      rootNode.setNodeData(2, -10.0 / 180 * Math.PI);
-//      rootNode.setNodeData(10, -30.0 / 180 * Math.PI);
-//      rootNode.setConfigurationJoints(GenericTaskNode.initialRobotModel);
-//
-//      PrintTools.info("initial node is " + rootNode.isValidNode());
-//
-//      tree = new CTTaskNodeTree(rootNode);
-//
-//      rootNode.convertDataToNormalizedData(CTTaskNode.constrainedEndEffectorTrajectory.getTaskNodeRegion());
-//
-//      if (startYoVariableServer)
-//      {
-//         treeVisualizer = new CTTreeVisualizer(tree);
-//         treeVisualizer.initialize();
-//      }
-//   }
 }
