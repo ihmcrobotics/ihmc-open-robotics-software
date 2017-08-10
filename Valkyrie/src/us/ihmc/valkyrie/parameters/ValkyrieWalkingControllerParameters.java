@@ -1,9 +1,12 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -21,10 +24,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -44,7 +47,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final ValkyrieJointMap jointMap;
 
-   private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
@@ -245,25 +247,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-   {
-      YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
-      boolean realRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 40.0;
-      double zeta = realRobot ? 0.4 : 0.8;
-      double maxAccel = 18.0;
-      double maxJerk = 270.0;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
-   }
-
    private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
@@ -284,52 +267,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
-   {
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 50.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
-      spineGains.setKp(kp);
-      spineGains.setZeta(zeta);
-      spineGains.setKi(ki);
-      spineGains.setMaximumIntegralError(maxIntegralError);
-      spineGains.setMaximumFeedback(maxAccel);
-      spineGains.setMaximumFeedbackRate(maxJerk);
-      spineGains.createDerivativeGainUpdater(true);
-
-      return spineGains;
-   }
-
-   private YoPIDGains createArmControlGains(YoVariableRegistry registry)
-   {
-      YoPIDGains armGains = new YoPIDGains("ArmJointspace", registry);
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
-      double zeta = runningOnRealRobot ? 1.0 : 0.7;
-      double ki = runningOnRealRobot ? 0.0 : 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
-
-      armGains.setKp(kp);
-      armGains.setZeta(zeta);
-      armGains.setKi(ki);
-      armGains.setMaximumIntegralError(maxIntegralError);
-      armGains.setMaximumFeedback(maxAccel);
-      armGains.setMaximumFeedbackRate(maxJerk);
-      armGains.createDerivativeGainUpdater(true);
-
-      return armGains;
    }
 
    private YoOrientationPIDGainsInterface createHandOrientationControlGains(YoVariableRegistry registry)
@@ -380,29 +317,91 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   public List<ImmutablePair<PIDGains, List<String>>> getOrCreateJointSpaceControlGains()
    {
-      if (jointspaceGains != null)
-         return jointspaceGains;
+      List<String> spineNames = new ArrayList<>();
+      List<String> neckNames = new ArrayList<>();
+      List<String> armNames = new ArrayList<>();
 
-      jointspaceGains = new HashMap<>();
-
-      YoPIDGains spineGains = createSpineControlGains(registry);
-      for (SpineJointName name : jointMap.getSpineJointNames())
-         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
-
-      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
-
-      YoPIDGains armGains = createArmControlGains(registry);
-      for (RobotSide robotSide : RobotSide.values)
+      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
+      Arrays.stream(jointMap.getNeckJointNames()).forEach(n -> neckNames.add(jointMap.getNeckJointName(n)));
+      for (RobotSide side : RobotSide.values)
       {
-         for (ArmJointName name : jointMap.getArmJointNames())
-            jointspaceGains.put(jointMap.getArmJointName(robotSide, name), armGains);
+         Arrays.stream(jointMap.getArmJointNames()).forEach(n -> armNames.add(jointMap.getArmJointName(side, n)));
       }
 
+      PIDGains spineGains = createSpineControlGains();
+      PIDGains neckGains = createNeckControlGains();
+      PIDGains armGains = createArmControlGains();
+
+      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(neckGains, neckNames));
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(armGains, armNames));
+
       return jointspaceGains;
+   }
+
+   private PIDGains createSpineControlGains()
+   {
+      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = 50.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaxIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+
+      return spineGains;
+   }
+
+   private PIDGains createNeckControlGains()
+   {
+      PIDGains gains = new PIDGains("_NeckJointGains");
+      boolean realRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = 40.0;
+      double zeta = realRobot ? 0.4 : 0.8;
+      double maxAccel = 18.0;
+      double maxJerk = 270.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
+
+      return gains;
+   }
+
+   private PIDGains createArmControlGains()
+   {
+      PIDGains armGains = new PIDGains("_NeckJointGains");
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
+      double zeta = runningOnRealRobot ? 1.0 : 0.7;
+      double ki = runningOnRealRobot ? 0.0 : 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
+
+      armGains.setKp(kp);
+      armGains.setZeta(zeta);
+      armGains.setKi(ki);
+      armGains.setMaxIntegralError(maxIntegralError);
+      armGains.setMaximumFeedback(maxAccel);
+      armGains.setMaximumFeedbackRate(maxJerk);
+
+      return armGains;
    }
 
    /** {@inheritDoc} */
