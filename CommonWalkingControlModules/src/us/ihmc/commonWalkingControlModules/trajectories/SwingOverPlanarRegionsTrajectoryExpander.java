@@ -13,10 +13,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -32,6 +28,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
 {
@@ -102,11 +102,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       String namePrefix = "trajectoryExpander";
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, swingTrajectoryParameters.getSwingWaypointProportions(),
-            swingTrajectoryParameters.getObstacleClearanceProportions(), walkingControllerParameters.getMinSwingHeightFromStanceFoot(),
-            walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
-      minimumSwingHeight = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
-      maximumSwingHeight = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
-      soleToToeLength = walkingControllerParameters.getActualFootLength() / 2.0;
+            swingTrajectoryParameters.getObstacleClearanceProportions(), walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
+            walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
+      minimumSwingHeight = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
+      maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
+      soleToToeLength = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
       System.out.println("soltotoelength: " + soleToToeLength);
 
       numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
@@ -234,7 +234,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, adjustedWaypoints);
       twoWaypointSwingGenerator.initialize();
 
-      double stepAmount = 1.0 / (double) numberOfCheckpoints.getIntegerValue();
+      double stepAmount = 1.0 / numberOfCheckpoints.getIntegerValue();
       for (double time = 0.0; time < 1.0; time += stepAmount)
       {
          twoWaypointSwingGenerator.compute(time);

@@ -11,10 +11,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LegConfigurationManager
@@ -52,12 +52,13 @@ public class LegConfigurationManager
 
       attemptToStraightenLegs.set(legConfigurationParameters.attemptToStraightenLegs());
 
-      this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
+      this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
+            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
 
       maxStepHeightForCollapse.set(stepHeightForCollapse);
       stepHeightForForcedCollapse.set(stepDownTooFar);
-      minStepLengthForCollapse.set(walkingControllerParameters.getFootLength());
+      minStepLengthForCollapse.set(walkingControllerParameters.getSteppingParameters().getFootLength());
 
       parentRegistry.addChild(registry);
    }

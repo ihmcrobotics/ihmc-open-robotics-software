@@ -35,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -53,6 +52,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 {
@@ -225,11 +225,11 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.15, 0.0, "desiredVelocityControlModule"));
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
+      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
+      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
+      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
 
       desiredFootstepCalculator.initialize();
       FootstepDataListMessage footsteps = computeNextFootsteps(RobotSide.LEFT, desiredFootstepCalculator, stepTime);
