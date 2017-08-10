@@ -87,7 +87,6 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
    compile group: "us.ihmc", name: "common-walking-control-modules-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: dependencyMode
    compile group: "us.ihmc", name: "sensor-processing-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit-test", version: dependencyMode
