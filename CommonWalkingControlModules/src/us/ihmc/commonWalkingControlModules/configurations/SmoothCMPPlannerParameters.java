@@ -341,7 +341,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    @Override
    public double getStepHeightThresholdForExitCoPOnToesWhenSteppingDown()
    {
-      return 0;
+      return modelScale * 0.05;
    }
 
    @Override

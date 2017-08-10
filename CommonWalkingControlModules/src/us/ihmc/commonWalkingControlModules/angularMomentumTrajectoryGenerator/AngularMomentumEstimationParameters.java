@@ -14,6 +14,10 @@ public class AngularMomentumEstimationParameters
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
    private double percentageSupportLegMass = 0.10;
+   /**
+    * Defines the percentage of the total robot mass that is to be considered as the support leg
+    */
+   private double robotOperatingHeight = 0.90;
    
    private final SmoothCMPPlannerParameters copPlannerParameters;
    private final FullHumanoidRobotModel robotModel;
@@ -108,7 +112,7 @@ public class AngularMomentumEstimationParameters
 
    public double getCoMHeight()
    {
-      return 0.33;
+      return robotOperatingHeight;
    }
 
    public double getSwingFootMaxLift()
