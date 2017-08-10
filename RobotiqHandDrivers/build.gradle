@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.15"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.16"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -16,20 +16,20 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
-dependencies {
+mainDependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.wimpi', name: 'jamod', version: '1.2'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
-   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {

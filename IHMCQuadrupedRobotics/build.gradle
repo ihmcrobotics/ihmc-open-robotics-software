@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.15"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.16"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -13,7 +13,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
-dependencies {
+mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
    compile group: 'us.ihmc', name: 'euclid', version: '0.5.0'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
@@ -25,19 +25,19 @@ dependencies {
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   ihmc.compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "convex-optimization-adapter", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-state-estimation", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robot-description", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: dependencyMode
+   compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
+   compile group: "us.ihmc", name: "convex-optimization-adapter", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
+   compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-state-estimation", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: dependencyMode
 }
 
 testDependencies {

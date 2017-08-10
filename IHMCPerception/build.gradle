@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.15"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.16"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -17,7 +17,7 @@ configurations {
    all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
 }
 
-dependencies {
+mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
@@ -50,18 +50,18 @@ dependencies {
    compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
    compile "org.ddogleg:ddogleg:0.7"
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   ihmc.compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-ros-tools", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-ros-tools", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: dependencyMode
+   compile group: "us.ihmc", name: "sensor-processing", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {

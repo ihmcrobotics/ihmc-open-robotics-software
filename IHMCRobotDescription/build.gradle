@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.15"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.16"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -13,12 +13,12 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
-dependencies {
+mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
    compile group: 'org.ejml', name: 'core', version: '0.30'
-   ihmc.compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-geometry", version: dependencyMode
-   ihmc.compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-geometry", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {
