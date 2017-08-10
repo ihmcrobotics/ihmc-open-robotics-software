@@ -2,7 +2,6 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSphereRobot;
@@ -22,13 +21,13 @@ import java.util.Random;
 
 public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmentInterface
 {
-   enum GoalMarkerLocation
+   public enum GoalMarkerLocation
    {
-      ORIGIN(0.0, 0.0, 1.0), TOP_OF_STAIRS(12.8, -2.0, 1.5);
+      ORIGIN(0.0, 0.0, 2.0), TOP_OF_STAIRS(12.8, -2.0, 1.5);
 
       private final Point3D markerLocation;
 
-      private GoalMarkerLocation(double x, double y, double z)
+      GoalMarkerLocation(double x, double y, double z)
       {
          markerLocation = new Point3D(x, y, z);
       }
@@ -47,7 +46,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
 
    private final ArrayList<Robot> environmentRobots = new ArrayList<>();
 
-   private final ContactableSphereRobot goalMarker = new ContactableSphereRobot("FootstepPlannerGoalMarker", 0.1, 1.0, YoAppearance.Green());
+   private final ContactableSphereRobot goalMarkerRobot = new ContactableSphereRobot("FootstepPlannerGoalMarker", 0.1, 1.0, YoAppearance.Green());
 
    public StaticFootstepPlanningEnvironment()
    {
@@ -57,7 +56,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       addRocks(1.0, -3.0);
       addStairs(11.0, -2.0);
 
-      addGoalMarker();
+      addGoalMarkerRobot();
    }
 
    private void setupGround()
@@ -218,12 +217,12 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       }
    }
 
-   private void addGoalMarker()
+   private void addGoalMarkerRobot()
    {
-      goalMarker.setGravity(0.0);
-      environmentRobots.add(goalMarker);
+      goalMarkerRobot.setGravity(0.0);
+      environmentRobots.add(goalMarkerRobot);
 
-      YoVariableRegistry robotsYoVariableRegistry = goalMarker.getRobotsYoVariableRegistry();
+      YoVariableRegistry robotsYoVariableRegistry = goalMarkerRobot.getRobotsYoVariableRegistry();
       YoEnum<GoalMarkerLocation> goalMarkerLocationYoEnum = YoEnum.create("DesiredGoalMarkerLocation", GoalMarkerLocation.class, robotsYoVariableRegistry);
       goalMarkerLocationYoEnum.addVariableChangedListener(new GoalMarkerLocationUpdater());
       goalMarkerLocationYoEnum.set(GoalMarkerLocation.TOP_OF_STAIRS);
@@ -265,7 +264,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       public void variableChanged(YoVariable<?> v)
       {
          GoalMarkerLocation goalMarkerLocation = ((YoEnum<GoalMarkerLocation>) v).getEnumValue();
-         goalMarker.setPosition(goalMarkerLocation.getMarkerLocation());
+         goalMarkerRobot.setPosition(goalMarkerLocation.getMarkerLocation());
       }
    }
 }
