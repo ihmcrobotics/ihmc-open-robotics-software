@@ -23,7 +23,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
 {
    public enum GoalMarkerLocation
    {
-      ORIGIN(0.0, 0.0, 2.0), TOP_OF_STAIRS(12.8, -2.0, 1.5);
+      ORIGIN(0.0, 0.0, 2.0), TOP_OF_STAIRS(STAIRS_START_X + 1.5, STAIRS_START_Y, 1.5);
 
       private final Point3D markerLocation;
 
@@ -41,6 +41,20 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    private static final double ROBOT_AREA_WIDTH_IN_METERS = 7.3152;
    private static final double ROBOT_AREA_LENGTH_IN_METERS = 21.9456;
 
+   private static final double SHORT_CINDER_BLOCK_FIELD_START_X = 1.0;
+   private static final double SHORT_CINDER_BLOCK_FIELD_START_Y = 2.0;
+
+   private static final double RAMPS_WITH_STEPPING_STONES_START_X = 4.0;
+   private static final double RAMPS_WITH_STEPPING_STONES_START_Y = 2.0;
+
+   private static final double ROCK_FIELD_START_X = 1.0;
+   private static final double ROCK_FIELD_START_Y = -3.0;
+   private static final double ROCK_FIELD_LENGTH = 8.0;
+   private static final double ROCK_FIELD_WIDTH = 2.0;
+
+   private static final double STAIRS_START_X = 11.0;
+   private static final double STAIRS_START_Y = -2.0;
+
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D("StaticFootstepPlanningEnvironment");
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
@@ -51,10 +65,10 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    public StaticFootstepPlanningEnvironment()
    {
       setupGround();
-      addShortCinderBlockField(1.0, 2.0);
-      addRampsWithSteppingStones(4.0 , 2.0);
-      addRocks(1.0, -3.0);
-      addStairs(11.0, -2.0);
+      addShortCinderBlockField(SHORT_CINDER_BLOCK_FIELD_START_X, SHORT_CINDER_BLOCK_FIELD_START_Y);
+      addRampsWithSteppingStones(RAMPS_WITH_STEPPING_STONES_START_X, RAMPS_WITH_STEPPING_STONES_START_Y);
+      addRocks(ROCK_FIELD_START_X, ROCK_FIELD_START_Y, ROCK_FIELD_LENGTH, ROCK_FIELD_WIDTH);
+      addStairs(STAIRS_START_X, STAIRS_START_Y);
 
       addGoalMarkerRobot();
    }
@@ -155,15 +169,12 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
             rampHeight, color);
    }
 
-   private void addRocks(double startDistanceX, double startDistanceY)
+   private void addRocks(double startDistanceX, double startDistanceY, double rockFieldLength, double rockFieldWidth)
    {
       Random random = new Random(34782L);
       int numberOfRocksToAdd = 80;
       double maxRockHeightInMeters = 0.2;
       double maxRockWidth = 0.5;
-
-      double rockFieldLength = 8.0;
-      double rockFieldWidth = 2.0;
 
       for (int i = 0; i < numberOfRocksToAdd; i++)
       {
