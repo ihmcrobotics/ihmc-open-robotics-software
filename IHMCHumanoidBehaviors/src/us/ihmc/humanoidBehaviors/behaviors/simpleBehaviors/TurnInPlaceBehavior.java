@@ -12,13 +12,13 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class TurnInPlaceBehavior extends AbstractBehavior
 {
@@ -34,7 +34,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
-   
+
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
 
@@ -53,7 +53,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
 
-      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getSteppingParameters().getMaxStepLength(), walkingControllerParameters.getSteppingParameters().getInPlaceWidth(), 0.0,
             Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
 
@@ -69,7 +69,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       targetOrientationInWorldFrame = new FrameOrientation2d(referenceFrames.getMidFeetZUpFrame());
       targetOrientationInWorldFrame.setYaw(desiredYaw);
       targetOrientationInWorldFrame.changeFrame(worldFrame);
-      
+
       hasTargetBeenProvided.set(true);
       generateFootsteps();
    }
@@ -104,24 +104,24 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private void generateFootsteps()
    {
       footsteps.clear();
-      
+
       TurnInPlaceFootstepGenerator footstepGenerator = new TurnInPlaceFootstepGenerator(feet, soleFrames, targetOrientationInWorldFrame, pathType);
       footstepGenerator.initialize();
-      
+
       footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
 
       FramePoint midFeetPoint = new FramePoint();
       midFeetPoint.setToZero(referenceFrames.getMidFeetZUpFrame());
       midFeetPoint.changeFrame(worldFrame);
-      
+
       for(Footstep footstep : footsteps)
       {
          footstep.setZ(midFeetPoint.getZ());
       }
-      
+
       footstepListBehavior.set(footsteps, swingTime, transferTime);
       haveFootstepsBeenGenerated.set(true);
-      
+
    }
 
    @Override
@@ -134,7 +134,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-  
+
 
 
    @Override
@@ -143,7 +143,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       footstepListBehavior.onBehaviorAborted();
    }
 
-  
+
 
    @Override
    public void onBehaviorPaused()

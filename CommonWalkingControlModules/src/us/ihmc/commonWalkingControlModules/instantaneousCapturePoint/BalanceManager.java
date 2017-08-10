@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
@@ -132,6 +131,8 @@ public class BalanceManager
    private final boolean useICPOptimizationControl;
    private final boolean useICPTimingOptimization;
 
+   private final YoICPControlGains icpControlGains = new YoICPControlGains("", registry);
+
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoVariableRegistry parentRegistry)
@@ -149,7 +150,7 @@ public class BalanceManager
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
 
-      ICPControlGains icpControlGains = walkingControllerParameters.createICPControlGains(registry);
+      icpControlGains.set(walkingControllerParameters.createICPControlGains());
 
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
@@ -796,5 +797,10 @@ public class BalanceManager
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
       linearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
+   }
+
+   public YoICPControlGains getICPCOntrollerGains()
+   {
+      return icpControlGains;
    }
 }

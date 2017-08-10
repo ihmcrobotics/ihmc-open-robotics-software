@@ -53,10 +53,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -75,6 +71,10 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
@@ -424,7 +424,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       FramePose2d poseTwoSecondsAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterStop.getPositionDistance(poseBeforeStop);
-      assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getMaxStepLength());
+      assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -473,7 +473,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       FramePose2d poseTwoSecondsAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterPause.getPositionDistance(poseBeforePause);
-      assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getMaxStepLength());
+      assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
       BehaviorControlModePacket resumeModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.RESUME);

@@ -1,12 +1,12 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
+public class AtlasPhysicalProperties implements RobotPhysicalProperties
 {
    private final static double ATLAS_HEIGHT = 2.0;
    private final static double ATLAS_WEIGHT = 155.944174;
@@ -24,7 +24,7 @@ public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
    private final double actualFootWidth ;
    private final double actualFootLength;
    private final double footStartToetaperFromBack;
-   private final double footForward; // 0.16;   //0.178;    // 0.18;
+   private final double footForwardForControl; // 0.16;   //0.178;    // 0.18;
    private final double shinLength;
    private final double thighLength;
 
@@ -66,7 +66,7 @@ public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
       actualFootWidth = footWidthScale * 0.138;
       actualFootLength = modelScale * 0.26;
       footStartToetaperFromBack = modelScale * 0.195;
-      footForward = footLengthForControl - footBackForControl; // 0.16;   //0.178;    // 0.18;
+      footForwardForControl = footLengthForControl - footBackForControl; // 0.16;   //0.178;    // 0.18;
       shinLength = modelScale * 0.374;
       thighLength = modelScale * 0.422;
 
@@ -81,18 +81,6 @@ public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
          RigidBodyTransform handControlFrameToWristTransform = TransformTools.createTransformFromTranslationAndEulerAngles(0.0, y, 0.0, 0.0, 0.0, yaw);
          handAttachmentPlateToWristTransforms.put(robotSide, handControlFrameToWristTransform);
       }
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return ankleHeight;
-   }
-
-   @Override
-   public double getPelvisToFoot()
-   {
-      return pelvisToFoot;
    }
 
    @Override
@@ -132,15 +120,9 @@ public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
    }
 
    @Override
-   public double getFootStartToetaperFromBack()
+   public double getFootForwardForControl()
    {
-      return footStartToetaperFromBack;
-   }
-
-   @Override
-   public double getFootForward()
-   {
-      return footForward;
+      return footForwardForControl;
    }
 
    @Override
