@@ -99,8 +99,11 @@ SortedSet<String> parseDependenciesFromGradleFile(java.nio.file.Path buildFile, 
             if (it[1].contains("-"))
             {
                def possibleMainProject = it[1].substring(0, it[1].lastIndexOf("-"))
-               dependencySet.add(possibleMainProject)
-               dependencySet.add(hyphenatedToPascalCased(possibleMainProject, projectNameReplacements))
+               if (possibleMainProject != hyphenatedName)
+               {
+                  dependencySet.add(possibleMainProject)
+                  dependencySet.add(hyphenatedToPascalCased(possibleMainProject, projectNameReplacements))
+               }
             }
          }
       }
