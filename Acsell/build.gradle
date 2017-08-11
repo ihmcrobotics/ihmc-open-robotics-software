@@ -92,7 +92,7 @@ task deploy(dependsOn: assemble) << {
       directory = "wanderer"
    } else
    {
-      throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+      println("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
    }
 
    println "Trying ssh"
