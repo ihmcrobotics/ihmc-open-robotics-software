@@ -150,11 +150,22 @@ public abstract class WalkingControllerParameters
    /**
     * Specifies whether the controller will abort any arm trajectories when close to loosing its balance. This is
     * determined by the ICP tracking error.
-    * TODO: extract threshold.
     *
-    * @return whether the robot will abort arm trajectories when the ICP error is above a threshold
+    * @return whether the robot will abort arm trajectories when the ICP error is large
     */
    public abstract boolean allowAutomaticManipulationAbort();
+
+   /**
+    * Determines the threshold for the ICP tracking error that will cause the robot do abort manipulation if
+    * {@link #allowAutomaticManipulationAbort()} is returning {@code true}.
+    *
+    * @return the threshold on the ICP error that will trigger manipulation abort
+    * @see #allowAutomaticManipulationAbort()
+    */
+   public double getICPErrorThresholdForManipulationAbort()
+   {
+      return 0.04;
+   }
 
    /**
     * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
