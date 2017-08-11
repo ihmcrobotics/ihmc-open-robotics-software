@@ -234,9 +234,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+   public ICPControlGains createICPControlGains()
    {
-      ICPControlGains gains = new ICPControlGains("", registry);
+      ICPControlGains gains = new ICPControlGains();
 
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;

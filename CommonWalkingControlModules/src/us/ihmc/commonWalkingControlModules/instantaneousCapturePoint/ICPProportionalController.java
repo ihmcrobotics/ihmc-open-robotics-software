@@ -42,7 +42,7 @@ public class ICPProportionalController
 
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
-   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(YoICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 

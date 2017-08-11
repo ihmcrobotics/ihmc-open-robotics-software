@@ -537,7 +537,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+      public ICPControlGains createICPControlGains()
       {
          // TODO Auto-generated method stub
          return null;

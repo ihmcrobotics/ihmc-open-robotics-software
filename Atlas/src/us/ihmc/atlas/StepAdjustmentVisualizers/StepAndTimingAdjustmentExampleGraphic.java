@@ -734,7 +734,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+         public ICPControlGains createICPControlGains()
          {
             return null;
          }
