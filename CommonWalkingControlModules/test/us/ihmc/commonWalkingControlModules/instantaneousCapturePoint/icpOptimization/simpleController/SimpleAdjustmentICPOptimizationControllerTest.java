@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -622,7 +622,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+      public PDGains getCoMHeightControlGains()
       {
          return null;
       }

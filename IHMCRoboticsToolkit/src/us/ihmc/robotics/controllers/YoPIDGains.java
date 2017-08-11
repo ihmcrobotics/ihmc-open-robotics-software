@@ -66,13 +66,8 @@ public class YoPIDGains extends YoPDGains
 
    public void set(PIDGains pidGains)
    {
-      setKp(pidGains.getKp());
-      setKd(pidGains.getKd());
+      super.set(pidGains);
       setKi(pidGains.getKi());
-      setZeta(pidGains.getZeta());
-      setMaximumOutput(pidGains.getMaximumOutput());
-      setMaximumFeedback(pidGains.getMaximumFeedback());
-      setPositionDeadband(pidGains.getPositionDeadband());
       setMaximumIntegralError(pidGains.getMaxIntegralError());
       setIntegralLeakRatio(pidGains.getIntegralLeakRatio());
    }
