@@ -35,7 +35,14 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new AtlasSimpleICPOptimizationParameters(false);
+                  return new AtlasSimpleICPOptimizationParameters(false)
+                  {
+                     @Override
+                     public boolean useAngularMomentum()
+                     {
+                        return true;
+                     }
+                  };
                }
             };
          }

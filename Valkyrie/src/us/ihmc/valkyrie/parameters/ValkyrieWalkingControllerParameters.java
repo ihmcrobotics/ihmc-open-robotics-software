@@ -161,9 +161,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+   public ICPControlGains createICPControlGains()
    {
-      ICPControlGains gains = new ICPControlGains("", registry);
+      ICPControlGains gains = new ICPControlGains();
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 

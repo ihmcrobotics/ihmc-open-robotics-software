@@ -201,9 +201,10 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
 
       yoPelvisAngularWeight.get(pelvisAngularWeight);
-      leapOfFaithModule.updateAngularOffsets(deltaTime);
+      leapOfFaithModule.update(deltaTime);
+      leapOfFaithModule.updateAngularOffsets();
       leapOfFaithModule.addAngularOffset(tempOrientation);
-      leapOfFaithModule.relaxAngularWeight(deltaTime, pelvisAngularWeight);
+      leapOfFaithModule.relaxAngularWeight(pelvisAngularWeight);
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
