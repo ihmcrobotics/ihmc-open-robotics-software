@@ -16,7 +16,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc.configureProjectForOpenRobotics(project)
 
-dependencies {
+mainDependencies {
    runtime group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.9.4', classifier: 'natives-desktop' // runtime?
 
    compile group: 'net.jafama', name: 'jafama', version: '2.1.0'
