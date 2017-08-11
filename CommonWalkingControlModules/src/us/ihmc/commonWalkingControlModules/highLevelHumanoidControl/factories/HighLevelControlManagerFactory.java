@@ -5,13 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -31,7 +30,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -79,7 +77,7 @@ public class HighLevelControlManagerFactory
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
-      extractJointGainMap(walkingControllerParameters.getOrCreateJointSpaceControlGains(), jointGainMap, registry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -316,23 +314,4 @@ public class HighLevelControlManagerFactory
 
       return ret;
    }
-
-   private static void extractJointGainMap(List<ImmutablePair<PIDGains, List<String>>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
-                                           YoVariableRegistry registry)
-   {
-      jointGainMapToPack.clear();
-      for (ImmutablePair<PIDGains, List<String>> gainPair : jointspaceGains)
-      {
-         PIDGains gains = gainPair.getLeft();
-         YoPIDGains yoGains = new YoPIDGains(gains.getName(), registry);
-         yoGains.set(gains);
-         yoGains.createDerivativeGainUpdater(true);
-
-         for (String jointName : gainPair.getRight())
-         {
-            jointGainMapToPack.put(jointName, yoGains);
-         }
-      }
-   }
-
 }

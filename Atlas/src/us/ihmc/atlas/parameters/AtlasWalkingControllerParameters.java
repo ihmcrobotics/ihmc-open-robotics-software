@@ -378,7 +378,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<PIDGains, List<String>>> getOrCreateJointSpaceControlGains()
+   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       List<String> neckNames = new ArrayList<>();
