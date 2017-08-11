@@ -11,12 +11,13 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.19"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.20"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
+
 
 task generateSubprojectSettings {
 
@@ -26,20 +27,6 @@ task generateSubprojectSettings {
          settings.writeSettingsFileToProject(new File(project.projectDir, childDir))
       }
    }
-
-//   doLast {
-//      gradle.includedBuilds.each {
-//
-//         def dependencies = settings.findTransitiveProjectDependencies(it)
-//
-//         settings.generateSettingsFile(it.projectDir, dependencies)
-//         println(it.name + ": " + dependencies)
-//      }
-//
-//      gradle.includedBuilds.each {
-//         settings.deleteDependenciesFile(it.projectDir)
-//      }
-//   }
 }
 
 task deleteTests {
@@ -51,17 +38,5 @@ task deleteTests {
 task copyTests {
    gradle.includedBuilds.each {
       dependsOn it.task(":copyTests")
-   }
-}
-
-task printDependenciesFiles {
-   gradle.includedBuilds.each {
-      dependsOn it.task(":printDependenciesFile")
-   }
-}
-
-task deleteDependenciesFiles {
-   gradle.includedBuilds.each {
-      dependsOn it.task(":deleteDependenciesFile")
    }
 }
