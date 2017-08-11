@@ -16,6 +16,9 @@ ihmc.configureProjectForOpenRobotics(project)
 configurations {
    all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
 }
+project(":ihmc-perception-test").configurations {
+   all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
+}
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
