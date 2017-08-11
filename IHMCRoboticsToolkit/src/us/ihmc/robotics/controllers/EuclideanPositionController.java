@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -57,9 +58,9 @@ public class EuclideanPositionController implements PositionController
          gains = new YoEuclideanPositionGains(prefix, registry);
 
       this.gains = gains;
-      proportionalGainMatrix = gains.createProportionalGainMatrix();
-      derivativeGainMatrix = gains.createDerivativeGainMatrix();
-      integralGainMatrix = gains.createIntegralGainMatrix();
+      proportionalGainMatrix = gains.getProportionalGainMatrix();
+      derivativeGainMatrix = gains.getDerivativeGainMatrix();
+      integralGainMatrix = gains.getIntegralGainMatrix();
 
       positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
       positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);

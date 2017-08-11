@@ -1,16 +1,10 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public interface YoOrientationPIDGainsInterface extends OrientationPIDGainsInterface
 {
-   public abstract Matrix3DReadOnly createProportionalGainMatrix();
-
-   public abstract Matrix3DReadOnly createDerivativeGainMatrix();
-
-   public abstract Matrix3DReadOnly createIntegralGainMatrix();
-
    public abstract void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ);
 
    public abstract void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ);

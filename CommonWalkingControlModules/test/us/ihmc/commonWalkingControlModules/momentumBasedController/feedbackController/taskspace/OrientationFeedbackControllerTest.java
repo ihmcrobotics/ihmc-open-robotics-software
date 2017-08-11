@@ -92,9 +92,9 @@ public class OrientationFeedbackControllerTest
          double integralGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
          double maxIntegralError = RandomNumbers.nextDouble(random, 0.0, 10.0);
          orientationGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
-         orientationGains.setMaximumProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         orientationGains.setMaximumDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         orientationGains.setMaximumFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
+         orientationGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         orientationGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         orientationGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
          orientationFeedbackControlCommand.setGains(orientationGains);
          spatialFeedbackControlCommand.setGains(orientationGains);
 

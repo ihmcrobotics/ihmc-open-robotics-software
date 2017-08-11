@@ -1,5 +1,8 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+
 public interface SE3PIDGainsInterface
 {
    public abstract void set(SE3PIDGainsInterface gains);

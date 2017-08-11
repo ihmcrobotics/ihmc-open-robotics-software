@@ -1,5 +1,7 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
@@ -16,12 +18,6 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    {
       positionGains = new YoEuclideanPositionGains(prefix, createDampingRatio, registry);
       orientationGains = new YoAxisAngleOrientationGains(prefix, createDampingRatio, registry);
-   }
-
-   public void reset()
-   {
-      positionGains.reset();
-      orientationGains.reset();
    }
 
    @Override

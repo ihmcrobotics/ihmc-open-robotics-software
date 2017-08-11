@@ -2,6 +2,8 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,22 +45,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
-   }
-
-   @Override
-   public void reset()
-   {
-      proportionalGain.set(0.0);
-      derivativeGain.set(0.0);
-      dampingRatio.set(0.0);
-      integralGain.set(0.0);
-
-      maxIntegralError.set(0.0);
-      maxDerivativeError.set(Double.POSITIVE_INFINITY);
-      maxProportionalError.set(Double.POSITIVE_INFINITY);
-
-      maximumFeedback.set(Double.POSITIVE_INFINITY);
-      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -157,7 +143,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public Matrix3DReadOnly createProportionalGainMatrix()
+   public Matrix3DReadOnly getProportionalGainMatrix()
    {
       Matrix3D proportionalGainMatrix = new Matrix3D();
 
@@ -171,7 +157,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public Matrix3DReadOnly createDerivativeGainMatrix()
+   public Matrix3DReadOnly getDerivativeGainMatrix()
    {
       Matrix3D derivativeGainMatrix = new Matrix3D();
 
@@ -185,7 +171,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public Matrix3DReadOnly createIntegralGainMatrix()
+   public Matrix3DReadOnly getIntegralGainMatrix()
    {
       Matrix3D integralGainMatrix = new Matrix3D();
 

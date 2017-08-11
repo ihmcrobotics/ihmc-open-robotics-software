@@ -86,9 +86,9 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getCenterOfMassGains();
-      kp = gains.createProportionalGainMatrix();
-      kd = gains.createDerivativeGainMatrix();
-      ki = gains.createIntegralGainMatrix();
+      kp = gains.getProportionalGainMatrix();
+      kd = gains.getDerivativeGainMatrix();
+      ki = gains.getIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);

@@ -1,5 +1,7 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 
 /**
  * @author twan
@@ -76,22 +78,22 @@ public class SE3PIDGains implements SE3PIDGainsInterface
 
    public void setPositionMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionGains.setMaximumFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+      positionGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setOrientationMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      orientationGains.setMaximumFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+      orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setOrientationMaximumDerivativeError(double maxDerivativeError)
    {
-      orientationGains.setMaximumDerivativeError(maxDerivativeError);
+      orientationGains.setMaxDerivativeError(maxDerivativeError);
    }
 
    public void setOrientationMaximumProportionalError(double maxProportionalError)
    {
-      orientationGains.setMaximumProportionalError(maxProportionalError);
+      orientationGains.setMaxProportionalError(maxProportionalError);
    }
 
    @Override

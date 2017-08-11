@@ -4,7 +4,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -58,7 +57,7 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createProportionalGainMatrix()
+   public Matrix3DReadOnly getProportionalGainMatrix()
    {
       Matrix3D proportionalGainMatrix = new Matrix3D();
 
@@ -73,7 +72,7 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createDerivativeGainMatrix()
+   public Matrix3DReadOnly getDerivativeGainMatrix()
    {
       Matrix3D derivativeGainMatrix = new Matrix3D();
 
@@ -88,7 +87,7 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createIntegralGainMatrix()
+   public Matrix3DReadOnly getIntegralGainMatrix()
    {
       return new Matrix3D();
    }
@@ -213,17 +212,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
-   }
-
-   @Override
-   public void set(OrientationPIDGainsInterface gains)
-   {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
-      setMaxDerivativeError(gains.getMaximumDerivativeError());
-      setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
