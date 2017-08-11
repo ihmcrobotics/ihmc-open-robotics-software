@@ -4,9 +4,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.TangentialDampingGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoTangentialDampingGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,8 +21,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    private final YoDouble maxDerivativeError;
    private final YoDouble maxProportionalError;
 
-   private final YoTangentialDampingGains tangentialDampingGains;
-
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
       proportionalXYGain = new YoDouble("kpXYLinear" + suffix, registry);
@@ -37,8 +33,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       maximumFeedbackRate = new YoDouble("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new YoDouble("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new YoDouble("maximumLinearProportionalError" + suffix, registry);
-
-      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -188,18 +182,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
-   {
-      this.tangentialDampingGains.set(tangentialDampingGains);
-   }
-
-   @Override
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
-   {
-      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
-   }
-
-   @Override
    public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
@@ -221,18 +203,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
-   }
-
-   @Override
-   public YoTangentialDampingGains getYoTangentialDampingGains()
-   {
-      return tangentialDampingGains;
-   }
-
-   @Override
-   public TangentialDampingGains getTangentialDampingGains()
-   {
-      return tangentialDampingGains;
    }
 
    private double[] tempProportionalGains = new double[3];

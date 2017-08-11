@@ -1,8 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -11,6 +9,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class EuclideanPositionController implements PositionController
 {
@@ -28,7 +27,7 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
-   
+
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
    private final FrameVector feedForwardLinearAction = new FrameVector();
@@ -37,7 +36,6 @@ public class EuclideanPositionController implements PositionController
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
 
-   private final EuclideanTangentialDampingCalculator tangentialDampingCalculator;
    private final double dt;
 
    private final YoPositionPIDGainsInterface gains;
@@ -73,8 +71,6 @@ public class EuclideanPositionController implements PositionController
       feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
                                                                      dt, feedbackLinearAction);
-
-      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains());
 
       parentRegistry.addChild(registry);
    }
@@ -116,7 +112,7 @@ public class EuclideanPositionController implements PositionController
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
    }
-   
+
    /**
     * Computes linear portion of twist to pack
     */
@@ -134,7 +130,7 @@ public class EuclideanPositionController implements PositionController
       compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
       twistToPack.setLinearPart(actionFromPositionController.getVector());
    }
-   
+
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
    {
       desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
@@ -169,7 +165,6 @@ public class EuclideanPositionController implements PositionController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private final Matrix3D tempMatrix = new Matrix3D();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
@@ -186,11 +181,7 @@ public class EuclideanPositionController implements PositionController
       }
 
       velocityError.set(derivativeTerm);
-
-      tempMatrix.set(derivativeGainMatrix);
-      tangentialDampingCalculator.compute(positionError, tempMatrix);
-
-      tempMatrix.transform(derivativeTerm.getVector());
+      derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()

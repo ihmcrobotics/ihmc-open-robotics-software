@@ -19,9 +19,6 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -34,6 +31,9 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * {@code FeedbackControllerToolbox} is meant to be used only in the
@@ -43,7 +43,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * controllers. For instance, when a {@code YoFramePoint} has already been created by a controller,
  * the same object will be given to be next controller needing it.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -79,7 +79,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFramePoint} for the center of mass associated with the
     * given {@code type}, if it does not exist it is created.
-    * 
+    *
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criterion.
     */
@@ -107,7 +107,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFrameVector} for the center of mass associated with the
     * given {@code type}, and {@code space}, if it does not exist it is created.
-    * 
+    *
     * @param type the type of the data to retrieve.
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
@@ -148,7 +148,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not
     * exist yet.
     * </p>
-    * 
+    *
     * @param space the space of the data to retrieve.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -182,7 +182,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
     * mass, if it does not exist it is created.
-    * 
+    *
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
    public YoPositionPIDGainsInterface getCenterOfMassGains()
@@ -204,7 +204,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the desired position for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredPosition".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criteria.
@@ -248,7 +248,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the current orientation for the rigid-body 'rightHand' will have the prefix:
     * "rightHandCurrentOrientation".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFrameQuaternion} matching the search criteria.
@@ -291,7 +291,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the desired linear velocity for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredLinearVelocity".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @param space the space of the data to retrieve.
@@ -347,7 +347,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the rate-limited vector of the desired linear acceleration for the rigid-body
     * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param space the space of the data to retrieve.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
@@ -390,7 +390,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFramePoseUsingQuaternions} associated with the given
     * end-effector and {@code type}, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoseUsingQuaternions} matching the search criteria.
@@ -404,7 +404,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
     * velocities of the given end-effector for representing a given data {@code type}. If it does
     * not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
@@ -419,7 +419,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
     * accelerations of the given end-effector for representing a given data {@code type}. If it does
     * not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
@@ -438,7 +438,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
     * only used if the data does not exist yet.
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -460,7 +460,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
     * only used if the data does not exist yet.
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -477,7 +477,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the set of gains {@code YoOrientationPIDGainsInterface} associated to
     * the given end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
     * @return the unique {@code YoOrientationPIDGainsInterface} associated with the given
     *         end-effector.
@@ -497,7 +497,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} associated to the
     * given end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
     * @return the unique {@code YoPositionPIDGainsInterface} associated with the given end-effector.
     */
@@ -516,7 +516,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the set of gains {@code YoSE3PIDGainsInterface} associated to the given
     * end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
     * @return the unique {@code YoSE3PIDGainsInterface} associated with the given end-effector.
     */
@@ -528,15 +528,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return new YoSE3PIDGainsInterface()
       {
          @Override
-         public void set(PositionPIDGainsInterface positionGains)
+         public void set(PositionPIDGainsInterface positionGainsToSet)
          {
-            positionGains.set(positionGains);
+            positionGains.set(positionGainsToSet);
          }
 
          @Override
-         public void set(OrientationPIDGainsInterface orientationGains)
+         public void set(OrientationPIDGainsInterface orientationGainsToSet)
          {
-            orientationGains.set(orientationGains);
+            orientationGains.set(orientationGainsToSet);
          }
 
          @Override
@@ -563,7 +563,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the control frame {@code YoSE3OffsetFrame} associated to the given
     * end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the control frame is associated.
     * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given
     *         end-effector.

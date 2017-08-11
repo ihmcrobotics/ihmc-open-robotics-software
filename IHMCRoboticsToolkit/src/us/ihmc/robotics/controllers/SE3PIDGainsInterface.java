@@ -12,6 +12,6 @@ public interface SE3PIDGainsInterface
    public abstract void set(PositionPIDGainsInterface positionGains);
 
    public abstract PositionPIDGainsInterface getPositionGains();
-   
+
    public abstract OrientationPIDGainsInterface getOrientationGains();
 }
