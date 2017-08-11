@@ -18,9 +18,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -147,9 +147,9 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+   public PDGains getCoMHeightControlGains()
    {
-      YoPDGains gains = new YoPDGains("CoMHeight", registry);
+      PDGains gains = new PDGains("_CoMHeight");
 
       double kp = runningOnRealRobot ? 40.0 : 50.0;
       double zeta = runningOnRealRobot ? 0.4 : 1.0;
@@ -160,7 +160,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setZeta(zeta);
       gains.setMaximumFeedback(maxAcceleration);
       gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }

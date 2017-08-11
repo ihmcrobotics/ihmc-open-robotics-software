@@ -34,7 +34,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -740,7 +740,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+         public PDGains getCoMHeightControlGains()
          {
             return null;
          }

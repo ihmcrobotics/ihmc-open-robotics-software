@@ -21,9 +21,9 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -182,10 +182,8 @@ public abstract class WalkingControllerParameters
 
    /**
     * This method returns the gains used in the controller to regulate the center of mass height.
-    *
-    * TODO: remove registry
     */
-   public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
+   public abstract PDGains getCoMHeightControlGains();
 
    /**
     * Returns a list with pairs of joint control gains and the names of the joints that the gain will

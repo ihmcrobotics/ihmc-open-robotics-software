@@ -32,9 +32,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -253,9 +253,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+   public PDGains getCoMHeightControlGains()
    {
-      YoPDGains gains = new YoPDGains("CoMHeight", registry);
+      PDGains gains = new PDGains("_CoMHeight");
 
       double kp = 40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
@@ -266,7 +266,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setZeta(zeta);
       gains.setMaximumFeedback(maxAcceleration);
       gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
