@@ -8,6 +8,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -234,7 +235,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
          jointAccelerationIntegrationParameters = new HashMap<>();
-         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = walkingControllerParameters.getJointAccelerationIntegrationParameters(registry);
+         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = new HashMap<>();
+         ParameterTools.extractAccelerationIntegrationParameterMap(walkingControllerParameters.getJointAccelerationIntegrationParameters(), parameters, registry);
 
          for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
          {

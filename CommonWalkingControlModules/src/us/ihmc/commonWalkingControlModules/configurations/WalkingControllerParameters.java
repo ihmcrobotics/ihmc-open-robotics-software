@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
@@ -62,7 +63,9 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns a map from joint name to joint acceleration integration parameters.
+    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
+    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
+    * parameters. The name will be used to create YoVariables in the controller.
     * <p>
     * Note that this method is only called if
     * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
@@ -71,26 +74,15 @@ public abstract class WalkingControllerParameters
     * This method is called by the controller to know the set of joints for which specific
     * parameters are to be used. If a joint is not added to this map, the default parameters will be used.
     * </p>
-    * Example a robot for which we want to provide specific parameters for the elbow joints only:</br>
-    * {@code Map<String, JointAccelerationIntegrationParametersReadOnly> jointParameters = new HashMap<>();}</br>
-    * {@code JointAccelerationIntegrationParametersReadOnly elbowParameters = new YoJointAccelerationIntegrationParameters("elbow", 0.999, 0.95, 0.1, 0.1, registry);}</br>
-    * {@code jointParameters.put("leftElbow", elbowParameters);}</br>
-    * {@code jointParameters.put("rightElbow", elbowParameters);}</br>
-    * {@code return jointParameters;}</br>
-    * </p>
-    * @param registry the controller registry allowing to create {@code YoVariable}s for the
-    *           parameters.
-    * @return the map from the names of the joints with their specific parameters to use.
-    *
-    * TODO: remove registry
+    * @return list containing acceleration integration parameters and the corresponding joints
     */
-   public Map<String, JointAccelerationIntegrationParametersReadOnly> getJointAccelerationIntegrationParameters(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
    {
       return null;
    }
 
    /**
-    * Returns the value of sqrt(g / z0) which corrsponds to omega0 in the Linear Inverted Pendulum
+    * Returns the value of sqrt(g / z0) which corresponds to omega0 in the Linear Inverted Pendulum
     * Model that the ICP is based on. Note, that this value is a tuning parameter for each robot and
     * is not computed from the actual CoM height.
     *
@@ -191,7 +183,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<ImmutablePair<PIDGains, List<String>>> getOrCreateJointSpaceControlGains()
+   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }

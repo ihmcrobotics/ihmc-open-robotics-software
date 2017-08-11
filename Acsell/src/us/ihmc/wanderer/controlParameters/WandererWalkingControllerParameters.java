@@ -1,7 +1,12 @@
 package us.ihmc.wanderer.controlParameters;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -13,9 +18,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -204,8 +209,24 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   /** {@inheritDoc} */
+   @Override
+   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
    {
+      List<String> spineNames = new ArrayList<>();
+      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
+      PIDGains spineGains = createSpineControlGains();
+
+      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
+
+      return jointspaceGains;
+   }
+
+   private PIDGains createSpineControlGains()
+   {
+      PIDGains spineGains = new PIDGains("_SpineJointGains");
+
       double kp = 250.0;
       double zeta = 0.6;
       double ki = 0.0;
@@ -213,33 +234,14 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
       spineGains.setKp(kp);
       spineGains.setZeta(zeta);
       spineGains.setKi(ki);
-      spineGains.setMaximumIntegralError(maxIntegralError);
+      spineGains.setMaxIntegralError(maxIntegralError);
       spineGains.setMaximumFeedback(maxAccel);
       spineGains.setMaximumFeedbackRate(maxJerk);
-      spineGains.createDerivativeGainUpdater(true);
 
       return spineGains;
-   }
-
-   private Map<String, YoPIDGains> jointspaceGains = null;
-   /** {@inheritDoc} */
-   @Override
-   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
-   {
-      if (jointspaceGains != null)
-         return jointspaceGains;
-
-      jointspaceGains = new HashMap<>();
-
-      YoPIDGains spineGains = createSpineControlGains(registry);
-      for (SpineJointName name : jointMap.getSpineJointNames())
-         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
-
-      return jointspaceGains;
    }
 
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
