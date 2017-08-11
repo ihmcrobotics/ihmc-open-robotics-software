@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -12,6 +12,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AxisAngleOrientationController
 {
@@ -29,7 +30,7 @@ public class AxisAngleOrientationController
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
-   
+
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAction = new FrameVector();
@@ -61,9 +62,9 @@ public class AxisAngleOrientationController
          gains = new YoAxisAngleOrientationGains(prefix, registry);
 
       this.gains = gains;
-      proportionalGainMatrix = gains.createProportionalGainMatrix();
-      derivativeGainMatrix = gains.createDerivativeGainMatrix();
-      integralGainMatrix = gains.createIntegralGainMatrix();
+      proportionalGainMatrix = gains.getProportionalGainMatrix();
+      derivativeGainMatrix = gains.getDerivativeGainMatrix();
+      integralGainMatrix = gains.getIntegralGainMatrix();
 
       rotationErrorInBody = new YoFrameVector(prefix + "RotationErrorInBody", bodyFrame, registry);
       rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
@@ -119,7 +120,7 @@ public class AxisAngleOrientationController
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
    }
-   
+
    /**
     * Computes using Twists, ignores linear part
     */
@@ -137,7 +138,7 @@ public class AxisAngleOrientationController
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
       twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
    }
-   
+
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
    {
       desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);

@@ -1,8 +1,14 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains;
 
-public interface PositionPIDGainsInterface
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+
+public interface PID3DGainsReadOnly
 {
-   public abstract void set(PositionPIDGainsInterface gains);
+   public abstract Matrix3DReadOnly getProportionalGainMatrix();
+
+   public abstract Matrix3DReadOnly getDerivativeGainMatrix();
+
+   public abstract Matrix3DReadOnly getIntegralGainMatrix();
 
    public abstract double[] getProportionalGains();
 
@@ -19,6 +25,4 @@ public interface PositionPIDGainsInterface
    public abstract double getMaximumFeedback();
 
    public abstract double getMaximumFeedbackRate();
-
-   public abstract TangentialDampingGains getTangentialDampingGains();
 }

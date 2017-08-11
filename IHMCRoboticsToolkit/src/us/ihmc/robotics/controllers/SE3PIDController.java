@@ -1,6 +1,8 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;

@@ -99,9 +99,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getPositionGains(endEffector);
-      kp = gains.createProportionalGainMatrix();
-      kd = gains.createDerivativeGainMatrix();
-      ki = gains.createIntegralGainMatrix();
+      kp = gains.getProportionalGainMatrix();
+      kd = gains.getDerivativeGainMatrix();
+      ki = gains.getIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);

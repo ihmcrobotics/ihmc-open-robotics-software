@@ -104,9 +104,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getOrientationGains(endEffector);
-      kp = gains.createProportionalGainMatrix();
-      kd = gains.createDerivativeGainMatrix();
-      ki = gains.createIntegralGainMatrix();
+      kp = gains.getProportionalGainMatrix();
+      kd = gains.getDerivativeGainMatrix();
+      ki = gains.getIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       endEffectorFrame = endEffector.getBodyFixedFrame();

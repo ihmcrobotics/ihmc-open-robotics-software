@@ -74,33 +74,7 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void reset()
-   {
-      for (int i = 0; i < proportionalGains.length; i++)
-      {
-         proportionalGains[i].set(0.0);
-         derivativeGains[i].set(0.0);
-         integralGains[i].set(0.0);
-      }
-
-      if (dampingRatios != null)
-      {
-         for (int i = 0; i < 3; i++)
-            dampingRatios[i].set(0.0);
-      }
-
-      maxIntegralError.set(0.0);
-      maxFeedback.set(Double.POSITIVE_INFINITY);
-      maxFeedbackRate.set(Double.POSITIVE_INFINITY);
-      maxDerivativeError.set(Double.POSITIVE_INFINITY);
-      maxProportionalError.set(Double.POSITIVE_INFINITY);
-
-      if (tangentialDampingGains != null)
-         tangentialDampingGains.reset();
-   }
-
-   @Override
-   public Matrix3DReadOnly createProportionalGainMatrix()
+   public Matrix3DReadOnly getProportionalGainMatrix()
    {
       Matrix3D proportionalGainMatrix = new Matrix3D();
 
@@ -114,7 +88,7 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createDerivativeGainMatrix()
+   public Matrix3DReadOnly getDerivativeGainMatrix()
    {
       Matrix3D derivativeGainMatrix = new Matrix3D();
 
@@ -128,7 +102,7 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createIntegralGainMatrix()
+   public Matrix3DReadOnly getIntegralGainMatrix()
    {
       Matrix3D integralGainMatrix = new Matrix3D();
 
@@ -225,18 +199,6 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
-   }
-
-   @Override
-   public void set(PositionPIDGainsInterface gains)
-   {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setTangentialDampingGains(gains.getTangentialDampingGains());
-      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
-      setMaxDerivativeError(gains.getMaximumDerivativeError());
-      setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override

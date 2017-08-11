@@ -130,13 +130,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
       YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
-      kpLinear = positionGains.createProportionalGainMatrix();
-      kdLinear = positionGains.createDerivativeGainMatrix();
-      kiLinear = positionGains.createIntegralGainMatrix();
+      kpLinear = positionGains.getProportionalGainMatrix();
+      kdLinear = positionGains.getDerivativeGainMatrix();
+      kiLinear = positionGains.getIntegralGainMatrix();
 
-      kpAngular = orientationGains.createProportionalGainMatrix();
-      kdAngular = orientationGains.createDerivativeGainMatrix();
-      kiAngular = orientationGains.createIntegralGainMatrix();
+      kpAngular = orientationGains.getProportionalGainMatrix();
+      kdAngular = orientationGains.getDerivativeGainMatrix();
+      kiAngular = orientationGains.getIntegralGainMatrix();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 

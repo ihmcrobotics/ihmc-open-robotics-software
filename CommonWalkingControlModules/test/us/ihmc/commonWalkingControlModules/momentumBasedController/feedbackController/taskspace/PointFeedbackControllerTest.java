@@ -311,9 +311,9 @@ public final class PointFeedbackControllerTest
          double integralGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
          double maxIntegralError = RandomNumbers.nextDouble(random, 0.0, 10.0);
          positionGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
-         positionGains.setMaximumError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         positionGains.setMaximumVelocityError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         positionGains.setMaximumFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
+         positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
          pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setGains(positionGains);
 

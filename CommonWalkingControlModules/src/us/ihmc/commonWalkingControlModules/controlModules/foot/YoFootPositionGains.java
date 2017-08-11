@@ -4,7 +4,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.TangentialDampingGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoTangentialDampingGains;
@@ -48,21 +47,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void reset()
-   {
-      proportionalXYGain.set(0.0);
-      proportionalZGain.set(0.0);
-      derivativeXYGain.set(0.0);
-      derivativeZGain.set(0.0);
-      dampingRatio.set(0.0);
-      maximumFeedback.set(Double.POSITIVE_INFINITY);
-      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
-      maxDerivativeError.set(Double.POSITIVE_INFINITY);
-      maxProportionalError.set(Double.POSITIVE_INFINITY);
-   }
-
-   @Override
-   public Matrix3DReadOnly createProportionalGainMatrix()
+   public Matrix3DReadOnly getProportionalGainMatrix()
    {
       Matrix3D proportionalGainMatrix = new Matrix3D();
 
@@ -77,7 +62,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createDerivativeGainMatrix()
+   public Matrix3DReadOnly getDerivativeGainMatrix()
    {
       Matrix3D derivativeGainMatrix = new Matrix3D();
 
@@ -92,7 +77,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public Matrix3DReadOnly createIntegralGainMatrix()
+   public Matrix3DReadOnly getIntegralGainMatrix()
    {
       return new Matrix3D();
    }
@@ -212,18 +197,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
       tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
-   }
-
-   @Override
-   public void set(PositionPIDGainsInterface gains)
-   {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setTangentialDampingGains(gains.getTangentialDampingGains());
-      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
-      setMaxDerivativeError(gains.getMaximumDerivativeError());
-      setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override

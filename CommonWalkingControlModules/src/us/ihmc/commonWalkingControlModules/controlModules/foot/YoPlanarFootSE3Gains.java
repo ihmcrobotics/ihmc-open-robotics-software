@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoPlanarFootSE3Gains implements YoSE3PIDGainsInterface
@@ -15,12 +15,6 @@ public class YoPlanarFootSE3Gains implements YoSE3PIDGainsInterface
    {
       positionGains = new YoPlanarFootPositionGains(prefix, registry);
       orientationGains = new YoPlanarFootOrientationGains(prefix, registry);
-   }
-
-   public void reset()
-   {
-      positionGains.reset();
-      orientationGains.reset();
    }
 
    @Override

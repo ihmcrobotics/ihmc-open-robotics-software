@@ -93,7 +93,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3DReadOnly createProportionalGainMatrix()
+   public Matrix3DReadOnly getProportionalGainMatrix()
    {
       Matrix3D proportionalGainMatrix = new Matrix3D();
 
@@ -107,7 +107,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3DReadOnly createDerivativeGainMatrix()
+   public Matrix3DReadOnly getDerivativeGainMatrix()
    {
       Matrix3D derivativeGainMatrix = new Matrix3D();
 
@@ -121,7 +121,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3DReadOnly createIntegralGainMatrix()
+   public Matrix3DReadOnly getIntegralGainMatrix()
    {
       Matrix3D integralGainMatrix = new Matrix3D();
 
@@ -218,17 +218,6 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
-   }
-
-   @Override
-   public void set(OrientationPIDGainsInterface gains)
-   {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
-      setMaxDerivativeError(gains.getMaximumDerivativeError());
-      setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
