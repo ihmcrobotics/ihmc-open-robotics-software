@@ -38,7 +38,6 @@ task deleteTests {
             ihmc.deleteTestsFromProject(new File(project.projectDir, childDir), "visualizers")
          }
       }
-
    }
 }
 
