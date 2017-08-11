@@ -168,12 +168,12 @@ task deploy(dependsOn: ['jar']) {
    doLast {
       if (!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
       {
-         throw new GradleException("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         println("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
       }
 
       if (!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
       {
-         throw new GradleException("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         println("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
       }
 
       ssh.run {
