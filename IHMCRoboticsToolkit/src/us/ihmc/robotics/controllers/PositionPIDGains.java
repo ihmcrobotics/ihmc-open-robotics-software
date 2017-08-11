@@ -23,27 +23,6 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    private final Matrix3D derivativeGainMatrix = new Matrix3D();
    private final Matrix3D integralGainMatrix = new Matrix3D();
 
-   public void set(PositionPIDGainsInterface gains)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         positionProportionalGains[i] = gains.getProportionalGains()[i];
-         positionDerivativeGains[i] = gains.getDerivativeGains()[i];
-         positionIntegralGains[i] = gains.getIntegralGains()[i];
-      }
-
-      positionMaxIntegralError = gains.getMaximumIntegralError();
-      positionMaxDerivativeError = gains.getMaximumDerivativeError();
-      positionMaxProportionalError = gains.getMaximumProportionalError();
-
-      positionMaximumFeedback = gains.getMaximumFeedback();
-      positionMaximumFeedbackRate = gains.getMaximumFeedbackRate();
-
-      tangentialDampingGains = gains.getTangentialDampingGains();
-
-      updateGainMatrices();
-   }
-
    public void setGains(double proportionalGain, double derivativeGain)
    {
       setGains(proportionalGain, derivativeGain, 0.0, 0.0);
@@ -162,12 +141,6 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double getMaximumProportionalError()
    {
       return positionMaxProportionalError;
-   }
-
-   @Override
-   public TangentialDampingGains getTangentialDampingGains()
-   {
-      return tangentialDampingGains;
    }
 
    private void updateGainMatrices()

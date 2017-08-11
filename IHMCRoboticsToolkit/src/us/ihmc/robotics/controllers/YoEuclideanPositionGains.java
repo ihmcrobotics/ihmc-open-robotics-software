@@ -23,8 +23,6 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    private final YoDouble maxFeedback;
    private final YoDouble maxFeedbackRate;
 
-   private final YoTangentialDampingGains tangentialDampingGains;
-
    public YoEuclideanPositionGains(String prefix, YoVariableRegistry registry)
    {
       this(prefix, false, registry);
@@ -64,8 +62,6 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 
       maxFeedback = new YoDouble(prefix + "PositionMaxFeedback", registry);
       maxFeedbackRate = new YoDouble(prefix + "PositionMaxFeedbackRate", registry);
-
-      tangentialDampingGains = new YoTangentialDampingGains(prefix, registry);
 
       maxFeedback.set(Double.POSITIVE_INFINITY);
       maxFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -202,18 +198,6 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
-   {
-      this.tangentialDampingGains.set(tangentialDampingGains);
-   }
-
-   @Override
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
-   {
-      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
-   }
-
-   @Override
    public YoDouble getYoMaximumFeedback()
    {
       return maxFeedback;
@@ -235,18 +219,6 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
-   }
-
-   @Override
-   public YoTangentialDampingGains getYoTangentialDampingGains()
-   {
-      return tangentialDampingGains;
-   }
-
-   @Override
-   public TangentialDampingGains getTangentialDampingGains()
-   {
-      return tangentialDampingGains;
    }
 
    private double[] tempPropotionalGains = new double[3];
