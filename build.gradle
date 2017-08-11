@@ -11,32 +11,45 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.21"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.22"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
-
 task generateSubprojectSettings {
-
-   project.projectDir.list().each { childDir ->
-      if (new File(project.projectDir, childDir + "/build.gradle").exists())
-      {
-         settings.writeSettingsFileToProject(new File(project.projectDir, childDir))
+   doLast {
+      project.projectDir.list().each { childDir ->
+         if (new File(project.projectDir, childDir + "/build.gradle").exists())
+         {
+            settings.writeSettingsFileToProject(new File(project.projectDir, childDir))
+         }
       }
    }
 }
 
 task deleteTests {
-   gradle.includedBuilds.each {
-      dependsOn it.task(":deleteTests")
+   doLast {
+      project.projectDir.list().each { childDir ->
+         if (new File(project.projectDir, childDir + "/build.gradle").exists())
+         {
+            ihmc.deleteTestsFromProject(new File(project.projectDir, childDir), "test")
+            ihmc.deleteTestsFromProject(new File(project.projectDir, childDir), "visualizers")
+         }
+      }
+
    }
 }
 
 task copyTests {
-   gradle.includedBuilds.each {
-      dependsOn it.task(":copyTests")
+   doLast {
+      project.projectDir.list().each { childDir ->
+         if (new File(project.projectDir, childDir + "/build.gradle").exists())
+         {
+            ihmc.copyTestsForProject(new File(project.projectDir, childDir), "test")
+            ihmc.copyTestsForProject(new File(project.projectDir, childDir), "visualizers")
+         }
+      }
    }
 }
