@@ -7,7 +7,7 @@ if (startParameter.searchUpwards)
    settingsDir.list().each { childDir ->
       if (new File(settingsDir, childDir + "/build.gradle").exists())
       {
-         includeBuild childDir
+         //includeBuild childDir
       }
    }
 }
