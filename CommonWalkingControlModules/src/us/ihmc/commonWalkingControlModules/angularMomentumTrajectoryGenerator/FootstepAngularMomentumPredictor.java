@@ -147,8 +147,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
       if (DEBUG)
       {
-         this.comTrajDebug = new YoFrameTrajectory3D("CoMDebugTraj", maxNumberOfTrajectoryCoefficients, worldFrame, registry);
-         this.swingTrajDebug = new YoFrameTrajectory3D("SwingDebugTraj", maxNumberOfTrajectoryCoefficients, worldFrame, registry);
+         this.comTrajDebug = new YoFrameTrajectory3D("CoMDebugTraj", 2 * maxNumberOfTrajectoryCoefficients, worldFrame, registry);
+         this.swingTrajDebug = new YoFrameTrajectory3D("SwingDebugTraj", 2 * maxNumberOfTrajectoryCoefficients, worldFrame, registry);
          this.anguMomTrajDebug = new YoFrameVector("AngMomViz", worldFrame, registry);
          this.comPosDebug = new YoFramePoint("CoMViz", "", worldFrame, registry);
          this.swingFootTrajDebug = new YoFramePoint("SwFViz", worldFrame, registry);
