@@ -40,8 +40,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBased
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -657,7 +657,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
-         feedbackControlCommand.setGains((SE3PIDGainsInterface) gains);
+         feedbackControlCommand.setGains((PIDSE3Gains) gains);
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.set(poseToHold);
          inputs.addCommand(feedbackControlCommand);

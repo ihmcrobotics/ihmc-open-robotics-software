@@ -11,14 +11,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -528,22 +526,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return new YoSE3PIDGainsInterface()
       {
          @Override
-         public void set(PositionPIDGainsInterface positionGainsToSet)
+         public void setPositionGains(PID3DGainsReadOnly positionGainsToSet)
          {
             positionGains.set(positionGainsToSet);
          }
 
          @Override
-         public void set(OrientationPIDGainsInterface orientationGainsToSet)
+         public void setOrientationGains(PID3DGainsReadOnly orientationGainsToSet)
          {
             orientationGains.set(orientationGainsToSet);
-         }
-
-         @Override
-         public void set(SE3PIDGainsInterface gains)
-         {
-            positionGains.set(gains.getPositionGains());
-            orientationGains.set(gains.getOrientationGains());
          }
 
          @Override

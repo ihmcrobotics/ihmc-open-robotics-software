@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public interface HexapodControllerParameters
@@ -15,7 +15,7 @@ public interface HexapodControllerParameters
 
    double getSwingZProportionalGain();
 
-   SE3PIDGainsInterface getBodySpatialGains();
+   PIDSE3Gains getBodySpatialGains();
 
    void getBodySpatialLinearQPWeight(Vector3D linearWeight);
 

@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -221,7 +222,7 @@ public class SE3PIDController
       orientationController.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(SE3PIDGainsInterface gains)
+   public void setGains(PIDSE3Gains gains)
    {
       positionController.setGains(gains.getPositionGains());
       orientationController.setGains(gains.getOrientationGains());

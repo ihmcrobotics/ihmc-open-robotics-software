@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -265,7 +265,7 @@ public class AxisAngleOrientationController
       gains.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(OrientationPIDGainsInterface gains)
+   public void setGains(PID3DGainsReadOnly gains)
    {
       this.gains.set(gains);
    }
