@@ -950,4 +950,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return steppingParameters;
    }
+   
+   @Override
+   public boolean alwaysAllowMomentum()
+   {
+      return true;
+   }
 }
