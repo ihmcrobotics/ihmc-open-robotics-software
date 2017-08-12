@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
