@@ -2,6 +2,8 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.MatrixUpdater;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

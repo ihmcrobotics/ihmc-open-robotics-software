@@ -6,8 +6,6 @@ import java.util.Map;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.controllers.GainCoupling;
-import us.ihmc.robotics.controllers.MatrixUpdater;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

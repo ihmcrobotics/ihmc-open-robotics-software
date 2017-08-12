@@ -1,4 +1,4 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains;
 
 /**
  * This enum is used in the context of 3D PID gains and can be set to determine if
