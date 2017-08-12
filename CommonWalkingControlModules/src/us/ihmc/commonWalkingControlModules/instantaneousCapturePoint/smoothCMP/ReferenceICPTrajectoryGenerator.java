@@ -370,7 +370,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, cmpPolynomial3D.getFramePosition());
       icpVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
 
-      areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-6));
+      areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-5));
    }
 
    private void checkCoMDynamics(double time, FrameVector comVelocityDesiredCurrent, FramePoint icpPositionDesiredCurrent, FramePoint comPositionDesiredCurrent)
@@ -378,7 +378,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       comVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
       comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
 
-      areCoMDynamicsSatisfied.set(comVelocityDesiredCurrent.epsilonEquals(comVelocityDynamicsCurrent, 10e-6));
+      areCoMDynamicsSatisfied.set(comVelocityDesiredCurrent.epsilonEquals(comVelocityDynamicsCurrent, 10e-5));
    }
 
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<YoFrameTrajectory3D> cmpTrajectories)
