@@ -1,7 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
@@ -143,20 +142,13 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    }
 
    @Override
-   public void set(SE3PIDGainsInterface gains)
-   {
-      set(gains.getPositionGains());
-      set(gains.getOrientationGains());
-   }
-
-   @Override
-   public void set(PositionPIDGainsInterface positionGains)
+   public void setPositionGains(PID3DGainsReadOnly positionGains)
    {
       this.positionGains.set(positionGains);
    }
 
    @Override
-   public void set(OrientationPIDGainsInterface orientationGains)
+   public void setOrientationGains(PID3DGainsReadOnly orientationGains)
    {
       this.orientationGains.set(orientationGains);
    }

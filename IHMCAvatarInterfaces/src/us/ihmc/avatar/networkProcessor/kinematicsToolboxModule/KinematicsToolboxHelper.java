@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -67,7 +67,7 @@ public class KinematicsToolboxHelper
     * @param gains the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, SE3PIDGainsInterface gains)
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, PIDSE3Gains gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());

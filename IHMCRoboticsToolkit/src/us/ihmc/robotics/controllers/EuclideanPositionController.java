@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -263,7 +263,7 @@ public class EuclideanPositionController implements PositionController
       gains.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(PositionPIDGainsInterface gains)
+   public void setGains(PID3DGainsReadOnly gains)
    {
       this.gains.set(gains);
    }

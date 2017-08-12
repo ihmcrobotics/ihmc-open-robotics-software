@@ -1,13 +1,15 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 
 /**
  * @author twan
  *         Date: 6/4/13
  */
-public class SE3PIDGains implements SE3PIDGainsInterface
+public class SE3PIDGains implements PIDSE3Gains
 {
    private final PositionPIDGains positionGains = new PositionPIDGains();
    private final OrientationPIDGains orientationGains = new OrientationPIDGains();
@@ -97,20 +99,20 @@ public class SE3PIDGains implements SE3PIDGainsInterface
    }
 
    @Override
-   public void set(SE3PIDGainsInterface gains)
+   public void set(PIDSE3Gains gains)
    {
       positionGains.set(gains.getPositionGains());
       orientationGains.set(gains.getOrientationGains());
    }
 
    @Override
-   public void set(PositionPIDGainsInterface positionGains)
+   public void setPositionGains(PID3DGainsReadOnly positionGains)
    {
       this.positionGains.set(positionGains);
    }
 
    @Override
-   public void set(OrientationPIDGainsInterface orientationGains)
+   public void setOrientationGains(PID3DGainsReadOnly orientationGains)
    {
       this.orientationGains.set(orientationGains);
    }

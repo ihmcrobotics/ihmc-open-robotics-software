@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientation
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -47,10 +47,10 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
       positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingZProportionalGain());
       positionGains.setDampingRatio(0.9);
       positionGains.createDerivativeGainUpdater(true);
-      footGains.set(positionGains);
+      footGains.setPositionGains(positionGains);
       YoFootOrientationGains orientationGains = new YoFootOrientationGains(name + "footOrientationGains", registry);
       orientationGains.setProportionalGains(0.0, 0.0, 0.0);
-      footGains.set(orientationGains);
+      footGains.setOrientationGains(orientationGains);
       
       parentRegistry.addChild(registry);
    }
@@ -74,7 +74,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public SE3PIDGainsInterface getBodySpatialGains()
+   public PIDSE3Gains getBodySpatialGains()
    {
       return bodySpatialGains;
    }

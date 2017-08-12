@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.SE3PIDGains;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -223,7 +223,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * 
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(SE3PIDGainsInterface gains)
+   public void setGains(PIDSE3Gains gains)
    {
       this.gains.set(gains);
    }
@@ -235,7 +235,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void setGains(OrientationPIDGainsInterface orientationGains)
    {
-      this.gains.set(orientationGains);
+      this.gains.setOrientationGains(orientationGains);
    }
 
    /**
@@ -245,7 +245,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void setGains(PositionPIDGainsInterface positionGains)
    {
-      this.gains.set(positionGains);
+      this.gains.setPositionGains(positionGains);
    }
 
    /**
@@ -700,7 +700,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       return spatialAccelerationCommand;
    }
 
-   public SE3PIDGainsInterface getGains()
+   public PIDSE3Gains getGains()
    {
       return gains;
    }

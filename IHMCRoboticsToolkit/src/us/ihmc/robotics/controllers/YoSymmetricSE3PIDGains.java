@@ -2,8 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -91,7 +90,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public void set(OrientationPIDGainsInterface gains)
+   public void setOrientationGains(PID3DGainsReadOnly gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
@@ -102,7 +101,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public void set(PositionPIDGainsInterface gains)
+   public void setPositionGains(PID3DGainsReadOnly gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
@@ -110,13 +109,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
-   }
-
-   @Override
-   public void set(SE3PIDGainsInterface gains)
-   {
-      set(gains.getPositionGains());
-      set(gains.getOrientationGains());
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)
