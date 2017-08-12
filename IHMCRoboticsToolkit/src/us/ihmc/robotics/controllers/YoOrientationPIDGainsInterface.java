@@ -1,9 +1,9 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public interface YoOrientationPIDGainsInterface extends OrientationPIDGainsInterface
+public interface YoOrientationPIDGainsInterface extends PID3DGains
 {
    public abstract YoDouble getYoMaximumFeedback();
 

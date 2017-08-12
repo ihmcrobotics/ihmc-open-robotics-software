@@ -272,9 +272,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       if (orientationGains != null)
-         spatialFeedbackControlCommand.setGains(orientationGains);
+         spatialFeedbackControlCommand.setOrientationGains(orientationGains);
       if (positionGains != null)
-         spatialFeedbackControlCommand.setGains(positionGains);
+         spatialFeedbackControlCommand.setPositionGains(positionGains);
 
       spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
       spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);

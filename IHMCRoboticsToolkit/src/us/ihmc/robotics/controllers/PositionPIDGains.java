@@ -2,9 +2,9 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 
-public class PositionPIDGains implements PositionPIDGainsInterface
+public class PositionPIDGains implements PID3DGains
 {
    private double[] positionProportionalGains = new double[3];
    private double[] positionDerivativeGains = new double[3];

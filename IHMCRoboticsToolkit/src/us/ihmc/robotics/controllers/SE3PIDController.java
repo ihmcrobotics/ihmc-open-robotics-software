@@ -1,9 +1,7 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -11,6 +9,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Double-geodesic PD controller with feed forward for a left-invariant system (i.e. in body coordinates)
@@ -228,12 +227,12 @@ public class SE3PIDController
       orientationController.setGains(gains.getOrientationGains());
    }
 
-   public void setPositionGains(PositionPIDGainsInterface gains)
+   public void setPositionGains(PID3DGains gains)
    {
       positionController.setGains(gains);
    }
 
-   public void setOrientationGains(OrientationPIDGainsInterface gains)
+   public void setOrientationGains(PID3DGains gains)
    {
       orientationController.setGains(gains);
    }

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -28,7 +29,6 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -41,6 +41,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class PointFeedbackControllerTest
 {
@@ -313,9 +314,9 @@ public final class PointFeedbackControllerTest
          positionGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
          positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
+         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
          pointFeedbackControlCommand.setGains(positionGains);
-         spatialFeedbackControlCommand.setGains(positionGains);
+         spatialFeedbackControlCommand.setPositionGains(positionGains);
 
          FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
          FramePoint desiredPosition = new FramePoint(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
