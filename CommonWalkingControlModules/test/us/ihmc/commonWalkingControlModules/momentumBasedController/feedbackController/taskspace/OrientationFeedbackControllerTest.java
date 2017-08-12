@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -22,7 +22,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.controllers.OrientationPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -33,6 +32,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class OrientationFeedbackControllerTest
 {
@@ -94,9 +94,9 @@ public class OrientationFeedbackControllerTest
          orientationGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
          orientationGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          orientationGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         orientationGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
+         orientationGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
          orientationFeedbackControlCommand.setGains(orientationGains);
-         spatialFeedbackControlCommand.setGains(orientationGains);
+         spatialFeedbackControlCommand.setOrientationGains(orientationGains);
 
          FrameOrientation desiredOrientation = new FrameOrientation(worldFrame, EuclidCoreRandomTools.generateRandomQuaternion(random));
          FrameVector desiredAngularVelocity = new FrameVector(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));

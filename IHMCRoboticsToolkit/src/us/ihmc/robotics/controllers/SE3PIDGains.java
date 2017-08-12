@@ -1,9 +1,8 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
 
 /**
  * @author twan
@@ -118,13 +117,13 @@ public class SE3PIDGains implements PIDSE3Gains
    }
 
    @Override
-   public PositionPIDGainsInterface getPositionGains()
+   public PID3DGains getPositionGains()
    {
       return positionGains;
    }
 
    @Override
-   public OrientationPIDGainsInterface getOrientationGains()
+   public PID3DGains getOrientationGains()
    {
       return orientationGains;
    }

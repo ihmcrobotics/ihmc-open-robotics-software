@@ -24,12 +24,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.PositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -45,6 +39,10 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class MovingBaseRobotArmController implements RobotController
 {
@@ -280,8 +278,8 @@ public class MovingBaseRobotArmController implements RobotController
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handSpatialCommand.setGains((PositionPIDGainsInterface) handPositionGains);
-      handSpatialCommand.setGains((OrientationPIDGainsInterface) handOrientationGains);
+      handSpatialCommand.setPositionGains(handPositionGains);
+      handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.setControlBaseFrame(trajectory.getCurrentReferenceFrame());
       handSpatialCommand.changeFrameAndSet(position, linearVelocity, linearAcceleration);

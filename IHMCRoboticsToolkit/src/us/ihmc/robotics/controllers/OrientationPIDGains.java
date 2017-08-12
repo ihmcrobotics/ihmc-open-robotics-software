@@ -2,10 +2,10 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 
-public class OrientationPIDGains implements OrientationPIDGainsInterface
+public class OrientationPIDGains implements PID3DGains
 {
    private double[] orientationProportionalGains = new double[3];
    private double[] orientationDerivativeGains = new double[3];

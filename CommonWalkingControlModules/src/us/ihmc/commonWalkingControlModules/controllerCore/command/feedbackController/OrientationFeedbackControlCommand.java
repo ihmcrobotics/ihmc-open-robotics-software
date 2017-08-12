@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.OrientationPIDGains;
-import us.ihmc.robotics.controllers.pidGains.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -341,7 +341,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return ControllerCoreCommandType.ORIENTATION;
    }
 
-   public OrientationPIDGainsInterface getGains()
+   public PID3DGains getGains()
    {
       return gains;
    }

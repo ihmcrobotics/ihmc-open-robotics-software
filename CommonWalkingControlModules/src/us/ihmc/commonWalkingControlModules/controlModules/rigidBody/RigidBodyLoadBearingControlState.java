@@ -19,9 +19,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoad
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -34,6 +31,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
@@ -137,8 +137,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    public void setGains(YoOrientationPIDGainsInterface taskspaceOrientationGains, YoPositionPIDGainsInterface taskspacePositionGains)
    {
-      spatialFeedbackControlCommand.setGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setGains(taskspacePositionGains);
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
+      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
