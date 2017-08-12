@@ -3,11 +3,16 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectory3D
@@ -287,18 +292,26 @@ public class YoTrajectory3D
 
    public double getInitialTime()
    {
-      if (xTrajectory.getInitialTime() == yTrajectory.getInitialTime() && xTrajectory.getInitialTime() == zTrajectory.getInitialTime())
+      if (MathTools.epsilonCompare(xTrajectory.getInitialTime(), yTrajectory.getInitialTime(), Epsilons.ONE_THOUSANDTH)
+            && MathTools.epsilonCompare(xTrajectory.getInitialTime(), zTrajectory.getInitialTime(), Epsilons.ONE_THOUSANDTH))
          return xTrajectory.getInitialTime();
       else
+      {
+         //PrintTools.warn("Trajectory initial times do not match. Using X trajectory times for computation");
          return xTrajectory.getInitialTime();
+      }
    }
 
    public double getFinalTime()
    {
-      if (xTrajectory.getFinalTime() == yTrajectory.getFinalTime() && xTrajectory.getFinalTime() == zTrajectory.getFinalTime())
+      if (MathTools.epsilonCompare(xTrajectory.getFinalTime(), yTrajectory.getFinalTime(), Epsilons.ONE_THOUSANDTH)
+            && MathTools.epsilonCompare(xTrajectory.getFinalTime(), zTrajectory.getFinalTime(), Epsilons.ONE_THOUSANDTH))
          return xTrajectory.getFinalTime();
       else
+      {
+         //PrintTools.warn("Trajectory final times do not match. Using X trajectory times for computation");
          return xTrajectory.getFinalTime();
+      }
    }
 
    public double getInitialTime(Direction dir)
@@ -679,5 +692,17 @@ public class YoTrajectory3D
    {
       for (int index = 0; index < 3; index++)
          getYoTrajectory(index).getDerivative(dervTraj.getYoTrajectory(index), order);
+   }
+
+   public void getStartPoint(Point3D positionToPack)
+   {
+      compute(getInitialTime());
+      positionToPack.set(getPosition());
+   }
+
+   public void getEndPoint(Point3D positionToPack)
+   {
+      compute(getFinalTime());
+      positionToPack.set(getPosition());
    }
 }

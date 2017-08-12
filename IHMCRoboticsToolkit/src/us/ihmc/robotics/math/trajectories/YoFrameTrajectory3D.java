@@ -623,4 +623,16 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       checkReferenceFrameMatch(dervTraj);
       super.getDerivative(dervTraj, order);
    }
+   
+   public void getStartPoint(FramePoint positionToPack)
+   {
+      positionToPack.setToZero(referenceFrame);
+      super.getStartPoint(positionToPack.getPoint());
+   }
+   
+   public void getEndPoint(FramePoint positionToPack)
+   {
+      positionToPack.setToZero(referenceFrame);
+      super.getEndPoint(positionToPack.getPoint());
+   }
 }
