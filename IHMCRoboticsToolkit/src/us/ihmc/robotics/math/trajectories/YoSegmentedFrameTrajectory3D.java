@@ -158,6 +158,10 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       this.numberOfSegments.set(numberOfSegments);
    }
 
+   
+   /**
+    * Returns the coefficients for all the set trajectories
+    */
    @Override
    public String toString()
    {
@@ -168,6 +172,10 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       return ret;
    }
 
+   /**
+    * Returns the coefficients for all the trajectories that can be set
+    * @return
+    */
    public String toString2()
    {
       String ret = "";
@@ -176,4 +184,25 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }
+   
+   /**
+    * Returns the start and end points of each segment that has been set. Creates garbage. Use only for debugging 
+    * @return
+    */
+   public String toString3()
+   {
+      String ret = "";
+      ret += name;
+      FramePoint tempFramePointForPrinting = new FramePoint();
+      for (int i = 0; i < numberOfSegments.getIntegerValue(); i++)
+      {
+         ret += "\nSegment " + i + ":\n"; 
+         segments.get(i).getStartPoint(tempFramePointForPrinting);
+         ret += "Start Point: t = " + segments.get(i).getInitialTime() + ", " + tempFramePointForPrinting.toString();
+         segments.get(i).getEndPoint(tempFramePointForPrinting);
+         ret += "End Point: t = " + segments.get(i).getFinalTime() + ", " + tempFramePointForPrinting.toString();
+      }
+      return ret;
+   }
+   
 }

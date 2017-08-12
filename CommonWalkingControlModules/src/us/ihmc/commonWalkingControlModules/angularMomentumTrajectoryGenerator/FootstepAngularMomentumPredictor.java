@@ -578,6 +578,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       tempFramePoint2.add(0, 0, comHeight.getDoubleValue());
    }
 
+   CoPPointName searchCoPName;
    private void updateCurrentSegmentTimes(int footstepIndex)
    {
       this.currentFootstepTime = 0.0;
@@ -599,7 +600,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       currentFirstTransferSegmentDuration = 0.0;
       currentCoPPlanReference = upcomingCoPsInFootsteps.get(footstepIndex + 2);
       currentCoPListReference = currentCoPPlanReference.getCoPPointList();
-      for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != endCoPName; tempInt1++)
+      searchCoPName = (numberOfRegisteredFootsteps.getIntegerValue() < numberOfFootstepsToConsider.getIntegerValue() && footstepIndex == numberOfRegisteredFootsteps.getIntegerValue() - 1) ? CoPPointName.FINAL_COP : endCoPName;
+      for (tempInt1 = 0; currentCoPListReference.get(tempInt1) != searchCoPName; tempInt1++)
          currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
       
       currentFirstTransferSegmentDuration += currentCoPPlanReference.get(tempInt1).getTime();
