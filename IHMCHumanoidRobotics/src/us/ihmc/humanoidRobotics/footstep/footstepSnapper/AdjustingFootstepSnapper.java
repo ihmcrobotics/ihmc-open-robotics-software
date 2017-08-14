@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -22,14 +22,14 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/28/15.
  */
-public class AdjustingFootstepSnapper implements FootstepSnapper
+public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 {
-   private FootstepSnappingParameters footstepSnappingParameters;
+   private QuadTreeFootstepSnappingParameters footstepSnappingParameters;
    private double distanceAdjustment;
    private double angleAdjustment;
    private ConvexHullFootstepSnapper convexHullFootstepSnapper;
 
-   public AdjustingFootstepSnapper(FootstepValueFunction valueFunction, FootstepSnappingParameters parameters)
+   public AdjustingFootstepSnapper(FootstepValueFunction valueFunction, QuadTreeFootstepSnappingParameters parameters)
    {
       convexHullFootstepSnapper = new ConvexHullFootstepSnapper(valueFunction, parameters);
       this.footstepSnappingParameters = parameters;
@@ -55,13 +55,13 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       return convexHullFootstepSnapper.getPointList();
    }
 
-   public void updateParameters(FootstepSnappingParameters newParameters)
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters)
    {
       this.footstepSnappingParameters = newParameters;
       convexHullFootstepSnapper.updateParameters(newParameters);
    }
 
-   public FootstepSnappingParameters getParameters()
+   public QuadTreeFootstepSnappingParameters getParameters()
    {
       return footstepSnappingParameters;
    }
@@ -116,7 +116,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
       //set to the sole pose
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());

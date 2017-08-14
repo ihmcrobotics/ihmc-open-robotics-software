@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -113,7 +113,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       robotSide = footstep.getRobotSide();
 
-      FramePoint location = new FramePoint();
+      FramePoint3D location = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());

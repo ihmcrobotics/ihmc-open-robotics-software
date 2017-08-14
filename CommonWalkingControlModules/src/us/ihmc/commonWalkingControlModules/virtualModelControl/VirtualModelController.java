@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
@@ -315,8 +315,8 @@ public class VirtualModelController
          for (RigidBody rigidBody : allBodies)
          {
             Wrench gravityWrench = gravityWrenchMap.get(rigidBody);
-            gravityWrench.set(new FrameVector(ReferenceFrame.getWorldFrame(), 0, 0, -9.81 * rigidBody.getInertia().getMass()),
-                              new FrameVector(ReferenceFrame.getWorldFrame(), 0, 0, 0));
+            gravityWrench.set(new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, -9.81 * rigidBody.getInertia().getMass()),
+                              new FrameVector3D(ReferenceFrame.getWorldFrame(), 0, 0, 0));
          }
          gravityWrenchVisualizer.visualize(gravityWrenchMap);
       }

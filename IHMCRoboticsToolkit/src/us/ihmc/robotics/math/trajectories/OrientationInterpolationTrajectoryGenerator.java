@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
@@ -128,17 +128,17 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector velocityToPack)
+   public void getAngularVelocity(FrameVector3D velocityToPack)
    {
       desiredAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAngularAcceleration(FrameVector accelerationToPack)
+   public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

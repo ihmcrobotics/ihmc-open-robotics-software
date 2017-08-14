@@ -8,11 +8,11 @@ import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasUIParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
@@ -26,8 +26,8 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -65,6 +65,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.FootContactPoints;
+import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
@@ -96,7 +97,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
 
@@ -153,8 +153,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
-
-      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
+      
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 
@@ -190,7 +189,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return stateEstimatorParameters;
    }
 
-   @Override
    public AtlasPhysicalProperties getPhysicalProperties()
    {
       return atlasPhysicalProperties;
@@ -352,9 +350,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public UIParameters getUIParameters()
    {
-      return icpOptimizationParameters;
+      return new AtlasUIParameters(atlasPhysicalProperties);
    }
 
    @Override
@@ -783,5 +781,4 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       linkHolder.setInertia(inertia);
    }
-
 }

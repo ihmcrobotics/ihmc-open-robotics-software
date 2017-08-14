@@ -12,23 +12,21 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
-import us.ihmc.footstepPlanning.aStar.implementations.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.footstepPlanning.aStar.implementations.*;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   public static final double DEFAULT_COST_PER_STEP = 0.005;
-   public static final double DEFAULT_YAW_WEIGHT = 0.1;
+   private final String name = getClass().getSimpleName();
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+
    public static final double DEFAULT_STEP_WIDTH = 0.25;
 
    private FootstepGraph graph;
@@ -38,30 +36,35 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode goalNode;
 
-   private PlanarRegionsList planarRegionsList;
-   private SideDependentList<ConvexPolygon2D> footPolygons;
-
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
+   private final FootstepNodeSnapper snapper;
 
-   private double timeout = Double.POSITIVE_INFINITY;
+   private final YoDouble timeout;
 
-   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion, FootstepCost stepCostCalculator)
+   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion, FootstepCost stepCostCalculator,
+                               FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
    {
-      this(nodeChecker, heuristics, expansion, stepCostCalculator, null);
+      this(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null, parentRegistry);
    }
 
    public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion,
-         FootstepCost stepCostCalculator, GraphVisualization visualization)
+         FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, GraphVisualization visualization, YoVariableRegistry parentRegistry)
    {
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
       this.stepCostCalculator = stepCostCalculator;
       this.visualization = visualization;
+      this.snapper = snapper;
+
+      this.timeout = new YoDouble("timeout", registry);
+      timeout.set(Double.POSITIVE_INFINITY);
+
+      parentRegistry.addChild(registry);
    }
 
    public void setWeight(double weight)
@@ -71,7 +74,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public void setTimeout(double timeoutInSeconds)
    {
-      timeout = timeoutInSeconds;
+      timeout.set(timeoutInSeconds);
    }
 
    @Override
@@ -101,13 +104,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
-   }
-
-   public void setFootPolygons(SideDependentList<ConvexPolygon2D> footPolygons)
-   {
-      this.footPolygons = footPolygons;
+      snapper.setPlanarRegions(planarRegionsList);
    }
 
    @Override
@@ -127,29 +125,20 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepPlan plan = new FootstepPlan();
       List<FootstepNode> path = graph.getPathFromStart(goalNode);
       for (int i = 1; i < path.size(); i++)
-         plan.addFootstep(path.get(i).getRobotSide(), createPoseFromNode(path.get(i)));
-      return plan;
-   }
-
-   private FramePose createPoseFromNode(FootstepNode node)
-   {
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(node.getYaw());
-      footstepPose.setTranslationX(node.getX());
-      footstepPose.setTranslationY(node.getY());
-
-      if (footPolygons != null && planarRegionsList != null)
       {
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(node.getRobotSide()));
-         RigidBodyTransform worldToSole = new RigidBodyTransform();
-         worldToSole.setRotationYawAndZeroTranslation(node.getYaw());
-         worldToSole.setTranslation(node.getX(), node.getY(), 0.0);
-         footPolygon.applyTransformAndProjectToXYPlane(worldToSole);
-         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList);
+         RobotSide robotSide = path.get(i).getRobotSide();
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
+
+         RigidBodyTransform footstepPose = new RigidBodyTransform();
+         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+         footstepPose.setTranslationX(path.get(i).getX());
+         footstepPose.setTranslationY(path.get(i).getY());
          snapTransform.transform(footstepPose);
+
+         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
       }
 
-      return new FramePose(ReferenceFrame.getWorldFrame(), footstepPose);
+      return plan;
    }
 
    private void initialize()
@@ -162,6 +151,18 @@ public class AStarFootstepPlanner implements FootstepPlanner
       graph = new FootstepGraph(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
+
+      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
+      if(!validStartNode)
+         throw new RuntimeException("Start node isn't valid");
+
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
+         if(!validGoalNode)
+            throw new RuntimeException("Goal node isn't valid");
+      }
+      
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       goalNode = null;
@@ -212,7 +213,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout)
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
             break;
       }
    }
@@ -244,29 +245,35 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createDefaultPlanner(GraphVisualization viz)
+   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
    {
-      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      double yawWeight = 0.1;
+
+      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
-      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);
 
-      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
+      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
    }
 
-   public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons)
+   public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons,
+                                                                YoVariableRegistry registry)
    {
-      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons);
+      double yawWeight = 0.1;
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons, snapper, registry);
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
-      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
-      planner.setFootPolygons(footPolygons);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
       return planner;
    }
 }

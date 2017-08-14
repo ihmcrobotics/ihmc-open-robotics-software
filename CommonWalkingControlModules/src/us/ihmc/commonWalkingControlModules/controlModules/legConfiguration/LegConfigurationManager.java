@@ -8,13 +8,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LegConfigurationManager
@@ -52,12 +52,13 @@ public class LegConfigurationManager
 
       attemptToStraightenLegs.set(legConfigurationParameters.attemptToStraightenLegs());
 
-      this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
+      this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
+            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
 
       maxStepHeightForCollapse.set(stepHeightForCollapse);
       stepHeightForForcedCollapse.set(stepDownTooFar);
-      minStepLengthForCollapse.set(walkingControllerParameters.getFootLength());
+      minStepLengthForCollapse.set(walkingControllerParameters.getSteppingParameters().getFootLength());
 
       parentRegistry.addChild(registry);
    }
@@ -127,7 +128,10 @@ public class LegConfigurationManager
          if (isNextStepTooLow)
          {
             prepareForLegBracing(swingSide);
-            //useMediumWeight(swingSide);
+         }
+         else
+         {
+            doNotBrace(swingSide);
          }
       }
    }
@@ -145,6 +149,11 @@ public class LegConfigurationManager
    public void prepareForLegBracing(RobotSide robotSide)
    {
       legConfigurationControlModules.get(robotSide).prepareForLegBracing();
+   }
+
+   public void doNotBrace(RobotSide robotSide)
+   {
+      legConfigurationControlModules.get(robotSide).doNotBrace();
    }
 
    public void useLowWeight(RobotSide robotSide)
@@ -187,10 +196,10 @@ public class LegConfigurationManager
       }
    }
 
-   private final FramePoint2d tempLeadingFootPosition = new FramePoint2d();
-   private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
-   private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
-   private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
+   private final FramePoint2D tempLeadingFootPosition = new FramePoint2D();
+   private final FramePoint2D tempTrailingFootPosition = new FramePoint2D();
+   private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
+   private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
 
    public boolean areFeetWellPositionedForCollapse(RobotSide trailingLeg)
    {

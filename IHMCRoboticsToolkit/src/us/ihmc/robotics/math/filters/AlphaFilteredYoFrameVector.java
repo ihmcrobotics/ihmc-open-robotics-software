@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -110,7 +110,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
       z.update(vectorUnfiltered.getZ());
    }
 
-   public void update(FrameVector vectorUnfiltered)
+   public void update(FrameVector3D vectorUnfiltered)
    {
       checkReferenceFrameMatch(vectorUnfiltered);
       x.update(vectorUnfiltered.getX());

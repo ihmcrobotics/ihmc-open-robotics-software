@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -60,11 +60,11 @@ public class YoPositionProviderTest
    {
       provider = new YoPositionProvider(yoFramePoint);
       
-      FramePoint result = new FramePoint(referenceFrame);
+      FramePoint3D result = new FramePoint3D(referenceFrame);
       result.set(5.0, 10.0, 15.0);
       provider.set(result);
       
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
       provider.getPosition(positionToPack);
       
       assertSame(referenceFrame, positionToPack.getReferenceFrame());

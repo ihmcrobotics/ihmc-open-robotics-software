@@ -39,9 +39,9 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -68,7 +68,7 @@ public class FootstepSnapperSimulationTest
    @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       double maskSafetyBuffer = 0.01;
       double boundingBoxDimension = 0.3;
@@ -130,7 +130,7 @@ public class FootstepSnapperSimulationTest
       ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromInputStream(resourceAsStream, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
 //    SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       double maskSafetyBuffer = 0.01;
       double boundingBoxDimension = 0.3;
@@ -326,7 +326,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
-      FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
 
 
       double centerX = -3.5;
@@ -369,7 +369,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
-      FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
 
 
       double centerX = 0.5;
@@ -413,7 +413,7 @@ public class FootstepSnapperSimulationTest
       boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
-      FootstepSnapper footstepSnapper = createAdjustingFootstepSnapper();
+      QuadTreeFootstepSnapper footstepSnapper = createAdjustingFootstepSnapper();
 
 
       double centerX = 0.5;
@@ -450,7 +450,7 @@ public class FootstepSnapperSimulationTest
 
    private SimpleFootstepSnapper createSimpleFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       BasicFootstepMask footstepMask = new BasicFootstepMask(snappingParameters.getCollisionPolygon(), 0.0);
 
       SimpleFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
@@ -465,7 +465,7 @@ public class FootstepSnapperSimulationTest
 
    private ConvexHullFootstepSnapper createConvexHullFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
       return footstepSnapper;
@@ -473,7 +473,7 @@ public class FootstepSnapperSimulationTest
 
    private AdjustingFootstepSnapper createAdjustingFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       AdjustingFootstepSnapper footstepSnapper = new AdjustingFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
       return footstepSnapper;
@@ -597,7 +597,7 @@ public class FootstepSnapperSimulationTest
 
    protected class FootstepSnapperTestHelper
    {
-      private final FootstepSnapper footstepSnapper;
+      private final QuadTreeFootstepSnapper footstepSnapper;
       private final Random random = new Random(1776L);
 
       private QuadTreeForGroundHeightMap heightMap;
@@ -619,7 +619,7 @@ public class FootstepSnapperSimulationTest
       private BagOfBalls pointListBalls = null;
 
 
-      public FootstepSnapperTestHelper(String description, FootstepSnapper footstepSnapper, Graphics3DObject linkGraphics, boolean visualize)
+      public FootstepSnapperTestHelper(String description, QuadTreeFootstepSnapper footstepSnapper, Graphics3DObject linkGraphics, boolean visualize)
               throws InsufficientDataException
       {
          this.footstepSnapper = footstepSnapper;
@@ -798,9 +798,9 @@ public class FootstepSnapperSimulationTest
                footstepBody.getRigidBody(), footstepBody.getSoleFrame(), robotSide, heightMap);
 
          ReferenceFrame soleFrame = generatedSnappedFootstep.getSoleReferenceFrame();
-         FramePoint solePosition = new FramePoint(soleFrame);
+         FramePoint3D solePosition = new FramePoint3D(soleFrame);
          FrameOrientation soleOrientation = new FrameOrientation(soleFrame);
-         FrameVector soleNormal = new FrameVector(soleFrame, 0.0, 0.0, 1.0);
+         FrameVector3D soleNormal = new FrameVector3D(soleFrame, 0.0, 0.0, 1.0);
          solePosition.changeFrame(worldFrame);
          soleOrientation.changeFrame(worldFrame);
          soleNormal.changeFrame(worldFrame);
@@ -844,7 +844,7 @@ public class FootstepSnapperSimulationTest
             for (Point3D point : pointList)
             {
                double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
-               pointListBalls.setBall(new FramePoint(worldFrame, point.getX(), point.getY(), point.getZ()));
+               pointListBalls.setBall(new FramePoint3D(worldFrame, point.getX(), point.getY(), point.getZ()));
 
 //             pointListBalls.setBall(new FramePoint(worldFrame, point.getX(), point.getY(), heightMapZ));
             }

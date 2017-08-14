@@ -3,7 +3,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -64,7 +64,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
+   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
    {
       estimatedAngularVelocityToPack.setToZero();
    }

@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -26,14 +26,14 @@ public class AxisAngleOrientationController
    private final Matrix3DReadOnly integralGainMatrix;
 
    private final ReferenceFrame bodyFrame;
-   private final FrameVector proportionalTerm;
-   private final FrameVector derivativeTerm;
-   private final FrameVector integralTerm;
+   private final FrameVector3D proportionalTerm;
+   private final FrameVector3D derivativeTerm;
+   private final FrameVector3D integralTerm;
    
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAction = new FrameVector();
-   private final FrameVector angularActionFromOrientationController = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
+   private final FrameVector3D angularActionFromOrientationController = new FrameVector3D();
 
    private final AxisAngle errorAngleAxis = new AxisAngle();
    private final Quaternion errorQuaternion = new Quaternion();
@@ -69,9 +69,9 @@ public class AxisAngleOrientationController
       rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
       velocityError = new YoFrameVector(prefix + "AngularVelocityError", bodyFrame, registry);
 
-      proportionalTerm = new FrameVector(bodyFrame);
-      derivativeTerm = new FrameVector(bodyFrame);
-      integralTerm = new FrameVector(bodyFrame);
+      proportionalTerm = new FrameVector3D(bodyFrame);
+      derivativeTerm = new FrameVector3D(bodyFrame);
+      integralTerm = new FrameVector3D(bodyFrame);
 
       feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
       rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "", registry,
@@ -90,8 +90,8 @@ public class AxisAngleOrientationController
       rotationErrorCumulated.setToZero();
    }
 
-   public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
-         FrameVector feedForward)
+   public void compute(FrameVector3D output, FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity,
+         FrameVector3D feedForward)
    {
       computeProportionalTerm(desiredOrientation);
       if (currentAngularVelocity != null)
@@ -176,7 +176,7 @@ public class AxisAngleOrientationController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private void computeDerivativeTerm(FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity)
+   private void computeDerivativeTerm(FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity)
    {
       desiredAngularVelocity.changeFrame(bodyFrame);
       currentAngularVelocity.changeFrame(bodyFrame);

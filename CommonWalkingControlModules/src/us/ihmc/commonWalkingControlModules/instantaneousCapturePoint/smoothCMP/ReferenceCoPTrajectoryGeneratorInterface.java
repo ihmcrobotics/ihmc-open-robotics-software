@@ -9,10 +9,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,7 +24,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void initializeParameters(SmoothCMPPlannerParameters parameters);
 
-   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2D heelOffset);
+   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2D copOffset);
 
    void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList);
 
@@ -40,9 +40,9 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void update(double currentTime);
 
-   void getDesiredCenterOfPressure(FramePoint desiredCoPToPack);
+   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack);
 
-   void getDesiredCenterOfPressure(FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
+   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack);
 
    void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack);
 

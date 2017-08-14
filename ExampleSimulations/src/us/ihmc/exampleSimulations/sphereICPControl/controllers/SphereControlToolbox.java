@@ -2,6 +2,8 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -93,6 +95,7 @@ public class SphereControlToolbox
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<Footstep> footsteps = new ArrayList<>();
@@ -136,7 +139,7 @@ public class SphereControlToolbox
       double omega = Math.sqrt(gravity / desiredHeight);
       omega0.set(omega);
 
-      setupFeetFrames(yoGraphicsListRegistry);
+      setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -160,7 +163,7 @@ public class SphereControlToolbox
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
          contactPoints.add(point.getPointCopy());
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
@@ -198,7 +201,7 @@ public class SphereControlToolbox
       parentRegistry.addChild(registry);
    }
 
-   private void setupFeetFrames(YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupFeetFrames(double gravityZ, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -232,7 +235,7 @@ public class SphereControlToolbox
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -251,6 +254,9 @@ public class SphereControlToolbox
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega0, centerOfMassFrame, gravityZ, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
@@ -309,6 +315,11 @@ public class SphereControlToolbox
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
+   }
+
+   public ICPControlPolygons getICPControlPolygons()
+   {
+      return icpControlPolygons;
    }
 
    public SideDependentList<FootSpoof> getContactableFeet()
@@ -376,7 +387,7 @@ public class SphereControlToolbox
       return icp;
    }
 
-   public FramePoint2d getCapturePoint2d()
+   public FramePoint2D getCapturePoint2d()
    {
       return capturePoint2d;
    }
@@ -388,6 +399,7 @@ public class SphereControlToolbox
       twistCalculator.compute();
       centerOfMassJacobian.compute();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
 
       callUpdatables();
       updateFootViz();
@@ -525,10 +537,10 @@ public class SphereControlToolbox
    }
 
 
-   private final FramePoint centerOfMass = new FramePoint();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
-   private final FramePoint2d centerOfMass2d = new FramePoint2d();
-   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
+   private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
    public void computeCenterOfMass()
    {
       centerOfMass.changeFrame(worldFrame);
@@ -544,7 +556,7 @@ public class SphereControlToolbox
       yoCenterOfMassVelocity2d.set(centerOfMassVelocity2d);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
 
    public void computeCapturePoint()
    {
@@ -608,6 +620,12 @@ public class SphereControlToolbox
    {
       return new ICPOptimizationParameters()
       {
+         @Override
+         public boolean useSimpleOptimization()
+         {
+            return false;
+         }
+
          @Override
          public int numberOfFootstepsToConsider()
          {
@@ -744,30 +762,6 @@ public class SphereControlToolbox
          public double getMinimumTimeRemaining()
          {
             return 0.0001;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPLateralExit()
-         {
-            return 0;
          }
 
          @Override
