@@ -10,6 +10,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DefaultYoPID3DGains implements YoPID3DGains
 {
+   private final GainCoupling gainCoupling;
+
    private final Map<Axis, YoDouble> kpMap = new EnumMap<>(Axis.class);
    private final Map<Axis, YoDouble> kdMap = new EnumMap<>(Axis.class);
    private final Map<Axis, YoDouble> kiMap = new EnumMap<>(Axis.class);
@@ -27,8 +29,16 @@ public class DefaultYoPID3DGains implements YoPID3DGains
 
    private final YoBoolean updateFromDampingRatio;
 
+   public DefaultYoPID3DGains(String suffix, PID3DGainsReadOnly other, YoVariableRegistry registry)
+   {
+      this(suffix, other.getGainCoupling(), registry);
+      set(other);
+   }
+
    public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
    {
+      this.gainCoupling = gainCoupling;
+
       populateMap(kpMap, "kp", suffix, gainCoupling, registry);
       populateMap(kdMap, "kd", suffix, gainCoupling, registry);
       populateMap(kiMap, "ki", suffix, gainCoupling, registry);
@@ -250,5 +260,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
+   }
+
+   @Override
+   public GainCoupling getGainCoupling()
+   {
+      return gainCoupling;
    }
 }
