@@ -8,14 +8,14 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
-   private final FrameVector frameVector = new FrameVector();
+   private final FrameVector3D frameVector = new FrameVector3D();
    private final Vector3D vector = new Vector3D();
 
    private final String namePrefix;
@@ -114,7 +114,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
 
          attachVariableChangedListener(new VariableChangedListener()
          {
-            private final FrameVector localFrameVector = new FrameVector();
+            private final FrameVector3D localFrameVector = new FrameVector3D();
             private final YoFrameVector vector = yoFrameVectorInWorld;
 
             @Override

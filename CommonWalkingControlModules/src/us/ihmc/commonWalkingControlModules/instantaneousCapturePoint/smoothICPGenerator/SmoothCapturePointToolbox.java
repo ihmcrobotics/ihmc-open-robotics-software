@@ -10,7 +10,7 @@ import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
  * @author Tim Seyde
@@ -114,14 +114,14 @@ public class SmoothCapturePointToolbox
    }  
    
    public void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3D finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
-                                                         FrameVector desiredCapturePointVelocityToPack)
+                                                         FrameVector3D desiredCapturePointVelocityToPack)
    {
       calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, 
                                                                                    desiredCapturePointVelocityToPack);
    }
    
    public void computeDesiredCapturePointVelocityDecoupled(double omega0, double time, FramePoint3D finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
-                                                                  FrameVector desiredCapturePointVelocityToPack)
+                                                                  FrameVector3D desiredCapturePointVelocityToPack)
    {
       for(Direction dir : Direction.values())
       {
@@ -133,14 +133,14 @@ public class SmoothCapturePointToolbox
    }
    
    public void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
-                                                             FrameVector desiredCapturePointAccelerationToPack)
+                                                             FrameVector3D desiredCapturePointAccelerationToPack)
    {
       calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, 
                                                                                    desiredCapturePointAccelerationToPack);
    }
    
    public void computeDesiredCapturePointAccelerationDecoupled(double omega0, double time, FramePoint3D finalCapturePoint, YoFrameTrajectory3D cmpPolynomial3D,
-                                                                      FrameVector desiredCapturePointAccelerationToPack)
+                                                                      FrameVector3D desiredCapturePointAccelerationToPack)
    {
       for(Direction dir : Direction.values())
       {

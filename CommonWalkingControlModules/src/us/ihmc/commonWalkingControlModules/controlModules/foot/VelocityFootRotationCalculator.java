@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
@@ -100,7 +100,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    private final YoBoolean hasBeenInitialized;
 
-   private final FrameVector angularVelocity = new FrameVector();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
    private final FrameVector2d angularVelocity2d = new FrameVector2d();
 
    private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
@@ -110,7 +110,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
 
-   private final FrameVector pointingBackwardVector = new FrameVector();
+   private final FrameVector3D pointingBackwardVector = new FrameVector3D();
 
    private final ContactablePlaneBody rotatingBody;
 

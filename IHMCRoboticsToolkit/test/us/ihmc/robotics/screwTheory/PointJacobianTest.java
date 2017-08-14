@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -56,7 +56,7 @@ public class PointJacobianTest
 
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
-      FrameVector pointVelocityFromJacobian = new FrameVector(pointJacobian.getFrame());
+      FrameVector3D pointVelocityFromJacobian = new FrameVector3D(pointJacobian.getFrame());
       pointVelocityFromJacobian.getVector().set(pointVelocityFromJacobianMatrix);
 
       FramePoint3D point2 = new FramePoint3D(point);
@@ -65,7 +65,7 @@ public class PointJacobianTest
       ScrewTestTools.integrateVelocities(randomFloatingChain.getRevoluteJoints(), dt);
       point2.changeFrame(base.getBodyFixedFrame());
 
-      FrameVector pointVelocityFromNumericalDifferentiation = new FrameVector(point2);
+      FrameVector3D pointVelocityFromNumericalDifferentiation = new FrameVector3D(point2);
       pointVelocityFromNumericalDifferentiation.sub(point);
       pointVelocityFromNumericalDifferentiation.scale(1.0 / dt);
 

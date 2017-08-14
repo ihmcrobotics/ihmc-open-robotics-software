@@ -13,7 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -248,8 +248,8 @@ public class SmoothCoMIntegrationToolsTest
          EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredCurrent.getPoint(), comPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
          // Velocity
-         FrameVector comVelocityDesiredCurrent = new FrameVector(worldFrame);
-         FrameVector comVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrent = new FrameVector3D(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentByHand = new FrameVector3D(worldFrame);
          
          comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrent);
          calculateCoMVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrentByHand);
@@ -265,12 +265,12 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
          icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          
-         FrameVector comVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
          comVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrent);
          
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
          
-         FrameVector comVelocityDesiredCurrentDynamicsByHand = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentDynamicsByHand = new FrameVector3D(worldFrame);
          comVelocityDesiredCurrentDynamicsByHand.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrentByHand);
          
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand.getVectorCopy(), comVelocityDesiredCurrentDynamicsByHand.getVectorCopy(), EPSILON);
@@ -310,7 +310,7 @@ public class SmoothCoMIntegrationToolsTest
       }
    }
    
-   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredFinal, FrameVector comVelocityDesiredCurrent)
+   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredFinal, FrameVector3D comVelocityDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());

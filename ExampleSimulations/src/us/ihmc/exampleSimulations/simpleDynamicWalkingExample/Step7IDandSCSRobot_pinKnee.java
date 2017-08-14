@@ -24,7 +24,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -138,11 +138,11 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    private final Twist bodyJointTwist = new Twist();
    private final double qd_x, qd_z, qd_wy;
-   private final FrameVector bodyJointLinearVelocity = new FrameVector();
-   private final FrameVector bodyJointAngularVelocity = new FrameVector();
+   private final FrameVector3D bodyJointLinearVelocity = new FrameVector3D();
+   private final FrameVector3D bodyJointAngularVelocity = new FrameVector3D();
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMass2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
    private final FramePoint2d capturePoint = new FramePoint2d();
@@ -718,7 +718,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       return GCpointsHeel.get(robotSide).getZ();
    }
 
-   public void getFootLinearVelocity(RobotSide robotSide, FrameVector linearVelocityToPack)
+   public void getFootLinearVelocity(RobotSide robotSide, FrameVector3D linearVelocityToPack)
    {
       GCpointsHeel.get(robotSide).getYoVelocity().getFrameTupleIncludingFrame(linearVelocityToPack);
    }

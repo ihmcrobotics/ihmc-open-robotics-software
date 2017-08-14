@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -104,7 +104,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       trajectoryTime.set(duration);
    }
 
-   public void setInitialConditions(FramePoint3D initialPosition, FrameVector initialVelocity)
+   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.setAndMatchFrame(initialPosition);
       this.initialVelocity.setAndMatchFrame(initialVelocity);
@@ -116,13 +116,13 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.initialVelocity.set(initialVelocity);
    }
 
-   public void setInitialConditions(YoFramePoint initialPosition, FrameVector initialVelocity)
+   public void setInitialConditions(YoFramePoint initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.set(initialPosition);
       this.initialVelocity.setAndMatchFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector finalVelocity)
+   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.setAndMatchFrame(finalPosition);
       this.finalVelocity.setAndMatchFrame(finalVelocity);
@@ -134,13 +134,13 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setFinalConditions(YoFramePoint finalPosition, FrameVector finalVelocity)
+   public void setFinalConditions(YoFramePoint finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.set(finalPosition);
       this.finalVelocity.setAndMatchFrame(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, FrameVector initialVelocity, FramePoint3D finalPosition, FrameVector finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, FrameVector3D initialVelocity, FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -163,7 +163,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FrameVector tempLinearVelocity = new FrameVector();
+   private final FrameVector3D tempLinearVelocity = new FrameVector3D();
 
    public void setTrajectoryParameters(FrameEuclideanTrajectoryPoint initialFrameEuclideanWaypoint, FrameEuclideanTrajectoryPoint finalFrameEuclideanWaypoint)
    {
@@ -298,7 +298,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
@@ -314,7 +314,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -330,7 +330,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

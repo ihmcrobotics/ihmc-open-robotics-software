@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
@@ -37,21 +37,21 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack)
    {
       update(timeInState);
       desiredAngularMomentumToPack.setIncludingFrame(currentSegment.getFramePosition());
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack)
    {
       update(timeInState, desiredAngularMomentumToPack);
       desiredTorqueToPack.setIncludingFrame(currentSegment.getFrameVelocity());
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
    {
       update(timeInState, desiredAngularMomentumToPack, desiredTorqueToPack);
       desiredRotatumToPack.setIncludingFrame(currentSegment.getFrameAcceleration());

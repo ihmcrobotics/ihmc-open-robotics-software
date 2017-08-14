@@ -34,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -196,11 +196,11 @@ public class FixedBaseRobotArmController implements RobotController
    }
 
    private final FramePoint3D position = new FramePoint3D();
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearAcceleration = new FrameVector();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearAcceleration = new FrameVector3D();
    private final FrameOrientation orientation = new FrameOrientation();
-   private final FrameVector angularVelocity = new FrameVector();
-   private final FrameVector angularAcceleration = new FrameVector();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private final FrameVector3D angularAcceleration = new FrameVector3D();
 
    @Override
    public void doControl()

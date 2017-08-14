@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -110,7 +110,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          waypointPosition.add(xOffset, 0.0, zOffset);
          waypointPosition.changeFrame(worldFrame);
 
-         FrameVector waypointLinearVelocity = new FrameVector(soleFrame);
+         FrameVector3D waypointLinearVelocity = new FrameVector3D(soleFrame);
          if (i > 0 && i < points - 1)
          {
             double timeBetweenWaypoints = swingTime / (points + 1);

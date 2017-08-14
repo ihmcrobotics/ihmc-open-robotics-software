@@ -127,7 +127,7 @@ public class GeometryTools
     * @return the projection of the point onto the plane, or {@code null} if the method failed.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static FramePoint3D getOrthogonalProjectionOnPlane(FramePoint3D pointToProject, FramePoint3D pointOnPlane, FrameVector planeNormal)
+   public static FramePoint3D getOrthogonalProjectionOnPlane(FramePoint3D pointToProject, FramePoint3D pointOnPlane, FrameVector3D planeNormal)
    {
       FramePoint3D projection = new FramePoint3D();
       boolean success = getOrthogonalProjectionOnPlane(pointToProject, pointOnPlane, planeNormal, projection);
@@ -155,7 +155,7 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame,
     *  except for {@code projectionToPack}.
     */
-   public static boolean getOrthogonalProjectionOnPlane(FramePoint3D pointToProject, FramePoint3D pointOnPlane, FrameVector planeNormal,
+   public static boolean getOrthogonalProjectionOnPlane(FramePoint3D pointToProject, FramePoint3D pointOnPlane, FrameVector3D planeNormal,
                                                         FramePoint3D projectionToPack)
    {
       pointToProject.checkReferenceFrameMatch(pointOnPlane);
@@ -177,7 +177,7 @@ public class GeometryTools
     * @return the minimum distance between the two lines.
     * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
-   public static double getClosestPointsForTwoLines(FramePoint3D pointOnLine1, FrameVector lineDirection1, FramePoint3D pointOnLine2, FrameVector lineDirection2,
+   public static double getClosestPointsForTwoLines(FramePoint3D pointOnLine1, FrameVector3D lineDirection1, FramePoint3D pointOnLine2, FrameVector3D lineDirection2,
                                                   FramePoint3D closestPointOnLine1ToPack, FramePoint3D closestPointOnLine2ToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
@@ -206,8 +206,8 @@ public class GeometryTools
     * @return the coordinates of the intersection, or {@code null} if the line is parallel to the plane.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same frame.
     */
-   public static FramePoint3D getIntersectionBetweenLineAndPlane(FramePoint3D pointOnPlane, FrameVector planeNormal, FramePoint3D pointOnLine,
-                                                               FrameVector lineDirection)
+   public static FramePoint3D getIntersectionBetweenLineAndPlane(FramePoint3D pointOnPlane, FrameVector3D planeNormal, FramePoint3D pointOnLine,
+                                                               FrameVector3D lineDirection)
    {
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
       pointOnLine.checkReferenceFrameMatch(lineDirection);
@@ -247,7 +247,7 @@ public class GeometryTools
     * @return the intersection, or {@code null} if there is no intersection.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static FramePoint3D getIntersectionBetweenLineSegmentAndPlane(FramePoint3D pointOnPlane, FrameVector planeNormal, FramePoint3D lineSegmentStart,
+   public static FramePoint3D getIntersectionBetweenLineSegmentAndPlane(FramePoint3D pointOnPlane, FrameVector3D planeNormal, FramePoint3D lineSegmentStart,
                                                                       FramePoint3D lineSegmentEnd)
    {
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
@@ -280,7 +280,7 @@ public class GeometryTools
     * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static boolean isLineSegmentIntersectingPlane(FramePoint3D pointOnPlane, FrameVector planeNormal, FramePoint3D lineSegmentStart,
+   public static boolean isLineSegmentIntersectingPlane(FramePoint3D pointOnPlane, FrameVector3D planeNormal, FramePoint3D lineSegmentStart,
                                                         FramePoint3D lineSegmentEnd)
    {
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
@@ -298,7 +298,7 @@ public class GeometryTools
     * @return the distance between the point and the plane.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static double distanceFromPointToPlane(FramePoint3D point, FramePoint3D pointOnPlane, FrameVector planeNormal)
+   public static double distanceFromPointToPlane(FramePoint3D point, FramePoint3D pointOnPlane, FrameVector3D planeNormal)
    {
       point.checkReferenceFrameMatch(pointOnPlane);
       point.checkReferenceFrameMatch(planeNormal);
@@ -414,8 +414,8 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint3D pointOnLine1, FrameVector lineDirection1, FramePoint3D pointOnLine2,
-                                                          FrameVector lineDirection2, FramePoint3D intersectionToPack)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint3D pointOnLine1, FrameVector3D lineDirection1, FramePoint3D pointOnLine2,
+                                                          FrameVector3D lineDirection2, FramePoint3D intersectionToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
       pointOnLine2.checkReferenceFrameMatch(lineDirection2);
@@ -466,8 +466,8 @@ public class GeometryTools
     * @return {@code true} if the intersection was calculated properly, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code pointOnIntersectionToPack} and {@code intersectionDirectionToPack}.
     */
-   public static boolean getIntersectionBetweenTwoPlanes(FramePoint3D pointOnPlane1, FrameVector planeNormal1, FramePoint3D pointOnPlane2, FrameVector planeNormal2,
-                                                         double angleThreshold, FramePoint3D pointOnIntersectionToPack, FrameVector intersectionDirectionToPack)
+   public static boolean getIntersectionBetweenTwoPlanes(FramePoint3D pointOnPlane1, FrameVector3D planeNormal1, FramePoint3D pointOnPlane2, FrameVector3D planeNormal2,
+                                                         double angleThreshold, FramePoint3D pointOnIntersectionToPack, FrameVector3D intersectionDirectionToPack)
    {
       pointOnPlane1.checkReferenceFrameMatch(planeNormal1);
       pointOnPlane2.checkReferenceFrameMatch(planeNormal2);
@@ -497,9 +497,9 @@ public class GeometryTools
     * @return the plane normal or {@code null} when the normal could not be determined.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static FrameVector getPlaneNormalGivenThreePoints(FramePoint3D firstPointOnPlane, FramePoint3D secondPointOnPlane, FramePoint3D thirdPointOnPlane)
+   public static FrameVector3D getPlaneNormalGivenThreePoints(FramePoint3D firstPointOnPlane, FramePoint3D secondPointOnPlane, FramePoint3D thirdPointOnPlane)
    {
-      FrameVector normal = new FrameVector();
+      FrameVector3D normal = new FrameVector3D();
       boolean success = getPlaneNormalGivenThreePoints(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane, normal);
       if (!success)
          return null;
@@ -525,7 +525,7 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code normalToPack}.
     */
    public static boolean getPlaneNormalGivenThreePoints(FramePoint3D firstPointOnPlane, FramePoint3D secondPointOnPlane, FramePoint3D thirdPointOnPlane,
-                                                        FrameVector normalToPack)
+                                                        FrameVector3D normalToPack)
    {
       firstPointOnPlane.checkReferenceFrameMatch(secondPointOnPlane);
       firstPointOnPlane.checkReferenceFrameMatch(thirdPointOnPlane);
@@ -558,10 +558,10 @@ public class GeometryTools
     * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack}.
     */
-   public static FrameVector getPerpendicularVectorFromLineToPoint(FramePoint3D point, FramePoint3D firstPointOnLine, FramePoint3D secondPointOnLine,
+   public static FrameVector3D getPerpendicularVectorFromLineToPoint(FramePoint3D point, FramePoint3D firstPointOnLine, FramePoint3D secondPointOnLine,
                                                                    FramePoint3D orthogonalProjectionToPack)
    {
-      FrameVector perpendicularVector = new FrameVector();
+      FrameVector3D perpendicularVector = new FrameVector3D();
 
       boolean success = getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, orthogonalProjectionToPack, perpendicularVector);
       if (!success)
@@ -592,7 +592,7 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack} and {@code perpendicularVectorToPack}.
     */
    public static boolean getPerpendicularVectorFromLineToPoint(FramePoint3D point, FramePoint3D firstPointOnLine, FramePoint3D secondPointOnLine,
-                                                               FramePoint3D orthogonalProjectionToPack, FrameVector perpendicularVectorToPack)
+                                                               FramePoint3D orthogonalProjectionToPack, FrameVector3D perpendicularVectorToPack)
    {
       point.checkReferenceFrameMatch(firstPointOnLine);
       point.checkReferenceFrameMatch(secondPointOnLine);
@@ -625,7 +625,7 @@ public class GeometryTools
     * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
     */
    // FIXME this is just bad.
-   public static void getPerpendicularVector2d(FrameVector vector, FrameVector perpendicularVectorToPack)
+   public static void getPerpendicularVector2d(FrameVector3D vector, FrameVector3D perpendicularVectorToPack)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
    }
@@ -645,7 +645,7 @@ public class GeometryTools
     * @param topVertexBToPack the missing vertex B. Modified.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code topVertexBToPack}.
     */
-   public static void getTopVertexOfIsoscelesTriangle(FramePoint3D baseVertexA, FramePoint3D baseVertexC, FrameVector trianglePlaneNormal,
+   public static void getTopVertexOfIsoscelesTriangle(FramePoint3D baseVertexA, FramePoint3D baseVertexC, FrameVector3D trianglePlaneNormal,
                                                       double ccwAngleAboutNormalAtTopVertex, FramePoint3D topVertexBToPack)
    {
       ReferenceFrame commonFrame = baseVertexA.getReferenceFrame();

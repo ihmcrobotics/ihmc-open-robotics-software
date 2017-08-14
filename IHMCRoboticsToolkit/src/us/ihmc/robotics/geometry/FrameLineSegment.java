@@ -80,14 +80,14 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d.set(firstEndpoint, fromFirstToSecondEndpoint);
    }
 
-   public void set(FramePoint3D firstEndpoint, FrameVector fromFirstToSecondEndpoint)
+   public void set(FramePoint3D firstEndpoint, FrameVector3D fromFirstToSecondEndpoint)
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(fromFirstToSecondEndpoint);
       lineSegment3d.set(firstEndpoint.getPoint(), fromFirstToSecondEndpoint.getVector());
    }
 
-   public void setIncludingFrame(FramePoint3D firstEndpoint, FrameVector fromFirstToSecondEndpoint)
+   public void setIncludingFrame(FramePoint3D firstEndpoint, FrameVector3D fromFirstToSecondEndpoint)
    {
       firstEndpoint.checkReferenceFrameMatch(fromFirstToSecondEndpoint);
       setToZero(firstEndpoint.getReferenceFrame());
@@ -130,7 +130,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d.midpoint(midpointToPack.getPoint());
    }
 
-   public void getDirection(boolean normalize, FrameVector directionToPack)
+   public void getDirection(boolean normalize, FrameVector3D directionToPack)
    {
       checkReferenceFrameMatch(directionToPack);
       lineSegment3d.getDirection(normalize, directionToPack.getVector());

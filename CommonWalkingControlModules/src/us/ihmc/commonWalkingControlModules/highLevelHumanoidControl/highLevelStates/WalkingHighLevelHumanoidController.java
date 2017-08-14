@@ -57,7 +57,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -539,7 +539,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector achievedLinearMomentumRate = new FrameVector();
+   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    @Override
    public void doAction()

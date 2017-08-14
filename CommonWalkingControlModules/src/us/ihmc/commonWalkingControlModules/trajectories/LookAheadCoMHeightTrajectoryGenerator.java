@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -339,7 +339,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final FramePoint3D transferToContactFramePosition = new FramePoint3D();
    private final FramePoint3D transferFromDesiredContactFramePosition = new FramePoint3D();
 
-   private final FrameVector fromContactFrameDrift = new FrameVector();
+   private final FrameVector3D fromContactFrameDrift = new FrameVector3D();
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
    private final Point2D queryPoint = new Point2D();
 

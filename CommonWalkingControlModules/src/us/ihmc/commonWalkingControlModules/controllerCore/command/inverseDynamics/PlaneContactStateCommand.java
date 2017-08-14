@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,7 +21,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    private double coefficientOfFriction = Double.NaN;
    private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
-   private final FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+   private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
    private boolean useHighCoPDamping = false;
 
@@ -91,7 +91,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.get(contactPointIndex).setValue(maxNormalForce);
    }
 
-   public void setContactNormal(FrameVector contactNormal)
+   public void setContactNormal(FrameVector3D contactNormal)
    {
       this.contactNormal.setIncludingFrame(contactNormal);
    }
@@ -136,7 +136,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactPointToPack.setIncludingFrame(contactPoints.get(index));
    }
 
-   public void getContactNormal(FrameVector contactNormalToPack)
+   public void getContactNormal(FrameVector3D contactNormalToPack)
    {
       contactNormalToPack.setIncludingFrame(contactNormal);
    }

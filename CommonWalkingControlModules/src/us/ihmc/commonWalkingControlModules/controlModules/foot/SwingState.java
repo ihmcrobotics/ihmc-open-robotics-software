@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -78,17 +78,17 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final FramePose initialPose = new FramePose();
    private final FramePoint3D initialPosition = new FramePoint3D();
-   private final FrameVector initialLinearVelocity = new FrameVector();
+   private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameOrientation initialOrientation = new FrameOrientation();
-   private final FrameVector initialAngularVelocity = new FrameVector();
+   private final FrameVector3D initialAngularVelocity = new FrameVector3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
-   private final FrameVector finalLinearVelocity = new FrameVector();
+   private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameOrientation finalOrientation = new FrameOrientation();
-   private final FrameVector finalAngularVelocity = new FrameVector();
+   private final FrameVector3D finalAngularVelocity = new FrameVector3D();
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameOrientation tmpOrientation = new FrameOrientation();
-   private final FrameVector tmpVector = new FrameVector();
+   private final FrameVector3D tmpVector = new FrameVector3D();
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
@@ -378,7 +378,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      FrameVector touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
+      FrameVector3D touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 

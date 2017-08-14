@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -92,7 +92,7 @@ public class WalkingMessageHandler
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
-   private final FrameVector planOffsetInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -777,7 +777,7 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void addOffsetVector(FrameVector offset)
+   public void addOffsetVector(FrameVector3D offset)
    {
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {

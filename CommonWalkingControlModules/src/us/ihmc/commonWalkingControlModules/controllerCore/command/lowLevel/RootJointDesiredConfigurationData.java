@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
@@ -62,14 +62,14 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
       position.getPoint().get(4, desiredConfiguration);
    }
 
-   public void setDesiredVelocity(FrameVector angularVelocity, FrameVector linearVelocity)
+   public void setDesiredVelocity(FrameVector3D angularVelocity, FrameVector3D linearVelocity)
    {
       desiredVelocity.reshape(6, 1);
       angularVelocity.getVector().get(0, desiredVelocity);
       linearVelocity.getVector().get(3, desiredVelocity);
    }
 
-   public void setDesiredAcceleration(FrameVector angularAcceleration, FrameVector linearAcceleration)
+   public void setDesiredAcceleration(FrameVector3D angularAcceleration, FrameVector3D linearAcceleration)
    {
       desiredAcceleration.reshape(6, 1);
       angularAcceleration.getVector().get(0, desiredAcceleration);

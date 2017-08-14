@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -43,15 +43,15 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final PositionOptimizedTrajectoryGenerator trajectory;
 
    private final FramePoint3D initialPosition = new FramePoint3D();
-   private final FrameVector initialVelocity = new FrameVector();
+   private final FrameVector3D initialVelocity = new FrameVector3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
-   private final FrameVector finalVelocity = new FrameVector();
+   private final FrameVector3D finalVelocity = new FrameVector3D();
    private final ArrayList<FramePoint3D> waypointPositions = new ArrayList<>();
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
-   private final FrameVector initialVelocityNoTimeDimension = new FrameVector();
-   private final FrameVector finalVelocityNoTimeDiemension = new FrameVector();
-   private final FrameVector tempWaypointVelocity = new FrameVector();
+   private final FrameVector3D initialVelocityNoTimeDimension = new FrameVector3D();
+   private final FrameVector3D finalVelocityNoTimeDiemension = new FrameVector3D();
+   private final FrameVector3D tempWaypointVelocity = new FrameVector3D();
 
    private final BagOfBalls waypointViz;
 
@@ -110,13 +110,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setInitialConditions(FramePoint3D initialPosition, FrameVector initialVelocity)
+   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector finalVelocity)
+   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.setIncludingFrame(finalPosition);
       this.finalVelocity.setIncludingFrame(finalVelocity);
@@ -268,14 +268,14 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       trajectory.getVelocity(velocityToPack);
       velocityToPack.scale(1.0 / stepTime.getDoubleValue());
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       trajectory.getAcceleration(accelerationToPack);
       accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
@@ -283,7 +283,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

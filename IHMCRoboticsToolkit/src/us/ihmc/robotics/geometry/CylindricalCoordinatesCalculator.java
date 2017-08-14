@@ -43,7 +43,7 @@ public class CylindricalCoordinatesCalculator
       pointToPack.setIncludingFrame(frame, x, y, z);
    }
 
-   public static void getVelocity(FrameVector velocityToPack, ReferenceFrame frame, double angle, double angleDot, double radius, double radiusDot, double zDot)
+   public static void getVelocity(FrameVector3D velocityToPack, ReferenceFrame frame, double angle, double angleDot, double radius, double radiusDot, double zDot)
    {
       double cos = Math.cos(angle);
       double sin = Math.sin(angle);
@@ -58,7 +58,7 @@ public class CylindricalCoordinatesCalculator
       velocityToPack.setZ(zDot);
    }
 
-   public static void getAcceleration(FrameVector accelerationToPack, ReferenceFrame frame, double angle, double angleDot, double angleDDot, double radius, double radiusDot, double radiusDDot, double zDDot)
+   public static void getAcceleration(FrameVector3D accelerationToPack, ReferenceFrame frame, double angle, double angleDot, double angleDDot, double radius, double radiusDot, double radiusDDot, double zDDot)
    {
       double cos = Math.cos(angle);
       double sin = Math.sin(angle);
@@ -91,7 +91,7 @@ public class CylindricalCoordinatesCalculator
       return angle;
    }
 
-   public static double getRadialVelocity(FramePoint3D position, FrameVector velocity)
+   public static double getRadialVelocity(FramePoint3D position, FrameVector3D velocity)
    {
       position.checkReferenceFrameMatch(velocity);
 
@@ -105,7 +105,7 @@ public class CylindricalCoordinatesCalculator
       return (x * xd + y * yd) / radius;
    }
 
-   public static double getAngularVelocity(FramePoint3D position, FrameVector velocity)
+   public static double getAngularVelocity(FramePoint3D position, FrameVector3D velocity)
    {
       position.checkReferenceFrameMatch(velocity);
 

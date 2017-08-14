@@ -26,7 +26,7 @@ import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -90,8 +90,8 @@ public final class SpatialFeedbackControllerTest
       gains.setOrientationGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -107,8 +107,8 @@ public final class SpatialFeedbackControllerTest
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
       
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -195,8 +195,8 @@ public final class SpatialFeedbackControllerTest
       gains.setOrientationGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -230,8 +230,8 @@ public final class SpatialFeedbackControllerTest
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
       
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;

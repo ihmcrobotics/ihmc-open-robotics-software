@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoSpline3DTest
@@ -28,9 +28,9 @@ public class YoSpline3DTest
       double t0 = 1.0;
       double tf = 5.0;
       FramePoint3D p0 = new FramePoint3D(worldFrame, 5.0, 7.0, 8.0);
-      FrameVector pd0 = new FrameVector(worldFrame, 8.0, 7.0, 2.0);
+      FrameVector3D pd0 = new FrameVector3D(worldFrame, 8.0, 7.0, 2.0);
       FramePoint3D pf = new FramePoint3D(worldFrame, 181.0, 259.0, 32.0);
-      FrameVector pdf = new FrameVector(worldFrame, 96.0, 151.0, 10.0);
+      FrameVector3D pdf = new FrameVector3D(worldFrame, 96.0, 151.0, 10.0);
       
       cubic.setCubic(t0, tf, p0, pd0, pf, pdf);
       
@@ -55,11 +55,11 @@ public class YoSpline3DTest
 	   double t0 = 0.0;
 	   double tf = 1.0;
 	   FramePoint3D p0 = new FramePoint3D(worldFrame, -1.0, -4.0, 0.0);
-	   FrameVector pd0 = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
-	   FrameVector pdd0 = new FrameVector(worldFrame, 0.0, 0.0, 0.0);   
+	   FrameVector3D pd0 = new FrameVector3D(worldFrame, 1.0, 0.0, 0.0);
+	   FrameVector3D pdd0 = new FrameVector3D(worldFrame, 0.0, 0.0, 0.0);   
 	   FramePoint3D pf = new FramePoint3D(worldFrame, 0.0, -2.0, 3.0);
-	   FrameVector pdf = new FrameVector(worldFrame, 3.0, 10.0, 13.0);
-	   FrameVector pddf = new FrameVector(worldFrame, 14.0, 40.0, 44.0);
+	   FrameVector3D pdf = new FrameVector3D(worldFrame, 3.0, 10.0, 13.0);
+	   FrameVector3D pddf = new FrameVector3D(worldFrame, 14.0, 40.0, 44.0);
 
 	   quintic.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
 	   
@@ -83,11 +83,11 @@ public class YoSpline3DTest
 	   double t = 2 * (random.nextDouble() - 1);
 	   double dt = 1e-9;
 	   spline.compute(t);
-	   FrameVector actual = spline.getVelocityCopy();
+	   FrameVector3D actual = spline.getVelocityCopy();
 	   FramePoint3D pos1 = spline.getPositionCopy();
 	   spline.compute(t + dt);
 	   FramePoint3D pos2 = spline.getPositionCopy();
-	   FrameVector numerical = new FrameVector(worldFrame, (pos2.getX() - pos1.getX()) / dt, (pos2.getY() - pos1.getY()) / dt, (pos2.getZ() - pos1.getZ()) / dt);
+	   FrameVector3D numerical = new FrameVector3D(worldFrame, (pos2.getX() - pos1.getX()) / dt, (pos2.getY() - pos1.getY()) / dt, (pos2.getZ() - pos1.getZ()) / dt);
 	   assertEquals(numerical.getX(), actual.getX(), 1e-5);
 	   assertEquals(numerical.getY(), actual.getY(), 1e-5);
 	   assertEquals(numerical.getZ(), actual.getZ(), 1e-5);
@@ -103,11 +103,11 @@ public class YoSpline3DTest
 	   double t = 2 * (random.nextDouble() - 1);
 	   double dt = 1e-9;
 	   spline.compute(t);
-	   FrameVector actual = spline.getAccelerationCopy();
-	   FrameVector vel1 = spline.getVelocityCopy();
+	   FrameVector3D actual = spline.getAccelerationCopy();
+	   FrameVector3D vel1 = spline.getVelocityCopy();
 	   spline.compute(t + dt);
-	   FrameVector vel2 = spline.getVelocityCopy();
-	   FrameVector numerical = new FrameVector(worldFrame, (vel2.getX() - vel1.getX()) / dt, (vel2.getY() - vel1.getY()) / dt, (vel2.getZ() - vel1.getZ()) / dt);
+	   FrameVector3D vel2 = spline.getVelocityCopy();
+	   FrameVector3D numerical = new FrameVector3D(worldFrame, (vel2.getX() - vel1.getX()) / dt, (vel2.getY() - vel1.getY()) / dt, (vel2.getZ() - vel1.getZ()) / dt);
 	   assertEquals(numerical.getX(), actual.getX(), Math.abs(actual.getX()) * 1e-5);
 	   assertEquals(numerical.getY(), actual.getY(), Math.abs(actual.getY()) * 1e-5);
 	   assertEquals(numerical.getZ(), actual.getZ(), Math.abs(actual.getZ()) * 1e-5);
@@ -121,11 +121,11 @@ public class YoSpline3DTest
 	   double t0 = random.nextDouble() - 1;
 	   double tf = random.nextDouble();
 	   FramePoint3D p0 = new FramePoint3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
-	   FrameVector pd0 = new FrameVector(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
-	   FrameVector pdd0 = new FrameVector(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));   
+	   FrameVector3D pd0 = new FrameVector3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
+	   FrameVector3D pdd0 = new FrameVector3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));   
 	   FramePoint3D pf = new FramePoint3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
-	   FrameVector pdf = new FrameVector(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
-	   FrameVector pddf = new FrameVector(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1)); 	   
+	   FrameVector3D pdf = new FrameVector3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1));
+	   FrameVector3D pddf = new FrameVector3D(worldFrame, 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1), 2 * (random.nextDouble() - 1)); 	   
 
 	   spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
 	   
@@ -148,10 +148,10 @@ public class YoSpline3DTest
 	   double tf = 1.0;
 	   
 	   FramePoint3D p0 = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
-	   FrameVector pd0 = new FrameVector(worldFrame, 1.0, 1.0, 1.0);
+	   FrameVector3D pd0 = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
 
 	   FramePoint3D pf = new FramePoint3D(worldFrame, 1.0, 1.0, 1.0);
-	   FrameVector pdf = new FrameVector(worldFrame, 1.0, 1.0, 1.0);
+	   FrameVector3D pdf = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
 	   
 	   spline.setCubic(t0, tf, p0, pd0, pf, pdf);
 	   

@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -533,7 +533,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       return getName();
    }
 
-   FrameVector intialAcceleration = new FrameVector();
+   FrameVector3D intialAcceleration = new FrameVector3D();
 
    @Override
    public void doControl()

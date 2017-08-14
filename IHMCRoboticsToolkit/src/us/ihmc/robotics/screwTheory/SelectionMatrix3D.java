@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -234,7 +234,7 @@ public class SelectionMatrix3D
     * 
     * @param vectorToBeModified the vector on which this selection matrix to be applied. Modified.
     */
-   public void applySelection(FrameVector vectorToBeModified)
+   public void applySelection(FrameVector3D vectorToBeModified)
    {
       ReferenceFrame vectorFrame = vectorToBeModified.getReferenceFrame();
       boolean canIgnoreSelectionFrame = canIgnoreSelectionFrame(vectorFrame);

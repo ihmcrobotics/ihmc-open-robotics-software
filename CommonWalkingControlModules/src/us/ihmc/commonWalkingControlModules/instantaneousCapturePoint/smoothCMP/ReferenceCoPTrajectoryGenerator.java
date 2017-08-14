@@ -27,7 +27,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -107,8 +107,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    // Runtime variables
    private FramePoint3D desiredCoPPosition = new FramePoint3D();
-   private FrameVector desiredCoPVelocity = new FrameVector();
-   private FrameVector desiredCoPAcceleration = new FrameVector();
+   private FrameVector3D desiredCoPVelocity = new FrameVector3D();
+   private FrameVector3D desiredCoPAcceleration = new FrameVector3D();
    private FramePoint3D heldCoPPosition = new FramePoint3D();
 
    private int footstepIndex = 0;
@@ -389,7 +389,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector desiredCoPVelocityToPack)
+   public void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack)
    {
       getDesiredCenterOfPressure(desiredCoPToPack);
       desiredCoPVelocityToPack.setIncludingFrame(desiredCoPVelocity);

@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMass
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +39,7 @@ public class CenterOfMassTrajectoryHandlerTest
       handler.handleComTrajectory(command);
 
       FramePoint3D desiredICPPosition = new FramePoint3D();
-      FrameVector desiredICPVelocity = new FrameVector();
+      FrameVector3D desiredICPVelocity = new FrameVector3D();
 
       yoTime.set(-0.1);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
@@ -93,7 +93,7 @@ public class CenterOfMassTrajectoryHandlerTest
       handler.handleComTrajectory(command);
 
       FramePoint3D desiredICPPosition = new FramePoint3D();
-      FrameVector desiredICPVelocity = new FrameVector();
+      FrameVector3D desiredICPVelocity = new FrameVector3D();
 
       yoTime.set(-0.1 + offset);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
@@ -156,7 +156,7 @@ public class CenterOfMassTrajectoryHandlerTest
       handler.handleComTrajectory(command2);
 
       FramePoint3D desiredICPPosition = new FramePoint3D();
-      FrameVector desiredICPVelocity = new FrameVector();
+      FrameVector3D desiredICPVelocity = new FrameVector3D();
 
       yoTime.set(-0.1);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));

@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -26,17 +26,17 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
    private final FramePoint3D com = new FramePoint3D(worldFrame);
    private final FramePoint3D icp = new FramePoint3D(worldFrame);
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FrameVector angularMomentum = new FrameVector(worldFrame);
-   private final FrameVector actualGroundReaction = new FrameVector(worldFrame);
+   private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D angularMomentum = new FrameVector3D(worldFrame);
+   private final FrameVector3D actualGroundReaction = new FrameVector3D(worldFrame);
    private final FramePoint3D footLocation = new FramePoint3D(worldFrame);
    private final FramePoint3D desiredCMP = new FramePoint3D(worldFrame);
-   private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
+   private final FrameVector3D desiredGroundReaction = new FrameVector3D(worldFrame);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final Wrench endEffectorWrench = new Wrench();
-   private final FrameVector errorVector = new FrameVector();
+   private final FrameVector3D errorVector = new FrameVector3D();
    private final YoFramePoint targetPosition;
    private final FramePoint3D endEffectorPosition = new FramePoint3D();
    private final YoDouble kp;
@@ -150,7 +150,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    private final Vector3D tempLinearMomentum = new Vector3D();
    private final Vector3D tempAngularMomentum = new Vector3D();
 
-   public void computeComAndICP(FramePoint3D comToPack, FrameVector comVelocityToPack, FramePoint3D icpToPack, FrameVector angularMomentumToPack)
+   public void computeComAndICP(FramePoint3D comToPack, FrameVector3D comVelocityToPack, FramePoint3D icpToPack, FrameVector3D angularMomentumToPack)
    {
       totalMass.set(skippy.computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum));
       angularMomentumToPack.set(tempAngularMomentum);
@@ -167,7 +167,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
    public void cmpFromIcpDynamics(FramePoint3D icp, FramePoint3D footLocation, FramePoint3D desiredCMPToPack)
    {
-      FrameVector icpToFoot = new FrameVector();
+      FrameVector3D icpToFoot = new FrameVector3D();
       icpToFoot.sub(icp, footLocation);
       desiredCMPToPack.scaleAdd(kCapture.getDoubleValue(), icpToFoot, icp);
       desiredCMPToPack.setZ(0.0);

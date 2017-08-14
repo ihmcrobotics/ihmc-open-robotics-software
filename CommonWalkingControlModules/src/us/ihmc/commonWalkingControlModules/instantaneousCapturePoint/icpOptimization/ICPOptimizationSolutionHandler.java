@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -66,9 +66,9 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint3D solutionLocation = new FramePoint3D();
    private final FramePoint3D referenceLocation = new FramePoint3D();
    private final FramePoint3D previousLocation = new FramePoint3D();
-   private final FrameVector solutionAdjustment = new FrameVector();
+   private final FrameVector3D solutionAdjustment = new FrameVector3D();
 
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
    private final FrameVector2d tempVector2d = new FrameVector2d();
 

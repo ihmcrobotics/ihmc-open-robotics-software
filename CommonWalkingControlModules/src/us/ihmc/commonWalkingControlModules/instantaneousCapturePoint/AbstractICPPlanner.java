@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -423,7 +423,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredICPVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -444,7 +444,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCapturePointAcceleration(FrameVector desiredCapturePointAccelerationToPack)
+   public void getDesiredCapturePointAcceleration(FrameVector3D desiredCapturePointAccelerationToPack)
    {
       desiredICPAcceleration.getFrameTuple(desiredCapturePointAccelerationToPack);
    }
@@ -471,7 +471,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCMPVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
@@ -508,7 +508,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    }
    
    /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector desiredCenterOfPressureVelocityToPack)
+   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
    {
       desiredCoPVelocity.getFrameTupleIncludingFrame(desiredCenterOfPressureVelocityToPack);
    }

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.An
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
@@ -36,7 +36,7 @@ public class ReferenceCMPTrajectoryGenerator
    private CMPTrajectory activeTrajectory;
 
    private final FramePoint3D desiredCMP = new FramePoint3D();
-   private final FrameVector desiredCMPVelocity = new FrameVector();
+   private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
    private CMPTrajectory cmpTrajectoryReference;
    private CoPTrajectory copTrajectoryReference;
    private TorqueTrajectory torqueTrajectory; 
@@ -100,7 +100,7 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPToPack.set(desiredCMP);
    }
 
-   public void getVelocity(FrameVector desiredCMPVelocityToPack)
+   public void getVelocity(FrameVector3D desiredCMPVelocityToPack)
    {
       desiredCMPVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
@@ -110,7 +110,7 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPVelocityToPack.set(desiredCMPVelocity);
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

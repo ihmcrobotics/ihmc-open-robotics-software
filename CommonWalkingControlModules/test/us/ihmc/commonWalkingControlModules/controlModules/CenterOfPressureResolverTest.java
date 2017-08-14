@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -139,8 +139,8 @@ public class CenterOfPressureResolverTest
          PoseReferenceFrame centerOfPressurePlaneFrame = createPlaneFrame("groundPlaneFrame", copPoint3d, groundNormal);
          spatialForceVector.changeFrame(centerOfPressurePlaneFrame);
 
-         FrameVector forceResolvedInCenterOfPressureFrame = spatialForceVector.getLinearPartAsFrameVectorCopy();
-         FrameVector torqueResolvedInCenterOfPressureFrame = spatialForceVector.getAngularPartAsFrameVectorCopy();
+         FrameVector3D forceResolvedInCenterOfPressureFrame = spatialForceVector.getLinearPartAsFrameVectorCopy();
+         FrameVector3D torqueResolvedInCenterOfPressureFrame = spatialForceVector.getAngularPartAsFrameVectorCopy();
 
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 

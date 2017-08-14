@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -46,12 +46,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
 
    private final FramePose desiredPose = new FramePose();
    private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
-   private final FrameVector desiredVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D desiredAcceleration = new FrameVector3D(worldFrame);
 
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
 
    private TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand;

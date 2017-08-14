@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -46,17 +46,17 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>();
    
    private FramePoint3D icpPositionDesiredCurrent = new FramePoint3D();
-   private FrameVector icpVelocityDesiredCurrent = new FrameVector();
-   private FrameVector icpAccelerationDesiredCurrent = new FrameVector();
-   private FrameVector icpVelocityDynamicsCurrent = new FrameVector();
+   private FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
+   private FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
+   private FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
    
    private final List<FramePoint3D> comDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint3D> comDesiredFinalPositions = new ArrayList<>();
    
    private FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
-   private FrameVector comVelocityDesiredCurrent = new FrameVector();
-   private FrameVector comAccelerationDesiredCurrent = new FrameVector();
-   private FrameVector comVelocityDynamicsCurrent = new FrameVector();
+   private FrameVector3D comVelocityDesiredCurrent = new FrameVector3D();
+   private FrameVector3D comAccelerationDesiredCurrent = new FrameVector3D();
+   private FrameVector3D comVelocityDynamicsCurrent = new FrameVector3D();
    
    private FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
    private FramePoint3D comPositionDesiredInitialCurrentSegment = new FramePoint3D();
@@ -140,7 +140,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          comDesiredInitialPositions.add(new FramePoint3D());
          comDesiredFinalPositions.add(new FramePoint3D());
          
-         icpQuantityInitialConditionList.add(new FrameVector());
+         icpQuantityInitialConditionList.add(new FrameVector3D());
       }
    }
 
@@ -357,7 +357,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       icpCurrentTest.set(icpPositionDesiredCurrent);
    }
    
-   private void checkICPDynamics(double time, FrameVector icpVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, YoFrameTrajectory3D cmpPolynomial3D)
+   private void checkICPDynamics(double time, FrameVector3D icpVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, YoFrameTrajectory3D cmpPolynomial3D)
    {
       cmpPolynomial3D.compute(time);
       
@@ -367,7 +367,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-6));
    }
    
-   private void checkCoMDynamics(double time, FrameVector comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
+   private void checkCoMDynamics(double time, FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
    {      
       comVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
       comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
@@ -432,7 +432,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.set(icpVelocityDesiredCurrent);
    }
@@ -443,7 +443,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.set(icpAccelerationDesiredCurrent);
    }
@@ -454,7 +454,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

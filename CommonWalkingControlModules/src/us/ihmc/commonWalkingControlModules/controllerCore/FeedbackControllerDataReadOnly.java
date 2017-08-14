@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -83,14 +83,14 @@ public interface FeedbackControllerDataReadOnly
     * the method returns {@code false}.
     * </p>
     * 
-    * @param vectorDataToPack the {@link FrameVector} in which the vector data is stored. Data is
+    * @param vectorDataToPack the {@link FrameVector3D} in which the vector data is stored. Data is
     *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type specifies the data type requested. Look up the options available in {@link Type}.
     * @param space specifies the physical quantity requested. Look up the options available in
     *           {@link Space}.
     * @return whether the data is available or not.
     */
-   boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space);
+   boolean getCenterOfMassVectorData(FrameVector3D vectorDataToPack, Type type, Space space);
 
    /**
     * Retrieves if possible the position data about a specific end-effector.
@@ -132,12 +132,12 @@ public interface FeedbackControllerDataReadOnly
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param vectorDataToPack the {@link FrameVector} in which the vector data is stored. Data is
+    * @param vectorDataToPack the {@link FrameVector3D} in which the vector data is stored. Data is
     *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type specifies the data type requested. Look up the options available in {@link Type}.
     * @param space specifies the physical quantity requested. Look up the options available in
     *           {@link Space}.
     * @return whether the data is available or not.
     */
-   boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space);
+   boolean getVectorData(RigidBody endEffector, FrameVector3D vectorDataToPack, Type type, Space space);
 }

@@ -4,7 +4,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -35,8 +35,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoDouble timeIntoTouchdown;
    
    private final FramePoint3D p0;
-   private final FrameVector pd0;
-   private final FrameVector pdd0;
+   private final FrameVector3D pd0;
+   private final FrameVector3D pdd0;
    
    private final double tf = Double.POSITIVE_INFINITY;
    private double t0;
@@ -56,8 +56,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
       
       p0 = new FramePoint3D();
-      pd0 = new FrameVector();
-      pdd0 = new FrameVector();
+      pd0 = new FrameVector3D();
+      pdd0 = new FrameVector3D();
       t0 = 0.0;
       
       this.replanningTrajectory = new YoBoolean(namePrefix + "ReplanningTrajectory", parentRegistry);
@@ -127,19 +127,19 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

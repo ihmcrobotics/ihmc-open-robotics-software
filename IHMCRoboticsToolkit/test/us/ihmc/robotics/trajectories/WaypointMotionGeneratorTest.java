@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -66,13 +66,13 @@ public class WaypointMotionGeneratorTest
       testPoint = waypointMotionGenerator.getCurrentDesiredPoint(moveDuration / 2.0);
       assertEquals(0.0, testPoint.distance(midPoint), 1e-6);
 
-      FrameVector velocity = waypointMotionGenerator.getCurrentDesiredVelocity(0.0);
+      FrameVector3D velocity = waypointMotionGenerator.getCurrentDesiredVelocity(0.0);
       assertEquals(0.0, velocity.length(), 1e-6);
 
       velocity = waypointMotionGenerator.getCurrentDesiredVelocity(moveDuration);
       assertEquals(0.0, velocity.length(), 1e-6);
 
-      FrameVector acceleration = waypointMotionGenerator.getCurrentDesiredAcceleration(0.0);
+      FrameVector3D acceleration = waypointMotionGenerator.getCurrentDesiredAcceleration(0.0);
 //      System.err.println("acceleration=" + acceleration);
 
       assertEquals(0.0, acceleration.length(), 1e-2);

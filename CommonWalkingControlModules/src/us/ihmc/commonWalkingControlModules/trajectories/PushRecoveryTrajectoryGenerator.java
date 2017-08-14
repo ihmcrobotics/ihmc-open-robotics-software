@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -53,8 +53,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    private final DoubleProvider swingTimeProvider;
 
    private FramePoint3D nominalTrajectoryPosition = new FramePoint3D();
-   private FrameVector nominalTrajectoryVelocity = new FrameVector();
-   private FrameVector nominalTrajectoryAcceleration = new FrameVector();
+   private FrameVector3D nominalTrajectoryVelocity = new FrameVector3D();
+   private FrameVector3D nominalTrajectoryAcceleration = new FrameVector3D();
 
    public PushRecoveryTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider,
          DoubleProvider swingTimeRemainingProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
@@ -92,7 +92,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry, yoGraphicsListRegistry);
    }
 
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
 
    public void initialize()
@@ -188,12 +188,12 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -204,7 +204,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       return timeIntoStep.getDoubleValue() >= swingTime.getDoubleValue();
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

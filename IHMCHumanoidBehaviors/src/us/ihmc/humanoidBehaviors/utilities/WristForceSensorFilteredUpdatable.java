@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
@@ -141,12 +141,12 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       return sensorMassCompensator.getSensorPosition();
    }
 
-   public FrameVector getWristForceRawInWorld()
+   public FrameVector3D getWristForceRawInWorld()
    {
       return sensorMassCompensator.getSensorForceRaw(world);
    }
 
-   public FrameVector getWristForceMassCompensatedInWorld()
+   public FrameVector3D getWristForceMassCompensatedInWorld()
    {
       return sensorMassCompensator.getSensorForceMassCompensated(world);
    }
@@ -198,7 +198,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       forceSensorData.getWrench(wristSensorWrench);
       sensorMassCompensator.update(forceSensorData);
 
-      FrameVector sensorForceRawInWorld = sensorMassCompensator.getSensorForceRaw(world);
+      FrameVector3D sensorForceRawInWorld = sensorMassCompensator.getSensorForceRaw(world);
       yoWristSensorForceMagnitude.set(sensorForceRawInWorld.length());
    }
 
@@ -241,13 +241,13 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       }
    }
 
-   private final FrameVector wristSensorForceInWorld = new FrameVector();
+   private final FrameVector3D wristSensorForceInWorld = new FrameVector3D();
 
    private void estimateStiffnessOfConstraintsActingUponWrist()
    {
       FramePoint3D sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
 
-      FrameVector forceInWorldFrame = sensorMassCompensator.getSensorForceMassCompensated(world);
+      FrameVector3D forceInWorldFrame = sensorMassCompensator.getSensorForceMassCompensated(world);
       wristSensorForceInWorld.setIncludingFrame(forceInWorldFrame);
 
       taskspaceStiffnessCalc.update(sensorPositionInWorld, wristSensorForceInWorld);

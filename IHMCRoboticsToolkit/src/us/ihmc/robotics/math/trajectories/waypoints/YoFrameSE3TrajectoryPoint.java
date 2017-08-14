@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
@@ -66,7 +66,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void setLinearVelocity(FrameVector linearVelocity)
+   public void setLinearVelocity(FrameVector3D linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
@@ -77,7 +77,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -98,7 +98,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, FramePoint3D position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void set(double time, FramePoint3D position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.position.set(position);
@@ -224,12 +224,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       orientation.getFrameOrientation(orientationToPack);
    }
 
-   public void getLinearVelocity(FrameVector linearVelocityToPack)
+   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       linearVelocity.getFrameTuple(linearVelocityToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocity.getFrameTuple(angularVelocityToPack);
    }
@@ -244,12 +244,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
+   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
       linearVelocity.getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }

@@ -6,7 +6,7 @@ import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.Jo
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -26,9 +26,9 @@ public class SwingTrajectoryGenerator //This is a wrapper class -- it wraps the 
    private final FramePoint3D currentFootPosition = new FramePoint3D();
    private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
-   private final FrameVector initialAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector initialVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D initialAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D initialVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D finalDesiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
    
    public SwingTrajectoryGenerator(YoVariableRegistry parentRegistry, RobotSide robotSide, double dt, SideDependentList<EnumMap<JointNames, OneDoFJoint>> allLegJoints)
    {

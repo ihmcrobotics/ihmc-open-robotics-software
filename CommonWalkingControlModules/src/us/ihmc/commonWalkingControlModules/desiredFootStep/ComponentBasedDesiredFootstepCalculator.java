@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -241,10 +241,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
          upcomingSwingAnkle.changeFrame(worldFrame);
          double zUpcomingSwing = upcomingSwingAnkle.getZ();
 
-         FrameVector searchDirection = new FrameVector(upcomingSupportZUpFrame, 0.0, 0.0, -1.0);
+         FrameVector3D searchDirection = new FrameVector3D(upcomingSupportZUpFrame, 0.0, 0.0, -1.0);
          List<FramePoint3D> contactPointsCopy = upcomingSwingFoot.getContactPointsCopy();
          FramePoint3D upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactPointsCopy, searchDirection, 1).get(0);
-         FrameVector deltaZ = new FrameVector(upcomingSwingMinZPoint);
+         FrameVector3D deltaZ = new FrameVector3D(upcomingSwingMinZPoint);
          deltaZ.changeFrame(worldFrame);
          double upcomingSwingMinZ = deltaZ.getZ();
 

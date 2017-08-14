@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -77,7 +77,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.switchTrajectoryFrame(referenceFrame);
    }
 
-   public void setInitialLeadOut(FramePose initialPose, FrameVector initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePose initialPose, FrameVector3D initialDirection, double leaveDistance)
    {
       initialPose.getPositionIncludingFrame(tempPosition);
       initialPose.getOrientationIncludingFrame(tempOrientation);
@@ -85,7 +85,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
    }
 
-   public void setFinalLeadIn(FramePose finalPose, FrameVector finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePose finalPose, FrameVector3D finalDirection, double approachDistance)
    {
       finalPose.getPositionIncludingFrame(tempPosition);
       finalPose.getOrientationIncludingFrame(tempOrientation);
@@ -134,12 +134,12 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       positionTrajectoryGenerator.getPosition(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       positionTrajectoryGenerator.getVelocity(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       positionTrajectoryGenerator.getAcceleration(accelerationToPack);
    }
@@ -149,24 +149,24 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       orientationTrajectoryGenerator.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

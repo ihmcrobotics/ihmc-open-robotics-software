@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -205,9 +205,9 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       return getName();
    }
    
-   FrameVector initialVelocity = new FrameVector();
-   FrameVector intialAcceleration = new FrameVector();
-   FrameVector finalDesiredVelocity = new FrameVector();
+   FrameVector3D initialVelocity = new FrameVector3D();
+   FrameVector3D intialAcceleration = new FrameVector3D();
+   FrameVector3D finalDesiredVelocity = new FrameVector3D();
 
    @Override
    public void doControl()

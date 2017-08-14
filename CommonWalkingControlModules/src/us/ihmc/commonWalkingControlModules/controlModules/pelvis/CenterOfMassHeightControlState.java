@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -185,7 +185,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
    private final FramePoint3D comPosition = new FramePoint3D();
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
+   private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2d comXYVelocity = new FrameVector2d();
    private final FrameVector2d comXYAcceleration = new FrameVector2d();
    private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();

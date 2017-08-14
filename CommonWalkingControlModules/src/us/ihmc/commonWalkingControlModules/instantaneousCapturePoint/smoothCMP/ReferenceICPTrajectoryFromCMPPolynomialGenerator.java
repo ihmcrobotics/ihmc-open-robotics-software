@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -43,8 +43,8 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private final DenseMatrix64F coefficientsCurrentVector = new DenseMatrix64F();
    
    private FramePoint3D icpPositionDesiredCurrent = new FramePoint3D();
-   private FrameVector icpVelocityDesiredCurrent = new FrameVector();
-   private FrameVector icpAccelerationDesiredCurrent = new FrameVector();
+   private FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
+   private FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
    
    private FramePoint3D icpPositionDesiredFinalFirstSegment = new FramePoint3D();
    
@@ -275,19 +275,19 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.set(icpVelocityDesiredCurrent);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.set(icpAccelerationDesiredCurrent);
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

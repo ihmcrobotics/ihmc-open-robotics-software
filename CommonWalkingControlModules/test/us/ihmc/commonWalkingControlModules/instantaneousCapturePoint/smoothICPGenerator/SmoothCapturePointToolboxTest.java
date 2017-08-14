@@ -15,7 +15,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -205,8 +205,8 @@ public class SmoothCapturePointToolboxTest
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
-         FrameVector cmpD0 = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FrameVector cmpDFinal = new FrameVector(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FrameVector3D cmpD0 = new FrameVector3D(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FrameVector3D cmpDFinal = new FrameVector3D(worldFrame, new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
          cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal,cmpDFinal);
          
@@ -295,8 +295,8 @@ public class SmoothCapturePointToolboxTest
          EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
          //Velocity
-         FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
-         FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrentByHand = new FrameVector3D(worldFrame);
          
          icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
          calculateICPVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
@@ -310,7 +310,7 @@ public class SmoothCapturePointToolboxTest
          linear3D.compute(time);
          FramePoint3D cmpPositionDesiredCurrent = new FramePoint3D(worldFrame, linear3D.getPosition());
          
-         FrameVector icpVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
          icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
          
          EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
@@ -335,8 +335,8 @@ public class SmoothCapturePointToolboxTest
          FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
          // !!! TESTING WITH 0 VELOCITIES !!!
-         FrameVector cmpD0 = new FrameVector(worldFrame);
-         FrameVector cmpDFinal = new FrameVector(worldFrame);
+         FrameVector3D cmpD0 = new FrameVector3D(worldFrame);
+         FrameVector3D cmpDFinal = new FrameVector3D(worldFrame);
          
          cubic3D.setCubic(t0, tFinal, cmp0, cmpD0, cmpFinal, cmpDFinal);
          
@@ -357,8 +357,8 @@ public class SmoothCapturePointToolboxTest
          EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
          // Velocity
-         FrameVector icpVelocityDesiredCurrent = new FrameVector(worldFrame);
-         FrameVector icpVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrentByHand = new FrameVector3D(worldFrame);
          
          icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
          calculateICPVelocityByHand3DCubic(omega0, time, cubic3D, icpPositionDesiredFinal, icpVelocityDesiredCurrentByHand);
@@ -372,7 +372,7 @@ public class SmoothCapturePointToolboxTest
          cubic3D.compute(time);
          FramePoint3D cmpPositionDesiredCurrent = new FramePoint3D(worldFrame, cubic3D.getPosition());
          
-         FrameVector icpVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         FrameVector3D icpVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
          icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
          
          EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
@@ -425,7 +425,7 @@ public class SmoothCapturePointToolboxTest
       icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public static void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   public static void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FrameVector3D icpVelocityDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());
@@ -448,7 +448,7 @@ public class SmoothCapturePointToolboxTest
       icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
    }
    
-   public static void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint3D icpPositionDesiredFinal, FrameVector icpVelocityDesiredCurrent)
+   public static void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint3D icpPositionDesiredFinal, FrameVector3D icpVelocityDesiredCurrent)
    {      
       cubic3D.compute(cubic3D.getInitialTime());
       FramePoint3D cmpRefInit = new FramePoint3D(cubic3D.getFramePosition());

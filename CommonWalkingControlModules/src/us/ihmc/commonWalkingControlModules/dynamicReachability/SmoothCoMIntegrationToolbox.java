@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class SmoothCoMIntegrationToolbox
 {
@@ -77,13 +77,13 @@ public class SmoothCoMIntegrationToolbox
    }
    
    public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
-                                                         FrameVector desiredCenterOfMassVelocityToPack)
+                                                         FrameVector3D desiredCenterOfMassVelocityToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassVelocityToPack);
    }
    
    public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
-                                                         FrameVector desiredCenterOfMassAccelerationToPack)
+                                                         FrameVector3D desiredCenterOfMassAccelerationToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassAccelerationToPack);
    }  
