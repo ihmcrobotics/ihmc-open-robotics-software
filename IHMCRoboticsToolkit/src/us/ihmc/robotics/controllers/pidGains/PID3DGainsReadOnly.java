@@ -20,6 +20,11 @@ public interface PID3DGainsReadOnly
 
    public abstract double getMaximumFeedbackRate();
 
+   public default GainCoupling getGainCoupling()
+   {
+      return GainCoupling.NONE;
+   }
+
    public default void getProportionalGainMatrix(Matrix3D proportialGainMatrixToPack)
    {
       setMatrixDiagonal(getProportionalGains(), proportialGainMatrixToPack);
