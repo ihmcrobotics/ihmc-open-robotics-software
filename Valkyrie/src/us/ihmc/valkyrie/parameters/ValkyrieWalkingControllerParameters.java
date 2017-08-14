@@ -26,7 +26,10 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -225,8 +228,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private YoPID3DGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      YoValkyrieHeadPIDGains gains = new YoValkyrieHeadPIDGains("HeadOrientation", registry);
-
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpX = 5.0;
@@ -235,13 +236,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = 18.0;
       double maxJerk = 270.0;
 
-      gains.setProportionalGains(kpX, kpYZ);
-      gains.setDampingRatio(zeta);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.YZ);
+      gains.setProportionalGains(kpX, kpYZ, kpYZ);
+      gains.setDampingRatios(zeta, zeta, zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new DefaultYoPID3DGains("HeadOrientation", gains, registry);
    }
 
    private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)

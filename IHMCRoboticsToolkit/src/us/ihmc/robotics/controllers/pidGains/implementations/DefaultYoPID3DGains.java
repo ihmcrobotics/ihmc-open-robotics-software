@@ -213,6 +213,13 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       kdMap.get(Axis.Z).set(derivativeGainZ);
    }
 
+   public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
+   {
+      zetaMap.get(Axis.X).set(dampingRatioX);
+      zetaMap.get(Axis.Y).set(dampingRatioY);
+      zetaMap.get(Axis.Z).set(dampingRatioZ);
+   }
+
    @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
