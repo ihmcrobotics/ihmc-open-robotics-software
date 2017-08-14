@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -89,9 +89,9 @@ public class FeetManager
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      YoSE3PIDGainsInterface swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
-      YoSE3PIDGainsInterface holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
-      YoSE3PIDGainsInterface toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
+      YoPIDSE3Gains swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
+      YoPIDSE3Gains holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
+      YoPIDSE3Gains toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
 
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)

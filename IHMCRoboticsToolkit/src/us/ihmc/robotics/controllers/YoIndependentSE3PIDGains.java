@@ -1,9 +1,8 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
+public class YoIndependentSE3PIDGains implements YoPIDSE3Gains
 {
    private final YoEuclideanPositionGains positionGains;
    private final YoAxisAngleOrientationGains orientationGains;
@@ -139,18 +138,6 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    public void setOrientationMaxProportionalError(double maxProportionalError)
    {
       orientationGains.setMaxProportionalError(maxProportionalError);
-   }
-
-   @Override
-   public void setPositionGains(PID3DGainsReadOnly positionGains)
-   {
-      this.positionGains.set(positionGains);
-   }
-
-   @Override
-   public void setOrientationGains(PID3DGainsReadOnly orientationGains)
-   {
-      this.orientationGains.set(orientationGains);
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

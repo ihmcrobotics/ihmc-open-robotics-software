@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,7 +60,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final ReferenceFrame soleZUpFrame;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 

@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientation
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -17,7 +17,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    private final String name = "vmcParams_";
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
-   private final YoSE3PIDGainsInterface footGains;
+   private final YoPIDSE3Gains footGains;
    
    //body spatial feeback controller params
    private final Vector3D linearWeight = new Vector3D(1.0, 1.0, 10.0);
@@ -98,7 +98,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public YoSE3PIDGainsInterface getFootGains()
+   public YoPIDSE3Gains getFootGains()
    {
       return footGains;
    }

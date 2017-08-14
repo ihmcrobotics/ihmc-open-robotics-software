@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -734,19 +734,19 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
