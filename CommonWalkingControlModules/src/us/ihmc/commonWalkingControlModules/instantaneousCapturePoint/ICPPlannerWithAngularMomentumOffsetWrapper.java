@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -87,15 +87,15 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
-   private final FramePoint desiredCMPPosition = new FramePoint();
+   private final FramePoint3D desiredCMPPosition = new FramePoint3D();
    private final FrameVector desiredCMPVelocity = new FrameVector();
 
-   private final FramePoint desiredICPPosition = new FramePoint();
+   private final FramePoint3D desiredICPPosition = new FramePoint3D();
    private final FrameVector desiredICPVelocity = new FrameVector();
    private final FrameVector desiredICPAcceleration = new FrameVector();
 
    // TODO have this guy account for the desired difference between the CMP and CoP.
-   public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)
+   public void modifyDesiredICPForAngularMomentum(FramePoint3D copEstimate, RobotSide supportSide)
    {
       super.getDesiredCentroidalMomentumPivotPosition(desiredCMPPosition);
       super.getDesiredCentroidalMomentumPivotVelocity(desiredCMPVelocity);
@@ -158,7 +158,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
-   private void estimateCurrentTimeWithModifiedCMP(FramePoint desiredCoPFromAngularMomentum)
+   private void estimateCurrentTimeWithModifiedCMP(FramePoint3D desiredCoPFromAngularMomentum)
    {
       double copCMPDistance = desiredCMPPosition.getXYPlaneDistance(desiredCoPFromAngularMomentum);
       double distanceFromCMP = desiredICPPosition.getXYPlaneDistance(modifiedCMPPosition.getFrameTuple());
@@ -191,7 +191,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       modifiedCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }

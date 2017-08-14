@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
@@ -136,7 +136,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       return sensorMassCompensator.getDistalMass();
    }
 
-   public FramePoint getWristPositionInWorld()
+   public FramePoint3D getWristPositionInWorld()
    {
       return sensorMassCompensator.getSensorPosition();
    }
@@ -245,7 +245,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void estimateStiffnessOfConstraintsActingUponWrist()
    {
-      FramePoint sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
+      FramePoint3D sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
 
       FrameVector forceInWorldFrame = sensorMassCompensator.getSensorForceMassCompensated(world);
       wristSensorForceInWorld.setIncludingFrame(forceInWorldFrame);

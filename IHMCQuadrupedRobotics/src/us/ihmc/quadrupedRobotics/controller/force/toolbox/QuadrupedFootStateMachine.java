@@ -12,7 +12,7 @@ import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -97,7 +97,7 @@ public class QuadrupedFootStateMachine
       }
    }
 
-   public void adjustStep(FramePoint newGoalPosition)
+   public void adjustStep(FramePoint3D newGoalPosition)
    {
       this.stepCommand.setGoalPosition(newGoalPosition);
    }
@@ -169,13 +169,13 @@ public class QuadrupedFootStateMachine
    {
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
-      private final FramePoint goalPosition;
+      private final FramePoint3D goalPosition;
       private final GlitchFilteredYoBoolean touchdownTrigger;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
-         this.goalPosition = new FramePoint();
+         this.goalPosition = new FramePoint3D();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
          this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                parameters.getTouchdownTriggerWindowParameter());
@@ -190,7 +190,7 @@ public class QuadrupedFootStateMachine
          stepCommand.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
          goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
-         FramePoint solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
+         FramePoint3D solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 

@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -50,14 +50,14 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d defaultFootPolygon;
 
-   private final FramePoint groundPlanePoint = new FramePoint();
+   private final FramePoint3D groundPlanePoint = new FramePoint3D();
    private final FrameVector groundPlaneNormal = new FrameVector();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   private final FramePoint cop = new FramePoint();
+   private final FramePoint3D cop = new FramePoint3D();
    private final YoDouble copAlpha;
    private final AlphaFilteredYoFramePoint copFiltered;
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();

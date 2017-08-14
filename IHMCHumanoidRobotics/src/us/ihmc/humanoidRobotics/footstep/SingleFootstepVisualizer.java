@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -110,7 +110,7 @@ public class SingleFootstepVisualizer
       {
          Point2D contactPoint = predictedContactPoints.get(i);
          
-         FramePoint pointInWorld = new FramePoint(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
+         FramePoint3D pointInWorld = new FramePoint3D(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
          pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          
          yoContactPoints[i].set(pointInWorld.getPoint());

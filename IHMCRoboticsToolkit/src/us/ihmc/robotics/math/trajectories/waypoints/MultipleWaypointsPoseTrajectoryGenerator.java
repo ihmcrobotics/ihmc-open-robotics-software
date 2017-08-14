@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -19,7 +19,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    
    private ReferenceFrame activeFrame;
    
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
 
    public MultipleWaypointsPoseTrajectoryGenerator(String namePrefix, int maxNumberOfWaypoints, YoVariableRegistry parentRegistry)
@@ -58,7 +58,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       orientationTrajectory.appendWaypoint(waypoint);
    }
 
-   public void appendPositionWaypoint(double timeAtWaypoint, FramePoint position, FrameVector linearVelocity)
+   public void appendPositionWaypoint(double timeAtWaypoint, FramePoint3D position, FrameVector linearVelocity)
    {
       position.changeFrame(activeFrame);
       linearVelocity.changeFrame(activeFrame);
@@ -111,7 +111,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTrajectory.getPosition(positionToPack);
    }

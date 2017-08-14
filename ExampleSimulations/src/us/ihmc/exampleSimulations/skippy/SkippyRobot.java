@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -546,7 +546,7 @@ public class SkippyRobot extends Robot
    /**
     * Computes the CoM position and velocity and the ICP
     */
-   public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
+   public void computeComAndICP(FramePoint3D comToPack, FrameVector comVelocityToPack, FramePoint3D icpToPack, FrameVector angularMomentumToPack)
    {
       double totalMass = computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum);
       angularMomentumToPack.set(tempAngularMomentum);

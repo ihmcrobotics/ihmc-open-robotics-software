@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -15,14 +15,14 @@ public class QuadrupedSolePositionController
    public static class Setpoints
    {
       private RobotQuadrant robotQuadrant;
-      private final FramePoint solePosition;
+      private final FramePoint3D solePosition;
       private final FrameVector soleLinearVelocity;
       private final FrameVector soleForceFeedforward;
 
       public Setpoints(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
-         this.solePosition = new FramePoint();
+         this.solePosition = new FramePoint3D();
          this.soleLinearVelocity = new FrameVector();
          this.soleForceFeedforward = new FrameVector();
       }
@@ -40,7 +40,7 @@ public class QuadrupedSolePositionController
          return robotQuadrant;
       }
 
-      public FramePoint getSolePosition()
+      public FramePoint3D getSolePosition()
       {
          return solePosition;
       }
@@ -96,7 +96,7 @@ public class QuadrupedSolePositionController
 
    public void compute(FrameVector soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      FramePoint solePositionSetpoint = setpoints.getSolePosition();
+      FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
       FrameVector soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
       FrameVector soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
       FrameVector soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();

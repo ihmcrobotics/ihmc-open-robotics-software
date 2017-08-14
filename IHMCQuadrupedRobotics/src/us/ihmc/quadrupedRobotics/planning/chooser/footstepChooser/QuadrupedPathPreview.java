@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -43,9 +43,9 @@ public class QuadrupedPathPreview
    private final YoFrameConvexPolygon2d[] tripleSupportPolygons = new YoFrameConvexPolygon2d[iterations * 2];
    private final YoArtifactPolygon[] tripleSupportArtifactPolygons = new YoArtifactPolygon[iterations * 2];
 
-   private final FramePoint footLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D footLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-   private final FramePoint desiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D desiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
 //   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
 
    public QuadrupedPathPreview(SwingTargetGenerator swingTargetGenerator, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
@@ -129,7 +129,7 @@ public class QuadrupedPathPreview
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint footstep = supportPolygon.getFootstep(quadrant);
+         FramePoint3D footstep = supportPolygon.getFootstep(quadrant);
          if (footstep != null)
          {
             polygon.addVertex(footstep.getX(), footstep.getY());

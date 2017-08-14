@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -83,7 +83,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
    private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
@@ -103,11 +103,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final FramePose controlFramePose = new FramePose();
 
-   private final FramePoint controlPoint = new FramePoint();
+   private final FramePoint3D controlPoint = new FramePoint3D();
    private final YoFramePoint yoControlPoint;
    private final FrameOrientation controlOrientation = new FrameOrientation();
    private final YoFrameOrientation yoControlOrientation;
-   private final FramePoint desiredPoint = new FramePoint();
+   private final FramePoint3D desiredPoint = new FramePoint3D();
    private final YoFramePoint yoDesiredPoint;
 
    private final YoBoolean hybridModeActive;

@@ -6,7 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,7 +25,7 @@ public class QuadrupedSoleForceEstimator
 
    private final QuadrantDependentList<FrameVector> soleVirtualForce;
    private final QuadrantDependentList<FrameVector> soleContactForce;
-   private final QuadrantDependentList<FramePoint> solePosition;
+   private final QuadrantDependentList<FramePoint3D> solePosition;
    private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
 
@@ -56,7 +56,7 @@ public class QuadrupedSoleForceEstimator
       soleContactForce = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.set(robotQuadrant, new FramePoint(worldFrame));
+         solePosition.set(robotQuadrant, new FramePoint3D(worldFrame));
          soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
          soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
       }

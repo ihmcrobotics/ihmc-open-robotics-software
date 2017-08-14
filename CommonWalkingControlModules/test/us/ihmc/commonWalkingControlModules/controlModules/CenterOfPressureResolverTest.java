@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -128,9 +128,9 @@ public class CenterOfPressureResolverTest
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
          SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
 
-         ImmutablePair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal,
+         ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal,
                centerOfMassFrame, spatialForceVector);
-         FramePoint centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
+         FramePoint3D centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
          double normalTorqueResolvedAtCenterOfPressure = centerOfPressureAndNormalTorque.getRight();
          centerOfPressure.changeFrame(worldFrame);
 
@@ -160,12 +160,12 @@ public class CenterOfPressureResolverTest
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
       SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
 
-      ImmutablePair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame,
+      ImmutablePair<FramePoint3D, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame,
             spatialForceVector);
-      FramePoint centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
+      FramePoint3D centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
       double normalTorque = centerOfPressureAndNormalTorque.getRight();
 
-      FramePoint expectedCenterOfPressureFramePoint = new FramePoint(worldFrame, expectedCenterOfPressure);
+      FramePoint3D expectedCenterOfPressureFramePoint = new FramePoint3D(worldFrame, expectedCenterOfPressure);
 
       if (Double.isNaN(expectedCenterOfPressureFramePoint.getX()) && Double.isNaN(expectedCenterOfPressureFramePoint.getY())
             && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
@@ -177,7 +177,7 @@ public class CenterOfPressureResolverTest
       assertEquals(expectedNormalTorque, normalTorque, 1e-7);
    }
 
-   private static ImmutablePair<FramePoint, Double> computeCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal,
+   private static ImmutablePair<FramePoint3D, Double> computeCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal,
          ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
@@ -187,9 +187,9 @@ public class CenterOfPressureResolverTest
 
       double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector,
             groundPlaneFrame);
-      FramePoint centerOfPressure = centerOfPressure2d.toFramePoint();
+      FramePoint3D centerOfPressure = centerOfPressure2d.toFramePoint();
       centerOfPressure.changeFrame(worldFrame);
-      return new ImmutablePair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
+      return new ImmutablePair<FramePoint3D, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }
 
    private static PoseReferenceFrame createPlaneFrame(String name, Point3D planeReferencePoint, Vector3D planeSurfaceNormal)

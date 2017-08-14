@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -40,9 +40,9 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void update(double currentTime);
 
-   void getDesiredCenterOfPressure(FramePoint desiredCoPToPack);
+   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack);
 
-   void getDesiredCenterOfPressure(FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
+   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
 
    void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack);
 

@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
@@ -143,8 +143,8 @@ public class SkippyController implements RobotController
    private final YoDouble qShoulderIncludingOffset = new YoDouble("qShoulderIncludingOffset", registry);
    private final YoDouble qd_shoulder = new YoDouble("qd_shoulder", registry);
 
-   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempFootLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempCoMLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private final YoDouble z0 = new YoDouble("z0", registry);
@@ -685,7 +685,7 @@ public class SkippyController implements RobotController
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
 
-      FramePoint bodyPoint = new FramePoint(bodyFrame);
+      FramePoint3D bodyPoint = new FramePoint3D(bodyFrame);
       bodyPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
       bodyLocation.set(bodyPoint);

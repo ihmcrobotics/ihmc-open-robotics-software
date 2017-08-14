@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -17,11 +17,11 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
    private final YoFrameVector yoSmoothedVelocity;
    private final YoFrameVector yoSmoothedAcceleration;
 
-   private final FramePoint smoothedPosition = new FramePoint();
+   private final FramePoint3D smoothedPosition = new FramePoint3D();
    private final FrameVector smoothedVelocity = new FrameVector();
    private final FrameVector smoothedAcceleration = new FrameVector();
 
-   private final FramePoint positionInput;
+   private final FramePoint3D positionInput;
    private final FrameVector velocityInput;
    private final FrameVector accelerationInput;
 
@@ -63,7 +63,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       velocityGain = new YoDouble(namePrefix + "VelocityGain", registry);
       accelerationGain = new YoDouble(namePrefix + "AccelerationGain", registry);
       
-      positionInput = new FramePoint(trajectoryReferenceFrame);
+      positionInput = new FramePoint3D(trajectoryReferenceFrame);
       velocityInput = new FrameVector(trajectoryReferenceFrame);
       accelerationInput = new FrameVector(trajectoryReferenceFrame);
 
@@ -175,7 +175,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       return isTrajectoryInputDone && isSmoothingDone;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -190,7 +190,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       yoSmoothedAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

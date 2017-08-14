@@ -266,7 +266,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    public void testToFramePoint()
    {
       FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0, "point1");
-      FramePoint framePoint = point1.toFramePoint();
+      FramePoint3D framePoint = point1.toFramePoint();
       assertEquals("Should be equal", point1.getX(), framePoint.getX(), epsilon);
       assertEquals("Should be equal", point1.getY(), framePoint.getY(), epsilon);
       point1.checkReferenceFrameMatch(framePoint.getReferenceFrame());

@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -155,10 +155,10 @@ public class FlatGroundContactForceOptimizer
     * can be used to compute the ground reaction forces and return the wrenches exerted by the groups of contact points. The contact frames are
     * the point at which this wrench is assumed to be located.
     */
-   public List<Wrench> compute(List<List<FramePoint>> contactPlanes, List<ReferenceFrame> contactFrames, FramePoint centerOfMass, FrameVector force,
+   public List<Wrench> compute(List<List<FramePoint3D>> contactPlanes, List<ReferenceFrame> contactFrames, FramePoint3D centerOfMass, FrameVector force,
                                FrameVector torque, WeightMatrix6D weights)
    {
-      List<FramePoint> contactPoints = new ArrayList<>();
+      List<FramePoint3D> contactPoints = new ArrayList<>();
       List<FrameVector> contactForces = new ArrayList<>();
 
       contactPlanes.stream().forEachOrdered(points -> contactPoints.addAll(points));
@@ -176,7 +176,7 @@ public class FlatGroundContactForceOptimizer
          resultForce.setToZero();
          resultTorque.setToZero();
          ReferenceFrame planeFrame = contactFrames.get(planeIdx);
-         FramePoint planeCenter = new FramePoint(planeFrame);
+         FramePoint3D planeCenter = new FramePoint3D(planeFrame);
          planeCenter.changeFrame(ReferenceFrame.getWorldFrame());
 
          int contactPointsInPlane = contactPlanes.get(planeIdx).size();
@@ -201,7 +201,7 @@ public class FlatGroundContactForceOptimizer
    /**
     * Method computes the ground reaction forces at the contact points that will best achieve the specified momentum rate.
     */
-   public boolean compute(List<FramePoint> contactPoints, FramePoint centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights)
+   public boolean compute(List<FramePoint3D> contactPoints, FramePoint3D centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights)
    {
       return compute(contactPoints, centerOfMass, force, torque, weights, null);
    }
@@ -210,7 +210,7 @@ public class FlatGroundContactForceOptimizer
     * Method computes the ground reaction forces at the contact points that will best achieve the specified momentum rate. This method also
     * packs the forces at the contact points if contactForcesToPack is not null. In that case the method will generate garbage.
     */
-   public boolean compute(List<FramePoint> contactPoints, FramePoint centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights,
+   public boolean compute(List<FramePoint3D> contactPoints, FramePoint3D centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights,
                           List<FrameVector> contactForcesToPack)
    {
       for (int contactIdx = 0; contactIdx < contactPoints.size(); contactIdx++)

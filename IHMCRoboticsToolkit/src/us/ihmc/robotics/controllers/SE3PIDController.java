@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,7 +27,7 @@ public class SE3PIDController
    private final FrameVector angularActionFromOrientationController = new FrameVector();
 
    private final EuclideanPositionController positionController;
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector desiredVelocity = new FrameVector();
    private final FrameVector feedForwardLinearAction = new FrameVector();
    private final FrameVector currentVelocity = new FrameVector();

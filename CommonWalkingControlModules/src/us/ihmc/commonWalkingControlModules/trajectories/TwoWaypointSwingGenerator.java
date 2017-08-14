@@ -11,7 +11,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -42,12 +42,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private TrajectoryType trajectoryType;
    private final PositionOptimizedTrajectoryGenerator trajectory;
 
-   private final FramePoint initialPosition = new FramePoint();
+   private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector initialVelocity = new FrameVector();
-   private final FramePoint finalPosition = new FramePoint();
+   private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector finalVelocity = new FrameVector();
-   private final ArrayList<FramePoint> waypointPositions = new ArrayList<>();
-   private final FramePoint stanceFootPosition = new FramePoint();
+   private final ArrayList<FramePoint3D> waypointPositions = new ArrayList<>();
+   private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameVector initialVelocityNoTimeDimension = new FrameVector();
    private final FrameVector finalVelocityNoTimeDiemension = new FrameVector();
@@ -97,7 +97,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints);
 
       for (int i = 0; i < numberWaypoints; i++)
-         waypointPositions.add(new FramePoint());
+         waypointPositions.add(new FramePoint3D());
 
       if (yoGraphicsListRegistry != null)
          waypointViz = new BagOfBalls(numberWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
@@ -110,13 +110,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setInitialConditions(FramePoint initialPosition, FrameVector initialVelocity)
+   public void setInitialConditions(FramePoint3D initialPosition, FrameVector initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint finalPosition, FrameVector finalVelocity)
+   public void setFinalConditions(FramePoint3D finalPosition, FrameVector finalVelocity)
    {
       this.finalPosition.setIncludingFrame(finalPosition);
       this.finalVelocity.setIncludingFrame(finalVelocity);
@@ -127,7 +127,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       setTrajectoryType(trajectoryType, null);
    }
 
-   public void setTrajectoryType(TrajectoryType trajectoryType, RecyclingArrayList<FramePoint> waypoints)
+   public void setTrajectoryType(TrajectoryType trajectoryType, RecyclingArrayList<FramePoint3D> waypoints)
    {
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
@@ -166,7 +166,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          this.swingHeight.set(swingHeight);
    }
 
-   public void setStanceFootPosition(FramePoint stanceFootPosition)
+   public void setStanceFootPosition(FramePoint3D stanceFootPosition)
    {
       this.stanceFootPosition.setIncludingFrame(stanceFootPosition);
    }
@@ -262,7 +262,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       trajectory.getPosition(positionToPack);
    }
@@ -283,7 +283,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

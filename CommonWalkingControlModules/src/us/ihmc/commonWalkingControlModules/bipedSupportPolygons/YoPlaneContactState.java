@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -72,7 +72,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       hasContactStateChanged = new YoBoolean(namePrefix + "HasChanged", registry);
    }
 
-   private final FramePoint tempContactPointPosition = new FramePoint();
+   private final FramePoint3D tempContactPointPosition = new FramePoint3D();
 
    @Override
    public void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack)
@@ -203,9 +203,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public List<FramePoint> getContactFramePointsInContactCopy()
+   public List<FramePoint3D> getContactFramePointsInContactCopy()
    {
-      List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
+      List<FramePoint3D> ret = new ArrayList<FramePoint3D>(totalNumberOfContactPoints);
 
       for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
@@ -213,7 +213,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
          if (contactPoint.isInContact())
          {
-            FramePoint framePoint = new FramePoint();
+            FramePoint3D framePoint = new FramePoint3D();
             contactPoint.getPosition(framePoint);
             ret.add(framePoint);
          }
@@ -223,7 +223,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
+   public void getContactFramePointsInContact(List<FramePoint3D> contactPointListToPack)
    {
       int counter = 0;
       for (int i = 0; i < totalNumberOfContactPoints; i++)
@@ -234,7 +234,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
             continue;
 
          if (counter >= contactPointListToPack.size())
-            contactPointListToPack.add(new FramePoint());
+            contactPointListToPack.add(new FramePoint3D());
 
          contactPoint.getPosition(contactPointListToPack.get(counter));
          counter++;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -29,7 +29,7 @@ public class DiagnosticsWhenHangingHelper
    private final YoFramePoint belowJointCoMInZUpFrame;
    private final YoFrameVector yoJointAxis, yoJointToCenterOfMass, yoForceVector;
 
-   private final FramePoint centerOfMassPosition;
+   private final FramePoint3D centerOfMassPosition;
    private final FrameVector jointAxis = new FrameVector();
    private final FrameVector jointToCenterOfMass = new FrameVector();
    private FrameVector forceVector = new FrameVector();
@@ -53,7 +53,7 @@ public class DiagnosticsWhenHangingHelper
       centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY, isSpineJoint, topLegJointsIfSpine);
 
       belowJointCoMInZUpFrame = new YoFramePoint(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
-      centerOfMassPosition = new FramePoint(centerOfMassCalculator.getDesiredFrame());
+      centerOfMassPosition = new FramePoint3D(centerOfMassCalculator.getDesiredFrame());
 
       yoJointAxis = new YoFrameVector(parentJoint.getName() + "JointAxis", ReferenceFrame.getWorldFrame(), registry);
       yoJointToCenterOfMass = new YoFrameVector(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);

@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -51,20 +51,20 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    private final RigidBodyTransform topJointTransform3D = new RigidBodyTransform();
    private final RigidBodyTransform bottomJointTransform3D = new RigidBodyTransform();
 
-   private final FramePoint b5InBottomFrame = new FramePoint();   
-   private final FramePoint b6InBottomFrame = new FramePoint();   
+   private final FramePoint3D b5InBottomFrame = new FramePoint3D();   
+   private final FramePoint3D b6InBottomFrame = new FramePoint3D();   
 
-   private final FramePoint b5InTopFrame = new FramePoint();
-   private final FramePoint b6InTopFrame = new FramePoint();
+   private final FramePoint3D b5InTopFrame = new FramePoint3D();
+   private final FramePoint3D b6InTopFrame = new FramePoint3D();
    
-   private final FramePoint b5InSlideFrame = new FramePoint();
-   private final FramePoint b6InSlideFrame = new FramePoint();
+   private final FramePoint3D b5InSlideFrame = new FramePoint3D();
+   private final FramePoint3D b6InSlideFrame = new FramePoint3D();
 
-   private final FramePoint t5InTopFrame = new FramePoint();
-   private final FramePoint t6InTopFrame = new FramePoint();
+   private final FramePoint3D t5InTopFrame = new FramePoint3D();
+   private final FramePoint3D t6InTopFrame = new FramePoint3D();
    
-   private final FramePoint t5InBottomFrame = new FramePoint();
-   private final FramePoint t6InBottomFrame = new FramePoint();
+   private final FramePoint3D t5InBottomFrame = new FramePoint3D();
+   private final FramePoint3D t6InBottomFrame = new FramePoint3D();
 
    private final FrameVector f5VectorInTopFrame = new FrameVector(topFrame);
    private final FrameVector f6VectorInTopFrame = new FrameVector(topFrame);
@@ -378,15 +378,15 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
       if (visualize)
       {
-         FramePoint t5InWorld = new FramePoint(t5InTopFrame);
-         FramePoint t6InWorld = new FramePoint(t6InTopFrame);
+         FramePoint3D t5InWorld = new FramePoint3D(t5InTopFrame);
+         FramePoint3D t6InWorld = new FramePoint3D(t6InTopFrame);
          t5InWorld.changeFrame(worldFrame);
          t6InWorld.changeFrame(worldFrame);
          t5Viz.setPosition(t5InWorld);
          t6Viz.setPosition(t6InWorld);
 
-         FramePoint b5InWorld = new FramePoint(b5InBottomFrame);
-         FramePoint b6InWorld = new FramePoint(b6InBottomFrame);
+         FramePoint3D b5InWorld = new FramePoint3D(b5InBottomFrame);
+         FramePoint3D b6InWorld = new FramePoint3D(b6InBottomFrame);
          b5InWorld.changeFrame(worldFrame);
          b6InWorld.changeFrame(worldFrame);
          b5Viz.setPosition(b5InWorld);

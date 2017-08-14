@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -53,11 +53,11 @@ public class PositionOptimizedTrajectoryGenerator
    private final EnumMap<Direction, ArrayList<YoPolynomial>> trajectories = new EnumMap<>(Direction.class);
    private final double[] tempCoeffs = new double[order.getCoefficients()];
 
-   private final FramePoint initialPosition = new FramePoint();
+   private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector initialVelocity = new FrameVector();
-   private final FramePoint finalPosition = new FramePoint();
+   private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector finalVelocity = new FrameVector();
-   private final FramePoint waypointPosition = new FramePoint();
+   private final FramePoint3D waypointPosition = new FramePoint3D();
    private final RecyclingArrayList<TDoubleArrayList> waypointPositions;
 
    private final TDoubleArrayList initialPositionArray = new TDoubleArrayList(dimensions);
@@ -215,7 +215,7 @@ public class PositionOptimizedTrajectoryGenerator
     * @param finalPosition
     * @param finalVelocity
     */
-   public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
+   public void setEndpointConditions(FramePoint3D initialPosition, FrameVector initialVelocity, FramePoint3D finalPosition, FrameVector finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
@@ -243,7 +243,7 @@ public class PositionOptimizedTrajectoryGenerator
     *
     * @param waypointPositions
     */
-   public void setWaypoints(ArrayList<FramePoint> waypointPositions)
+   public void setWaypoints(ArrayList<FramePoint3D> waypointPositions)
    {
       if (waypointPositions.size() > waypointTimes.size())
          throw new RuntimeException("Too many waypoints");
@@ -414,7 +414,7 @@ public class PositionOptimizedTrajectoryGenerator
       return isDone.getBooleanValue();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -429,7 +429,7 @@ public class PositionOptimizedTrajectoryGenerator
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

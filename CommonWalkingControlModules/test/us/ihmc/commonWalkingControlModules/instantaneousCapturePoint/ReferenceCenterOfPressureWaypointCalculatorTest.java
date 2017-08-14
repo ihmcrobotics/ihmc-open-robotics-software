@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -76,10 +76,10 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       for (RobotSide side : RobotSide.values)
       {
          ZUpFrame soleFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(),
-                                           new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, side.negateIfRightSide(soleFrameYDisplacement), 0.0),
+                                           new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, side.negateIfRightSide(soleFrameYDisplacement), 0.0),
                                            "DummyRobot" + side.toString() + "FootSoleFrame");
          soleZUpFrames.put(side, soleFrame);
-         ZUpFrame ankleFrame = new ZUpFrame(soleFrame, new FramePoint(soleFrame, 0.0, 0.0, ankleFrameZDisplacement),
+         ZUpFrame ankleFrame = new ZUpFrame(soleFrame, new FramePoint3D(soleFrame, 0.0, 0.0, ankleFrameZDisplacement),
                                             "DummyRobot" + side.toString() + "AnkleSoleFrame");
          ankleZUpFrames.put(side, ankleFrame);
          List<Point2D> contactPoints = new ArrayList<>(numberOfContactPoints);
@@ -156,7 +156,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    public void sendFootStepMessages(int numberOfFootstepsToPlan)
    {
       RobotSide robotSide = RobotSide.LEFT;
-      FramePoint footstepLocation = new FramePoint();
+      FramePoint3D footstepLocation = new FramePoint3D();
       FrameOrientation footstepOrientation = new FrameOrientation();
       for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
       {

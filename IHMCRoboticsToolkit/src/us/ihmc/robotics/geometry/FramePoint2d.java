@@ -162,9 +162,9 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
    /**
     * Creates a new FramePoint based on the x and y components of this FramePoint2d
     */
-   public FramePoint toFramePoint()
+   public FramePoint3D toFramePoint()
    {
-      return new FramePoint(this.getReferenceFrame(), this.getX(), this.getY(), 0.0);
+      return new FramePoint3D(this.getReferenceFrame(), this.getX(), this.getY(), 0.0);
    }
 
    /**

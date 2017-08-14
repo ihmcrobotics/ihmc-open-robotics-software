@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -139,7 +139,7 @@ public class FootstepAdjustor
    }
 
    private final FramePoint2d centroid2d = new FramePoint2d();
-   private final FramePoint centroid3d = new FramePoint();
+   private final FramePoint3D centroid3d = new FramePoint3D();
 
    /**
     * This function takes a footstep and calculates the touch-down polygon in the

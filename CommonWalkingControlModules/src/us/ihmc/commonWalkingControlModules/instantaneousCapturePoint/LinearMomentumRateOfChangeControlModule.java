@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -56,7 +56,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected double gravityZ;
 
    protected final ReferenceFrame centerOfMassFrame;
-   protected final FramePoint centerOfMass;
+   protected final FramePoint3D centerOfMass;
    protected final FramePoint2d centerOfMass2d = new FramePoint2d();
 
    protected final FramePoint2d capturePoint = new FramePoint2d();
@@ -103,7 +103,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
          cmpProjector = new SmartCMPPlanarProjector(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMass = new FramePoint(centerOfMassFrame);
+      centerOfMass = new FramePoint3D(centerOfMassFrame);
 
       controlledCoMAcceleration = new YoFrameVector(namePrefix + "ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
@@ -256,7 +256,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       achievedCMPToPack.add(centerOfMass2d);
    }
 
-   private final FramePoint cmp3d = new FramePoint();
+   private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector groundReactionForce = new FrameVector();
 
    protected FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)

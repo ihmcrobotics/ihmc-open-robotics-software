@@ -15,7 +15,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantC
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -28,7 +28,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FramePoint currentDcmEstimate;
+   private final FramePoint3D currentDcmEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final QuadrupedTimedContactSequence timedContactSequence;
@@ -64,7 +64,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    {
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
-      this.currentDcmEstimate = new FramePoint();
+      this.currentDcmEstimate = new FramePoint3D();
       this.timedContactSequence = new QuadrupedTimedContactSequence(0, 2 * maxPreviewSteps + 4);
       this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
 
@@ -85,8 +85,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    }
 
    @Override
-   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
-         QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
+   public void compute(FrameVector stepAdjustmentVector, FramePoint3D cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
+         QuadrantDependentList<FramePoint3D> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint3D currentComPosition,
          FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Compute step adjustment and contact pressure by solving the following QP:
@@ -210,7 +210,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       CommonOps.scale(-2, b, b);
    }
 
-   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint> currentSolePosition)
+   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint3D> currentSolePosition)
    {
       // Initialize equality constraints. (Aeq u = beq)
       x0.reshape(2 * numberOfIntervals, 1);                    // center of pressure offset
@@ -327,7 +327,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
    }
 
-   private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
+   private void addPointWithScaleFactor(FramePoint3D point, FramePoint3D pointToAdd, double scaleFactor)
    {
       point.checkReferenceFrameMatch(pointToAdd);
       point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());

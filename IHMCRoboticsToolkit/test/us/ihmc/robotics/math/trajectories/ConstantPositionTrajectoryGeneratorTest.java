@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
@@ -26,7 +26,7 @@ public class ConstantPositionTrajectoryGeneratorTest
    private String namePrefix = "namePrefixTEST";
    private ReferenceFrame referenceFrame;
    private PositionProvider positionProvider;
-   private FramePoint position;
+   private FramePoint3D position;
    private YoVariableRegistry parentRegistry;
 
    private static double finalTime = 10.0;
@@ -38,7 +38,7 @@ public class ConstantPositionTrajectoryGeneratorTest
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      position = new FramePoint(referenceFrame, xValue, yValue, zValue, "framePoint");
+      position = new FramePoint3D(referenceFrame, xValue, yValue, zValue, "framePoint");
       positionProvider = new ConstantPositionProvider(position);
       parentRegistry = new YoVariableRegistry("registry");
    }
@@ -83,7 +83,7 @@ public class ConstantPositionTrajectoryGeneratorTest
    public void testGet()
    {
       generator = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
 
       generator.getPosition(positionToPack);
 
@@ -128,7 +128,7 @@ public class ConstantPositionTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(referenceFrame);
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);

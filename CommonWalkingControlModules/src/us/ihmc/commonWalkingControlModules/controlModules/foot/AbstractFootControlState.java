@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,7 +26,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final RigidBody pelvis;
    protected final ContactableFoot contactableFoot;
 
-   protected final FramePoint desiredPosition = new FramePoint(worldFrame);
+   protected final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
    protected final FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
    protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);

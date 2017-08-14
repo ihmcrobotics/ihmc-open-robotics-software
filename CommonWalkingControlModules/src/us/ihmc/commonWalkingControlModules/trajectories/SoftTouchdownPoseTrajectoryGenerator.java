@@ -4,7 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -17,13 +17,13 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final YoVariableRegistry registry;
    
    private final YoSpline3D positionTouchdownTrajectory;
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    
    private final YoDouble timeInitial;
    private final YoDouble timeFinal;
    private final YoDouble timeIntoTouchdown;
    
-   private final FramePoint initialPosition = new FramePoint();
+   private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector initialVelocity = new FrameVector();
    private final FrameVector initialAcceleration = new FrameVector();
    
@@ -51,7 +51,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       constantAngularAcceleration.setToZero(worldFrame);
    }
 
-   public void setLinearTrajectory(double initialTime, FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration)
+   public void setLinearTrajectory(double initialTime, FramePoint3D initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration)
    {
       this.timeInitial.set(initialTime);
       
@@ -87,7 +87,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTouchdownTrajectory.getPosition(positionToPack);
    }

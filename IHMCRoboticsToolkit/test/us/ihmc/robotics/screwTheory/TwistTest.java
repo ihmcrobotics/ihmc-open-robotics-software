@@ -18,7 +18,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -422,7 +422,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       FrameVector actual = new FrameVector(ReferenceFrame.getWorldFrame());
       twist1.changeFrame(twist1.getBaseFrame());
-      FramePoint bodyFrameOrigin = new FramePoint(twist1.getBodyFrame());
+      FramePoint3D bodyFrameOrigin = new FramePoint3D(twist1.getBodyFrame());
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
@@ -449,7 +449,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
          Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
 
-         FramePoint pointFixedInBodyFrame = new FramePoint(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
          FrameVector bodyFixedPointLinearVelocityInBody = new FrameVector();
          FrameVector bodyFixedPointLinearVelocityInBase = new FrameVector();
 
@@ -529,7 +529,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       FrameVector offsetAlongAxis = new FrameVector(frameB, axisOfRotation);
       offsetAlongAxis.scale(random.nextDouble());
-      FramePoint pointThatShouldBeStationary = new FramePoint(frameB, offset);
+      FramePoint3D pointThatShouldBeStationary = new FramePoint3D(frameB, offset);
       pointThatShouldBeStationary.add(offsetAlongAxis);
       pointThatShouldBeStationary.changeFrame(frameA);
 

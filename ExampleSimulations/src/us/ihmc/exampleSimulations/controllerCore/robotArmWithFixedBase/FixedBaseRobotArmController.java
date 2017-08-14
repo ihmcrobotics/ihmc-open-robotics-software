@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -173,7 +173,7 @@ public class FixedBaseRobotArmController implements RobotController
       handOrientationGains.setDampingRatio(1.0);
       handOrientationGains.createDerivativeGainUpdater(true);
 
-      FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
+      FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);
       FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
       initialOrientation.changeFrame(worldFrame);
@@ -195,7 +195,7 @@ public class FixedBaseRobotArmController implements RobotController
       trajectory.showVisualization();
    }
 
-   private final FramePoint position = new FramePoint();
+   private final FramePoint3D position = new FramePoint3D();
    private final FrameVector linearVelocity = new FrameVector();
    private final FrameVector linearAcceleration = new FrameVector();
    private final FrameOrientation orientation = new FrameOrientation();
@@ -285,12 +285,12 @@ public class FixedBaseRobotArmController implements RobotController
    {
       if (goToTarget.getBooleanValue())
       {
-         FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
+         FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
          initialPosition.changeFrame(worldFrame);
          FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
-         FramePoint finalPosition = new FramePoint();
+         FramePoint3D finalPosition = new FramePoint3D();
          FrameOrientation finalOrientation = new FrameOrientation();
          handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);

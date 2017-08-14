@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -68,7 +68,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final YoFrameTrajectory3D supportFootVelocity;
    private final YoFrameTrajectory3D estimatedAngularMomentumTrajectory;
    private final YoFrameTrajectory3D previousEstimatedTransferTrajectory; // needed to compute the first double support trajectory segment 
-   private final FramePoint previousFinalReferenceCoP = new FramePoint();
+   private final FramePoint3D previousFinalReferenceCoP = new FramePoint3D();
    private AngularMomentumTrajectoryInterface activeTrajectory;
    private double initialTime;
    private double previousFirstTransferEndTime;
@@ -82,7 +82,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       END_TO_ENTRY, EXIT_TO_END, ENTRY_TO_EXIT
    };
 
-   private final FramePoint tempFramePoint1 = new FramePoint(), tempFramePoint2 = new FramePoint(), tempFramePoint3 = new FramePoint(), tempFramePoint4 = new FramePoint();
+   private final FramePoint3D tempFramePoint1 = new FramePoint3D(), tempFramePoint2 = new FramePoint3D(), tempFramePoint3 = new FramePoint3D(), tempFramePoint4 = new FramePoint3D();
    private final FrameVector tempFrameVector1 = new FrameVector(), tempFrameVector2 = new FrameVector();
 
    // DEBUGGING 
@@ -577,7 +577,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       if (DEBUG)
       {
          comTrajDebug.compute(time - initialTime);
-         FramePoint comPosition = comTrajDebug.getFramePosition();
+         FramePoint3D comPosition = comTrajDebug.getFramePosition();
          pointToPack.set(comPosition);
          comPosDebug.set(comPosition);
       }
@@ -595,7 +595,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
          swingTrajDebug.compute(time - initialTime);
 
-         FramePoint predictedSwingFootPosition = swingTrajDebug.getFramePosition();
+         FramePoint3D predictedSwingFootPosition = swingTrajDebug.getFramePosition();
          pointToPack.set(predictedSwingFootPosition);
          swingFootTrajDebug.set(predictedSwingFootPosition);
       }

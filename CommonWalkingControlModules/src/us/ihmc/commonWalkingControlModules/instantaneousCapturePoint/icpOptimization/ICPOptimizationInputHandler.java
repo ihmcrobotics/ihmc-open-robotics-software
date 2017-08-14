@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -264,8 +264,8 @@ public class ICPOptimizationInputHandler
 
       if (useTwoCMPs)
       {
-         FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
-         FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(footstepIndex).getFrameTuple();
 
          stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
          stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
@@ -275,7 +275,7 @@ public class ICPOptimizationInputHandler
       }
       else
       {
-         FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
 
          stanceExitCMP2d.setToZero();
          stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
@@ -351,7 +351,7 @@ public class ICPOptimizationInputHandler
       return stanceExitCMP.getFrameTuple2d();
    }
 
-   public FramePoint getFinalICP()
+   public FramePoint3D getFinalICP()
    {
       return finalICP.getFrameTuple();
    }

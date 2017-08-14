@@ -7,7 +7,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -25,13 +25,13 @@ public class QuadrupedTaskSpaceEstimator
    public static class Estimates
    {
       private final FrameOrientation bodyOrientation = new FrameOrientation();
-      private final FramePoint bodyPosition = new FramePoint();
+      private final FramePoint3D bodyPosition = new FramePoint3D();
       private final FrameVector bodyLinearVelocity = new FrameVector();
       private final FrameVector bodyAngularVelocity = new FrameVector();
-      private final FramePoint comPosition = new FramePoint();
+      private final FramePoint3D comPosition = new FramePoint3D();
       private final FrameVector comVelocity = new FrameVector();
       private final QuadrantDependentList<FrameOrientation> soleOrientation = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FramePoint> solePosition = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
       private final QuadrantDependentList<FrameVector> soleAngularVelocity = new QuadrantDependentList<>();
       private final QuadrantDependentList<FrameVector> soleLinearVelocity = new QuadrantDependentList<>();
       private final QuadrantDependentList<FrameVector> soleVirtualForce = new QuadrantDependentList<>();
@@ -42,7 +42,7 @@ public class QuadrupedTaskSpaceEstimator
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             soleOrientation.set(robotQuadrant, new FrameOrientation());
-            solePosition.set(robotQuadrant, new FramePoint());
+            solePosition.set(robotQuadrant, new FramePoint3D());
             soleAngularVelocity.set(robotQuadrant, new FrameVector());
             soleLinearVelocity.set(robotQuadrant, new FrameVector());
             soleVirtualForce.set(robotQuadrant, new FrameVector());
@@ -74,7 +74,7 @@ public class QuadrupedTaskSpaceEstimator
          return bodyOrientation;
       }
 
-      public FramePoint getBodyPosition()
+      public FramePoint3D getBodyPosition()
       {
          return bodyPosition;
       }
@@ -89,7 +89,7 @@ public class QuadrupedTaskSpaceEstimator
          return bodyAngularVelocity;
       }
 
-      public FramePoint getComPosition()
+      public FramePoint3D getComPosition()
       {
          return comPosition;
       }
@@ -104,7 +104,7 @@ public class QuadrupedTaskSpaceEstimator
          return soleOrientation.get(robotQuadrant);
       }
 
-      public FramePoint getSolePosition(RobotQuadrant robotQuadrant)
+      public FramePoint3D getSolePosition(RobotQuadrant robotQuadrant)
       {
          return solePosition.get(robotQuadrant);
       }
@@ -134,7 +134,7 @@ public class QuadrupedTaskSpaceEstimator
          return soleOrientation;
       }
 
-      public QuadrantDependentList<FramePoint> getSolePosition()
+      public QuadrantDependentList<FramePoint3D> getSolePosition()
       {
          return solePosition;
       }

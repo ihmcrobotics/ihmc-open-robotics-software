@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 
@@ -46,21 +46,21 @@ public class SmoothCoMIntegrationToolbox
    }
    
    //TODO: implement validity checks
-   public void computeDesiredCenterOfMassCornerPoints(List<FramePoint> entryCornerPointsToPack, List<FramePoint> exitCornerPointsToPack,
-                                                             List<FramePoint> entryCoMCornerPointsToPack, List<FramePoint> exitCoMCornerPointsToPack,
-                                                             List<YoFrameTrajectory3D> cmpPolynomials3D, FramePoint initialCenterOfMass, double omega0)
+   public void computeDesiredCenterOfMassCornerPoints(List<FramePoint3D> entryCornerPointsToPack, List<FramePoint3D> exitCornerPointsToPack,
+                                                             List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
+                                                             List<YoFrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMass, double omega0)
    {
       YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
-      FramePoint previousExitCoMCornerPoint = initialCenterOfMass;
+      FramePoint3D previousExitCoMCornerPoint = initialCenterOfMass;
       
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
          
-         FramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         FramePoint3D exitCornerPoint = exitCornerPointsToPack.get(i);
          
-         FramePoint entryCoMCornerPoint = entryCoMCornerPointsToPack.get(i);
-         FramePoint exitCoMCornerPoint = exitCoMCornerPointsToPack.get(i);
+         FramePoint3D entryCoMCornerPoint = entryCoMCornerPointsToPack.get(i);
+         FramePoint3D exitCoMCornerPoint = exitCoMCornerPointsToPack.get(i);
          
          entryCoMCornerPoint.set(previousExitCoMCornerPoint);
          
@@ -70,19 +70,19 @@ public class SmoothCoMIntegrationToolbox
       }
    }
    
-   public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
-                                                         FramePoint desiredCenterOfMassPositionToPack)
+   public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+                                                         FramePoint3D desiredCenterOfMassPositionToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassPositionToPack);
    }
    
-   public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+   public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FrameVector desiredCenterOfMassVelocityToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassVelocityToPack);
    }
    
-   public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint finalCapturePoint, FramePoint initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
+   public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass, YoFrameTrajectory3D cmpPolynomial3D, 
                                                          FrameVector desiredCenterOfMassAccelerationToPack)
    {         
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass, desiredCenterOfMassAccelerationToPack);

@@ -24,7 +24,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       this(referenceFrame, new Line3D());
    }
    
-   public FrameLine(FramePoint point, FrameVector vector)
+   public FrameLine(FramePoint3D point, FrameVector vector)
    {
       this(point.getReferenceFrame(), new Line3D(point.getGeometryObject(), vector.getGeometryObject()));
       point.checkReferenceFrameMatch(vector);
@@ -79,7 +79,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3D>
       return line.epsilonEquals(otherLine.getGeometryObject(), epsilon);
    }
 
-   public void setPoint(FramePoint point)
+   public void setPoint(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
 

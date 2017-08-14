@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerPa
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -242,7 +242,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void holdCurrentICP(FramePoint icpPositionToHold)
+   public void holdCurrentICP(FramePoint3D icpPositionToHold)
    {
       this.icpPositionToHold.set(icpPositionToHold);
       requestedHoldPosition.set(true);
@@ -309,7 +309,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public abstract void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack);
+   public abstract void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack);
 
    @Override
    /** {@inheritDoc} */
@@ -317,11 +317,11 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public abstract void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack);
+   public abstract void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
 
    @Override
    /** {@inheritDoc} */
-   public abstract void getNextExitCMP(FramePoint entryCMPToPack);
+   public abstract void getNextExitCMP(FramePoint3D entryCMPToPack);
 
    @Override
    /** {@inheritDoc} */
@@ -378,7 +378,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCapturePointPosition(FramePoint desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack)
    {
       desiredICPPosition.getFrameTupleIncludingFrame(desiredCapturePointPositionToPack);
    }
@@ -399,7 +399,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(FramePoint3D desiredCenterOfMassPositionToPack)
    {
       desiredCoMPosition.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
    }
@@ -451,7 +451,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
@@ -490,7 +490,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    }
    
    /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint desiredCenterOfPressurePositionToPack)
+   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
    {
       desiredCoPPosition.getFrameTupleIncludingFrame(desiredCenterOfPressurePositionToPack);
    }

@@ -5,7 +5,7 @@ import static us.ihmc.commonWalkingControlModules.trajectories.InitialClearanceP
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -17,7 +17,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
    private final InitialClearancePositionTrajectoryGenerator positionTrajectoryGenerator;
    private final SimpleOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
    public InitialClearancePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
@@ -127,7 +127,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       positionTrajectoryGenerator.hideVisualization();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTrajectoryGenerator.getPosition(positionToPack);
    }
@@ -157,7 +157,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

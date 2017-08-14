@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
@@ -28,7 +28,7 @@ public class CirclePositionTrajectoryGeneratorTest
       Random random = new Random(12522535L);
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      FramePoint offset = new FramePoint(referenceFrame, 1.0, 2.0, 3.0);
+      FramePoint3D offset = new FramePoint3D(referenceFrame, 1.0, 2.0, 3.0);
       double rotationAngle = 2.0 * Math.PI;
       double trajectoryTime = 1.0;
 
@@ -39,7 +39,7 @@ public class CirclePositionTrajectoryGeneratorTest
       double tInitial = random.nextDouble() - deltaT;
       double tFinal = tInitial + deltaT;
 
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameVector velocity = new FrameVector();
       FrameVector acceleration = new FrameVector();
 
@@ -48,7 +48,7 @@ public class CirclePositionTrajectoryGeneratorTest
       circleTrajectory.getVelocity(velocity);
       circleTrajectory.getAcceleration(acceleration);
 
-      FramePoint position2 = new FramePoint();
+      FramePoint3D position2 = new FramePoint3D();
       FrameVector velocity2 = new FrameVector();
 
       circleTrajectory.compute(tFinal);
@@ -70,14 +70,14 @@ public class CirclePositionTrajectoryGeneratorTest
 
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      FramePoint offset = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+      FramePoint3D offset = new FramePoint3D(referenceFrame, RandomGeometry.nextVector3D(random));
       double rotationAngle = 2.0 * Math.PI;
       double trajectoryTime = random.nextDouble();
 
       CirclePositionTrajectoryGenerator circleTrajectory = createTrajectory(referenceFrame, offset, rotationAngle, trajectoryTime);
       circleTrajectory.initialize();
 
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameVector velocity = new FrameVector();
       FrameVector acceleration = new FrameVector();
       FrameVector zero = new FrameVector(referenceFrame);
@@ -108,7 +108,7 @@ public class CirclePositionTrajectoryGeneratorTest
       return ret;
    }
 
-   private FrameVector numericallyDifferentiate(double deltaT, FramePoint position, FramePoint position2)
+   private FrameVector numericallyDifferentiate(double deltaT, FramePoint3D position, FramePoint3D position2)
    {
       FrameVector ret = new FrameVector(position2);
       ret.sub(position);
@@ -117,7 +117,7 @@ public class CirclePositionTrajectoryGeneratorTest
       return ret;
    }
 
-   private CirclePositionTrajectoryGenerator createTrajectory(ReferenceFrame referenceFrame, FramePoint offset, double rotationAngle, double trajectoryTime)
+   private CirclePositionTrajectoryGenerator createTrajectory(ReferenceFrame referenceFrame, FramePoint3D offset, double rotationAngle, double trajectoryTime)
    {
       PositionProvider initialPositionProvider = new ConstantPositionProvider(offset);
       DoubleProvider desiredRotationAngleProvider = new ConstantDoubleProvider(rotationAngle);

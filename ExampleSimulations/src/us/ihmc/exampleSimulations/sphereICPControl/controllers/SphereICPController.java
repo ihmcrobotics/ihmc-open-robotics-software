@@ -133,8 +133,8 @@ public class SphereICPController implements GenericSphereController
    }
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint desiredCapturePoint = new FramePoint();
-   private final FramePoint finalDesiredCapturePoint = new FramePoint();
+   private final FramePoint3D desiredCapturePoint = new FramePoint3D();
+   private final FramePoint3D finalDesiredCapturePoint = new FramePoint3D();
    private final FrameVector desiredCapturePointVelocity = new FrameVector();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
@@ -190,9 +190,9 @@ public class SphereICPController implements GenericSphereController
       return desiredForces.getVector3dCopy();
    }
 
-   private final FramePoint cmp3d = new FramePoint();
+   private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector groundReactionForce = new FrameVector();
-   private final FramePoint centerOfMass = new FramePoint();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);

@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -32,8 +32,8 @@ public class FrameConvexPolygon2dIntersector
    private final FrameLine intersectionOfPlanes;
    private final FrameLine2d planeIntersectionOnPolygonPlane;
    private final Pair<FramePoint2d, FramePoint2d> lineIntersectionOnPolygonPlane;
-   private final Pair<FramePoint, FramePoint> intersectionWithPolygonOne;
-   private final Pair<FramePoint, FramePoint> intersectionWithPolygonTwo;
+   private final Pair<FramePoint3D, FramePoint3D> intersectionWithPolygonOne;
+   private final Pair<FramePoint3D, FramePoint3D> intersectionWithPolygonTwo;
    private final Vector3D point2Vector;
    private final Vector3D point3Vector;
    private final Vector3D point4Vector;
@@ -46,8 +46,8 @@ public class FrameConvexPolygon2dIntersector
       intersectionOfPlanes = new FrameLine();
       planeIntersectionOnPolygonPlane = new FrameLine2d();
       lineIntersectionOnPolygonPlane = new Pair<FramePoint2d, FramePoint2d>(new FramePoint2d(), new FramePoint2d());
-      intersectionWithPolygonOne = new Pair<FramePoint, FramePoint>(new FramePoint(), new FramePoint());
-      intersectionWithPolygonTwo = new Pair<FramePoint, FramePoint>(new FramePoint(), new FramePoint());
+      intersectionWithPolygonOne = new Pair<FramePoint3D, FramePoint3D>(new FramePoint3D(), new FramePoint3D());
+      intersectionWithPolygonTwo = new Pair<FramePoint3D, FramePoint3D>(new FramePoint3D(), new FramePoint3D());
       point2Vector = new Vector3D();
       point3Vector = new Vector3D();
       point4Vector = new Vector3D();
@@ -103,7 +103,7 @@ public class FrameConvexPolygon2dIntersector
       }
    }
 
-   private void findIntersectionAmongPoints(FramePoint point1, FramePoint point2, FramePoint point3, FramePoint point4, FrameLineSegment intersectionToPack)
+   private void findIntersectionAmongPoints(FramePoint3D point1, FramePoint3D point2, FramePoint3D point3, FramePoint3D point4, FrameLineSegment intersectionToPack)
    {
       if (allAreValid(point1, point2, point3, point4))
       {
@@ -187,27 +187,27 @@ public class FrameConvexPolygon2dIntersector
       noIntersection = true;
    }
 
-   private boolean allAreValid(FramePoint point1, FramePoint point2)
+   private boolean allAreValid(FramePoint3D point1, FramePoint3D point2)
    {
       return isValid(point1) && isValid(point2);
    }
 
-   private boolean allAreValid(FramePoint point1, FramePoint point2, FramePoint point3)
+   private boolean allAreValid(FramePoint3D point1, FramePoint3D point2, FramePoint3D point3)
    {
       return isValid(point1) && isValid(point2) && isValid(point3);
    }
 
-   private boolean allAreValid(FramePoint point1, FramePoint point2, FramePoint point3, FramePoint point4)
+   private boolean allAreValid(FramePoint3D point1, FramePoint3D point2, FramePoint3D point3, FramePoint3D point4)
    {
       return isValid(point1) && isValid(point2) && isValid(point3) && isValid(point4);
    }
 
-   private boolean isValid(FramePoint point)
+   private boolean isValid(FramePoint3D point)
    {
       return !point.containsNaN();
    }
 
-   private void intersectASinglePolygon(FrameConvexPolygon2d polygon, Pair<FramePoint, FramePoint> intersectionWithPolygon)
+   private void intersectASinglePolygon(FrameConvexPolygon2d polygon, Pair<FramePoint3D, FramePoint3D> intersectionWithPolygon)
    {
       intersectionOfPlanes.changeFrame(polygon.getReferenceFrame());
       intersectionOfPlanes.projectOntoXYPlane(planeIntersectionOnPolygonPlane);

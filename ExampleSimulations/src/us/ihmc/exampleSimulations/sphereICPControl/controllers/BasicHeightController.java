@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,7 +24,7 @@ public class BasicHeightController
 
    private final ReferenceFrame centerOfMassFrame;
 
-   private final FramePoint centerOfMass = new FramePoint();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector centerOfMassVelocity = new FrameVector();
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);

@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -106,10 +106,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
 
    // Runtime variables
-   private FramePoint desiredCoPPosition = new FramePoint();
+   private FramePoint3D desiredCoPPosition = new FramePoint3D();
    private FrameVector desiredCoPVelocity = new FrameVector();
    private FrameVector desiredCoPAcceleration = new FrameVector();
-   private FramePoint heldCoPPosition = new FramePoint();
+   private FramePoint3D heldCoPPosition = new FramePoint3D();
 
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
@@ -128,7 +128,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private FrameConvexPolygon2d framePolygonReference;
    private FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
    private ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-   private FramePoint tempFramePoint = new FramePoint();
+   private FramePoint3D tempFramePoint = new FramePoint3D();
    private FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    // Planner level overrides (the planner knows better!)
@@ -383,13 +383,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint desiredCoPToPack)
+   public void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack)
    {
       desiredCoPToPack.setIncludingFrame(desiredCoPPosition);
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint desiredCoPToPack, FrameVector desiredCoPVelocityToPack)
+   public void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector desiredCoPVelocityToPack)
    {
       getDesiredCenterOfPressure(desiredCoPToPack);
       desiredCoPVelocityToPack.setIncludingFrame(desiredCoPVelocity);
@@ -458,12 +458,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       generateCoPTrajectoriesFromWayPoints();
    }
 
-   private void computeMidFeetPointWithChickenSupportForInitialTransfer(FramePoint framePointToPack)
+   private void computeMidFeetPointWithChickenSupportForInitialTransfer(FramePoint3D framePointToPack)
    {
       computeMidFeetPointWithChickenSupport(framePointToPack, swingFootInitialPolygon, supportFootPolygon);
    }
 
-   private void computeMidFeetPointWithChickenSupportForFinalTransfer(FramePoint framePointToPack)
+   private void computeMidFeetPointWithChickenSupportForFinalTransfer(FramePoint3D framePointToPack)
    {
       computeMidFeetPointWithChickenSupport(framePointToPack, supportFootPolygon, swingFootPredictedFinalPolygon);
    }
@@ -473,7 +473,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * @param framePointToPack
     * @param transferToSide
     */
-   private void computeMidFeetPointWithChickenSupport(FramePoint framePointToPack, FrameConvexPolygon2d supportFootPolygon,
+   private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon,
                                                       FrameConvexPolygon2d swingFootPolygon)
    {
       computeMidFeetPointByPositionFraction(tempFramePoint2d, supportFootPolygon, swingFootPolygon, percentageChickenSupport.getDoubleValue());

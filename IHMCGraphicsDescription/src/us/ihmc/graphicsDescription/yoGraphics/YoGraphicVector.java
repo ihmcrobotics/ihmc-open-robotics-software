@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -109,7 +109,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       point3d.setZ(this.baseZ.getDoubleValue());
    }
 
-   public void getBasePosition(FramePoint framePoint)
+   public void getBasePosition(FramePoint3D framePoint)
    {
       framePoint.setX(this.baseX.getDoubleValue());
       framePoint.setY(this.baseY.getDoubleValue());

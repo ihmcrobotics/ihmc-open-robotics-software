@@ -28,7 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -84,7 +84,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       // step in place but do some fancy foot motion
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-      FramePoint footPosition = new FramePoint(soleFrame);
+      FramePoint3D footPosition = new FramePoint3D(soleFrame);
       FrameOrientation footOrientation = new FrameOrientation(soleFrame);
 
       FootstepDataMessage footstep = new FootstepDataMessage();
@@ -94,7 +94,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       double radius = robotScale * 0.10;
       double pitch = Math.toRadians(10.0);
-      FramePoint circleCenter = new FramePoint(soleFrame, 0.0, 0.0, robotScale * 0.15);
+      FramePoint3D circleCenter = new FramePoint3D(soleFrame, 0.0, 0.0, robotScale * 0.15);
       int points = 6;
 
       SE3TrajectoryPointMessage[] waypoints = new SE3TrajectoryPointMessage[points];
@@ -106,7 +106,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
          double xOffset = Math.sin(angleInCircle) * radius;
          double zOffset = -Math.cos(angleInCircle) * radius;
-         FramePoint waypointPosition = new FramePoint(circleCenter);
+         FramePoint3D waypointPosition = new FramePoint3D(circleCenter);
          waypointPosition.add(xOffset, 0.0, zOffset);
          waypointPosition.changeFrame(worldFrame);
 

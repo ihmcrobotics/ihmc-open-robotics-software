@@ -140,7 +140,7 @@ public class FrameLineTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorC()
    {
-      FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
+      FramePoint3D origin = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
       FrameVector direction = new FrameVector(createRandomFrame(ReferenceFrame.getWorldFrame(), new Random(1231L)), 4.0, 5.0, 6.0);
 
       new FrameLine(origin, direction);

@@ -8,7 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -253,7 +253,7 @@ public class RobotTools
 
       String bodyName = idRigidBody.getName();
       Vector3D comOffset = new Vector3D();
-      FramePoint centerOfMassOffset = idInertia.getCenterOfMassOffset();
+      FramePoint3D centerOfMassOffset = idInertia.getCenterOfMassOffset();
       centerOfMassOffset.changeFrame(idJoint.getFrameAfterJoint());
       centerOfMassOffset.get(comOffset);
       double mass = idInertia.getMass();

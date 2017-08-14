@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
@@ -127,7 +127,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -180,7 +180,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -235,7 +235,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -470,7 +470,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    {
       FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
       FramePoint2d point = new FramePoint2d(worldFrame);
-      FramePoint point3d = new FramePoint();
+      FramePoint3D point3d = new FramePoint3D();
 
       @Override
       public void doControl()

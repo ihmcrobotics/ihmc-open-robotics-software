@@ -12,7 +12,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
@@ -29,7 +29,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<PointVelocityMeasurementModelElement> elementPool = new ArrayList<PointVelocityMeasurementModelElement>();
    private final ControlFlowInputPort<List<PointVelocityDataObject>> inputPort;
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
@@ -51,7 +51,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private int nElementsInUse;
 
    public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<List<PointVelocityDataObject>> inputPort,
-           ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
+           ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
            ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort,
            ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
            RigidBodyToIndexMap rigidBodyToIndexMap, ReferenceFrame estimationFrame, boolean assumePerfectIMU)

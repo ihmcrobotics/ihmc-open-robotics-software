@@ -23,7 +23,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -261,7 +261,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
     */
    @Override
-   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack)
+   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getPositionIncludingFrame(positionToPack);
@@ -304,9 +304,9 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       }
    }
 
-   private final FramePoint controlPosition = new FramePoint();
+   private final FramePoint3D controlPosition = new FramePoint3D();
    private final FrameOrientation controlOrientation = new FrameOrientation();
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector desiredLinearVelocity = new FrameVector();
    private final FrameVector feedForwardLinearAcceleration = new FrameVector();
    private final FrameVector currentLinearVelocity = new FrameVector();

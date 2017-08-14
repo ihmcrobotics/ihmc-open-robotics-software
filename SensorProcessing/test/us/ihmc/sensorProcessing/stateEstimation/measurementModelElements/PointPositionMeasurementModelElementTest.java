@@ -17,7 +17,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -68,7 +68,7 @@ public class PointPositionMeasurementModelElementTest
       AfterJointReferenceFrameNameMap referenceFrameMap = new AfterJointReferenceFrameNameMap(elevator);
       ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort = new ControlFlowInputPort<PointPositionDataObject>("pointPositionMeasurementInputPort", controlFlowElement);
 
-      ControlFlowOutputPort<FramePoint> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint>("centerOfMassPositionPort", controlFlowElement);
+      ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint3D>("centerOfMassPositionPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>("centerOfMassVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>("centerOfMassAccelerationPort", controlFlowElement);
 
@@ -76,7 +76,7 @@ public class PointPositionMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>("angularVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>("angularAccelerationPort", controlFlowElement);
 
-      FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
+      FramePoint3D stationaryPoint = new FramePoint3D(measurementFrame, RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
       PointPositionMeasurementModelElement modelElement = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
             centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, false, registry);
 
@@ -87,7 +87,7 @@ public class PointPositionMeasurementModelElementTest
       Runnable updater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
                             centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
-      centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+      centerOfMassPositionPort.setData(new FramePoint3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       RotationMatrix orientation = new RotationMatrix();
@@ -110,16 +110,16 @@ public class PointPositionMeasurementModelElementTest
 
       // CoM position perturbations
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(centerOfMassPositionPort, modelElement,
-              new FramePoint(centerOfMassPositionPort.getData()), perturbation, tol, updater);
+              new FramePoint3D(centerOfMassPositionPort.getData()), perturbation, tol, updater);
 
       // orientation perturbations
       MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
               perturbation, tol, updater);
    }
 
-   private void setMeasuredPointPositionToActual(FramePoint point, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort)
+   private void setMeasuredPointPositionToActual(FramePoint3D point, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort)
    {
-      FramePoint pointInWorld = new FramePoint(point);
+      FramePoint3D pointInWorld = new FramePoint3D(point);
       pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
       boolean isPointPositionValid = true;

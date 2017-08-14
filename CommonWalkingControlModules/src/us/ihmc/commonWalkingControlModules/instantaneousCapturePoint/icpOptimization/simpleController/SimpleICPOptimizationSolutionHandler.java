@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -48,9 +48,9 @@ public class SimpleICPOptimizationSolutionHandler
    private final FramePoint2d previousLocationSolution = new FramePoint2d();
    private final FramePoint2d clippedLocationSolution = new FramePoint2d();
 
-   private final FramePoint solutionLocation = new FramePoint();
-   private final FramePoint referenceLocation = new FramePoint();
-   private final FramePoint previousLocation = new FramePoint();
+   private final FramePoint3D solutionLocation = new FramePoint3D();
+   private final FramePoint3D referenceLocation = new FramePoint3D();
+   private final FramePoint3D previousLocation = new FramePoint3D();
    private final FrameVector solutionAdjustment = new FrameVector();
 
    private final FrameVector tempVector = new FrameVector();

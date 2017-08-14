@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -36,11 +36,11 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final PIDController shoulderAngleController = new PIDController("shoulderAngleController", registry);
    private final FrameVector angularMomentum = new FrameVector(worldFrame);
 
-   private final FramePoint com = new FramePoint(worldFrame);
+   private final FramePoint3D com = new FramePoint3D(worldFrame);
    private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FramePoint icp = new FramePoint(worldFrame);
-   private final FramePoint footLocation = new FramePoint(worldFrame);
-   private final FramePoint desiredCMP = new FramePoint(worldFrame);
+   private final FramePoint3D icp = new FramePoint3D(worldFrame);
+   private final FramePoint3D footLocation = new FramePoint3D(worldFrame);
+   private final FramePoint3D desiredCMP = new FramePoint3D(worldFrame);
    private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
    private final FrameVector groundReaction = new FrameVector(worldFrame);
    private final FrameVector worldToHip = new FrameVector(worldFrame);
@@ -192,7 +192,7 @@ public class SkippyICPBasedController extends SimpleRobotController
     * CMP computed from ICP and CMP coupled dynamics according to:
     * CMP = ICP + kCapture * (ICP - foot)
     */
-   private void cmpFromIcpDynamics(FramePoint icp, FramePoint footLocation, FramePoint desiredCMPToPack)
+   private void cmpFromIcpDynamics(FramePoint3D icp, FramePoint3D footLocation, FramePoint3D desiredCMPToPack)
    {
       FrameVector icpToFoot = new FrameVector();
       icpToFoot.sub(icp, footLocation);

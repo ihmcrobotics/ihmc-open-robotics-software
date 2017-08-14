@@ -10,7 +10,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedRefere
 import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -30,7 +30,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
-   private final FramePoint temporaryCentroid = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D temporaryCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    public LongestFeasibleStepChooser(QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -60,7 +60,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          QuadrupedGeometryTools.updateFootstepWorkspace(robotQuadrant, actualFootstepWorkspaces.get(robotQuadrant), commonQuadrupedReferenceFrames);
          
          // Update workspace center YoFramePoints
-         FramePoint workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
+         FramePoint3D workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
          double hipHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
          
          double x = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM03();
@@ -116,7 +116,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          double greatestDistance = -1.0;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
          {
-            FramePoint desiredPerfectFoot = desiredPerfectPolygon.getFootstep(robotQuadrant);
+            FramePoint3D desiredPerfectFoot = desiredPerfectPolygon.getFootstep(robotQuadrant);
             desiredPerfectFoot.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));
             if (actualFootstepWorkspaces.get(robotQuadrant).isInsideOrOnSurface(desiredPerfectFoot, 1e-7))
             {

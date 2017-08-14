@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -236,7 +236,7 @@ public class PosePlaybackSCSBridge
          for (RobotSide robotSide : RobotSide.values())
          {
             ReferenceFrame ankleFrame = fullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint();
-            FramePoint anklePosition = new FramePoint(ankleFrame);
+            FramePoint3D anklePosition = new FramePoint3D(ankleFrame);
             anklePosition.changeFrame(ReferenceFrame.getWorldFrame());
             anklePositions.get(robotSide).set(anklePosition);
 
@@ -244,14 +244,14 @@ public class PosePlaybackSCSBridge
             feetCoordinateSystems.get(robotSide).setToReferenceFrame(footFrame);
 
             ReferenceFrame wristFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
-            FramePoint wristPosition = new FramePoint(wristFrame);
+            FramePoint3D wristPosition = new FramePoint3D(wristFrame);
             wristPosition.changeFrame(ReferenceFrame.getWorldFrame());
             wristPositions.get(robotSide).set(wristPosition);
 
             ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
 
             FramePose palmPose = new FramePose(handFrame);
-            FramePoint palmPositionWithRespectToHandFrame = new FramePoint(handFrame, 0.0, robotSide.negateIfRightSide(0.08), -0.04);
+            FramePoint3D palmPositionWithRespectToHandFrame = new FramePoint3D(handFrame, 0.0, robotSide.negateIfRightSide(0.08), -0.04);
             double yaw = 0.0;
             double pitch = 0.0;
             double roll = robotSide.negateIfLeftSide(0.4);

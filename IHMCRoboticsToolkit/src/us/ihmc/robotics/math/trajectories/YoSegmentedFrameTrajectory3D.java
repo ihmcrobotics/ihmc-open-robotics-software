@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -70,19 +70,19 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       currentSegment.compute(timeInState);
    }
 
-   public void update(double timeInState, FramePoint desiredPositionToPack)
+   public void update(double timeInState, FramePoint3D desiredPositionToPack)
    {
       update(timeInState);
       currentSegment.getFramePosition(desiredPositionToPack);
    }
 
-   public void update(double timeInState, FramePoint desiredPositionToPack, FrameVector desiredVelocityToPack)
+   public void update(double timeInState, FramePoint3D desiredPositionToPack, FrameVector desiredVelocityToPack)
    {
       update(timeInState, desiredPositionToPack);
       currentSegment.getFrameVelocity(desiredVelocityToPack);
    }
 
-   public void update(double timeInState, FramePoint desiredPositonToPack, FrameVector desiredVelocityToPack, FrameVector desiredAccelerationToPack)
+   public void update(double timeInState, FramePoint3D desiredPositonToPack, FrameVector desiredVelocityToPack, FrameVector desiredAccelerationToPack)
    {
       update(timeInState, desiredPositonToPack, desiredVelocityToPack);
       currentSegment.getFrameAcceleration(desiredAccelerationToPack);

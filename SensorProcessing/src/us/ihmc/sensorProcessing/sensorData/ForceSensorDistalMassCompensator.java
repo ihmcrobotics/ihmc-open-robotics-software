@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -85,7 +85,7 @@ public class ForceSensorDistalMassCompensator
       return distalMass.getDoubleValue();
    }
 
-   public FramePoint getSensorPosition()
+   public FramePoint3D getSensorPosition()
    {
       return yoSensorPositionInWorld.getFrameTuple();
    }
@@ -171,7 +171,7 @@ public class ForceSensorDistalMassCompensator
       yoSensorTorqueMassCompensated.sub(yoSensorTorque, yoSensorTorqueFromDistalMass);
    }
 
-   private final FramePoint temp = new FramePoint();
+   private final FramePoint3D temp = new FramePoint3D();
 
    private void updateSensorPosition()
    {
@@ -188,7 +188,7 @@ public class ForceSensorDistalMassCompensator
       distalMass.set(distalMassCalc.getTotalMass());
       distalMassForceInWorld.set(0.0, 0.0, Math.abs(GRAVITY) * distalMass.getDoubleValue());
 
-      FramePoint distalCoMinWorld = distalMassCalc.getCenterOfMass();
+      FramePoint3D distalCoMinWorld = distalMassCalc.getCenterOfMass();
       distalCoMInWorld.set(distalCoMinWorld);
       
       lowPassSensorForceZ.update(yoSensorForce.getZ());

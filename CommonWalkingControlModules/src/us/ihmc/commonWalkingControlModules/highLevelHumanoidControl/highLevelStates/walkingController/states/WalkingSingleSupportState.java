@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -33,7 +33,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
    private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
-   private final FramePoint nextExitCMP = new FramePoint();
+   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;

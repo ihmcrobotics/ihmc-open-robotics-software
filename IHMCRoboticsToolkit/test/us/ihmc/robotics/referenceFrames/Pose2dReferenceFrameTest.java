@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -26,7 +26,7 @@ public class Pose2dReferenceFrameTest
       Pose2dReferenceFrame poseFrame0 = new Pose2dReferenceFrame("poseFrame0", worldFrame);
       Pose2dReferenceFrame poseFrame00 = new Pose2dReferenceFrame("poseFrame00", poseFrame0);
       Pose2dReferenceFrame poseFrame000 = new Pose2dReferenceFrame("poseFrame000", poseFrame00);
-      FramePoint framePoint = new FramePoint(poseFrame000, 1.0, 2.8, 4.4);
+      FramePoint3D framePoint = new FramePoint3D(poseFrame000, 1.0, 2.8, 4.4);
 
       Random random = new Random(1776L);
 
@@ -35,10 +35,10 @@ public class Pose2dReferenceFrameTest
       doRandomPoseChangeAndUpdate(poseFrame000, random);
 
       // Make sure that after a pose change of an intermediate frame, that the point before and after is different.
-      FramePoint framePointInWorldOne = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldOne = new FramePoint3D(framePoint);
       framePointInWorldOne.changeFrame(worldFrame);
       doRandomPoseChangeAndUpdate(poseFrame0, random);
-      FramePoint framePointInWorldTwo = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldTwo = new FramePoint3D(framePoint);
       framePointInWorldTwo.changeFrame(worldFrame);
 
       assertFalse(framePointInWorldOne.epsilonEquals(framePointInWorldTwo, 1e-7));
@@ -48,7 +48,7 @@ public class Pose2dReferenceFrameTest
       poseFrame00.update();
       poseFrame000.update();
       
-      FramePoint framePointInWorldThree = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldThree = new FramePoint3D(framePoint);
       framePointInWorldThree.changeFrame(worldFrame);
 
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));

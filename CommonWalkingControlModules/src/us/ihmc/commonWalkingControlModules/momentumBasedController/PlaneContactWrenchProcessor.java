@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -95,7 +95,7 @@ public class PlaneContactWrenchProcessor
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint tempCoP3d = new FramePoint();
+   private final FramePoint3D tempCoP3d = new FramePoint3D();
    private final FrameVector tempForce = new FrameVector();
 
    public void compute(Map<RigidBody, Wrench> externalWrenches)

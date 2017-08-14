@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -198,7 +198,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       return isPointOnOrInside(pointInWorldToCheck);
    }
    
-   private final FramePoint pointToCheck = new FramePoint();
+   private final FramePoint3D pointToCheck = new FramePoint3D();
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
@@ -224,7 +224,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    private boolean lastInsideHandles; // TODO hack since SlipStickModel doesn't seem to address multi-Link situations
    
-   private boolean isInsideHandles(FramePoint pointInDoorFrame)
+   private boolean isInsideHandles(FramePoint3D pointInDoorFrame)
    {
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -240,11 +240,11 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       
       boolean packedByHandles = false;
       
-      FramePoint frameIntersectionToPack = new FramePoint();
+      FramePoint3D frameIntersectionToPack = new FramePoint3D();
       FrameVector frameNormalToPack = new FrameVector();
       
       // check if close enough to handles
