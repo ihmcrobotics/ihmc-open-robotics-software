@@ -86,6 +86,21 @@ public interface PID3DGainsReadOnly
    }
 
    /**
+    * Returns whether the PID controller used an I gain or not (if this
+    * returns {@code false} the controller will behave as a PD controller).
+    * <p>
+    * This is especially useful when using the YoVariable implementation of
+    * this class {@link DefaultYoPID3DGains} is used since is will avoid
+    * creating the YoVariables for tuning the integration.
+    * </p>
+    * @return whether the gains include integrator gains.
+    */
+   public default boolean isUseIntegrator()
+   {
+      return false;
+   }
+
+   /**
     * Will pack the proportional gain matrix. The matrix will be a diagonal
     * matrix with the diagonal elements set to the proportional gains.
     *

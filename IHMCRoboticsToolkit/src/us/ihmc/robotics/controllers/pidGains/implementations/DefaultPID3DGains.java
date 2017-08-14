@@ -7,6 +7,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 public class DefaultPID3DGains implements PID3DGains
 {
    private final GainCoupling gainCoupling;
+   private final boolean useIntegrator;
 
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
@@ -21,12 +22,18 @@ public class DefaultPID3DGains implements PID3DGains
 
    public DefaultPID3DGains()
    {
-      this(GainCoupling.NONE);
+      this(true);
    }
 
-   public DefaultPID3DGains(GainCoupling gainCoupling)
+   public DefaultPID3DGains(boolean useIntegrator)
+   {
+      this(GainCoupling.NONE, useIntegrator);
+   }
+
+   public DefaultPID3DGains(GainCoupling gainCoupling, boolean useIntegrator)
    {
       this.gainCoupling = gainCoupling;
+      this.useIntegrator = useIntegrator;
    }
 
    @Override
@@ -151,5 +158,11 @@ public class DefaultPID3DGains implements PID3DGains
    public GainCoupling getGainCoupling()
    {
       return gainCoupling;
+   }
+
+   @Override
+   public boolean isUseIntegrator()
+   {
+      return useIntegrator;
    }
 }
