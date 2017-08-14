@@ -21,8 +21,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,7 +70,7 @@ public class CentroidProjectionToeOffCalculatorTest
 
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
          yoPlaneContactState.setFullyConstrained();
@@ -108,7 +108,7 @@ public class CentroidProjectionToeOffCalculatorTest
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       exitCMP.setX(0.05);
 
@@ -124,8 +124,8 @@ public class CentroidProjectionToeOffCalculatorTest
       RobotSide trailingSide = RobotSide.LEFT;
 
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -144,9 +144,9 @@ public class CentroidProjectionToeOffCalculatorTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
-      FramePoint2d toeOffPoint = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D toeOffPoint = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -232,7 +232,7 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+         public ICPControlGains createICPControlGains()
          {
             return null;
          }

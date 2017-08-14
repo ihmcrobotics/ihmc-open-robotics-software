@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -71,7 +71,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
    }

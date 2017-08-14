@@ -6,7 +6,7 @@ import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -26,7 +26,7 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    private final EnumMap<Direction, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Direction.class);
 
    private final ReferenceFrame referenceFrameUsedForComparison;
-   private final FrameVector tempAngularVelocity = new FrameVector();
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector angularVelocityToCheck, double updateDT,
          YoVariableRegistry parentRegistry)

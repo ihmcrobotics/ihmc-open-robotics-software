@@ -4,11 +4,11 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @SuppressWarnings("serial")
-public class PlotterPoint2d extends FramePoint2d
+public class PlotterPoint2d extends FramePoint2D
 {
    public PlotterPoint2d(PlotterPoint2d frameTuple2d)
    {

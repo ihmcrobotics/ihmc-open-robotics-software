@@ -25,10 +25,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -98,21 +98,21 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * controller time.
  * <li>The output of the planner can be accessed using the various following getters:
  * <ul>
- * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint)},
- * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
+ * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
+ * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
- * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector)},
- * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
+ * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
+ * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
- * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint)},
- * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
+ * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
+ * {@link #getDesiredCenterOfMassPosition(FramePoint2D)}, or
  * {@link #getDesiredCenterOfMassPosition(YoFramePoint2d)}.
  * <li>To get the CMP position, use either
- * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint)}, or
- * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
  * <li>To get the CMP velocity, use either
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector)}, or
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2D)}.
  * </ul>
  * </ul>
  * </p>
@@ -129,8 +129,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final YoFramePoint yoSingleSupportInitialCoM;
    private final YoFramePoint yoSingleSupportFinalCoM;
-   private final FramePoint singleSupportInitialCoM = new FramePoint();
-   private final FramePoint singleSupportFinalCoM = new FramePoint();
+   private final FramePoint3D singleSupportInitialCoM = new FramePoint3D();
+   private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
 
    private final List<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final List<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
@@ -139,9 +139,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    private final ICPPlannerSegmentedTrajectoryGenerator icpSingleSupportTrajectoryGenerator;
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
-   private final FramePoint tempConstantCMP = new FramePoint();
-   private final FramePoint tempICP = new FramePoint();
-   private final FramePoint tempCoM = new FramePoint();
+   private final FramePoint3D tempConstantCMP = new FramePoint3D();
+   private final FramePoint3D tempICP = new FramePoint3D();
+   private final FramePoint3D tempCoM = new FramePoint3D();
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
@@ -783,11 +783,11 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurations.get(stepNumber).set(duration);
    }
 
-   private final FramePoint tempFinalICP = new FramePoint();
+   private final FramePoint3D tempFinalICP = new FramePoint3D();
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
@@ -819,11 +819,11 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   private final FramePoint tempFinalCoM = new FramePoint();
+   private final FramePoint3D tempFinalCoM = new FramePoint3D();
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
@@ -841,7 +841,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   public void getNextExitCMP(FramePoint entryCMPToPack)
+   public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
    }

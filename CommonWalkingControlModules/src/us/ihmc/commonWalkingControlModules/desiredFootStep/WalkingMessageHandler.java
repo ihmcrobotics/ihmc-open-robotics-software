@@ -28,10 +28,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -92,7 +92,7 @@ public class WalkingMessageHandler
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
-   private final FrameVector planOffsetInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -316,7 +316,7 @@ public class WalkingMessageHandler
          return false;
       }
 
-      FramePoint adjustedPosition = requestedFootstepAdjustment.getPosition();
+      FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
       FrameOrientation adjustedOrientation = requestedFootstepAdjustment.getOrientation();
       footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
 
@@ -459,7 +459,7 @@ public class WalkingMessageHandler
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
-   public void reportControllerFailure(FrameVector2d fallingDirection)
+   public void reportControllerFailure(FrameVector2D fallingDirection)
    {
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.setFallingDirection(fallingDirection);
@@ -628,7 +628,7 @@ public class WalkingMessageHandler
          }
          else
          {
-            RecyclingArrayList<FramePoint> positionWaypoints = footstepData.getCustomPositionWaypoints();
+            RecyclingArrayList<FramePoint3D> positionWaypoints = footstepData.getCustomPositionWaypoints();
             footstep.setCustomPositionWaypoints(positionWaypoints);
          }
       }
@@ -777,7 +777,7 @@ public class WalkingMessageHandler
       return true;
    }
 
-   public void addOffsetVector(FrameVector offset)
+   public void addOffsetVector(FrameVector3D offset)
    {
       if (!offsettingPlanWithFootstepError.getBooleanValue())
       {

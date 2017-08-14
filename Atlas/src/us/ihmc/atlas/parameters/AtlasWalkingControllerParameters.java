@@ -232,9 +232,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+   public ICPControlGains createICPControlGains()
    {
-      ICPControlGains gains = new ICPControlGains("", registry);
+      ICPControlGains gains = new ICPControlGains();
 
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
@@ -863,7 +863,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.06 * jointMap.getModelScale();
+      return 0.06 * jointMap.getModelScale(); //0.06
    }
 
    /** {@inheritDoc} */
@@ -949,5 +949,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public SteppingParameters getSteppingParameters()
    {
       return steppingParameters;
+   }
+   
+   @Override
+   public boolean alwaysAllowMomentum()
+   {
+      return false;
    }
 }

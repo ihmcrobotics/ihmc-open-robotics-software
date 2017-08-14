@@ -545,7 +545,7 @@ public class PlanarRegionTest
          planarRegion.getTransformToWorld(actualTransform);
          assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
 
-         FramePoint2d point2d = new FramePoint2d();
+         FramePoint2D point2d = new FramePoint2D();
 
          // Do a bunch of trivial queries with isPointInside(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
@@ -557,7 +557,7 @@ public class PlanarRegionTest
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
          assertFalse(planarRegion.isPointInside(point2d.getPoint()));
 
-         FramePoint point3d = new FramePoint();
+         FramePoint3D point3d = new FramePoint3D();
          double maximumOrthogonalDistance = 1.0e-3;
          // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);
