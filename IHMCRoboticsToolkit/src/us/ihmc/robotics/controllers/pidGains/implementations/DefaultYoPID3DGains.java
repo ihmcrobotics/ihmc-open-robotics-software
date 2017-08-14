@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -128,15 +129,9 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       YoDouble kd = kdMap.get(axis);
       YoDouble zeta = zetaMap.get(axis);
 
-      // If kp or zeta is changed update kd.
       DampingUpdater kdUpdater = new DampingUpdater(kp, kd, zeta, update);
       kp.addVariableChangedListener(kdUpdater);
       zeta.addVariableChangedListener(kdUpdater);
-
-      // If kd is changed update zeta.
-      // This will not update listeners to avoid an infinite update loop.
-      ZetaUpdater zetaUpdater = new ZetaUpdater(kp, kd, zeta, update);
-      kd.addVariableChangedListener(zetaUpdater);
    }
 
    @Override
@@ -203,6 +198,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       kpMap.get(Axis.X).set(proportionalGainX);
       kpMap.get(Axis.Y).set(proportionalGainY);
       kpMap.get(Axis.Z).set(proportionalGainZ);
+      updateDerivativeGains();
    }
 
    @Override
@@ -211,6 +207,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       kdMap.get(Axis.X).set(derivativeGainX);
       kdMap.get(Axis.Y).set(derivativeGainY);
       kdMap.get(Axis.Z).set(derivativeGainZ);
+      updateDampingRatios();
    }
 
    public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
@@ -218,6 +215,29 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       zetaMap.get(Axis.X).set(dampingRatioX);
       zetaMap.get(Axis.Y).set(dampingRatioY);
       zetaMap.get(Axis.Z).set(dampingRatioZ);
+      updateDerivativeGains();
+   }
+
+   private void updateDerivativeGains()
+   {
+      for (int i = 0; i < Axis.values.length; i++)
+      {
+         YoDouble kp = kpMap.get(Axis.values[i]);
+         YoDouble kd = kdMap.get(Axis.values[i]);
+         YoDouble zeta = zetaMap.get(Axis.values[i]);
+         kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
+      }
+   }
+
+   private void updateDampingRatios()
+   {
+      for (int i = 0; i < Axis.values.length; i++)
+      {
+         YoDouble kp = kpMap.get(Axis.values[i]);
+         YoDouble kd = kdMap.get(Axis.values[i]);
+         YoDouble zeta = zetaMap.get(Axis.values[i]);
+         zeta.set(GainCalculator.computeDampingRatio(kp.getDoubleValue(), kd.getDoubleValue()));
+      }
    }
 
    @Override
