@@ -2,7 +2,6 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 
 /**
@@ -96,25 +95,6 @@ public class SE3PIDGains implements PIDSE3Gains
    public void setOrientationMaximumProportionalError(double maxProportionalError)
    {
       orientationGains.setMaxProportionalError(maxProportionalError);
-   }
-
-   @Override
-   public void set(PIDSE3Gains gains)
-   {
-      positionGains.set(gains.getPositionGains());
-      orientationGains.set(gains.getOrientationGains());
-   }
-
-   @Override
-   public void setPositionGains(PID3DGainsReadOnly positionGains)
-   {
-      this.positionGains.set(positionGains);
-   }
-
-   @Override
-   public void setOrientationGains(PID3DGainsReadOnly orientationGains)
-   {
-      this.orientationGains.set(orientationGains);
    }
 
    @Override

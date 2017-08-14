@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -103,7 +103,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final YoSE3PIDGainsInterface gains;
+   private final YoPIDSE3Gains gains;
    private final YoPID3DGains positionGains;
    private final YoPID3DGains orientationGains;
    private final Matrix3D tempGainMatrix = new Matrix3D();

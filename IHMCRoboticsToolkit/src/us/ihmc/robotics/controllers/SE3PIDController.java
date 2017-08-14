@@ -40,7 +40,7 @@ public class SE3PIDController
       this(namePrefix, bodyFrame, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)

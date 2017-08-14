@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DefaultYoPID3DGains implements PID3DGains
+public class DefaultYoPID3DGains implements YoPID3DGains
 {
    private final Map<Axis, YoDouble> kpMap = new EnumMap<>(Axis.class);
    private final Map<Axis, YoDouble> kdMap = new EnumMap<>(Axis.class);
@@ -226,5 +226,29 @@ public class DefaultYoPID3DGains implements PID3DGains
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
+   }
+
+   @Override
+   public YoDouble getYoMaximumFeedback()
+   {
+      return maxFeedback;
+   }
+
+   @Override
+   public YoDouble getYoMaximumFeedbackRate()
+   {
+      return maxFeedbackRate;
+   }
+
+   @Override
+   public YoDouble getYoMaximumDerivativeError()
+   {
+      return maxDerivativeError;
+   }
+
+   @Override
+   public YoDouble getYoMaximumProportionalError()
+   {
+      return maxProportionalError;
    }
 }

@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoPlanarFootSE3Gains implements YoSE3PIDGainsInterface
+public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
 {
    private final YoPlanarFootPositionGains positionGains;
    private final YoPlanarFootOrientationGains orientationGains;
@@ -95,18 +94,6 @@ public class YoPlanarFootSE3Gains implements YoSE3PIDGainsInterface
    public void setOrientationMaxProportionalError(double maxProportionalError)
    {
       orientationGains.setMaxProportionalError(maxProportionalError);
-   }
-
-   @Override
-   public void setPositionGains(PID3DGainsReadOnly positionGains)
-   {
-      this.positionGains.set(positionGains);
-   }
-
-   @Override
-   public void setOrientationGains(PID3DGainsReadOnly orientationGains)
-   {
-      this.orientationGains.set(orientationGains);
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)
