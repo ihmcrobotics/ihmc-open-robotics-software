@@ -19,6 +19,11 @@ public class GenericTaskNode extends CTTaskNode
    {
       super(11);
    }
+   
+   public GenericTaskNode(CTTaskNode node)
+   {
+      super(node);
+   }
 
    public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, double eeX, double eeY, double eeZ,
                           double eeRoll, double eePitch, double eeYaw)
