@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
@@ -112,7 +112,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    }
 
    FrameVector3D normalVector = new FrameVector3D(WORLD_FRAME);
-   FramePoint2d xyPoint = new FramePoint2d(WORLD_FRAME);
+   FramePoint2D xyPoint = new FramePoint2D(WORLD_FRAME);
    /**
     * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
     */

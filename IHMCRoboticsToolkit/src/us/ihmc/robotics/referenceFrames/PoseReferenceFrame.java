@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 
@@ -125,7 +125,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
    
-   public void setXYFromPosition2dAndUpdate(FramePoint2d position2d)
+   public void setXYFromPosition2dAndUpdate(FramePoint2D position2d)
    {
       position2d.checkReferenceFrameMatch(parentFrame);
       originPose.setXYFromPosition2d(position2d);
@@ -232,7 +232,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.getPose2dIncludingFrame(framePose2dToPack);
    }
 
-   public void getPosition2dIncludingFrame(FramePoint2d framePoint2dToPack)
+   public void getPosition2dIncludingFrame(FramePoint2D framePoint2dToPack)
    {
       originPose.getPosition2dIncludingFrame(framePoint2dToPack);
    }

@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
@@ -105,7 +105,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
 
-   private final FramePoint2d centerOfRotation = new FramePoint2d();
+   private final FramePoint2D centerOfRotation = new FramePoint2D();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
@@ -205,7 +205,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    @SuppressWarnings("unused")
    @Override
-   public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);

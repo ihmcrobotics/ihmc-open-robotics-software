@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMXYTimeDerivativesData
 {
-   private FramePoint2d comXYPosition = new FramePoint2d(ReferenceFrame.getWorldFrame());
+   private FramePoint2D comXYPosition = new FramePoint2D(ReferenceFrame.getWorldFrame());
    private FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
 
@@ -17,7 +17,7 @@ public class CoMXYTimeDerivativesData
       this.comXYAcceleration.set(comXYData.comXYAcceleration);
    }
 
-   public void getCoMXYPosition(FramePoint2d comXYPositionToPack)
+   public void getCoMXYPosition(FramePoint2D comXYPositionToPack)
    {
       comXYPositionToPack.set(this.comXYPosition);
    }
@@ -32,7 +32,7 @@ public class CoMXYTimeDerivativesData
       comXYAccelerationToPack.set(this.comXYAcceleration);
    }
 
-   public void setCoMXYPosition(FramePoint2d comXYPosition)
+   public void setCoMXYPosition(FramePoint2D comXYPosition)
    {
       this.comXYPosition.set(comXYPosition);
    }

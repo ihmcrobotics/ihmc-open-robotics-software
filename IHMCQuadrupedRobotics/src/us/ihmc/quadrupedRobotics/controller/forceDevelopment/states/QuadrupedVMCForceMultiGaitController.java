@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -207,7 +207,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint2d closestIntersection = new YoFramePoint2d("closestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d secondClosestIntersection = new YoFramePoint2d("secondClosestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d midPointOfIntersections = new YoFramePoint2d("midPointOfIntersections", ReferenceFrame.getWorldFrame(), registry);
-   private final FramePoint2d trotCrossPoint = new FramePoint2d();
+   private final FramePoint2D trotCrossPoint = new FramePoint2D();
    private final YoFramePoint2d innerCenterOfPressure = new YoFramePoint2d("innerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
@@ -793,13 +793,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          lineForFindingClosestLineSegment.getLine2d().setDirection(lengthwiseMidLine.getLine2d().getDirection());
       }
 
-      FramePoint2d closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
+      FramePoint2D closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
       leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       closestIntersection.setWithoutChecks(closestIntersectionFrameTuple);
 
       double distanceUpward = closestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
 
-      FramePoint2d secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
+      FramePoint2D secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
       rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, secondClosestIntersectionFramePoint);
       secondClosestIntersection.setWithoutChecks(secondClosestIntersectionFramePoint);
 

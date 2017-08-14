@@ -21,9 +21,9 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint3D exitCMP = new FramePoint3D();
-   private final FramePoint2d exitCMP2d = new FramePoint2d();
+   private final FramePoint2D exitCMP2d = new FramePoint2D();
 
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final LineSegment2D toeOffContactLine2d = new LineSegment2D();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -72,13 +72,13 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg)
    {
       hasComputedToeOffContactPoint.set(true);
    }
 
    @Override
-   public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
+   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
@@ -87,7 +87,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg)
    {
       hasComputedToeOffContactLine.set(true);
    }

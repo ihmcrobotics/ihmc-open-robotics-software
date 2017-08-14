@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.OriginAndPointFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,7 +17,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final ReferenceFrame centerOfMassFrame;
    private final double totalMass;
    private final SideDependentList<FramePoint3D> cops = new SideDependentList<>(); // Max of 2 CoPs assumed here
-   private final FramePoint2d pseudoCoP2d = new FramePoint2d();
+   private final FramePoint2D pseudoCoP2d = new FramePoint2D();
    private final FramePoint3D pseudoCoP = new FramePoint3D();
    private final SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
 
@@ -36,7 +36,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
 
    private final FramePoint3D tempCoP3d = new FramePoint3D();
 
-   public double computeOmega0(SideDependentList<FramePoint2d> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
+   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
    {
       totalGroundReactionWrench.set(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
@@ -51,7 +51,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d cop2d = cop2ds.get(robotSide);
+            FramePoint2D cop2d = cop2ds.get(robotSide);
             if (!cop2d.containsNaN())
             {
                tempCoP3d.setXYIncludingFrame(cop2d);
@@ -65,7 +65,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d cop2d = cop2ds.get(robotSide);
+            FramePoint2D cop2d = cop2ds.get(robotSide);
             cops.get(robotSide).setIncludingFrame(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
             cops.get(robotSide).changeFrame(copToCoPFrame.getParent());
          }

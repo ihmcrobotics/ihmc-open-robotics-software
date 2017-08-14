@@ -20,7 +20,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -193,7 +193,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();
-   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
+   private final FramePoint2D comPositionAsFramePoint2d = new FramePoint2D();
    private final Twist currentPelvisTwist = new Twist();
    
    private boolean desiredCMPcontainedNaN = false;

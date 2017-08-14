@@ -56,7 +56,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -535,10 +535,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
-   private final SideDependentList<FramePoint2d> footDesiredCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
+   private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    @Override

@@ -25,7 +25,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -184,7 +184,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       }
    }
 
-   private final FramePoint2d contactPoint2d = new FramePoint2d();
+   private final FramePoint2D contactPoint2d = new FramePoint2D();
 
    private void updateRobotContactPoints()
    {
@@ -225,7 +225,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       }
    }
 
-   private void findProjectionOntoPlaneFrame(ReferenceFrame planeFrame, FramePoint2d pointInWorld, FramePoint3D pointProjectedOntoPlaneFrameToPack)
+   private void findProjectionOntoPlaneFrame(ReferenceFrame planeFrame, FramePoint2D pointInWorld, FramePoint3D pointProjectedOntoPlaneFrameToPack)
    {
       pointInWorld.checkReferenceFrameMatch(worldFrame);
 

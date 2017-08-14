@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -652,7 +652,7 @@ public class SkippyController implements RobotController
     */
    public void cmpFromParameterizedReaction()
    {
-      FramePoint2d tempCMP = new FramePoint2d(ReferenceFrame.getWorldFrame());
+      FramePoint2D tempCMP = new FramePoint2D(ReferenceFrame.getWorldFrame());
 
       tempCMP.set(reactionForce.getFrameVector2dCopy());
       if (reactionForce.getZ() != 0.0)

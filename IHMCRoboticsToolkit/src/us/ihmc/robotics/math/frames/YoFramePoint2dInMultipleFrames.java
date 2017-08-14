@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -15,7 +15,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
-   private final FramePoint2d framePoint2d = new FramePoint2d();
+   private final FramePoint2D framePoint2d = new FramePoint2D();
    private final Point2D point2d = new Point2D();
 
    private final String namePrefix;
@@ -103,7 +103,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
 
          attachVariableChangedListener(new VariableChangedListener()
          {
-            private final FramePoint2d localFramePoint = new FramePoint2d();
+            private final FramePoint2D localFramePoint = new FramePoint2D();
             private final YoFramePoint2d point = yoFramePointInWorld;
 
             @Override

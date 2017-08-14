@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -94,9 +94,9 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
       return new FrameVector2d(getFrameTuple2d());
    }
 
-   public final FramePoint2d getFramePoint2dCopy()
+   public final FramePoint2D getFramePoint2dCopy()
    {
-      return new FramePoint2d(getFrameTuple2d());
+      return new FramePoint2D(getFrameTuple2d());
    }
    
    public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2dToPack)

@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -185,11 +185,11 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       stance.getPose(stanceFramePose);
       swingEnd.getPose(endingFramePose);
 
-      FramePoint2d initialPoint = new FramePoint2d();
+      FramePoint2D initialPoint = new FramePoint2D();
       initialFramePose.getPosition2dIncludingFrame(initialPoint);
-      FramePoint2d stancePoint = new FramePoint2d();
+      FramePoint2D stancePoint = new FramePoint2D();
       stanceFramePose.getPosition2dIncludingFrame(stancePoint);
-      FramePoint2d endPoint = new FramePoint2d();
+      FramePoint2D endPoint = new FramePoint2D();
       endingFramePose.getPosition2dIncludingFrame(endPoint);
       boolean swingsThroughStanceLeg;
       if ((initialPoint.getX() == endPoint.getX()) && (initialPoint.getY() == endPoint.getY()))
@@ -216,10 +216,10 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 
       FrameVector3D offset1 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, circleCenterOffset);
       FrameVector3D offset2 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, -3 * footReachLimitInMeters);
-      FramePoint2d stanceInsideOffset = new FramePoint2d(ReferenceFrame.getWorldFrame(), offset1.getX(), offset1.getY());
-      FramePoint2d stanceOutsideOffset = new FramePoint2d(ReferenceFrame.getWorldFrame(), offset2.getX(), offset2.getY());
+      FramePoint2D stanceInsideOffset = new FramePoint2D(ReferenceFrame.getWorldFrame(), offset1.getX(), offset1.getY());
+      FramePoint2D stanceOutsideOffset = new FramePoint2D(ReferenceFrame.getWorldFrame(), offset2.getX(), offset2.getY());
       FrameLineSegment2d crossThroughLine = new FrameLineSegment2d(stanceInsideOffset, stanceOutsideOffset);
-      FramePoint2d intersectionPoint = crossThroughLine.intersectionWith(swingLine);
+      FramePoint2D intersectionPoint = crossThroughLine.intersectionWith(swingLine);
       boolean swingsThroughStanceLeg;
       if (intersectionPoint == null)
          swingsThroughStanceLeg = false;

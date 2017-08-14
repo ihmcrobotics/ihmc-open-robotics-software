@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -121,8 +121,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2d desiredCapturePoint = latestPacket.getDesiredCapturePoint();
-         FramePoint2d capturePoint = latestPacket.getCapturePoint();
+         FramePoint2D desiredCapturePoint = latestPacket.getDesiredCapturePoint();
+         FramePoint2D capturePoint = latestPacket.getCapturePoint();
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)

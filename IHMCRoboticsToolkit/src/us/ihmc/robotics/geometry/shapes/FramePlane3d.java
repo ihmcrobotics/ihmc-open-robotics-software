@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -225,7 +225,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       plane3d.orthogonalProjection(point.getPoint());
    }
 
-   public double getZOnPlane(FramePoint2d xyPoint)
+   public double getZOnPlane(FramePoint2D xyPoint)
    {
       checkReferenceFrameMatch(xyPoint.getReferenceFrame());
       return plane3d.getZOnPlane(xyPoint.getX(), xyPoint.getY());

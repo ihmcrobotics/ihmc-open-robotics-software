@@ -13,7 +13,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
@@ -327,8 +327,8 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
       YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
-      FramePoint2d p1 = new FramePoint2d();
-      FramePoint2d p2 = new FramePoint2d();
+      FramePoint2D p1 = new FramePoint2D();
+      FramePoint2D p2 = new FramePoint2D();
 
       int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -391,8 +391,8 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
-      FramePoint2d p1 = new FramePoint2d();
-      FramePoint2d p2 = new FramePoint2d();
+      FramePoint2D p1 = new FramePoint2D();
+      FramePoint2D p2 = new FramePoint2D();
       YoFramePoint desiredICP = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
 
       int numberFootstepsToConsider = random.nextInt(((nFootsteps - 3) + 1)) + 3;
@@ -521,8 +521,8 @@ public class CapturePointToolsTest
       YoFramePoint constantCenterOfPressure = new YoFramePoint("COP", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint finalDesiredICP = new YoFramePoint("finalICP", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint initialICP = new YoFramePoint("initialICP", ReferenceFrame.getWorldFrame(), registry);
-      FramePoint2d p1 = new FramePoint2d();
-      FramePoint2d p2 = new FramePoint2d();
+      FramePoint2D p1 = new FramePoint2D();
+      FramePoint2D p2 = new FramePoint2D();
 
       for (int j = 0; j < nTests; j++)
       {

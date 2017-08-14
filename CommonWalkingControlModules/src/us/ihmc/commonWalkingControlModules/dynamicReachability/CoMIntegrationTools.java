@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -73,7 +73,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
-         FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP.getFrameTuple(), initialICP.getFrameTuple(), initialCoM, finalCoMToPack);
    }
@@ -95,7 +95,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
    }
@@ -171,7 +171,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         YoFramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         YoFramePoint2d initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple2d(), finalCoMToPack);
    }
@@ -190,7 +190,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(constantCMP);
       initialCoM.checkReferenceFrameMatch(initialICP);
@@ -318,7 +318,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         YoPolynomial yPolynomial, FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
             finalCoMToPack);
@@ -405,7 +405,7 @@ public class CoMIntegrationTools
     * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double duration, double omega0, ReferenceFrame polynomialFrame,
-         YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
+         YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(polynomialFrame);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);

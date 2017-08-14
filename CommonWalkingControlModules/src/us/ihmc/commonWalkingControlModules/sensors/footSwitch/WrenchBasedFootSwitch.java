@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -58,7 +58,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final GlitchFilteredYoBoolean toeHitGroundFilter;
 
    private final YoFramePoint2d yoResolvedCoP;
-   private final FramePoint2d resolvedCoP;
+   private final FramePoint2D resolvedCoP;
    private final FramePoint3D resolvedCoP3d = new FramePoint3D();
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
@@ -153,7 +153,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.contactablePlaneBody = contactablePlaneBody;
 
       yoResolvedCoP = new YoFramePoint2d(namePrefix + "ResolvedCoP", "", contactablePlaneBody.getSoleFrame(), registry);
-      resolvedCoP = new FramePoint2d(contactablePlaneBody.getSoleFrame());
+      resolvedCoP = new FramePoint2D(contactablePlaneBody.getSoleFrame());
 
       this.forceSensorData = forceSensorData;
       this.footSwitchCoPThresholdFraction = new YoDouble(namePrefix + "footSwitchCoPThresholdFraction", registry);
@@ -277,7 +277,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return pastThresholdFilter.getBooleanValue();
    }
 
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       updateCoP();
       copToPack.setIncludingFrame(resolvedCoP);

@@ -157,7 +157,7 @@ public class SphereICPPlannerVisualizer
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<Point2D>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
          contactPoints.add(point.getPointCopy());
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0));
@@ -437,13 +437,13 @@ public class SphereICPPlannerVisualizer
    private void generateRandomPredictedContactPoints(Footstep footstep)
    {
       FrameConvexPolygon2d randomSupportPolygon = new FrameConvexPolygon2d(contactableFeet.get(footstep.getRobotSide()).getContactPoints2d());
-      List<FramePoint2d> randomPredictedContactPointList = new ArrayList<>();
+      List<FramePoint2D> randomPredictedContactPointList = new ArrayList<>();
 
       double minX = 0.5 * randomSupportPolygon.getMinX();
       double minY = 0.5 * randomSupportPolygon.getMinY();
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
-      FramePoint2d randomLineOrigin = FramePoint2d.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), minX, minY, maxX, maxY);
+      FramePoint2D randomLineOrigin = FramePoint2D.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), minX, minY, maxX, maxY);
       FrameVector2d randomLineVector = FrameVector2d.generateRandomFrameVector2d(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
@@ -452,7 +452,7 @@ public class SphereICPPlannerVisualizer
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
       {
-         FramePoint2d duplicate = FramePoint2d.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
+         FramePoint2D duplicate = FramePoint2D.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
          duplicate.add(randomSupportPolygon.getFrameVertexCopy(0));
          randomSupportPolygon.addVertex(duplicate);
          randomSupportPolygon.update();
@@ -636,7 +636,7 @@ public class SphereICPPlannerVisualizer
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();

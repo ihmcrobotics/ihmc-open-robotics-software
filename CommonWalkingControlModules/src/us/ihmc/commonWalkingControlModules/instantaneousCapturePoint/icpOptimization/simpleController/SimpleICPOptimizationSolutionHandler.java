@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -44,9 +44,9 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final boolean debug;
 
-   private final FramePoint2d locationSolution = new FramePoint2d();
-   private final FramePoint2d previousLocationSolution = new FramePoint2d();
-   private final FramePoint2d clippedLocationSolution = new FramePoint2d();
+   private final FramePoint2D locationSolution = new FramePoint2D();
+   private final FramePoint2D previousLocationSolution = new FramePoint2D();
+   private final FramePoint2D clippedLocationSolution = new FramePoint2D();
 
    private final FramePoint3D solutionLocation = new FramePoint3D();
    private final FramePoint3D referenceLocation = new FramePoint3D();
@@ -111,8 +111,8 @@ public class SimpleICPOptimizationSolutionHandler
       }
    }
 
-   private final FramePoint2d referenceFootstepLocation = new FramePoint2d();
-   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
+   private final FramePoint2D referenceFootstepLocation = new FramePoint2D();
+   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
          ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
@@ -152,14 +152,14 @@ public class SimpleICPOptimizationSolutionHandler
       footstepWasAdjusted.set(false);
    }
 
-   public void updateVisualizers(FramePoint2d desiredICP, double footstepMultiplier)
+   public void updateVisualizers(FramePoint2D desiredICP, double footstepMultiplier)
    {
       adjustedICPReferenceLocation.set(clippedFootstepAdjustment);
       adjustedICPReferenceLocation.scale(footstepMultiplier);
       adjustedICPReferenceLocation.add(desiredICP);
    }
 
-   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
+   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2D currentSolutionLocation, FramePoint2D referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
       solutionLocation.setXYIncludingFrame(solutionLocationToPack);

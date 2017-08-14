@@ -6,7 +6,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -60,7 +60,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
    }
 
-   public void addPointInContact(FramePoint2d newPointInContact)
+   public void addPointInContact(FramePoint2D newPointInContact)
    {
       contactPoints.add().setXYIncludingFrame(newPointInContact);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);

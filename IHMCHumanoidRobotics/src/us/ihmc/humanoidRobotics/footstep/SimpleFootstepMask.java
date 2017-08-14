@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -21,10 +21,10 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
    {
       this.yawFrame2d = yawFrame2D;
       this.safetyBuffer = footKernelMaskSafetyBuffer;
-      ArrayList<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
-      for (FramePoint2d point : foot.getContactPoints2d())
+      ArrayList<FramePoint2D> contactPoints = new ArrayList<FramePoint2D>();
+      for (FramePoint2D point : foot.getContactPoints2d())
       {
-         contactPoints.add(new FramePoint2d(yawFrame2D, inflate(point.getX()), inflate(point.getY())));
+         contactPoints.add(new FramePoint2D(yawFrame2D, inflate(point.getX()), inflate(point.getY())));
       }
 
       footPolygon = new FrameConvexPolygon2d(contactPoints);

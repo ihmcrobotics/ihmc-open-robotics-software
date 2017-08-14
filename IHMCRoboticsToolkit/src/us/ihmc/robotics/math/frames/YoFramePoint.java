@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -47,7 +47,7 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> imple
       return getFrameTuple().getXYPlaneDistance(framePoint);
    }
 
-   public double getXYPlaneDistance(FramePoint2d framePoint2d)
+   public double getXYPlaneDistance(FramePoint2D framePoint2d)
    {
       return getFrameTuple().getXYPlaneDistance(framePoint2d);
    }

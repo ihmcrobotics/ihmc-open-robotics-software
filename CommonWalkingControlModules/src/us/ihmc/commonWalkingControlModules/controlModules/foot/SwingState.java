@@ -21,7 +21,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -269,7 +269,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
-      FramePoint2d toeContactPoint2d = new FramePoint2d();
+      FramePoint2D toeContactPoint2d = new FramePoint2D();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint3D toeContactPoint = new FramePoint3D();
       toeContactPoint.setXYIncludingFrame(toeContactPoint2d);

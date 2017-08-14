@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -87,7 +87,7 @@ public class PartialFootholdControlModule
    private final int footCornerPoints;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2D capturePoint = new FramePoint2D();
    private RobotSide robotSide;
 
    /**
@@ -98,7 +98,7 @@ public class PartialFootholdControlModule
    private final YoBoolean unsafeAreaAboveThreshold;
 
    private final YoBoolean expectingLineContact;
-   private final FramePoint2d dummyDesiredCop = new FramePoint2d();
+   private final FramePoint2D dummyDesiredCop = new FramePoint2D();
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -183,7 +183,7 @@ public class PartialFootholdControlModule
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
-   public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCenterOfPressure, FramePoint2D centerOfPressure)
    {
       footCoPOccupancyGrid.update();
 
@@ -248,7 +248,7 @@ public class PartialFootholdControlModule
 
    }
 
-   public void getShrunkPolygonCentroid(FramePoint2d centroidToPack)
+   public void getShrunkPolygonCentroid(FramePoint2D centroidToPack)
    {
       shrunkFootPolygon.getCentroid(centroidToPack);
    }
@@ -263,7 +263,7 @@ public class PartialFootholdControlModule
       unsafeArea.set(0.0);
    }
 
-   private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
+   private void computeShrunkFoothold(FramePoint2D desiredCenterOfPressure)
    {
       boolean wasCoPInThatRegion = false;
       if (useCoPOccupancyGrid.getBooleanValue()) {
@@ -417,7 +417,7 @@ public class PartialFootholdControlModule
       backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
 
-   public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
+   public void projectOntoShrunkenPolygon(FramePoint2D pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
    }

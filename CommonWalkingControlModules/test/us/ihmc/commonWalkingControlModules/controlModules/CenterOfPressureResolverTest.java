@@ -17,7 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -183,7 +183,7 @@ public class CenterOfPressureResolverTest
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
       PoseReferenceFrame groundPlaneFrame = createPlaneFrame("groundPlaneFrame", groundPoint, groundNormal);
-      FramePoint2d centerOfPressure2d = new FramePoint2d(worldFrame);
+      FramePoint2D centerOfPressure2d = new FramePoint2D(worldFrame);
 
       double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector,
             groundPlaneFrame);

@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -74,10 +74,10 @@ public class ContactPointWrenchMatrixCalculator
       int column = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         List<FramePoint2d> contactPoints2d = contactState.getContactFramePoints2dInContactCopy();
+         List<FramePoint2D> contactPoints2d = contactState.getContactFramePoints2dInContactCopy();
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame()); // TODO: use normal
 
-         for (FramePoint2d contactPoint2d : contactPoints2d)
+         for (FramePoint2D contactPoint2d : contactPoints2d)
          {
             // torque part of A
             tempContactPoint.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);

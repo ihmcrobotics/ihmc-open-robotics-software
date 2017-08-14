@@ -14,7 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -123,7 +123,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    }
 
    @Override
-   public void computeCMPInternal(FramePoint2d desiredCMPPreviousValue)
+   public void computeCMPInternal(FramePoint2D desiredCMPPreviousValue)
    {
       icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
       icpOptimizationController.getDesiredCMP(desiredCMP);
@@ -146,7 +146,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    }
 
    private final FramePose footstepPose = new FramePose();
-   private final FramePoint2d footstepPositionSolution = new FramePoint2d();
+   private final FramePoint2D footstepPositionSolution = new FramePoint2D();
 
    @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)

@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunc
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -311,7 +311,7 @@ public class FootstepVisualizer
       }
 
       new FramePose2d(worldFrame, new Point2D(0.0, 0.0), 0);
-      FramePoint2d endPoint = new FramePoint2d(worldFrame, 3.0, 0.0);
+      FramePoint2D endPoint = new FramePoint2D(worldFrame, 3.0, 0.0);
 
       SimplePathParameters pathType = new SimplePathParameters(0.5, 0.2, 0.0, Math.PI / 6, Math.PI / 12, 0.3);
       

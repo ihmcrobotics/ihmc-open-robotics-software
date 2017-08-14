@@ -23,7 +23,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -143,9 +143,9 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
-   private final FramePoint2d centerOfMass2d = new FramePoint2d();
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
-   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2D capturePoint = new FramePoint2D();
    private double totalFz;
    
 
@@ -770,7 +770,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    }
    
    //CoM and ICP
-   public void getCoM(FramePoint2d comToPack)
+   public void getCoM(FramePoint2D comToPack)
    {
       yoCoM.getFrameTuple2dIncludingFrame(comToPack);
    }
@@ -780,7 +780,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       yoCoM.getFrameTupleIncludingFrame(centerOfMassToPack);
    }
 
-   public void getCapturePoint(FramePoint2d capturePoinToPack)
+   public void getCapturePoint(FramePoint2D capturePoinToPack)
    {
       yoICP.getFrameTuple2dIncludingFrame(capturePoinToPack);
    }

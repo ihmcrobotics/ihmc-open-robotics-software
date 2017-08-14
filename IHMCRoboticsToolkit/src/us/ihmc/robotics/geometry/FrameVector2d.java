@@ -96,7 +96,7 @@ public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
+   public FrameVector2d(FramePoint2D startFramePoint, FramePoint2D endFramePoint)
    {
       this(endFramePoint.referenceFrame, endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
       startFramePoint.checkReferenceFrameMatch(endFramePoint);

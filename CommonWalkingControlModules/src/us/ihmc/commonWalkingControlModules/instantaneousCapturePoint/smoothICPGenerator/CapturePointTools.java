@@ -6,7 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -943,8 +943,8 @@ public class CapturePointTools
     *           biped.
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0,
-                                                            FramePoint2d desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2D desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0,
+                                                            FramePoint2D desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
@@ -992,7 +992,7 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2D currentCapturePointPosition, FramePoint2D desiredCapturePointPosition,
                                                                     FrameVector2d desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
@@ -1026,7 +1026,7 @@ public class CapturePointTools
     * @param projectedCapturePoint
     */
    public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint3D actualICP, FrameLine2d capturePointTrajectoryLine,
-                                                                                    FramePoint2d projectedCapturePoint)
+                                                                                    FramePoint2D projectedCapturePoint)
    {
       projectedCapturePoint.set(actualICP.getX(), actualICP.getY());
       capturePointTrajectoryLine.orthogonalProjection(projectedCapturePoint);
@@ -1045,8 +1045,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeCapturePointPosition(double omega0, double time, FramePoint2d initialCapturePoint, FramePoint2d initialCMP,
-                                                  FramePoint2d desiredCapturePointToPack)
+   public static void computeCapturePointPosition(double omega0, double time, FramePoint2D initialCapturePoint, FramePoint2D initialCMP,
+                                                  FramePoint2D desiredCapturePointToPack)
    {
       desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
@@ -1067,7 +1067,7 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
    {
       computeAngularMomentum(mass, gravity, 0.0, eCMP, zmp, angularMomentumToPack);
    }
@@ -1084,7 +1084,7 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FrameVector3D comAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FrameVector3D comAcceleration, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
    {
       comAcceleration.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       computeAngularMomentum(mass, gravity, comAcceleration.getZ(), eCMP, zmp, angularMomentumToPack);
@@ -1102,7 +1102,7 @@ public class CapturePointTools
     * @param zmp location of the ZMP
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2d eCMP, FramePoint2d zmp, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2D eCMP, FramePoint2D zmp, FramePoint2D angularMomentumToPack)
    {
       angularMomentumToPack.setToZero(ReferenceFrame.getWorldFrame());
       angularMomentumToPack.set(eCMP);
@@ -1126,7 +1126,7 @@ public class CapturePointTools
     * @param delta distance between the eCMP and the ZMP.
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, FramePoint2d delta, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, FramePoint2D delta, FramePoint2D angularMomentumToPack)
    {
       computeAngularMomentum(mass, gravity, 0.0, delta, angularMomentumToPack);
    }
@@ -1142,7 +1142,7 @@ public class CapturePointTools
     * @param delta distance between the eCMP and the ZMP.
     * @param angularMomentumToPack angular momentum about the center of mass. Modified.
     */
-   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2d delta, FramePoint2d angularMomentumToPack)
+   public static void computeAngularMomentum(double mass, double gravity, double comVerticalAcceleration, FramePoint2D delta, FramePoint2D angularMomentumToPack)
    {
       delta.changeFrame(ReferenceFrame.getWorldFrame());
 

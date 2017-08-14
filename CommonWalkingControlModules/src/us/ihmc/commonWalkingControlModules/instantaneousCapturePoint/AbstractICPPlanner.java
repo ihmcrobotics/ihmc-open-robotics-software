@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -266,7 +266,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
    {
       if (isDone())
          return 0.0;
@@ -338,13 +338,13 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected abstract void updateTransferPlan(boolean updateUpcomingCMPs);
    protected abstract void updateSingleSupportPlan(boolean updateUpcomingCMPs);
 
-   private final FramePoint2d desiredICP2d = new FramePoint2d();
-   private final FramePoint2d finalICP2d = new FramePoint2d();
+   private final FramePoint2D desiredICP2d = new FramePoint2D();
+   private final FramePoint2D finalICP2d = new FramePoint2D();
    private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
-   private final FramePoint2d actualICP2d = new FramePoint2d();
+   private final FramePoint2D actualICP2d = new FramePoint2D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2d actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
    {
       desiredICPPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
       singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
@@ -385,7 +385,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
    {
       desiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
    }
@@ -458,7 +458,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
@@ -496,7 +496,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    }
 
    /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint2d desiredCenterOfPressurePositionToPack)
+   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
       desiredCoPPosition.getFrameTuple2dIncludingFrame(desiredCenterOfPressurePositionToPack);
    }

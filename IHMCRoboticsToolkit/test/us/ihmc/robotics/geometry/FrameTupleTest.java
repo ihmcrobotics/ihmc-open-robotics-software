@@ -349,7 +349,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
    public final void testSetXY()
    {
       FrameTuple3D<?, ?> alpha = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
-      FramePoint2d framepoint2d = new FramePoint2d(theFrame);
+      FramePoint2D framepoint2d = new FramePoint2D(theFrame);
       framepoint2d.set(-1.0, -2.0);
 
       alpha.setXY(framepoint2d);
