@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 
 /**
  * Read-only interface for PID gains in three dimensions.

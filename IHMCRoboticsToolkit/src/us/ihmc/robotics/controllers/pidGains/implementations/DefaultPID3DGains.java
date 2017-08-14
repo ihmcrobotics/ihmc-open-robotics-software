@@ -1,4 +1,8 @@
-package us.ihmc.robotics.controllers.pidGains;
+package us.ihmc.robotics.controllers.pidGains.implementations;
+
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 
 public class DefaultPID3DGains implements PID3DGains
 {
