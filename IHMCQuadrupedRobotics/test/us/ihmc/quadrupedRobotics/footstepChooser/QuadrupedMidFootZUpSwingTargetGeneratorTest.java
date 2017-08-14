@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -586,7 +586,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       endPoint.yawAboutPoint(temporaryCentroid, endPoint, nominalYaw.getDoubleValue());
       nominalYawEndpoint.set(endPoint);
 
-      FramePoint2d endpointTwoD = new FramePoint2d();
+      FramePoint2D endpointTwoD = new FramePoint2D();
       endPoint.getFramePoint2d(endpointTwoD);
       nominalYawLineSegment.set(centroid.getFramePoint2dCopy(), endpointTwoD);
 

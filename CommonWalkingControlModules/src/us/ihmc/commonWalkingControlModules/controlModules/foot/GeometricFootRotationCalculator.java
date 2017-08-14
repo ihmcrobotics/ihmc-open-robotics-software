@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
@@ -133,11 +133,11 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FrameVector3D footNormal = new FrameVector3D();
    private final Vector3D footNormalVector = new Vector3D();
 
-   private final FramePoint2d centerOfRotation2d = new FramePoint2d();
+   private final FramePoint2D centerOfRotation2d = new FramePoint2D();
    private final FrameVector2d lineOfRotation2d = new FrameVector2d();
 
    @Override
-   public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
    {
       centerOfPressure.checkReferenceFrameMatch(soleFrame);
       cop.setXYIncludingFrame(centerOfPressure);

@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -188,7 +188,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       reportDesiredCenterOfPressureForEstimator();
    }
 
-   private final SideDependentList<FramePoint2d> desiredFootCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
+   private final SideDependentList<FramePoint2D> desiredFootCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
 
    private void reportDesiredCenterOfPressureForEstimator()
    {

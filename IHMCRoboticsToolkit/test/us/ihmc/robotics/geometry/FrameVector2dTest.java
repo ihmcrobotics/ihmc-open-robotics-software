@@ -124,8 +124,8 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testFrameVector2d_FramePoint2d_FramePoint2d()
    {
       double x = 5.7, y = 56.3;
-      FramePoint2d startFramePoint = new FramePoint2d(theFrame, x, y, "start");
-      FramePoint2d endFramePoint = new FramePoint2d(theFrame, y, x, "end");
+      FramePoint2D startFramePoint = new FramePoint2D(theFrame, x, y, "start");
+      FramePoint2D endFramePoint = new FramePoint2D(theFrame, y, x, "end");
       FrameVector2d frame = new FrameVector2d(startFramePoint, endFramePoint);
       assertEquals("Should be equal", frame.getX(), endFramePoint.getX() - startFramePoint.getX(), epsilon);
       assertEquals("Should be equal", frame.getY(), endFramePoint.getY() - startFramePoint.getY(), epsilon);
@@ -133,7 +133,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", frame.getReferenceFrame(), startFramePoint.getReferenceFrame());
       try
       {
-         FramePoint2d startFramePoint2 = new FramePoint2d(aFrame, x, y);
+         FramePoint2D startFramePoint2 = new FramePoint2D(aFrame, x, y);
          new FrameVector2d(startFramePoint2, endFramePoint);
          fail();
       }

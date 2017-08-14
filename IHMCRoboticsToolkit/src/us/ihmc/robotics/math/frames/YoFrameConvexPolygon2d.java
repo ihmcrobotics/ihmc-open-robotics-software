@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder implements VariableChangedListener
@@ -128,7 +128,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       }
    }
 
-   public void setConvexPolygon2d(FramePoint2d[] framePoints)
+   public void setConvexPolygon2d(FramePoint2D[] framePoints)
    {
       if (framePoints == null)
       {
@@ -194,7 +194,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       return numVertices;
    }
    
-   public FramePoint2d getFrameVertex(int vertexIndex)
+   public FramePoint2D getFrameVertex(int vertexIndex)
    {
       checkIndexInBoundaries(vertexIndex);
       return yoFramePoints.get(vertexIndex).getFrameTuple2d();

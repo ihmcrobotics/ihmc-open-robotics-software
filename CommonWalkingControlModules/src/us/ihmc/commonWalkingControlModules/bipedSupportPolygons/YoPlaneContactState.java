@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -37,7 +37,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    private final YoBoolean hasContactStateChanged;
 
-   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -178,7 +178,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
-   public void setContactFramePoints(List<FramePoint2d> contactPointLocations)
+   public void setContactFramePoints(List<FramePoint2D> contactPointLocations)
    {
       int contactPointLocationsSize = contactPointLocations.size();
 
@@ -187,7 +187,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       for (int i = 0; i < contactPointLocationsSize; i++)
       {
-         FramePoint2d contactPointLocation = contactPointLocations.get(i);
+         FramePoint2D contactPointLocation = contactPointLocations.get(i);
          YoContactPoint yoContactPoint = contactPoints.get(i);
 
          yoContactPoint.setPosition(contactPointLocation);
@@ -197,7 +197,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
-   public void getContactPointCentroid(FramePoint2d centroidToPack)
+   public void getContactPointCentroid(FramePoint2D centroidToPack)
    {
       this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
    }
@@ -260,7 +260,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
-   public void getContactFramePoint2dsInContact(List<FramePoint2d> contactPointListToPack)
+   public void getContactFramePoint2dsInContact(List<FramePoint2D> contactPointListToPack)
    {
       int counter = 0;
       for (int i = 0; i < totalNumberOfContactPoints; i++)
@@ -275,7 +275,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
             if (contactPointListToPack instanceof RecyclingArrayList<?>)
                ((RecyclingArrayList<?>) contactPointListToPack).add();
             else
-               contactPointListToPack.add(new FramePoint2d());
+               contactPointListToPack.add(new FramePoint2D());
          }
 
          contactPoint.getPosition2d(contactPointListToPack.get(counter));
@@ -288,7 +288,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
-   public void getAllContactPoints(FrameTuple2dArrayList<FramePoint2d> contactPointListToPack)
+   public void getAllContactPoints(FrameTuple2dArrayList<FramePoint2D> contactPointListToPack)
    {
       contactPointListToPack.clear();
 
@@ -296,15 +296,15 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       {
          YoContactPoint contactPoint = contactPoints.get(i);
 
-         FramePoint2d contactPointLocation = contactPointListToPack.getAndGrowIfNeeded(i);
+         FramePoint2D contactPointLocation = contactPointListToPack.getAndGrowIfNeeded(i);
          contactPoint.getPosition2d(contactPointLocation);
       }
    }
 
    @Override
-   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
+   public List<FramePoint2D> getContactFramePoints2dInContactCopy()
    {
-      List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
+      List<FramePoint2D> ret = new ArrayList<FramePoint2D>(totalNumberOfContactPoints);
 
       for (int i = 0; i < totalNumberOfContactPoints; i++)
       {
@@ -312,7 +312,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
          if (contactPoint.isInContact())
          {
-            FramePoint2d framePoint2d = new FramePoint2d();
+            FramePoint2D framePoint2d = new FramePoint2D();
             contactPoint.getPosition2d(framePoint2d);
             ret.add(framePoint2d);
          }
@@ -321,7 +321,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return ret;
    }
 
-   public YoContactPoint findContactPoint(FramePoint2d contactPointPosition2d)
+   public YoContactPoint findContactPoint(FramePoint2D contactPointPosition2d)
    {
       for (int i = 0; i < contactPoints.size(); i++)
       {

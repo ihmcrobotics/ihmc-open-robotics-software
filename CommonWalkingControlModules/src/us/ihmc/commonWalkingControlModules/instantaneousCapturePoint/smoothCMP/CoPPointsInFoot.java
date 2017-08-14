@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Co
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -181,7 +181,7 @@ public class CoPPointsInFoot
       this.swingFootCentroid.setIncludingFrame(footLocation);
    }
 
-   public void setSwingFootLocation(FramePoint2d footLocation)
+   public void setSwingFootLocation(FramePoint2D footLocation)
    {
       this.swingFootCentroid.setXYIncludingFrame(footLocation);
    }
@@ -196,7 +196,7 @@ public class CoPPointsInFoot
       this.supportFootCentroid.setIncludingFrame(footLocation);
    }
 
-   public void setSupportFootLocation(FramePoint2d footLocation)
+   public void setSupportFootLocation(FramePoint2D footLocation)
    {
       this.supportFootCentroid.setXYIncludingFrame(footLocation);
    }

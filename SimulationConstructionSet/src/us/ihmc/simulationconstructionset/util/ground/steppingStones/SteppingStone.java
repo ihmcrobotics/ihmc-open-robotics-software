@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SteppingStone
@@ -189,7 +189,7 @@ public class SteppingStone
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2D randomPoint = FramePoint2d.generateRandomFramePoint2d(random, ReferenceFrame.getWorldFrame(), xMin, xMax, yMin, yMax).getPointCopy();
+         Point2D randomPoint = FramePoint2D.generateRandomFramePoint2d(random, ReferenceFrame.getWorldFrame(), xMin, xMax, yMin, yMax).getPointCopy();
 
          if (randomPoint.distance(zeroFramePoint) > radius)
             continue;

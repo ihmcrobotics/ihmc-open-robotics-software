@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +34,7 @@ public class KickBehavior extends AbstractBehavior
    private YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final FootTrajectoryBehavior footTrajectoryBehavior;
 
-   private FramePoint2d objectToKickPose;
+   private FramePoint2D objectToKickPose;
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
@@ -71,7 +71,7 @@ public class KickBehavior extends AbstractBehavior
       }
    }
 
-   public void setObjectToKickPoint(FramePoint2d objectToKickPose)
+   public void setObjectToKickPoint(FramePoint2D objectToKickPose)
    {
       this.objectToKickPose = objectToKickPose;
    }

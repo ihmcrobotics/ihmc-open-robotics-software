@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -31,7 +31,7 @@ public class FrameConvexPolygon2dIntersector
    private final FramePlane3d planeTwo;
    private final FrameLine intersectionOfPlanes;
    private final FrameLine2d planeIntersectionOnPolygonPlane;
-   private final Pair<FramePoint2d, FramePoint2d> lineIntersectionOnPolygonPlane;
+   private final Pair<FramePoint2D, FramePoint2D> lineIntersectionOnPolygonPlane;
    private final Pair<FramePoint3D, FramePoint3D> intersectionWithPolygonOne;
    private final Pair<FramePoint3D, FramePoint3D> intersectionWithPolygonTwo;
    private final Vector3D point2Vector;
@@ -45,7 +45,7 @@ public class FrameConvexPolygon2dIntersector
       planeTwo = new FramePlane3d();
       intersectionOfPlanes = new FrameLine();
       planeIntersectionOnPolygonPlane = new FrameLine2d();
-      lineIntersectionOnPolygonPlane = new Pair<FramePoint2d, FramePoint2d>(new FramePoint2d(), new FramePoint2d());
+      lineIntersectionOnPolygonPlane = new Pair<FramePoint2D, FramePoint2D>(new FramePoint2D(), new FramePoint2D());
       intersectionWithPolygonOne = new Pair<FramePoint3D, FramePoint3D>(new FramePoint3D(), new FramePoint3D());
       intersectionWithPolygonTwo = new Pair<FramePoint3D, FramePoint3D>(new FramePoint3D(), new FramePoint3D());
       point2Vector = new Vector3D();

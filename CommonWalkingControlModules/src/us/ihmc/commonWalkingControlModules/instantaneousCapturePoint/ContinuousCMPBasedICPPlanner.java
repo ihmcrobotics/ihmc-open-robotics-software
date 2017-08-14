@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -99,17 +99,17 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * <li>The output of the planner can be accessed using the various following getters:
  * <ul>
  * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
- * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
+ * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
  * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
- * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
+ * {@link #getDesiredCenterOfMassPosition(FramePoint2D)}, or
  * {@link #getDesiredCenterOfMassPosition(YoFramePoint2d)}.
  * <li>To get the CMP position, use either
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
- * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
  * <li>To get the CMP velocity, use either
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.

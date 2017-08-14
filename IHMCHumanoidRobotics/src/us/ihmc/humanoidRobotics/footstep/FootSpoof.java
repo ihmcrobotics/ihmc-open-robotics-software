@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,7 +33,7 @@ public class FootSpoof implements ContactablePlaneBody
    private final PoseReferenceFrame shinFrame;
    private final ReferenceFrame soleFrame;
    private final List<FramePoint3D> contactPoints = new ArrayList<FramePoint3D>();
-   private final List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>();
+   private final List<FramePoint2D> contactPoints2d = new ArrayList<FramePoint2D>();
    private final double coefficientOfFriction;
    private final int totalNumberOfContactPoints;
 
@@ -167,7 +167,7 @@ public class FootSpoof implements ContactablePlaneBody
       return soleFrame;
    }
 
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2d()
    {
       return contactPoints2d;
    }

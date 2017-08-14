@@ -338,7 +338,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testToFramePoint2d() //Brett
    {
       FramePoint3D framePoint = new FramePoint3D(theFrame, 1.0, 2.0, 5.0);
-      FramePoint2d framePoint2d = framePoint.toFramePoint2d();
+      FramePoint2D framePoint2d = framePoint.toFramePoint2d();
 
       assertSame(theFrame, framePoint2d.getReferenceFrame());
       assertEquals(1.0, framePoint2d.getX(), epsilon);
@@ -350,7 +350,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testGetFramePoint2d() //Brett
    {
       FramePoint3D framePoint = new FramePoint3D(theFrame, 1.0, 2.0, 5.0);
-      FramePoint2d framePoint2d = new FramePoint2d();
+      FramePoint2D framePoint2d = new FramePoint2D();
       framePoint.getFramePoint2d(framePoint2d);
       //      System.out.println(framePoint);
       //      System.out.println(framePoint2d);

@@ -63,14 +63,14 @@ public class SupportState extends AbstractFootControlState
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
-   private final FramePoint2d cop2d = new FramePoint2d();
+   private final FramePoint2D cop2d = new FramePoint2D();
    private final FramePoint3D framePosition = new FramePoint3D();
    private final FrameOrientation frameOrientation = new FrameOrientation();
    private final FramePose bodyFixedControlledPose = new FramePose();
    private final FramePoint3D desiredCopPosition = new FramePoint3D();
 
-   private final FramePoint2d cop = new FramePoint2d();
-   private final FramePoint2d desiredCoP = new FramePoint2d();
+   private final FramePoint2D cop = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
    private final FramePoint3D footPosition = new FramePoint3D();
    private final FrameOrientation footOrientation = new FrameOrientation();

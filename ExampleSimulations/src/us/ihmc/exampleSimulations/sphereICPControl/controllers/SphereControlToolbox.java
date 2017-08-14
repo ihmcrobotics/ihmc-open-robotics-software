@@ -163,7 +163,7 @@ public class SphereControlToolbox
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
          contactPoints.add(point.getPointCopy());
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
@@ -235,7 +235,7 @@ public class SphereControlToolbox
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -387,7 +387,7 @@ public class SphereControlToolbox
       return icp;
    }
 
-   public FramePoint2d getCapturePoint2d()
+   public FramePoint2D getCapturePoint2d()
    {
       return capturePoint2d;
    }
@@ -539,7 +539,7 @@ public class SphereControlToolbox
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
-   private final FramePoint2d centerOfMass2d = new FramePoint2d();
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
    public void computeCenterOfMass()
    {
@@ -556,7 +556,7 @@ public class SphereControlToolbox
       yoCenterOfMassVelocity2d.set(centerOfMassVelocity2d);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
 
    public void computeCapturePoint()
    {

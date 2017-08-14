@@ -216,7 +216,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       pose.setOrientation(frameOrientation.getQuaternion());
    }
 
-   public void setXYFromPosition2d(FramePoint2d position2d)
+   public void setXYFromPosition2d(FramePoint2D position2d)
    {
       pose.setPositionXY(position2d.getPoint());
    }
@@ -340,7 +340,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       framePose2dToPack.setIncludingFrame(referenceFrame, getX(), getY(), getYaw());
    }
 
-   public void getPosition2dIncludingFrame(FramePoint2d framePoint2dToPack)
+   public void getPosition2dIncludingFrame(FramePoint2D framePoint2dToPack)
    {
       framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPosition().getX(), pose.getPosition().getY());
    }

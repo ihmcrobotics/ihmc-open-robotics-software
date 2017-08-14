@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -175,7 +175,7 @@ public interface ICPPlannerInterface
     * @return the estimated time remaining before the capture point reaches its desired position at
     *         the end of this state.
     */
-   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition);
+   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition);
 
    /**
     * Updates the current state of the ICP plan.
@@ -210,7 +210,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack);
+   void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack);
 
    /**
     * Gets the current ICP position.
@@ -309,7 +309,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack);
+   void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack);
 
    /**
     * Gets the current CMP velocity.

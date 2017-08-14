@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -53,7 +53,7 @@ public class OnToesState extends AbstractFootControlState
    private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
    private final TranslationReferenceFrame toeOffFrame;
@@ -218,7 +218,7 @@ public class OnToesState extends AbstractFootControlState
    }
 
    private final FrameVector3D direction = new FrameVector3D();
-   private final FramePoint2d tmpPoint2d = new FramePoint2d();
+   private final FramePoint2D tmpPoint2d = new FramePoint2D();
    private void setupContactLine()
    {
       direction.setToZero(contactableFoot.getSoleFrame());

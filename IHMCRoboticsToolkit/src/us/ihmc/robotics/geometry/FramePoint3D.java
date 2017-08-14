@@ -176,7 +176,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
       return Math.sqrt(dx * dx + dy * dy);
    }
 
-   public double getXYPlaneDistance(FramePoint2d framePoint2d)
+   public double getXYPlaneDistance(FramePoint2D framePoint2d)
    {
       checkReferenceFrameMatch(framePoint2d);
 
@@ -219,9 +219,9 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
    /**
     * Creates a new FramePoint2d based on the x and y components of this FramePoint
     */
-   public FramePoint2d toFramePoint2d()
+   public FramePoint2D toFramePoint2d()
    {
-      return new FramePoint2d(this.getReferenceFrame(), this.getX(), this.getY());
+      return new FramePoint2D(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
    /**
@@ -229,7 +229,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
     * 
     * @param pointToPack
     */
-   public void getFramePoint2d(FramePoint2d pointToPack)
+   public void getFramePoint2d(FramePoint2D pointToPack)
    {
       pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }

@@ -20,7 +20,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  *
  * @author Learning Locomotion Team
  */
-public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements FramePoint2dReadOnly
+public class FramePoint2D extends FrameTuple2D<FramePoint2D, Point2D> implements FramePoint2dReadOnly
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -32,7 +32,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double x, double y, String name)
+   public FramePoint2D(ReferenceFrame referenceFrame, double x, double y, String name)
    {
       super(referenceFrame, new Point2D(x, y), name);
    }
@@ -42,7 +42,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(FrameTuple2D<?, ?> frameTuple2d)
+   public FramePoint2D(FrameTuple2D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
@@ -52,7 +52,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame)
+   public FramePoint2D(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, 0.0, 0.0, null);
    }
@@ -62,7 +62,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d()
+   public FramePoint2D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -72,7 +72,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double x, double y)
+   public FramePoint2D(ReferenceFrame referenceFrame, double x, double y)
    {
       this(referenceFrame, x, y, null);
    }
@@ -82,7 +82,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double[] position)
+   public FramePoint2D(ReferenceFrame referenceFrame, double[] position)
    {
       this(referenceFrame, position[0], position[1], null);
    }
@@ -92,7 +92,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, double[] position, String name)
+   public FramePoint2D(ReferenceFrame referenceFrame, double[] position, String name)
    {
       this(referenceFrame, position[0], position[1], name);
    }
@@ -102,7 +102,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, String name)
+   public FramePoint2D(ReferenceFrame referenceFrame, String name)
    {
       this(referenceFrame, 0.0, 0.0, name);
    }
@@ -112,7 +112,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position)
+   public FramePoint2D(ReferenceFrame referenceFrame, Tuple2DReadOnly position)
    {
       this(referenceFrame, position.getX(), position.getY(), null);
    }
@@ -122,27 +122,27 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * <p/>
     * A normal point2d associated with a specific reference frame.
     */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position, String name)
+   public FramePoint2D(ReferenceFrame referenceFrame, Tuple2DReadOnly position, String name)
    {
       this(referenceFrame, position.getX(), position.getY(), name);
    }
 
-   public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
+   public static FramePoint2D generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax),
+      FramePoint2D randomPoint = new FramePoint2D(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax),
                                                   RandomNumbers.nextDouble(random, yMin, yMax));
 
       return randomPoint;
    }
 
-   public double distance(FramePoint2d framePoint)
+   public double distance(FramePoint2D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
 
       return this.tuple.distance(framePoint.tuple);
    }
 
-   public double distanceSquared(FramePoint2d framePoint)
+   public double distanceSquared(FramePoint2D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
 
@@ -190,9 +190,9 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
     * @return Copied FramePoint2d in the new reference frame.
     */
-   public FramePoint2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
+   public FramePoint2D changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame)
    {
-      FramePoint2d ret = new FramePoint2d(this);
+      FramePoint2D ret = new FramePoint2D(this);
       ret.changeFrameAndProjectToXYPlane(desiredFrame);
       return ret;
    }
@@ -209,7 +209,7 @@ public class FramePoint2d extends FrameTuple2D<FramePoint2d, Point2D> implements
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public void yawAboutPoint(FramePoint2d pointToYawAbout, FramePoint2d pointToPack, double yaw)
+   public void yawAboutPoint(FramePoint2D pointToYawAbout, FramePoint2D pointToPack, double yaw)
    {
       if (temporaryPointForYawing == null)
          temporaryPointForYawing = new FrameVector2d(this);

@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -41,7 +41,7 @@ public class PlaneContactWrenchProcessor
    private final Map<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
 
-   private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, FramePoint2D> cops = new LinkedHashMap<>();
 
    private final CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
 
@@ -71,7 +71,7 @@ public class PlaneContactWrenchProcessor
          YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
          centersOfPressureWorld.put(contactableBody, cop);
 
-         FramePoint2d footCenter2d = new FramePoint2d(contactableBody.getSoleFrame());
+         FramePoint2D footCenter2d = new FramePoint2D(contactableBody.getSoleFrame());
          footCenter2d.setToNaN();
          cops.put(contactableBody, footCenter2d);
 
@@ -103,7 +103,7 @@ public class PlaneContactWrenchProcessor
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
-         FramePoint2d cop = cops.get(contactablePlaneBody);
+         FramePoint2D cop = cops.get(contactablePlaneBody);
          YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
          yoCop.getFrameTuple2d(cop);
 
@@ -143,7 +143,7 @@ public class PlaneContactWrenchProcessor
       }
    }
 
-   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
       YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
       yoCop.getFrameTuple2dIncludingFrame(desiredCoPToPack);

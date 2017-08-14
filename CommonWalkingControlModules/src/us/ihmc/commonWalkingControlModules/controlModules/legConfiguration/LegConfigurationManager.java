@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -196,8 +196,8 @@ public class LegConfigurationManager
       }
    }
 
-   private final FramePoint2d tempLeadingFootPosition = new FramePoint2d();
-   private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
+   private final FramePoint2D tempLeadingFootPosition = new FramePoint2D();
+   private final FramePoint2D tempTrailingFootPosition = new FramePoint2D();
    private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
    private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
 
