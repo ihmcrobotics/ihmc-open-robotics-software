@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 
 /**
@@ -165,8 +165,8 @@ public class SmoothCapturePointToolbox
     */
    public void calculateICPQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int icpDerivativeOrder, 
                                                                            YoFrameTrajectory3D cmpPolynomial3D, 
-                                                                           FrameTuple<?, ?> icpPositionDesiredFinal, 
-                                                                           FrameTuple<?, ?> icpQuantityDesired)
+                                                                           FrameTuple3D<?, ?> icpPositionDesiredFinal, 
+                                                                           FrameTuple3D<?, ?> icpQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if(numberOfCoefficients == -1)
@@ -217,8 +217,8 @@ public class SmoothCapturePointToolbox
     * @return
     */
    public void calculateICPQuantity3D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
-                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple<?, ?> icpPositionDesiredFinal,
-                                             FrameTuple<?, ?> icpQuantityDesired)
+                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal,
+                                             FrameTuple3D<?, ?> icpQuantityDesired)
    {
       M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
       M1.zero();

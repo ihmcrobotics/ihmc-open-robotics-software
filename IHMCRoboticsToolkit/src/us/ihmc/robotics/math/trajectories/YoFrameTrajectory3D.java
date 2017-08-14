@@ -8,7 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -754,7 +754,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       return Math.max(Math.max(xTrajectory.getNumberOfCoefficients(), yTrajectory.getNumberOfCoefficients()), zTrajectory.getNumberOfCoefficients());
    }
    
-   public void getDerivative(int order, double x, FrameTuple<?, ?> dQuantity)
+   public void getDerivative(int order, double x, FrameTuple3D<?, ?> dQuantity)
    {
       dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
    }

@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple<FramePoint, Point3D> implements PointInterface
+public class FramePoint extends FrameTuple3D<FramePoint, Point3D> implements PointInterface
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -97,7 +97,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple<?, ?> frameTuple)
+   public FramePoint(FrameTuple3D<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new Point3D(frameTuple.tuple), frameTuple.name);
    }
