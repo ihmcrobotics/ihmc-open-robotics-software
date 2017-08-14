@@ -11,7 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CaptureRegionMathToolsTest
@@ -28,18 +28,18 @@ public class CaptureRegionMathToolsTest
       double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
       FramePoint2D center = FramePoint2D.generateRandomFramePoint2d(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
       
-      FrameVector2d directionToExpectedPoint = FrameVector2d.generateRandomFrameVector2d(random, worldFrame);
+      FrameVector2D directionToExpectedPoint = FrameVector2D.generateRandomFrameVector2d(random, worldFrame);
       directionToExpectedPoint.normalize();
       FramePoint2D expectedPoint = new FramePoint2D();
       expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);
 
       double angleFromExpectedToA = RandomNumbers.nextDouble(random, 0.0, Math.PI);
-      FrameVector2d directionA = new FrameVector2d(directionToExpectedPoint);
+      FrameVector2D directionA = new FrameVector2D(directionToExpectedPoint);
       rotationMatrix.setToYawMatrix(angleFromExpectedToA);
       directionA.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
       double angleFromExpectedToB = RandomNumbers.nextDouble(random, -Math.PI, 0.0);
-      FrameVector2d directionB = new FrameVector2d(directionToExpectedPoint);
+      FrameVector2D directionB = new FrameVector2D(directionToExpectedPoint);
       rotationMatrix.setToYawMatrix(angleFromExpectedToB);
       directionB.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 

@@ -10,7 +10,7 @@ import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -1091,7 +1091,7 @@ public class ICPQPOptimizationSolver
     *
     * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
     */
-   public void getCMPFeedbackDifference(FrameVector2d cmpFeedbackDifferenceToPack)
+   public void getCMPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
       cmpFeedbackDifferenceToPack.setX(feedbackDeltaSolution.get(0, 0));

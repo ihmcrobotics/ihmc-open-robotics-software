@@ -28,7 +28,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -102,7 +102,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
- * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
+ * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint2D)}, or
@@ -112,7 +112,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
  * <li>To get the CMP velocity, use either
  * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2D)}.
  * </ul>
  * </ul>
  * </p>

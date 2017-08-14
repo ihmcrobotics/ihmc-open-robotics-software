@@ -31,7 +31,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -459,7 +459,7 @@ public class WalkingMessageHandler
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
-   public void reportControllerFailure(FrameVector2d fallingDirection)
+   public void reportControllerFailure(FrameVector2D fallingDirection)
    {
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.setFallingDirection(fallingDirection);

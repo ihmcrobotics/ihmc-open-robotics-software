@@ -131,7 +131,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final FramePoint2D adjustedLocation = new FramePoint2D();
    private final FramePoint2D referenceLocation = new FramePoint2D();
-   private final FrameVector2d adjustmentDirection = new FrameVector2d();
+   private final FrameVector2D adjustmentDirection = new FrameVector2D();
    private final FrameLine2d motionLine = new FrameLine2d();
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();

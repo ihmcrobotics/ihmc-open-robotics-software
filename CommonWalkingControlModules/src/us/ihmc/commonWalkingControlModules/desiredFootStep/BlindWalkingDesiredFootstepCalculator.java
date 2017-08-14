@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -117,7 +117,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
    private FramePoint3D getDesiredFootstepPositionCopy(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide)
    {
-      FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(supportAnkleZUpFrame, swingLegSide, angleToDestination.getDoubleValue(),
+      FrameVector2D desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(supportAnkleZUpFrame, swingLegSide, angleToDestination.getDoubleValue(),
             distanceToDestination.getDoubleValue());
       FramePoint3D footstepPosition = computeDesiredFootPosition(supportAnkleFrame, desiredOffsetFromAnkle);
       footstepPosition.changeFrame(worldFrame);
@@ -133,7 +133,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       FramePoint2D squaredUpMidpointInAnkleFrame = new FramePoint2D(supportAnkleZUpFrame, 0.0,
             swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue() / 2.0));
 
-      FrameVector2d midpointToDestination = new FrameVector2d(destinationInAnkleFrame);
+      FrameVector2D midpointToDestination = new FrameVector2D(destinationInAnkleFrame);
       midpointToDestination.sub(squaredUpMidpointInAnkleFrame);
 
       distanceToDestination.set(midpointToDestination.length());
@@ -143,12 +143,12 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
    private final Vector2D desiredOffsetFromSquaredUp = new Vector2D();
 
-   private FrameVector2d computeDesiredOffsetFromSupportAnkle(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, double angleToDestination,
+   private FrameVector2D computeDesiredOffsetFromSupportAnkle(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, double angleToDestination,
          double distanceToDestination)
    {
       if (distanceToDestination < DISTANCE_TO_DESTINATION_FOR_STEP_IN_PLACE)
       {
-         return new FrameVector2d(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()));
+         return new FrameVector2D(supportAnkleZUpFrame, 0.0, swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()));
       }
 
       double absoluteAngleToDestination;
@@ -236,7 +236,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
          desiredOffsetFromSquaredUp.scale(maxStepLength.getDoubleValue() / stepLength);
       }
 
-      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(supportAnkleZUpFrame, desiredOffsetFromSquaredUp.getX(),
+      FrameVector2D desiredOffsetFromAnkle = new FrameVector2D(supportAnkleZUpFrame, desiredOffsetFromSquaredUp.getX(),
             desiredOffsetFromSquaredUp.getY() + swingLegSide.negateIfRightSide(desiredStepWidth.getDoubleValue()));
 
       if (swingLegSide == RobotSide.LEFT)
@@ -309,7 +309,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return new FrameOrientation(worldFrame, ret);
    }
 
-   private FramePoint3D computeDesiredFootPosition(ReferenceFrame upcomingSupportFrame, FrameVector2d desiredOffsetFromSupport)
+   private FramePoint3D computeDesiredFootPosition(ReferenceFrame upcomingSupportFrame, FrameVector2D desiredOffsetFromSupport)
    {
       desiredOffsetFromSupport.changeFrame(upcomingSupportFrame);
       FramePoint3D footstepPosition = new FramePoint3D(upcomingSupportFrame, desiredOffsetFromSupport.getX(), desiredOffsetFromSupport.getY(), 0.0);

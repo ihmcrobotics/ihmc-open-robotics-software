@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -144,7 +144,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
-   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+   private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
    private final FramePoint2D capturePoint = new FramePoint2D();
    private double totalFz;
    

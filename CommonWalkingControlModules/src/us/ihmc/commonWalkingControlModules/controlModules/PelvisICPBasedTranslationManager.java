@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -79,9 +79,9 @@ public class PelvisICPBasedTranslationManager
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FramePoint2D tempPosition2d = new FramePoint2D();
-   private final FrameVector2d tempError2d = new FrameVector2d();
-   private final FrameVector2d tempICPOffset = new FrameVector2d();
-   private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
+   private final FrameVector2D tempError2d = new FrameVector2D();
+   private final FrameVector2D tempICPOffset = new FrameVector2D();
+   private final FrameVector2D icpOffsetForFreezing = new FrameVector2D();
 
    private final YoLong lastCommandId;
 
@@ -384,7 +384,7 @@ public class PelvisICPBasedTranslationManager
 
    private final FramePoint2D originalICPToModify = new FramePoint2D();
 
-   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
+   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());

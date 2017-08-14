@@ -33,12 +33,12 @@ public class FrameLine2dTest
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("zUpFrame");
 
       FramePoint2D point1 = new FramePoint2D(zUpFrame, 0.0, 0.0);
-      FrameVector2d vector1 = new FrameVector2d(zUpFrame, 1.0, 1.0);
+      FrameVector2D vector1 = new FrameVector2D(zUpFrame, 1.0, 1.0);
 
       FrameLine2d line1 = new FrameLine2d(point1, vector1);
 
       FramePoint2D point2 = new FramePoint2D(zUpFrame, 1.0, 0.0);
-      FrameVector2d vector2 = new FrameVector2d(zUpFrame, -1.0, 1.0);
+      FrameVector2D vector2 = new FrameVector2D(zUpFrame, -1.0, 1.0);
 
       FrameLine2d line2 = new FrameLine2d(point2, vector2);
 

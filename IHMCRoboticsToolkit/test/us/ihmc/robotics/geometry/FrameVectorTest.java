@@ -139,7 +139,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
    public void testToFrameVector2d() //Brett was here
    {
       FrameVector3D frameVector = new FrameVector3D(theFrame, 11.0, 22.0, 33.0);
-      FrameVector2d expected = frameVector.toFrameVector2d();
+      FrameVector2D expected = frameVector.toFrameVector2d();
       assertEquals("These should be equal", 11.0, expected.getX(), epsilon);
       assertEquals("These should be equal", 22.0, expected.getY(), epsilon);
    }

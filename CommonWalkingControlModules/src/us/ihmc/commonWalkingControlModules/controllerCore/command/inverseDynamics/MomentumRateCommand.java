@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -176,7 +176,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed
     *            in world frame.
     */
-   public void setLinearMomentumXYRate(FrameVector2d linearMomentumRateOfChange)
+   public void setLinearMomentumXYRate(FrameVector2D linearMomentumRateOfChange)
    {
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 

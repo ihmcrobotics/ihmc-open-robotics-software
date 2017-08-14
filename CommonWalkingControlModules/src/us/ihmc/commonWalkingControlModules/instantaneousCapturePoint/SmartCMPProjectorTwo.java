@@ -7,14 +7,14 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SmartCMPProjectorTwo extends CMPProjector
 {
    private final YoBoolean cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
-   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2D finalDesiredICPToICPDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
    private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
    private final FramePoint2D finalDesiredICPLocation = new FramePoint2D();
 

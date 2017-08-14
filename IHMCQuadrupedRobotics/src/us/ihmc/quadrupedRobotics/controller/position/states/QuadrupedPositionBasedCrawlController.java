@@ -48,7 +48,7 @@ import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -1610,7 +1610,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
             FramePoint2D midpoint = lineSegment.midpoint();
             double bisectorLengthDesired = 0.1;
-            FrameVector2d perpendicularBisector = new FrameVector2d();
+            FrameVector2D perpendicularBisector = new FrameVector2D();
             lineSegment.getPerpendicular(true, perpendicularBisector);
             perpendicularBisector.scale(-bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
@@ -1847,7 +1847,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          drawSupportPolygon(secondTripleSupportPolygon, tripleSupportPolygons.get(secondSwingLeg));
       }
 
-      private final FrameVector2d tempFrameVector = new FrameVector2d();
+      private final FrameVector2D tempFrameVector = new FrameVector2D();
 
       private void calculateTrajectoryTarget(RobotQuadrant upcomingSwingLeg, QuadrupedSupportPolygon commonTriangle, FramePoint2D comTargetToPack)
       {

@@ -9,7 +9,7 @@ import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -573,7 +573,7 @@ public class SimpleICPOptimizationQPSolver
       compute(currentICPError.getFrameTuple2d(), perfectCMP);
    }
 
-   public void compute(FrameVector2d currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
+   public void compute(FrameVector2D currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
@@ -938,7 +938,7 @@ public class SimpleICPOptimizationQPSolver
     *
     * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
     */
-   public void getCoPFeedbackDifference(FrameVector2d cmpFeedbackDifferenceToPack)
+   public void getCoPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
       cmpFeedbackDifferenceToPack.setX(feedbackDeltaSolution.get(0, 0));
@@ -951,7 +951,7 @@ public class SimpleICPOptimizationQPSolver
     *
     * @param differenceToPack difference between the two points. Modified.
     */
-   public void getCMPDifferenceFromCoP(FrameVector2d differenceToPack)
+   public void getCMPDifferenceFromCoP(FrameVector2D differenceToPack)
    {
       differenceToPack.setToZero(worldFrame);
       differenceToPack.setX(angularMomentumSolution.get(0, 0));

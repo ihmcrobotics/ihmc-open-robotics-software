@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2D;
@@ -193,7 +193,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    }
 
    @Override
-   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity)
+   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
    {
       icpOptimizationController.setReferenceICPVelocity(referenceICPVelocity);
    }

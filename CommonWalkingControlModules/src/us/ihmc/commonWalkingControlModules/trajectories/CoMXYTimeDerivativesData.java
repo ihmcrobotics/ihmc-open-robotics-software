@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMXYTimeDerivativesData
 {
    private FramePoint2D comXYPosition = new FramePoint2D(ReferenceFrame.getWorldFrame());
-   private FrameVector2d comXYVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
-   private FrameVector2d comXYAcceleration = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private FrameVector2D comXYVelocity = new FrameVector2D(ReferenceFrame.getWorldFrame());
+   private FrameVector2D comXYAcceleration = new FrameVector2D(ReferenceFrame.getWorldFrame());
 
    public void set(CoMXYTimeDerivativesData comXYData)
    {
@@ -22,12 +22,12 @@ public class CoMXYTimeDerivativesData
       comXYPositionToPack.set(this.comXYPosition);
    }
 
-   public void getCoMXYVelocity(FrameVector2d comXYVelocityToPack)
+   public void getCoMXYVelocity(FrameVector2D comXYVelocityToPack)
    {
       comXYVelocityToPack.set(this.comXYVelocity);
    }
 
-   public void getCoMXYAcceleration(FrameVector2d comXYAccelerationToPack)
+   public void getCoMXYAcceleration(FrameVector2D comXYAccelerationToPack)
    {
       comXYAccelerationToPack.set(this.comXYAcceleration);
    }
@@ -37,12 +37,12 @@ public class CoMXYTimeDerivativesData
       this.comXYPosition.set(comXYPosition);
    }
 
-   public void setCoMXYVelocity(FrameVector2d comXYVelocity)
+   public void setCoMXYVelocity(FrameVector2D comXYVelocity)
    {
       this.comXYVelocity.set(comXYVelocity);
    }
 
-   public void setCoMXYAcceleration(FrameVector2d comXYAcceleration)
+   public void setCoMXYAcceleration(FrameVector2D comXYAcceleration)
    {
       this.comXYAcceleration.set(comXYAcceleration);
    }

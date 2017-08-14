@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -97,7 +97,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2d desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 

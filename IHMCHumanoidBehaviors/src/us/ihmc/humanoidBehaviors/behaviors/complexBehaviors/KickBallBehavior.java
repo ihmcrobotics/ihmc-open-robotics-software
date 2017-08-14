@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -207,7 +207,7 @@ public class KickBallBehavior extends AbstractBehavior
             sphereDetectionBehavior.getBallLocation().getY());
       FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
-      FrameVector2d walkingDirection = new FrameVector2d(worldFrame);
+      FrameVector2D walkingDirection = new FrameVector2D(worldFrame);
       walkingDirection.set(ballPosition2d);
       walkingDirection.sub(robotPosition);
       walkingDirection.normalize();

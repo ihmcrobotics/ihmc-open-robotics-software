@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -265,7 +265,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack);
+   void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -331,7 +331,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
-   void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack);
+   void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack);
 
    /**
     * Gets the time relative to the beginning of the current state.
