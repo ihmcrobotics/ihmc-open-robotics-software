@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
+public class FrameVector2d extends FrameTuple2D<FrameVector2d, Vector2D>
 {
    private static final long serialVersionUID = -610124454205790361L;
 
@@ -86,7 +86,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
+   public FrameVector2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
