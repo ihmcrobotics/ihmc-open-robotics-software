@@ -11,7 +11,7 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
 
    public FramePose2d()
    {
-      this(new FramePoint2d(), new FrameOrientation2d());
+      this(new FramePoint2D(), new FrameOrientation2d());
    }
 
    public FramePose2d(ReferenceFrame referenceFrame)
@@ -25,7 +25,7 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
       this.pose = getGeometryObject();
    }
 
-   public FramePose2d(FramePoint2d position, FrameOrientation2d orientation)
+   public FramePose2d(FramePoint2D position, FrameOrientation2d orientation)
    {
       this(position.getReferenceFrame(), new Pose2D(position.getGeometryObject(), orientation.getGeometryObject()));
       position.checkReferenceFrameMatch(orientation);
@@ -52,7 +52,7 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
       pose.setOrientation(orientation.getGeometryObject());
    }
 
-   public void setPosition(FramePoint2d position)
+   public void setPosition(FramePoint2D position)
    {
       checkReferenceFrameMatch(position);
       pose.setPosition(position.getGeometryObject());
@@ -105,7 +105,7 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
       return pose.getY();
    }
 
-   public void getPositionIncludingFrame(FramePoint2d positionToPack)
+   public void getPositionIncludingFrame(FramePoint2D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);
       pose.getPosition(positionToPack.getGeometryObject());

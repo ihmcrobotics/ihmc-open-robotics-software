@@ -4,8 +4,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,8 +23,8 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
 
    private final YoDouble forceThreshold;
 
-   private final FrameVector measuredForce = new FrameVector();
-   private final FrameVector measuredForceWorld = new FrameVector();
+   private final FrameVector3D measuredForce = new FrameVector3D();
+   private final FrameVector3D measuredForceWorld = new FrameVector3D();
    private final YoFrameVector yoMeasuredForceWorld;
    private final YoBoolean hasFootHitGround;
 
@@ -73,7 +73,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
    }

@@ -19,8 +19,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
@@ -64,7 +64,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    private final YoBoolean showViz;
@@ -216,7 +216,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialPosition.set(x, y, z);
    }
 
-   public void setInitialPosition(FramePoint initialPosition)
+   public void setInitialPosition(FramePoint3D initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }
@@ -226,14 +226,14 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.finalPosition.set(x, y, z);
    }
 
-   public void setFinalPosition(FramePoint finalPosition)
+   public void setFinalPosition(FramePoint3D finalPosition)
    {
       this.finalPosition.set(finalPosition);
    }
 
    private final Vector3D tempVector = new Vector3D();
 
-   public void setInitialClearance(FrameVector initialDirection, double leaveDistance)
+   public void setInitialClearance(FrameVector3D initialDirection, double leaveDistance)
    {
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
@@ -340,22 +340,22 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       showViz.set(false);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -49,12 +49,12 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       yoFramePoint.set(x, y, z);
    }
 
-   public void getPosition(FramePoint framePointToPack)
+   public void getPosition(FramePoint3D framePointToPack)
    {
       yoFramePoint.getFrameTuple(framePointToPack);
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       yoFramePoint.set(position);
    }

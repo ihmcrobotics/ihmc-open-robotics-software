@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -559,7 +559,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final TransformReferenceFrame parentSoleFrame = new TransformReferenceFrame("parentSole", ReferenceFrame.getWorldFrame());
    private final ZUpFrame parentSoleZupFrame = new ZUpFrame(worldFrame, parentSoleFrame, "parentSoleZupFrame");
    private final TransformReferenceFrame nodeSoleFrame = new TransformReferenceFrame("nodeSole", ReferenceFrame.getWorldFrame());
-   private final FramePoint solePositionInParentZUpFrame = new FramePoint(parentSoleZupFrame);
+   private final FramePoint3D solePositionInParentZUpFrame = new FramePoint3D(parentSoleZupFrame);
 
    private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
@@ -627,7 +627,7 @@ public class PlanarRegionPotentialNextStepCalculator
       return true;
    }
 
-   private double getXYLength(FramePoint point)
+   private double getXYLength(FramePoint3D point)
    {
       return Math.sqrt(point.getX() * point.getX() + point.getY() * point.getY());
    }

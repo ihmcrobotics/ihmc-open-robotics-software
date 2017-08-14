@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements VectorInterface
+public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> implements VectorInterface
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -27,7 +27,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
+   public FrameVector3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
    {
       super(referenceFrame, new Vector3D(tuple), null);
    }
@@ -37,7 +37,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple, String name)
+   public FrameVector3D(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple, String name)
    {
       super(referenceFrame, new Vector3D(tuple), name);
    }
@@ -47,7 +47,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vector)
+   public FrameVector3D(ReferenceFrame referenceFrame, double[] vector)
    {
       super(referenceFrame, new Vector3D(vector), null);
    }
@@ -57,7 +57,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double[] vector, String name)
+   public FrameVector3D(ReferenceFrame referenceFrame, double[] vector, String name)
    {
       super(referenceFrame, new Vector3D(vector), name);
    }
@@ -67,7 +67,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector()
+   public FrameVector3D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -77,7 +77,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame)
+   public FrameVector3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Vector3D(), null);
    }
@@ -87,7 +87,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, String name)
+   public FrameVector3D(ReferenceFrame referenceFrame, String name)
    {
       super(referenceFrame, new Vector3D(), name);
    }
@@ -97,7 +97,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(FrameTuple<?, ?> frameTuple)
+   public FrameVector3D(FrameTuple3D<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new Vector3D(frameTuple.tuple), frameTuple.name);
    }
@@ -107,7 +107,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z)
+   public FrameVector3D(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       this(referenceFrame, x, y, z, null);
    }
@@ -117,21 +117,21 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z, String name)
+   public FrameVector3D(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
       super(referenceFrame, new Vector3D(x, y, z), name);
    }
 
-   public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)
+   public static FrameVector3D generateRandomFrameVector(Random random, ReferenceFrame frame)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomGeometry.nextVector3D(random));
+      FrameVector3D randomVector = new FrameVector3D(frame, RandomGeometry.nextVector3D(random));
       return randomVector;
    }
 
-   public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
+   public static FrameVector3D generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                        double zMax)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomNumbers.nextDouble(random, xMin, xMax),
+      FrameVector3D randomVector = new FrameVector3D(frame, RandomNumbers.nextDouble(random, xMin, xMax),
                                                  RandomNumbers.nextDouble(random, yMin, yMax), RandomNumbers.nextDouble(random, zMin, zMax));
       return randomVector;
    }
@@ -149,9 +149,9 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
    /**
     * Creates a new FrameVector2d based on the x and y components of this FrameVector
     */
-   public FrameVector2d toFrameVector2d()
+   public FrameVector2D toFrameVector2d()
    {
-      return new FrameVector2d(this.getReferenceFrame(), this.getX(), this.getY());
+      return new FrameVector2D(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
    public double dot(Vector3DReadOnly vector)
@@ -159,7 +159,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       return this.tuple.dot(vector);
    }
 
-   public double dot(FrameVector frameVector)
+   public double dot(FrameVector3D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 
@@ -171,14 +171,14 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       return this.tuple.angle(vector);
    }
 
-   public double angle(FrameVector frameVector)
+   public double angle(FrameVector3D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 
       return this.tuple.angle(frameVector.tuple);
    }
 
-   public boolean isEpsilonParallel(FrameVector frameVector, double epsilonAngle)
+   public boolean isEpsilonParallel(FrameVector3D frameVector, double epsilonAngle)
    {
       checkReferenceFrameMatch(frameVector);
 
@@ -188,12 +188,12 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       return errorFromParallel < epsilonAngle;
    }
 
-   public boolean isEpsilonParallel(FrameVector frameVector)
+   public boolean isEpsilonParallel(FrameVector3D frameVector)
    {
       return isEpsilonParallel(frameVector, 1e-7);
    }
 
-   public void cross(FrameTuple<?, ?> frameTuple1)
+   public void cross(FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       cross(this.tuple, this.tuple, frameTuple1.tuple);
@@ -209,7 +209,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       cross(this.tuple, tuple1, tuple2);
    }
 
-   public void cross(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public void cross(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);

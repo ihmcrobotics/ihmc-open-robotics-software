@@ -18,7 +18,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -295,7 +295,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          ramps.get(direction).set(MathTools.clamp(ramp, 0.0, 1.0));
       }
 
-      FrameVector tempAngularVelocity = new FrameVector(imuSensor.getMeasurementFrame());
+      FrameVector3D tempAngularVelocity = new FrameVector3D(imuSensor.getMeasurementFrame());
       imuSensor.getAngularVelocityMeasurement(tempAngularVelocity.getVector());
       imuAngularVelocityInPelvis.setAndMatchFrame(tempAngularVelocity);
 

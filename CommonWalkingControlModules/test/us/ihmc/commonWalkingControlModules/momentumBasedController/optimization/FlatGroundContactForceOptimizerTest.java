@@ -11,8 +11,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.simulationconstructionset.Robot;
@@ -36,11 +36,11 @@ public class FlatGroundContactForceOptimizerTest
       double regWeight = 1.0e-6;
       FlatGroundContactForceOptimizer optimizer = new FlatGroundContactForceOptimizer(friction, vectorsPerContact, regWeight, graphicsListRegistry, registry);
 
-      List<FramePoint> contactPoints = new ArrayList<>();
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5, -0.5, 0.0));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5, 0.5, 0.0));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 0.0));
-      contactPoints.add(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, -0.5, 0.0));
+      List<FramePoint3D> contactPoints = new ArrayList<>();
+      contactPoints.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, -0.5, 0.0));
+      contactPoints.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, 0.5, 0.0));
+      contactPoints.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 0.0));
+      contactPoints.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, -0.5, 0.0));
 
       Point3D comPosition = new Point3D(0.0, 0.0, 0.6);
 
@@ -54,7 +54,7 @@ public class FlatGroundContactForceOptimizerTest
          scs.addYoVariableRegistry(registry);
       }
 
-      FrameVector torque = new FrameVector(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);
+      FrameVector3D torque = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);
       WeightMatrix6D weights = new WeightMatrix6D();
       weights.setAngularWeights(1.0, 1.0, 1.0);
       weights.setLinearWeights(1.0, 1.0, 1.0);
@@ -67,8 +67,8 @@ public class FlatGroundContactForceOptimizerTest
          Vector3D forceVector = new Vector3D(x, y, z);
          forceVector.scale(0.2);
 
-         FramePoint centerOfMass = new FramePoint(ReferenceFrame.getWorldFrame(), comPosition);
-         FrameVector force = new FrameVector(ReferenceFrame.getWorldFrame(), forceVector);
+         FramePoint3D centerOfMass = new FramePoint3D(ReferenceFrame.getWorldFrame(), comPosition);
+         FrameVector3D force = new FrameVector3D(ReferenceFrame.getWorldFrame(), forceVector);
 
          assertTrue(optimizer.compute(contactPoints, centerOfMass, force, torque, weights));
 

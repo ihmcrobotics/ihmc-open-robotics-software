@@ -7,16 +7,16 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameTuple3D;
+import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
-   private final FramePoint framePoint = new FramePoint();
+   private final FramePoint3D framePoint = new FramePoint3D();
    private final Point3D point = new Point3D();
 
    private final String namePrefix;
@@ -49,7 +49,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       set(point);
    }
 
-   public void setIncludingFrame(FrameTuple<?, ?> frameTuple)
+   public void setIncludingFrame(FrameTuple3D<?, ?> frameTuple)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple.getReferenceFrame());
       set(frameTuple);
@@ -61,7 +61,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       set(yoFrameTuple);
    }
 
-   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public void setXYIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       setXY(frameTuple2d);
@@ -122,7 +122,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
 
          attachVariableChangedListener(new VariableChangedListener()
          {
-            private final FramePoint localFramePoint = new FramePoint();
+            private final FramePoint3D localFramePoint = new FramePoint3D();
             private final YoFramePoint point = yoFramePointInWorld;
 
             @Override
