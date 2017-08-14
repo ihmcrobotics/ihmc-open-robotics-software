@@ -7,15 +7,13 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.YoFrameTrajectory3D;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -46,8 +44,8 @@ public class SmoothCoMIntegrationToolsTest
          double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
                     
-         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
@@ -131,8 +129,8 @@ public class SmoothCoMIntegrationToolsTest
          double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + scaleTFinal * Math.random();
                     
-         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
@@ -210,24 +208,24 @@ public class SmoothCoMIntegrationToolsTest
 //         double scaleTFinal = 1.0 / Math.random();
          double t0 = 0.0, tFinal = t0 + Math.random(); //scaleTFinal * Math.random();
                     
-         FramePoint cmp0 = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
-         FramePoint cmpFinal = new FramePoint(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
+         FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
+         FramePoint3D cmpFinal = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 1.0));
          
          linear3D.setLinear(t0, tFinal, cmp0, cmpFinal);
          
          double time = t0 + Math.random() * (tFinal - t0);                
          
-         FramePoint icpPositionDesiredFinal = new FramePoint(worldFrame, cmpFinal.getPoint());
-         FramePoint comPositionDesiredInitial = new FramePoint(worldFrame, cmp0.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
+         FramePoint3D comPositionDesiredInitial = new FramePoint3D(worldFrame, cmp0.getPoint());
          
-         FramePoint icpPositionDesiredInitial = new FramePoint(worldFrame);
+         FramePoint3D icpPositionDesiredInitial = new FramePoint3D(worldFrame);
          icpToolbox.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
          // Position
-         FramePoint comPositionDesiredCurrent = new FramePoint(worldFrame);
-         FramePoint comPositionDesiredFinal = new FramePoint(worldFrame);
-         FramePoint comPositionDesiredCurrentByHand = new FramePoint(worldFrame);
-         FramePoint comPositionDesiredFinalByHand = new FramePoint(worldFrame);
+         FramePoint3D comPositionDesiredCurrent = new FramePoint3D(worldFrame);
+         FramePoint3D comPositionDesiredFinal = new FramePoint3D(worldFrame);
+         FramePoint3D comPositionDesiredCurrentByHand = new FramePoint3D(worldFrame);
+         FramePoint3D comPositionDesiredFinalByHand = new FramePoint3D(worldFrame);
          
          comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredCurrent);
          comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, tFinal, 0, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comPositionDesiredFinal);
@@ -250,8 +248,8 @@ public class SmoothCoMIntegrationToolsTest
          EuclidCoreTestTools.assertTuple3DEquals("", comPositionDesiredCurrent.getPoint(), comPositionDesiredCurrentByHand.getPoint(), EPSILON);
          
          // Velocity
-         FrameVector comVelocityDesiredCurrent = new FrameVector(worldFrame);
-         FrameVector comVelocityDesiredCurrentByHand = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrent = new FrameVector3D(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentByHand = new FrameVector3D(worldFrame);
          
          comToolbox.calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrent);
          calculateCoMVelocityByHand3DLinear(omega0, time, linear3D, icpPositionDesiredFinal, comPositionDesiredInitial, comVelocityDesiredCurrentByHand);
@@ -264,28 +262,28 @@ public class SmoothCoMIntegrationToolsTest
          
          // Dynamics
          linear3D.compute(time);
-         FramePoint icpPositionDesiredCurrent = new FramePoint(worldFrame);
+         FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
          icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          
-         FrameVector comVelocityDesiredCurrentDynamics = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
          comVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrent);
          
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
          
-         FrameVector comVelocityDesiredCurrentDynamicsByHand = new FrameVector(worldFrame);
+         FrameVector3D comVelocityDesiredCurrentDynamicsByHand = new FrameVector3D(worldFrame);
          comVelocityDesiredCurrentDynamicsByHand.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrentByHand);
          
          EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand.getVectorCopy(), comVelocityDesiredCurrentDynamicsByHand.getVectorCopy(), EPSILON);
       }
    }
    
-   public static void calculateCoMPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint comPositionDesiredInitial, FramePoint comPositionDesiredCurrent)
+   public static void calculateCoMPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredInitial, FramePoint3D comPositionDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
-      FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
+      FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());
       
       linear3D.compute(linear3D.getFinalTime());
-      FramePoint cmpRefFinal = new FramePoint(linear3D.getFramePosition());
+      FramePoint3D cmpRefFinal = new FramePoint3D(linear3D.getFramePosition());
       
       double timeInitial = linear3D.getInitialTime();
       double timeFinal = linear3D.getFinalTime();
@@ -312,13 +310,13 @@ public class SmoothCoMIntegrationToolsTest
       }
    }
    
-   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint icpPositionDesiredFinal, FramePoint comPositionDesiredFinal, FrameVector comVelocityDesiredCurrent)
+   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredFinal, FrameVector3D comVelocityDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
-      FramePoint cmpRefInit = new FramePoint(linear3D.getFramePosition());
+      FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());
       
       linear3D.compute(linear3D.getFinalTime());
-      FramePoint cmpRefFinal = new FramePoint(linear3D.getFramePosition());
+      FramePoint3D cmpRefFinal = new FramePoint3D(linear3D.getFramePosition());
       
       double timeInitial = linear3D.getInitialTime();
       double timeFinal = linear3D.getFinalTime();

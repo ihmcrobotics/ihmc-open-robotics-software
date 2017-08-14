@@ -16,7 +16,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -38,8 +38,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -127,7 +127,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -180,7 +180,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -235,7 +235,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
-         FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
@@ -254,9 +254,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    {
       double angle = RandomNumbers.nextDouble(random, Math.PI);
 
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footLengthForLineOrigin = 0.5 * walkingControllerParameters.getFootLength();
-      double footWidthForLineOrigin = 0.5 * walkingControllerParameters.getFootWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footLengthForLineOrigin = 0.5 * steppingParameters.getFootLength();
+      double footWidthForLineOrigin = 0.5 * steppingParameters.getFootWidth();
 
       double x = RandomNumbers.nextDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
       double y = RandomNumbers.nextDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
@@ -269,11 +269,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       double lineWidth = 0.01;
 
       // build default foot polygon:
-      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
-      double footWidth = walkingControllerParameters.getFootWidth();
-      double toeWidth = walkingControllerParameters.getToeWidth();
+      SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
+      double footForwardOffset = steppingParameters.getFootForwardOffset();
+      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footWidth = steppingParameters.getFootWidth();
+      double toeWidth = steppingParameters.getToeWidth();
 
       ArrayList<Point2D> soleVertices = new ArrayList<Point2D>();
       soleVertices.add(new Point2D(footForwardOffset, toeWidth / 2.0));
@@ -469,8 +469,8 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private class VizUpdater implements RobotController
    {
       FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
-      FramePoint2d point = new FramePoint2d(worldFrame);
-      FramePoint point3d = new FramePoint();
+      FramePoint2D point = new FramePoint2D(worldFrame);
+      FramePoint3D point3d = new FramePoint3D();
 
       @Override
       public void doControl()

@@ -42,7 +42,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
@@ -244,11 +244,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
 
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         FramePoint circleCenter = new FramePoint(ankleFrame);
+         FramePoint3D circleCenter = new FramePoint3D(ankleFrame);
          circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.10);
          double radiusY = 0.15;
          double radiusZ = 0.08;
-         FramePoint tempPoint = new FramePoint();
+         FramePoint3D tempPoint = new FramePoint3D();
          FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
          tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -387,11 +387,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 12.0;
 
       ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-      FramePoint circleCenter = new FramePoint(ankleFrame);
+      FramePoint3D circleCenter = new FramePoint3D(ankleFrame);
       circleCenter.setZ(0.15);
       double radiusXY = 0.15;
       double radiusZ = 0.08;
-      FramePoint tempPoint = new FramePoint();
+      FramePoint3D tempPoint = new FramePoint3D();
       FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
       tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -574,11 +574,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          double trajectoryTime = 12.0;
 
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         FramePoint circleCenter = new FramePoint(ankleFrame);
+         FramePoint3D circleCenter = new FramePoint3D(ankleFrame);
          circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.10);
          double radiusXY = 0.15;
          double radiusZ = 0.08;
-         FramePoint tempPoint = new FramePoint();
+         FramePoint3D tempPoint = new FramePoint3D();
          FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
          tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -718,11 +718,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          double trajectoryTime = 12.0;
 
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         FramePoint circleCenter = new FramePoint(ankleFrame);
+         FramePoint3D circleCenter = new FramePoint3D(ankleFrame);
          circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.10);
          double radiusXY = 0.15;
          double radiusZ = 0.08;
-         FramePoint tempPoint = new FramePoint();
+         FramePoint3D tempPoint = new FramePoint3D();
          FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
          tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 

@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -80,7 +80,7 @@ public class MocapToPelvisFrameConverterVisualTest
       Vector3D pelvisToMarker2Translation = new Vector3D();
       pelvisToMarker2Transform.getTranslation(pelvisToMarker2Translation);
       pelvisToMarker2Translation.negate();
-      FramePoint markerPoint2 = new FramePoint(pelvisFrame, pelvisToMarker2Translation);
+      FramePoint3D markerPoint2 = new FramePoint3D(pelvisFrame, pelvisToMarker2Translation);
 
       markerPoint2.changeFrame(ReferenceFrame.getWorldFrame());
 

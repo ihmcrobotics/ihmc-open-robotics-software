@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -19,15 +19,15 @@ public interface PlaneContactState
 
    public abstract boolean inContact();
 
-   public abstract FrameVector getContactNormalFrameVectorCopy();
+   public abstract FrameVector3D getContactNormalFrameVectorCopy();
 
-   public abstract void getContactNormalFrameVector(FrameVector frameVectorToPack);
+   public abstract void getContactNormalFrameVector(FrameVector3D frameVectorToPack);
 
-   public abstract List<FramePoint> getContactFramePointsInContactCopy();
+   public abstract List<FramePoint3D> getContactFramePointsInContactCopy();
 
-   public abstract void getContactFramePointsInContact(List<FramePoint> contactPointListToPack);
+   public abstract void getContactFramePointsInContact(List<FramePoint3D> contactPointListToPack);
 
-   public abstract List<FramePoint2d> getContactFramePoints2dInContactCopy();
+   public abstract List<FramePoint2D> getContactFramePoints2dInContactCopy();
 
    public abstract double getCoefficientOfFriction();
 

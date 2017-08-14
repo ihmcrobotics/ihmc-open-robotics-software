@@ -46,7 +46,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -474,7 +474,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       return atlasPhysicalProperties.getMassScalePower();
    }
 
-   public NewRobotPhysicalProperties getPhysicalProperties()
+   public RobotPhysicalProperties getPhysicalProperties()
    {
       return atlasPhysicalProperties;
    }

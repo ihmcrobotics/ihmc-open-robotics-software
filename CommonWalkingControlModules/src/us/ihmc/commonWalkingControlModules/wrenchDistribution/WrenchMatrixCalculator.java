@@ -17,8 +17,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -64,8 +64,8 @@ public class WrenchMatrixCalculator
    private final List<RigidBody> rigidBodies = new ArrayList<>();
    private final Map<RigidBody, PlaneContactStateToWrenchMatrixHelper> planeContactStateToWrenchMatrixHelpers = new HashMap<>();
 
-   private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
-   private final List<FrameVector> basisVectors = new ArrayList<>();
+   private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
+   private final List<FrameVector3D> basisVectors = new ArrayList<>();
 
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -282,7 +282,7 @@ public class WrenchMatrixCalculator
       return wrenchesFromRho;
    }
 
-   public List<FramePoint> getBasisVectorsOrigin()
+   public List<FramePoint3D> getBasisVectorsOrigin()
    {
       return basisVectorsOrigin;
    }
@@ -297,7 +297,7 @@ public class WrenchMatrixCalculator
       return centerOfMassFrame;
    }
 
-   public List<FrameVector> getBasisVectors()
+   public List<FrameVector3D> getBasisVectors()
    {
       return basisVectors;
    }

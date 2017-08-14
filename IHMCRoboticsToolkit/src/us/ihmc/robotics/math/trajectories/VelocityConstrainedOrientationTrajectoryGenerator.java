@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -203,7 +203,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       this.finalOrientation.set(tempOrientation);
    }
 
-   public void setInitialAngularVelocity(FrameVector initialAngularVelocity)
+   public void setInitialAngularVelocity(FrameVector3D initialAngularVelocity)
    {
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
@@ -213,7 +213,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
 
-   public void setFinalAngularVelocity(FrameVector finalAngularVelocity)
+   public void setFinalAngularVelocity(FrameVector3D finalAngularVelocity)
    {
       this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
    }
@@ -233,7 +233,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       finalAngularVelocity.setToZero();
    }
 
-   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
+   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
@@ -245,7 +245,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector finalAngularVelocity)
+   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector3D finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -422,19 +422,19 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    }
 
    @Override
-   public void getAngularVelocity(FrameVector velocityToPack)
+   public void getAngularVelocity(FrameVector3D velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector accelerationToPack)
+   public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

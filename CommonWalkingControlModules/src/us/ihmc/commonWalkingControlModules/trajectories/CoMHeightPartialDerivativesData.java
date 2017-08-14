@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMHeightPartialDerivativesData
@@ -18,7 +18,7 @@ public class CoMHeightPartialDerivativesData
       this.partialD2zDxDy = centerOfMassHeightPartialDerivativesData.partialD2zDxDy;
    }
 
-   public void getCoMHeight(FramePoint framePointToPack)
+   public void getCoMHeight(FramePoint3D framePointToPack)
    {
       framePointToPack.setIncludingFrame(frameOfCoMHeight, 0.0, 0.0, comHeight);
    }

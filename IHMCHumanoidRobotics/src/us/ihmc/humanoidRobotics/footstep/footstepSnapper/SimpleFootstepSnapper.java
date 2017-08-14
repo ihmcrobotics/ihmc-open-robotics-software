@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/14/15.
  */
-public class SimpleFootstepSnapper implements FootstepSnapper
+public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
 {
    // Generates Footsteps using grid without a mask
    private List<Point3D> pointList = new ArrayList<Point3D>();
@@ -75,7 +75,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());

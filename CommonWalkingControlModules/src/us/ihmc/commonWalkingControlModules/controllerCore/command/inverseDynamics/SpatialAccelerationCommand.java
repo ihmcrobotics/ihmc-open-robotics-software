@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -290,7 +290,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} or
     *            {@code desiredLinearAcceleration} is not expressed in control frame.
     */
-   public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector desiredAngularAcceleration, FrameVector desiredLinearAcceleration)
+   public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration, FrameVector3D desiredLinearAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularAcceleration);
       controlFrame.checkReferenceFrameMatch(desiredLinearAcceleration);
@@ -325,7 +325,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} is not expressed
     *            in control frame.
     */
-   public void setAngularAcceleration(ReferenceFrame controlFrame, FrameVector desiredAngularAcceleration)
+   public void setAngularAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularAcceleration);
 
@@ -360,7 +360,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @throws ReferenceFrameMismatchException if {@code desiredLinearAcceleration} is not expressed
     *            in control frame.
     */
-   public void setLinearAcceleration(ReferenceFrame controlFrame, FrameVector desiredLinearAcceleration)
+   public void setLinearAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredLinearAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredLinearAcceleration);
 
@@ -755,7 +755,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint positionToPack, FrameOrientation orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameOrientation orientationToPack)
    {
       controlFramePose.getPositionIncludingFrame(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);

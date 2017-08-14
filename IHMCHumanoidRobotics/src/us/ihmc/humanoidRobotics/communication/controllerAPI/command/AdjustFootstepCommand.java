@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>
 {
    private RobotSide robotSide;
-   private final FramePoint adjustedPosition = new FramePoint();
+   private final FramePoint3D adjustedPosition = new FramePoint3D();
    private final FrameOrientation adjustedOrientation = new FrameOrientation();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
   
@@ -92,7 +92,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       return robotSide;
    }
 
-   public FramePoint getPosition()
+   public FramePoint3D getPosition()
    {
       return adjustedPosition;
    }
