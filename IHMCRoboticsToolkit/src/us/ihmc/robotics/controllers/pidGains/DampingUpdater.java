@@ -19,6 +19,7 @@ public class DampingUpdater implements VariableChangedListener
       this.kd = kd;
       this.zeta = zeta;
       this.update = update;
+      update.addVariableChangedListener(this);
    }
 
    @Override
