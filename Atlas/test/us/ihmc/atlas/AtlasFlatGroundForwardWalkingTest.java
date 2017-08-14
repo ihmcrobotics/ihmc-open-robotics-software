@@ -1,11 +1,11 @@
 package us.ihmc.atlas;
 
-import us.ihmc.avatar.AvatarFlatGroundStraightWalkTest;
+import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotics.partNames.ArmJointName;
 
-public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundStraightWalkTest
+public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
    private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
