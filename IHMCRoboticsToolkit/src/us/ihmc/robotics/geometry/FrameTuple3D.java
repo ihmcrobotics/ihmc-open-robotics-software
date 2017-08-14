@@ -190,7 +190,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
     * Changes the referenceFrame of this frameTuple to frameTuple2d.getReferenceFrame().
     * @param frameTuple2d
     */
-   public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public void setXYIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       this.referenceFrame = frameTuple2d.getReferenceFrame();
       setXY(frameTuple2d);
@@ -253,7 +253,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
     * @param frameTuple2d
     * @throws ReferenceFrameMismatchException
     */
-   public void setXY(FrameTuple2d<?, ?> frameTuple2d)
+   public void setXY(FrameTuple2D<?, ?> frameTuple2d)
    {
       checkReferenceFrameMatch(frameTuple2d);
       setXY(frameTuple2d.tuple);
@@ -781,7 +781,7 @@ public abstract class FrameTuple3D<S extends FrameTuple3D<S, T>, T extends Tuple
     * @param threshold double
     * @throws ReferenceFrameMismatchException
     */
-   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
+   public final boolean epsilonEquals(FrameTuple2D<?, ?> frameTuple2d, double threshold)
    {
       if (frameTuple2d == null)
       {

@@ -107,7 +107,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint3D(FrameTuple2d<?, ?> frameTuple2d)
+   public FramePoint3D(FrameTuple2D<?, ?> frameTuple2d)
    {
       super(frameTuple2d.referenceFrame, new Point3D(), frameTuple2d.name);
       setXY(frameTuple2d);
@@ -245,7 +245,7 @@ public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements
     * 
     * @param tupleToPack
     */
-   public void getFrameTuple2d(FrameTuple2d<?, ?> tupleToPack)
+   public void getFrameTuple2d(FrameTuple2D<?, ?> tupleToPack)
    {
       tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }

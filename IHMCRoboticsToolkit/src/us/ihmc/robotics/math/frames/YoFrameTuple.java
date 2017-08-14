@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -123,7 +123,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> extends Abst
       frameTuple.set(getFrameTuple());
    }
 
-   public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       frameTuple2d.setByProjectionOntoXYPlane(getFrameTuple());
    }
@@ -159,7 +159,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> extends Abst
       frameTuple.setIncludingFrame(getReferenceFrame(), getX(), getY(), getZ());
    }
 
-   public final void getFrameTuple2dIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       putYoValuesIntoFrameTuple();
       frameTuple2d.setIncludingFrame(getReferenceFrame(), getX(), getY());
@@ -378,7 +378,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> extends Abst
       getYoValuesFromFrameTuple();
    }
 
-   public final void setXY(FrameTuple2d<?, ?> frameTuple2d)
+   public final void setXY(FrameTuple2D<?, ?> frameTuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.setXY(frameTuple2d);
@@ -646,7 +646,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> extends Abst
       return this.frameTuple.epsilonEquals(frameTuple, threshold);
    }
 
-   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
+   public final boolean epsilonEquals(FrameTuple2D<?, ?> frameTuple2d, double threshold)
    {
       putYoValuesIntoFrameTuple();
       return this.frameTuple.epsilonEquals(frameTuple2d, threshold);

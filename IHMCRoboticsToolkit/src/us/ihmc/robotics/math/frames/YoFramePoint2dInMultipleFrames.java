@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FrameTuple2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements YoMultipleFramesHolder
@@ -48,7 +48,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
       set(point2d);
    }
 
-   public void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       set(frameTuple2d);
