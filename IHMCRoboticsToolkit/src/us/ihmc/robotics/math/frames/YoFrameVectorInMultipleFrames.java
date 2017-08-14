@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -52,7 +52,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       setIncludingFrame(yoFrameTuple.getFrameTuple());
    }
 
-   public void setIncludingFrame(FrameTuple<?, ?> frameTuple)
+   public void setIncludingFrame(FrameTuple3D<?, ?> frameTuple)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple.getReferenceFrame());
       set(frameTuple);

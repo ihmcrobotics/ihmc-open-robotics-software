@@ -10,7 +10,7 @@ import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 
 public class SmoothCoMIntegrationToolbox
@@ -91,9 +91,9 @@ public class SmoothCoMIntegrationToolbox
    
    public void calculateCoMQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int comDerivativeOrder, 
                                                                            YoFrameTrajectory3D cmpPolynomial3D, 
-                                                                           FrameTuple<?, ?> icpPositionDesiredFinal, 
-                                                                           FrameTuple<?, ?> comPositionDesiredInitial, 
-                                                                           FrameTuple<?, ?> comQuantityDesired)
+                                                                           FrameTuple3D<?, ?> icpPositionDesiredFinal, 
+                                                                           FrameTuple3D<?, ?> comPositionDesiredInitial, 
+                                                                           FrameTuple3D<?, ?> comQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if(numberOfCoefficients < 0)
@@ -160,8 +160,8 @@ public class SmoothCoMIntegrationToolbox
     * @param comQuantityDesired = x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
     */
    public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, DenseMatrix64F generalizedGammaCoMPrimeMatrix, DenseMatrix64F generalizedDeltaCoMPrimeMatrix, 
-                                             DenseMatrix64F generalizedAlphaPrimeTerminalMatrix, DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple<?, ?> icpPositionDesiredFinal, 
-                                             FrameTuple<?, ?> comPositionDesiredInitial, FrameTuple<?, ?> comQuantityDesired)
+                                             DenseMatrix64F generalizedAlphaPrimeTerminalMatrix, DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal, 
+                                             FrameTuple3D<?, ?> comPositionDesiredInitial, FrameTuple3D<?, ?> comQuantityDesired)
    {
       M1.reshape(generalizedAlphaBetaCoMPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
       M1.zero();

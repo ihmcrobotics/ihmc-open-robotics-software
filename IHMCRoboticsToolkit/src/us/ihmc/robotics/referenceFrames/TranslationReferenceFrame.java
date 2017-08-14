@@ -2,7 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 
 public class TranslationReferenceFrame extends ReferenceFrame
@@ -24,7 +24,7 @@ public class TranslationReferenceFrame extends ReferenceFrame
       transformToParent.setTranslation(originVector.getVector());
    }
 
-   public void updateTranslation(FrameTuple<?, ?> frameVector)
+   public void updateTranslation(FrameTuple3D<?, ?> frameVector)
    {      
       originVector.set(frameVector);
       this.update();

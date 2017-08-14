@@ -261,7 +261,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       pose.getPosition(tupleToPack);
    }
 
-   public void getPositionIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
+   public void getPositionIncludingFrame(FrameTuple3D<?, ?> frameTupleToPack)
    {
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }

@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements VectorInterface
+public class FrameVector extends FrameTuple3D<FrameVector, Vector3D> implements VectorInterface
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -97,7 +97,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
     * <p/>
     * A normal vector associated with a specific reference frame.
     */
-   public FrameVector(FrameTuple<?, ?> frameTuple)
+   public FrameVector(FrameTuple3D<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new Vector3D(frameTuple.tuple), frameTuple.name);
    }
@@ -193,7 +193,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       return isEpsilonParallel(frameVector, 1e-7);
    }
 
-   public void cross(FrameTuple<?, ?> frameTuple1)
+   public void cross(FrameTuple3D<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       cross(this.tuple, this.tuple, frameTuple1.tuple);
@@ -209,7 +209,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       cross(this.tuple, tuple1, tuple2);
    }
 
-   public void cross(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public void cross(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);

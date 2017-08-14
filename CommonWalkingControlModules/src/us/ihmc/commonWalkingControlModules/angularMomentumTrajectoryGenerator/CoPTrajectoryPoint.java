@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,7 +34,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       putYoValuesIntoFrameWaypoint();
    }
 
-   public FrameTuple getFrameTuple()
+   public FrameTuple3D getFrameTuple()
    {
       return yoFramePointInWorld.getFrameTuple();
    }

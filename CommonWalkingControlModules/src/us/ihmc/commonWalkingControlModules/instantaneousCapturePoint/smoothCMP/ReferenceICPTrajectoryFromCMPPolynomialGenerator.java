@@ -10,7 +10,7 @@ import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -320,7 +320,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
     * @param icpDerivativeOrder
     * @param time
     */
-   private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
+   private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple3D<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
    {            
       for(Direction dir : Direction.values())
       {
