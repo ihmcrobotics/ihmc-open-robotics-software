@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -13,7 +13,7 @@ public class QuadrupedComPositionController
 {
    public static class Setpoints
    {
-      private final FramePoint comPosition = new FramePoint();
+      private final FramePoint3D comPosition = new FramePoint3D();
       private final FrameVector comVelocity = new FrameVector();
       private final FrameVector comForceFeedforward = new FrameVector();
 
@@ -25,7 +25,7 @@ public class QuadrupedComPositionController
          comForceFeedforward.setToZero();
       }
 
-      public FramePoint getComPosition()
+      public FramePoint3D getComPosition()
       {
          return comPosition;
       }
@@ -76,7 +76,7 @@ public class QuadrupedComPositionController
 
    public void compute(FrameVector comForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      FramePoint comPositionSetpoint = setpoints.getComPosition();
+      FramePoint3D comPositionSetpoint = setpoints.getComPosition();
       FrameVector comVelocitySetpoint = setpoints.getComVelocity();
       FrameVector comVelocityEstimate = estimates.getComVelocity();
       FrameVector comForceFeedforwardSetpoint = setpoints.getComForceFeedforward();

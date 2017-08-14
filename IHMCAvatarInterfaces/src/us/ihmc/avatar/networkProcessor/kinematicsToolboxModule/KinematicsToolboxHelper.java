@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -284,7 +284,7 @@ public class KinematicsToolboxHelper
 
       controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       feedbackControllerDataHolder.getPositionData(endEffector, currentPosition, Type.CURRENT);
       currentPosition.changeFrame(worldFrame);
       controlFrame.setPositionAndUpdate(currentPosition);

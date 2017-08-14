@@ -28,7 +28,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
 
    public FramePose()
    {
-      this(new FramePoint(), new FrameOrientation());
+      this(new FramePoint3D(), new FrameOrientation());
    }
 
    public FramePose(ReferenceFrame referenceFrame)
@@ -42,7 +42,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       this.pose = getGeometryObject();
    }
 
-   public FramePose(FramePoint position, FrameOrientation orientation)
+   public FramePose(FramePoint3D position, FrameOrientation orientation)
    {
       this(position.getReferenceFrame(), new Pose3D(position.getGeometryObject(), orientation.getGeometryObject()));
 
@@ -84,7 +84,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin,
                                                    double[] yawPitchRollMax)
    {
-      FramePose randomFramePose = new FramePose(FramePoint.generateRandomFramePoint(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
+      FramePose randomFramePose = new FramePose(FramePoint3D.generateRandomFramePoint(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
                                                                                     xyzMin[2], xyzMax[2]),
                                                 FrameOrientation.generateRandomFrameOrientation(random, referenceFrame, yawPitchRollMin[0], yawPitchRollMax[0],
                                                                                                 yawPitchRollMin[1], yawPitchRollMax[1], yawPitchRollMin[2],
@@ -118,7 +118,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       set(pose);
    }
 
-   public void setPose(FramePoint position, FrameOrientation orientation)
+   public void setPose(FramePoint3D position, FrameOrientation orientation)
    {
       setPosition(position);
       setOrientation(orientation);
@@ -145,7 +145,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       referenceFrame = framePose.referenceFrame;
    }
 
-   public void setPoseIncludingFrame(FramePoint position, FrameOrientation orientation)
+   public void setPoseIncludingFrame(FramePoint3D position, FrameOrientation orientation)
    {
       position.checkReferenceFrameMatch(orientation);
       referenceFrame = position.referenceFrame;
@@ -164,7 +164,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       this.referenceFrame = referenceFrame;
    }
 
-   public void setPosition(FramePoint framePoint)
+   public void setPosition(FramePoint3D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
       pose.setPosition(framePoint.getPoint());
@@ -245,7 +245,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       pose.get(transformToPack);
    }
 
-   public void getPoseIncludingFrame(FramePoint framePointToPack, FrameOrientation orientationToPack)
+   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameOrientation orientationToPack)
    {
       getPositionIncludingFrame(framePointToPack);
       getOrientationIncludingFrame(orientationToPack);
@@ -350,7 +350,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       frameOrientation2dToPack.setIncludingFrame(referenceFrame, pose.getYaw());
    }
 
-   public void rotatePoseAboutAxis(FrameVector rotatationAxis, FramePoint rotationAxisOrigin, double angle)
+   public void rotatePoseAboutAxis(FrameVector rotatationAxis, FramePoint3D rotationAxisOrigin, double angle)
    {
       ReferenceFrame frameWhoseZAxisIsRotationAxis = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);
@@ -548,9 +548,9 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return pose.printOutOrientation();
    }
 
-   public FramePoint getFramePointCopy()
+   public FramePoint3D getFramePointCopy()
    {
-      FramePoint ret = new FramePoint(getReferenceFrame(), pose.getPosition());
+      FramePoint3D ret = new FramePoint3D(getReferenceFrame(), pose.getPosition());
       return ret;
    }
 
@@ -610,7 +610,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return TransformTools.getTransformFromA2toA1(transformToThat, transformToThis);
    }
 
-   public double getSpatialAxisOfRotationAndAngleToOtherPose(FramePose otherPose, FrameVector rotationAxisToPack, FramePoint rotationAxisOriginToPack)
+   public double getSpatialAxisOfRotationAndAngleToOtherPose(FramePose otherPose, FrameVector rotationAxisToPack, FramePoint3D rotationAxisOriginToPack)
    {
       double rotationAngle = getAxisAngleRotationToOtherPose(otherPose, rotationAxisToPack);
 
@@ -619,7 +619,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return rotationAngle;
    }
 
-   private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector rotationAxis, double rotationAngle, FramePoint originToPack)
+   private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector rotationAxis, double rotationAngle, FramePoint3D originToPack)
    {
       otherPose.checkReferenceFrameMatch(rotationAxis);
       otherPose.checkReferenceFrameMatch(originToPack);

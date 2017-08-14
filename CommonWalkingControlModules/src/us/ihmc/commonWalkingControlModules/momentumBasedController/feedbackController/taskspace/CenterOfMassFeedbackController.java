@@ -16,7 +16,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -53,8 +53,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
    private final YoFrameVector yoAchievedLinearAcceleration;
 
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FramePoint currentPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FramePoint3D currentPosition = new FramePoint3D();
 
    private final FrameVector desiredLinearVelocity = new FrameVector();
    private final FrameVector currentLinearVelocity = new FrameVector();

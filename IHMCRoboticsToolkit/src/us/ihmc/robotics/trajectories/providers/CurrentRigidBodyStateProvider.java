@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -16,7 +16,7 @@ public class CurrentRigidBodyStateProvider
       this.frameOfInterest = frameOfInterest;
    }
    
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(frameOfInterest);
    }

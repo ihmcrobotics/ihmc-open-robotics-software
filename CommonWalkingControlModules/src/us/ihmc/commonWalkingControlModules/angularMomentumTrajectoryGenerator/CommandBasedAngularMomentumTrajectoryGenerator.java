@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -40,8 +40,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private FrameVector desiredAngularMomentum;
    private FrameVector desiredTorque;
    private FrameVector desiredRotatum;
-   private FramePoint tempFramePoint1 = new FramePoint(worldFrame);
-   private FramePoint tempFramePoint2 = new FramePoint(worldFrame);
+   private FramePoint3D tempFramePoint1 = new FramePoint3D(worldFrame);
+   private FramePoint3D tempFramePoint2 = new FramePoint3D(worldFrame);
    private double planTime;
    
    public CommandBasedAngularMomentumTrajectoryGenerator(String namePrefix, AngularMomentumEstimationParameters trajectoryGenerationParameters,

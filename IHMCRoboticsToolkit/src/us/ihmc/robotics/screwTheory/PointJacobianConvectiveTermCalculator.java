@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 
 /**
@@ -12,7 +12,7 @@ public class PointJacobianConvectiveTermCalculator
    private final Twist twist = new Twist();
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
-   private final FramePoint bodyFixedPoint = new FramePoint();
+   private final FramePoint3D bodyFixedPoint = new FramePoint3D();
 //   private final FrameVector bodyFixedPointVelocity = new FrameVector();
 //   private final FrameVector tempVector = new FrameVector();
 

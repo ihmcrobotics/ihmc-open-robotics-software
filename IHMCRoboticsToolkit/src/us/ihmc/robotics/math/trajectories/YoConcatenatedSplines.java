@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -59,7 +59,7 @@ public class YoConcatenatedSplines
       currentSplineIndex = new YoInteger(namePrefix + "CurrentSplineIndex", registry);
    }
 
-   public void setQuadraticQuinticQuadratic(double[] times, FramePoint[] positions, FrameVector initialVelocity, FrameVector finalVelocity)
+   public void setQuadraticQuinticQuadratic(double[] times, FramePoint3D[] positions, FrameVector initialVelocity, FrameVector finalVelocity)
    {
       MathTools.checkEquals(times.length, 4);
       MathTools.checkEquals(positions.length, 4);
@@ -72,8 +72,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
 
          if (i == 0)
          {
@@ -104,7 +104,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setCubicLinearQuinticLinearCubic(double[] fixedPointTimes, FramePoint[] fixedPointPositions, FrameVector[] fixedPointVelocities,
+   public void setCubicLinearQuinticLinearCubic(double[] fixedPointTimes, FramePoint3D[] fixedPointPositions, FrameVector[] fixedPointVelocities,
            double[] intermediateTimes)
    {
       MathTools.checkEquals(rangeList.size(), 5);
@@ -116,7 +116,7 @@ public class YoConcatenatedSplines
       {
          fixedPointTimes[0], intermediateTimes[0], fixedPointTimes[1], fixedPointTimes[2], intermediateTimes[1], fixedPointTimes[3]
       };
-      FramePoint[] allPositions = new FramePoint[]
+      FramePoint3D[] allPositions = new FramePoint3D[]
       {
          fixedPointPositions[0], null, fixedPointPositions[1], fixedPointPositions[2], null, fixedPointPositions[3]
       };
@@ -132,8 +132,8 @@ public class YoConcatenatedSplines
 
          double t0 = allTimes[i];
          double tf = allTimes[i + 1];
-         FramePoint p0 = allPositions[i];
-         FramePoint pf = allPositions[i + 1];
+         FramePoint3D p0 = allPositions[i];
+         FramePoint3D pf = allPositions[i + 1];
          FrameVector pd0 = allVelocities[i];
          FrameVector pdf = allVelocities[i + 1];
          FrameVector zero = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
@@ -178,7 +178,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setQuarticLinearQuinticLinearQuartic(double[] fixedPointTimes, FramePoint[] fixedPointPositions, FrameVector[] fixedPointVelocities,
+   public void setQuarticLinearQuinticLinearQuartic(double[] fixedPointTimes, FramePoint3D[] fixedPointPositions, FrameVector[] fixedPointVelocities,
            double[] intermediateTimes)
    {
       MathTools.checkEquals(rangeList.size(), 5);
@@ -190,7 +190,7 @@ public class YoConcatenatedSplines
       {
          fixedPointTimes[0], intermediateTimes[0], fixedPointTimes[1], fixedPointTimes[2], intermediateTimes[1], fixedPointTimes[3]
       };
-      FramePoint[] allPositions = new FramePoint[]
+      FramePoint3D[] allPositions = new FramePoint3D[]
       {
          fixedPointPositions[0], null, fixedPointPositions[1], fixedPointPositions[2], null, fixedPointPositions[3]
       };
@@ -207,8 +207,8 @@ public class YoConcatenatedSplines
 
          double t0 = allTimes[i];
          double tf = allTimes[i + 1];
-         FramePoint p0 = allPositions[i];
-         FramePoint pf = allPositions[i + 1];
+         FramePoint3D p0 = allPositions[i];
+         FramePoint3D pf = allPositions[i + 1];
          FrameVector pd0 = allVelocities[i];
          FrameVector pdf = allVelocities[i + 1];
          FrameVector zero = new FrameVector(referenceFrame, 0.0, 0.0, 0.0);
@@ -255,7 +255,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setCubicQuarticQuinticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
+   public void setCubicQuarticQuinticCubic(double[] times, FramePoint3D[] positions, FrameVector[] velocities)
    {
       MathTools.checkEquals(rangeList.size(), 4);
       MathTools.checkEquals(times.length, 5);
@@ -270,8 +270,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -303,7 +303,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setCubicQuarticQuinticQuarticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
+   public void setCubicQuarticQuinticQuarticCubic(double[] times, FramePoint3D[] positions, FrameVector[] velocities)
    {
       MathTools.checkEquals(rangeList.size(), 5);
       MathTools.checkEquals(times.length, 6);
@@ -318,8 +318,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -358,7 +358,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setCubicQuinticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
+   public void setCubicQuinticCubic(double[] times, FramePoint3D[] positions, FrameVector[] velocities)
    {
       MathTools.checkEquals(rangeList.size(), 3);
       MathTools.checkEquals(times.length, 4);
@@ -373,8 +373,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -398,7 +398,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setQuarticQuinticQuartic(double[] times, FramePoint[] positions, FrameVector[] velocities, double[] intermediateTimes,
+   public void setQuarticQuinticQuartic(double[] times, FramePoint3D[] positions, FrameVector[] velocities, double[] intermediateTimes,
            FrameVector[] intermediateVelocities)
    {
       MathTools.checkEquals(rangeList.size(), 3);
@@ -416,8 +416,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -443,7 +443,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setQuinticsUsingIntermediateVeloctiesAndAccelerations(double[] times, FramePoint[] positions, FrameVector[] velocities,
+   public void setQuinticsUsingIntermediateVeloctiesAndAccelerations(double[] times, FramePoint3D[] positions, FrameVector[] velocities,
            double[] intermediateTimes, FrameVector[] intermediateVelocities, FrameVector[] intermediateAccelerations)
    {
       MathTools.checkEquals(rangeList.size(), 3);
@@ -462,8 +462,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -490,8 +490,8 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setQuinticSexticQuinticUsingWaypointAndIntermediateVeloctiesAndAccelerations(double[] times, FramePoint[] positions, FrameVector[] velocities,
-           double ghostTime, FramePoint ghostWaypoint, double[] intermediateTimes, FrameVector[] intermediateVelocities,
+   public void setQuinticSexticQuinticUsingWaypointAndIntermediateVeloctiesAndAccelerations(double[] times, FramePoint3D[] positions, FrameVector[] velocities,
+           double ghostTime, FramePoint3D ghostWaypoint, double[] intermediateTimes, FrameVector[] intermediateVelocities,
            FrameVector[] intermediateAccelerations)
    {
       MathTools.checkEquals(rangeList.size(), 3);
@@ -510,8 +510,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
 
@@ -538,7 +538,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setSexticQuinticSexticUsingIntermediateVelocitiesAndAccelerations(double[] times, FramePoint[] positions, FrameVector[] velocities,
+   public void setSexticQuinticSexticUsingIntermediateVelocitiesAndAccelerations(double[] times, FramePoint3D[] positions, FrameVector[] velocities,
            FrameVector[] waypointAccelerations, double[] intermediateTimes, FrameVector[] intermediateVelocities, FrameVector[] intermediateAccelerations)
    {
       MathTools.checkEquals(rangeList.size(), 3);
@@ -559,8 +559,8 @@ public class YoConcatenatedSplines
          double t0 = times[i];
          double t1 = 0.0;
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd1 = null;
          FrameVector pdd1 = null;
          FrameVector pd0 = velocities[i];
@@ -600,7 +600,7 @@ public class YoConcatenatedSplines
       setArcLength();
    }
 
-   public void setQuintics(double[] times, FramePoint[] positions, FrameVector[] velocities, FrameVector[] accelerations)
+   public void setQuintics(double[] times, FramePoint3D[] positions, FrameVector[] velocities, FrameVector[] accelerations)
    {
       MathTools.checkEquals(times.length, rangeList.size() + 1);
       MathTools.checkEquals(positions.length, times.length);
@@ -613,8 +613,8 @@ public class YoConcatenatedSplines
 
          double t0 = times[i];
          double tf = times[i + 1];
-         FramePoint p0 = positions[i];
-         FramePoint pf = positions[i + 1];
+         FramePoint3D p0 = positions[i];
+         FramePoint3D pf = positions[i + 1];
          FrameVector pd0 = velocities[i];
          FrameVector pdf = velocities[i + 1];
          FrameVector pdd0 = accelerations[i];
@@ -640,13 +640,13 @@ public class YoConcatenatedSplines
 
          oldSplines.compute(oldTimes[i]);
          double t0 = newTimes[i];
-         FramePoint p0 = oldSplines.getPosition();
+         FramePoint3D p0 = oldSplines.getPosition();
          FrameVector pd0 = oldSplines.getVelocity();
          FrameVector pdd0 = oldSplines.getAcceleration();
 
          oldSplines.compute(oldTimes[i + 1]);
          double tf = newTimes[i + 1];
-         FramePoint pf = oldSplines.getPosition();
+         FramePoint3D pf = oldSplines.getPosition();
          FrameVector pdf = oldSplines.getVelocity();
          FrameVector pddf = oldSplines.getAcceleration();
 
@@ -705,7 +705,7 @@ public class YoConcatenatedSplines
       desiredSpline.getAcceleration(acceleration);
    }
 
-   public FramePoint getPosition()
+   public FramePoint3D getPosition()
    {
       return position.getFramePointCopy();
    }

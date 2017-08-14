@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -35,7 +35,7 @@ public class ReferenceCMPTrajectoryGenerator
    private final int maxNumberOfSegments = 25;
    private CMPTrajectory activeTrajectory;
 
-   private final FramePoint desiredCMP = new FramePoint();
+   private final FramePoint3D desiredCMP = new FramePoint3D();
    private final FrameVector desiredCMPVelocity = new FrameVector();
    private CMPTrajectory cmpTrajectoryReference;
    private CoPTrajectory copTrajectoryReference;
@@ -90,7 +90,7 @@ public class ReferenceCMPTrajectoryGenerator
          activeTrajectory.update(timeInState, desiredCMP, desiredCMPVelocity);
    }
 
-   public void getPosition(FramePoint desiredCMPToPack)
+   public void getPosition(FramePoint3D desiredCMPToPack)
    {
       desiredCMPToPack.setIncludingFrame(desiredCMP);
    }
@@ -110,7 +110,7 @@ public class ReferenceCMPTrajectoryGenerator
       desiredCMPVelocityToPack.set(desiredCMPVelocity);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

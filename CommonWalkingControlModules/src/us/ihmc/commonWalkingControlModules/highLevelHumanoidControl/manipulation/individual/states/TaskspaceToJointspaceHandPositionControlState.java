@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -45,7 +45,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    private PoseTrajectoryGenerator poseTrajectoryGenerator;
 
    private final FramePose desiredPose = new FramePose();
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    private final FrameVector desiredVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
 

@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -361,7 +361,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private void moveUpSlightlyToEnsureVisible(YoGraphicPolygon footstepToExpandViz)
    {
-      FramePoint framePointToPack = new FramePoint(worldFrame);
+      FramePoint3D framePointToPack = new FramePoint3D(worldFrame);
       footstepToExpandViz.getPosition(framePointToPack);
       framePointToPack.setZ(framePointToPack.getZ() + 0.0025);
       footstepToExpandViz.setPosition(framePointToPack);

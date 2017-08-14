@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
@@ -39,7 +39,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       setToZero(referenceFrame);
    }
 
-   public FrameSE3TrajectoryPoint(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public FrameSE3TrajectoryPoint(double time, FramePoint3D position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
       this();
       setIncludingFrame(time, position, orientation, linearVelocity, angularVelocity);
@@ -63,7 +63,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.setPosition(position);
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       checkReferenceFrameMatch(position);
       geometryObject.setPosition(position.getPoint());
@@ -117,7 +117,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.set(time, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public void set(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void set(double time, FramePoint3D position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(orientation);
@@ -126,7 +126,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.set(time, position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
    }
 
-   public void setIncludingFrame(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void setIncludingFrame(double time, FramePoint3D position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
       position.checkReferenceFrameMatch(orientation);
       position.checkReferenceFrameMatch(linearVelocity);
@@ -273,15 +273,15 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
       geometryObject.getPosition(positionToPack.getPoint());
    }
 
-   public FramePoint getPositionCopy()
+   public FramePoint3D getPositionCopy()
    {
-      FramePoint positionCopy = new FramePoint(getReferenceFrame());
+      FramePoint3D positionCopy = new FramePoint3D(getReferenceFrame());
       getPosition(positionCopy);
       return positionCopy;
    }
@@ -333,7 +333,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       return angularVelocityCopy;
    }
 
-   public void getPositionIncludingFrame(FramePoint positionToPack)
+   public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
       geometryObject.getPosition(positionToPack.getPoint());

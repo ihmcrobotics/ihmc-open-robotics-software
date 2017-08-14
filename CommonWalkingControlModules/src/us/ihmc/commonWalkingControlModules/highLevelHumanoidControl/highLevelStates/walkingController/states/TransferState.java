@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -34,7 +34,7 @@ public abstract class TransferState extends WalkingState
 
    private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
-   private final FramePoint nextExitCMP = new FramePoint();
+   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,

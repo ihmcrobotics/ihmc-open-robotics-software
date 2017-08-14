@@ -38,7 +38,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -608,7 +608,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       footSpoof.setSoleFrame(nextSupportPose);
    }
 
-   private final FramePoint desiredICP3d = new FramePoint();
+   private final FramePoint3D desiredICP3d = new FramePoint3D();
    public void updateTrajectoyViz()
    {
       icpPlanner.clearPlan();

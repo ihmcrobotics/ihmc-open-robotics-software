@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -22,7 +22,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final YoDouble leaveTime;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
    public LeadInOutPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
@@ -129,7 +129,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       positionTrajectoryGenerator.hideVisualization();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTrajectoryGenerator.getPosition(positionToPack);
    }
@@ -159,7 +159,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

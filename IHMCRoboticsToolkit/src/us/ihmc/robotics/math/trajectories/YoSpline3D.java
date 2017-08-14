@@ -6,7 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -59,7 +59,7 @@ public class YoSpline3D
       }
    }
 
-   public void setLinear(double t0, double tf, FramePoint p0, FramePoint pf)
+   public void setLinear(double t0, double tf, FramePoint3D p0, FramePoint3D pf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -73,7 +73,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setLinearUsingInitialPositionAndVelocity(double t0, double tf, FramePoint p0, FrameVector pd0)
+   public void setLinearUsingInitialPositionAndVelocity(double t0, double tf, FramePoint3D p0, FrameVector pd0)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -87,7 +87,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setLinearUsingFinalPositionAndVelocity(double t0, double tf, FramePoint pf, FrameVector pdf)
+   public void setLinearUsingFinalPositionAndVelocity(double t0, double tf, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
       pf.checkReferenceFrameMatch(referenceFrame);
@@ -101,7 +101,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuarticUsingIntermediateVelocity(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pd1, FramePoint pf,
+   public void setQuarticUsingIntermediateVelocity(double t0, double t1, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pd1, FramePoint3D pf,
            FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
@@ -120,8 +120,8 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pd1,
-           FrameVector pdd1, FramePoint pf, FrameVector pdf)
+   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double t1, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pd1,
+           FrameVector pdd1, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 6);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -140,7 +140,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setSexticUsingWaypoint(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint p1, FramePoint pf,
+   public void setSexticUsingWaypoint(double t0, double t1, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pdd0, FramePoint3D p1, FramePoint3D pf,
                                       FrameVector pdf, FrameVector pddf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
@@ -161,8 +161,8 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setSexticUsingWaypointVelocityAndAccelerationAndInitialAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0,
-           FrameVector pdd0, FrameVector pd1, FrameVector pdd1, FramePoint pf, FrameVector pdf)
+   public void setSexticUsingWaypointVelocityAndAccelerationAndInitialAcceleration(double t0, double t1, double tf, FramePoint3D p0, FrameVector pd0,
+           FrameVector pdd0, FrameVector pd1, FrameVector pdd1, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -182,8 +182,8 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setSexticUsingWaypointVelocityAndAccelerationAndFinalAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0,
-           FrameVector pd1, FrameVector pdd1, FramePoint pf, FrameVector pdf, FrameVector pddf)
+   public void setSexticUsingWaypointVelocityAndAccelerationAndFinalAcceleration(double t0, double t1, double tf, FramePoint3D p0, FrameVector pd0,
+           FrameVector pd1, FrameVector pdd1, FramePoint3D pf, FrameVector pdf, FrameVector pddf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -203,7 +203,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuarticUsingInitialAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint pf, FrameVector pdf)
+   public void setQuarticUsingInitialAcceleration(double t0, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pdd0, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -220,7 +220,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuarticUsingFinalAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf, FrameVector pdf, FrameVector pddf)
+   public void setQuarticUsingFinalAcceleration(double t0, double tf, FramePoint3D p0, FrameVector pd0, FramePoint3D pf, FrameVector pdf, FrameVector pddf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -237,7 +237,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuadraticUsingInitialVelocity(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf)
+   public void setQuadraticUsingInitialVelocity(double t0, double tf, FramePoint3D p0, FrameVector pd0, FramePoint3D pf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -252,7 +252,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuadraticUsingFinalVelocity(double t0, double tf, FramePoint p0, FramePoint pf, FrameVector pdf)
+   public void setQuadraticUsingFinalVelocity(double t0, double tf, FramePoint3D p0, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -267,7 +267,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuadraticUsingInitialVelocityAndAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0)
+   public void setQuadraticUsingInitialVelocityAndAcceleration(double t0, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pdd0)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -282,7 +282,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setCubic(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf, FrameVector pdf)
+   public void setCubic(double t0, double tf, FramePoint3D p0, FrameVector pd0, FramePoint3D pf, FrameVector pdf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 4);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -298,7 +298,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdf, FrameVector pddf)
+   public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pdf, FrameVector pddf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 4);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -315,7 +315,7 @@ public class YoSpline3D
       setYoVariables(t0, tf);
    }
 
-   public void setQuintic(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint pf, FrameVector pdf, FrameVector pddf)
+   public void setQuintic(double t0, double tf, FramePoint3D p0, FrameVector pd0, FrameVector pdd0, FramePoint3D pf, FrameVector pdf, FrameVector pddf)
    {
       MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 6);
       p0.checkReferenceFrameMatch(referenceFrame);
@@ -367,7 +367,7 @@ public class YoSpline3D
    /**
     * GC-free but unsafe accessor.
     */
-   public FramePoint getPosition()
+   public FramePoint3D getPosition()
    {
       return position.getFrameTuple();
    }
@@ -391,7 +391,7 @@ public class YoSpline3D
    /**
     * @deprecated Creates garbage.
     */
-   public FramePoint getPositionCopy()
+   public FramePoint3D getPositionCopy()
    {
       return position.getFramePointCopy();
    }
@@ -412,7 +412,7 @@ public class YoSpline3D
       return acceleration.getFrameVectorCopy();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -452,8 +452,8 @@ public class YoSpline3D
       return arcLengths[arcLengths.length - 1].getDoubleValue();
    }
 
-   private final FramePoint pi = new FramePoint();
-   private final FramePoint piPlusOne = new FramePoint();
+   private final FramePoint3D pi = new FramePoint3D();
+   private final FramePoint3D piPlusOne = new FramePoint3D();
 
    private void setArcLengths()
    {

@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -76,7 +76,7 @@ public class PelvisICPBasedTranslationManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2d supportPolygon;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector tempVelocity = new FrameVector();
    private final FramePoint2d tempPosition2d = new FramePoint2d();
    private final FrameVector2d tempError2d = new FrameVector2d();

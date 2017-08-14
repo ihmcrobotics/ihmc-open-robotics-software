@@ -33,7 +33,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
 
-   private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    private final FramePoint2d temporaryCentroid = new FramePoint2d();
@@ -238,7 +238,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * Note that this method recycles memory.
     * @param newVertex {@code FramePoint} the new vertex (it is not modified).
     */
-   public void addVertexByProjectionOntoXYPlane(FramePoint newVertex)
+   public void addVertexByProjectionOntoXYPlane(FramePoint3D newVertex)
    {
       tempPoint.setIncludingFrame(newVertex);
       tempPoint.changeFrame(referenceFrame);
@@ -292,11 +292,11 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint2d>} the list of new vertices (it is not modified).
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void addVerticesByProjectionOntoXYPlane(List<FramePoint> vertices, int numberOfVertices)
+   public void addVerticesByProjectionOntoXYPlane(List<FramePoint3D> vertices, int numberOfVertices)
    {
       for (int i = 0; i < numberOfVertices; i++)
       {
-         FramePoint vertex = vertices.get(i);
+         FramePoint3D vertex = vertices.get(i);
          addVertexByProjectionOntoXYPlane(vertex);
       }
    }
@@ -369,7 +369,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * 3- {@code update()}.
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     */
-   public void setAndUpdate(List<FramePoint> vertices)
+   public void setAndUpdate(List<FramePoint3D> vertices)
    {
       clear();
       for (int i = 0; i < vertices.size(); i++)
@@ -386,7 +386,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * 3- {@code update()}.
     * @param vertices {@code FramePoint[]} the array of points that is used to creates the vertices.
     */
-   public void setAndUpdate(FramePoint[] vertices)
+   public void setAndUpdate(FramePoint3D[] vertices)
    {
       clear();
       for (int i = 0; i < vertices.length; i++)
@@ -476,7 +476,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void setByProjectionOntoXYPlaneAndUpdate(List<FramePoint> vertices, int numberOfVertices)
+   public void setByProjectionOntoXYPlaneAndUpdate(List<FramePoint3D> vertices, int numberOfVertices)
    {
       clear();
       addVerticesByProjectionOntoXYPlane(vertices, numberOfVertices);
@@ -629,7 +629,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     * @throws ReferenceFrameMismatchException
     */
-   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<FramePoint> vertices)
+   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<FramePoint3D> vertices)
    {
       int numberOfVertices = vertices.size();
       clear(referenceFrame);
@@ -647,7 +647,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
     * @param numberOfVertices {@code int}.
     * @throws ReferenceFrameMismatchException
     */
-   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<FramePoint> vertices, int numberOfVertices)
+   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<FramePoint3D> vertices, int numberOfVertices)
    {
       clear(referenceFrame);
       addVerticesByProjectionOntoXYPlane(vertices, numberOfVertices);
@@ -681,7 +681,7 @@ public class FrameConvexPolygon2d extends AbstractFrameObject<FrameConvexPolygon
       vertexToPack.setIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
    }
 
-   public void getFrameVertexXY(int vertexIndex, FramePoint vertexToPack)
+   public void getFrameVertexXY(int vertexIndex, FramePoint3D vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
 

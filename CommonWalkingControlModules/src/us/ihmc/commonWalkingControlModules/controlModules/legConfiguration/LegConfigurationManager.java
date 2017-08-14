@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -198,8 +198,8 @@ public class LegConfigurationManager
 
    private final FramePoint2d tempLeadingFootPosition = new FramePoint2d();
    private final FramePoint2d tempTrailingFootPosition = new FramePoint2d();
-   private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
-   private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
+   private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
+   private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
 
    public boolean areFeetWellPositionedForCollapse(RobotSide trailingLeg)
    {

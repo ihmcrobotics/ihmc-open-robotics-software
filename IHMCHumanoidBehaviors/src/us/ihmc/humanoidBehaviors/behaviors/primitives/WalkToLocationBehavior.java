@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -216,7 +216,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private void generateFootsteps()
    {
-      FramePoint midFeetPosition = getCurrentMidFeetPosition();
+      FramePoint3D midFeetPosition = getCurrentMidFeetPosition();
 
       footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
@@ -276,9 +276,9 @@ public class WalkToLocationBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-   private FramePoint getCurrentMidFeetPosition()
+   private FramePoint3D getCurrentMidFeetPosition()
    {
-      FramePoint ret = new FramePoint();
+      FramePoint3D ret = new FramePoint3D();
       ret.setToZero(referenceFrames.getMidFeetZUpFrame());
       ret.changeFrame(worldFrame);
 

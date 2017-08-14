@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -178,7 +178,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @throws ReferenceFrameMismatchException if {@code point} and {@code zAxis} are not expressed
     *            in the same reference frame.
     */
-   public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint point, FrameVector zAxis)
+   public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint3D point, FrameVector zAxis)
    {
       point.checkReferenceFrameMatch(zAxis.getReferenceFrame());
 
@@ -205,7 +205,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
     * @throws ReferenceFrameMismatchException if {@code point} and {@code alignAxisWithThis} are not
     *            expressed in the same reference frame.
     */
-   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint point, Axis axisToAlign, FrameVector alignAxisWithThis)
+   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3D point, Axis axisToAlign, FrameVector alignAxisWithThis)
    {
       point.checkReferenceFrameMatch(alignAxisWithThis.getReferenceFrame());
 

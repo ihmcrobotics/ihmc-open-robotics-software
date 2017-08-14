@@ -9,7 +9,7 @@ import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadi
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -35,12 +35,12 @@ public class CylindricalCoordinatesPositionController implements PositionControl
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame cylinderFrame;
-   private final FramePoint currentPosition;
+   private final FramePoint3D currentPosition;
 
    public CylindricalCoordinatesPositionController(String prefix, ReferenceFrame bodyFrame, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry)
    {
       this.bodyFrame = bodyFrame;
-      this.currentPosition = new FramePoint(bodyFrame);
+      this.currentPosition = new FramePoint3D(bodyFrame);
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
       positionErrorRadial = new YoDouble(prefix + "RadialPositionError", registry);
@@ -65,7 +65,7 @@ public class CylindricalCoordinatesPositionController implements PositionControl
       parentRegistry.addChild(registry);
    }
 
-   public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity,
+   public void compute(FrameVector output, FramePoint3D desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity,
                        FrameVector feedForward)
    {
       desiredPosition.changeFrame(cylinderFrame);

@@ -13,7 +13,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -197,7 +197,7 @@ public class ComposableOrientationEstimatorCreator
          estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityStatePort.getData());
       }
 
-      public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
+      public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
       {
          // Do nothing.
       }
@@ -217,7 +217,7 @@ public class ComposableOrientationEstimatorCreator
          angularVelocityStatePort.setData(angularVelocity);
       }
 
-      public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+      public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
       {
          // do nothing
       }
@@ -288,7 +288,7 @@ public class ComposableOrientationEstimatorCreator
          return controlFlowGraph;
       }
 
-      public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+      public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
       {
          throw new RuntimeException("No pelvis position estimated with this state estimator (" + getClass().getSimpleName() + ").");
       }

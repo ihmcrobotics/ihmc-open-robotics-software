@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -105,7 +105,7 @@ public class StateEstimatorErrorCalculator
       angularVelocityError.set(actualAngularVelocity.length());
    }
 
-   private final FramePoint estimatedCoMPosition = new FramePoint();
+   private final FramePoint3D estimatedCoMPosition = new FramePoint3D();
    
    private void computeCoMPositionError()
    {
@@ -165,7 +165,7 @@ public class StateEstimatorErrorCalculator
 	   }
    }
 
-   private final FramePoint estimatedPelvisPosition = new FramePoint();
+   private final FramePoint3D estimatedPelvisPosition = new FramePoint3D();
    
    private void computePelvisPositionError()
    {

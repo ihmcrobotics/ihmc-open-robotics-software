@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,7 +38,7 @@ public class CenterOfMassTrajectoryHandlerTest
       CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
       handler.handleComTrajectory(command);
 
-      FramePoint desiredICPPosition = new FramePoint();
+      FramePoint3D desiredICPPosition = new FramePoint3D();
       FrameVector desiredICPVelocity = new FrameVector();
 
       yoTime.set(-0.1);
@@ -92,7 +92,7 @@ public class CenterOfMassTrajectoryHandlerTest
       yoTime.set(offset);
       handler.handleComTrajectory(command);
 
-      FramePoint desiredICPPosition = new FramePoint();
+      FramePoint3D desiredICPPosition = new FramePoint3D();
       FrameVector desiredICPVelocity = new FrameVector();
 
       yoTime.set(-0.1 + offset);
@@ -155,7 +155,7 @@ public class CenterOfMassTrajectoryHandlerTest
       yoTime.set(-20.9);
       handler.handleComTrajectory(command2);
 
-      FramePoint desiredICPPosition = new FramePoint();
+      FramePoint3D desiredICPPosition = new FramePoint3D();
       FrameVector desiredICPVelocity = new FrameVector();
 
       yoTime.set(-0.1);

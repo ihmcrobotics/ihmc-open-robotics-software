@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -42,9 +42,9 @@ public class PrecomputedICPPlanner
 
    private final YoDouble omega0 = new YoDouble(name + "Omega0", registry);
 
-   private final FramePoint desiredICPPosition = new FramePoint();
+   private final FramePoint3D desiredICPPosition = new FramePoint3D();
    private final FrameVector desiredICPVelocity = new FrameVector();
-   private final FramePoint desiredCoMPosition = new FramePoint();
+   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
 
    private final CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler;
 

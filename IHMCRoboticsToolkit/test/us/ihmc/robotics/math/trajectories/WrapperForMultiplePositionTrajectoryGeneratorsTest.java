@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
@@ -28,7 +28,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
    private ReferenceFrame referenceFrame;
    private WrapperForMultiplePositionTrajectoryGenerators generator;
    private ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators;
-   private FramePoint position;
+   private FramePoint3D position;
    private YoVariableRegistry parentRegistry;
    private PositionProvider positionProvider;
 
@@ -43,7 +43,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      position = new FramePoint(referenceFrame, xValue, yValue, zValue);
+      position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       positionProvider = new ConstantPositionProvider(position);
       positionTrajectoryGenerators.add(new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry));
@@ -89,7 +89,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
    public void testGet()
    {
       generator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, parentRegistry);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
 
       generator.getPosition(positionToPack);
 
@@ -134,7 +134,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
 	@Test(timeout = 30000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(referenceFrame);
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, parentRegistry);

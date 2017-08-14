@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -64,7 +64,7 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       numberOfSegments.increment();
    }
 
-   public void set(double t0, double tFinal, FramePoint z0, FramePoint zf)
+   public void set(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
    {
       segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
       numberOfSegments.increment();

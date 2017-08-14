@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
@@ -92,7 +92,7 @@ public class TaskSpaceStiffnessCalculator
 
    private final FrameVector directionOfMotion = new FrameVector();
 
-   public void update(FramePoint forcePointPosition, FrameVector force)
+   public void update(FramePoint3D forcePointPosition, FrameVector force)
    {
       yoForcePointPosition.set(forcePointPosition);
 

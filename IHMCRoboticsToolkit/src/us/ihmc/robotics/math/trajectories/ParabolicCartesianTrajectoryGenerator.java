@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -36,7 +36,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       this.groundClearance.set(groundClearance);
    }
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition,
+   public void initialize(FramePoint3D initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint3D finalDesiredPosition,
                           FrameVector finalDesiredVelocity)
    {
       timeIntoStep.set(0.0);
@@ -53,7 +53,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
 
    }
 
-   public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
+   public void updateFinalDesiredPosition(FramePoint3D finalDesiredPosition)
    {
       // empty
    }
@@ -83,7 +83,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       return this.groundClearance.getDoubleValue();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
 
@@ -112,7 +112,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       accelerationToPack.add(tempVector);
    }
    
-   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
+   public void computeNextTick(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
@@ -121,7 +121,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       getAcceleration(accelerationToPack);
    }
    
-   public void computeNextTick(FramePoint positionToPack, double deltaT)
+   public void computeNextTick(FramePoint3D positionToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());

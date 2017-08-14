@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -44,7 +44,7 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint point = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint3D point = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
       PointJacobian pointJacobian = new PointJacobian();
       pointJacobian.set(geometricJacobian, point);
       pointJacobian.compute();
@@ -59,7 +59,7 @@ public class PointJacobianTest
       FrameVector pointVelocityFromJacobian = new FrameVector(pointJacobian.getFrame());
       pointVelocityFromJacobian.getVector().set(pointVelocityFromJacobianMatrix);
 
-      FramePoint point2 = new FramePoint(point);
+      FramePoint3D point2 = new FramePoint3D(point);
       point2.changeFrame(endEffector.getBodyFixedFrame());
       double dt = 1e-8;
       ScrewTestTools.integrateVelocities(randomFloatingChain.getRevoluteJoints(), dt);
@@ -89,8 +89,8 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint point1 = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
-      FramePoint point2 = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint3D point1 = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint3D point2 = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
 
       PointJacobian pointJacobian1 = new PointJacobian();
       pointJacobian1.set(geometricJacobian, point1);

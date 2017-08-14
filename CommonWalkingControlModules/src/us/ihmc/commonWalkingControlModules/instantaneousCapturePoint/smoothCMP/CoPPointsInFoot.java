@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -74,7 +74,7 @@ public class CoPPointsInFoot
       this.copPointsList.add(copPointName);
    }
 
-   public void setIncludingFrame(int waypointIndex, double time, FramePoint location)
+   public void setIncludingFrame(int waypointIndex, double time, FramePoint3D location)
    {
       copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
       zeroVector.setToZero(location.getReferenceFrame());;
@@ -98,7 +98,7 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint3D location)
    {
       setIncludingFrame(copPointsList.size(), time, location);
       addWayPoint(copPointName);
@@ -176,7 +176,7 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
    }
 
-   public void setSwingFootLocation(FramePoint footLocation)
+   public void setSwingFootLocation(FramePoint3D footLocation)
    {
       this.swingFootCentroid.setIncludingFrame(footLocation);
    }
@@ -186,12 +186,12 @@ public class CoPPointsInFoot
       this.swingFootCentroid.setXYIncludingFrame(footLocation);
    }
 
-   public void getSwingFootLocation(FramePoint footLocationToPack)
+   public void getSwingFootLocation(FramePoint3D footLocationToPack)
    {
       footLocationToPack.setIncludingFrame(swingFootCentroid.getFrameTuple());
    }
 
-   public void setSupportFootLocation(FramePoint footLocation)
+   public void setSupportFootLocation(FramePoint3D footLocation)
    {
       this.supportFootCentroid.setIncludingFrame(footLocation);
    }
@@ -201,12 +201,12 @@ public class CoPPointsInFoot
       this.supportFootCentroid.setXYIncludingFrame(footLocation);
    }
 
-   public void getSupportFootLocation(FramePoint footLocationToPack)
+   public void getSupportFootLocation(FramePoint3D footLocationToPack)
    {
       footLocationToPack.setIncludingFrame(supportFootCentroid.getFrameTuple());
    }
    
-   public void setFeetLocation(FramePoint swingFootLocation, FramePoint supportFootLocation)
+   public void setFeetLocation(FramePoint3D swingFootLocation, FramePoint3D supportFootLocation)
    {
       setSwingFootLocation(swingFootLocation);
       setSupportFootLocation(supportFootLocation);
@@ -243,7 +243,7 @@ public class CoPPointsInFoot
       return copPointsList;
    }
 
-   public void getFinalCoPPosition(FramePoint tempFinalICP)
+   public void getFinalCoPPosition(FramePoint3D tempFinalICP)
    {
       copLocations.get(copPointsList.size() - 1).getPosition(tempFinalICP);
    }

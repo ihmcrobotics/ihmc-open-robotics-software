@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
@@ -10,7 +10,7 @@ public interface PositionTrajectoryGenerator extends TrajectoryGenerator, Positi
 
    public abstract void getAcceleration(FrameVector accelerationToPack);
 
-   public default void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public default void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

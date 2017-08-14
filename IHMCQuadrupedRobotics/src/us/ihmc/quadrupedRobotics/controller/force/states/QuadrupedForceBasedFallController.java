@@ -19,7 +19,7 @@ import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
@@ -70,7 +70,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final FramePoint solePositionSetpoint;
+   private final FramePoint3D solePositionSetpoint;
    private final Vector3D zeroVelocity;
    private FullQuadrupedRobotModel fullRobotModel;
 
@@ -82,7 +82,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
       quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
-      solePositionSetpoint = new FramePoint();
+      solePositionSetpoint = new FramePoint3D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());

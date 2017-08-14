@@ -28,7 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -316,7 +316,7 @@ public class WalkingMessageHandler
          return false;
       }
 
-      FramePoint adjustedPosition = requestedFootstepAdjustment.getPosition();
+      FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
       FrameOrientation adjustedOrientation = requestedFootstepAdjustment.getOrientation();
       footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
 
@@ -628,7 +628,7 @@ public class WalkingMessageHandler
          }
          else
          {
-            RecyclingArrayList<FramePoint> positionWaypoints = footstepData.getCustomPositionWaypoints();
+            RecyclingArrayList<FramePoint3D> positionWaypoints = footstepData.getCustomPositionWaypoints();
             footstep.setCustomPositionWaypoints(positionWaypoints);
          }
       }

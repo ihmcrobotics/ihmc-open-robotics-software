@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -179,7 +179,7 @@ public class PelvisIMUBasedLinearStateCalculator
       yoMeasurementFrameLinearVelocityInWorld.add(correctionVelocityForMeasurementFrameOffset);
    }
 
-   public void updatePelvisPosition(FramePoint rootJointPositionPrevValue, FramePoint rootJointPositionToPack)
+   public void updatePelvisPosition(FramePoint3D rootJointPositionPrevValue, FramePoint3D rootJointPositionToPack)
    {
       if (!isEstimationEnabled())
          throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
@@ -201,7 +201,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final Twist tempRootJointTwist = new Twist();
    private final FrameVector tempRootJointAngularVelocity = new FrameVector();
-   private final FramePoint measurementOffset = new FramePoint();
+   private final FramePoint3D measurementOffset = new FramePoint3D();
 
    private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector correctionTermToPack)
    {

@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
@@ -33,7 +33,7 @@ public class OnToesState extends AbstractFootControlState
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final FramePoint desiredContactPointPosition = new FramePoint();
+   private final FramePoint3D desiredContactPointPosition = new FramePoint3D();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
 
    private final ToeOffCalculator toeOffCalculator;
@@ -43,7 +43,7 @@ public class OnToesState extends AbstractFootControlState
    private final FrameOrientation startOrientation = new FrameOrientation();
    private final double[] tempYawPitchRoll = new double[3];
 
-   private final FramePoint contactPointPosition = new FramePoint();
+   private final FramePoint3D contactPointPosition = new FramePoint3D();
 
    private final YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();

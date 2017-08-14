@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -75,7 +75,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private PoseReferenceFrame previousPoseFrame;
 
    private FrameVector desiredOffset;
-   private FramePoint desiredPosition;
+   private FramePoint3D desiredPosition;
    private FrameOrientation desiredOrientation;
 
    private final FootstepDataCommand desiredFootstepCommand = new FootstepDataCommand();
@@ -91,7 +91,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
       ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
       desiredOffset = new FrameVector(stanceFootFrame);
-      desiredPosition = new FramePoint(stanceFootFrame);
+      desiredPosition = new FramePoint3D(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
 
       firstStepSide.set(supportSide);

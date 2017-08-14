@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
@@ -39,7 +39,7 @@ public abstract class PelvisAndCenterOfMassHeightControlState extends Finishable
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
-   public abstract void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack);
+   public abstract void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack);
 
    public abstract void initializeDesiredHeightToCurrent();
 

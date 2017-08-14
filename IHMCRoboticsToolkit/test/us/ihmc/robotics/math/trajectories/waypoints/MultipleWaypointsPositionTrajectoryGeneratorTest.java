@@ -8,7 +8,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,8 +40,8 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       
       
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, 1.0, 0.0, 1.0));
-      PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame,   0.2, 1.0, 0.4));
+      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame, 1.0, 0.0, 1.0));
+      PositionProvider finalPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame,   0.2, 1.0, 0.4));
       simpleTrajectory = new StraightLinePositionTrajectoryGenerator("simpleTraj", worldFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, registry);
       simpleTrajectory.initialize();
 
@@ -51,7 +51,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       
       
 
-      FramePoint waypointPosition = new FramePoint();
+      FramePoint3D waypointPosition = new FramePoint3D();
       FrameVector waypointVelocity = new FrameVector();
 
       for (int i = 0; i < numberOfWaypoints; i++)
@@ -65,11 +65,11 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       multipleWaypointTrajectory.initialize();
 
       
-      FramePoint positionToPackMultiple = new FramePoint(worldFrame);
+      FramePoint3D positionToPackMultiple = new FramePoint3D(worldFrame);
       FrameVector velocityToPackMultiple = new FrameVector(worldFrame);
       FrameVector accelerationToPackMultiple = new FrameVector(worldFrame);
       
-      FramePoint positionToPackSimple = new FramePoint(worldFrame);
+      FramePoint3D positionToPackSimple = new FramePoint3D(worldFrame);
       FrameVector velocityToPackSimple = new FrameVector(worldFrame);
       FrameVector accelerationToPackSimple = new FrameVector(worldFrame);
       

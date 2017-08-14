@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -25,11 +25,11 @@ public class AverageVelocityTrajectoryTimeProvider implements  DoubleProvider
 
    public double getValue()
    {
-      FramePoint initialPosition = new FramePoint();
+      FramePoint3D initialPosition = new FramePoint3D();
       initialPositionProvider.getPosition(initialPosition);
       initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePoint finalPosition = new FramePoint();
+      FramePoint3D finalPosition = new FramePoint3D();
       finalPositionProvider.getPosition(finalPosition);
       finalPosition.changeFrame(ReferenceFrame.getWorldFrame());
 

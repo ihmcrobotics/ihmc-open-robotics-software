@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
@@ -11,7 +11,7 @@ public class ThreeDoFMinimumJerkTrajectory
    final private MinimumJerkTrajectory xTrajectory;
    final private MinimumJerkTrajectory yTrajectory;
    final private MinimumJerkTrajectory zTrajectory;
-   final private FramePoint position;
+   final private FramePoint3D position;
    final private FrameVector velocity;
    final private FrameVector acceleration;
    private ReferenceFrame referenceFrame;
@@ -23,7 +23,7 @@ public class ThreeDoFMinimumJerkTrajectory
       xTrajectory = new MinimumJerkTrajectory();
       yTrajectory = new MinimumJerkTrajectory();
       zTrajectory = new MinimumJerkTrajectory();
-      position = new FramePoint();
+      position = new FramePoint3D();
       velocity = new FrameVector();
       acceleration = new FrameVector();
       referenceFrame = ReferenceFrame.getWorldFrame();
@@ -41,7 +41,7 @@ public class ThreeDoFMinimumJerkTrajectory
       return timeInterval.getEndTime();
    }
 
-   public void getPosition(FramePoint position)
+   public void getPosition(FramePoint3D position)
    {
       position.setIncludingFrame(this.position);
    }
@@ -61,17 +61,17 @@ public class ThreeDoFMinimumJerkTrajectory
       return referenceFrame;
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, TimeInterval timeInterval)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, TimeInterval timeInterval)
    {
       initializeTrajectory(initialPosition, finalPosition, timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double duration)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double duration)
    {
       initializeTrajectory(initialPosition, finalPosition, 0, duration);
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double startTime, double endTime)
+   public void initializeTrajectory(FramePoint3D initialPosition, FramePoint3D finalPosition, double startTime, double endTime)
    {
       timeInterval.setInterval(startTime, endTime);
       double duration = timeInterval.getDuration();

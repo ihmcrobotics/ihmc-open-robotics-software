@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2d;
@@ -139,9 +139,9 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> extends Abst
       return new FrameVector(getFrameTuple());
    }
 
-   public final FramePoint getFramePointCopy()
+   public final FramePoint3D getFramePointCopy()
    {
-      return new FramePoint(getFrameTuple());
+      return new FramePoint3D(getFrameTuple());
    }
 
    public final FrameVector2d getFrameVector2dCopy()

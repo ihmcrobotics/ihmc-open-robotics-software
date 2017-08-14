@@ -25,7 +25,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -1904,9 +1904,9 @@ public class FootstepGeneratorsTest
       {
          footstep1 = footsteps.get(i);
          footstep2 = footsteps.get(i + 1);
-         FramePoint position2 = new FramePoint();
+         FramePoint3D position2 = new FramePoint3D();
          footstep2.getPosition(position2);
-         FramePoint position1 = new FramePoint();
+         FramePoint3D position1 = new FramePoint3D();
          footstep1.getPosition(position1);
          double dis = position2.distance(position1);
          assertTrue(String.format(message + " %.2f<=%.2f? step %d to %d", dis, distTest, i, i + 1), dis < distTest + 1e-14);
@@ -1924,9 +1924,9 @@ public class FootstepGeneratorsTest
       {
          footstep1 = footsteps.get(i);
          footstep2 = footsteps.get(i + 2);
-         FramePoint position2 = new FramePoint();
+         FramePoint3D position2 = new FramePoint3D();
          footstep2.getPosition(position2);
-         FramePoint position1 = new FramePoint();
+         FramePoint3D position1 = new FramePoint3D();
          footstep1.getPosition(position1);
          double dis = position2.distance(position1);
 
@@ -2183,8 +2183,8 @@ public class FootstepGeneratorsTest
       Point2D rightFootStartPoint = new Point2D(startX - leftXFactor, startY - leftYFactor);
       FramePose2d rightFootPose2d = new FramePose2d(WORLD_FRAME, rightFootStartPoint, startYaw - initialDeltaFeetYaw / 2);
 
-      FramePoint leftPosition = new FramePoint(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
-      FramePoint rightPosition = new FramePoint(WORLD_FRAME, rightFootStartPoint.getX(), rightFootStartPoint.getY(), 0);
+      FramePoint3D leftPosition = new FramePoint3D(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
+      FramePoint3D rightPosition = new FramePoint3D(WORLD_FRAME, rightFootStartPoint.getX(), rightFootStartPoint.getY(), 0);
       FrameOrientation leftOrientation = new FrameOrientation(WORLD_FRAME, leftFootPose2d.getYaw(), 0.0, 0.0);
       FrameOrientation rightOrientation = new FrameOrientation(WORLD_FRAME, rightFootPose2d.getYaw(), 0.0, 0.0);
 

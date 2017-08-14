@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -115,7 +115,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void holdCurrentICP(FramePoint icpPositionToHold)
+   public void holdCurrentICP(FramePoint3D icpPositionToHold)
    {
       icpPlanner.holdCurrentICP(icpPositionToHold);
    }
@@ -186,7 +186,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointPosition(FramePoint desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack)
    {
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePointPositionToPack);
    }
@@ -207,7 +207,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(FramePoint3D desiredCenterOfMassPositionToPack)
    {
       icpPlanner.getDesiredCenterOfMassPosition(desiredCenterOfMassPositionToPack);
    }
@@ -249,7 +249,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(desiredCentroidalMomentumPivotPositionToPack);
    }
@@ -403,7 +403,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredCapturePointPositionToPack);
    }
@@ -417,14 +417,14 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
    {
       icpPlanner.getFinalDesiredCenterOfMassPosition(finalDesiredCenterOfMassPositionToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getNextExitCMP(FramePoint exitCMPToPack)
+   public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       icpPlanner.getNextExitCMP(exitCMPToPack);
    }

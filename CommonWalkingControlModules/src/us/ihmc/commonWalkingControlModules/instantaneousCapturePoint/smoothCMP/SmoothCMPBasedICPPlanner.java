@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -302,11 +302,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getWaypoints();
    }
 
-   private final FramePoint tempFinalICP = new FramePoint();
+   private final FramePoint3D tempFinalICP = new FramePoint3D();
    
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if(isStanding.getBooleanValue())
       {
@@ -332,36 +332,36 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
    
-   public List<FramePoint> getInitialDesiredCapturePointPositions()
+   public List<FramePoint3D> getInitialDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredInitialList();
    }
    
-   public List<FramePoint> getFinalDesiredCapturePointPositions()
+   public List<FramePoint3D> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
    
-   public List<FramePoint> getInitialDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getInitialDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredInitialList();
    }
    
-   public List<FramePoint> getFinalDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getFinalDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
    {
       throw new RuntimeException("to implement"); //TODOLater
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getNextExitCMP(FramePoint exitCMPToPack)
+   public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
       nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);

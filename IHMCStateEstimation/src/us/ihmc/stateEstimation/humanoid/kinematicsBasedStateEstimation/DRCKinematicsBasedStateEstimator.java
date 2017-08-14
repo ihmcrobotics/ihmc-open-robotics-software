@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -349,13 +349,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
+   public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
    }
 
    @Override
-   public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+   public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
    }
@@ -372,7 +372,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+   public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
    }

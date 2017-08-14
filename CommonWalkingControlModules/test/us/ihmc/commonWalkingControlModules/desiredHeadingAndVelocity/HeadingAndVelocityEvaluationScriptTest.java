@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -111,7 +111,7 @@ public class HeadingAndVelocityEvaluationScriptTest
 
          position.add(desiredVelocity.getX() * controlDT, desiredVelocity.getY() * controlDT, 0.0);
 
-         FramePoint location = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint3D location = new FramePoint3D(ReferenceFrame.getWorldFrame());
          location.set(position.getX(), position.getY(), 0.0);
 
          bagOfBalls.setBall(location);

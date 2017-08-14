@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -235,7 +235,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       FrameVector offset = new FrameVector(ReferenceFrame.getWorldFrame(), new double[] { Math.cos(offsetDirAngle) * sideOffset,
             Math.sin(offsetDirAngle) * sideOffset, 0 });
 
-      FramePoint stanceFramePosition = new FramePoint();
+      FramePoint3D stanceFramePosition = new FramePoint3D();
       stanceFramePose.getPositionIncludingFrame(stanceFramePosition);
       FrameVector offsetStart = new FrameVector(stanceFramePosition);
       offsetStart.add(offset);
@@ -245,7 +245,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 
    private FrameVector offCenterVectorToSwingEnd(Footstep stance, Footstep swingEnd, FrameVector translationFromFootCenterToCircleCenter)
    {
-      FramePoint circleCenter;
+      FramePoint3D circleCenter;
       FramePose stanceSole = new FramePose();
       FramePose swingEndSole = new FramePose();
       stance.getPose(stanceSole);

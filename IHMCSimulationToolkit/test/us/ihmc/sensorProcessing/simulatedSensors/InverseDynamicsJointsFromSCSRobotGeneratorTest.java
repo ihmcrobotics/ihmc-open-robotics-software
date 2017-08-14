@@ -21,7 +21,7 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -403,7 +403,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   pinJoint.getLink().getComOffset(comOffset);
                   pinJoint.physics.getLinearVelocityInBody(pinJointCoMLinearVelocityInBody, comOffset);
 
-                  FramePoint comOffsetCheck = new FramePoint();
+                  FramePoint3D comOffsetCheck = new FramePoint3D();
                   revoluteJoint.getSuccessor().getCoMOffset(comOffsetCheck);
                   comOffsetCheck.changeFrame(revoluteJoint.getFrameAfterJoint());
                   EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);

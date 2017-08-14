@@ -4,7 +4,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -14,8 +14,8 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
    private final MovingReferenceFrame frameOne;
    private final MovingReferenceFrame frameTwo;
 
-   private final FramePoint originOne = new FramePoint();
-   private final FramePoint originTwo = new FramePoint();
+   private final FramePoint3D originOne = new FramePoint3D();
+   private final FramePoint3D originTwo = new FramePoint3D();
    private final FrameVector vectorBetweenFrames = new FrameVector();
    private final Vector2D xAxis = new Vector2D();
 

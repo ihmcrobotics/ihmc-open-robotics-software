@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,7 +23,7 @@ public class YoContactPoint implements ContactPointInterface
       setPosition(contactPointPosition2d);
    }
 
-   public YoContactPoint(String namePrefix, int index, FramePoint contactPointPosition, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   public YoContactPoint(String namePrefix, int index, FramePoint3D contactPointPosition, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition.getReferenceFrame(), parentContactState, parentRegistry);
       setPosition(contactPointPosition);
@@ -60,13 +60,13 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public FramePoint getPosition()
+   public FramePoint3D getPosition()
    {
       return yoPosition.getFrameTuple();
    }
 
    @Override
-   public void getPosition(FramePoint framePointToPack)
+   public void getPosition(FramePoint3D framePointToPack)
    {
       yoPosition.getFrameTupleIncludingFrame(framePointToPack);
    }
@@ -79,7 +79,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       this.yoPosition.set(position);
    }

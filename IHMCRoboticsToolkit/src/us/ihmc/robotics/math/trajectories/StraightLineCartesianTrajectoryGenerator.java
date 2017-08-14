@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,7 +33,7 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
       parentRegistry.addChild(registry);
    }
 
-   public void computeNextTick(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
+   public void computeNextTick(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack, double deltaT)
    {
       double time = this.time.getDoubleValue();
 
@@ -47,13 +47,13 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
       return referenceFrame;
    }
 
-   public void initialize(FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint finalDesiredPosition, FrameVector finalDesiredVelocity)
+   public void initialize(FramePoint3D initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration, FramePoint3D finalDesiredPosition, FrameVector finalDesiredVelocity)
    {
-      initialPosition = new FramePoint(initialPosition);
+      initialPosition = new FramePoint3D(initialPosition);
       initialPosition.changeFrame(referenceFrame);
       initialVelocity = new FrameVector(initialVelocity);
       initialVelocity.changeFrame(referenceFrame);
-      finalDesiredPosition = new FramePoint(finalDesiredPosition);
+      finalDesiredPosition = new FramePoint3D(finalDesiredPosition);
       finalDesiredPosition.changeFrame(referenceFrame);
 
       FrameVector finalVelocity = new FrameVector(referenceFrame);
@@ -68,7 +68,7 @@ public class StraightLineCartesianTrajectoryGenerator implements CartesianTrajec
               vMax, aMax, AlphaToAlphaType.LINEAR);
    }
 
-   public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
+   public void updateFinalDesiredPosition(FramePoint3D finalDesiredPosition)
    {
       // Just ignore on straight line...
    }

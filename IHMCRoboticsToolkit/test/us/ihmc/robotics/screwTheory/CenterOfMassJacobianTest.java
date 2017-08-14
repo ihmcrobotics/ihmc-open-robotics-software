@@ -17,7 +17,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -195,7 +195,7 @@ public class CenterOfMassJacobianTest
 
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       centerOfMassCalculator.compute();
-      FramePoint centerOfMassBody = new FramePoint(worldFrame);
+      FramePoint3D centerOfMassBody = new FramePoint3D(worldFrame);
       centerOfMassCalculator.getCenterOfMass(centerOfMassBody);
       FrameVector crossPart = new FrameVector(rootJointFrame);
       crossPart.cross(angularVelocityBody, centerOfMassBody);
@@ -213,7 +213,7 @@ public class CenterOfMassJacobianTest
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodiesToUse, referenceFrame);
 
       centerOfMassCalculator.compute();
-      FramePoint centerOfMass1 = new FramePoint(centerOfMassCalculator.getCenterOfMass());
+      FramePoint3D centerOfMass1 = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
 
       double dt = 1e-8;
       if (sixDoFJoint != null)
@@ -222,7 +222,7 @@ public class CenterOfMassJacobianTest
       rootBody.updateFramesRecursively();
 
       centerOfMassCalculator.compute();
-      FramePoint centerOfMass2 = new FramePoint(centerOfMassCalculator.getCenterOfMass());
+      FramePoint3D centerOfMass2 = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
 
       FrameVector velocityNumerical = new FrameVector(centerOfMass2);
       velocityNumerical.sub(centerOfMass1);

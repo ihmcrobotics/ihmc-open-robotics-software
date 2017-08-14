@@ -8,7 +8,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -165,7 +165,7 @@ public class ICPQPOptimizationSolver
    /** Minimum allowable weight on the feedback task. */
    private final double minimumFeedbackWeight;
 
-   private final FramePoint tmpPoint = new FramePoint();
+   private final FramePoint3D tmpPoint = new FramePoint3D();
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;

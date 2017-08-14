@@ -9,7 +9,7 @@ import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -31,7 +31,7 @@ public class QuadrupedContactForceOptimization
    private final FrameVector comForceSolution;
    private final QuadrantDependentList<FrameVector> contactForceCommand = new QuadrantDependentList<>();
    private final QuadrantDependentList<FrameVector> contactForceSolution = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FramePoint> contactPosition = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FramePoint3D> contactPosition = new QuadrantDependentList<>();
    private final QuadrantDependentList<ContactState> contactState = new QuadrantDependentList<>();
 
    private final YoVariableRegistry registry;
@@ -75,7 +75,7 @@ public class QuadrupedContactForceOptimization
       {
          contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
-         contactPosition.set(robotQuadrant, new FramePoint(comFrame));
+         contactPosition.set(robotQuadrant, new FramePoint3D(comFrame));
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
 

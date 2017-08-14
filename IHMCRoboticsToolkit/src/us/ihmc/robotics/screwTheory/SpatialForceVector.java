@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -104,7 +104,7 @@ public class SpatialForceVector
       angularPart.cross(arm, linearPart);
    }
 
-   public void setIncludingFrame(FrameVector force, FramePoint pointOfApplication)
+   public void setIncludingFrame(FrameVector force, FramePoint3D pointOfApplication)
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
@@ -113,7 +113,7 @@ public class SpatialForceVector
       angularPart.cross(tempVector, linearPart);
    }
 
-   public void setIncludingFrame(FrameVector force, FrameVector moment, FramePoint pointOfApplication)
+   public void setIncludingFrame(FrameVector force, FrameVector moment, FramePoint3D pointOfApplication)
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();

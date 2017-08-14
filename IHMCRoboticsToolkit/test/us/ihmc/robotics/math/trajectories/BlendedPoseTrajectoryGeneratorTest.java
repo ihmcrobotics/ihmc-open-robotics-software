@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -37,7 +37,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    private class PoseTrajectoryState
    {
       public final double time;
-      public final FramePoint position;
+      public final FramePoint3D position;
       public final FrameOrientation orientation;
       public final FrameVector linearVelocity;
       public final FrameVector angularVelocity;
@@ -50,7 +50,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(PoseTrajectoryGenerator trajectory, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
             ReferenceFrame expressedInFrame)
       {
-         this.position = new FramePoint(expressedInFrame);
+         this.position = new FramePoint3D(expressedInFrame);
          this.orientation = new FrameOrientation(expressedInFrame);
          this.linearVelocity = new FrameVector(expressedInFrame);
          this.angularVelocity = new FrameVector(expressedInFrame);
@@ -68,7 +68,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(Random random, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
       {
          this.time = time;
-         this.position = FramePoint.generateRandomFramePoint(random, expressedInFrame, 1.0, 1.0, 1.0);
+         this.position = FramePoint3D.generateRandomFramePoint(random, expressedInFrame, 1.0, 1.0, 1.0);
          this.orientation = FrameOrientation.generateRandomFrameOrientation(random, expressedInFrame);
          this.linearVelocity = FrameVector.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          this.angularVelocity = FrameVector.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);

@@ -18,7 +18,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -49,24 +49,24 @@ public class GroundPlaneEstimatorTest
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
-      List<FramePoint> pointListA = new ArrayList<FramePoint>();
+      List<FramePoint3D> pointListA = new ArrayList<FramePoint3D>();
       Plane3D plane3dA = new Plane3D();
 
-      pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0,  1.0,  0.1));
-      pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0, -1.0,  0.1));
-      pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(), -1.0,  1.0, -0.1));
-      pointListA.add(new FramePoint(ReferenceFrame.getWorldFrame(), -1.0, -1.0, -0.1));
+      pointListA.add(new FramePoint3D(ReferenceFrame.getWorldFrame(),  1.0,  1.0,  0.1));
+      pointListA.add(new FramePoint3D(ReferenceFrame.getWorldFrame(),  1.0, -1.0,  0.1));
+      pointListA.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -1.0,  1.0, -0.1));
+      pointListA.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -1.0, -1.0, -0.1));
       
       groundPlaneEstimator.compute(pointListA);
       groundPlaneEstimator.getPlane(plane3dA);
       Vector3D normalA = plane3dA.getNormalCopy();
       
-      List<FramePoint> pointListB = new ArrayList<FramePoint>();
+      List<FramePoint3D> pointListB = new ArrayList<FramePoint3D>();
       Plane3D plane3dB = new Plane3D();
-      pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0 + 4.0,  1.0 + 4.0,  0.1));
-      pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(),  1.0 + 4.0, -1.0 + 4.0,  0.1));
-      pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(), -1.0 + 4.0,  1.0 + 4.0, -0.1));
-      pointListB.add(new FramePoint(ReferenceFrame.getWorldFrame(), -1.0 + 4.0, -1.0 + 4.0, -0.1));
+      pointListB.add(new FramePoint3D(ReferenceFrame.getWorldFrame(),  1.0 + 4.0,  1.0 + 4.0,  0.1));
+      pointListB.add(new FramePoint3D(ReferenceFrame.getWorldFrame(),  1.0 + 4.0, -1.0 + 4.0,  0.1));
+      pointListB.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -1.0 + 4.0,  1.0 + 4.0, -0.1));
+      pointListB.add(new FramePoint3D(ReferenceFrame.getWorldFrame(), -1.0 + 4.0, -1.0 + 4.0, -0.1));
       
       groundPlaneEstimator.compute(pointListB);
       groundPlaneEstimator.getPlane(plane3dB);
@@ -83,7 +83,7 @@ public class GroundPlaneEstimatorTest
       Random random = new Random(123123);
       
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
-      QuadrantDependentList<FramePoint> contactPoints = new QuadrantDependentList<>();
+      QuadrantDependentList<FramePoint3D> contactPoints = new QuadrantDependentList<>();
       FramePose centerOfFeetPose = new FramePose(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame centerOfFeetFrame = new PoseReferenceFrame("centerOfFeetFrame", centerOfFeetPose);
       
@@ -121,7 +121,7 @@ public class GroundPlaneEstimatorTest
       Random random = new Random();
       
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
-      QuadrantDependentList<FramePoint> contactPoints = new QuadrantDependentList<>();
+      QuadrantDependentList<FramePoint3D> contactPoints = new QuadrantDependentList<>();
       FramePose centerOfFeetPose = new FramePose(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame centerOfFeetFrame = new PoseReferenceFrame("centerOfFeetFrame", centerOfFeetPose);
       
@@ -190,11 +190,11 @@ public class GroundPlaneEstimatorTest
       
    }
 
-   private void putFeetOnPlane(Random random, QuadrantDependentList<FramePoint> contactPoints, PoseReferenceFrame centerOfFeetFrame)
+   private void putFeetOnPlane(Random random, QuadrantDependentList<FramePoint3D> contactPoints, PoseReferenceFrame centerOfFeetFrame)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint contactPoint = new FramePoint(centerOfFeetFrame);
+         FramePoint3D contactPoint = new FramePoint3D(centerOfFeetFrame);
          
          int xSign = (robotQuadrant.getEnd() == RobotEnd.FRONT) ? 1 : -1;
          contactPoint.setX(xSign * random.nextDouble());
@@ -206,7 +206,7 @@ public class GroundPlaneEstimatorTest
       }
    }
 
-   private void changeFrame(QuadrantDependentList<FramePoint> contactPoints, PoseReferenceFrame centerOfFeetFrame)
+   private void changeFrame(QuadrantDependentList<FramePoint3D> contactPoints, PoseReferenceFrame centerOfFeetFrame)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

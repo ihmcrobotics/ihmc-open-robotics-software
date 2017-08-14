@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -116,7 +116,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientation.set(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
    }
 
-   public void setConstantPose(FramePoint constantPosition, FrameOrientation constantOrientation)
+   public void setConstantPose(FramePoint3D constantPosition, FrameOrientation constantOrientation)
    {
       this.position.set(position);
       this.orientation.set(orientation);
@@ -137,7 +137,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return true;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -152,7 +152,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       accelerationToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

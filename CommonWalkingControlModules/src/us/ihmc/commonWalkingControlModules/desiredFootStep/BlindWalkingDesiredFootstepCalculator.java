@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -89,7 +89,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       }
 
       FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), swingLegSide, supportFrame);
-      FramePoint footstepPosition = getDesiredFootstepPositionCopy(supportZUpFrame, supportFrame, swingLegSide);
+      FramePoint3D footstepPosition = getDesiredFootstepPositionCopy(supportZUpFrame, supportFrame, swingLegSide);
 
       setYoVariables(swingLegSide, footOrientation, footstepPosition);
    }
@@ -106,7 +106,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
       computeDistanceAndAngleToDestination(futureSupportZUpFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy());
       FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
-      FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
+      FramePoint3D footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
@@ -115,11 +115,11 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return predictedFootstep;
    }
 
-   private FramePoint getDesiredFootstepPositionCopy(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide)
+   private FramePoint3D getDesiredFootstepPositionCopy(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide)
    {
       FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(supportAnkleZUpFrame, swingLegSide, angleToDestination.getDoubleValue(),
             distanceToDestination.getDoubleValue());
-      FramePoint footstepPosition = computeDesiredFootPosition(supportAnkleFrame, desiredOffsetFromAnkle);
+      FramePoint3D footstepPosition = computeDesiredFootPosition(supportAnkleFrame, desiredOffsetFromAnkle);
       footstepPosition.changeFrame(worldFrame);
 
       return footstepPosition;
@@ -309,16 +309,16 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return new FrameOrientation(worldFrame, ret);
    }
 
-   private FramePoint computeDesiredFootPosition(ReferenceFrame upcomingSupportFrame, FrameVector2d desiredOffsetFromSupport)
+   private FramePoint3D computeDesiredFootPosition(ReferenceFrame upcomingSupportFrame, FrameVector2d desiredOffsetFromSupport)
    {
       desiredOffsetFromSupport.changeFrame(upcomingSupportFrame);
-      FramePoint footstepPosition = new FramePoint(upcomingSupportFrame, desiredOffsetFromSupport.getX(), desiredOffsetFromSupport.getY(), 0.0);
+      FramePoint3D footstepPosition = new FramePoint3D(upcomingSupportFrame, desiredOffsetFromSupport.getX(), desiredOffsetFromSupport.getY(), 0.0);
       footstepPosition.changeFrame(worldFrame);
 
       return footstepPosition;
    }
 
-   private void setYoVariables(RobotSide swingLegSide, FrameOrientation footstepOrientation, FramePoint footstepPosition)
+   private void setYoVariables(RobotSide swingLegSide, FrameOrientation footstepOrientation, FramePoint3D footstepPosition)
    {
       footstepOrientations.get(swingLegSide).set(footstepOrientation);
       footstepPositions.get(swingLegSide).set(footstepPosition);

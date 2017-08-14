@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -82,7 +82,7 @@ public class CenterOfMassTrajectoryHandler
     * @param desiredICPVelocityToPack (modified)
     * @return whether a valid trajectory point for this time was available
     */
-   public boolean packCurrentDesiredICP(double omega0, FramePoint desiredICPPositionToPack, FrameVector desiredICPVelocityToPack)
+   public boolean packCurrentDesiredICP(double omega0, FramePoint3D desiredICPPositionToPack, FrameVector desiredICPVelocityToPack)
    {
       return packCurrentDesiredICP(omega0, desiredICPPositionToPack, desiredICPVelocityToPack, null);
    }
@@ -98,7 +98,7 @@ public class CenterOfMassTrajectoryHandler
     * @param comPositionToPack (modified)
     * @return whether a valid trajectory point for this time was available
     */
-   public boolean packCurrentDesiredICP(double omega0, FramePoint desiredICPPositionToPack, FrameVector desiredICPVelocityToPack, FramePoint comPositionToPack)
+   public boolean packCurrentDesiredICP(double omega0, FramePoint3D desiredICPPositionToPack, FrameVector desiredICPVelocityToPack, FramePoint3D comPositionToPack)
    {
       return packDesiredICPAtTime(yoTime.getDoubleValue(), omega0, desiredICPPositionToPack, desiredICPVelocityToPack, comPositionToPack);
    }
@@ -113,7 +113,7 @@ public class CenterOfMassTrajectoryHandler
     * @param desiredICPVelocityToPack (modified)
     * @return whether a valid trajectory point for this time was available
     */
-   public boolean packDesiredICPAtTime(double controllerTime, double omega0, FramePoint desiredICPPositionToPack, FrameVector desiredICPVelocityToPack)
+   public boolean packDesiredICPAtTime(double controllerTime, double omega0, FramePoint3D desiredICPPositionToPack, FrameVector desiredICPVelocityToPack)
    {
       return packDesiredICPAtTime(controllerTime, omega0, desiredICPPositionToPack, desiredICPVelocityToPack, null);
    }
@@ -130,8 +130,8 @@ public class CenterOfMassTrajectoryHandler
     * @param comPositionToPack (modified)
     * @return whether a valid trajectory point for this time was available
     */
-   public boolean packDesiredICPAtTime(double controllerTime, double omega0, FramePoint desiredICPPositionToPack, FrameVector desiredICPVelocityToPack,
-                                       FramePoint comPositionToPack)
+   public boolean packDesiredICPAtTime(double controllerTime, double omega0, FramePoint3D desiredICPPositionToPack, FrameVector desiredICPVelocityToPack,
+                                       FramePoint3D comPositionToPack)
    {
       if (!isWithinInterval(controllerTime))
       {

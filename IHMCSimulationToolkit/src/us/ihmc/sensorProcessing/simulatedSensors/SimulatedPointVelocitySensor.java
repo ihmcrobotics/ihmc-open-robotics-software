@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -17,8 +17,8 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FramePoint pointToMeasureVelocityOf;
-   private final FramePoint tempPointToMeasureVelocityOf = new FramePoint();
+   private final FramePoint3D pointToMeasureVelocityOf;
+   private final FramePoint3D tempPointToMeasureVelocityOf = new FramePoint3D();
    private final FrameVector pointVelocityFrameVector = new FrameVector();
 
    private final Twist twist = new Twist();
@@ -30,13 +30,13 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
 
    private final ControlFlowOutputPort<Vector3D> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
 
-   public SimulatedPointVelocitySensor(String name, RigidBody rigidBody, FramePoint pointToMeasureVelocityOf,
+   public SimulatedPointVelocitySensor(String name, RigidBody rigidBody, FramePoint3D pointToMeasureVelocityOf,
            TwistCalculator twistCalculator, YoVariableRegistry registry)
    {
       this.rigidBody = rigidBody;
       this.twistCalculator = twistCalculator;
 
-      this.pointToMeasureVelocityOf = new FramePoint(pointToMeasureVelocityOf);
+      this.pointToMeasureVelocityOf = new FramePoint3D(pointToMeasureVelocityOf);
 
       this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", ReferenceFrame.getWorldFrame(), registry);
       this.yoFrameVectorNoisy = new YoFrameVector(name + "Noisy", ReferenceFrame.getWorldFrame(), registry);

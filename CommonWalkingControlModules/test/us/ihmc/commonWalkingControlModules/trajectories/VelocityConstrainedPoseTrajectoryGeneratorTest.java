@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -94,8 +94,8 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame);
       FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
 
-      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
-      FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
 
       trajToTest.setInitialPoseWithoutInitialVelocity(initialPosition, initialOrientation);
       trajToTest.setFinalPoseWithoutFinalVelocity(new FramePose(finalPosition, finalOrientation));
@@ -108,14 +108,14 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       trajToCompare.initialize();
 
       double dt = 1.0e-3;
-      FramePoint position1 = new FramePoint();
+      FramePoint3D position1 = new FramePoint3D();
       FrameVector velocity1 = new FrameVector();
       FrameVector acceleration1 = new FrameVector();
       FrameOrientation orientation1 = new FrameOrientation();
       FrameVector angularVelocity1 = new FrameVector();
       FrameVector angularAcceleration1 = new FrameVector();
 
-      FramePoint position2 = new FramePoint();
+      FramePoint3D position2 = new FramePoint3D();
       FrameVector velocity2 = new FrameVector();
       FrameVector acceleration2 = new FrameVector();
       FrameOrientation orientation2 = new FrameOrientation();
@@ -150,9 +150,9 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector initialVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
-      FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
 
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0);
       FrameVector initialAngularVelocity = new FrameVector(worldFrame, 0.0, 0.0, 0.0);
@@ -169,21 +169,21 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector finiteDiffVel = new FrameVector();
       FrameVector finiteDiffAcc = new FrameVector();
 
-      FramePoint position1 = new FramePoint();
+      FramePoint3D position1 = new FramePoint3D();
       FrameVector velocity1 = new FrameVector();
       FrameVector acceleration1 = new FrameVector();
       FrameOrientation orientation1 = new FrameOrientation();
       FrameVector angularVelocity1 = new FrameVector();
       FrameVector angularAcceleration1 = new FrameVector();
 
-      FramePoint position2 = new FramePoint();
+      FramePoint3D position2 = new FramePoint3D();
       FrameVector velocity2 = new FrameVector();
       FrameVector acceleration2 = new FrameVector();
       FrameOrientation orientation2 = new FrameOrientation();
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      FramePoint position3 = new FramePoint();
+      FramePoint3D position3 = new FramePoint3D();
       FrameVector velocity3 = new FrameVector();
       FrameVector acceleration3 = new FrameVector();
       FrameOrientation orientation3 = new FrameOrientation();
@@ -258,9 +258,9 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector initialVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
-      FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector finalVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
 
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0);
@@ -280,21 +280,21 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector finiteDiffVel = new FrameVector();
       FrameVector finiteDiffAcc = new FrameVector();
 
-      FramePoint position1 = new FramePoint();
+      FramePoint3D position1 = new FramePoint3D();
       FrameVector velocity1 = new FrameVector();
       FrameVector acceleration1 = new FrameVector();
       FrameOrientation orientation1 = new FrameOrientation();
       FrameVector angularVelocity1 = new FrameVector();
       FrameVector angularAcceleration1 = new FrameVector();
 
-      FramePoint position2 = new FramePoint();
+      FramePoint3D position2 = new FramePoint3D();
       FrameVector velocity2 = new FrameVector();
       FrameVector acceleration2 = new FrameVector();
       FrameOrientation orientation2 = new FrameOrientation();
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      FramePoint position3 = new FramePoint();
+      FramePoint3D position3 = new FramePoint3D();
       FrameVector velocity3 = new FrameVector();
       FrameVector acceleration3 = new FrameVector();
       FrameOrientation orientation3 = new FrameOrientation();
@@ -357,7 +357,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       }
    }
 
-   FrameVector calculateFiniteDdt(FramePoint a, FramePoint c, double dt)
+   FrameVector calculateFiniteDdt(FramePoint3D a, FramePoint3D c, double dt)
    {
       FrameVector ret = new FrameVector();
       ret.sub(c, a);
@@ -365,7 +365,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       return ret;
    }
 
-   FrameVector calulateFiniteDDdt(FramePoint a, FramePoint b, FramePoint c, double dt)
+   FrameVector calulateFiniteDDdt(FramePoint3D a, FramePoint3D b, FramePoint3D c, double dt)
    {
       FrameVector ret = new FrameVector();
       ret.add(a, c);
@@ -383,8 +383,8 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
-      FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
 
       FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
       FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
@@ -399,14 +399,14 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       trajToTest.initialize();
       trajToTest.compute(15.0);
 
-      FramePoint position1 = new FramePoint(finalPosition);
+      FramePoint3D position1 = new FramePoint3D(finalPosition);
       FrameVector velocity1 = new FrameVector(worldFrame);
       FrameVector acceleration1 = new FrameVector(worldFrame);
       FrameOrientation orientation1 = new FrameOrientation(finalOrientation);
       FrameVector angularVelocity1 = new FrameVector(worldFrame);
       FrameVector angularAcceleration1 = new FrameVector(worldFrame);
 
-      FramePoint position2 = new FramePoint();
+      FramePoint3D position2 = new FramePoint3D();
       FrameVector velocity2 = new FrameVector();
       FrameVector acceleration2 = new FrameVector();
       FrameOrientation orientation2 = new FrameOrientation();

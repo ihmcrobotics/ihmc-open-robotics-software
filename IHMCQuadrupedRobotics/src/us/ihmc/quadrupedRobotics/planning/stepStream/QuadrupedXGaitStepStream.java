@@ -14,7 +14,7 @@ import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
@@ -33,7 +33,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
-   private final FramePoint supportCentroid;
+   private final FramePoint3D supportCentroid;
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame worldFrame;
@@ -53,7 +53,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    {
       this.planarVelocityProvider = planarVelocityProvider;
       this.xGaitSettingsProvider = xGaitSettingsProvider;
-      this.supportCentroid = new FramePoint();
+      this.supportCentroid = new FramePoint3D();
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       this.bodyZUpFrame = referenceFrames.getBodyZUpFrame();
       this.worldFrame = ReferenceFrame.getWorldFrame();

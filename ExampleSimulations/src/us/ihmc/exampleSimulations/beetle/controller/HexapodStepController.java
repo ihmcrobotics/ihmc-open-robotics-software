@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -41,7 +41,7 @@ public class HexapodStepController
    private RobotSextant[] legsSwinging = leftTriple;
    private RobotSextant[] legsSupporting = rightTriple;
 
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private RigidBody[] rigidBodiesToControl = new RigidBody[6];
 
@@ -203,11 +203,11 @@ public class HexapodStepController
       }
    }
 
-   private final FramePoint currentPosition = new FramePoint();
+   private final FramePoint3D currentPosition = new FramePoint3D();
    private final Twist currentTwist = new Twist();
    private final FrameVector currentVelocity = new FrameVector();
    private final FrameVector finalDesiredVelocity = new FrameVector();
-   private final FramePoint pointFixedInBodyFrame = new FramePoint();
+   private final FramePoint3D pointFixedInBodyFrame = new FramePoint3D();
 
    private void initializeTrajectories(FrameVector desiredBodyLinearVelocity, FrameVector desiredAngularVelocity)
    {

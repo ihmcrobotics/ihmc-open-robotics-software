@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -755,7 +755,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint positionToPack, FrameOrientation orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameOrientation orientationToPack)
    {
       controlFramePose.getPositionIncludingFrame(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);

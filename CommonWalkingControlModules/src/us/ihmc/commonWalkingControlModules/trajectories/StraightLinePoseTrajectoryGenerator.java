@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -60,14 +60,14 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
    // For viz
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -232,7 +232,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       initialOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
-   public void setInitialPose(FramePoint initialPosition, FrameOrientation initialOrientation)
+   public void setInitialPose(FramePoint3D initialPosition, FrameOrientation initialOrientation)
    {
       this.initialPosition.setAndMatchFrame(initialPosition);
       this.initialOrientation.setAndMatchFrame(initialOrientation);
@@ -250,7 +250,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       finalOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
-   public void setFinalPose(FramePoint finalPosition, FrameOrientation finalOrientation)
+   public void setFinalPose(FramePoint3D finalPosition, FrameOrientation finalOrientation)
    {
       this.finalPosition.setAndMatchFrame(finalPosition);
       this.finalOrientation.setAndMatchFrame(finalOrientation);
@@ -349,7 +349,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       showViz.set(false);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -379,7 +379,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

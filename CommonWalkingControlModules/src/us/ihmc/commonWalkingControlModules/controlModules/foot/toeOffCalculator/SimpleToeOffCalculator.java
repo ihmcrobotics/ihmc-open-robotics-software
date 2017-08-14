@@ -44,7 +44,7 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
    {
    }
 
