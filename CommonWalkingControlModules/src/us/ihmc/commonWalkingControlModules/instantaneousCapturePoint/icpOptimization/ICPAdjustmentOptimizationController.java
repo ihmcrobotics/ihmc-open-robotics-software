@@ -9,8 +9,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -93,7 +93,7 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 

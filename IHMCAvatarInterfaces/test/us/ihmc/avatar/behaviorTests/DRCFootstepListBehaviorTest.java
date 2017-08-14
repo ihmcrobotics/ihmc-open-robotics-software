@@ -29,7 +29,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -258,7 +258,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       {
          Footstep footstep = desiredFootsteps.get(i);
 
-         FramePoint position = new FramePoint();
+         FramePoint3D position = new FramePoint3D();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
 

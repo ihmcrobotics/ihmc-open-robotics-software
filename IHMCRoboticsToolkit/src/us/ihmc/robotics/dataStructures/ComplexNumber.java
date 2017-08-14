@@ -28,7 +28,7 @@ public class ComplexNumber
    public static void copyComplexArray(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
    {
       if (arrayToPack.length < arrayToCopy.length)
-         throw new RuntimeException("Insufficient size for copying complex number array");
+         throw new RuntimeException("Insufficient size for copying complex number array, available: " + arrayToPack.length + " needed: " + arrayToCopy.length);
       int index = 0;
       for (; index < arrayToCopy.length; index++)
          arrayToPack[index].set(arrayToCopy[index]);

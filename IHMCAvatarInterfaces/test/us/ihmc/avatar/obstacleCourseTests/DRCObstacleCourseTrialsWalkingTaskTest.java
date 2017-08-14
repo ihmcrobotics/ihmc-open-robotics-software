@@ -20,7 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -76,7 +76,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
-      FramePoint pelvisHeight = new FramePoint(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
       drcSimulationTestHelper.send(message);
@@ -119,7 +119,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      FramePoint pelvisHeight = new FramePoint(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
       drcSimulationTestHelper.send(message);

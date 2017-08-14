@@ -279,7 +279,7 @@ public class AngleTools
     * @param noTranslationTolerance tolerance for determining if path angle should be determined
     * @return number between -PI and PI
     */
-   public static double calculateHeading(FramePose2d startPose, FramePoint2d endPoint, double headingOffset, double noTranslationTolerance)
+   public static double calculateHeading(FramePose2d startPose, FramePoint2D endPoint, double headingOffset, double noTranslationTolerance)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();

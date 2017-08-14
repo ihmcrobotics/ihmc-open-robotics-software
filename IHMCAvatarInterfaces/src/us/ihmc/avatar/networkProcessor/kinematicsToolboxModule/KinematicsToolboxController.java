@@ -47,7 +47,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -383,7 +383,8 @@ public class KinematicsToolboxController extends ToolboxController
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null,
+      KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
@@ -687,7 +688,7 @@ public class KinematicsToolboxController extends ToolboxController
          return null;
       }
 
-      FramePoint positionToHold = new FramePoint();
+      FramePoint3D positionToHold = new FramePoint3D();
       initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -726,7 +727,7 @@ public class KinematicsToolboxController extends ToolboxController
    private void updateVisualization()
    {
       boolean hasData;
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
 
       for (RigidBody endEffector : desiredCoodinateSystems.keySet())
