@@ -15,7 +15,7 @@ import us.ihmc.manipulation.planning.rrt.generalrrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -27,135 +27,138 @@ public class SolarPanelWholeBodyTrajectoryMessageFactory
 {
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
    private SolarPanelPath cleaningPath;
-   
+
    private ReferenceFrame midFeetFrame;
    private ReferenceFrame worldFrame;
-   
+
    public SolarPanelWholeBodyTrajectoryMessageFactory(FullHumanoidRobotModel fullRobotModel)
    {
       this.wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-            
+
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
-      
+
       worldFrame = referenceFrames.getWorldFrame();
    }
-   
+
    private void clearWholeBodyTrajectoryMessage()
    {
       this.wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    }
-   
+
    public void setCleaningPath(SolarPanelPath cleaningPath)
    {
       this.cleaningPath = cleaningPath;
    }
-   
+
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
    {
       return wholebodyTrajectoryMessage;
    }
-   
+
    public void setMessage(SolarPanelCleaningPose cleaningPose, double pelvisYaw, double pelvisHeight, double motionTime)
    {
       clearWholeBodyTrajectoryMessage();
-            
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), midFeetFrame);      
-      
+
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(),
+                                                                              cleaningPose.getDesiredHandOrientation(), midFeetFrame);
+
       Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(pelvisYaw);      
+      desiredChestOrientation.appendYawRotation(pelvisYaw);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, midFeetFrame);
-      
+
       wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
       wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
    }
-   
+
    public void setMessage(SolarPanelCleaningPose cleaningPose, double pelvisHeight, double chestYaw, double chestPitch, double motionTime)
    {
       clearWholeBodyTrajectoryMessage();
-            
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), midFeetFrame);      
-      
+
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(),
+                                                                              cleaningPose.getDesiredHandOrientation(), midFeetFrame);
+
       Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(chestYaw);      
-      desiredChestOrientation.appendPitchRotation(chestPitch);      
+      desiredChestOrientation.appendYawRotation(chestYaw);
+      desiredChestOrientation.appendPitchRotation(chestPitch);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, midFeetFrame);
-      
+
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(motionTime, new Point3D(0, 0, pelvisHeight), new Quaternion());
       SelectionMatrix6D pelvisTrajectorySelectionMatrix = new SelectionMatrix6D();
       pelvisTrajectorySelectionMatrix.clearSelection();
       pelvisTrajectorySelectionMatrix.selectLinearZ(true);
       pelvisTrajectoryMessage.setSelectionMatrix(pelvisTrajectorySelectionMatrix);
-      
+
       wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
       wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
    }
-   
+
    public void setMessage(ArrayList<RRTNode> rrtPath)
    {
-      switch(SolarPanelCleaningInfo.getDegreesOfRedundancy())
+      switch (SolarPanelCleaningInfo.getDegreesOfRedundancy())
       {
-         case ONE:
-         {
-            setMessage1D(rrtPath);
-            break;
-         }
-         case THREE:
-         {
-            PrintTools.info("set three ");
-            setMessage3D(rrtPath);
-            break;
-         }
+      case ONE:
+      {
+         setMessage1D(rrtPath);
+         break;
+      }
+      case THREE:
+      {
+         PrintTools.info("set three ");
+         setMessage3D(rrtPath);
+         break;
+      }
       }
    }
-   
+
    public void setMessage1D(ArrayList<RRTNode> rrtPath)
    {
-      if(cleaningPath == null)
+      if (cleaningPath == null)
       {
          PrintTools.warn("You must set cleaningPath");
       }
       else
       {
          clearWholeBodyTrajectoryMessage();
-         int numberOfWayPoints = rrtPath.size()-1;
-         
-         PrintTools.info("numberOfWayPoints "+numberOfWayPoints);
-         
+         int numberOfWayPoints = rrtPath.size() - 1;
+
+         PrintTools.info("numberOfWayPoints " + numberOfWayPoints);
+
          HandTrajectoryMessage handTrajectoryMessage;
          ChestTrajectoryMessage chestTrajectoryMessage;
-         
+
          handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, numberOfWayPoints);
          chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfWayPoints);
-         
+
          handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
-         
+
          chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
          chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
-         
-         for(int i=1;i<rrtPath.size();i++)
+
+         for (int i = 1; i < rrtPath.size(); i++)
          {
             double time = rrtPath.get(i).getNodeData(0);
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-            
-            handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), midFeetFrame);            
-            
+
+            handTrajectoryMessage.setTrajectoryPoint(i - 1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(),
+                                                     new Vector3D(), new Vector3D(), midFeetFrame);
+
             Quaternion desiredChestOrientation = new Quaternion();
             desiredChestOrientation.appendYawRotation(rrtPath.get(i).getNodeData(1));
-            chestTrajectoryMessage.setTrajectoryPoint(i-1, time, desiredChestOrientation, new Vector3D(), midFeetFrame);
+            chestTrajectoryMessage.setTrajectoryPoint(i - 1, time, desiredChestOrientation, new Vector3D(), midFeetFrame);
          }
-         
+
          wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-         wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);     
+         wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       }
    }
-   
+
    public void setMessage3D(ArrayList<RRTNode> rrtPath)
    {
-      if(cleaningPath == null)
+      if (cleaningPath == null)
       {
          PrintTools.warn("You must set cleaningPath");
       }
@@ -163,72 +166,76 @@ public class SolarPanelWholeBodyTrajectoryMessageFactory
       {
          clearWholeBodyTrajectoryMessage();
          int numberOfWayPoints = rrtPath.size();
-         
-         PrintTools.info("numberOfWayPoints "+numberOfWayPoints);
-         
+
+         PrintTools.info("numberOfWayPoints " + numberOfWayPoints);
+
          HandTrajectoryMessage handTrajectoryMessage;
          ChestTrajectoryMessage chestTrajectoryMessage;
          PelvisTrajectoryMessage pelvisTrajectoryMessage;
-         
+
          handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, numberOfWayPoints);
          chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfWayPoints);
          pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfWayPoints);
-         
+
          handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
-         
+
          chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
          chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
-         
+
          pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(midFeetFrame);
          pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(midFeetFrame);
-         
+
          SelectionMatrix6D pelvisTrajectorySelectionMatrix = new SelectionMatrix6D();
          pelvisTrajectorySelectionMatrix.clearSelection();
          pelvisTrajectorySelectionMatrix.selectLinearZ(true);
          pelvisTrajectoryMessage.setSelectionMatrix(pelvisTrajectorySelectionMatrix);
-         
-         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();         
-         for (int i=1; i<rrtPath.size(); i++)
+
+         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+         for (int i = 1; i < rrtPath.size(); i++)
          {
             double time = rrtPath.get(i).getNodeData(0);
-            
+
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-            
-            FramePoint tempPoint = new FramePoint(midFeetFrame, cleaningPose.getPose().getPosition());            
+
+            FramePoint3D tempPoint = new FramePoint3D(midFeetFrame, cleaningPose.getPose().getPosition());
             tempPoint.changeFrame(midFeetFrame);
-            
+
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
          }
-         
+
          double firstTime = 8.0;
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTime, SolarPanelCleaningInfo.getCleaningPath().getArrivalTime());
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-         
-         for(int i=0;i<rrtPath.size();i++)
+
+         for (int i = 0; i < rrtPath.size(); i++)
          {
             double time = rrtPath.get(i).getNodeData(0);
-            
+
             Point3D desiredPosition = new Point3D();
             Vector3D desiredLinearVelocity = new Vector3D();
             //trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
-            
+
             SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-            PrintTools.info(""+i+" time "+time+" "+ cleaningPose.getU()+" "+ cleaningPose.getV() +"       "+ rrtPath.get(i).getNodeData(1) +" "+ rrtPath.get(i).getNodeData(2) +" "+ rrtPath.get(i).getNodeData(3) +" ");
-            PrintTools.info(" "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
+            PrintTools.info("" + i + " time " + time + " " + cleaningPose.getU() + " " + cleaningPose.getV() + "       " + rrtPath.get(i).getNodeData(1) + " "
+                  + rrtPath.get(i).getNodeData(2) + " " + rrtPath.get(i).getNodeData(3) + " ");
+            PrintTools.info(" " + cleaningPose.getDesiredHandPosition().getX() + " " + cleaningPose.getDesiredHandPosition().getY() + " "
+                  + cleaningPose.getDesiredHandPosition().getZ());
             time = time + firstTime;
-            
-            handTrajectoryMessage.setTrajectoryPoint(i, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), desiredLinearVelocity, new Vector3D(), midFeetFrame);
-            
+
+            handTrajectoryMessage.setTrajectoryPoint(i, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(),
+                                                     desiredLinearVelocity, new Vector3D(), midFeetFrame);
+
             Quaternion desiredChestOrientation = new Quaternion();
             desiredChestOrientation.appendYawRotation(rrtPath.get(i).getNodeData(2));
             desiredChestOrientation.appendPitchRotation(rrtPath.get(i).getNodeData(3));
             chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredChestOrientation, new Vector3D(), midFeetFrame);
-            
-            pelvisTrajectoryMessage.setTrajectoryPoint(i, time, new Point3D(0,0, rrtPath.get(i).getNodeData(1)), new Quaternion(), new Vector3D(), new Vector3D(), midFeetFrame);
+
+            pelvisTrajectoryMessage.setTrajectoryPoint(i, time, new Point3D(0, 0, rrtPath.get(i).getNodeData(1)), new Quaternion(), new Vector3D(),
+                                                       new Vector3D(), midFeetFrame);
          }
-         
+
          wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
          wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
          wholebodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);

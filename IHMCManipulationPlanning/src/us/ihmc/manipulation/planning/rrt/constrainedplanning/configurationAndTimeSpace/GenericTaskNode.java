@@ -7,14 +7,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class GenericTaskNode extends CTTaskNode
 {
    public static double handCoordinateOffsetX = -0.2;
    public static int nodeDimension = 11;
-   
+
    public GenericTaskNode()
    {
       super(11);
@@ -85,7 +85,7 @@ public class GenericTaskNode extends CTTaskNode
        */
       return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
    }
-  
+
    @Override
    public boolean isValidNode()
    {
@@ -113,25 +113,25 @@ public class GenericTaskNode extends CTTaskNode
       nodeTester.holdCurrentTrajectoryMessages();
       /*
        * set whole body tasks.
-       */      
+       */
       Pose3D desiredPose = getEndEffectorPose();
-      FramePoint desiredPointToWorld = new FramePoint(worldFrame, desiredPose.getPosition());
+      FramePoint3D desiredPointToWorld = new FramePoint3D(worldFrame, desiredPose.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
 
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-     
+
       desiredPoseToWorld.changeFrame(midZUpFrame);
 
       Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);      
-      
+      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+
       nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
       nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(getNodeData(2));
 
-      PrintTools.info("c yaw "+ getNodeData(2)*180/Math.PI);
+      PrintTools.info("c yaw " + getNodeData(2) * 180 / Math.PI);
       desiredChestOrientation.appendPitchRotation(getNodeData(3));
       desiredChestOrientation.appendRollRotation(getNodeData(4));
       nodeTester.setDesiredChestOrientation(desiredChestOrientation);

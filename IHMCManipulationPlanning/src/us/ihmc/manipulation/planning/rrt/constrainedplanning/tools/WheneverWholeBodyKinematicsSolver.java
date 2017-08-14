@@ -37,7 +37,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -488,7 +488,7 @@ public class WheneverWholeBodyKinematicsSolver
          return null;
       }
 
-      FramePoint positionToHold = new FramePoint();
+      FramePoint3D positionToHold = new FramePoint3D();
       initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -721,7 +721,7 @@ public class WheneverWholeBodyKinematicsSolver
          preMultipliedOrientation.appendYawRotation(-Math.PI * 0.5);
       }
 
-      FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getPosition());
+      FramePoint3D desiredPointToWorld = new FramePoint3D(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getPosition());
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), desiredPoseToMidZUp.getOrientation());
 
       desiredOrientationToWorld.multiply(preMultipliedOrientation);
@@ -739,7 +739,7 @@ public class WheneverWholeBodyKinematicsSolver
       pelvisSelectionMatrix.selectLinearZ(true);
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
 
-      FramePoint desiredPointToWorld = new FramePoint(referenceFrames.getMidFootZUpGroundFrame(), new Point3D(0, 0, desiredHeightToMidZUp));
+      FramePoint3D desiredPointToWorld = new FramePoint3D(referenceFrames.getMidFootZUpGroundFrame(), new Point3D(0, 0, desiredHeightToMidZUp));
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), new Quaternion());
 
       FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
@@ -871,15 +871,15 @@ public class WheneverWholeBodyKinematicsSolver
    {
       OneDoFJoint aJoint = desiredFullRobotModel.getOneDoFJointByName(jointName);
 
-      double jointLimitScore = 0;      
+      double jointLimitScore = 0;
       double aJointValue = aJoint.getQ();
       double upperValue = aJoint.getJointLimitUpper();
       double lowerValue = aJoint.getJointLimitLower();
-      
+
       double limitSize = upperValue - lowerValue;
-      aJointValue = aJointValue/limitSize;
-      upperValue = upperValue/limitSize;
-      lowerValue = lowerValue/limitSize;
+      aJointValue = aJointValue / limitSize;
+      upperValue = upperValue / limitSize;
+      lowerValue = lowerValue / limitSize;
 
       double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue));
       double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue));
@@ -890,7 +890,7 @@ public class WheneverWholeBodyKinematicsSolver
          jointLimitScore = diffUpper;
 
       if (DEBUG)
-         PrintTools.info(""+jointName+" " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
+         PrintTools.info("" + jointName + " " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
 
       return jointLimitScore;
    }

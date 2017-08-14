@@ -27,8 +27,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -47,9 +47,9 @@ public class WheneverWholeBodyFunctions
 
    public void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
-   {      
+   {
       float[] newJointAngles = robotConfigurationData.getJointAngles();
-      
+
       for (int i = 0; i < newJointAngles.length; i++)
       {
          oneDoFJoints[i].setQ(newJointAngles[i]);
@@ -64,7 +64,7 @@ public class WheneverWholeBodyFunctions
       desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();
-      
+
    }
 
    public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
@@ -93,7 +93,7 @@ public class WheneverWholeBodyFunctions
 
    public double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
-      FrameVector positionError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
       feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
       command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
@@ -114,7 +114,7 @@ public class WheneverWholeBodyFunctions
 
       controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       feedbackControllerDataHolder.getPositionData(endEffector, currentPosition, Type.CURRENT);
       currentPosition.changeFrame(worldFrame);
       controlFrame.setPositionAndUpdate(currentPosition);
@@ -124,11 +124,11 @@ public class WheneverWholeBodyFunctions
       currentOrientation.changeFrame(worldFrame);
       controlFrame.setOrientationAndUpdate(currentOrientation);
 
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D rotationError = new FrameVector3D();
       feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
       rotationError.changeFrame(controlFrame);
 
-      FrameVector positionError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
       feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
       positionError.changeFrame(controlFrame);
 
