@@ -32,10 +32,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -149,10 +149,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoTwist desiredBodyTwist;
 
    // Jacobian
-   private final FramePoint jointPosition = new FramePoint();
-   private final FrameVector jointToFootVector = new FrameVector();
-   private final FrameVector vmcRequestedTorqueFromJoint = new FrameVector();
-   private final FrameVector jointAxis = new FrameVector();
+   private final FramePoint3D jointPosition = new FramePoint3D();
+   private final FrameVector3D jointToFootVector = new FrameVector3D();
+   private final FrameVector3D vmcRequestedTorqueFromJoint = new FrameVector3D();
+   private final FrameVector3D jointAxis = new FrameVector3D();
 
    // Walking
    private final YoEnum<QuadrupedGaitCycle> desiredGait = new YoEnum<>("desiredGait", registry, QuadrupedGaitCycle.class);
@@ -192,11 +192,11 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final QuadrantDependentList<BagOfBalls> swingTrajectoryBagsOfBalls = new QuadrantDependentList<>();
 
    // Experimental Trot Stuff
-   private final FramePoint rightMidpoint = new FramePoint();
-   private final FramePoint leftMidpoint = new FramePoint();
-   private final FramePoint frontMidpoint = new FramePoint();
-   private final FramePoint hindMidpoint = new FramePoint();
-   private final FrameVector2d frontDirection = new FrameVector2d();
+   private final FramePoint3D rightMidpoint = new FramePoint3D();
+   private final FramePoint3D leftMidpoint = new FramePoint3D();
+   private final FramePoint3D frontMidpoint = new FramePoint3D();
+   private final FramePoint3D hindMidpoint = new FramePoint3D();
+   private final FrameVector2D frontDirection = new FrameVector2D();
    private final FrameLine2d sidewaysMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d lengthwiseMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d lineForFindingClosestLineSegment = new FrameLine2d(ReferenceFrame.getWorldFrame());
@@ -207,9 +207,9 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint2d closestIntersection = new YoFramePoint2d("closestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d secondClosestIntersection = new YoFramePoint2d("secondClosestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d midPointOfIntersections = new YoFramePoint2d("midPointOfIntersections", ReferenceFrame.getWorldFrame(), registry);
-   private final FramePoint2d trotCrossPoint = new FramePoint2d();
+   private final FramePoint2D trotCrossPoint = new FramePoint2D();
    private final YoFramePoint2d innerCenterOfPressure = new YoFramePoint2d("innerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
+   private final FrameVector2D awayFromCentroidToClosestIntersection = new FrameVector2D();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private double ratioFromMidToClosest;
    private final YoBoolean isInFrontOfLeftTrotLine = new YoBoolean("isInFrontOfLeftTrotLine", registry);
@@ -493,7 +493,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       centerOfMassJacobian.compute();
 
-      FrameVector tempVector = centerOfMassVelocity.getFrameTuple();
+      FrameVector3D tempVector = centerOfMassVelocity.getFrameTuple();
       centerOfMassJacobian.getCenterOfMassVelocity(tempVector);
       tempVector.changeFrame(centerOfMassVelocity.getReferenceFrame());
       centerOfMassVelocity.setWithoutChecks(tempVector);
@@ -793,13 +793,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          lineForFindingClosestLineSegment.getLine2d().setDirection(lengthwiseMidLine.getLine2d().getDirection());
       }
 
-      FramePoint2d closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
+      FramePoint2D closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
       leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       closestIntersection.setWithoutChecks(closestIntersectionFrameTuple);
 
       double distanceUpward = closestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
 
-      FramePoint2d secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
+      FramePoint2D secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
       rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, secondClosestIntersectionFramePoint);
       secondClosestIntersection.setWithoutChecks(secondClosestIntersectionFramePoint);
 

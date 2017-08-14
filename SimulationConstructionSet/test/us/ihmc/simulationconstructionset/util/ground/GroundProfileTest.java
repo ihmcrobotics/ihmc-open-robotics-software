@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -162,7 +162,7 @@ public abstract class GroundProfileTest
                
                AppearanceDefinition appearance = YoAppearance.AliceBlue();
 
-               bagOfBalls.setBallLoop(new FramePoint(ReferenceFrame.getWorldFrame(), queryPoint), appearance);
+               bagOfBalls.setBallLoop(new FramePoint3D(ReferenceFrame.getWorldFrame(), queryPoint), appearance);
                scs.setTime(scs.getTime() + 0.001);
                scs.tickAndUpdate();
             }

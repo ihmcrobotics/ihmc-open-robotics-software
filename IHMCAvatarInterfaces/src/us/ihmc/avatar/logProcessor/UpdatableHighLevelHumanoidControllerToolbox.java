@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -84,7 +84,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         FramePoint2d desiredCop = desiredCoPsUpdatedFromSCS.get(robotSide).getFrameTuple2d();
+         FramePoint2D desiredCop = desiredCoPsUpdatedFromSCS.get(robotSide).getFrameTuple2d();
          setDesiredCenterOfPressure(contactableFoot, desiredCop);
       }
    }

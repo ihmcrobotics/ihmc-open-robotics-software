@@ -9,16 +9,16 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -63,10 +63,10 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
 
    private final ICPTimingCostFunctionEstimator costFunctionEstimator = new ICPTimingCostFunctionEstimator();
 
-   private final FramePoint2d currentSwingFootPosition = new FramePoint2d();
-   private final FrameVector2d currentSwingFootVelocity = new FrameVector2d();
-   private final FrameVector2d requiredSwingFootVelocity = new FrameVector2d();
-   private final FrameVector2d requiredFootstepPosition = new FrameVector2d();
+   private final FramePoint2D currentSwingFootPosition = new FramePoint2D();
+   private final FrameVector2D currentSwingFootVelocity = new FrameVector2D();
+   private final FrameVector2D requiredSwingFootVelocity = new FrameVector2D();
+   private final FrameVector2D requiredFootstepPosition = new FrameVector2D();
 
    private double previousSwingDurationSolution;
 
@@ -160,7 +160,7 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
@@ -443,8 +443,8 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
       return adjustmentWeight + regularizationWeight;
    }
 
-   private final FramePoint tempPoint = new FramePoint();
-   private final FrameVector tempVector = new FrameVector();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    public double computeFootVelocityCostToGo()
    {

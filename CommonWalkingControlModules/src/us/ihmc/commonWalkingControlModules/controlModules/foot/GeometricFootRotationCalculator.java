@@ -18,10 +18,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
@@ -50,14 +50,14 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d defaultFootPolygon;
 
-   private final FramePoint groundPlanePoint = new FramePoint();
-   private final FrameVector groundPlaneNormal = new FrameVector();
+   private final FramePoint3D groundPlanePoint = new FramePoint3D();
+   private final FrameVector3D groundPlaneNormal = new FrameVector3D();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   private final FramePoint cop = new FramePoint();
+   private final FramePoint3D cop = new FramePoint3D();
    private final YoDouble copAlpha;
    private final AlphaFilteredYoFramePoint copFiltered;
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
@@ -129,15 +129,15 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final Vector3D normal = new Vector3D();
 
    private final Vector3D lineOfContactVector = new Vector3D();
-   private final FrameVector lineOfContact = new FrameVector();
-   private final FrameVector footNormal = new FrameVector();
+   private final FrameVector3D lineOfContact = new FrameVector3D();
+   private final FrameVector3D footNormal = new FrameVector3D();
    private final Vector3D footNormalVector = new Vector3D();
 
-   private final FramePoint2d centerOfRotation2d = new FramePoint2d();
-   private final FrameVector2d lineOfRotation2d = new FrameVector2d();
+   private final FramePoint2D centerOfRotation2d = new FramePoint2D();
+   private final FrameVector2D lineOfRotation2d = new FrameVector2D();
 
    @Override
-   public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
    {
       centerOfPressure.checkReferenceFrameMatch(soleFrame);
       cop.setXYIncludingFrame(centerOfPressure);

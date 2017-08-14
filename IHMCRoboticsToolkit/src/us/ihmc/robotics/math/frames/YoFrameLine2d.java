@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -121,41 +121,41 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
       return referenceFrame;
    }
 
-   public void orthogonalProjection(FramePoint2d point)
+   public void orthogonalProjection(FramePoint2D point)
    {
       putYoValuesIntoFrameLine();
       frameLine.orthogonalProjection(point);
    }
 
-   public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
+   public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.orthogonalProjectionCopy(point);
    }
 
-   public FramePoint2d intersectionWith(FrameLine2d line)
+   public FramePoint2D intersectionWith(FrameLine2d line)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.intersectionWith(line);
    }
 
-   public FramePoint2d intersectionWith(FrameLineSegment2d secondLineSegment)
+   public FramePoint2D intersectionWith(FrameLineSegment2d secondLineSegment)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.intersectionWith(secondLineSegment);
    }
 
-   public FramePoint2d[] intersectionWith(FrameConvexPolygon2d convexPolygon)
+   public FramePoint2D[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.intersectionWith(convexPolygon);
    }
 
-   public double distance(FramePoint2d point)
+   public double distance(FramePoint2D point)
    {
       putYoValuesIntoFrameLine();
 

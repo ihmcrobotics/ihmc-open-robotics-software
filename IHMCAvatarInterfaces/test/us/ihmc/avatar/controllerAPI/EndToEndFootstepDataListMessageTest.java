@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -75,7 +75,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       for (int foostepIdx = 0; foostepIdx < steps; foostepIdx++)
       {
          // walk forward
-         FramePoint frameLocation = new FramePoint(midFeetFrame);
+         FramePoint3D frameLocation = new FramePoint3D(midFeetFrame);
          frameLocation.setX(stepLength * (foostepIdx + 1));
          frameLocation.setY(stepSide.negateIfRightSide(halfStepWidth));
          frameLocation.changeFrame(ReferenceFrame.getWorldFrame());

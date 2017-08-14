@@ -28,7 +28,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.*;
@@ -63,12 +63,12 @@ public class WholeBodyInverseDynamicsSolver
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateAngular;
-   private final FrameVector achievedMomentumRateLinear = new FrameVector();
-   private final FrameVector achievedMomentumRateAngular = new FrameVector();
+   private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
+   private final FrameVector3D achievedMomentumRateAngular = new FrameVector3D();
 
    private final Wrench residualRootJointWrench = new Wrench();
-   private final FrameVector residualRootJointForce = new FrameVector();
-   private final FrameVector residualRootJointTorque = new FrameVector();
+   private final FrameVector3D residualRootJointForce = new FrameVector3D();
+   private final FrameVector3D residualRootJointTorque = new FrameVector3D();
 
    private final YoFrameVector yoResidualRootJointForce;
    private final YoFrameVector yoResidualRootJointTorque;
@@ -302,12 +302,12 @@ public class WholeBodyInverseDynamicsSolver
       return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
    }
 
-   public FrameVector getAchievedMomentumRateLinear()
+   public FrameVector3D getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
    }
 
-   public FrameVector getAchievedMomentumRateAngular()
+   public FrameVector3D getAchievedMomentumRateAngular()
    {
       return achievedMomentumRateAngular;
    }

@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.physics;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,15 +33,15 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
    private final YoDouble yoConnectionVelocityErrorMagnitude;
 
    // Temporary variables:
-   private final FramePoint connectionAPosition = new FramePoint(worldFrame);
-   private final FramePoint connectionBPosition = new FramePoint(worldFrame);
-   private final FrameVector connectionPositionError;
-   private final FrameVector connectionAVelocity = new FrameVector(worldFrame);
-   private final FrameVector connectionBVelocity = new FrameVector(worldFrame);
-   private final FrameVector connectionVelocityError;
-   private final FrameVector springForce;
-   private final FrameVector damperForce;
-   private final FrameVector totalForce = new FrameVector(worldFrame);
+   private final FramePoint3D connectionAPosition = new FramePoint3D(worldFrame);
+   private final FramePoint3D connectionBPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D connectionPositionError;
+   private final FrameVector3D connectionAVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D connectionBVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D connectionVelocityError;
+   private final FrameVector3D springForce;
+   private final FrameVector3D damperForce;
+   private final FrameVector3D totalForce = new FrameVector3D(worldFrame);
 
    public ExternalForcePointPDConstraintToIntegrate(String name, ExternalForcePoint connectionPointA, ExternalForcePoint connectionPointB,
          YoVariableRegistry parentRegistry)
@@ -65,11 +65,11 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
       parentRegistry.addChild(registry);
 
-      connectionPositionError = new FrameVector(worldFrame);
-      connectionVelocityError = new FrameVector(worldFrame);
+      connectionPositionError = new FrameVector3D(worldFrame);
+      connectionVelocityError = new FrameVector3D(worldFrame);
 
-      springForce = new FrameVector(worldFrame);
-      damperForce = new FrameVector(worldFrame);
+      springForce = new FrameVector3D(worldFrame);
+      damperForce = new FrameVector3D(worldFrame);
    }
 
    public void setStiffness(double stiffness)

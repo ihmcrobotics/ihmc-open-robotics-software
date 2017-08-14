@@ -13,7 +13,7 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -72,7 +72,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
+      FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -98,7 +98,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
+      FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);

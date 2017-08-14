@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.CurrentSegment</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPX</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -55,15 +55,15 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>17.028206991810972</Camera X>
- <Camera Y>-5.133791738356224</Camera Y>
- <Camera Z>10.921704381877507</Camera Z>
+ <Camera X>6.976864475128554</Camera X>
+ <Camera Y>19.531857713662216</Camera Y>
+ <Camera Z>6.745607451643721</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
  <Position Z>0.0</Position Z>
 <Dolly Booleans>
-<Dolly>false</Dolly>
+<Dolly>true</Dolly>
 <Dolly X>true</Dolly X>
 <Dolly Y>true</Dolly Y>
 <Dolly Z>true</Dolly Z>
@@ -74,15 +74,15 @@ null,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>false</Track Z>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.9609629731473781</Fix X>
-<Fix Y>-1.1437341793280376</Fix Y>
-<Fix Z>1.2412984704337067</Fix Z>
+<Fix X>4.976864475128554</Fix X>
+<Fix Y>7.531857713662217</Fix Y>
+<Fix Z>1.1</Fix Z>
 </Fix Position>
 </Canvas 1>
