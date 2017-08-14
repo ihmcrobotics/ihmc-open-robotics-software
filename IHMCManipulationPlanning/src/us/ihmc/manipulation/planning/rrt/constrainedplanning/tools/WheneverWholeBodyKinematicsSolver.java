@@ -230,8 +230,10 @@ public class WheneverWholeBodyKinematicsSolver
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null, null,
-                                                                            registry);
+      WheneverKinematicsSolverSetting optimizationSettings = new WheneverKinematicsSolverSetting();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+                                                                            null, registry);
+      toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate();
@@ -387,7 +389,7 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      double solutionStableThreshold = 0.01;
+      double solutionStableThreshold = 0.001;
       double solutionQualityThreshold = 0.005;
 
       double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
@@ -580,8 +582,14 @@ public class WheneverWholeBodyKinematicsSolver
 
    private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-      System.out.println(newConfigurationData.rootTranslation);
-      System.out.println(newConfigurationData.rootOrientation);
+//      System.out.println(newConfigurationData.rootTranslation);
+//      System.out.println(newConfigurationData.rootOrientation);
+//      System.out.println(newConfigurationData.jointAngles[3]);
+//      System.out.println(newConfigurationData.jointAngles[4]);
+//      System.out.println(newConfigurationData.jointAngles[5]);
+//      System.out.println(newConfigurationData.jointAngles[6]);
+//      System.out.println(newConfigurationData.jointAngles[7]);      
+//      System.out.println(newConfigurationData.jointAngles[8]);
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 

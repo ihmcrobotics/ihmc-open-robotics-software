@@ -112,7 +112,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
-   private int numberOfExpanding = 500;
+   private int numberOfExpanding = 100;
 
    private int numberOfInitialGuess = 30;
 
@@ -179,7 +179,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (bestScoreInitialGuess < scoreInitialGuess)
          {
             bestScoreInitialGuess = scoreInitialGuess;
+
+            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[3].getQ());
+            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[4].getQ());
+            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[5].getQ());
+            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[6].getQ());
+
             rootNode = visualizedNode.createNodeCopy();
+            rootNode = new GenericTaskNode(visualizedNode);
+
+            PrintTools.info("root node " + rootNode.getNodeData(1));
+            PrintTools.info("root node " + rootNode.getOneDoFJoints()[3].getQ());
+            PrintTools.info("root node " + rootNode.getOneDoFJoints()[4].getQ());
+            PrintTools.info("root node " + rootNode.getOneDoFJoints()[5].getQ());
+            PrintTools.info("root node " + rootNode.getOneDoFJoints()[6].getQ());
          }
 
          /*
@@ -191,15 +204,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             PrintTools.info("initial guess terminate");
             state = CWBToolboxState.EXPAND_TREE;
 
-            if (startYoVariableServer)
+            if (true)
             {
-               tree = new CTTaskNodeTree(rootNode);
-               tree.setTaskRegion(taskRegion);
-
                rootNode.convertDataToNormalizedData(taskRegion);
 
-               //               treeVisualizer = new CTTreeVisualizer(tree);
-               //               treeVisualizer.initialize();
+               tree = new CTTaskNodeTree(rootNode);
+               tree.setTaskRegion(taskRegion);
             }
          }
 
@@ -209,14 +219,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          tree.updateRandomConfiguration();
          tree.updateNearestNode();
          tree.updateNewConfiguration();
-
          tree.getNewNode().convertNormalizedDataToData(taskRegion);
+         tree.getNewNode().setParentNode(tree.getNearNode());
 
          if (isValidNode(tree.getNewNode()))
          {
             tree.connectNewNode(true);
             if (tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
             {
+               PrintTools.info("terminate expanding");
                numberOfExpanding = 1; // for terminate
             }
          }
@@ -289,6 +300,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
          FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
 
+
       /*
        * update visualizer.
        */
@@ -356,12 +368,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       worldFrame = referenceFrames.getWorldFrame();
 
-      PrintTools.info("worldFrame in kinematics Solver ");
-      System.out.println(worldFrame.getTransformToWorldFrame());
-
-      PrintTools.info("midZUpFrame in kinematics Solver ");
-      System.out.println(midZUpFrame.getTransformToWorldFrame());
-
       /*
        * start toolbox
        */
@@ -415,6 +421,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       if (node.getParentNode() != null)
       {
+         PrintTools.warn("this node has parent node.");
+         PrintTools.info("node " + node.getParentNode().getNodeData(1));
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
                                                        node.getParentNode().getRootRotation());
          for (int i = 0; i < node.getParentNode().getOneDoFJoints().length; i++)
@@ -426,7 +434,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          PrintTools.warn("parentNode is required.");
          kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
-
       }
 
       kinematicsSolver.initialize();

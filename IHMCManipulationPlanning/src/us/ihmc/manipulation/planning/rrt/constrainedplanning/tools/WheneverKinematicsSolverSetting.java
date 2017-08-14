@@ -1,9 +1,9 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.tools;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class KinematicsToolboxOptimizationSettings implements ControllerCoreOptimizationSettings
+public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizationSettings
 {
    /** @inheritDoc */
    @Override
@@ -16,7 +16,7 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    @Override
    public double getJointAccelerationWeight()
    {
-      return 11.0;
+      return 0.5;
    }
 
    /** @inheritDoc */

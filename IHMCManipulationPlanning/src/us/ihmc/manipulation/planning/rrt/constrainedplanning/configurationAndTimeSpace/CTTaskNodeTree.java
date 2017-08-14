@@ -39,7 +39,7 @@ public class CTTaskNodeTree
 
    public CTTaskNodeTree(CTTaskNode rootNode)
    {
-      this.rootNode = rootNode;
+      this.rootNode = rootNode.createNodeCopy();
       this.wholeNodes.add(this.rootNode);
 
 //      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
@@ -286,8 +286,8 @@ public class CTTaskNodeTree
             optMatric = curMatric;
             nearNode = curNode;
          }
-      }
-
+      }     
+      
       this.nearNode = nearNode;
    }
 
@@ -432,6 +432,11 @@ public class CTTaskNodeTree
    public CTTaskNode getNewNode()
    {
       return newNode;
+   }
+   
+   public CTTaskNode getNearNode()
+   {
+      return nearNode;
    }
 
    public ArrayList<CTTaskNode> getPath()

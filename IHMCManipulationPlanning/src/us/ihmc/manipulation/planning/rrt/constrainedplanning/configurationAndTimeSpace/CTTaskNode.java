@@ -46,6 +46,8 @@ public abstract class CTTaskNode
       this.parentNode = node.parentNode;
       this.normalizedNodeData = node.normalizedNodeData;
       this.configurationJoints = node.configurationJoints;
+      this.configurationTranslation = node.configurationTranslation;
+      this.configurationRotation = node.configurationRotation;
    }
 
    public CTTaskNode(double[] rootData)
@@ -220,6 +222,10 @@ public abstract class CTTaskNode
       
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
+      
+      nodeCopy.configurationJoints = this.configurationJoints;
+      nodeCopy.configurationTranslation = this.configurationTranslation;
+      nodeCopy.configurationRotation = this.configurationRotation;
             
       return nodeCopy;
    }

@@ -209,7 +209,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if(visulaizerOn)
-         ThreadTools.sleep(5000);
+         ThreadTools.sleep(4000);
       
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -229,9 +229,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       initialOrientation.appendRollRotation(Math.PI*0.5);
       initialOrientation.appendYawRotation(Math.PI*0.5);
       initialOrientation.appendPitchRotation(-Math.PI*0.3);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(handTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      
+      initialOrientation = new Quaternion();
+      initialOrientation.appendPitchRotation(Math.PI*0.3);
+      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.45, 0.8), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       
       System.out.println("Start");
       
@@ -379,18 +387,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
       CTTaskNodeTree tree = new CTTaskNodeTree(rootNode);
       
-//      tree.getTaskNodeRegion().setRandomRegion(0, 0.0, endeffectorTrajectory.getTrajectoryTime());
-//      tree.getTaskNodeRegion().setRandomRegion(1, 0.75, 0.90);
-//      tree.getTaskNodeRegion().setRandomRegion(2, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(3, -20.0/180*Math.PI, 20.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(4, -5.0/180*Math.PI, 5.0/180*Math.PI);
-//      tree.getTaskNodeRegion().setRandomRegion(5, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(6, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(7, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(8, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(9, 0.0, 0.0);
-//      tree.getTaskNodeRegion().setRandomRegion(10, -90.0/180*Math.PI, 90.0/180*Math.PI);
-            
       tree.testMonteCarlo(50);
 
       CTTaskNodeTreeVisualizer taskNodeTreeVisualizer = new CTTaskNodeTreeVisualizer(scs, tree);
