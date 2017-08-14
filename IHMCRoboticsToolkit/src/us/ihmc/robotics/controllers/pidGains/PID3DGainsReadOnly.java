@@ -1,15 +1,9 @@
 package us.ihmc.robotics.controllers.pidGains;
 
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
 
 public interface PID3DGainsReadOnly
 {
-   public abstract Matrix3DReadOnly getProportionalGainMatrix();
-
-   public abstract Matrix3DReadOnly getDerivativeGainMatrix();
-
-   public abstract Matrix3DReadOnly getIntegralGainMatrix();
-
    public abstract double[] getProportionalGains();
 
    public abstract double[] getDerivativeGains();
@@ -25,4 +19,28 @@ public interface PID3DGainsReadOnly
    public abstract double getMaximumFeedback();
 
    public abstract double getMaximumFeedbackRate();
+
+   public default void getProportionalGainMatrix(Matrix3D proportialGainMatrixToPack)
+   {
+      setMatrixDiagonal(getProportionalGains(), proportialGainMatrixToPack);
+   }
+
+   public default void getDerivativeGainMatrix(Matrix3D derivativeGainMatrixToPack)
+   {
+      setMatrixDiagonal(getDerivativeGains(), derivativeGainMatrixToPack);
+   }
+
+   public default void getIntegralGainMatrix(Matrix3D integralGainMatrixToPack)
+   {
+      setMatrixDiagonal(getIntegralGains(), integralGainMatrixToPack);
+   }
+
+   static void setMatrixDiagonal(double[] diagonalElements, Matrix3D matrixToFill)
+   {
+      matrixToFill.fill(0.0);
+      for (int i = 0; i < 3; i++)
+      {
+         matrixToFill.setElement(i, i, diagonalElements[i]);
+      }
+   }
 }

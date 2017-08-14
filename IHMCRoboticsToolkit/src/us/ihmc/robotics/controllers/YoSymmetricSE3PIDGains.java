@@ -1,9 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.MatrixUpdater;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -129,48 +126,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 
       if (updateNow)
          kdUpdater.variableChanged(null);
-   }
-
-   @Override
-   public Matrix3DReadOnly getProportionalGainMatrix()
-   {
-      Matrix3D proportionalGainMatrix = new Matrix3D();
-
-      for (int i = 0; i < 3; i++)
-      {
-         proportionalGain.addVariableChangedListener(new MatrixUpdater(i, i, proportionalGainMatrix));
-      }
-
-      proportionalGain.notifyVariableChangedListeners();
-      return proportionalGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getDerivativeGainMatrix()
-   {
-      Matrix3D derivativeGainMatrix = new Matrix3D();
-
-      for (int i = 0; i < 3; i++)
-      {
-         derivativeGain.addVariableChangedListener(new MatrixUpdater(i, i, derivativeGainMatrix));
-      }
-
-      derivativeGain.notifyVariableChangedListeners();
-      return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getIntegralGainMatrix()
-   {
-      Matrix3D integralGainMatrix = new Matrix3D();
-
-      for (int i = 0; i < 3; i++)
-      {
-         integralGain.addVariableChangedListener(new MatrixUpdater(i, i, integralGainMatrix));
-      }
-
-      integralGain.notifyVariableChangedListeners();
-      return integralGainMatrix;
    }
 
    @Override

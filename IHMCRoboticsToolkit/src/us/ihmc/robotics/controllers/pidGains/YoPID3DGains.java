@@ -3,8 +3,6 @@ package us.ihmc.robotics.controllers.pidGains;
 import java.util.EnumMap;
 import java.util.Map;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -27,10 +25,6 @@ public class YoPID3DGains implements PID3DGains
    private final double[] tempDerivativeGains = new double[3];
    private final double[] tempIntegralGains = new double[3];
 
-   private final Matrix3D proportionalGainMatrix = new Matrix3D();
-   private final Matrix3D derivativeGainMatrix = new Matrix3D();
-   private final Matrix3D integralGainMatrix = new Matrix3D();
-
    private final YoBoolean updateFromDampingRatio;
 
    public YoPID3DGains(String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
@@ -43,10 +37,6 @@ public class YoPID3DGains implements PID3DGains
       updateFromDampingRatio = new YoBoolean("UpdateFromDampingRatio" + suffix, registry);
       updateFromDampingRatio.set(true);
       createDampingUpdaters(kpMap, kdMap, zetaMap, updateFromDampingRatio, gainCoupling);
-
-      createGainMatrixUpdater(kpMap, proportionalGainMatrix);
-      createGainMatrixUpdater(kdMap, derivativeGainMatrix);
-      createGainMatrixUpdater(kiMap, integralGainMatrix);
 
       maxIntegralError = new YoDouble("maxIntegralError" + suffix, registry);
       maxDerivativeError = new YoDouble("maxDerivativeError" + suffix, registry);
@@ -134,31 +124,6 @@ public class YoPID3DGains implements PID3DGains
       // This will not update listeners to avoid an infinite update loop.
       ZetaUpdater zetaUpdater = new ZetaUpdater(kp, kd, zeta, update);
       kd.addVariableChangedListener(zetaUpdater);
-   }
-
-   private static void createGainMatrixUpdater(Map<Axis, YoDouble> map, Matrix3D matrixToUpdate)
-   {
-      map.get(Axis.X).addVariableChangedListener(new MatrixUpdater(0, 0, matrixToUpdate));
-      map.get(Axis.Y).addVariableChangedListener(new MatrixUpdater(1, 1, matrixToUpdate));
-      map.get(Axis.Z).addVariableChangedListener(new MatrixUpdater(2, 2, matrixToUpdate));
-   }
-
-   @Override
-   public Matrix3DReadOnly getProportionalGainMatrix()
-   {
-      return proportionalGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getDerivativeGainMatrix()
-   {
-      return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getIntegralGainMatrix()
-   {
-      return integralGainMatrix;
    }
 
    @Override

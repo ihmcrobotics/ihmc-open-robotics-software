@@ -1,7 +1,5 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 
 public class PositionPIDGains implements PID3DGains
@@ -18,10 +16,6 @@ public class PositionPIDGains implements PID3DGains
    private double positionMaximumFeedbackRate = Double.POSITIVE_INFINITY;
 
    private TangentialDampingGains tangentialDampingGains;
-
-   private final Matrix3D proportionalGainMatrix = new Matrix3D();
-   private final Matrix3D derivativeGainMatrix = new Matrix3D();
-   private final Matrix3D integralGainMatrix = new Matrix3D();
 
    public void setGains(double proportionalGain, double derivativeGain)
    {
@@ -48,7 +42,6 @@ public class PositionPIDGains implements PID3DGains
       this.positionProportionalGains[0] = proportionalGainX;
       this.positionProportionalGains[1] = proportionalGainY;
       this.positionProportionalGains[2] = proportionalGainZ;
-      updateGainMatrices();
    }
 
    @Override
@@ -57,7 +50,6 @@ public class PositionPIDGains implements PID3DGains
       this.positionDerivativeGains[0] = derivativeGainX;
       this.positionDerivativeGains[1] = derivativeGainY;
       this.positionDerivativeGains[2] = derivativeGainZ;
-      updateGainMatrices();
    }
 
    @Override
@@ -67,7 +59,6 @@ public class PositionPIDGains implements PID3DGains
       this.positionIntegralGains[1] = integralGainY;
       this.positionIntegralGains[2] = integralGainZ;
       this.positionMaxIntegralError = maxIntegralError;
-      updateGainMatrices();
    }
 
    public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
@@ -141,36 +132,5 @@ public class PositionPIDGains implements PID3DGains
    public double getMaximumProportionalError()
    {
       return positionMaxProportionalError;
-   }
-
-   private void updateGainMatrices()
-   {
-      proportionalGainMatrix.fill(0.0);
-      derivativeGainMatrix.fill(0.0);
-      integralGainMatrix.fill(0.0);
-      for (int i = 0; i < 3; i++)
-      {
-         proportionalGainMatrix.setElement(i, i, positionProportionalGains[i]);
-         derivativeGainMatrix.setElement(i, i, positionDerivativeGains[i]);
-         integralGainMatrix.setElement(i, i, positionIntegralGains[i]);
-      }
-   }
-
-   @Override
-   public Matrix3DReadOnly getProportionalGainMatrix()
-   {
-      return proportionalGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getDerivativeGainMatrix()
-   {
-      return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getIntegralGainMatrix()
-   {
-      return integralGainMatrix;
    }
 }

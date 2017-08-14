@@ -1,7 +1,5 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 
@@ -17,10 +15,6 @@ public class OrientationPIDGains implements PID3DGains
 
    private double orientationMaximumFeedback = Double.POSITIVE_INFINITY;
    private double orientationMaximumFeedbackRate = Double.POSITIVE_INFINITY;
-
-   private final Matrix3D proportionalGainMatrix = new Matrix3D();
-   private final Matrix3D derivativeGainMatrix = new Matrix3D();
-   private final Matrix3D integralGainMatrix = new Matrix3D();
 
    @Override
    public void set(PID3DGainsReadOnly gains)
@@ -38,8 +32,6 @@ public class OrientationPIDGains implements PID3DGains
 
       orientationMaximumFeedback = gains.getMaximumFeedback();
       orientationMaximumFeedbackRate = gains.getMaximumFeedbackRate();
-
-      updateGainMatrices();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
@@ -60,7 +52,6 @@ public class OrientationPIDGains implements PID3DGains
       this.orientationProportionalGains[0] = proportionalGainX;
       this.orientationProportionalGains[1] = proportionalGainY;
       this.orientationProportionalGains[2] = proportionalGainZ;
-      updateGainMatrices();
    }
 
    @Override
@@ -69,7 +60,6 @@ public class OrientationPIDGains implements PID3DGains
       this.orientationDerivativeGains[0] = derivativeGainX;
       this.orientationDerivativeGains[1] = derivativeGainY;
       this.orientationDerivativeGains[2] = derivativeGainZ;
-      updateGainMatrices();
    }
 
    @Override
@@ -79,7 +69,6 @@ public class OrientationPIDGains implements PID3DGains
       this.orientationIntegralGains[1] = integralGainY;
       this.orientationIntegralGains[2] = integralGainZ;
       this.orientationMaxIntegralError = maxIntegralError;
-      updateGainMatrices();
    }
 
    @Override
@@ -147,36 +136,5 @@ public class OrientationPIDGains implements PID3DGains
    public double getMaximumProportionalError()
    {
       return orientationMaxProportionalError;
-   }
-
-   private void updateGainMatrices()
-   {
-      proportionalGainMatrix.fill(0.0);
-      derivativeGainMatrix.fill(0.0);
-      integralGainMatrix.fill(0.0);
-      for (int i = 0; i < 3; i++)
-      {
-         proportionalGainMatrix.setElement(i, i, orientationProportionalGains[i]);
-         derivativeGainMatrix.setElement(i, i, orientationDerivativeGains[i]);
-         integralGainMatrix.setElement(i, i, orientationIntegralGains[i]);
-      }
-   }
-
-   @Override
-   public Matrix3DReadOnly getProportionalGainMatrix()
-   {
-      return proportionalGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getDerivativeGainMatrix()
-   {
-      return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getIntegralGainMatrix()
-   {
-      return integralGainMatrix;
    }
 }

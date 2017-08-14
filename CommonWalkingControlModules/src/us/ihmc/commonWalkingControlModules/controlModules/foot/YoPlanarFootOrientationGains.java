@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.MatrixUpdater;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -49,34 +46,6 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
-   }
-
-   @Override
-   public Matrix3DReadOnly getProportionalGainMatrix()
-   {
-      Matrix3D proportionalGainMatrix = new Matrix3D();
-
-      proportionalYGain.addVariableChangedListener(new MatrixUpdater(1, 1, proportionalGainMatrix));
-      proportionalYGain.notifyVariableChangedListeners();
-
-      return proportionalGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getDerivativeGainMatrix()
-   {
-      Matrix3D derivativeGainMatrix = new Matrix3D();
-
-      derivativeYGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeGainMatrix));
-      derivativeYGain.notifyVariableChangedListeners();
-
-      return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3DReadOnly getIntegralGainMatrix()
-   {
-      return new Matrix3D();
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

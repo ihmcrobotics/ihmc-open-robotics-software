@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -22,9 +22,7 @@ public class AxisAngleOrientationController
    private final YoFrameVector rotationErrorCumulated;
    private final YoFrameVector velocityError;
 
-   private final Matrix3DReadOnly proportionalGainMatrix;
-   private final Matrix3DReadOnly derivativeGainMatrix;
-   private final Matrix3DReadOnly integralGainMatrix;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
@@ -62,9 +60,6 @@ public class AxisAngleOrientationController
          gains = new YoAxisAngleOrientationGains(prefix, registry);
 
       this.gains = gains;
-      proportionalGainMatrix = gains.getProportionalGainMatrix();
-      derivativeGainMatrix = gains.getDerivativeGainMatrix();
-      integralGainMatrix = gains.getIntegralGainMatrix();
 
       rotationErrorInBody = new YoFrameVector(prefix + "RotationErrorInBody", bodyFrame, registry);
       rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
@@ -174,7 +169,8 @@ public class AxisAngleOrientationController
       proportionalTerm.scale(errorAngleAxis.getAngle());
       rotationErrorInBody.set(proportionalTerm);
 
-      proportionalGainMatrix.transform(proportionalTerm.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(proportionalTerm.getVector());
    }
 
    private void computeDerivativeTerm(FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity)
@@ -193,7 +189,8 @@ public class AxisAngleOrientationController
       }
 
       velocityError.set(derivativeTerm);
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()
@@ -217,7 +214,8 @@ public class AxisAngleOrientationController
       }
 
       rotationErrorCumulated.getFrameTuple(integralTerm);
-      integralGainMatrix.transform(integralTerm.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(integralTerm.getVector());
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
