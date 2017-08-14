@@ -121,6 +121,65 @@ public interface PID3DGains extends PID3DGainsReadOnly
    }
 
    /**
+    * Sets the proportional PID gains for all three dimensions to the provided gain.
+    *
+    * @param proportionalGain the new proportional gain for the three dimensions.
+    * @see PID3DGains#setProportionalGains(double, double, double)
+    */
+   public default void setProportionalGains(double proportionalGain)
+   {
+      setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
+   }
+
+   /**
+    * Sets the derivative PID gains for all three dimensions to the provided gain.
+    * <p>
+    * Note, that depending on the implementation the gains might use a damping ratio
+    * to determine the derivative gains from the current proportional gains and the
+    * current damping ratio. Those implementations will typically update the damping
+    * ratio from the current proportional gain and the provided derivative gain if the
+    * derivative gain is set. In that case the order in which the proportional and
+    * derivative gains are set might influence the outcome. Typically, it is safe to
+    * first set the proportional gain and then set the derivative gain or damping
+    * ratio. For an example of this see {@link DefaultPID3DGains}.
+    * </p>
+    * @param derivativeGain the new derivative gain for the three dimensions.
+    * @see PID3DGains#setDerivativeGains(double, double, double)
+    */
+   public default void setDerivativeGains(double derivativeGain)
+   {
+      setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
+   }
+
+   /**
+    * Sets the integral PID gains for all three dimensions to the provided gain.
+    * Also sets the maximum integral error allowed by the PID controller.
+    *
+    * @param integralGain the new integral gain for the three dimensions.
+    * @param maxIntegralError the new maximum integral error.
+    * @see PID3DGains#setIntegralGains(double, double, double)
+    */
+   public default void setIntegralGains(double integralGain, double maxIntegralError)
+   {
+      setIntegralGains(integralGain, integralGain, integralGain, maxIntegralError);
+   }
+
+   /**
+    * Sets the gains for all three directions to the provided values.
+    *
+    * @param proportionalGain the new proportional gain for the three dimensions.
+    * @param derivativeGain the new derivative gain for the three dimensions.
+    * @param integralGain the new integral gain for the three dimensions.
+    * @param maxIntegralError the new maximum integral error.
+    */
+   public default void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
+   {
+      setProportionalGains(proportionalGain);
+      setDerivativeGains(derivativeGain);
+      setIntegralGains(integralGain, maxIntegralError);
+   }
+
+   /**
     * Copies the gains and parameters from the provided {@link PID3DGainsReadOnly}
     * parameters into this.
     * <p>

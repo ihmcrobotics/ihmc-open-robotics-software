@@ -19,6 +19,11 @@ public class DefaultPID3DGains implements PID3DGains
    private double maxFeedback = Double.POSITIVE_INFINITY;
    private double maxFeedbackRate = Double.POSITIVE_INFINITY;
 
+   public DefaultPID3DGains()
+   {
+      this(GainCoupling.NONE);
+   }
+
    public DefaultPID3DGains(GainCoupling gainCoupling)
    {
       this.gainCoupling = gainCoupling;

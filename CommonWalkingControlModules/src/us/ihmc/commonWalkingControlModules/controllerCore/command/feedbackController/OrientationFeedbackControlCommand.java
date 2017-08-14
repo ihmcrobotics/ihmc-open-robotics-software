@@ -6,9 +6,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.controllers.OrientationPIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -49,7 +49,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final OrientationPIDGains gains = new OrientationPIDGains();
+   private final PID3DGains gains = new DefaultPID3DGains();
    /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
    private ReferenceFrame angularGainsFrame = null;
 
