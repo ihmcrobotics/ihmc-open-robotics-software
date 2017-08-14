@@ -1,6 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -19,9 +19,7 @@ public class EuclideanPositionController implements PositionController
    private final YoFrameVector positionErrorCumulated;
    private final YoFrameVector velocityError;
 
-   private final Matrix3DReadOnly proportionalGainMatrix;
-   private final Matrix3DReadOnly derivativeGainMatrix;
-   private final Matrix3DReadOnly integralGainMatrix;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
@@ -56,9 +54,6 @@ public class EuclideanPositionController implements PositionController
          gains = new YoEuclideanPositionGains(prefix, registry);
 
       this.gains = gains;
-      proportionalGainMatrix = gains.getProportionalGainMatrix();
-      derivativeGainMatrix = gains.getDerivativeGainMatrix();
-      integralGainMatrix = gains.getIntegralGainMatrix();
 
       positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
       positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
@@ -162,7 +157,8 @@ public class EuclideanPositionController implements PositionController
          proportionalTerm.scale(maximumError / errorMagnitude);
       }
 
-      proportionalGainMatrix.transform(proportionalTerm.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(proportionalTerm.getVector());
    }
 
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
@@ -181,7 +177,8 @@ public class EuclideanPositionController implements PositionController
       }
 
       velocityError.set(derivativeTerm);
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()
@@ -204,7 +201,8 @@ public class EuclideanPositionController implements PositionController
       }
 
       positionErrorCumulated.getFrameTuple(integralTerm);
-      integralGainMatrix.transform(integralTerm.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(integralTerm.getVector());
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)

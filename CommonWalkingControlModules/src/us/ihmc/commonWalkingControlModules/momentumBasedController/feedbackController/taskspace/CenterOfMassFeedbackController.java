@@ -1,7 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -11,11 +19,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -24,6 +29,9 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
 {
@@ -69,7 +77,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
-   private final Matrix3DReadOnly kp, kd, ki;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private ReferenceFrame centerOfMassFrame;
    private CentroidalMomentumHandler centroidalMomentumHandler;
@@ -86,9 +94,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getCenterOfMassGains();
-      kp = gains.getProportionalGainMatrix();
-      kd = gains.getDerivativeGainMatrix();
-      ki = gains.getIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);
@@ -260,7 +265,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     * <p>
     * This method also updates {@link #yoCurrentPosition} and {@link #yoErrorPosition}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    private void computeProportionalTerm(FrameVector feedbackTermToPack)
@@ -278,7 +283,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorPosition.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
-      kp.transform(feedbackTermToPack.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
    }
 
    /**
@@ -291,7 +297,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     * <p>
     * This method also updates {@link #yoCurrentLinearVelocity} and {@link #yoErrorLinearVelocity}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified
     */
    private void computeDerivativeTerm(FrameVector feedbackTermToPack)
@@ -309,7 +315,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
-      kd.transform(feedbackTermToPack.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
    }
 
    /**
@@ -321,7 +328,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     * <p>
     * This method also updates {@link #yoErrorPositionIntegrated}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    private void computeIntegralTerm(FrameVector feedbackTermToPack)
@@ -343,7 +350,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
-      ki.transform(feedbackTermToPack.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
    }
 
    @Override

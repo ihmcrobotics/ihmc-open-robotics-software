@@ -1,7 +1,14 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -11,11 +18,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -27,6 +31,9 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
@@ -75,7 +82,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPositionPIDGainsInterface gains;
-   private final Matrix3DReadOnly kp, kd, ki;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
    private final YoSE3OffsetFrame controlFrame;
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
@@ -99,9 +106,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getPositionGains(endEffector);
-      kp = gains.getProportionalGainMatrix();
-      kd = gains.getDerivativeGainMatrix();
-      ki = gains.getIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
@@ -287,7 +291,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * <p>
     * This method also updates {@link #yoCurrentPosition} and {@link #yoErrorPosition}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    private void computeProportionalTerm(FrameVector feedbackTermToPack)
@@ -309,7 +313,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      kp.transform(feedbackTermToPack.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -324,7 +329,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * <p>
     * This method also updates {@link #yoCurrentLinearVelocity} and {@link #yoErrorLinearVelocity}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified
     */
    private void computeDerivativeTerm(FrameVector feedbackTermToPack)
@@ -347,7 +352,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      kd.transform(feedbackTermToPack.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -362,7 +368,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * <p>
     * This method also updates {@link #yoErrorPositionIntegrated}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    private void computeIntegralTerm(FrameVector feedbackTermToPack)
@@ -388,7 +394,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      ki.transform(feedbackTermToPack.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -404,7 +411,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
     * moving frame, here a frame attache to the end-effector.
     * </p>
-    * 
+    *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
     *           subtracted. Its frame is changed to {@code controlFrame}. Modified.
     */
@@ -431,7 +438,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
     * moving frame, here a frame attache to the end-effector.
     * </p>
-    * 
+    *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
     *           added. Its frame is changed to {@code worldFrame}. Modified.
     */
