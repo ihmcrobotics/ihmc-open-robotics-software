@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -160,7 +160,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       double stepLength = steppingParameters.getDefaultStepLength();
       double stepWidth = steppingParameters.getMinStepWidth();
       RobotSide side = RobotSide.LEFT;
-      FramePoint framePosition = new FramePoint();
+      FramePoint3D framePosition = new FramePoint3D();
       framePosition.setToZero(soleFrames.get(RobotSide.RIGHT));
       framePosition.changeFrame(ReferenceFrame.getWorldFrame());
 

@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.C
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -20,9 +20,9 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void update(double currentTime);
 
-   void getDesiredAngularMomentum(FrameVector desiredAngMomToPack);
+   void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack);
 
-   void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack);
+   void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack);
 
    void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack);
 

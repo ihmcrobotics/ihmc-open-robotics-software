@@ -15,8 +15,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -85,7 +85,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    protected final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
    protected final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
-   protected final ArrayList<FramePoint2d> unclippedFootstepSolutions = new ArrayList<>();
+   protected final ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
 
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
@@ -136,13 +136,13 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected boolean localUseStepAdjustment;
    protected boolean localScaleUpcomingStepWeights;
 
-   private final FramePoint2d tempPoint2d = new FramePoint2d();
-   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FramePoint2D tempPoint2d = new FramePoint2D();
+   private final FrameVector2D tempVector2d = new FrameVector2D();
 
-   protected final FramePoint2d currentICP = new FramePoint2d();
-   protected final FramePoint2d desiredICP = new FramePoint2d();
-   protected final FramePoint2d perfectCMP = new FramePoint2d();
-   protected final FrameVector2d desiredICPVelocity = new FrameVector2d();
+   protected final FramePoint2D currentICP = new FramePoint2D();
+   protected final FramePoint2D desiredICP = new FramePoint2D();
+   protected final FramePoint2D perfectCMP = new FramePoint2D();
+   protected final FrameVector2D desiredICPVelocity = new FrameVector2D();
 
    protected final SimpleICPOptimizationQPSolver solver;
 
@@ -203,7 +203,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       {
          upcomingFootstepLocations.add(new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation" + i, worldFrame, registry));
          footstepSolutions.add(new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation" + i, worldFrame, registry));
-         unclippedFootstepSolutions.add(new FramePoint2d(worldFrame));
+         unclippedFootstepSolutions.add(new FramePoint2D(worldFrame));
 
          YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
@@ -227,7 +227,8 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
 
-      setupVisualizers(yoGraphicsListRegistry);
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry);
    }
 
    public void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -242,7 +243,6 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
-
    }
 
    @Override
@@ -394,13 +394,13 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    }
 
    @Override
-   public void getDesiredCMP(FramePoint2d desiredCMP)
+   public void getDesiredCMP(FramePoint2D desiredCMP)
    {
       feedbackCMP.getFrameTuple2d(desiredCMP);
    }
 
    @Override
-   public void getFootstepSolution(int footstepIndex, FramePoint2d footstepSolutionToPack)
+   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack)
    {
       footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
    }
@@ -418,7 +418,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    }
 
    @Override
-   public abstract void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0);
+   public abstract void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
 
    @Override
    public void setFinalTransferSplitFractionToDefault()
@@ -426,7 +426,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    }
 
    @Override
-   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity)
+   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
    {
    }
 

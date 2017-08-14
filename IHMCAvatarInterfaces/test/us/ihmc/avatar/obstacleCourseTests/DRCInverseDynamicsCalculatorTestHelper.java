@@ -16,8 +16,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -152,8 +152,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
       rootJoint.getWrench(rootJointWrench);
 
-      FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
-      FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
+      FrameVector3D rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
+      FrameVector3D rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
 
       rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
       rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
@@ -164,7 +164,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointExternalForcePoint.setForce(rootJointForce.getVectorCopy());
       rootJointExternalForcePoint.setMoment(rootJointTorque.getVectorCopy());
 
-      FramePoint rootJointPosition = new FramePoint(bodyFixedFrame);
+      FramePoint3D rootJointPosition = new FramePoint3D(bodyFixedFrame);
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       rootJointExternalForcePoint.setOffsetWorld(rootJointPosition.getPointCopy());
@@ -280,8 +280,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
       rootJoint.getWrench(rootJointWrench);
 
-      FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
-      FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
+      FrameVector3D rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
+      FrameVector3D rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
 
       rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
       rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
@@ -520,15 +520,15 @@ public class DRCInverseDynamicsCalculatorTestHelper
          footExternalForcePoint.getMoment(externalMoment);
          //         System.out.println("externalMoment = " + externalMoment);
 
-         FrameVector externalForcePointForce = new FrameVector(ReferenceFrame.getWorldFrame(), externalForce);
-         FrameVector externalForcePointMoment = new FrameVector(ReferenceFrame.getWorldFrame(), externalMoment);
+         FrameVector3D externalForcePointForce = new FrameVector3D(ReferenceFrame.getWorldFrame(), externalForce);
+         FrameVector3D externalForcePointMoment = new FrameVector3D(ReferenceFrame.getWorldFrame(), externalMoment);
 
          externalForcePointForce.changeFrame(footFrame);
          externalForcePointMoment.changeFrame(footFrame);
 
          Point3D position = new Point3D();
          footExternalForcePoint.getPosition(position);
-         FramePoint pointOfApplication = new FramePoint(ReferenceFrame.getWorldFrame(), position);
+         FramePoint3D pointOfApplication = new FramePoint3D(ReferenceFrame.getWorldFrame(), position);
          pointOfApplication.changeFrame(footFrame);
 
          Vector3D torqueFromLeverArm = new Vector3D();
@@ -537,8 +537,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          externalForcePointMoment.add(torqueFromLeverArm);
 
-         FrameVector totalTorqueOnFoot = wrench.getAngularPartAsFrameVectorCopy();
-         FrameVector totalForceOnFoot = wrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D totalTorqueOnFoot = wrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D totalForceOnFoot = wrench.getLinearPartAsFrameVectorCopy();
 
          totalTorqueOnFoot.add(externalForcePointMoment);
          totalForceOnFoot.add(externalForcePointForce);
@@ -552,8 +552,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setFullRobotModelRootJointVelocityAndAngularVelocityToMatchRobot(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
-      FrameVector angularVelocityFrameVector = new FrameVector();
-      FrameVector linearVelocityFrameVector = new FrameVector();
+      FrameVector3D angularVelocityFrameVector = new FrameVector3D();
+      FrameVector3D linearVelocityFrameVector = new FrameVector3D();
 
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
       ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
@@ -573,7 +573,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       floatingJoint.setAngularVelocityInBody(rootJointTwist.getAngularPartCopy());
 
-      FrameVector linearVelocityInWorld = new FrameVector();
+      FrameVector3D linearVelocityInWorld = new FrameVector3D();
       rootJointTwist.getLinearPart(linearVelocityInWorld);
 
       linearVelocityInWorld.changeFrame(ReferenceFrame.getWorldFrame());
@@ -711,16 +711,16 @@ public class DRCInverseDynamicsCalculatorTestHelper
          inverseDynamicsCalculator.getExternalWrench(foot, wrench);
 
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
-         FramePoint pointOfWrenchApplication = new FramePoint(bodyFixedFrame);
+         FramePoint3D pointOfWrenchApplication = new FramePoint3D(bodyFixedFrame);
          pointOfWrenchApplication.changeFrame(ReferenceFrame.getWorldFrame());
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
          footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication.getPointCopy());
 
-         FrameVector wrenchForce = wrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D wrenchForce = wrench.getLinearPartAsFrameVectorCopy();
          wrenchForce.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FrameVector wrenchTorque = wrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D wrenchTorque = wrench.getAngularPartAsFrameVectorCopy();
          wrenchTorque.changeFrame(ReferenceFrame.getWorldFrame());
 
          footExternalForcePoint.setForce(wrenchForce.getVectorCopy());
@@ -765,9 +765,9 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
       ReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
-      FrameVector angularAccelerationInBody = new FrameVector();
+      FrameVector3D angularAccelerationInBody = new FrameVector3D();
       floatingJoint.getAngularAcceleration(angularAccelerationInBody, bodyFrame);
-      FrameVector linearAccelerationInBody = new FrameVector();
+      FrameVector3D linearAccelerationInBody = new FrameVector3D();
       floatingJoint.getLinearAcceleration(linearAccelerationInBody);
       linearAccelerationInBody.changeFrame(bodyFrame);
 
@@ -788,8 +788,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAcceleration));
-      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
+      FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAcceleration));
+      FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
       //      originAcceleration.changeFrame(elevatorFrame);
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
@@ -807,8 +807,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(elevatorFrame);
-      FrameVector angularAcceleration = new FrameVector(bodyFrame);
+      FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
+      FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
       floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
       floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
@@ -829,8 +829,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(elevatorFrame);
-      FrameVector angularAcceleration = new FrameVector(bodyFrame);
+      FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
+      FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
       floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
       floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());

@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -71,7 +71,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final YoFramePoint yoDesiredCMP;
 
    private final ICPOptimizationController icpOptimizationController;
-   private final ICPControlGains icpGains;
+   private final YoICPControlGains icpGains;
    private final YoDouble omega0 = new YoDouble("omega0", registry);
    private final double totalMass;
 
@@ -108,7 +108,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpPlanner.setOmega0(omega0.getDoubleValue());
       icpPlanner.initializeParameters(controlToolbox.getCapturePointPlannerParameters());
 
-      icpGains = new ICPControlGains("CoMController", registry);
+      icpGains = new YoICPControlGains("CoMController", registry);
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
@@ -143,14 +143,14 @@ public class SphereICPOptimizationController implements GenericSphereController
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint desiredCapturePoint = new FramePoint();
-   private final FramePoint finalDesiredCapturePoint = new FramePoint();
-   private final FrameVector desiredCapturePointVelocity = new FrameVector();
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
-   private final FramePoint2d perfectCMP = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint3D desiredCapturePoint = new FramePoint3D();
+   private final FramePoint3D finalDesiredCapturePoint = new FramePoint3D();
+   private final FrameVector3D desiredCapturePointVelocity = new FrameVector3D();
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
+   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
 
    private int counter = 0;
    public void doControl()
@@ -174,10 +174,10 @@ public class SphereICPOptimizationController implements GenericSphereController
       desiredCapturePointVelocity2d.setByProjectionOntoXYPlane(desiredCapturePointVelocity);
       finalDesiredCapturePoint2d.setByProjectionOntoXYPlane(finalDesiredCapturePoint);
 
-      FramePoint2d desiredCMP = yoDesiredCMP.getFramePoint2dCopy();
+      FramePoint2D desiredCMP = yoDesiredCMP.getFramePoint2dCopy();
 
       double fZ = heightController.getVerticalForce();
-      FrameVector reactionForces = computeGroundReactionForce(desiredCMP, fZ);
+      FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
       planarForces.setByProjectionOntoXYPlane(reactionForces);
 
@@ -199,10 +199,10 @@ public class SphereICPOptimizationController implements GenericSphereController
       return desiredForces.getVector3dCopy();
    }
 
-   private final FramePoint cmp3d = new FramePoint();
-   private final FrameVector groundReactionForce = new FrameVector();
-   private final FramePoint centerOfMass = new FramePoint();
-   private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
+   private final FramePoint3D cmp3d = new FramePoint3D();
+   private final FrameVector3D groundReactionForce = new FrameVector3D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private FrameVector3D computeGroundReactionForce(FramePoint2D cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0.getDoubleValue());
@@ -235,7 +235,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private class StandingState extends State<SupportState>
    {
-      private final FramePoint2d desiredCMP = new FramePoint2d();
+      private final FramePoint2D desiredCMP = new FramePoint2D();
 
       public StandingState()
       {
@@ -279,8 +279,8 @@ public class SphereICPOptimizationController implements GenericSphereController
    private class SingleSupportState extends State<SupportState>
    {
       private final FramePose footstepPose = new FramePose();
-      private final FramePoint2d footstepPositionSolution = new FramePoint2d();
-      private final FramePoint2d desiredCMP = new FramePoint2d();
+      private final FramePoint2D footstepPositionSolution = new FramePoint2D();
+      private final FramePoint2D desiredCMP = new FramePoint2D();
 
       public SingleSupportState()
       {
@@ -366,8 +366,8 @@ public class SphereICPOptimizationController implements GenericSphereController
    private class DoubleSupportState extends State<SupportState>
    {
       private final FramePose footstepPose = new FramePose();
-      private final FramePoint2d footstepPositionSolution = new FramePoint2d();
-      private final FramePoint2d desiredCMP = new FramePoint2d();
+      private final FramePoint2D footstepPositionSolution = new FramePoint2D();
+      private final FramePoint2D desiredCMP = new FramePoint2D();
 
       public DoubleSupportState()
       {

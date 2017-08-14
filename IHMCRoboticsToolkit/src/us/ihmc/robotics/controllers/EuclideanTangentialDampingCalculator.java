@@ -6,7 +6,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -18,7 +18,7 @@ public class EuclideanTangentialDampingCalculator
 {
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame bodyFrameTangentToControl;
-   private final FrameVector positionError = new FrameVector();
+   private final FrameVector3D positionError = new FrameVector3D();
 
    private final TangentialDampingGains tangentialDampingGains;
 

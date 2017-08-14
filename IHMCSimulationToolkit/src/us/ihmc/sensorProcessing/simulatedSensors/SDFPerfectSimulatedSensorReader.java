@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -148,10 +148,10 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
-      FrameVector linearVelocity = robot.getRootJointVelocity();
+      FrameVector3D linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
-      FrameVector angularVelocity = robot.getRootJointAngularVelocityInRootJointFrame(pelvisFrame);
+      FrameVector3D angularVelocity = robot.getRootJointAngularVelocityInRootJointFrame(pelvisFrame);
       angularVelocity.changeFrame(pelvisFrame);
 
       Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());

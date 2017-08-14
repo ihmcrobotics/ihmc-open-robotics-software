@@ -14,8 +14,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -31,8 +31,8 @@ public class CenterOfPressureVisualizer
 
    private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap<>();
    private final YoFramePoint overallRawCoPPositionInWorld;
-   private final FramePoint2d tempRawCoP2d = new FramePoint2d();
-   private final FramePoint tempRawCoP = new FramePoint();
+   private final FramePoint2D tempRawCoP2d = new FramePoint2D();
+   private final FramePoint3D tempRawCoP = new FramePoint3D();
    private final Wrench tempWrench = new Wrench();
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Collection<RigidBody> footRigidBodies;

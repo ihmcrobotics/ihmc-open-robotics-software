@@ -25,8 +25,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -57,12 +57,12 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       FrameOrientation desiredOrientation = new FrameOrientation();
@@ -90,8 +90,8 @@ public final class SpatialFeedbackControllerTest
       gains.setOrientationGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -103,12 +103,12 @@ public final class SpatialFeedbackControllerTest
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
       
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -163,12 +163,12 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       FrameOrientation desiredOrientation = new FrameOrientation();
@@ -195,8 +195,8 @@ public final class SpatialFeedbackControllerTest
       gains.setOrientationGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -226,12 +226,12 @@ public final class SpatialFeedbackControllerTest
 
       DenseMatrix64F tempJtW = new DenseMatrix64F(numberOfDoFs, 6);
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
       
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;

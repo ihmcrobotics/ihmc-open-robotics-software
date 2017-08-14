@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple<FramePoint, Point3D> implements PointInterface
+public class FramePoint3D extends FrameTuple3D<FramePoint3D, Point3D> implements PointInterface
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -27,7 +27,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly position)
+   public FramePoint3D(ReferenceFrame referenceFrame, Tuple3DReadOnly position)
    {
       this(referenceFrame, position, null);
    }
@@ -37,7 +37,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, Tuple3DReadOnly position, String name)
+   public FramePoint3D(ReferenceFrame referenceFrame, Tuple3DReadOnly position, String name)
    {
       super(referenceFrame, new Point3D(position), name);
    }
@@ -47,7 +47,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double[] position)
+   public FramePoint3D(ReferenceFrame referenceFrame, double[] position)
    {
       this(referenceFrame, position, null);
    }
@@ -57,7 +57,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double[] position, String name)
+   public FramePoint3D(ReferenceFrame referenceFrame, double[] position, String name)
    {
       super(referenceFrame, new Point3D(position), name);
    }
@@ -67,7 +67,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint()
+   public FramePoint3D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -77,7 +77,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame)
+   public FramePoint3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new Point3D(), null);
    }
@@ -87,7 +87,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, String name)
+   public FramePoint3D(ReferenceFrame referenceFrame, String name)
    {
       super(referenceFrame, new Point3D(), name);
    }
@@ -97,7 +97,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple<?, ?> frameTuple)
+   public FramePoint3D(FrameTuple3D<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new Point3D(frameTuple.tuple), frameTuple.name);
    }
@@ -107,7 +107,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
+   public FramePoint3D(FrameTuple2D<?, ?> frameTuple2d)
    {
       super(frameTuple2d.referenceFrame, new Point3D(), frameTuple2d.name);
       setXY(frameTuple2d);
@@ -118,7 +118,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z)
+   public FramePoint3D(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       this(referenceFrame, x, y, z, null);
    }
@@ -128,17 +128,17 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * <p/>
     * A normal point associated with a specific reference frame.
     */
-   public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z, String name)
+   public FramePoint3D(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
       super(referenceFrame, new Point3D(x, y, z), name);
    }
 
-   public static FramePoint average(List<? extends FramePoint> framePoints)
+   public static FramePoint3D average(List<? extends FramePoint3D> framePoints)
    {
       ReferenceFrame frame = framePoints.get(0).getReferenceFrame();
-      FramePoint nextPoint = new FramePoint(frame);
+      FramePoint3D nextPoint = new FramePoint3D(frame);
 
-      FramePoint average = new FramePoint(framePoints.get(0));
+      FramePoint3D average = new FramePoint3D(framePoints.get(0));
       for (int i = 1; i < framePoints.size(); i++)
       {
          nextPoint.set(framePoints.get(i));
@@ -150,22 +150,22 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       return average;
    }
 
-   public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
+   public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX),
+      FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX),
                                               RandomNumbers.nextDouble(random, yMaxAbsoluteY), RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
-   public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
+   public static FramePoint3D generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                      double zMax)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
+      FramePoint3D randomPoint = new FramePoint3D(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
                                               RandomNumbers.nextDouble(random, zMin, zMax));
       return randomPoint;
    }
 
-   public double getXYPlaneDistance(FramePoint framePoint)
+   public double getXYPlaneDistance(FramePoint3D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
 
@@ -176,7 +176,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       return Math.sqrt(dx * dx + dy * dy);
    }
 
-   public double getXYPlaneDistance(FramePoint2d framePoint2d)
+   public double getXYPlaneDistance(FramePoint2D framePoint2d)
    {
       checkReferenceFrameMatch(framePoint2d);
 
@@ -192,14 +192,14 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       return this.tuple.distance(point);
    }
 
-   public double distance(FramePoint framePoint)
+   public double distance(FramePoint3D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
 
       return this.tuple.distance(framePoint.tuple);
    }
 
-   public double distanceSquared(FramePoint framePoint)
+   public double distanceSquared(FramePoint3D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
 
@@ -219,9 +219,9 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
    /**
     * Creates a new FramePoint2d based on the x and y components of this FramePoint
     */
-   public FramePoint2d toFramePoint2d()
+   public FramePoint2D toFramePoint2d()
    {
-      return new FramePoint2d(this.getReferenceFrame(), this.getX(), this.getY());
+      return new FramePoint2D(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
    /**
@@ -229,7 +229,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * 
     * @param pointToPack
     */
-   public void getFramePoint2d(FramePoint2d pointToPack)
+   public void getFramePoint2d(FramePoint2D pointToPack)
    {
       pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
@@ -245,7 +245,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * 
     * @param tupleToPack
     */
-   public void getFrameTuple2d(FrameTuple2d<?, ?> tupleToPack)
+   public void getFrameTuple2d(FrameTuple2D<?, ?> tupleToPack)
    {
       tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
@@ -260,10 +260,10 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       return this.tuple;
    }
 
-   public static FramePoint getMidPoint(FramePoint point1, FramePoint point2)
+   public static FramePoint3D getMidPoint(FramePoint3D point1, FramePoint3D point2)
    {
       point1.checkReferenceFrameMatch(point2);
-      FramePoint midPoint = new FramePoint(point1.referenceFrame);
+      FramePoint3D midPoint = new FramePoint3D(point1.referenceFrame);
       midPoint.interpolate(point1, point2, 0.5);
       return midPoint;
    }
@@ -275,7 +275,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
     * @param yaw double
     * @return CartesianPositionFootstep
     */
-   public void yawAboutPoint(FramePoint pointToYawAbout, FramePoint resultToPack, double yaw)
+   public void yawAboutPoint(FramePoint3D pointToYawAbout, FramePoint3D resultToPack, double yaw)
    {
       checkReferenceFrameMatch(pointToYawAbout);
       double tempX = getX() - pointToYawAbout.getX();
@@ -293,7 +293,7 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       resultToPack.add(tempX, tempY, tempZ);
    }
 
-   public void pitchAboutPoint(FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
+   public void pitchAboutPoint(FramePoint3D pointToPitchAbout, FramePoint3D resultToPack, double pitch)
    {
       checkReferenceFrameMatch(pointToPitchAbout);
       double tempX = getX() - pointToPitchAbout.getX();
