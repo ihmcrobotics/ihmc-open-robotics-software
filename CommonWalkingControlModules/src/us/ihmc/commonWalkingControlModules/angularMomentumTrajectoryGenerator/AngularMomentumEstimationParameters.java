@@ -6,6 +6,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class AngularMomentumEstimationParameters
 {
+   private final double gravityZ;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the swing leg
     */
@@ -17,18 +18,17 @@ public class AngularMomentumEstimationParameters
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
-   private double robotOperatingHeight = 0.90;
-   
    private final SmoothCMPPlannerParameters copPlannerParameters;
    private final FullHumanoidRobotModel robotModel;
    
    private final boolean computePredictedAngularMomentum;
 
-   public AngularMomentumEstimationParameters(FullHumanoidRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum)
+   public AngularMomentumEstimationParameters(FullHumanoidRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum, double gravityZ)
    {
       this.copPlannerParameters = cmpPlannerParameters;
       this.robotModel = robotModel;
       this.computePredictedAngularMomentum = computePredictedAngularMomentum;
+      this.gravityZ = gravityZ;
    }
 
    public boolean computePredictedAngularMomentum()
@@ -110,11 +110,6 @@ public class AngularMomentumEstimationParameters
       return copPlannerParameters.getCoPPointsToPlan();
    }
 
-   public double getCoMHeight()
-   {
-      return robotOperatingHeight;
-   }
-
    public double getSwingFootMaxLift()
    {
       return 0.10;
@@ -138,5 +133,10 @@ public class AngularMomentumEstimationParameters
    public String getYoTimeVariableName()
    {
       return "t";
+   }
+
+   public double getGravityZ()
+   {
+      return gravityZ;
    }
 }
