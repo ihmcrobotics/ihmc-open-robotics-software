@@ -3,7 +3,6 @@ package us.ihmc.robotics.controllers.pidGains;
 public class DefaultPID3DGains implements PID3DGains
 {
    private final GainCoupling gainCoupling;
-   private final boolean useDampingRatios;
 
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
@@ -16,10 +15,9 @@ public class DefaultPID3DGains implements PID3DGains
    private double maxFeedback = Double.POSITIVE_INFINITY;
    private double maxFeedbackRate = Double.POSITIVE_INFINITY;
 
-   public DefaultPID3DGains(GainCoupling gainCoupling, boolean useDampingRatios)
+   public DefaultPID3DGains(GainCoupling gainCoupling)
    {
       this.gainCoupling = gainCoupling;
-      this.useDampingRatios = useDampingRatios;
    }
 
    @Override
@@ -76,24 +74,16 @@ public class DefaultPID3DGains implements PID3DGains
       proportionalGains[0] = proportionalGainX;
       proportionalGains[1] = proportionalGainY;
       proportionalGains[2] = proportionalGainZ;
-
-      if (useDampingRatios)
-      {
-         updateDerivativeGains();
-      }
+      updateDerivativeGains();
    }
 
    @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
-      if (useDampingRatios)
-      {
-         throw new RuntimeException("Using damping ratios. Do not set derivative gains directly.");
-      }
-
       derivativeGains[0] = derivativeGainX;
       derivativeGains[1] = derivativeGainY;
       derivativeGains[2] = derivativeGainZ;
+      updateDampingRatios();
    }
 
    public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
@@ -101,11 +91,7 @@ public class DefaultPID3DGains implements PID3DGains
       dampingRatios[0] = dampingRatioX;
       dampingRatios[1] = dampingRatioY;
       dampingRatios[2] = dampingRatioZ;
-
-      if (useDampingRatios)
-      {
-         updateDerivativeGains();
-      }
+      updateDerivativeGains();
    }
 
    private void updateDerivativeGains()
@@ -113,6 +99,14 @@ public class DefaultPID3DGains implements PID3DGains
       for (int i = 0; i < 3; i++)
       {
          derivativeGains[i] = GainCalculator.computeDerivativeGain(proportionalGains[i], dampingRatios[i]);
+      }
+   }
+
+   private void updateDampingRatios()
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         dampingRatios[i] = GainCalculator.computeDampingRatio(proportionalGains[i], derivativeGains[i]);
       }
    }
 
