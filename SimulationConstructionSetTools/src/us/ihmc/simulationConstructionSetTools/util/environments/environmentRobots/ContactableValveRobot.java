@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -208,7 +208,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       super.updateAllGroundContactPointVelocities();
    }
 
-   private final FramePoint pointToCheck = new FramePoint();
+   private final FramePoint3D pointToCheck = new FramePoint3D();
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
@@ -234,7 +234,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
 
       if (valveTorus.checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))

@@ -23,9 +23,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -41,7 +41,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private static final long NO_CONTACT_ID = 0L;
    private static final long IN_CONTACT_ID = 1L;
    private static final int dofs = Twist.SIZE;
-   private static final FrameVector zeroInWorld = new FrameVector(worldFrame, 0.0, 0.0, 0.0);
+   private static final FrameVector3D zeroInWorld = new FrameVector3D(worldFrame, 0.0, 0.0, 0.0);
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -72,9 +72,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final RigidBodyTransform bodyToJointTransform = new RigidBodyTransform();
    private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
 
-   private final FramePoint desiredContactPosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
    private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
-   private final FramePoint currentContactPosition = new FramePoint(worldFrame);
+   private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
    private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
 
    private final YoBoolean hybridModeActive;

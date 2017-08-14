@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -74,7 +74,7 @@ public class AverageSampleYoFrameVector extends YoFrameVector
       z.update(vectorSource.getZ());
    }
 
-   public void update(FrameVector vectorSource)
+   public void update(FrameVector3D vectorSource)
    {
       checkReferenceFrameMatch(vectorSource);
       x.update(vectorSource.getX());

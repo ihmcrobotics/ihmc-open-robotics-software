@@ -23,10 +23,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -261,7 +261,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
     */
    @Override
-   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint positionToPack)
+   public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getPositionIncludingFrame(positionToPack);
@@ -304,12 +304,12 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       }
    }
 
-   private final FramePoint controlPosition = new FramePoint();
+   private final FramePoint3D controlPosition = new FramePoint3D();
    private final FrameOrientation controlOrientation = new FrameOrientation();
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredLinearVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
-   private final FrameVector currentLinearVelocity = new FrameVector();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
+   private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final Twist twist = new Twist();
 
    /**
@@ -342,7 +342,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * Returns 0.0, we don't compute the acceleration here, we send the command to a feedback controller to do it for us
     */
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager)
    {
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();

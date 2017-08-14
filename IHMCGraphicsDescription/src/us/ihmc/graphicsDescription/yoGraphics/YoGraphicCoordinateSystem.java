@@ -13,7 +13,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -165,7 +165,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       this.z.set(z);
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       x.set(position.getX());
       y.set(position.getY());

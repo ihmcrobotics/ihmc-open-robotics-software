@@ -17,9 +17,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientationTest;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
@@ -90,12 +90,12 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.setControlHandAngleAboutAxis(true);
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() * 0.5);
 
-      FrameVector velocityToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
+      FrameVector3D velocityToPack = new FrameVector3D(worldFrame, 1.1, 2.2, 3.3);
       trajectoryGenerator.getAngularVelocity(velocityToPack);
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
       assertTrue(velocityToPack.getZ() != 0.0);
-      FrameVector accelerationToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
+      FrameVector3D accelerationToPack = new FrameVector3D(worldFrame, 1.1, 2.2, 3.3);
       trajectoryGenerator.getAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
@@ -103,12 +103,12 @@ public class CirclePoseTrajectoryGeneratorTest
 
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() + 1.0);
 
-      velocityToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
+      velocityToPack = new FrameVector3D(worldFrame, 1.1, 2.2, 3.3);
       trajectoryGenerator.getAngularVelocity(velocityToPack);
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
       assertEquals(0.0, velocityToPack.getZ(), EPSILON);
-      accelerationToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
+      accelerationToPack = new FrameVector3D(worldFrame, 1.1, 2.2, 3.3);
       trajectoryGenerator.getAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
@@ -121,7 +121,7 @@ public class CirclePoseTrajectoryGeneratorTest
    public void testGetPosition()
    {
       trajectoryGenerator.compute(0.0);
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       trajectoryGenerator.getPosition(currentPosition);
       currentPosition.getX();
    }
@@ -141,7 +141,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testGet_FramePoint()
    {
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
 
       trajectoryGenerator.getPosition(positionToPack);
 
@@ -163,7 +163,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackVelocity()
    {
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(velocityToPack.getReferenceFrame()));
 
@@ -179,7 +179,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackAcceleration()
    {
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(accelerationToPack.getReferenceFrame()));
 
@@ -195,7 +195,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackAngularVelocity()
    {
-      FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularVelocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(angularVelocityToPack.getReferenceFrame()));
 
@@ -211,7 +211,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {
-      FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularAccelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(angularAccelerationToPack.getReferenceFrame()));
 
@@ -227,7 +227,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(worldFrame);
+      FramePoint3D positionToPack = new FramePoint3D(worldFrame);
       positionToPack.setIncludingFrame(worldFrame, 4.4, 3.3, 1.4);
 
       trajectoryGenerator.getPosition(positionToPack);
@@ -238,8 +238,8 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(velocityToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(velocityToPack.getReferenceFrame()));
@@ -269,7 +269,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testPackAngularData()
    {
-      FramePoint positionToPack = new FramePoint(worldFrame);
+      FramePoint3D positionToPack = new FramePoint3D(worldFrame);
       positionToPack.setIncludingFrame(worldFrame, 4.4, 3.3, 1.4);
 
       trajectoryGenerator.getPosition(positionToPack);
@@ -280,8 +280,8 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
-      FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
-      FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularVelocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularAccelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(worldFrame.equals(angularVelocityToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(angularVelocityToPack.getReferenceFrame()));
@@ -320,10 +320,10 @@ public class CirclePoseTrajectoryGeneratorTest
 
       FrameOrientationTest.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
 
-      FramePoint initialPosition = new FramePoint(frame);
+      FramePoint3D initialPosition = new FramePoint3D(frame);
       trajectoryGenerator.getPosition(initialPosition);
 
-      FramePoint newPosition = new FramePoint(frame);
+      FramePoint3D newPosition = new FramePoint3D(frame);
 
       /*
        * check against rotated version of initial position
@@ -341,7 +341,7 @@ public class CirclePoseTrajectoryGeneratorTest
          RotationMatrix rotationMatrix = new RotationMatrix();
          rotationMatrix.set(difference);
 
-         FramePoint rotatedInitialPosition = new FramePoint(initialPosition);
+         FramePoint3D rotatedInitialPosition = new FramePoint3D(initialPosition);
          rotationMatrix.transform(rotatedInitialPosition.getPoint());
          //         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
       }
@@ -351,16 +351,16 @@ public class CirclePoseTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(random.nextDouble());
 
-      FrameVector omega = new FrameVector(frame);
+      FrameVector3D omega = new FrameVector3D(frame);
       trajectoryGenerator.getAngularVelocity(omega);
 
-      FrameVector v = new FrameVector(frame);
+      FrameVector3D v = new FrameVector3D(frame);
       trajectoryGenerator.getVelocity(v);
 
-      FramePoint r = new FramePoint(frame);
+      FramePoint3D r = new FramePoint3D(frame);
       trajectoryGenerator.getPosition(r);
 
-      FrameVector vCheck = new FrameVector(frame);
+      FrameVector3D vCheck = new FrameVector3D(frame);
       vCheck.cross(omega, r);
 
       FrameVectorTest.assertFrameVectorEquals(vCheck, v, 1e-8);

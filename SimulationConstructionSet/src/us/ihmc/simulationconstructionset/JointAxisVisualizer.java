@@ -8,8 +8,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -31,8 +31,8 @@ public class JointAxisVisualizer implements RobotController
          InverseDynamicsJoint joint = jointStack.get(0);
          if(joint instanceof OneDoFJoint)
          {
-            FrameVector jAxis=((OneDoFJoint)joint).getJointAxis();
-            ReferenceFrame referenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint(jAxis.getReferenceFrame()), new FrameVector(jAxis.getReferenceFrame(),jAxis.getVector()));
+            FrameVector3D jAxis=((OneDoFJoint)joint).getJointAxis();
+            ReferenceFrame referenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis(joint.getName()+"JointAxis", new FramePoint3D(jAxis.getReferenceFrame()), new FrameVector3D(jAxis.getReferenceFrame(),jAxis.getVector()));
             YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(referenceFrame , registry, length, YoAppearance.Gold());
             yoGraphicsList.add(yoGraphicReferenceFrame);
             yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
