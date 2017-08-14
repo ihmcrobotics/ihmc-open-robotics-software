@@ -13,11 +13,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -154,7 +154,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return gains;
    }
 
-   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -176,7 +176,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return gains;
    }
 
-   private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
@@ -236,20 +236,20 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       return jointspaceGains;
    }
 
-   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   private Map<String, YoPID3DGains> taskspaceAngularGains = null;
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
       if (taskspaceAngularGains != null)
          return taskspaceAngularGains;
 
       taskspaceAngularGains = new HashMap<>();
 
-      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      YoPID3DGains chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
 
-      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      YoPID3DGains pelvisAngularGains = createPelvisOrientationControlGains(registry);
       taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;

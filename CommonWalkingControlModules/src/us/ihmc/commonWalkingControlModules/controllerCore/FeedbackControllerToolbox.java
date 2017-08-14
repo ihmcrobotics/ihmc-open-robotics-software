@@ -13,10 +13,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -59,15 +58,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
    private final Map<RigidBody, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
 
-   private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
-   private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
+   private final Map<RigidBody, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
+   private final Map<RigidBody, YoPID3DGains> endEffectorPositionGains = new HashMap<>();
 
    private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
    private final EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
    private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
    private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
-   private YoPositionPIDGainsInterface centerOfMassPositionGains;
+   private YoPID3DGains centerOfMassPositionGains;
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
@@ -183,7 +182,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     *
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
-   public YoPositionPIDGainsInterface getCenterOfMassGains()
+   public YoPID3DGains getCenterOfMassGains()
    {
       if (centerOfMassPositionGains == null)
       {
@@ -480,9 +479,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @return the unique {@code YoOrientationPIDGainsInterface} associated with the given
     *         end-effector.
     */
-   public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)
+   public YoPID3DGains getOrientationGains(RigidBody endEffector)
    {
-      YoOrientationPIDGainsInterface gains = endEffectorOrientationGains.get(endEffector);
+      YoPID3DGains gains = endEffectorOrientationGains.get(endEffector);
 
       if (gains == null)
       {
@@ -499,9 +498,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param endEffector the end-effector to which the gains are associated.
     * @return the unique {@code YoPositionPIDGainsInterface} associated with the given end-effector.
     */
-   public YoPositionPIDGainsInterface getPositionGains(RigidBody endEffector)
+   public YoPID3DGains getPositionGains(RigidBody endEffector)
    {
-      YoPositionPIDGainsInterface gains = endEffectorPositionGains.get(endEffector);
+      YoPID3DGains gains = endEffectorPositionGains.get(endEffector);
 
       if (gains == null)
       {
@@ -520,8 +519,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     */
    public YoSE3PIDGainsInterface getSE3PIDGains(RigidBody endEffector)
    {
-      YoPositionPIDGainsInterface positionGains = getPositionGains(endEffector);
-      YoOrientationPIDGainsInterface orientationGains = getOrientationGains(endEffector);
+      YoPID3DGains positionGains = getPositionGains(endEffector);
+      YoPID3DGains orientationGains = getOrientationGains(endEffector);
 
       return new YoSE3PIDGainsInterface()
       {
@@ -538,13 +537,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          }
 
          @Override
-         public YoPositionPIDGainsInterface getPositionGains()
+         public YoPID3DGains getPositionGains()
          {
             return positionGains;
          }
 
          @Override
-         public YoOrientationPIDGainsInterface getOrientationGains()
+         public YoPID3DGains getOrientationGains()
          {
             return orientationGains;
          }

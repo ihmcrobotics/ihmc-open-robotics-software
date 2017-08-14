@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
+public class YoPlanarFootPositionGains implements YoPID3DGains
 {
    private final YoDouble proportionalXGain, proportionalZGain;
    private final YoDouble derivativeXGain, derivativeZGain;

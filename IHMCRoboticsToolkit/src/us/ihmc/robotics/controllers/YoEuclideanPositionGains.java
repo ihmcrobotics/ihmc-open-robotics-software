@@ -1,12 +1,13 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
+public class YoEuclideanPositionGains implements YoPID3DGains
 {
    private static final String[] directionNames = new String[] {"x", "y", "z"};
 

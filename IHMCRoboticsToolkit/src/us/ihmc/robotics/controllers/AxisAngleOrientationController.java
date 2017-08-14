@@ -4,6 +4,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -42,14 +43,14 @@ public class AxisAngleOrientationController
 
    private final double dt;
 
-   private final YoOrientationPIDGainsInterface gains;
+   private final YoPID3DGains gains;
 
    public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains,
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoPID3DGains gains,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;

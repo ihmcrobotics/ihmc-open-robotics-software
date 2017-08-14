@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -76,7 +76,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final MomentumCommand inverseKinematicsOutput = new MomentumCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final YoPositionPIDGainsInterface gains;
+   private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private ReferenceFrame centerOfMassFrame;

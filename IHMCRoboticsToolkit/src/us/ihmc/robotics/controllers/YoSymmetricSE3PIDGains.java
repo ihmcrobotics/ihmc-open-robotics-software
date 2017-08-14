@@ -2,12 +2,13 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositionPIDGainsInterface, YoOrientationPIDGainsInterface
+public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPID3DGains
 {
    private final YoDouble proportionalGain;
    private final YoDouble derivativeGain;
@@ -42,13 +43,13 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public YoPositionPIDGainsInterface getPositionGains()
+   public YoPID3DGains getPositionGains()
    {
       return this;
    }
 
    @Override
-   public YoOrientationPIDGainsInterface getOrientationGains()
+   public YoPID3DGains getOrientationGains()
    {
       return this;
    }
