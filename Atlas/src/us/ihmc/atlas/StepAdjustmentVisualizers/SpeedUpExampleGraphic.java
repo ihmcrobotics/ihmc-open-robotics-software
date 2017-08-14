@@ -167,7 +167,7 @@ public class SpeedUpExampleGraphic
 
       FramePoint2D firstKnot = new FramePoint2D();
 
-      FrameVector2d xAxis = new FrameVector2d(worldFrame);
+      FrameVector2D xAxis = new FrameVector2D(worldFrame);
       endICP.getFrameTuple2d(finalICP2d);
       desiredICP.getFrameTuple2d(desiredICP2d);
       xAxis.set(finalICP2d);
@@ -287,7 +287,7 @@ public class SpeedUpExampleGraphic
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -296,10 +296,10 @@ public class SpeedUpExampleGraphic
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector2d xAxis)
+      public void setXAxis(FrameVector2D xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);

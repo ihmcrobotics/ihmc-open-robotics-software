@@ -30,7 +30,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -106,7 +106,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
       FramePoint2D desiredICP = new FramePoint2D();
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
       FramePoint2D perfectCMP = new FramePoint2D();
       icpPlanner.compute(currentTime);
       icpPlanner.getDesiredCapturePointPosition(desiredICP);

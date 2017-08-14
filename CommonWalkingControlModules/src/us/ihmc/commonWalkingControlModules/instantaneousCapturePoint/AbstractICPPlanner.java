@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -430,7 +430,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       desiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -478,7 +478,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
@@ -514,7 +514,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    }
 
    /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector2d desiredCenterOfPressureVelocityToPack)
+   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
    {
       desiredCoPVelocity.getFrameTuple2dIncludingFrame(desiredCenterOfPressureVelocityToPack);
    }

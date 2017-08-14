@@ -23,7 +23,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -96,13 +96,13 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d();
+      FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
@@ -169,13 +169,13 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d();
+      FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
@@ -242,13 +242,13 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d(worldFrame, 0.03, 0.06);
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
@@ -332,13 +332,13 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d(worldFrame, 0.03, 0.06);
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);

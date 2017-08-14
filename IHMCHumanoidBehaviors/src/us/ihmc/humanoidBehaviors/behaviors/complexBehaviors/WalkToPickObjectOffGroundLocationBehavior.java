@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -84,7 +84,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), pickUpLocation.getX(), pickUpLocation.getY());
       FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameVector2d walkingDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
       walkingDirection.set(ballPosition2d);
       walkingDirection.sub(robotPosition);
       walkingDirection.normalize();

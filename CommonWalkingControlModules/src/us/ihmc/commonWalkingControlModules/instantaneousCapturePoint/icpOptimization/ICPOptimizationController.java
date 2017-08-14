@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ICPOptimizationController
@@ -28,10 +28,10 @@ public interface ICPOptimizationController
    public boolean wasFootstepAdjusted();
    public boolean useAngularMomentum();
 
-   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2d desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
+   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
 
    public void setFinalTransferSplitFractionToDefault();
-   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity);
+   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
    public double getOptimizedTimeRemaining();
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 }

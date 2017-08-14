@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -101,9 +101,9 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final YoBoolean hasBeenInitialized;
 
    private final FrameVector3D angularVelocity = new FrameVector3D();
-   private final FrameVector2d angularVelocity2d = new FrameVector2d();
+   private final FrameVector2D angularVelocity2d = new FrameVector2D();
 
-   private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
+   private final FrameVector2D footAngularVelocityUnitVector = new FrameVector2D();
 
    private final FramePoint2D centerOfRotation = new FramePoint2D();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();

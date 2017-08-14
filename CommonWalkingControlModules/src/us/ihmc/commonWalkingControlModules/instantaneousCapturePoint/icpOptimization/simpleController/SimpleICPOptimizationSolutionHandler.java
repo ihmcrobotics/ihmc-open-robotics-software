@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -214,7 +214,7 @@ public class SimpleICPOptimizationSolutionHandler
       return footstepWasAdjusted.getBooleanValue();
    }
 
-   public FrameVector2d getFootstepAdjustment()
+   public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
    }

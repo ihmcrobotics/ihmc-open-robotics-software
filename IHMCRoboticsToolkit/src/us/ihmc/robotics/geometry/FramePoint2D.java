@@ -25,7 +25,7 @@ public class FramePoint2D extends FrameTuple2D<FramePoint2D, Point2D> implements
    private static final long serialVersionUID = -1287148635726098768L;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   private FrameVector2d temporaryPointForYawing;
+   private FrameVector2D temporaryPointForYawing;
 
    /**
     * FramePoint2d
@@ -212,7 +212,7 @@ public class FramePoint2D extends FrameTuple2D<FramePoint2D, Point2D> implements
    public void yawAboutPoint(FramePoint2D pointToYawAbout, FramePoint2D pointToPack, double yaw)
    {
       if (temporaryPointForYawing == null)
-         temporaryPointForYawing = new FrameVector2d(this);
+         temporaryPointForYawing = new FrameVector2D(this);
       else
          temporaryPointForYawing.setIncludingFrame(this);
 

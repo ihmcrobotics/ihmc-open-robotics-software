@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -103,7 +103,7 @@ public class ToeOffManager
    private final FramePoint2D tempTrailingFootPosition = new FramePoint2D();
    private final FramePoint3D tempLeadingFootPositionInWorld = new FramePoint3D();
    private final FramePoint3D tempTrailingFootPositionInWorld = new FramePoint3D();
-   private final FrameVector2d toLeadingFoot = new FrameVector2d();
+   private final FrameVector2D toLeadingFoot = new FrameVector2D();
 
    private final HashMap<ToeContact, AbstractToeContact> toeContacts = new HashMap<>();
 

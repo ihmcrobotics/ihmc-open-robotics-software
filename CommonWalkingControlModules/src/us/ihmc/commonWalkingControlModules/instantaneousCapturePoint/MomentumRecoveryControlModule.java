@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -70,7 +70,7 @@ public class MomentumRecoveryControlModule
    private boolean capturePointUpToDate = false;
    private boolean supportUpToDate = false;
 
-   private final FrameVector2d icpError = new FrameVector2d();
+   private final FrameVector2D icpError = new FrameVector2D();
    private RobotSide supportSide;
    private Footstep nextFootstep;
 
@@ -297,7 +297,7 @@ public class MomentumRecoveryControlModule
       supportUpToDate = false;
    }
 
-   public void setICPError(FrameVector2d icpError)
+   public void setICPError(FrameVector2D icpError)
    {
       this.icpError.setIncludingFrame(icpError);
       icpErrorUpToDate = true;

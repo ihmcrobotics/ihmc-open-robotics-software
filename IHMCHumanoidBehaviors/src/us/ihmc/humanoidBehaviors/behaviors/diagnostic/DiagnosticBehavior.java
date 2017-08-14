@@ -65,7 +65,7 @@ import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -530,12 +530,12 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceMediumWarmup()
    {
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
-      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.1, 0.7);
+      FrameVector2D shiftScaleVector = new FrameVector2D(midFeetZUpFrame, 0.1, 0.7);
 
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
-      FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
+      FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
@@ -581,11 +581,11 @@ public class DiagnosticBehavior extends AbstractBehavior
          supportPolygon.getFrameVertex((i + 1) % numberOfVertices, frameVertexCurrentlyChecked);
          supportPolygon.getFrameVertex((i + 2) % numberOfVertices, frameVertexAfter);
 
-         FrameVector2d frameVector1 = new FrameVector2d(midFeetZUpFrame);
+         FrameVector2D frameVector1 = new FrameVector2D(midFeetZUpFrame);
          frameVector1.sub(frameVertexCurrentlyChecked, frameVertexBefore);
          frameVector1.normalize();
 
-         FrameVector2d frameVector2 = new FrameVector2d(midFeetZUpFrame);
+         FrameVector2D frameVector2 = new FrameVector2D(midFeetZUpFrame);
          frameVector2.sub(frameVertexAfter, frameVertexCurrentlyChecked);
          frameVector2.normalize();
 
@@ -594,7 +594,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
 
       // scale the rectangle so that the center of pressure does not go too far on the support polygon sides
-      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.1, 0.7);
+      FrameVector2D shiftScaleVector = new FrameVector2D(midFeetZUpFrame, 0.1, 0.7);
       for (int i = 0; i < supportCornerPoints.size(); i++)
          supportCornerPoints.get(i).scale(shiftScaleVector.getX(), shiftScaleVector.getY());
 
@@ -602,7 +602,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       //shiftWeight + pelvisOrientation
       FramePoint3D currentPelvisHeight = new FramePoint3D(pelvisZUpFrame);
       currentPelvisHeight.changeFrame(worldFrame);
-      FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
+      FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
 
       double yawPercentage = 0.3;
@@ -1002,7 +1002,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
-      FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
+      FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {

@@ -149,9 +149,9 @@ public class FrameVector3D extends FrameTuple3D<FrameVector3D, Vector3D> impleme
    /**
     * Creates a new FrameVector2d based on the x and y components of this FrameVector
     */
-   public FrameVector2d toFrameVector2d()
+   public FrameVector2D toFrameVector2d()
    {
-      return new FrameVector2d(this.getReferenceFrame(), this.getX(), this.getY());
+      return new FrameVector2D(this.getReferenceFrame(), this.getX(), this.getY());
    }
 
    public double dot(Vector3DReadOnly vector)

@@ -22,7 +22,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -186,8 +186,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
    private final FramePoint3D comPosition = new FramePoint3D();
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
-   private final FrameVector2d comXYVelocity = new FrameVector2d();
-   private final FrameVector2d comXYAcceleration = new FrameVector2d();
+   private final FrameVector2D comXYVelocity = new FrameVector2D();
+   private final FrameVector2D comXYAcceleration = new FrameVector2D();
    private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
@@ -199,7 +199,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
          FeetManager feetManager)
    {
       solve(coMHeightPartialDerivatives, isInDoubleSupport);

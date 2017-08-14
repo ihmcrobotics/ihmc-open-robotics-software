@@ -10,7 +10,7 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,7 +68,7 @@ public class Step6WalkingController implements RobotController
    private YoGraphicPosition icpGraphics;
    private YoDouble icpYoPosX, icpYoPosY, icpYoPosZ;
    private FramePoint2D capturePoint, centerOfMassInWorld; 
-   private FrameVector2d centerOfMassVelocityInWorld;
+   private FrameVector2D centerOfMassVelocityInWorld;
    
    
    /**
@@ -513,7 +513,7 @@ public class Step6WalkingController implements RobotController
     
     capturePoint = new FramePoint2D();
     centerOfMassInWorld = new FramePoint2D(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
-    centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
+    centerOfMassVelocityInWorld = new FrameVector2D(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
     CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
     icpPosX = capturePoint.getX();
     //    System.out.println("comPos" + centerOfMassInWorld + "\ncomVel" + centerOfMassVelocityInWorld + "\nicp" + capturePoint + "\nicpPosX" + icpPosX ); 

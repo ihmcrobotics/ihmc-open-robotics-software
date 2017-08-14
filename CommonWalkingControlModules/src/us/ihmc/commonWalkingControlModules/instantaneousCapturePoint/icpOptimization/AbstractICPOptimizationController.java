@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -127,7 +127,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    protected final FramePoint2D currentICP = new FramePoint2D();
    protected final FramePoint2D desiredICP = new FramePoint2D();
-   protected final FrameVector2d desiredICPVelocity = new FrameVector2d();
+   protected final FrameVector2D desiredICPVelocity = new FrameVector2D();
    protected final FramePoint2D referenceCMP = new FramePoint2D();
 
    protected final FramePoint2D finalICPRecursion = new FramePoint2D();
@@ -153,7 +153,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected boolean localUseStepAdjustment;
    protected boolean localScaleUpcomingStepWeights;
 
-   protected final FrameVector2d tempVector2d = new FrameVector2d();
+   protected final FrameVector2D tempVector2d = new FrameVector2D();
    protected final FramePoint2D tempPoint2d = new FramePoint2D();
 
    protected final double controlDT;
@@ -440,7 +440,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       }
    }
 
-   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   public void setReferenceICPVelocity(FrameVector2D desiredICPVelocity)
    {
       solutionHandler.setReferenceICPVelocity(desiredICPVelocity);
    }
@@ -566,7 +566,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       return numberOfFootstepsToConsider;
    }
 
-   public void setBeginningOfStateICP(FramePoint2D beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity)
+   public void setBeginningOfStateICP(FramePoint2D beginningOfStateICP, FrameVector2D beginningOfStateICPVelocity)
    {
       this.beginningOfStateICP.set(beginningOfStateICP);
       this.beginningOfStateICPVelocity.set(beginningOfStateICPVelocity);
@@ -865,7 +865,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   public abstract void compute(double currentTime, FramePoint2D desiredICP, FrameVector2d desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
+   public abstract void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
 
    public abstract double getOptimizedTimeRemaining();
 }

@@ -149,7 +149,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FrameVector3D desiredCapturePointVelocity = new FrameVector3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
+   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2D perfectCMP = new FramePoint2D();
 
    private int counter = 0;

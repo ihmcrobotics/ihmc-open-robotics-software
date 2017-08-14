@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -70,7 +70,7 @@ public class ICPOptimizationSolutionHandler
 
    private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint2D tempPoint2d = new FramePoint2D();
-   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FrameVector2D tempVector2d = new FrameVector2D();
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
          boolean visualize, boolean debug, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -264,8 +264,8 @@ public class ICPOptimizationSolutionHandler
          StateMultiplierCalculator stateMultiplierCalculator, YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity,
          double omega0, int numberOfFootstepsToConsider)
    {
-      ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
-      ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
+      ArrayList<FrameVector2D> entryOffsets = inputHandler.getEntryOffsets();
+      ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
       FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
       FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
       inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
@@ -289,8 +289,8 @@ public class ICPOptimizationSolutionHandler
    {
       if (debug)
       {
-         ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
-         ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
+         ArrayList<FrameVector2D> entryOffsets = inputHandler.getEntryOffsets();
+         ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
          FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
          FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
          inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
@@ -310,12 +310,12 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
-   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   public void setReferenceICPVelocity(FrameVector2D desiredICPVelocity)
    {
       referenceICPVelocity.set(desiredICPVelocity);
    }
 
-   public void setReferenceValues(FramePoint2D desiredICP, FrameVector2d desiredICPVelocity, double omega0)
+   public void setReferenceValues(FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, double omega0)
    {
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, tempPoint2d);
 
@@ -335,7 +335,7 @@ public class ICPOptimizationSolutionHandler
       return referenceICP.getFrameTuple2d();
    }
 
-   public FrameVector2d getControllerReferenceICPVelocity()
+   public FrameVector2D getControllerReferenceICPVelocity()
    {
       return referenceICPVelocity.getFrameTuple2d();
    }
@@ -350,7 +350,7 @@ public class ICPOptimizationSolutionHandler
       return footstepWasAdjusted.getBooleanValue();
    }
 
-   public FrameVector2d getFootstepAdjustment()
+   public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
    }

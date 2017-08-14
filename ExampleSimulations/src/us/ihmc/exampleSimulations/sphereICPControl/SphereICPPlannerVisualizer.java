@@ -376,7 +376,7 @@ public class SphereICPPlannerVisualizer
    }
 
    private int counter = 0;
-   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FrameVector2D tempVector2d = new FrameVector2D();
 
    private void simulateOneTick()
    {
@@ -444,7 +444,7 @@ public class SphereICPPlannerVisualizer
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
       FramePoint2D randomLineOrigin = FramePoint2D.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), minX, minY, maxX, maxY);
-      FrameVector2d randomLineVector = FrameVector2d.generateRandomFrameVector2d(random, randomSupportPolygon.getReferenceFrame());
+      FrameVector2D randomLineVector = FrameVector2D.generateRandomFrameVector2d(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
       ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));

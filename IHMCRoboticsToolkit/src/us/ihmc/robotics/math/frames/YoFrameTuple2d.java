@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.geometry.FrameTuple2D;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -89,9 +89,9 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
       return frameTuple2d;
    }
 
-   public final FrameVector2d getFrameVector2dCopy()
+   public final FrameVector2D getFrameVector2dCopy()
    {
-      return new FrameVector2d(getFrameTuple2d());
+      return new FrameVector2D(getFrameTuple2d());
    }
 
    public final FramePoint2D getFramePoint2dCopy()
