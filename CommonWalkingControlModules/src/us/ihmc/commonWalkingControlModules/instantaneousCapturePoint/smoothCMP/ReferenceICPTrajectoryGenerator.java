@@ -434,7 +434,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       comAccelerationToPack.set(comAccelerationDesiredCurrent);
    }
 
-   public void getFinalCoMPositionInSwing(FramePoint comPositionDesiredFinalToPack)
+   public void getFinalCoMPositionInSwing(FramePoint3D comPositionDesiredFinalToPack)
    {
       if(isDoubleSupport.getBooleanValue())
       {
@@ -446,7 +446,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
    
-   public void getFinalCoMPositionInTransfer(FramePoint comPositionDesiredFinalToPack)
+   public void getFinalCoMPositionInTransfer(FramePoint3D comPositionDesiredFinalToPack)
    {
       if(isDoubleSupport.getBooleanValue())
       {
