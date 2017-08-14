@@ -1,4 +1,4 @@
-package us.ihmc.robotics.controllers.pidGains;
+package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
