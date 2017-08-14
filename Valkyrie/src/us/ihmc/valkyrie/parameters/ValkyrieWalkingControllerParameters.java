@@ -236,7 +236,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = 18.0;
       double maxJerk = 270.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.YZ);
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.YZ, false);
       gains.setProportionalGains(kpX, kpYZ, kpYZ);
       gains.setDampingRatios(zeta, zeta, zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);

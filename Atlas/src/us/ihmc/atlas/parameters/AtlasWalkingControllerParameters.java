@@ -33,7 +33,10 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -325,7 +328,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
    {
-      YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
 
       double kpXY = 40.0;
       double kpZ = 40.0;
@@ -335,14 +338,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
       double maxProportionalError = 10.0 * Math.PI/180.0;
 
-      gains.setProportionalGains(kpXY, kpZ);
-      gains.setDampingRatios(zetaXY, zetaZ);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
+      gains.setProportionalGains(kpXY, kpXY, kpZ);
+      gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
       gains.setMaxProportionalError(maxProportionalError);
-      gains.createDerivativeGainUpdater(true);
 
-      return gains;
+      return new DefaultYoPID3DGains("ChestOrientation", gains, registry);
    }
 
    private YoPIDGains createSpineControlGains(YoVariableRegistry registry)

@@ -15,6 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class DefaultYoPID3DGains implements YoPID3DGains
 {
    private final GainCoupling gainCoupling;
+   private final boolean useIntegrator;
 
    private final Map<Axis, YoDouble> kpMap = new EnumMap<>(Axis.class);
    private final Map<Axis, YoDouble> kdMap = new EnumMap<>(Axis.class);
@@ -35,24 +36,33 @@ public class DefaultYoPID3DGains implements YoPID3DGains
 
    public DefaultYoPID3DGains(String suffix, PID3DGainsReadOnly other, YoVariableRegistry registry)
    {
-      this(suffix, other.getGainCoupling(), registry);
+      this(suffix, other.getGainCoupling(), other.isUseIntegrator(), registry);
       set(other);
    }
 
-   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
+   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
    {
       this.gainCoupling = gainCoupling;
+      this.useIntegrator = useIntegrator;
 
       populateMap(kpMap, "kp", suffix, gainCoupling, registry);
       populateMap(kdMap, "kd", suffix, gainCoupling, registry);
-      populateMap(kiMap, "ki", suffix, gainCoupling, registry);
       populateMap(zetaMap, "zeta", suffix, gainCoupling, registry);
+
+      if (useIntegrator)
+      {
+         populateMap(kiMap, "ki", suffix, gainCoupling, registry);
+         maxIntegralError = new YoDouble("maxIntegralError" + suffix, registry);
+      }
+      else
+      {
+         maxIntegralError = null;
+      }
 
       updateFromDampingRatio = new YoBoolean("UpdateFromDampingRatio" + suffix, registry);
       updateFromDampingRatio.set(true);
       createDampingUpdaters(kpMap, kdMap, zetaMap, updateFromDampingRatio, gainCoupling);
 
-      maxIntegralError = new YoDouble("maxIntegralError" + suffix, registry);
       maxDerivativeError = new YoDouble("maxDerivativeError" + suffix, registry);
       maxProportionalError = new YoDouble("maxProportionalError" + suffix, registry);
       maxFeedback = new YoDouble("maximumFeedback" + suffix, registry);
@@ -96,7 +106,8 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       }
    }
 
-   private static void createDampingUpdaters(Map<Axis, YoDouble> kpMap, Map<Axis, YoDouble> kdMap, Map<Axis, YoDouble> zetaMap, YoBoolean update, GainCoupling gainCoupling)
+   private static void createDampingUpdaters(Map<Axis, YoDouble> kpMap, Map<Axis, YoDouble> kdMap, Map<Axis, YoDouble> zetaMap, YoBoolean update,
+                                             GainCoupling gainCoupling)
    {
       switch (gainCoupling)
       {
@@ -151,6 +162,15 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public double[] getIntegralGains()
    {
+      if (!useIntegrator)
+      {
+         for (int i = 0; i < 3; i++)
+         {
+            tempIntegralGains[i] = 0.0;
+         }
+         return tempIntegralGains;
+      }
+
       fillFromMap(kiMap, tempIntegralGains);
       return tempIntegralGains;
    }
@@ -165,6 +185,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public double getMaximumIntegralError()
    {
+      if (!useIntegrator)
+      {
+         return 0.0;
+      }
+
       return maxIntegralError.getDoubleValue();
    }
 
@@ -243,6 +268,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
+      if (!useIntegrator)
+      {
+         return;
+      }
+
       kiMap.get(Axis.X).set(integralGainX);
       kiMap.get(Axis.Y).set(integralGainY);
       kiMap.get(Axis.Z).set(integralGainZ);
@@ -296,5 +326,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    public GainCoupling getGainCoupling()
    {
       return gainCoupling;
+   }
+
+   @Override
+   public boolean isUseIntegrator()
+   {
+      return useIntegrator;
    }
 }
