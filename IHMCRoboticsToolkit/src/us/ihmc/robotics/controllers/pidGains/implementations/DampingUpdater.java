@@ -28,8 +28,7 @@ public class DampingUpdater implements VariableChangedListener
    {
       if (update.getBooleanValue())
       {
-         // needs to update listeners in case a gain matrix is updated from this
-         kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()), true);
+         kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
       }
    }
 }
