@@ -44,13 +44,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final double gravityZ;
    
    public SmoothCMPBasedICPPlanner(FullHumanoidRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
-                                   int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                   int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ)
    {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
+      this.gravityZ = gravityZ;
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
       this.fullRobotModel = fullRobotModel;
       
@@ -70,7 +72,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport, useDecoupled, 
                                                                   worldFrame, registry);
 
-      angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, registry);
+      angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, omega0, registry);
       parentRegistry.addChild(registry);
 
       if (yoGraphicsListRegistry != null)
@@ -93,10 +95,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
 
          referenceCoPGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters);
-         referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * 9.81);
+         referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * gravityZ);
          //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
          angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters(fullRobotModel,
-                                                                                               (SmoothCMPPlannerParameters) icpPlannerParameters, computePredictedAngularMomentum));
+                                                                                               (SmoothCMPPlannerParameters) icpPlannerParameters, computePredictedAngularMomentum, gravityZ));
          defaultSwingDurationShiftFraction.set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
       }
       else

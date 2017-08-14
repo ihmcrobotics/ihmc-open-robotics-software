@@ -863,7 +863,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.10 * jointMap.getModelScale(); //0.06
+      return 0.06 * jointMap.getModelScale(); //0.06
    }
 
    /** {@inheritDoc} */
@@ -954,6 +954,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean alwaysAllowMomentum()
    {
-      return true;
+      return false;
    }
 }
