@@ -21,7 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -191,14 +191,14 @@ public class PushAndWalkBehavior extends AbstractBehavior
       referenceFrames.updateFrames();
       walking.set(true);
 
-      FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D direction = new FrameVector3D(ReferenceFrame.getWorldFrame());
       direction.setXY(direction2dInWorld);
       RobotSide swingSide = findStepSide(direction);
 
       FramePoint3D location = computeSteppingLocation(direction, swingSide);
 
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleFrame(swingSide.getOppositeSide());
-      FrameVector directionStanceFootFrame = new FrameVector(direction);
+      FrameVector3D directionStanceFootFrame = new FrameVector3D(direction);
       directionStanceFootFrame.changeFrame(stanceSoleFrame);
       
       double yawAngleChange = Math.atan(directionStanceFootFrame.getY()/directionStanceFootFrame.getX());
@@ -214,7 +214,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       sendPacketToController(footsteps);
    }
 
-   private RobotSide findStepSide(FrameVector direction)
+   private RobotSide findStepSide(FrameVector3D direction)
    {
       double score = 0.0;
       RobotSide ret = null;
@@ -246,7 +246,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       return ret;
    }
 
-   private FramePoint3D computeSteppingLocation(FrameVector direction, RobotSide stepSide)
+   private FramePoint3D computeSteppingLocation(FrameVector3D direction, RobotSide stepSide)
    {
       // reachable region in stance frame
       ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
@@ -258,7 +258,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
       //MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
-      FrameVector localDirection = new FrameVector(direction);
+      FrameVector3D localDirection = new FrameVector3D(direction);
       localDirection.changeFrame(stanceSoleFrame);
       FramePoint3D stanceLocation = new FramePoint3D(stanceSoleFrame);
       FramePoint3D swingLocation = new FramePoint3D(referenceFrames.getFootFrame(stepSide));

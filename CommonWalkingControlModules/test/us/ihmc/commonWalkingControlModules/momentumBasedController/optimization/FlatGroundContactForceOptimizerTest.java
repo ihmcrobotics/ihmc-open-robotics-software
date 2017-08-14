@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.simulationconstructionset.Robot;
@@ -54,7 +54,7 @@ public class FlatGroundContactForceOptimizerTest
          scs.addYoVariableRegistry(registry);
       }
 
-      FrameVector torque = new FrameVector(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);
+      FrameVector3D torque = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.3, 0.0, 0.2);
       WeightMatrix6D weights = new WeightMatrix6D();
       weights.setAngularWeights(1.0, 1.0, 1.0);
       weights.setLinearWeights(1.0, 1.0, 1.0);
@@ -68,7 +68,7 @@ public class FlatGroundContactForceOptimizerTest
          forceVector.scale(0.2);
 
          FramePoint3D centerOfMass = new FramePoint3D(ReferenceFrame.getWorldFrame(), comPosition);
-         FrameVector force = new FrameVector(ReferenceFrame.getWorldFrame(), forceVector);
+         FrameVector3D force = new FrameVector3D(ReferenceFrame.getWorldFrame(), forceVector);
 
          assertTrue(optimizer.compute(contactPoints, centerOfMass, force, torque, weights));
 

@@ -2,7 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
 {
@@ -12,9 +12,9 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
    private final FramePose poseOne = new FramePose();
    private final FramePose poseTwo = new FramePose();
 
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearVelocityOne = new FrameVector();
-   private final FrameVector linearVelocityTwo = new FrameVector();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearVelocityOne = new FrameVector3D();
+   private final FrameVector3D linearVelocityTwo = new FrameVector3D();
 
    public MovingMidFootZUpGroundFrame(String name, MovingZUpFrame frameOne, MovingZUpFrame frameTwo)
    {

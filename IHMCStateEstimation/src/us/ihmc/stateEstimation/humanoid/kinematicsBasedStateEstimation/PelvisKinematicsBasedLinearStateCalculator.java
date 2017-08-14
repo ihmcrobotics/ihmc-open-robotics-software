@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -90,11 +90,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    // temporary variables
    private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final FrameVector tempFrameVector = new FrameVector();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FramePoint2d tempCoP2d = new FramePoint2d();
    private final FramePoint3D tempCoP = new FramePoint3D();
-   private final FrameVector tempCoPOffset = new FrameVector();
+   private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
@@ -496,7 +496,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointPosition.set(pelvisPosition);
    }
 
-   public void getRootJointPositionAndVelocity(FramePoint3D positionToPack, FrameVector linearVelocityToPack)
+   public void getRootJointPositionAndVelocity(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack)
    {
       getPelvisPosition(positionToPack);
       getPelvisVelocity(linearVelocityToPack);
@@ -507,7 +507,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getPelvisVelocity(FrameVector linearVelocityToPack)
+   public void getPelvisVelocity(FrameVector3D linearVelocityToPack)
    {
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
    }

@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -42,7 +42,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack);
 
-   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector desiredCoPVelocityToPack);
+   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack);
 
    void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack);
 

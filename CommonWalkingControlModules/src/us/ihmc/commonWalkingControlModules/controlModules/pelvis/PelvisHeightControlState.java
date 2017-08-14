@@ -25,7 +25,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -307,9 +307,9 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    private final FramePoint3D controlPosition = new FramePoint3D();
    private final FrameOrientation controlOrientation = new FrameOrientation();
    private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameVector desiredLinearVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
-   private final FrameVector currentLinearVelocity = new FrameVector();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
+   private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final Twist twist = new Twist();
 
    /**

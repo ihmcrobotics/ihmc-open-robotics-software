@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends RecyclingArrayList<T>
 {
@@ -65,9 +65,9 @@ public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends Recycling
       return new FrameTupleArrayList<>(FramePoint3D.class);
    }
 
-   public static FrameTupleArrayList<FrameVector> createFrameVectorArrayList()
+   public static FrameTupleArrayList<FrameVector3D> createFrameVectorArrayList()
    {
-      return new FrameTupleArrayList<>(FrameVector.class);
+      return new FrameTupleArrayList<>(FrameVector3D.class);
    }
 
    public static FrameTupleArrayList<FramePoint3D> createFramePointArrayList(int initialSize)
@@ -75,8 +75,8 @@ public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends Recycling
       return new FrameTupleArrayList<>(initialSize, FramePoint3D.class);
    }
 
-   public static FrameTupleArrayList<FrameVector> createFrameVectorArrayList(int initialSize)
+   public static FrameTupleArrayList<FrameVector3D> createFrameVectorArrayList(int initialSize)
    {
-      return new FrameTupleArrayList<>(initialSize, FrameVector.class);
+      return new FrameTupleArrayList<>(initialSize, FrameVector3D.class);
    }
 }

@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
@@ -51,7 +51,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FrameConvexPolygon2d defaultFootPolygon;
 
    private final FramePoint3D groundPlanePoint = new FramePoint3D();
-   private final FrameVector groundPlaneNormal = new FrameVector();
+   private final FrameVector3D groundPlaneNormal = new FrameVector3D();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
@@ -129,8 +129,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final Vector3D normal = new Vector3D();
 
    private final Vector3D lineOfContactVector = new Vector3D();
-   private final FrameVector lineOfContact = new FrameVector();
-   private final FrameVector footNormal = new FrameVector();
+   private final FrameVector3D lineOfContact = new FrameVector3D();
+   private final FrameVector3D footNormal = new FrameVector3D();
    private final Vector3D footNormalVector = new Vector3D();
 
    private final FramePoint2d centerOfRotation2d = new FramePoint2d();

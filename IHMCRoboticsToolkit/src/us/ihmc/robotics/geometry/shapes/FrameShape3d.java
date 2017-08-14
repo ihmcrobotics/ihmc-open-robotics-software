@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends AbstractFrameObject<F, G>
@@ -39,7 +39,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param normalToPack  out parameter packed with the resulting normal vector
     * @param pointInWorldToCheck
     */
-   public final void getClosestPointAndNormalAt(FramePoint3D closestPointToPack, FrameVector normalToPack, FramePoint3D pointInWorldToCheck)
+   public final void getClosestPointAndNormalAt(FramePoint3D closestPointToPack, FrameVector3D normalToPack, FramePoint3D pointInWorldToCheck)
    {
       checkReferenceFrameMatch(pointInWorldToCheck);
       closestPointToPack.setToZero(referenceFrame);

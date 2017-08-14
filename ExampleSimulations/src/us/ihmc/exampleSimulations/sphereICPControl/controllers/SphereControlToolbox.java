@@ -538,7 +538,7 @@ public class SphereControlToolbox
 
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMass2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
    public void computeCenterOfMass()

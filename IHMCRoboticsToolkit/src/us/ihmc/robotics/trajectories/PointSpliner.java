@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PointSpliner
@@ -18,7 +18,7 @@ public class PointSpliner
    }
 
    @SuppressWarnings("unchecked")
-   public PointSpliner(ArrayList<FramePoint3D> listOfPoints, FrameVector initialHeading, FrameVector finalHeading)
+   public PointSpliner(ArrayList<FramePoint3D> listOfPoints, FrameVector3D initialHeading, FrameVector3D finalHeading)
    {
       if (listOfPoints.size() < 3)
          throw new RuntimeException("List must have at least 3 elements");
@@ -207,8 +207,8 @@ public class PointSpliner
       framePoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), 30.0, 0.0, 00.0);
       listOfPoints.add(framePoint);
 
-      FrameVector initialHeading = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
-      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, -4.0, 0.0);
+      FrameVector3D initialHeading = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
+      FrameVector3D finalHeading = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, -4.0, 0.0);
 
       PointSpliner pointSpliner = new PointSpliner(listOfPoints, initialHeading, finalHeading);
 

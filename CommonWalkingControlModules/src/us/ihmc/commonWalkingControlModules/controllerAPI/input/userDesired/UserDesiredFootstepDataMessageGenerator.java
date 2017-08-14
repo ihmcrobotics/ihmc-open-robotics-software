@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -74,7 +74,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private ReferenceFrame newStepReferenceFrame;
    private PoseReferenceFrame previousPoseFrame;
 
-   private FrameVector desiredOffset;
+   private FrameVector3D desiredOffset;
    private FramePoint3D desiredPosition;
    private FrameOrientation desiredOrientation;
 
@@ -90,7 +90,7 @@ public class UserDesiredFootstepDataMessageGenerator
       swingFoot = bipedFeet.get(swingSide);
 
       ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
-      desiredOffset = new FrameVector(stanceFootFrame);
+      desiredOffset = new FrameVector3D(stanceFootFrame);
       desiredPosition = new FramePoint3D(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
 

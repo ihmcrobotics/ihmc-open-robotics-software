@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -29,7 +29,7 @@ public class BasicPlanarController
    private final ReferenceFrame centerOfMassFrame;
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
 
    private final YoDouble yoDesiredX = new YoDouble("desiredX", registry);
    private final YoDouble yoDesiredY = new YoDouble("desiredY", registry);

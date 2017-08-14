@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class WrapperForMultiplePositionTrajectoryGenerators implements PositionTrajectoryGenerator
 {
@@ -68,19 +68,19 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
       currentGenerator.getPosition(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
       currentGenerator.getVelocity(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
       currentGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
       currentGenerator.getLinearData(positionToPack, velocityToPack, accelerationToPack);

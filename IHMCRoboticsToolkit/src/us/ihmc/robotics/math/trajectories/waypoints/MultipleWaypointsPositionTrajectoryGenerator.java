@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
@@ -114,13 +114,13 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(double timeAtWaypoint, FramePoint3D position, FrameVector linearVelocity)
+   public void appendWaypoint(double timeAtWaypoint, FramePoint3D position, FrameVector3D linearVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, position, linearVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, FramePoint3D position, FrameVector linearVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, FramePoint3D position, FrameVector3D linearVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, position, linearVelocity);
       numberOfWaypoints.increment();
@@ -152,7 +152,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, FramePoint3D[] positions, FrameVector[] linearVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, FramePoint3D[] positions, FrameVector3D[] linearVelocities)
    {
       if (timeAtWaypoints.length != positions.length || linearVelocities != null && positions.length != linearVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
@@ -302,19 +302,19 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    }
 
    @Override
-   public void getVelocity(FrameVector linearVelocityToPack)
+   public void getVelocity(FrameVector3D linearVelocityToPack)
    {
       subTrajectory.getVelocity(linearVelocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector linearAccelerationToPack)
+   public void getAcceleration(FrameVector3D linearAccelerationToPack)
    {
       subTrajectory.getAcceleration(linearAccelerationToPack);
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack, FrameVector3D linearAccelerationToPack)
    {
       subTrajectory.getLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
    }

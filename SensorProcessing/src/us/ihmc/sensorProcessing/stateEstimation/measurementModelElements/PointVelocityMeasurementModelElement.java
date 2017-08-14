@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -25,11 +25,11 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    public static final int SIZE = 3;
 
    private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
-   private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
+   private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
    
    private final boolean assumePerfectIMU;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
-   private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
+   private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
 
    private final ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort;
 
@@ -43,9 +43,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final Matrix3D tempMatrix = new Matrix3D();
    private final FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final Twist tempTwist = new Twist();
-   private final FrameVector tempFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempFrameVector2 = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector residualVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempFrameVector2 = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D residualVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    
    private final AfterJointReferenceFrameNameMap referenceFrameNameMap;
@@ -53,8 +53,8 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    
 
    public PointVelocityMeasurementModelElement(String name, ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort,
-         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
-         ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector> angularVelocityPort, ReferenceFrame estimationFrame,
+         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort,
+         ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort, ReferenceFrame estimationFrame,
          ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, boolean assumePerfectIMU, YoVariableRegistry registry)
    {
@@ -124,7 +124,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       tempMatrix.get(getOutputMatrixBlock(angularVelocityPort));
    }
 
-   private final FrameVector tempCenterOfMassVelocity = new FrameVector();
+   private final FrameVector3D tempCenterOfMassVelocity = new FrameVector3D();
    private void computeOrientationStateOutputBlock(RotationMatrix rotationFromPelvisToWorld)
    {
       computeVelocityOfStationaryPoint(tempFrameVector);
@@ -153,7 +153,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       return residual;
    }
 
-   private void computeVelocityOfStationaryPoint(FrameVector stationaryPointVelocityToPack)
+   private void computeVelocityOfStationaryPoint(FrameVector3D stationaryPointVelocityToPack)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       RigidBody stationaryPointLink = estimatorRigidBodyToIndexMap.getRigidBodyByName(pointVelocityMeasurementInputPort.getData().getRigidBodyName());

@@ -40,7 +40,7 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -176,11 +176,11 @@ public class RigidBodyControlManagerTest
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
       FramePoint3D desiredPosition = new FramePoint3D();
-      FrameVector desiredLinearVelocity = new FrameVector();
-      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FrameVector3D desiredLinearVelocity = new FrameVector3D();
+      FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
-      FrameVector desiredAngularVelocity = new FrameVector();
-      FrameVector feedForwardAngularAcceleration = new FrameVector();
+      FrameVector3D desiredAngularVelocity = new FrameVector3D();
+      FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
@@ -414,11 +414,11 @@ public class RigidBodyControlManagerTest
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
       FramePoint3D desiredPosition = new FramePoint3D();
-      FrameVector desiredLinearVelocity = new FrameVector();
-      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FrameVector3D desiredLinearVelocity = new FrameVector3D();
+      FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
-      FrameVector desiredAngularVelocity = new FrameVector();
-      FrameVector feedForwardAngularAcceleration = new FrameVector();
+      FrameVector3D desiredAngularVelocity = new FrameVector3D();
+      FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
       FrameOrientation actualControlFrameOrientation = new FrameOrientation();
       FramePoint3D actualControlFramePosition = new FramePoint3D();
 

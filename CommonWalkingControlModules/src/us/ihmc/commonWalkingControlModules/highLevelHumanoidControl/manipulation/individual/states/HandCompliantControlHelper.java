@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -41,10 +41,10 @@ public class HandCompliantControlHelper
    /** This is the desired torque that the external environment should apply on the hand */
    private final YoFrameVector desiredTorque;
 
-   private final FrameVector totalLinearCorrection = new FrameVector();
-   private final FrameVector totalAngularCorrection = new FrameVector();
-   private final FrameVector linearCorrection = new FrameVector();
-   private final FrameVector angularCorrection = new FrameVector();
+   private final FrameVector3D totalLinearCorrection = new FrameVector3D();
+   private final FrameVector3D totalAngularCorrection = new FrameVector3D();
+   private final FrameVector3D linearCorrection = new FrameVector3D();
+   private final FrameVector3D angularCorrection = new FrameVector3D();
 
    private final YoDouble linearGain;
    private final YoDouble angularGain;
@@ -59,10 +59,10 @@ public class HandCompliantControlHelper
 
    private ReferenceFrame controlFrame;
    private final Wrench measuredWrench = new Wrench();
-   private final FrameVector measuredForce = new FrameVector();
-   private final FrameVector measuredTorque = new FrameVector();
-   private final FrameVector errorForce = new FrameVector();
-   private final FrameVector errorTorque = new FrameVector();
+   private final FrameVector3D measuredForce = new FrameVector3D();
+   private final FrameVector3D measuredTorque = new FrameVector3D();
+   private final FrameVector3D errorForce = new FrameVector3D();
+   private final FrameVector3D errorTorque = new FrameVector3D();
 
    private final RobotSide robotSide;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -210,10 +210,10 @@ public class HandCompliantControlHelper
    private final RotationMatrix angularDisplacementAsMatrix = new RotationMatrix();
    private final RotationMatrix correctedRotationMatrix = new RotationMatrix();
 
-   private final FrameVector tempForceVector = new FrameVector();
-   private final FrameVector tempTorqueVector = new FrameVector();
+   private final FrameVector3D tempForceVector = new FrameVector3D();
+   private final FrameVector3D tempTorqueVector = new FrameVector3D();
 
-   private void updateWristMeasuredWrench(FrameVector measuredForceToPack, FrameVector measuredTorqueToPack)
+   private void updateWristMeasuredWrench(FrameVector3D measuredForceToPack, FrameVector3D measuredTorqueToPack)
    {
       controllerToolbox.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
 
@@ -237,7 +237,7 @@ public class HandCompliantControlHelper
       measuredWrench.getAngularPartIncludingFrame(measuredTorqueToPack);
    }
 
-   private void clipToVectorMagnitude(double maximumMagnitude, FrameVector frameVectorToClip)
+   private void clipToVectorMagnitude(double maximumMagnitude, FrameVector3D frameVectorToClip)
    {
       double magnitude = frameVectorToClip.length();
       if (magnitude > maximumMagnitude)

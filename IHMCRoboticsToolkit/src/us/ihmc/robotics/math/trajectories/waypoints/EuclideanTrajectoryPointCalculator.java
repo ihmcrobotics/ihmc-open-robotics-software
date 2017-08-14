@@ -11,7 +11,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
@@ -198,7 +198,7 @@ public class EuclideanTrajectoryPointCalculator
       }
    }
 
-   private final FrameVector computedLinearVelocity = new FrameVector();
+   private final FrameVector3D computedLinearVelocity = new FrameVector3D();
 
    public void computeTrajectoryPointVelocities(boolean startAndFinishWithZeroVelocity)
    {
@@ -258,11 +258,11 @@ public class EuclideanTrajectoryPointCalculator
    }
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final FrameVector tempFrameVector = new FrameVector();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
 
    private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         FrameVector linearVelocityToPack)
+         FrameVector3D linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
       {
@@ -296,7 +296,7 @@ public class EuclideanTrajectoryPointCalculator
 
    private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector linearVelocityToPack)
+         TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector3D linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
       {

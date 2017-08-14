@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -444,7 +444,7 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    public double computeFootVelocityCostToGo()
    {

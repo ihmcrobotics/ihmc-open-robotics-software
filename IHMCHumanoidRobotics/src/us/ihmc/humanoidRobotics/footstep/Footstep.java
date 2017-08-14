@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -471,7 +471,7 @@ public class Footstep
       footstepPose.setPoseIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 
-   public void addOffset(FrameVector offset)
+   public void addOffset(FrameVector3D offset)
    {
       footstepPose.prependTranslation(offset.getVector());
 

@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePointTest;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -56,12 +56,12 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
       ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort = new ControlFlowOutputPort<FramePoint3D>("centerOfMassPositionPort", controlFlowElement);
-      ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector>("centerOfMassVelocityPort", controlFlowElement);
-      ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector>("centerOfMassAccelerationPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassVelocityPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassAccelerationPort", controlFlowElement);
 
       ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>("orientationPort", controlFlowElement);
-      ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>("angularVelocityPort", controlFlowElement);
-      ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>("angularAccelerationPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector3D> angularVelocityPort = new ControlFlowOutputPort<FrameVector3D>("angularVelocityPort", controlFlowElement);
+      ControlFlowOutputPort<FrameVector3D> angularAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("angularAccelerationPort", controlFlowElement);
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootJoint);
       ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort =
@@ -83,13 +83,13 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       for (int i = 0; i < nTests; i++)
       {
          centerOfMassPositionPort.setData(new FramePoint3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
-         centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
-         centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+         centerOfMassVelocityPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+         centerOfMassAccelerationPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          RotationMatrix orientation = new RotationMatrix();
          orientation.set(RandomGeometry.nextAxisAngle(random));
          orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
-         angularVelocityPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
-         angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
+         angularVelocityPort.setData(new FrameVector3D(estimationFrame, RandomGeometry.nextVector3D(random)));
+         angularAccelerationPort.setData(new FrameVector3D(estimationFrame, RandomGeometry.nextVector3D(random)));
 
          // update full robot model
          fullRobotModelUpdater.run();
@@ -143,46 +143,46 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       assertTrue(rotationBack.epsilonEquals(rotation, epsilon));
    }
 
-   private void compareCenterOfMassVelocity(RigidBody elevator, ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort, double epsilon)
+   private void compareCenterOfMassVelocity(RigidBody elevator, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort, double epsilon)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(elevator);
       centerOfMassJacobian.compute();
-      FrameVector centerOfMassVelocityBack = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D centerOfMassVelocityBack = new FrameVector3D(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityBack);
-      FrameVector centerOfMassVelocity = centerOfMassVelocityPort.getData();
+      FrameVector3D centerOfMassVelocity = centerOfMassVelocityPort.getData();
       centerOfMassVelocityBack.changeFrame(centerOfMassVelocity.getReferenceFrame());
       FrameVectorTest.assertFrameVectorEquals(centerOfMassVelocity, centerOfMassVelocityBack, epsilon);
    }
 
    private void compareCenterOfMassAcceleration(RigidBody elevator, SpatialAccelerationCalculator spatialAccelerationCalculator,
-           ControlFlowOutputPort<FrameVector> centerOfMassAccelerationPort, double epsilon)
+           ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort, double epsilon)
    {
       CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
-      FrameVector centerOfMassAccelerationBack = new FrameVector();
+      FrameVector3D centerOfMassAccelerationBack = new FrameVector3D();
       centerOfMassAccelerationCalculator.getCoMAcceleration(centerOfMassAccelerationBack);
       centerOfMassAccelerationBack.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameVector centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
+      FrameVector3D centerOfMassAcceleration = centerOfMassAccelerationPort.getData();
       FrameVectorTest.assertFrameVectorEquals(centerOfMassAcceleration, centerOfMassAccelerationBack, epsilon);
    }
 
    private void compareAngularVelocity(RigidBody estimationLink, ReferenceFrame estimationFrame, TwistCalculator twistCalculator,
-           ControlFlowOutputPort<FrameVector> angularVelocityPort, double epsilon)
+           ControlFlowOutputPort<FrameVector3D> angularVelocityPort, double epsilon)
    {
       Twist estimationLinkTwist = new Twist();
       twistCalculator.getTwistOfBody(estimationLink, estimationLinkTwist);
       estimationLinkTwist.changeFrame(estimationFrame);
-      FrameVector angularVelocityBack = new FrameVector(estimationFrame);
+      FrameVector3D angularVelocityBack = new FrameVector3D(estimationFrame);
       estimationLinkTwist.getAngularPart(angularVelocityBack);
       FrameVectorTest.assertFrameVectorEquals(angularVelocityBack, angularVelocityPort.getData(), epsilon);
    }
 
    private void compareAngularAcceleration(RigidBody estimationLink, ReferenceFrame estimationFrame,
-           SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector> angularAccelerationPort, double epsilon)
+           SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector3D> angularAccelerationPort, double epsilon)
    {
       SpatialAccelerationVector estimationLinkAcceleration = new SpatialAccelerationVector();
       spatialAccelerationCalculator.getAccelerationOfBody(estimationLink, estimationLinkAcceleration);
       estimationLinkAcceleration.changeFrameNoRelativeMotion(estimationFrame);
-      FrameVector angularAccelerationBack = new FrameVector(estimationFrame);
+      FrameVector3D angularAccelerationBack = new FrameVector3D(estimationFrame);
       estimationLinkAcceleration.getAngularPart(angularAccelerationBack);
       FrameVectorTest.assertFrameVectorEquals(angularAccelerationBack, angularAccelerationPort.getData(), epsilon);
    }

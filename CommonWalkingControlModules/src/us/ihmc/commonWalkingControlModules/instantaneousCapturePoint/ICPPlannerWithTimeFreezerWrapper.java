@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -221,7 +221,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocityToPack);
    }
@@ -242,7 +242,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointAcceleration(FrameVector desiredCapturePointAccelerationToPack)
+   public void getDesiredCapturePointAcceleration(FrameVector3D desiredCapturePointAccelerationToPack)
    {
       icpPlanner.getDesiredCapturePointAcceleration(desiredCapturePointAccelerationToPack);
    }
@@ -263,7 +263,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       icpPlanner.getDesiredCentroidalMomentumPivotVelocity(desiredCentroidalMomentumPivotVelocityToPack);
    }

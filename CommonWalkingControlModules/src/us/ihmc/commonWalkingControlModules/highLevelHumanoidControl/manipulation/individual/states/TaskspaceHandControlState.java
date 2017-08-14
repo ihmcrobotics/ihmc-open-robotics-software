@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -57,12 +57,12 @@ public class TaskspaceHandControlState extends HandControlState
    // temp stuff:
    private final FramePose desiredPose = new FramePose();
    private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
-   private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
 
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame);
    private final FrameSE3TrajectoryPoint initialTrajectoryPoint = new FrameSE3TrajectoryPoint();
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;

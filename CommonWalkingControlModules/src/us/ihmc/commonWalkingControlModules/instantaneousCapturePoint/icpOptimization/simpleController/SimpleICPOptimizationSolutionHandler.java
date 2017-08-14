@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -51,9 +51,9 @@ public class SimpleICPOptimizationSolutionHandler
    private final FramePoint3D solutionLocation = new FramePoint3D();
    private final FramePoint3D referenceLocation = new FramePoint3D();
    private final FramePoint3D previousLocation = new FramePoint3D();
-   private final FrameVector solutionAdjustment = new FrameVector();
+   private final FrameVector3D solutionAdjustment = new FrameVector3D();
 
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {

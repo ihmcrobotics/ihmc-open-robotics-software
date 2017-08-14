@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,13 +40,13 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
       currentSegment.getFramePosition(desiredCMPToPack);
    }
 
-   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector desiredCMPVelocityToPack)
+   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector3D desiredCMPVelocityToPack)
    {
       update(timeInState, desiredCMPToPack);
       currentSegment.getFrameVelocity(desiredCMPVelocityToPack);
    }
 
-   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector desiredCMPVelocityToPack, FrameVector desiredCMPAccelerationToPack)
+   public void update(double timeInState, FramePoint3D desiredCMPToPack, FrameVector3D desiredCMPVelocityToPack, FrameVector3D desiredCMPAccelerationToPack)
    {
       update(timeInState, desiredCMPToPack, desiredCMPVelocityToPack);
       currentSegment.getFrameAcceleration(desiredCMPAccelerationToPack);

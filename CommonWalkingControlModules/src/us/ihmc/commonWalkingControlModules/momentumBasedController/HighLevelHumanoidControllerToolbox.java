@@ -37,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -108,8 +108,8 @@ public class HighLevelHumanoidControllerToolbox
    private final SideDependentList<ReferenceFrame> wristForceSensorMeasurementFrames;
    private final Wrench wristWrenchDueToGravity = new Wrench();
    private final Wrench wristTempWrench = new Wrench();
-   private final FrameVector tempWristForce = new FrameVector();
-   private final FrameVector tempWristTorque = new FrameVector();
+   private final FrameVector3D tempWristForce = new FrameVector3D();
+   private final FrameVector3D tempWristTorque = new FrameVector3D();
 
    private final SideDependentList<YoDouble> handsMass;
 
@@ -267,8 +267,8 @@ public class HighLevelHumanoidControllerToolbox
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
 
-         FrameVector pitchJointAxis;
-         FrameVector rollJointAxis;
+         FrameVector3D pitchJointAxis;
+         FrameVector3D rollJointAxis;
          if (anklePitchJoint != null)
          {
             pitchJointAxis = anklePitchJoint.getJointAxis();
@@ -464,7 +464,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
 
@@ -493,7 +493,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.setXY(capturePoint2d);
    }
 
-   private final FrameVector angularMomentum = new FrameVector();
+   private final FrameVector3D angularMomentum = new FrameVector3D();
    private final Momentum robotMomentum = new Momentum();
 
    private void computeAngularMomentum()
@@ -537,7 +537,7 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2d copActual = new FramePoint2d();
    private final FrameVector2d copError = new FrameVector2d();
    private final Wrench footWrench = new Wrench();
-   private final FrameVector footForceVector = new FrameVector();
+   private final FrameVector3D footForceVector = new FrameVector3D();
 
    private final YoBoolean enableHighCoPDampingForShakies = new YoBoolean("enableHighCoPDampingForShakies", registry);
    private final YoBoolean isCoPTrackingBad = new YoBoolean("isCoPTrackingBad", registry);
@@ -749,13 +749,13 @@ public class HighLevelHumanoidControllerToolbox
       yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
    }
 
-   public void setFootContactStateNormalContactVector(RobotSide robotSide, FrameVector normalContactVector)
+   public void setFootContactStateNormalContactVector(RobotSide robotSide, FrameVector3D normalContactVector)
    {
       YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setContactNormalVector(normalContactVector);
    }
 
-   public void setFootContactState(RobotSide robotSide, boolean[] newContactPointStates, FrameVector normalContactVector)
+   public void setFootContactState(RobotSide robotSide, boolean[] newContactPointStates, FrameVector3D normalContactVector)
    {
       YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setContactPointsInContact(newContactPointStates);
@@ -993,7 +993,7 @@ public class HighLevelHumanoidControllerToolbox
       yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
 
-   public void getAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
+   public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
    }

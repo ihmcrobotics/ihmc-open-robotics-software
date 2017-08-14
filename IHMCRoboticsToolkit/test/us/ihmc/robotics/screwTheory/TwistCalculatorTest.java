@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -41,7 +41,7 @@ public class TwistCalculatorTest
          ScrewTestTools.setRandomVelocities(prismaticJoints, random, -10.0, 10.0);
          twistCalculator.compute();
 
-         FrameVector cumulatedLinearVelocity = new FrameVector(worldFrame);
+         FrameVector3D cumulatedLinearVelocity = new FrameVector3D(worldFrame);
 
          for (PrismaticJoint joint : prismaticJoints)
          {
@@ -52,7 +52,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = joint.getJointAxis();
             cumulatedLinearVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedLinearVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedLinearVelocity);
             cumulatedLinearVelocity.changeFrame(bodyFrame);
@@ -78,7 +78,7 @@ public class TwistCalculatorTest
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
          twistCalculator.compute();
 
-         FrameVector cumulatedAngularVelocity = new FrameVector(worldFrame);
+         FrameVector3D cumulatedAngularVelocity = new FrameVector3D(worldFrame);
 
          for (RevoluteJoint joint : revoluteJoints)
          {
@@ -89,7 +89,7 @@ public class TwistCalculatorTest
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-            FrameVector jointAxis = joint.getJointAxis();
+            FrameVector3D jointAxis = joint.getJointAxis();
             cumulatedAngularVelocity.changeFrame(jointAxis.getReferenceFrame());
             cumulatedAngularVelocity.scaleAdd(joint.getQd(), jointAxis, cumulatedAngularVelocity);
             cumulatedAngularVelocity.changeFrame(bodyFrame);
@@ -127,12 +127,12 @@ public class TwistCalculatorTest
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
             RigidBody currentBody = body;
-            FrameVector cumulatedLinearVelocity = new FrameVector(worldFrame);
+            FrameVector3D cumulatedLinearVelocity = new FrameVector3D(worldFrame);
 
             while (currentBody.getParentJoint() != null)
             {
                PrismaticJoint parentJoint = (PrismaticJoint) currentBody.getParentJoint();
-               FrameVector jointAxis = parentJoint.getJointAxis();
+               FrameVector3D jointAxis = parentJoint.getJointAxis();
                cumulatedLinearVelocity.changeFrame(jointAxis.getReferenceFrame());
                cumulatedLinearVelocity.scaleAdd(parentJoint.getQd(), jointAxis, cumulatedLinearVelocity);
                currentBody = parentJoint.getPredecessor();
@@ -171,12 +171,12 @@ public class TwistCalculatorTest
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
             RigidBody currentBody = body;
-            FrameVector cumulatedAngularVelocity = new FrameVector(worldFrame);
+            FrameVector3D cumulatedAngularVelocity = new FrameVector3D(worldFrame);
 
             while (currentBody.getParentJoint() != null)
             {
                RevoluteJoint parentJoint = (RevoluteJoint) currentBody.getParentJoint();
-               FrameVector jointAxis = parentJoint.getJointAxis();
+               FrameVector3D jointAxis = parentJoint.getJointAxis();
                cumulatedAngularVelocity.changeFrame(jointAxis.getReferenceFrame());
                cumulatedAngularVelocity.scaleAdd(parentJoint.getQd(), jointAxis, cumulatedAngularVelocity);
                currentBody = parentJoint.getPredecessor();
@@ -344,15 +344,15 @@ public class TwistCalculatorTest
 
             Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
             FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
-            FrameVector actualLinearVelocity = new FrameVector();
+            FrameVector3D actualLinearVelocity = new FrameVector3D();
             twistCalculator.getLinearVelocityOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearVelocity);
-            FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
+            FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
 
             expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
             EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 1.0e-5);
 
-            FrameVector expectedAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
-            FrameVector actualAngularVelocity = new FrameVector();
+            FrameVector3D expectedAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+            FrameVector3D actualAngularVelocity = new FrameVector3D();
             twistCalculator.getAngularVelocityOfBody(body, actualAngularVelocity);
 
             expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
@@ -434,17 +434,17 @@ public class TwistCalculatorTest
 
                Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
                FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
-               FrameVector actualLinearVelocity = new FrameVector();
+               FrameVector3D actualLinearVelocity = new FrameVector3D();
                twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);
-               FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame,
+               FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame,
                                                                                                     baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
                EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 2.0e-5);
 
-               FrameVector expectedAngularVelocity = new FrameVector();
+               FrameVector3D expectedAngularVelocity = new FrameVector3D();
                expectedRelativeTwist.getAngularPart(expectedAngularVelocity);
-               FrameVector actualAngularVelocity = new FrameVector();
+               FrameVector3D actualAngularVelocity = new FrameVector3D();
                twistCalculator.getRelativeAngularVelocity(base, body, actualAngularVelocity);
 
                expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
@@ -478,13 +478,13 @@ public class TwistCalculatorTest
       }
    }
 
-   public static FrameVector computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
+   public static FrameVector3D computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
                                                                              Point3D bodyFixedPoint)
    {
       return computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, worldFrame, worldFrame, bodyFixedPoint);
    }
 
-   public static FrameVector computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
+   public static FrameVector3D computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
                                                                              ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture, Point3D bodyFixedPoint)
    {
       FramePoint3D point = new FramePoint3D(bodyFrame, bodyFixedPoint);
@@ -492,7 +492,7 @@ public class TwistCalculatorTest
       point.changeFrame(baseFrame);
       pointInFuture.changeFrame(baseFrameInFuture);
 
-      FrameVector pointLinearVelocity = new FrameVector(baseFrame);
+      FrameVector3D pointLinearVelocity = new FrameVector3D(baseFrame);
       pointLinearVelocity.sub(pointInFuture.getPoint(), point.getPoint());
       pointLinearVelocity.scale(1.0 / dt);
       return pointLinearVelocity;
@@ -502,10 +502,10 @@ public class TwistCalculatorTest
    {
       Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-      FrameVector bodyLinearVelocity = computeLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+      FrameVector3D bodyLinearVelocity = computeLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
       expectedTwist.setLinearPart(bodyLinearVelocity);
 
-      FrameVector bodyAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+      FrameVector3D bodyAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
       expectedTwist.setAngularPart(bodyAngularVelocity);
       return expectedTwist;
    }
@@ -524,14 +524,14 @@ public class TwistCalculatorTest
       return relativeTwist;
    }
 
-   public static FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector3D computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FrameOrientation bodyOrientation = new FrameOrientation(bodyFrame);
       bodyOrientation.changeFrame(worldFrame);
       FrameOrientation bodyOrientationInFuture = new FrameOrientation(bodyFrameInFuture);
       bodyOrientationInFuture.changeFrame(worldFrame);
 
-      FrameVector bodyAngularVelocity = new FrameVector(worldFrame);
+      FrameVector3D bodyAngularVelocity = new FrameVector3D(worldFrame);
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Vector4D qDot = new Vector4D();
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation.getQuaternion(), bodyOrientationInFuture.getQuaternion(), 0.5 * dt, qDot);
@@ -541,14 +541,14 @@ public class TwistCalculatorTest
       return bodyAngularVelocity;
    }
 
-   public static FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector3D computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FramePoint3D bodyPosition = new FramePoint3D(bodyFrame);
       bodyPosition.changeFrame(worldFrame);
       FramePoint3D bodyPositionInFuture = new FramePoint3D(bodyFrameInFuture);
       bodyPositionInFuture.changeFrame(worldFrame);
 
-      FrameVector bodyLinearVelocity = new FrameVector(worldFrame);
+      FrameVector3D bodyLinearVelocity = new FrameVector3D(worldFrame);
       bodyLinearVelocity.subAndScale(1.0 / dt, bodyPositionInFuture, bodyPosition);
       bodyLinearVelocity.changeFrame(bodyFrame);
       return bodyLinearVelocity;

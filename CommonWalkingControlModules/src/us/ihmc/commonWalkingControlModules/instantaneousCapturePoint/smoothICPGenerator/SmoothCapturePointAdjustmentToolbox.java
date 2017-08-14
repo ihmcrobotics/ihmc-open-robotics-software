@@ -12,7 +12,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 
@@ -51,7 +51,7 @@ public class SmoothCapturePointAdjustmentToolbox
       icpQuantityInitialConditionList.add(new FramePoint3D());
       while(icpQuantityInitialConditionList.size() < defaultSize)
       {
-         icpQuantityInitialConditionList.add(new FrameVector());
+         icpQuantityInitialConditionList.add(new FrameVector3D());
       }
    }
    

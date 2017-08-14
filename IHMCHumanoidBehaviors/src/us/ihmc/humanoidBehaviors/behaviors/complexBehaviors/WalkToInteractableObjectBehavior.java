@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -85,7 +85,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
             FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
             robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector walkingDirection = new FrameVector(ReferenceFrame.getWorldFrame());
+            FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
             walkingDirection.set(walkPosition2d);
             walkingDirection.sub(robotPosition);
             walkingDirection.normalize();

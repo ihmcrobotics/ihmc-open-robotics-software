@@ -14,7 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -186,7 +186,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackVelocity()
    {
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
@@ -202,7 +202,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackAcceleration()
    {
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
@@ -218,7 +218,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackAngularVelocity()
    {
-      FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularVelocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(angularVelocityToPack.getReferenceFrame()));
 
@@ -234,7 +234,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackAngularAcceleration()
    {
-      FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularAccelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
 
@@ -261,8 +261,8 @@ public class ConstantPoseTrajectoryGeneratorTest
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(velocityToPack.getReferenceFrame()));
@@ -303,8 +303,8 @@ public class ConstantPoseTrajectoryGeneratorTest
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
-      FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularVelocityToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
+      FrameVector3D angularAccelerationToPack = new FrameVector3D(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(angularVelocityToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(angularVelocityToPack.getReferenceFrame()));

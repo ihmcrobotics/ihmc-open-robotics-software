@@ -8,7 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,9 +37,9 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    private double initialTime;
    private AngularMomentumTrajectory activeTrajectory;
-   private FrameVector desiredAngularMomentum;
-   private FrameVector desiredTorque;
-   private FrameVector desiredRotatum;
+   private FrameVector3D desiredAngularMomentum;
+   private FrameVector3D desiredTorque;
+   private FrameVector3D desiredRotatum;
    private FramePoint3D tempFramePoint1 = new FramePoint3D(worldFrame);
    private FramePoint3D tempFramePoint2 = new FramePoint3D(worldFrame);
    private double planTime;
@@ -142,19 +142,19 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
       desiredTorqueToPack.setIncludingFrame(desiredTorque);
    }
 
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
       desiredTorqueToPack.setIncludingFrame(desiredTorque);

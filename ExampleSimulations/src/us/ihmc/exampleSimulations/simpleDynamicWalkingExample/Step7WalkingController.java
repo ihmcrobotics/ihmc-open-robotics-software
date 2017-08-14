@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -403,19 +403,19 @@ public class Step7WalkingController implements RobotController
       private final FramePoint3D initialPosition = new FramePoint3D();
       private final YoGraphicPosition debugIniPosViz;
       private final YoFramePoint iniPosDebug;
-      private final FrameVector initialVelocity = new FrameVector();
-      private final FrameVector initialAcceleration = new FrameVector();
+      private final FrameVector3D initialVelocity = new FrameVector3D();
+      private final FrameVector3D initialAcceleration = new FrameVector3D();
       private final FramePoint3D finalDesiredPositionToPack = new FramePoint3D();
-      private final FrameVector finalDesiredVelocity = new FrameVector();
+      private final FrameVector3D finalDesiredVelocity = new FrameVector3D();
       private int nTicksSinceTrajectoryIsDone = 0;
 
       private final FramePoint3D desiredPosition = new FramePoint3D();
       private final FramePoint3D desiredPositionTrajectoryViz = new FramePoint3D();
-      private final FrameVector pControl = new FrameVector();
+      private final FrameVector3D pControl = new FrameVector3D();
 
-      private final FrameVector currentVelocity = new FrameVector();
-      private final FrameVector desiredVelocity = new FrameVector();
-      private final FrameVector dControl = new FrameVector();
+      private final FrameVector3D currentVelocity = new FrameVector3D();
+      private final FrameVector3D desiredVelocity = new FrameVector3D();
+      private final FrameVector3D dControl = new FrameVector3D();
 
       private final ReferenceFrame soleFrame;
       private final GeometricJacobian swingLegJacobian;

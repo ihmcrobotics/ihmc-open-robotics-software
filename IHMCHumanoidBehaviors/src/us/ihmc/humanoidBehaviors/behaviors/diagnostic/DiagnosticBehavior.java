@@ -64,7 +64,7 @@ import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -451,7 +451,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          FramePoint3D tempPoint = new FramePoint3D(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
-         FrameVector tempVector = new FrameVector(tempPoint);
+         FrameVector3D tempVector = new FrameVector3D(tempPoint);
          EuclidCoreMissingTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
          tempVector.normalize();
 
@@ -470,7 +470,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          Vector3D expectedElbowAxis = new Vector3D(0.0, 0.0, 1.0);
          RigidBodyTransform zRotationDueToAccountForElbowAxis = new RigidBodyTransform();
-         FrameVector elbowJointAxis = elbowJoint.getJointAxis();
+         FrameVector3D elbowJointAxis = elbowJoint.getJointAxis();
          zRotationDueToAccountForElbowAxis.setRotationPitchAndZeroTranslation(-elbowJointAxis.angle(expectedElbowAxis));
          armZeroJointAngleConfigurationOffset.multiply(zRotationDueToAccountForElbowAxis);
 

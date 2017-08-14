@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,9 +25,9 @@ public class BasisVectorVisualizer
    private final Map<Integer, YoFramePoint> pointOfBases = new LinkedHashMap<>();
    private final Map<Integer, YoGraphicVector> basisVisualizers = new LinkedHashMap<>();
 
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector tempBasisVector = new FrameVector();
+   private final FrameVector3D tempBasisVector = new FrameVector3D();
 
    private final int rhoSize;
 
@@ -62,11 +62,11 @@ public class BasisVectorVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void visualize(List<FrameVector> basisVectors, List<FramePoint3D> contactPoints)
+   public void visualize(List<FrameVector3D> basisVectors, List<FramePoint3D> contactPoints)
    {
       for (int i = 0; i < rhoSize; i++)
       {
-         FrameVector basisVector = basisVectors.get(i);
+         FrameVector3D basisVector = basisVectors.get(i);
          tempBasisVector.changeFrame(basisVector.getReferenceFrame());
          tempBasisVector.set(basisVector);
          tempBasisVector.changeFrame(ReferenceFrame.getWorldFrame());

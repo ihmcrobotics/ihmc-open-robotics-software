@@ -8,7 +8,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

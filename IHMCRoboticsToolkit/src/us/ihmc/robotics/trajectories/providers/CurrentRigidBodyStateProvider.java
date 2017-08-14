@@ -2,7 +2,7 @@ package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 
@@ -21,7 +21,7 @@ public class CurrentRigidBodyStateProvider
       positionToPack.setToZero(frameOfInterest);
    }
    
-   public void getLinearVelocity(FrameVector linearVelocityToPack)
+   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
       twist.getLinearPart(linearVelocityToPack);
@@ -32,7 +32,7 @@ public class CurrentRigidBodyStateProvider
       orientationToPack.setToZero(frameOfInterest);
    }
    
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
       twist.getAngularPart(angularVelocityToPack);

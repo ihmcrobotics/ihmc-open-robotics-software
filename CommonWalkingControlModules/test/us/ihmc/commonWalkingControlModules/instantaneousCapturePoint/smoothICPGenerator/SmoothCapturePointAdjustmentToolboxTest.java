@@ -12,7 +12,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -70,19 +70,19 @@ public class SmoothCapturePointAdjustmentToolboxTest
          
          double scale1 = 1.0 / Math.random();
          double t1 = t0 + scale1 * Math.random();
-         FrameVector dcmp1 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
          
          double scale2 = 1.0 / Math.random();
          double t2 = t1 + scale2 * Math.random();
-         FrameVector dcmp2 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
          
          double scale3 = 1.0 / Math.random();
          double t3 = t2 + scale3 * Math.random();
-         FrameVector dcmp3 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
          
@@ -183,25 +183,25 @@ public class SmoothCapturePointAdjustmentToolboxTest
          
          double scale1 = 1.0 / Math.random();
          double t1 = t0 + scale1 * Math.random();
-         FrameVector dcmp1 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
          
          double scale2 = 1.0 / Math.random();
          double t2 = t1 + scale2 * Math.random();
-         FrameVector dcmp2 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
          
          double scale3 = 1.0 / Math.random();
          double t3 = t2 + scale3 * Math.random();
-         FrameVector dcmp3 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
          
          double scale4 = 1.0 / Math.random();
          double t4 = t3 + scale4 * Math.random();
-         FrameVector dcmp4 = new FrameVector(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
+         FrameVector3D dcmp4 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp4 = new FramePoint3D(worldFrame);
          cmp4.add(cmp3, dcmp4);
          

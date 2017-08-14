@@ -329,7 +329,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame of this pose are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       pose.getRotationVector(frameRotationVectorToPack.getVector());
@@ -350,7 +350,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       frameOrientation2dToPack.setIncludingFrame(referenceFrame, pose.getYaw());
    }
 
-   public void rotatePoseAboutAxis(FrameVector rotatationAxis, FramePoint3D rotationAxisOrigin, double angle)
+   public void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle)
    {
       ReferenceFrame frameWhoseZAxisIsRotationAxis = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);
@@ -560,32 +560,32 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return ret;
    }
 
-   public FrameVector getTranslationToOtherPoseTotal(FramePose otherPose)
+   public FrameVector3D getTranslationToOtherPoseTotal(FramePose otherPose)
    {
       checkReferenceFrameMatch(otherPose);
 
-      FrameVector ret = new FrameVector(referenceFrame);
+      FrameVector3D ret = new FrameVector3D(referenceFrame);
       ret.sub(otherPose.pose.getPosition(), pose.getPosition());
 
       return ret;
    }
 
-   public FrameVector getTranslationNOTDueToRotationAboutFrame(FramePose otherPose)
+   public FrameVector3D getTranslationNOTDueToRotationAboutFrame(FramePose otherPose)
    {
       checkReferenceFrameMatch(otherPose);
 
       RigidBodyTransform transformToOtherPose = getTransformFromThisToThat(otherPose);
-      FrameVector ret = new FrameVector(referenceFrame);
+      FrameVector3D ret = new FrameVector3D(referenceFrame);
       transformToOtherPose.getTranslation(ret.tuple);
 
       return ret;
    }
 
-   public FrameVector getTranslationDueToRotationAboutFrame(FramePose otherPose)
+   public FrameVector3D getTranslationDueToRotationAboutFrame(FramePose otherPose)
    {
       checkReferenceFrameMatch(otherPose);
 
-      FrameVector ret = getTranslationToOtherPoseTotal(otherPose);
+      FrameVector3D ret = getTranslationToOtherPoseTotal(otherPose);
       ret.sub(getTranslationNOTDueToRotationAboutFrame(otherPose));
       return ret;
    }
@@ -610,7 +610,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return TransformTools.getTransformFromA2toA1(transformToThat, transformToThis);
    }
 
-   public double getSpatialAxisOfRotationAndAngleToOtherPose(FramePose otherPose, FrameVector rotationAxisToPack, FramePoint3D rotationAxisOriginToPack)
+   public double getSpatialAxisOfRotationAndAngleToOtherPose(FramePose otherPose, FrameVector3D rotationAxisToPack, FramePoint3D rotationAxisOriginToPack)
    {
       double rotationAngle = getAxisAngleRotationToOtherPose(otherPose, rotationAxisToPack);
 
@@ -619,7 +619,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return rotationAngle;
    }
 
-   private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector rotationAxis, double rotationAngle, FramePoint3D originToPack)
+   private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector3D rotationAxis, double rotationAngle, FramePoint3D originToPack)
    {
       otherPose.checkReferenceFrameMatch(rotationAxis);
       otherPose.checkReferenceFrameMatch(originToPack);
@@ -644,7 +644,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       }
    }
 
-   public double getAxisAngleRotationToOtherPose(FramePose otherPose, FrameVector rotationAxisToPack)
+   public double getAxisAngleRotationToOtherPose(FramePose otherPose, FrameVector3D rotationAxisToPack)
    {
       AxisAngle rotationAxisAngle = new AxisAngle();
       getAxisAngleRotationToOtherPose(otherPose, rotationAxisAngle);

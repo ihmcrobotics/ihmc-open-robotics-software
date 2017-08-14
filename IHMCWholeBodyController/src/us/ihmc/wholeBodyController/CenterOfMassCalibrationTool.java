@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -132,8 +132,8 @@ public class CenterOfMassCalibrationTool implements Updatable
          ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
          forceSensorData.getWrench(footWrench);
-         FrameVector footForce = footWrench.getLinearPartAsFrameVectorCopy();
-         FrameVector footTorque = footWrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D footForce = footWrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D footTorque = footWrench.getAngularPartAsFrameVectorCopy();
          
          ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getFrameAfterJoint();
          
@@ -141,7 +141,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          forceSensorLocation.changeFrame(jointFrame);
          footForce.changeFrame(jointFrame);
          
-         FrameVector cross = new FrameVector(jointFrame);
+         FrameVector3D cross = new FrameVector3D(jointFrame);
          cross.cross(forceSensorLocation, footForce);
          
          footTorque.changeFrame(jointFrame);

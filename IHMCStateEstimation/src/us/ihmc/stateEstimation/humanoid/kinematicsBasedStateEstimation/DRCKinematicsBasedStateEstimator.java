@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -337,13 +337,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
+   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
    {
       pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
    }
 
    @Override
-   public void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity)
+   public void setEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocity)
    {
       // Do nothing, IMU is trusted
    }
@@ -361,13 +361,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
+   public void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
    }
 
    @Override
-   public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
+   public void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity)
    {
    }
 
@@ -378,7 +378,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
+   public void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
    }

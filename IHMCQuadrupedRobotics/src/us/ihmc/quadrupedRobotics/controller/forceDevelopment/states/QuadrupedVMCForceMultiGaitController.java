@@ -34,7 +34,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -150,9 +150,9 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
    // Jacobian
    private final FramePoint3D jointPosition = new FramePoint3D();
-   private final FrameVector jointToFootVector = new FrameVector();
-   private final FrameVector vmcRequestedTorqueFromJoint = new FrameVector();
-   private final FrameVector jointAxis = new FrameVector();
+   private final FrameVector3D jointToFootVector = new FrameVector3D();
+   private final FrameVector3D vmcRequestedTorqueFromJoint = new FrameVector3D();
+   private final FrameVector3D jointAxis = new FrameVector3D();
 
    // Walking
    private final YoEnum<QuadrupedGaitCycle> desiredGait = new YoEnum<>("desiredGait", registry, QuadrupedGaitCycle.class);
@@ -493,7 +493,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       centerOfMassJacobian.compute();
 
-      FrameVector tempVector = centerOfMassVelocity.getFrameTuple();
+      FrameVector3D tempVector = centerOfMassVelocity.getFrameTuple();
       centerOfMassJacobian.getCenterOfMassVelocity(tempVector);
       tempVector.changeFrame(centerOfMassVelocity.getReferenceFrame());
       centerOfMassVelocity.setWithoutChecks(tempVector);

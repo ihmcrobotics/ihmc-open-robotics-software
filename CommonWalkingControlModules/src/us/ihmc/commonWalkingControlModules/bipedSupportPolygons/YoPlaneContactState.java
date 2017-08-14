@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -28,7 +28,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final ReferenceFrame planeFrame;
    private final YoBoolean inContact;
    private final YoDouble coefficientOfFriction;
-   private final FrameVector contactNormalFrameVector;
+   private final FrameVector3D contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
    private final HashMap<YoContactPoint, YoDouble> maxContactPointNormalForces = new HashMap<>();
@@ -49,7 +49,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       parentRegistry.addChild(registry);
 
-      this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
+      this.contactNormalFrameVector = new FrameVector3D(planeFrame, 0.0, 0.0, 1.0);
 
       contactPoints = new ArrayList<YoContactPoint>(contactFramePoints.size());
       for (int i = 0; i < contactFramePoints.size(); i++)
@@ -136,7 +136,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.coefficientOfFriction.set(coefficientOfFriction);
    }
 
-   public void setContactNormalVector(FrameVector normalContactVector)
+   public void setContactNormalVector(FrameVector3D normalContactVector)
    {
       if (normalContactVector == null)
       {
@@ -434,13 +434,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    @Override
-   public FrameVector getContactNormalFrameVectorCopy()
+   public FrameVector3D getContactNormalFrameVectorCopy()
    {
-      return new FrameVector(contactNormalFrameVector);
+      return new FrameVector3D(contactNormalFrameVector);
    }
 
    @Override
-   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
       frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
    }

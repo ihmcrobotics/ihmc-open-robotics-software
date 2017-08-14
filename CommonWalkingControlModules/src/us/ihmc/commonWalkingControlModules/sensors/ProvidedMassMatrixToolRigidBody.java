@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -54,7 +54,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final ReferenceFrame elevatorFrame;
 
    private final FramePoint3D temporaryPoint = new FramePoint3D();
-   private final FrameVector temporaryVector = new FrameVector();
+   private final FrameVector3D temporaryVector = new FrameVector3D();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
 
    public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoVariableRegistry parentRegistry,

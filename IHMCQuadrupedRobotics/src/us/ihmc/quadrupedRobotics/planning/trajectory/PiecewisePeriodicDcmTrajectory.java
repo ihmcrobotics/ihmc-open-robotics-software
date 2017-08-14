@@ -4,7 +4,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class PiecewisePeriodicDcmTrajectory
    private final FramePoint3D[] dcmPositionAtSoS;
    private final FramePoint3D[] vrpPositionAtSoS;
    private final FramePoint3D dcmPosition;
-   private final FrameVector dcmVelocity;
+   private final FrameVector3D dcmVelocity;
    private final List<MutableDouble> temporaryDouble;
    private final List<FramePoint3D> temporaryFramePoint;
    private final DenseMatrix64F A = new DenseMatrix64F(3, 3);
@@ -45,7 +45,7 @@ public class PiecewisePeriodicDcmTrajectory
          this.vrpPositionAtSoS[i] = new FramePoint3D(ReferenceFrame.getWorldFrame());
       }
       this.dcmPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
-      this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      this.dcmVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
       this.temporaryDouble = new ArrayList<>();
       this.temporaryDouble.add(new MutableDouble(0));
       this.temporaryFramePoint = new ArrayList<>();
@@ -180,7 +180,7 @@ public class PiecewisePeriodicDcmTrajectory
       dcmPosition.setIncludingFrame(this.dcmPosition);
    }
 
-   public void getVelocity(FrameVector dcmVelocity)
+   public void getVelocity(FrameVector3D dcmVelocity)
    {
       dcmVelocity.setIncludingFrame(this.dcmVelocity);
    }

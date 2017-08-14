@@ -9,7 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
@@ -52,7 +52,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       
 
       FramePoint3D waypointPosition = new FramePoint3D();
-      FrameVector waypointVelocity = new FrameVector();
+      FrameVector3D waypointVelocity = new FrameVector3D();
 
       for (int i = 0; i < numberOfWaypoints; i++)
       {
@@ -66,12 +66,12 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
 
       
       FramePoint3D positionToPackMultiple = new FramePoint3D(worldFrame);
-      FrameVector velocityToPackMultiple = new FrameVector(worldFrame);
-      FrameVector accelerationToPackMultiple = new FrameVector(worldFrame);
+      FrameVector3D velocityToPackMultiple = new FrameVector3D(worldFrame);
+      FrameVector3D accelerationToPackMultiple = new FrameVector3D(worldFrame);
       
       FramePoint3D positionToPackSimple = new FramePoint3D(worldFrame);
-      FrameVector velocityToPackSimple = new FrameVector(worldFrame);
-      FrameVector accelerationToPackSimple = new FrameVector(worldFrame);
+      FrameVector3D velocityToPackSimple = new FrameVector3D(worldFrame);
+      FrameVector3D accelerationToPackSimple = new FrameVector3D(worldFrame);
       
       for (double t = 0.0; t <= trajectoryTime; t += dt)
       {

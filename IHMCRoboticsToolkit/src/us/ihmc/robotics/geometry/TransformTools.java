@@ -13,7 +13,7 @@ public class TransformTools
     * Creates a transform that transforms to the given point and rotates to make the z axis align
     * with the normal vector.
     */
-   public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint3D point, FrameVector zAxis)
+   public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint3D point, FrameVector3D zAxis)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
       ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVector()));

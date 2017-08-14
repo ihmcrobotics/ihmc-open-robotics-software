@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
@@ -163,7 +163,7 @@ public class DesiredFootstepCalculatorTools
       return maxFramePoint;
    }
 
-   public static List<FramePoint3D> computeMaximumPointsInDirection(List<FramePoint3D> framePoints, FrameVector searchDirection, int nPoints)
+   public static List<FramePoint3D> computeMaximumPointsInDirection(List<FramePoint3D> framePoints, FrameVector3D searchDirection, int nPoints)
    {
       if (framePoints.size() < nPoints)
          throw new RuntimeException("Not enough points");
@@ -194,7 +194,7 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
-   public static int[] findMaximumPointIndexesInDirection(List<FramePoint3D> framePoints, FrameVector searchDirection, int nPoints)
+   public static int[] findMaximumPointIndexesInDirection(List<FramePoint3D> framePoints, FrameVector3D searchDirection, int nPoints)
    {
       List<FramePoint3D> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
 
@@ -210,10 +210,10 @@ public class DesiredFootstepCalculatorTools
 
    private static class SearchDirectionFramePointComparator implements Comparator<FramePoint3D>
    {
-      private final FrameVector searchDirection;
-      private final FrameVector differenceVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      private final FrameVector3D searchDirection;
+      private final FrameVector3D differenceVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-      public SearchDirectionFramePointComparator(FrameVector searchDirection)
+      public SearchDirectionFramePointComparator(FrameVector3D searchDirection)
       {
          this.searchDirection = searchDirection;
       }

@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
@@ -119,7 +119,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void testPackVelocity()
    {
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
@@ -136,7 +136,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void testPackAcceleration()
    {
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
@@ -164,8 +164,8 @@ public class StraightLinePositionTrajectoryGeneratorTest
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(velocityToPack.getReferenceFrame()));

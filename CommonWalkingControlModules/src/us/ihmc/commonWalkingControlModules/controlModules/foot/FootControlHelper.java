@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -27,7 +27,7 @@ public class FootControlHelper
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   private final FrameVector fullyConstrainedNormalContactVector;
+   private final FrameVector3D fullyConstrainedNormalContactVector;
    private final YoBoolean isDesiredCoPOnEdge;
 
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -60,7 +60,7 @@ public class FootControlHelper
 
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
-      fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+      fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
@@ -136,7 +136,7 @@ public class FootControlHelper
       return partialFootholdControlModule;
    }
 
-   public void setFullyConstrainedNormalContactVector(FrameVector normalContactVector)
+   public void setFullyConstrainedNormalContactVector(FrameVector3D normalContactVector)
    {
       if (normalContactVector != null)
          fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
@@ -144,7 +144,7 @@ public class FootControlHelper
          fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
    }
 
-   public FrameVector getFullyConstrainedNormalContactVector()
+   public FrameVector3D getFullyConstrainedNormalContactVector()
    {
       return fullyConstrainedNormalContactVector;
    }

@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -184,12 +184,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -258,7 +258,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       for (int i = 0; i < 2; i++)
       {
-         FrameVector waypointVelocity = getOppositeWaypointToEndpoint(i);
+         FrameVector3D waypointVelocity = getOppositeWaypointToEndpoint(i);
          waypointVelocity.normalize();
          waypointVelocity.scale(waypointSpeed * ((i == 0) ? -1 : 1));
          allVelocities[waypointIndices[i]].set(waypointVelocity);
@@ -351,9 +351,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       for (int i : new int[] {0, 1})
       {
-         FrameVector waypointToEndpoint = getWaypointToEndpoint(i);
+         FrameVector3D waypointToEndpoint = getWaypointToEndpoint(i);
 
-         FrameVector oppositeWaypointToEndpoint = getOppositeWaypointToEndpoint(i);
+         FrameVector3D oppositeWaypointToEndpoint = getOppositeWaypointToEndpoint(i);
 
          double scaleFactor = waypointToEndpoint.dot(oppositeWaypointToEndpoint) / oppositeWaypointToEndpoint.length()
                * linearSplineLengthFactor.getDoubleValue();
@@ -366,17 +366,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
    }
 
-   private FrameVector getOppositeWaypointToEndpoint(int i)
+   private FrameVector3D getOppositeWaypointToEndpoint(int i)
    {
-      FrameVector oppositeWaypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
+      FrameVector3D oppositeWaypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
       oppositeWaypointToEndpoint.sub(allPositions[oppositeWaypointIndices[i]].getFrameVectorCopy());
 
       return oppositeWaypointToEndpoint;
    }
 
-   private FrameVector getWaypointToEndpoint(int i)
+   private FrameVector3D getWaypointToEndpoint(int i)
    {
-      FrameVector waypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
+      FrameVector3D waypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
       waypointToEndpoint.sub(allPositions[waypointIndices[i]].getFrameVectorCopy());
 
       return waypointToEndpoint;
@@ -409,7 +409,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private void setInitialAndFinalTimesPositionsAndVelocities()
    {
       FramePoint3D tempPosition = new FramePoint3D(referenceFrame);
-      FrameVector tempVelocity = new FrameVector(referenceFrame);
+      FrameVector3D tempVelocity = new FrameVector3D(referenceFrame);
       for (int i = 0; i < 2; i++)
       {
          positionSources[i].getPosition(tempPosition);
@@ -514,7 +514,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoint.setZ(zSwingHeight);
       }
 
-      FrameVector planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
+      FrameVector3D planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
       planarEndpointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
       planarEndpointOffset.setZ(0.0);
 
@@ -524,7 +524,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 2; i++)
       {
          FramePoint3D waypoint = waypoints.get(i);
-         FrameVector planarWaypointOffset = new FrameVector(planarEndpointOffset);
+         FrameVector3D planarWaypointOffset = new FrameVector3D(planarEndpointOffset);
          double scaleFactor = fractionsOfStepDistanceToMoveWaypointForStepOnOrOff[i];
          if (i == 1)
             scaleFactor = scaleFactor - 1.0;
@@ -573,7 +573,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          FramePoint3D waypoint = waypoints.get(i);
          waypoint.set(initialPosition);
 
-         FrameVector offsetFromInitial = new FrameVector(waypoint.getReferenceFrame());
+         FrameVector3D offsetFromInitial = new FrameVector3D(waypoint.getReferenceFrame());
          offsetFromInitial.set(finalPosition);
          offsetFromInitial.sub(initialPosition);
          offsetFromInitial.scale(proportionsThroughTrajectoryForGroundClearance[i]);
@@ -603,7 +603,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          FramePoint3D waypoint = waypoints.get(i);
          waypoint.set(initialPosition);
 
-         FrameVector offsetFromInitial = new FrameVector(waypoint.getReferenceFrame());
+         FrameVector3D offsetFromInitial = new FrameVector3D(waypoint.getReferenceFrame());
          offsetFromInitial.set(finalPosition);
          offsetFromInitial.sub(initialPosition);
          offsetFromInitial.scale(proportionsThroughTrajectoryForGroundClearance[i]);
@@ -620,7 +620,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double[] nonAccelerationEndpointTimes = new double[4];
       double[] accelerationEndpointTimes = new double[2];
       FramePoint3D[] nonAccelerationEndpointPositions = new FramePoint3D[4];
-      FrameVector[] nonAccelerationEndpointVelocities = new FrameVector[4];
+      FrameVector3D[] nonAccelerationEndpointVelocities = new FrameVector3D[4];
 
       for (int i = 0; i < 4; i++)
       {
@@ -665,7 +665,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

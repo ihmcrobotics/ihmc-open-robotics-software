@@ -251,7 +251,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testMidPoint()
    {
       FramePoint3D expectedMidPoint = new FramePoint3D(theFrame, 9.0, 3.6, -1.16);
-      FrameVector difference = new FrameVector(theFrame, 1.5, -3.1, 12.9);
+      FrameVector3D difference = new FrameVector3D(theFrame, 1.5, -3.1, 12.9);
 
       FramePoint3D framePoint1 = new FramePoint3D(expectedMidPoint);
       FramePoint3D framePoint2 = new FramePoint3D(expectedMidPoint);

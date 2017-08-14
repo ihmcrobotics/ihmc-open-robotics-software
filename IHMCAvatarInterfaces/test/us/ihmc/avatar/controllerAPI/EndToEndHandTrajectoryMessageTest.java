@@ -49,7 +49,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -223,7 +223,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.setControlFrameOrientation(frameOrientation);
 
          ReferenceFrame handBodyFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
-         FrameVector frameFramePosition = new FrameVector(handBodyFrame, framePosition);
+         FrameVector3D frameFramePosition = new FrameVector3D(handBodyFrame, framePosition);
          frameFramePosition.changeFrame(worldFrame);
          position.add(frameFramePosition.getVector());
 

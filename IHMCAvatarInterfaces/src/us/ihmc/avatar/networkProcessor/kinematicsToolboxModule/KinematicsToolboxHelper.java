@@ -28,7 +28,7 @@ import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -253,7 +253,7 @@ public class KinematicsToolboxHelper
     */
    private static double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
    {
-      FrameVector positionError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
       feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
       command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
@@ -294,11 +294,11 @@ public class KinematicsToolboxHelper
       currentOrientation.changeFrame(worldFrame);
       controlFrame.setOrientationAndUpdate(currentOrientation);
 
-      FrameVector rotationError = new FrameVector();
+      FrameVector3D rotationError = new FrameVector3D();
       feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
       rotationError.changeFrame(controlFrame);
 
-      FrameVector positionError = new FrameVector();
+      FrameVector3D positionError = new FrameVector3D();
       feedbackControllerDataHolder.getVectorData(endEffector, positionError, Type.ERROR, Space.POSITION);
       positionError.changeFrame(controlFrame);
 

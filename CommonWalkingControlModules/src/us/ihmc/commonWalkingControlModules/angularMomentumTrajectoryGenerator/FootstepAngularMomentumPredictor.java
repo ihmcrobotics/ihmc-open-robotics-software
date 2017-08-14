@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.C
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,7 +30,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private static final boolean DEBUG = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector zeroVector = new FrameVector();
+   private static final FrameVector3D zeroVector = new FrameVector3D();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final int maxNumberOfTrajectoryCoefficients = 7;
    private final int numberOfSwingSegments = 1;
@@ -54,9 +54,9 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final List<SwingAngularMomentumTrajectory> swingAngularMomentumTrajectories;
    private final List<TransferAngularMomentumTrajectory> transferAngularMomentumTrajectories;
 
-   private final FrameVector desiredAngularMomentum = new FrameVector();
-   private final FrameVector desiredTorque = new FrameVector();
-   private final FrameVector desiredRotatum = new FrameVector();
+   private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
+   private final FrameVector3D desiredTorque = new FrameVector3D();
+   private final FrameVector3D desiredRotatum = new FrameVector3D();
 
    //private final YoFrameTrajectory3D footstepCoMTrajectory;
    private final YoFrameTrajectory3D segmentCoMTrajectory;
@@ -83,7 +83,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    };
 
    private final FramePoint3D tempFramePoint1 = new FramePoint3D(), tempFramePoint2 = new FramePoint3D(), tempFramePoint3 = new FramePoint3D(), tempFramePoint4 = new FramePoint3D();
-   private final FrameVector tempFrameVector1 = new FrameVector(), tempFrameVector2 = new FrameVector();
+   private final FrameVector3D tempFrameVector1 = new FrameVector3D(), tempFrameVector2 = new FrameVector3D();
 
    // DEBUGGING 
    private boolean firstCoMDebug, firstSwingDebug, swingStartDebug;
@@ -221,19 +221,19 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
       desiredTorqueToPack.setIncludingFrame(desiredTorque);
    }
 
-   public void getDesiredAngularMomentum(FrameVector desiredAngMomToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
+   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
    {
       desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
       desiredTorqueToPack.setIncludingFrame(desiredTorque);

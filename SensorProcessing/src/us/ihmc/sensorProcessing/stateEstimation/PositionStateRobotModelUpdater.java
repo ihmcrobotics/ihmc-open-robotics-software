@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -23,7 +23,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
    private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort;
-   private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityOutputPort;
+   private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort;
 
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianBody;
@@ -31,7 +31,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public PositionStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-           ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector> centerOfMassVelocityOutputPort)
+           ControlFlowOutputPort<FramePoint3D> centerOfMassPositionOutputPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityOutputPort)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.centerOfMassPositionOutputPort = centerOfMassPositionOutputPort;
@@ -60,10 +60,10 @@ public class PositionStateRobotModelUpdater implements Runnable
    }
 
    private final Twist tempRootJointTwist = new Twist();
-   private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempRootJointLinearVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempRootJointAngularVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempRootJointLinearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   private void updateRootJointTwistLinearPart(FrameVector centerOfMassVelocityWorld, FloatingInverseDynamicsJoint rootJoint)
+   private void updateRootJointTwistLinearPart(FrameVector3D centerOfMassVelocityWorld, FloatingInverseDynamicsJoint rootJoint)
    {
       rootJoint.getJointTwist(tempRootJointTwist);
       tempRootJointTwist.getAngularPart(tempRootJointAngularVelocity);
@@ -76,13 +76,13 @@ public class PositionStateRobotModelUpdater implements Runnable
    }
 
    private final FramePoint3D tempComBody = new FramePoint3D();
-   private final FrameVector tempComVelocityBody = new FrameVector();
-   private final FrameVector tempCenterOfMassVelocityOffset = new FrameVector();
-   private final FrameVector tempCrossPart = new FrameVector();
-   private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempComVelocityBody = new FrameVector3D();
+   private final FrameVector3D tempCenterOfMassVelocityOffset = new FrameVector3D();
+   private final FrameVector3D tempCrossPart = new FrameVector3D();
+   private final FrameVector3D tempCenterOfMassVelocityWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   private void computeRootJointLinearVelocity(FrameVector centerOfMassVelocityWorld, FrameVector rootJointVelocityToPack,
-           FrameVector rootJointAngularVelocity, FloatingInverseDynamicsJoint rootJoint)
+   private void computeRootJointLinearVelocity(FrameVector3D centerOfMassVelocityWorld, FrameVector3D rootJointVelocityToPack,
+           FrameVector3D rootJointAngularVelocity, FloatingInverseDynamicsJoint rootJoint)
    {
       tempCenterOfMassVelocityWorld.setIncludingFrame(centerOfMassVelocityWorld);
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -111,9 +111,9 @@ public class PositionStateRobotModelUpdater implements Runnable
    }
 
    private final Twist tempRootJointTwistExisting = new Twist();
-   private final FrameVector tempRootJointTwistExistingAngularPart = new FrameVector();
+   private final FrameVector3D tempRootJointTwistExistingAngularPart = new FrameVector3D();
 
-   private void computeRootJointTwistLinearPart(FloatingInverseDynamicsJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointLinearVelocity)
+   private void computeRootJointTwistLinearPart(FloatingInverseDynamicsJoint rootJoint, Twist rootJointTwistToPack, FrameVector3D rootJointLinearVelocity)
    {
       rootJoint.getJointTwist(tempRootJointTwistExisting);
       tempRootJointTwistExisting.checkReferenceFramesMatch(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
