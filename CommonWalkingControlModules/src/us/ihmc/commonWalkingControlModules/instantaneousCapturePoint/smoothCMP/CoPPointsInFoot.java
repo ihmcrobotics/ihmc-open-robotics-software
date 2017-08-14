@@ -7,9 +7,9 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class CoPPointsInFoot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector zeroVector = new FrameVector();
+   private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final FrameEuclideanTrajectoryPoint tempVariableForSetting = new FrameEuclideanTrajectoryPoint();
    private static final int maxNumberOfTrajectoryPoints = 10;
    
@@ -74,7 +74,7 @@ public class CoPPointsInFoot
       this.copPointsList.add(copPointName);
    }
 
-   public void setIncludingFrame(int waypointIndex, double time, FramePoint location)
+   public void setIncludingFrame(int waypointIndex, double time, FramePoint3D location)
    {
       copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
       zeroVector.setToZero(location.getReferenceFrame());;
@@ -98,7 +98,7 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
-   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint location)
+   public void addAndSetIncludingFrame(CoPPointName copPointName, double time, FramePoint3D location)
    {
       setIncludingFrame(copPointsList.size(), time, location);
       addWayPoint(copPointName);
@@ -176,37 +176,37 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);
    }
 
-   public void setSwingFootLocation(FramePoint footLocation)
+   public void setSwingFootLocation(FramePoint3D footLocation)
    {
       this.swingFootCentroid.setIncludingFrame(footLocation);
    }
 
-   public void setSwingFootLocation(FramePoint2d footLocation)
+   public void setSwingFootLocation(FramePoint2D footLocation)
    {
       this.swingFootCentroid.setXYIncludingFrame(footLocation);
    }
 
-   public void getSwingFootLocation(FramePoint footLocationToPack)
+   public void getSwingFootLocation(FramePoint3D footLocationToPack)
    {
       footLocationToPack.setIncludingFrame(swingFootCentroid.getFrameTuple());
    }
 
-   public void setSupportFootLocation(FramePoint footLocation)
+   public void setSupportFootLocation(FramePoint3D footLocation)
    {
       this.supportFootCentroid.setIncludingFrame(footLocation);
    }
 
-   public void setSupportFootLocation(FramePoint2d footLocation)
+   public void setSupportFootLocation(FramePoint2D footLocation)
    {
       this.supportFootCentroid.setXYIncludingFrame(footLocation);
    }
 
-   public void getSupportFootLocation(FramePoint footLocationToPack)
+   public void getSupportFootLocation(FramePoint3D footLocationToPack)
    {
       footLocationToPack.setIncludingFrame(supportFootCentroid.getFrameTuple());
    }
    
-   public void setFeetLocation(FramePoint swingFootLocation, FramePoint supportFootLocation)
+   public void setFeetLocation(FramePoint3D swingFootLocation, FramePoint3D supportFootLocation)
    {
       setSwingFootLocation(swingFootLocation);
       setSupportFootLocation(supportFootLocation);
@@ -243,7 +243,7 @@ public class CoPPointsInFoot
       return copPointsList;
    }
 
-   public void getFinalCoPPosition(FramePoint tempFinalICP)
+   public void getFinalCoPPosition(FramePoint3D tempFinalICP)
    {
       copLocations.get(copPointsList.size() - 1).getPosition(tempFinalICP);
    }

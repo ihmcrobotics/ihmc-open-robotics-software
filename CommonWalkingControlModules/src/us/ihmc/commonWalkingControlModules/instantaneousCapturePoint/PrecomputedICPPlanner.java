@@ -12,10 +12,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,14 +37,14 @@ public class PrecomputedICPPlanner
    private final YoBoolean isBlending = new YoBoolean("isBlending", registry);
    private final YoDouble blendingStartTime = new YoDouble("blendingStartTime", registry);
    private final YoDouble blendingDuration = new YoDouble("blendingDuration", registry);
-   private final FramePoint2d precomputedDesiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d precomputedDesiredCapturePointVelocity2d = new FrameVector2d();
+   private final FramePoint2D precomputedDesiredCapturePoint2d = new FramePoint2D();
+   private final FrameVector2D precomputedDesiredCapturePointVelocity2d = new FrameVector2D();
 
    private final YoDouble omega0 = new YoDouble(name + "Omega0", registry);
 
-   private final FramePoint desiredICPPosition = new FramePoint();
-   private final FrameVector desiredICPVelocity = new FrameVector();
-   private final FramePoint desiredCoMPosition = new FramePoint();
+   private final FramePoint3D desiredICPPosition = new FramePoint3D();
+   private final FrameVector3D desiredICPVelocity = new FrameVector3D();
+   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
 
    private final CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler;
 
@@ -94,7 +94,7 @@ public class PrecomputedICPPlanner
       yoDesiredCoMPosition.set(desiredCoMPosition);
    }
 
-   public void compute(double time, FramePoint2d desiredCapturePoint2dToPack, FrameVector2d desiredCapturePointVelocity2dToPack, FramePoint2d desiredCMPToPack)
+   public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack, FramePoint2D desiredCMPToPack)
    {
       if (isWithinInterval(time))
       {
@@ -110,7 +110,7 @@ public class PrecomputedICPPlanner
       currentlyBlendingICPTrajectories.set(false);
    }
 
-   public void computeAndBlend(double time, FramePoint2d desiredCapturePoint2d, FrameVector2d desiredCapturePointVelocity2d, FramePoint2d desiredCMP)
+   public void computeAndBlend(double time, FramePoint2D desiredCapturePoint2d, FrameVector2D desiredCapturePointVelocity2d, FramePoint2D desiredCMP)
    {
       if (isWithinInterval(time))
       {
@@ -166,7 +166,7 @@ public class PrecomputedICPPlanner
     *
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   public void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack)
+   public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
    {
       yoDesiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
    }
@@ -180,7 +180,7 @@ public class PrecomputedICPPlanner
     *
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -194,7 +194,7 @@ public class PrecomputedICPPlanner
     *
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
       yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }

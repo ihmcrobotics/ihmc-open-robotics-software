@@ -23,8 +23,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -600,7 +600,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type)
+   public boolean getCenterOfMassPositionData(FramePoint3D positionDataToPack, Type type)
    {
       Pair<YoFramePoint, List<YoBoolean>> positionData = centerOfMassPositions.get(type);
 
@@ -612,7 +612,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space)
+   public boolean getCenterOfMassVectorData(FrameVector3D vectorDataToPack, Type type, Space space)
    {
       EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
 
@@ -629,7 +629,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type)
+   public boolean getPositionData(RigidBody endEffector, FramePoint3D positionDataToPack, Type type)
    {
       EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> endEffectorData = endEffectorPositions.get(endEffector);
 
@@ -663,7 +663,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space)
+   public boolean getVectorData(RigidBody endEffector, FrameVector3D vectorDataToPack, Type type, Space space)
    {
       EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> endEffectorData = endEffectorDataVectors.get(endEffector);
 

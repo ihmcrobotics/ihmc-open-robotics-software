@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
@@ -103,12 +103,12 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       double dt = 1.0e-3;
       FrameOrientation orientation1 = new FrameOrientation();
-      FrameVector angularVelocity1 = new FrameVector();
-      FrameVector angularAcceleration1 = new FrameVector();
+      FrameVector3D angularVelocity1 = new FrameVector3D();
+      FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
       {
@@ -145,12 +145,12 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.compute(-5.0);
 
       FrameOrientation orientation1 = new FrameOrientation(initialOrientation);
-      FrameVector angularVelocity1 = new FrameVector(worldFrame);
-      FrameVector angularAcceleration1 = new FrameVector(worldFrame);
+      FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
@@ -179,12 +179,12 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.compute(15.0);
 
       FrameOrientation orientation1 = new FrameOrientation(finalOrientation);
-      FrameVector angularVelocity1 = new FrameVector(worldFrame);
-      FrameVector angularAcceleration1 = new FrameVector(worldFrame);
+      FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
+      FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
@@ -219,12 +219,12 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       double dt = 1.0e-3;
       FrameOrientation orientation1 = new FrameOrientation();
-      FrameVector angularVelocity1 = new FrameVector();
-      FrameVector angularAcceleration1 = new FrameVector();
+      FrameVector3D angularVelocity1 = new FrameVector3D();
+      FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FrameOrientation orientation2 = new FrameOrientation();
-      FrameVector angularVelocity2 = new FrameVector();
-      FrameVector angularAcceleration2 = new FrameVector();
+      FrameVector3D angularVelocity2 = new FrameVector3D();
+      FrameVector3D angularAcceleration2 = new FrameVector3D();
 
       for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
       {

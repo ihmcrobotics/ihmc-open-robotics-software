@@ -3,11 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity;
 
-import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.rules.TemporaryFolder;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.FootstepAngularMomentumPredictor;
@@ -16,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -24,7 +20,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -348,11 +344,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceCoPGenerator.getWaypoints();
    }
 
-   private final FramePoint tempFinalICP = new FramePoint();
+   private final FramePoint3D tempFinalICP = new FramePoint3D();
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
+   public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
@@ -381,36 +377,36 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
 
-   public List<FramePoint> getInitialDesiredCapturePointPositions()
+   public List<FramePoint3D> getInitialDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredInitialList();
    }
 
-   public List<FramePoint> getFinalDesiredCapturePointPositions()
+   public List<FramePoint3D> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
 
-   public List<FramePoint> getInitialDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getInitialDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredInitialList();
    }
 
-   public List<FramePoint> getFinalDesiredCenterOfMassPositions()
+   public List<FramePoint3D> getFinalDesiredCenterOfMassPositions()
    {
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
    {
       finalDesiredCenterOfMassPositionToPack.setIncludingFrame(referenceICPGenerator.getCoMPositionDesiredFinalList().get(0));
    }
 
    @Override
    /** {@inheritDoc} */
-   public void getNextExitCMP(FramePoint exitCMPToPack)
+   public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       //CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
       //nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -110,7 +110,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
 
       footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
 
-      FramePoint midFeetPoint = new FramePoint();
+      FramePoint3D midFeetPoint = new FramePoint3D();
       midFeetPoint.setToZero(referenceFrames.getMidFeetZUpFrame());
       midFeetPoint.changeFrame(worldFrame);
 

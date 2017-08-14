@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnThenStraightOverheadPath;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,17 +11,17 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class TurningThenStraightFootstepGenerator extends AbstractSimpleParametersFootstepGenerator
 {
    private TurnThenStraightOverheadPath footstepPath;
-   private FramePoint2d endPoint;
+   private FramePoint2D endPoint;
    private double pathOrientation;
 
-   public TurningThenStraightFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2d endPoint, PathTypeStepParameters pathType)
+   public TurningThenStraightFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames, pathType);
       this.endPoint = endPoint;
       this.pathOrientation = pathType.getAngle();
    }
 
-   public TurningThenStraightFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2d endPoint, PathTypeStepParameters pathType,
+   public TurningThenStraightFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint, PathTypeStepParameters pathType,
            RobotSide stanceStart)
    {
       super(feet, soleFrames, pathType, stanceStart);

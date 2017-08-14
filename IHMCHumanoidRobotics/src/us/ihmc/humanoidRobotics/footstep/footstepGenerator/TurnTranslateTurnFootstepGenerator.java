@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,7 +32,7 @@ public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
       this.soleFrames = soleFrames;
       this.pathType = pathType;
       firstTurn = new TurnInPlaceFootstepGenerator(feet, soleFrames, pathYaw, pathType);
-      FramePoint2d endPosition = new FramePoint2d();
+      FramePoint2D endPosition = new FramePoint2D();
       endPose.getPositionIncludingFrame(endPosition);
       translate = new TranslationFootstepGenerator(feet, soleFrames, endPosition, translationalPathType);
       endOrientation = new FrameOrientation2d();

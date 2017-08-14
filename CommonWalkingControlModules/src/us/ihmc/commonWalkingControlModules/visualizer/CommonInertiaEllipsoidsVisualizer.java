@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -176,7 +176,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
    public void update()
    {
 
-      FramePoint tempCoMPosition = new FramePoint(worldFrame);
+      FramePoint3D tempCoMPosition = new FramePoint3D(worldFrame);
       for (RigidBodyVisualizationData comData : centerOfMassData)
       {
          comData.rigidBody.getCoMOffset(tempCoMPosition);

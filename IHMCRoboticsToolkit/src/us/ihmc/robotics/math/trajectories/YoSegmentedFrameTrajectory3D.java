@@ -3,11 +3,10 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -72,19 +71,19 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       currentSegment.compute(timeInState);
    }
 
-   public void update(double timeInState, FramePoint desiredPositionToPack)
+   public void update(double timeInState, FramePoint3D desiredPositionToPack)
    {
       update(timeInState);
       currentSegment.getFramePosition(desiredPositionToPack);
    }
 
-   public void update(double timeInState, FramePoint desiredPositionToPack, FrameVector desiredVelocityToPack)
+   public void update(double timeInState, FramePoint3D desiredPositionToPack, FrameVector3D desiredVelocityToPack)
    {
       update(timeInState, desiredPositionToPack);
       currentSegment.getFrameVelocity(desiredVelocityToPack);
    }
 
-   public void update(double timeInState, FramePoint desiredPositonToPack, FrameVector desiredVelocityToPack, FrameVector desiredAccelerationToPack)
+   public void update(double timeInState, FramePoint3D desiredPositonToPack, FrameVector3D desiredVelocityToPack, FrameVector3D desiredAccelerationToPack)
    {
       update(timeInState, desiredPositonToPack, desiredVelocityToPack);
       currentSegment.getFrameAcceleration(desiredAccelerationToPack);
@@ -193,7 +192,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
    {
       String ret = "";
       ret += name;
-      FramePoint tempFramePointForPrinting = new FramePoint();
+      FramePoint3D tempFramePointForPrinting = new FramePoint3D();
       for (int i = 0; i < numberOfSegments.getIntegerValue(); i++)
       {
          ret += "\nSegment " + i + ":\n"; 
