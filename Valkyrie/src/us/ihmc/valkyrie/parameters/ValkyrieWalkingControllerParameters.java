@@ -22,12 +22,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -45,8 +44,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ValkyrieJointMap jointMap;
 
    private Map<String, YoPIDGains> jointspaceGains = null;
-   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
-   private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
+   private Map<String, YoPID3DGains> taskspaceAngularGains = null;
+   private Map<String, YoPID3DGains> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
@@ -202,7 +201,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("pelvisOrientation", registry);
 
@@ -224,7 +223,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoValkyrieHeadPIDGains gains = new YoValkyrieHeadPIDGains("HeadOrientation", registry);
 
@@ -264,7 +263,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
@@ -332,7 +331,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return armGains;
    }
 
-   private YoOrientationPIDGainsInterface createHandOrientationControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createHandOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains orientationGains = new YoSymmetricSE3PIDGains("HandOrientation", registry);
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
@@ -355,7 +354,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return orientationGains;
    }
 
-   private YoPositionPIDGainsInterface createHandPositionControlGains(YoVariableRegistry registry)
+   private YoPID3DGains createHandPositionControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains positionGains = new YoSymmetricSE3PIDGains("HandPosition", registry);
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
@@ -407,24 +406,24 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
       if (taskspaceAngularGains != null)
          return taskspaceAngularGains;
 
       taskspaceAngularGains = new HashMap<>();
 
-      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      YoPID3DGains chestAngularGains = createChestControlGains(registry);
       taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
 
-      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
+      YoPID3DGains headAngularGains = createHeadOrientationControlGains(registry);
       taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
 
-      YoOrientationPIDGainsInterface handAngularGains = createHandOrientationControlGains(registry);
+      YoPID3DGains handAngularGains = createHandOrientationControlGains(registry);
       for (RobotSide robotSide : RobotSide.values)
          taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
 
-      YoOrientationPIDGainsInterface pelvisAngularGains = createPelvisOrientationControlGains(registry);
+      YoPID3DGains pelvisAngularGains = createPelvisOrientationControlGains(registry);
       taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
 
       return taskspaceAngularGains;
@@ -432,14 +431,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
       if (taskspaceLinearGains != null)
          return taskspaceLinearGains;
 
       taskspaceLinearGains = new HashMap<>();
 
-      YoPositionPIDGainsInterface handLinearGains = createHandPositionControlGains(registry);
+      YoPID3DGains handLinearGains = createHandPositionControlGains(registry);
       for (RobotSide robotSide : RobotSide.values)
          taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
 

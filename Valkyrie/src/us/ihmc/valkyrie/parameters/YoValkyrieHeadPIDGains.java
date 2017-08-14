@@ -1,13 +1,13 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
+public class YoValkyrieHeadPIDGains implements YoPID3DGains
 {
    private final YoDouble proportionalXGain, proportionalYZGain;
    private final YoDouble derivativeXGain, derivativeYZGain;

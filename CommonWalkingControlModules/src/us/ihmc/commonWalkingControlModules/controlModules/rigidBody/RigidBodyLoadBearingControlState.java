@@ -17,8 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -135,7 +134,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(YoOrientationPIDGainsInterface taskspaceOrientationGains, YoPositionPIDGainsInterface taskspacePositionGains)
+   public void setGains(YoPID3DGains taskspaceOrientationGains, YoPID3DGains taskspacePositionGains)
    {
       spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
       spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);

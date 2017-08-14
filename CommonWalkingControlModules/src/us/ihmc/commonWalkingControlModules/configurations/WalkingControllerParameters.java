@@ -18,11 +18,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -208,9 +207,9 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
-      return new HashMap<String, YoOrientationPIDGainsInterface>();
+      return new HashMap<String, YoPID3DGains>();
    }
 
    /**
@@ -224,9 +223,9 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
-      return new HashMap<String, YoPositionPIDGainsInterface>();
+      return new HashMap<String, YoPID3DGains>();
    }
 
    /**
