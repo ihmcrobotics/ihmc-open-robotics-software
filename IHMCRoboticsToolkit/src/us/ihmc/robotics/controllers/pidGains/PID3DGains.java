@@ -1,5 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains;
 
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+
 /**
  * Write and read interface for PID gains in three dimensions.
  */

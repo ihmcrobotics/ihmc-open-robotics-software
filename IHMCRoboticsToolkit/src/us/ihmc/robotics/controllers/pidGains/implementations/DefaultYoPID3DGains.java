@@ -1,9 +1,12 @@
-package us.ihmc.robotics.controllers.pidGains;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
