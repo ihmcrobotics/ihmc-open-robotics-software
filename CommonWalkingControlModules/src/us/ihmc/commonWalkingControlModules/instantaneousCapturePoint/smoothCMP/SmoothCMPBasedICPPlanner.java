@@ -44,7 +44,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final double gravityZ;
 
    private final YoFramePoint yoSingleSupportFinalCoM;
-   private final FramePoint singleSupportFinalCoM = new FramePoint();
+   private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
    
    public SmoothCMPBasedICPPlanner(FullHumanoidRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
@@ -412,7 +412,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceICPGenerator.getCoMPositionDesiredFinalList();
    }
 
-   private final FramePoint tempFinalCoM = new FramePoint();
+   private final FramePoint3D tempFinalCoM = new FramePoint3D();
    
    @Override
    /** {@inheritDoc} */
