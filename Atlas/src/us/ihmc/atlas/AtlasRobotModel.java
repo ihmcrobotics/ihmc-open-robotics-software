@@ -32,6 +32,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -155,6 +156,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
+
       robotDescription = createRobotDescription();
    }
 
@@ -365,6 +367,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          default :
             return null;
       }
+   }
+
+   @Override
+   public FootstepPlanningParameters getFootstepPlanningParameters()
+   {
+      return new AtlasFootstepPlanningParameters();
    }
 
    @Override

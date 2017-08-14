@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -31,7 +31,7 @@ public class QuadrupedFallDetector
    //Estimation Variables
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final FramePoint dcmPositionEstimate;
+   private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final QuadrupedSupportPolygon supportPolygon;
 
@@ -48,7 +48,7 @@ public class QuadrupedFallDetector
       this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, fallDetectorGlitchFilterWindow.get());
       this.isFallDetected.set(false);
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
-      dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimate = new FramePoint3D();
       this.dcmPositionEstimator = dcmPositionEstimator;
       supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePosition());
       parentRegistry.addChild(registry);

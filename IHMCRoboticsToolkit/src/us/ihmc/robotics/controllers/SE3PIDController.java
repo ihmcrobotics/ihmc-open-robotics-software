@@ -2,9 +2,9 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -21,17 +21,17 @@ public class SE3PIDController
 
    private final AxisAngleOrientationController orientationController;
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAction = new FrameVector();
-   private final FrameVector currentAngularVelocity = new FrameVector();
-   private final FrameVector angularActionFromOrientationController = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
+   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
+   private final FrameVector3D angularActionFromOrientationController = new FrameVector3D();
 
    private final EuclideanPositionController positionController;
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAction = new FrameVector();
-   private final FrameVector currentVelocity = new FrameVector();
-   private final FrameVector actionFromPositionController = new FrameVector();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
+   private final FrameVector3D currentVelocity = new FrameVector3D();
+   private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
    public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry registry)
    {

@@ -37,10 +37,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -90,26 +90,26 @@ public class BalanceManager
 
    private final ReferenceFrame centerOfMassFrame;
 
-   private final FramePoint centerOfMassPosition = new FramePoint();
-   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+   private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint tempCapturePoint = new FramePoint();
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
-   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint3D tempCapturePoint = new FramePoint3D();
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
    /** CMP position according to the ICP planner */
-   private final FramePoint2d perfectCMP = new FramePoint2d();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
 
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
-   private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
+   private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
    private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
 
-   private final FramePoint2d desiredCMP = new FramePoint2d();
-   private final FramePoint2d achievedCMP = new FramePoint2d();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D achievedCMP = new FramePoint2D();
 
-   private final FrameVector2d icpError2d = new FrameVector2d();
+   private final FrameVector2D icpError2d = new FrameVector2D();
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
@@ -376,7 +376,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   private final FramePoint copEstimate = new FramePoint();
+   private final FramePoint3D copEstimate = new FramePoint3D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
@@ -500,22 +500,22 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.freeze();
    }
 
-   public void getDesiredCMP(FramePoint2d desiredCMPToPack)
+   public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
       yoDesiredCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   public void getPerfectCMP(FramePoint2d desiredCMPToPack)
+   public void getPerfectCMP(FramePoint2D desiredCMPToPack)
    {
       yoPerfectCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   public void getDesiredICP(FramePoint2d desiredICPToPack)
+   public void getDesiredICP(FramePoint2D desiredICPToPack)
    {
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredICPToPack);
    }
 
-   public void getDesiredICPVelocity(FrameVector2d desiredICPVelocityToPack)
+   public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
    {
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPVelocityToPack);
    }
@@ -525,7 +525,7 @@ public class BalanceManager
       return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
-   public void getNextExitCMP(FramePoint entryCMPToPack)
+   public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
       icpPlanner.getNextExitCMP(entryCMPToPack);
    }
@@ -648,7 +648,7 @@ public class BalanceManager
       return capturePoint2d.distance(yoDesiredCapturePoint.getFrameTuple2d());
    }
 
-   public void getICPError(FrameVector2d icpErrorToPack)
+   public void getICPError(FrameVector2D icpErrorToPack)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
@@ -750,7 +750,7 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
-   public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
+   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate)
    {
       linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
       yoAchievedCMP.setAndMatchFrame(achievedCMP);
@@ -789,7 +789,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
    }
 
-   public void getCapturePoint(FramePoint2d capturePointToPack)
+   public void getCapturePoint(FramePoint2D capturePointToPack)
    {
       controllerToolbox.getCapturePoint(capturePointToPack);
    }

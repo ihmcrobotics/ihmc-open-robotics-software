@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -21,7 +21,7 @@ public class YoTranslationFrame extends ReferenceFrame
       translationToParent = new YoFrameVector(frameName, parentFrame, registry);
    }
 
-   public void setTranslationToParent(FrameTuple<?, ?> translationToParent)
+   public void setTranslationToParent(FrameTuple3D<?, ?> translationToParent)
    {
       this.translationToParent.set(translationToParent);
       update();

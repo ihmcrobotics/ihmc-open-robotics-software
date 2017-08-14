@@ -5,7 +5,7 @@ import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorServ
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -32,7 +32,7 @@ public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorSer
    public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
    {
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      FramePoint goalPosition = new FramePoint(midFeetZUpFrame, constantGoalLocationInMidFeetZUpFrame);
+      FramePoint3D goalPosition = new FramePoint3D(midFeetZUpFrame, constantGoalLocationInMidFeetZUpFrame);
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       FrameOrientation goalOrientation = new FrameOrientation(midFeetZUpFrame);

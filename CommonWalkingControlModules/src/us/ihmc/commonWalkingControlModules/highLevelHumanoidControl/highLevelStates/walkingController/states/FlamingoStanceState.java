@@ -16,12 +16,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FlamingoStanceState extends SingleSupportState
 {
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final YoBoolean loadFoot;
    private final YoDouble loadFootStartTime;
    private final YoDouble loadFootDuration;
