@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public abstract class AvatarFlatGroundStraightWalkTest implements MultiRobotTestInterface
+public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
