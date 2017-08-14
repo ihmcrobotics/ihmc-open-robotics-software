@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -44,7 +44,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final PositionPIDGains gains = new PositionPIDGains();
+   private final PID3DGains gains = new DefaultPID3DGains();
 
    /**
     * Momentum rate command used to save different control properties such as the weight to be used

@@ -28,7 +28,8 @@ import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.PositionPIDGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -87,8 +88,9 @@ public final class PointFeedbackControllerTest
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
-      PositionPIDGains gains = new PositionPIDGains();
-      gains.setGains(100.0, 50.0);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(100.0);
+      gains.setDerivativeGains(50.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
@@ -175,8 +177,9 @@ public final class PointFeedbackControllerTest
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
-      PositionPIDGains gains = new PositionPIDGains();
-      gains.setGains(10.0, 5.0);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(10.0);
+      gains.setDerivativeGains(5.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
@@ -286,8 +289,7 @@ public final class PointFeedbackControllerTest
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
-      PositionPIDGains positionGains = new PositionPIDGains();
-
+      PID3DGains positionGains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);

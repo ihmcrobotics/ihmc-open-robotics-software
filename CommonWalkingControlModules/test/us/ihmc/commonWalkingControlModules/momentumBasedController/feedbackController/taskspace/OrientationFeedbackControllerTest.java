@@ -21,7 +21,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.controllers.OrientationPIDGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -66,8 +67,7 @@ public class OrientationFeedbackControllerTest
 
       OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
       orientationFeedbackControlCommand.set(elevator, endEffector);
-      OrientationPIDGains orientationGains = new OrientationPIDGains();
-
+      PID3DGains orientationGains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);

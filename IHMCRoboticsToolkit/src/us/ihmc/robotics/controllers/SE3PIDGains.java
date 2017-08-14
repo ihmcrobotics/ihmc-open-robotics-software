@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 
 /**
  * @author twan
@@ -10,8 +11,8 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
  */
 public class SE3PIDGains implements PIDSE3Gains
 {
-   private final PositionPIDGains positionGains = new PositionPIDGains();
-   private final OrientationPIDGains orientationGains = new OrientationPIDGains();
+   private final PID3DGains positionGains = new DefaultPID3DGains();
+   private final PID3DGains orientationGains = new DefaultPID3DGains();
 
    public void set(double kpPosition, double zetaPosition, double kPOrientation, double zetaOrientation)
    {
@@ -54,7 +55,7 @@ public class SE3PIDGains implements PIDSE3Gains
 
    public void setOrientationGains(double proportionalGain, double derivativeGain)
    {
-      orientationGains.setGains(proportionalGain, derivativeGain);
+      setOrientationGains(proportionalGain, derivativeGain, 0.0, 0.0);
    }
 
    public void setOrientationGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
