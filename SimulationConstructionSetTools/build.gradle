@@ -5,13 +5,23 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.4.22"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.0"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
-ihmc.configureProjectForOpenRobotics(project)
+ihmc {
+   loadRepositoryWideProperties(projectDir.toPath().parent.resolve("product.properties"))
+   
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   bambooPlanKeys = ["LIBS-UI2", "LIBS-FAST2", "LIBS-FLAKY2", "LIBS-SLOW2", "LIBS-VIDEO2", "LIBS-INDEVELOPMENT2"]
+   disableBambooConfigurationCheck = true
+}
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.5.0'

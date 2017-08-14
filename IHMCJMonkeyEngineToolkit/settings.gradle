@@ -59,7 +59,7 @@ if (startParameter.searchUpwards)
    }
 }
 
-public TreeSet<String> findTransitivesRecursive(java.nio.file.Path projectDir, String name, TreeSet<String> set, Map<String, String> projectNameReplacements)
+TreeSet<String> findTransitivesRecursive(java.nio.file.Path projectDir, String name, TreeSet<String> set, Map<String, String> projectNameReplacements)
 {
    SortedSet<String> lines = parseDependenciesFromGradleFile(projectDir.resolve("build.gradle"), projectNameReplacements)
 
@@ -67,7 +67,6 @@ public TreeSet<String> findTransitivesRecursive(java.nio.file.Path projectDir, S
       if (!set.contains(it))
       {
          set.add(it)
-
          findTransitivesRecursive(projectDir.parent.resolve(it), it, set, projectNameReplacements)
       }
    }
@@ -129,7 +128,7 @@ SortedSet<String> parseDependenciesFromGradleFile(java.nio.file.Path buildFile, 
 
 class FindDependenciesVisitor extends CodeVisitorSupport
 {
-   private List<String[]> dependencies = new ArrayList<>();
+   List<String[]> dependencies = new ArrayList<>();
 
    @Override
    public void visitArgumentlistExpression(ArgumentListExpression ale)
@@ -156,6 +155,7 @@ class FindDependenciesVisitor extends CodeVisitorSupport
    @Override
    public void visitMapExpression(MapExpression expression)
    {
+      println("[ihmc-build] Found map entry: " + expression.getText())
       List<MapEntryExpression> mapEntryExpressions = expression.getMapEntryExpressions();
       if (mapEntryExpressions.size() >= 3)
       {
@@ -172,11 +172,6 @@ class FindDependenciesVisitor extends CodeVisitorSupport
       }
 
       super.visitMapExpression(expression);
-   }
-
-   public List<String[]> getDependencies()
-   {
-      return dependencies;
    }
 }
 
@@ -208,12 +203,8 @@ String capitalize(final String str)
    final char firstChar = str.charAt(0);
    if (Character.isTitleCase(firstChar))
    {
-      // already capitalized
       return str;
    }
 
-   return new StringBuilder(strLen)
-         .append(Character.toTitleCase(firstChar))
-         .append(str.substring(1))
-         .toString();
+   return new StringBuilder(strLen).append(Character.toTitleCase(firstChar)).append(str.substring(1)).toString();
 }
