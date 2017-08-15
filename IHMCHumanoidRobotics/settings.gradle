@@ -62,8 +62,11 @@ if (startParameter.searchUpwards)
    for (String transitiveKey : transitiveKeys)
    {
       def relativizedPathName = projectPath.relativize(buildNameToPathMap.get(transitiveKey)).toString()
-      logger.quiet("[ihmc-build] Including build: " + relativizedPathName)
-      includeBuild relativizedPathName
+      if (!relativizedPathName.isEmpty()) // Including itself
+      {
+         logger.quiet("[ihmc-build] Including build: " + relativizedPathName)
+         includeBuild relativizedPathName
+      }
    }
 }
 
