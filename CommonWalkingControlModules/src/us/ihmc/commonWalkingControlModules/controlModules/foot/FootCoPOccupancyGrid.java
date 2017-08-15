@@ -67,8 +67,8 @@ public class FootCoPOccupancyGrid
          int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getFootLength();
-      this.footWidth = walkingControllerParameters.getFootWidth();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
+      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);
@@ -279,12 +279,12 @@ public class FootCoPOccupancyGrid
 
    private double getXCoordinateInSoleFrame(int xIndex)
    {
-      return ((double) xIndex + 0.5) * cellSize.getX() + gridOrigin.getX();
+      return (xIndex + 0.5) * cellSize.getX() + gridOrigin.getX();
    }
 
    private double getYCoordinateInSoleFrame(int yIndex)
    {
-      return ((double) yIndex + 0.5) * cellSize.getY() + gridOrigin.getY();
+      return (yIndex + 0.5) * cellSize.getY() + gridOrigin.getY();
    }
 
    public boolean findCenterOfClosestCell(FramePoint2D centerOfClosestCellToPack, FramePoint2D closestToPoint)

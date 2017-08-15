@@ -383,7 +383,8 @@ public class KinematicsToolboxController extends ToolboxController
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null,
+      KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();

@@ -22,7 +22,7 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void initializeParameters(SmoothCMPPlannerParameters parameters);
 
-   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2D heelOffset);
+   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2D copOffset);
 
    void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList);
 

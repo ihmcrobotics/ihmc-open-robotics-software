@@ -161,7 +161,7 @@ public interface ICPPlannerInterface
     * modified from the outside. i.e. when dealing with push recovery via step adjustment.
     * </p>
     */
-   void updateCurrentPlan();
+   void updateCurrentPlan(boolean updateUpcomingCoPs);
 
    /**
     * Given the location of the actual ICP {@code actualCapturePointPosition}, this method estimates

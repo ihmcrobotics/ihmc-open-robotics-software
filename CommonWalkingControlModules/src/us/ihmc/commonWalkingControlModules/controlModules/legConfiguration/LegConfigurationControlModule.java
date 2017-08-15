@@ -38,7 +38,7 @@ public class LegConfigurationControlModule
    private static final double minimumDampingScale = 0.2;
    private static final boolean scaleDamping = true;
 
-   private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = false;
+   private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = true;
 
    private final YoVariableRegistry registry;
 
@@ -357,6 +357,11 @@ public class LegConfigurationControlModule
    public void prepareForLegBracing()
    {
       useBracingAngle.set(true);
+   }
+
+   public void doNotBrace()
+   {
+      useBracingAngle.set(false);
    }
 
    public void setLegControlWeight(LegControlWeight legControlWeight)

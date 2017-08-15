@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
@@ -74,7 +74,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final YoFramePoint yoDesiredCMP;
 
    private final ICPOptimizationController icpOptimizationController;
-   private final ICPControlGains icpGains;
+   private final YoICPControlGains icpGains;
    private final YoDouble omega0 = new YoDouble("omega0", registry);
    private final double totalMass;
 
@@ -111,12 +111,13 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpPlanner.setOmega0(omega0.getDoubleValue());
       icpPlanner.initializeParameters(controlToolbox.getCapturePointPlannerParameters());
 
-      icpGains = new ICPControlGains("CoMController", registry);
+      icpGains = new YoICPControlGains("CoMController", registry);
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
       icpOptimizationController = new ICPAdjustmentOptimizationController(controlToolbox.getCapturePointPlannerParameters(), controlToolbox.getICPOptimizationParameters(),
-                                                                          null, controlToolbox.getBipedSupportPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+                                                                          null, controlToolbox.getBipedSupportPolygons(),
+                                                                          controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
       stateMachine = new StateMachine<>("supportStateMachine", "supportStateTime", SupportState.class, controlToolbox.getYoTime(), registry);
       StandingState standingState = new StandingState();
@@ -152,6 +153,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
 
    private int counter = 0;
    public void doControl()
@@ -248,7 +250,7 @@ public class SphereICPOptimizationController implements GenericSphereController
          if (controlToolbox.hasFootsteps())
             this.transitionToDefaultNextState();
 
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, omega0.getDoubleValue());
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d, omega0.getDoubleValue());
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
       }
@@ -290,7 +292,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
       @Override public void doAction()
       {
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, omega0.getDoubleValue());
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d, omega0.getDoubleValue());
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
 
@@ -380,7 +382,7 @@ public class SphereICPOptimizationController implements GenericSphereController
          if (icpPlanner.isDone())
             transitionToDefaultNextState();
 
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, omega0.getDoubleValue());
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d, omega0.getDoubleValue());
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
 

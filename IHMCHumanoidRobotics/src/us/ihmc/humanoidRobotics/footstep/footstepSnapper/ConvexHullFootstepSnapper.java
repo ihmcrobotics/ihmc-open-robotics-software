@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/14/15.
  */
-public class ConvexHullFootstepSnapper implements FootstepSnapper
+public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 {
    public class PointWriter
    {
@@ -82,14 +82,14 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    private List<Point3D> pointList = new ArrayList<Point3D>();
    private final PlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private FootstepValueFunction footstepValueFunction;
-   private FootstepSnappingParameters parameters;
+   private QuadTreeFootstepSnappingParameters parameters;
    private BasicFootstepMask footstepMask = null;
    private final SimpleFootstepSnapper simpleSnapper = new SimpleFootstepSnapper();
    private boolean useMask = false;
    private double maskBuffer = 0.0;
    private static PointWriter writer = null;
 
-   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, FootstepSnappingParameters parameters)
+   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, QuadTreeFootstepSnappingParameters parameters)
    {
       this.footstepValueFunction = valueFunction;
       this.parameters = parameters;
@@ -115,7 +115,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    }
 
-   public void updateParameters(FootstepSnappingParameters newParameters)
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters)
    {
       parameters.updateParameters(newParameters);
       footstepValueFunction.updateFunction();
@@ -129,7 +129,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       return pointList;
    }
 
-   public FootstepSnappingParameters getParameters()
+   public QuadTreeFootstepSnappingParameters getParameters()
    {
       return parameters;
    }

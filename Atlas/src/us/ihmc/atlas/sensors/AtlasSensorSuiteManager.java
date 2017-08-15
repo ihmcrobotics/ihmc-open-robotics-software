@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -43,7 +43,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    public AtlasSensorSuiteManager(FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
-         NewRobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
+         RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;

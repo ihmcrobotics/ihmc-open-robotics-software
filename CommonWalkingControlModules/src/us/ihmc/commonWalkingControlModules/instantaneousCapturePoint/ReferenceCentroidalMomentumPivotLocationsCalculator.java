@@ -303,6 +303,18 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void computeReferenceCMPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
    {
+      int cmpIndex = computeSupportFeetReferenceCMPsDuringDoubleSupport(atAStop, transferToSide);
+      int numberOfUpcomingFootsteps = this.numberOfUpcomingFootsteps.getIntegerValue();
+      boolean noUpcomingFootsteps = numberOfUpcomingFootsteps == 0;
+      if (noUpcomingFootsteps)
+         return;
+
+      computeReferenceCMPsWithUpcomingFootsteps(transferToSide, numberOfUpcomingFootsteps, cmpIndex);
+      changeFrameOfCMPs(2, worldFrame);
+   }
+
+   public int computeSupportFeetReferenceCMPsDuringDoubleSupport(boolean atAStop, RobotSide transferToSide)
+   {
       RobotSide transferFromSide = transferToSide.getOppositeSide();
       int numberOfUpcomingFootsteps = upcomingFootsteps.size();
       this.numberOfUpcomingFootsteps.set(numberOfUpcomingFootsteps);
@@ -322,7 +334,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          if (noUpcomingFootsteps)
          {
             setRemainingCMPsToDuplicateLastComputedCMP(0);
-            return;
+            return cmpIndex;
          }
       }
       else
@@ -355,11 +367,23 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       exitCMPs.get(cmpIndex).setIncludingFrame(cmp);
       cmpIndex++;
 
-      computeReferenceCMPsWithUpcomingFootsteps(transferToSide, numberOfUpcomingFootsteps, cmpIndex);
-      changeFrameOfCMPs(2, worldFrame);
+      return cmpIndex;
    }
 
    public void computeReferenceCMPsStartingFromSingleSupport(RobotSide supportSide)
+   {
+      boolean computeMore = computeSupportFootReferenceCMPsDuringSingleSupport(supportSide);
+
+      if (!computeMore)
+         return;
+
+      int constantCMPIndex = 1;
+      int numberOfUpcomingFootsteps = this.numberOfUpcomingFootsteps.getIntegerValue();
+      computeReferenceCMPsWithUpcomingFootsteps(supportSide, numberOfUpcomingFootsteps, constantCMPIndex);
+      changeFrameOfCMPs(1, worldFrame);
+   }
+
+   public boolean computeSupportFootReferenceCMPsDuringSingleSupport(RobotSide supportSide)
    {
       int numberOfUpcomingFootsteps = upcomingFootsteps.size();
       this.numberOfUpcomingFootsteps.set(numberOfUpcomingFootsteps);
@@ -390,12 +414,13 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          predictedSupportPolygon.update();
          computeFinalCMPBetweenSupportFeet(constantCMPIndex, supportFootPolygonsInSoleZUpFrame.get(supportSide), predictedSupportPolygon);
          setRemainingCMPsToDuplicateLastComputedCMP(constantCMPIndex);
-         return;
+         return false;
       }
 
-      computeReferenceCMPsWithUpcomingFootsteps(supportSide, numberOfUpcomingFootsteps, constantCMPIndex);
-      changeFrameOfCMPs(1, worldFrame);
+      return true;
    }
+
+
 
    private void computeReferenceCMPsWithUpcomingFootsteps(RobotSide firstSupportSide, int numberOfUpcomingFootsteps, int cmpIndex)
    {

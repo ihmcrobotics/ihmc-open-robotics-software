@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -104,6 +106,7 @@ public class SphereControlToolbox
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
    private BipedSupportPolygons bipedSupportPolygons;
+   private ICPControlPolygons icpControlPolygons;
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<Footstep> footsteps = new ArrayList<>();
@@ -147,7 +150,7 @@ public class SphereControlToolbox
       double omega = Math.sqrt(gravity / desiredHeight);
       omega0.set(omega);
 
-      setupFeetFrames(yoGraphicsListRegistry);
+      setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -209,7 +212,7 @@ public class SphereControlToolbox
       parentRegistry.addChild(registry);
    }
 
-   private void setupFeetFrames(YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupFeetFrames(double gravityZ, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -262,6 +265,9 @@ public class SphereControlToolbox
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega0, centerOfMassFrame, gravityZ, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
@@ -320,6 +326,11 @@ public class SphereControlToolbox
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
+   }
+
+   public ICPControlPolygons getICPControlPolygons()
+   {
+      return icpControlPolygons;
    }
 
    public SideDependentList<FootSpoof> getContactableFeet()
@@ -399,6 +410,7 @@ public class SphereControlToolbox
       twistCalculator.compute();
       centerOfMassJacobian.compute();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStates(contactStates);
 
       callUpdatables();
       updateFootViz();
@@ -620,6 +632,12 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
+         public boolean useSimpleOptimization()
+         {
+            return false;
+         }
+
+         @Override
          public int numberOfFootstepsToConsider()
          {
             return 4;
@@ -755,30 +773,6 @@ public class SphereControlToolbox
          public double getMinimumTimeRemaining()
          {
             return 0.0001;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDoubleSupportMaxCoPLateralExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPForwardExit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSingleSupportMaxCoPLateralExit()
-         {
-            return 0;
          }
 
          @Override

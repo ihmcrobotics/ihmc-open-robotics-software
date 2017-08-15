@@ -101,7 +101,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
@@ -142,7 +141,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -410,7 +408,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
             walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
-      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
          controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
                                                              controllerPacketCommunicator);

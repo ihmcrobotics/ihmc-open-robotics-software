@@ -225,11 +225,11 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
+      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
+      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
+      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
 
       desiredFootstepCalculator.initialize();
       FootstepDataListMessage footsteps = computeNextFootsteps(RobotSide.LEFT, desiredFootstepCalculator, stepTime);

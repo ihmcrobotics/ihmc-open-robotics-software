@@ -132,14 +132,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
-      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());

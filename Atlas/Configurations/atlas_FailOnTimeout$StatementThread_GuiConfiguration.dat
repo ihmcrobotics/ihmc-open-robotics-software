@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingNewTwoWaypointSwingGenerator.leftFootSwingNewTrajectoryType</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.rightFootSwingNewTwoWaypointSwingGenerator.rightFootSwingNewTrajectoryType</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,14 +50,14 @@
 
 <Extra Panels>
 <Main Viewport>
-null,null,
+null,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>8.0</Camera X>
- <Camera Y>-8.0</Camera Y>
- <Camera Z>5.0</Camera Z>
+ <Camera X>17.028206991810972</Camera X>
+ <Camera Y>-5.133791738356224</Camera Y>
+ <Camera Z>10.921704381877507</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -81,8 +81,8 @@ null,null,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>1.5</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.8</Fix Z>
+<Fix X>-0.9609629731473781</Fix X>
+<Fix Y>-1.1437341793280376</Fix Y>
+<Fix Z>1.2412984704337067</Fix Z>
 </Fix Position>
 </Canvas 1>
