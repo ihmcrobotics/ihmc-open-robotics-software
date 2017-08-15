@@ -1,27 +1,30 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
 {
-   private final YoPlanarFootPositionGains positionGains;
-   private final YoPlanarFootOrientationGains orientationGains;
+   private final DefaultYoPID3DGains positionGains;
+   private final DefaultYoPID3DGains orientationGains;
 
    public YoPlanarFootSE3Gains(String prefix, YoVariableRegistry registry)
    {
-      positionGains = new YoPlanarFootPositionGains(prefix, registry);
-      orientationGains = new YoPlanarFootOrientationGains(prefix, registry);
+      positionGains = new DefaultYoPID3DGains(prefix + "Position", GainCoupling.XY, false, registry);
+      orientationGains = new DefaultYoPID3DGains(prefix + "Orientation", GainCoupling.XYZ, false, registry);
    }
 
    @Override
-   public YoPlanarFootPositionGains getPositionGains()
+   public YoPID3DGains getPositionGains()
    {
       return positionGains;
    }
 
    @Override
-   public YoPlanarFootOrientationGains getOrientationGains()
+   public YoPID3DGains getOrientationGains()
    {
       return orientationGains;
    }
@@ -33,7 +36,7 @@ public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
 
    public void setPositionProportionalGains(double proportionalGainX, double proportionalGainY)
    {
-      positionGains.setProportionalGains(proportionalGainX, proportionalGainY);
+      positionGains.setProportionalGains(proportionalGainX, proportionalGainX, proportionalGainY);
    }
 
    public void setPositionDerivativeGains(double derivativeGains)
@@ -43,12 +46,12 @@ public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
 
    public void setPositionDerivativeGains(double derivativeGainX, double derivativeGainZ)
    {
-      positionGains.setDerivativeGains(derivativeGainX, derivativeGainZ);
+      positionGains.setDerivativeGains(derivativeGainX, derivativeGainX, derivativeGainZ);
    }
 
    public void setPositionDampingRatio(double dampingRatio)
    {
-      positionGains.setDampingRatio(dampingRatio);
+      positionGains.setDampingRatios(dampingRatio);
    }
 
    public void setPositionMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
@@ -78,7 +81,7 @@ public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
 
    public void setOrientationDampingRatio(double dampingRatio)
    {
-      orientationGains.setDampingRatio(dampingRatio);
+      orientationGains.setDampingRatios(dampingRatio);
    }
 
    public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
@@ -94,11 +97,5 @@ public class YoPlanarFootSE3Gains implements YoPIDSE3Gains
    public void setOrientationMaxProportionalError(double maxProportionalError)
    {
       orientationGains.setMaxProportionalError(maxProportionalError);
-   }
-
-   public void createDerivativeGainUpdater(boolean updateNow)
-   {
-      positionGains.createDerivativeGainUpdater(updateNow);
-      orientationGains.createDerivativeGainUpdater(updateNow);
    }
 }
