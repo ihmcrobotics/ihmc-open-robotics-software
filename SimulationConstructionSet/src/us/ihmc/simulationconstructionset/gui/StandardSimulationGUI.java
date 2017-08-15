@@ -127,7 +127,6 @@ import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
       ViewportSelectorCommandExecutor, CameraHolder, ActiveCameraHolder, ActiveCanvas3DHolder, ExtraPanelSelector, VarGroupSelector, ExitActionListenerNotifier
