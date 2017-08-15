@@ -3,8 +3,10 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -58,7 +60,7 @@ public class AxisAngleOrientationController
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
       if (gains == null)
-         gains = new YoAxisAngleOrientationGains(prefix, registry);
+         gains = new DefaultYoPID3DGains(prefix, GainCoupling.NONE, true, registry);
 
       this.gains = gains;
 

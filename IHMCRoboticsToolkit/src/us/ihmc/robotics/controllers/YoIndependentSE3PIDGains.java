@@ -1,31 +1,29 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoIndependentSE3PIDGains implements YoPIDSE3Gains
 {
-   private final YoEuclideanPositionGains positionGains;
-   private final YoAxisAngleOrientationGains orientationGains;
+   private final DefaultYoPID3DGains positionGains;
+   private final DefaultYoPID3DGains orientationGains;
 
    public YoIndependentSE3PIDGains(String prefix, YoVariableRegistry registry)
    {
-      this(prefix, false, registry);
-   }
-
-   public YoIndependentSE3PIDGains(String prefix, boolean createDampingRatio, YoVariableRegistry registry)
-   {
-      positionGains = new YoEuclideanPositionGains(prefix, createDampingRatio, registry);
-      orientationGains = new YoAxisAngleOrientationGains(prefix, createDampingRatio, registry);
+      positionGains = new DefaultYoPID3DGains(prefix + "Position", GainCoupling.NONE, true, registry);
+      orientationGains = new DefaultYoPID3DGains(prefix + "Orientation", GainCoupling.NONE, true, registry);
    }
 
    @Override
-   public YoEuclideanPositionGains getPositionGains()
+   public YoPID3DGains getPositionGains()
    {
       return positionGains;
    }
 
    @Override
-   public YoAxisAngleOrientationGains getOrientationGains()
+   public YoPID3DGains getOrientationGains()
    {
       return orientationGains;
    }
@@ -62,7 +60,7 @@ public class YoIndependentSE3PIDGains implements YoPIDSE3Gains
 
    public void setPositionDampingRatio(double dampingRatio)
    {
-      positionGains.setDampingRatio(dampingRatio);
+      positionGains.setDampingRatios(dampingRatio);
    }
 
    public void setPositionDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
@@ -117,7 +115,7 @@ public class YoIndependentSE3PIDGains implements YoPIDSE3Gains
 
    public void setOrientationDampingRatio(double dampingRatio)
    {
-      orientationGains.setDampingRatio(dampingRatio);
+      orientationGains.setDampingRatios(dampingRatio);
    }
 
    public void setOrientationDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
@@ -138,11 +136,5 @@ public class YoIndependentSE3PIDGains implements YoPIDSE3Gains
    public void setOrientationMaxProportionalError(double maxProportionalError)
    {
       orientationGains.setMaxProportionalError(maxProportionalError);
-   }
-
-   public void createDerivativeGainUpdater(boolean updateNow)
-   {
-      positionGains.createDerivativeGainUpdater(updateNow);
-      orientationGains.createDerivativeGainUpdater(updateNow);
    }
 }

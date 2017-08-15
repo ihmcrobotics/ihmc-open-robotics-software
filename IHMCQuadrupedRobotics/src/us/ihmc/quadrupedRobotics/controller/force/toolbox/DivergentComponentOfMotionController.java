@@ -6,15 +6,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DivergentComponentOfMotionController
 {
@@ -46,7 +48,7 @@ public class DivergentComponentOfMotionController
    private final FramePoint vrpPositionSetpoint;
    private final FramePoint cmpPositionSetpoint;
    private final PIDController[] pidController;
-   private final YoEuclideanPositionGains pidControllerGains;
+   private final YoPID3DGains pidControllerGains;
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
@@ -77,7 +79,7 @@ public class DivergentComponentOfMotionController
       pidController[0] = new PIDController("dcmPositionX", registry);
       pidController[1] = new PIDController("dcmPositionY", registry);
       pidController[2] = new PIDController("dcmPositionZ", registry);
-      pidControllerGains = new YoEuclideanPositionGains("dcmPosition", registry);
+      pidControllerGains = new DefaultYoPID3DGains("dcmPosition", GainCoupling.NONE, true, registry);
 
       yoVrpPositionRateLimit = new YoDouble("vrpPositionRateLimit", registry);
       yoVrpPositionRateLimit.set(Double.MAX_VALUE);
@@ -117,7 +119,7 @@ public class DivergentComponentOfMotionController
       yoVrpPositionSetpointZ.reset();
    }
 
-   public YoEuclideanPositionGains getGains()
+   public YoPID3DGains getGains()
    {
       return pidControllerGains;
    }

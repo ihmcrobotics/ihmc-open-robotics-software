@@ -573,7 +573,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
    {
-      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SwingFoot", true, registry);
+      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SwingFoot", registry);
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -597,7 +597,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }

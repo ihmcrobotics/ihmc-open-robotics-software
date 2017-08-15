@@ -1,8 +1,10 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -52,7 +54,7 @@ public class EuclideanPositionController implements PositionController
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
       if (gains == null)
-         gains = new YoEuclideanPositionGains(prefix, registry);
+         gains = new DefaultYoPID3DGains(prefix, GainCoupling.NONE, true, registry);
 
       this.gains = gains;
 
