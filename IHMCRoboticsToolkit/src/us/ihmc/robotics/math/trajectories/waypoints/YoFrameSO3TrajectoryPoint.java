@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -45,7 +45,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -63,7 +63,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, FrameOrientation orientation, FrameVector angularVelocity)
+   public void set(double time, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.orientation.set(orientation);
@@ -134,7 +134,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       orientation.getFrameOrientation(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocity.getFrameTuple(angularVelocityToPack);
    }
@@ -144,7 +144,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }

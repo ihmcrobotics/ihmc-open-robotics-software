@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -219,7 +219,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @param desiredPosition the position the control frame's origin should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
     */
-   public void setDesiredPosition(FramePoint desiredPosition)
+   public void setDesiredPosition(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setDesiredPosition(desiredPosition.getPoint());
@@ -291,7 +291,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in world
     *            frame.
     */
-   public void setDesiredPose(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   public void setDesiredPose(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       setDesiredPosition(desiredPosition);
       setDesiredOrientation(desiredOrientation);

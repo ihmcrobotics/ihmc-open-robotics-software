@@ -12,9 +12,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -305,7 +305,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @throws ReferenceFrameMismatchException if {@code desiredAngularVelocity} or
     *            {@code desiredLineaerVelocitys} is not expressed in control frame.
     */
-   public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector desiredAngularVelocity, FrameVector desiredLinearVelocity)
+   public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearVelocity)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularVelocity);
       controlFrame.checkReferenceFrameMatch(desiredLinearVelocity);
@@ -340,7 +340,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @throws ReferenceFrameMismatchException if {@code desiredAngularVelocity} is not expressed in
     *            control frame.
     */
-   public void setAngularVelocity(ReferenceFrame controlFrame, FrameVector desiredAngularVelocity)
+   public void setAngularVelocity(ReferenceFrame controlFrame, FrameVector3D desiredAngularVelocity)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularVelocity);
 
@@ -375,7 +375,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @throws ReferenceFrameMismatchException if {@code desiredLinearVelocity} is not expressed in
     *            control frame.
     */
-   public void setLinearVelocity(ReferenceFrame controlFrame, FrameVector desiredLinearVelocity)
+   public void setLinearVelocity(ReferenceFrame controlFrame, FrameVector3D desiredLinearVelocity)
    {
       controlFrame.checkReferenceFrameMatch(desiredLinearVelocity);
 
@@ -755,7 +755,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint positionToPack, FrameOrientation orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameOrientation orientationToPack)
    {
       controlFramePose.getPositionIncludingFrame(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);

@@ -13,10 +13,10 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -56,21 +56,21 @@ public class ICPOptimizationSolutionHandler
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
-   private final FramePoint2d locationSolution = new FramePoint2d();
-   private final FramePoint2d clippedLocationSolution = new FramePoint2d();
-   private final FramePoint2d upcomingFootstepLocation = new FramePoint2d();
+   private final FramePoint2D locationSolution = new FramePoint2D();
+   private final FramePoint2D clippedLocationSolution = new FramePoint2D();
+   private final FramePoint2D upcomingFootstepLocation = new FramePoint2D();
 
-   private final FramePoint2d tmpEndPoint = new FramePoint2d();
-   private final FramePoint2d tmpReferencePoint = new FramePoint2d();
+   private final FramePoint2D tmpEndPoint = new FramePoint2D();
+   private final FramePoint2D tmpReferencePoint = new FramePoint2D();
 
-   private final FramePoint solutionLocation = new FramePoint();
-   private final FramePoint referenceLocation = new FramePoint();
-   private final FramePoint previousLocation = new FramePoint();
-   private final FrameVector solutionAdjustment = new FrameVector();
+   private final FramePoint3D solutionLocation = new FramePoint3D();
+   private final FramePoint3D referenceLocation = new FramePoint3D();
+   private final FramePoint3D previousLocation = new FramePoint3D();
+   private final FrameVector3D solutionAdjustment = new FrameVector3D();
 
-   private final FrameVector tempVector = new FrameVector();
-   private final FramePoint2d tempPoint2d = new FramePoint2d();
-   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint2D tempPoint2d = new FramePoint2D();
+   private final FrameVector2D tempVector2d = new FrameVector2D();
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
          boolean visualize, boolean debug, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -177,7 +177,7 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
-   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
+   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
          ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
          ICPQPOptimizationSolver solver)
    {
@@ -190,7 +190,7 @@ public class ICPOptimizationSolutionHandler
          upcomingFootsteps.get(i).getAnklePosition2d(upcomingFootstepLocation, ankleToSole);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
+         FramePoint2D referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
          clippedLocationSolution.set(locationSolution);
          boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(),
                deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
@@ -210,7 +210,7 @@ public class ICPOptimizationSolutionHandler
    }
 
 
-   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
+   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2D currentSolutionLocation, FramePoint2D referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
       solutionLocation.setXYIncludingFrame(solutionLocationToPack);
@@ -260,14 +260,14 @@ public class ICPOptimizationSolutionHandler
       return wasAdjusted;
    }
 
-   public void computeReferenceValuesFromSolution(ArrayList<FramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
+   public void computeReferenceValuesFromSolution(ArrayList<FramePoint2D> footstepSolutions, ICPOptimizationInputHandler inputHandler,
          StateMultiplierCalculator stateMultiplierCalculator, YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity,
          double omega0, int numberOfFootstepsToConsider)
    {
-      ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
-      ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
-      FramePoint2d stanceEntryCMP = inputHandler.getStanceEntryCMP();
-      FramePoint2d stanceExitCMP = inputHandler.getStanceExitCMP();
+      ArrayList<FrameVector2D> entryOffsets = inputHandler.getEntryOffsets();
+      ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
+      FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
+      FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
       inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
 
       stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, tempPoint2d, footstepSolutions, entryOffsets, exitOffsets,
@@ -289,10 +289,10 @@ public class ICPOptimizationSolutionHandler
    {
       if (debug)
       {
-         ArrayList<FrameVector2d> entryOffsets = inputHandler.getEntryOffsets();
-         ArrayList<FrameVector2d> exitOffsets = inputHandler.getExitOffsets();
-         FramePoint2d stanceEntryCMP = inputHandler.getStanceEntryCMP();
-         FramePoint2d stanceExitCMP = inputHandler.getStanceExitCMP();
+         ArrayList<FrameVector2D> entryOffsets = inputHandler.getEntryOffsets();
+         ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
+         FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
+         FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
          inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
 
          stateMultiplierCalculator
@@ -310,12 +310,12 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
-   public void setReferenceICPVelocity(FrameVector2d desiredICPVelocity)
+   public void setReferenceICPVelocity(FrameVector2D desiredICPVelocity)
    {
       referenceICPVelocity.set(desiredICPVelocity);
    }
 
-   public void setReferenceValues(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, double omega0)
+   public void setReferenceValues(FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, double omega0)
    {
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, tempPoint2d);
 
@@ -330,17 +330,17 @@ public class ICPOptimizationSolutionHandler
       }
    }
 
-   public FramePoint2d getControllerReferenceICP()
+   public FramePoint2D getControllerReferenceICP()
    {
       return referenceICP.getFrameTuple2d();
    }
 
-   public FrameVector2d getControllerReferenceICPVelocity()
+   public FrameVector2D getControllerReferenceICPVelocity()
    {
       return referenceICPVelocity.getFrameTuple2d();
    }
 
-   public void getControllerReferenceCMP(FramePoint2d framePointToPack)
+   public void getControllerReferenceCMP(FramePoint2D framePointToPack)
    {
       referenceCMP.getFrameTuple2d(framePointToPack);
    }
@@ -350,7 +350,7 @@ public class ICPOptimizationSolutionHandler
       return footstepWasAdjusted.getBooleanValue();
    }
 
-   public FrameVector2d getFootstepAdjustment()
+   public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
    }

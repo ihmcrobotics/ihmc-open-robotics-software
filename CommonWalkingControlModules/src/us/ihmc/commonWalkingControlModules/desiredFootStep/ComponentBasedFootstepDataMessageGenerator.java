@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -150,7 +150,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       if (useHeadingAndVelocityScript)
       {
          desiredVelocityControlModule = new ManualDesiredVelocityControlModule(ReferenceFrame.getWorldFrame(), registry);
-         desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.4, 0.0));
+         desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.4, 0.0));
 
          SimpleDesiredHeadingControlModule simpleDesiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
          simpleDesiredHeadingControlModule.setMaxHeadingDot(0.2);

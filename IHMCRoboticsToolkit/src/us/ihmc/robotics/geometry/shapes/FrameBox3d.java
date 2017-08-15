@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -55,22 +55,22 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
       return box3d;
    }
 
-   public FramePoint getCenter()
+   public FramePoint3D getCenter()
    {
-      FramePoint ret = new FramePoint(referenceFrame);
+      FramePoint3D ret = new FramePoint3D(referenceFrame);
       getCenter(ret);
       return ret;
    }
 
-   public void getCenter(FramePoint pointToPack)
+   public void getCenter(FramePoint3D pointToPack)
    {
       pointToPack.setToZero(referenceFrame);
       box3d.getCenter(pointToPack.getPoint());
    }
 
-   public FramePoint getCenterCopy()
+   public FramePoint3D getCenterCopy()
    {
-      FramePoint ret = new FramePoint(referenceFrame);
+      FramePoint3D ret = new FramePoint3D(referenceFrame);
       getCenter(ret);
 
       return ret;

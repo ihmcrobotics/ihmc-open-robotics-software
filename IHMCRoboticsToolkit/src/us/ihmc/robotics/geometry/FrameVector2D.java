@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
+public class FrameVector2D extends FrameTuple2D<FrameVector2D, Vector2D>
 {
    private static final long serialVersionUID = -610124454205790361L;
 
@@ -26,7 +26,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
+   public FrameVector2D(ReferenceFrame referenceFrame, double x, double y, String name)
    {
       super(referenceFrame, new Vector2D(x, y), name);
    }
@@ -36,7 +36,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
+   public FrameVector2D(ReferenceFrame referenceFrame, double x, double y)
    {
       this(referenceFrame, x, y, null);
    }
@@ -46,7 +46,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d()
+   public FrameVector2D()
    {
       this(ReferenceFrame.getWorldFrame());
    }
@@ -56,7 +56,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
+   public FrameVector2D(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
    {
       this(referenceFrame, tuple.getX(), tuple.getY());
    }
@@ -66,7 +66,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame, double[] vector)
+   public FrameVector2D(ReferenceFrame referenceFrame, double[] vector)
    {
       this(referenceFrame, vector[0], vector[1]);
    }
@@ -76,7 +76,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(ReferenceFrame referenceFrame)
+   public FrameVector2D(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, 0.0, 0.0);
    }
@@ -86,7 +86,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
+   public FrameVector2D(FrameTuple2D<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
@@ -96,18 +96,18 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
     * <p/>
     * A normal vector2d associated with a specific reference frame.
     */
-   public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
+   public FrameVector2D(FramePoint2D startFramePoint, FramePoint2D endFramePoint)
    {
       this(endFramePoint.referenceFrame, endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       sub(startFramePoint);
    }
 
-   public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
+   public static FrameVector2D generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
    {
       double randomAngle = RandomNumbers.nextDouble(random, -Math.PI, Math.PI);
 
-      FrameVector2d randomVector = new FrameVector2d(zUpFrame, Math.cos(randomAngle), Math.sin(randomAngle));
+      FrameVector2D randomVector = new FrameVector2D(zUpFrame, Math.cos(randomAngle), Math.sin(randomAngle));
 
       return randomVector;
    }
@@ -125,10 +125,10 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
    @Override
    public boolean equals(Object frameVector)
    {
-      if (frameVector instanceof FrameVector2d)
+      if (frameVector instanceof FrameVector2D)
       {
-         boolean referenceFrameMatches = referenceFrame.equals(((FrameVector2d) frameVector).getReferenceFrame());
-         boolean pointEquals = tuple.equals(((FrameVector2d) frameVector).tuple);
+         boolean referenceFrameMatches = referenceFrame.equals(((FrameVector2D) frameVector).getReferenceFrame());
+         boolean pointEquals = tuple.equals(((FrameVector2D) frameVector).tuple);
          return referenceFrameMatches && pointEquals;
       }
       else
@@ -137,7 +137,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
       }
    }
 
-   public boolean eplilonEquals(FrameVector2d frameVector, double epsilon)
+   public boolean eplilonEquals(FrameVector2D frameVector, double epsilon)
    {
       boolean referenceFrameMatches = referenceFrame.equals(frameVector.getReferenceFrame());
       boolean pointEquals = tuple.epsilonEquals(frameVector.tuple, epsilon);
@@ -152,21 +152,21 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
       tuple.set(x, y);
    }
 
-   public double dot(FrameVector2d frameVector)
+   public double dot(FrameVector2D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 
       return this.tuple.dot(frameVector.tuple);
    }
 
-   public double cross(FrameVector2d frameVector)
+   public double cross(FrameVector2D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 
       return this.tuple.getX() * frameVector.tuple.getY() - tuple.getY() * frameVector.tuple.getX();
    }
 
-   public double angle(FrameVector2d frameVector)
+   public double angle(FrameVector2D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 

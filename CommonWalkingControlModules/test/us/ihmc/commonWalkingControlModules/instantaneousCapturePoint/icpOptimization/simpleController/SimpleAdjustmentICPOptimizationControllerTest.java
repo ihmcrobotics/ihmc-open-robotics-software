@@ -21,9 +21,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -94,23 +94,23 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       double omega = walkingControllerParameters.getOmega0();
 
-      FramePoint2d desiredICP = new FramePoint2d(worldFrame, 0.03, 0.06);
-      FramePoint2d perfectCMP = new FramePoint2d(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d();
-      FramePoint2d currentICP = new FramePoint2d();
+      FrameVector2D icpError = new FrameVector2D();
+      FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
       controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
@@ -167,23 +167,23 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       double omega = walkingControllerParameters.getOmega0();
 
-      FramePoint2d desiredICP = new FramePoint2d(worldFrame, 0.03, 0.06);
-      FramePoint2d perfectCMP = new FramePoint2d(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d();
-      FramePoint2d currentICP = new FramePoint2d();
+      FrameVector2D icpError = new FrameVector2D();
+      FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForTransfer(0.0, RobotSide.LEFT, omega);
       controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
@@ -240,26 +240,26 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       double omega = walkingControllerParameters.getOmega0();
 
-      FramePoint2d desiredICP = new FramePoint2d(worldFrame, 0.03, 0.06);
-      FramePoint2d perfectCMP = new FramePoint2d(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d(worldFrame, 0.03, 0.06);
-      FramePoint2d currentICP = new FramePoint2d();
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
+      FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
          controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
 
-      FramePoint2d desiredCMPExpected = new FramePoint2d();
+      FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
@@ -330,26 +330,26 @@ public class SimpleAdjustmentICPOptimizationControllerTest
 
       double omega = walkingControllerParameters.getOmega0();
 
-      FramePoint2d desiredICP = new FramePoint2d(worldFrame, 0.03, 0.06);
-      FramePoint2d perfectCMP = new FramePoint2d(worldFrame, 0.01, 0.04);
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
-      FrameVector2d icpError = new FrameVector2d(worldFrame, 0.03, 0.06);
-      FramePoint2d currentICP = new FramePoint2d();
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
+      FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
       controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
 
-      FramePoint2d desiredCMPExpected = new FramePoint2d();
+      FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
@@ -401,7 +401,7 @@ public class SimpleAdjustmentICPOptimizationControllerTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
