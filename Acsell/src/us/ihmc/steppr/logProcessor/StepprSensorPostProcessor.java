@@ -28,8 +28,8 @@ import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -212,7 +212,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames)
       {
          @Override
-         public void getCenterOfPressure(FramePoint2d centerOfPressureToPack, RigidBody foot)
+         public void getCenterOfPressure(FramePoint2D centerOfPressureToPack, RigidBody foot)
          {
             logDataProcessorHelper.getDesiredCoP(feetMap.get(foot), centerOfPressureToPack);
          }
@@ -278,7 +278,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             }
 
             @Override
-            public void computeAndPackCoP(FramePoint2d copToPack)
+            public void computeAndPackCoP(FramePoint2D copToPack)
             {
                logDataProcessorHelper.getMeasuredCoP(robotSide, copToPack);
                copToPack.setIncludingFrame(contactableFoot.getSoleFrame(), copToPack.getPointCopy());
@@ -319,8 +319,8 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
    private final Vector3D angularVelocity = new Vector3D();
    private final Vector3D linearAcceleration = new Vector3D();
    private final Twist twist = new Twist();
-   private final FrameVector linearFrameVelocity = new FrameVector();
-   private final FrameVector angularFrameVelocity = new FrameVector();
+   private final FrameVector3D linearFrameVelocity = new FrameVector3D();
+   private final FrameVector3D angularFrameVelocity = new FrameVector3D();
 
    private final RotationMatrix processedOrientation = new RotationMatrix();
    private final Vector3D processedAngularVelocity = new Vector3D();

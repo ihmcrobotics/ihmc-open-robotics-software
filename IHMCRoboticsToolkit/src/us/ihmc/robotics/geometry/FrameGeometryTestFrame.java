@@ -49,7 +49,7 @@ public class FrameGeometryTestFrame extends JFrame
       return frameGeometry2dPlotter;
    }
 
-   public void addTestPoints(ArrayList<FramePoint2d> testPoints)
+   public void addTestPoints(ArrayList<FramePoint2D> testPoints)
    {
       frameGeometry2dPlotter.addTestPoints(testPoints);
    }

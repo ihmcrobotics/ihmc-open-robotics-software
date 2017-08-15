@@ -2,19 +2,19 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameTuple3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class TranslationReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -6741627181585210414L;
-   public final FrameVector originVector;
+   public final FrameVector3D originVector;
 
    public TranslationReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       super(frameName, parentFrame, false, parentFrame.isZupFrame());
 
-      originVector = new FrameVector(parentFrame);
+      originVector = new FrameVector3D(parentFrame);
    }
 
    @Override
@@ -24,7 +24,7 @@ public class TranslationReferenceFrame extends ReferenceFrame
       transformToParent.setTranslation(originVector.getVector());
    }
 
-   public void updateTranslation(FrameTuple<?, ?> frameVector)
+   public void updateTranslation(FrameTuple3D<?, ?> frameVector)
    {      
       originVector.set(frameVector);
       this.update();

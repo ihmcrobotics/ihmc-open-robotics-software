@@ -11,7 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -115,9 +115,9 @@ public class MovingWalkingReferenceFrameTest
          private final Point3D position = new Point3D();
          private final double[] yawPitchRoll = new double[3];
 
-         private final FrameVector linearVelocity = new FrameVector();
+         private final FrameVector3D linearVelocity = new FrameVector3D();
          private final double[] yawPitchRollDot = new double[3];
-         private final FrameVector angularVelocity = new FrameVector();
+         private final FrameVector3D angularVelocity = new FrameVector3D();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)

@@ -129,14 +129,14 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.addReachabilityPolygon(polygon2d);
    }
 
-   private final FramePoint2d adjustedLocation = new FramePoint2d();
-   private final FramePoint2d referenceLocation = new FramePoint2d();
-   private final FrameVector2d adjustmentDirection = new FrameVector2d();
+   private final FramePoint2D adjustedLocation = new FramePoint2D();
+   private final FramePoint2D referenceLocation = new FramePoint2D();
+   private final FrameVector2D adjustmentDirection = new FrameVector2D();
    private final FrameLine2d motionLine = new FrameLine2d();
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2d> footstepSolutions,
+   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2D> footstepSolutions,
                                                    boolean wasAdjusted)
    {
       if (!wasAdjusted)
@@ -164,7 +164,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityBasedOnAdjustment(List<Footstep> upcomingFootsteps, ArrayList<FramePoint2d> footstepSolutions, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(List<Footstep> upcomingFootsteps, ArrayList<FramePoint2D> footstepSolutions, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;

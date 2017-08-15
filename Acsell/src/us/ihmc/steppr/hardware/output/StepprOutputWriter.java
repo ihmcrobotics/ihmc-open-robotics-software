@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -362,7 +362,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void controllerFailed(FrameVector2d framevector)
+   public void controllerFailed(FrameVector2D framevector)
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingStateEnum.TO_STANDING);
