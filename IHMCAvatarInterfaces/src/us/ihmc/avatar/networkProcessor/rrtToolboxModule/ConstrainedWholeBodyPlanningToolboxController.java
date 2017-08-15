@@ -180,19 +180,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          {
             bestScoreInitialGuess = scoreInitialGuess;
 
-            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[3].getQ());
-            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[4].getQ());
-            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[5].getQ());
-            PrintTools.info("visualizedNode" + visualizedNode.getOneDoFJoints()[6].getQ());
-
             rootNode = visualizedNode.createNodeCopy();
             rootNode = new GenericTaskNode(visualizedNode);
-
-            PrintTools.info("root node " + rootNode.getNodeData(1));
-            PrintTools.info("root node " + rootNode.getOneDoFJoints()[3].getQ());
-            PrintTools.info("root node " + rootNode.getOneDoFJoints()[4].getQ());
-            PrintTools.info("root node " + rootNode.getOneDoFJoints()[5].getQ());
-            PrintTools.info("root node " + rootNode.getOneDoFJoints()[6].getQ());
          }
 
          /*
@@ -288,47 +277,26 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
       // ************************************************************************************************************** //
 
+      
+      
+      
       // ************************************************************************************************************** //
 
-      /*
-       * set fullRobotModel.
-       */
-      FullHumanoidRobotModel solverRobotModel = kinematicsSolver.getFullRobotModelCopy();
-      visualizedFullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
-      visualizedFullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
-
-      for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
-         FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
-
-
-      /*
-       * update visualizer.
-       */
-      if (visualizedNode != null)
-      {
-         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
-         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getIsValidNode());
-         treeStateVisualizer.updateVisualizer();
-
-         currentIsValid.set(visualizedNode.getIsValidNode());
-         currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
-         if (startYoVariableServer)
-            treeVisualizer.update(visualizedNode);
-      }
-
-      /*
-       * YoVariables.
-       */
-      isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
-      solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
-      endeffectorFrame.setVisible(true);
-      endeffectorFrame.update();
+      
+      updateVisualizerRobotConfiguration(kinematicsSolver.getFullRobotModelCopy());
+      updateVisualizers();
+      updateYoVariables();
 
       // ************************************************************************************************************** //
       updateCount.increment();
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
    }
+   
+   
+   
+   
+   
 
    @Override
    protected boolean initialize()
@@ -503,4 +471,44 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return isCollisionFree;
    }
 
+   /**
+    * set fullRobotModel.
+    */
+   private void updateVisualizerRobotConfiguration(FullHumanoidRobotModel solverRobotModel)
+   {
+      visualizedFullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
+      visualizedFullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
+
+      for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
+         FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
+   }
+   
+   /**
+    * update visualizers.
+    */
+   private void updateVisualizers()
+   {
+      if (visualizedNode != null)
+      {
+         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
+         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getIsValidNode());
+         treeStateVisualizer.updateVisualizer();
+
+         currentIsValid.set(visualizedNode.getIsValidNode());
+         currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
+         if (startYoVariableServer)
+            treeVisualizer.update(visualizedNode);
+      }
+   }
+   
+   /**
+    * YoVariables.
+    */   
+   private void updateYoVariables()
+   {
+      isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
+      solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
+      endeffectorFrame.setVisible(true);
+      endeffectorFrame.update();
+   }
 }
