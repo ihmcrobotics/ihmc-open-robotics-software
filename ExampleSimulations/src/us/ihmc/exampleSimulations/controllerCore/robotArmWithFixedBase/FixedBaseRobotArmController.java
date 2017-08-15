@@ -24,7 +24,7 @@ import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizat
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
@@ -78,8 +78,8 @@ public class FixedBaseRobotArmController implements RobotController
    private final WholeBodyControllerCore controllerCore;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
-   private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
-   private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
+   private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
+   private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
@@ -163,13 +163,11 @@ public class FixedBaseRobotArmController implements RobotController
 
       handWeight.set(1.0);
 
-      handPositionGains.setProportionalGain(100.0);
-      handPositionGains.setDampingRatio(1.0);
-      handPositionGains.createDerivativeGainUpdater(true);
+      handPositionGains.setProportionalGains(100.0);
+      handPositionGains.setDampingRatios(1.0);
 
-      handOrientationGains.setProportionalGain(100.0);
-      handOrientationGains.setDampingRatio(1.0);
-      handOrientationGains.createDerivativeGainUpdater(true);
+      handOrientationGains.setProportionalGains(100.0);
+      handOrientationGains.setDampingRatios(1.0);
 
       FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);

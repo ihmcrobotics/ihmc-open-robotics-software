@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -162,7 +162,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
    private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
+      SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("PelvisOrientation", registry);
 
       double kp = 100;//600.0;
       double zeta = 0.4;//0.8;
@@ -171,20 +171,17 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = Double.POSITIVE_INFINITY;
       double maxJerk = Double.POSITIVE_INFINITY;
 
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setIntegralGains(ki, maxIntegralError);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
       return gains;
    }
 
    private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+      SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("ChestOrientation", registry);
 
       double kp = runningOnRealRobot ? 100.0 : 100.0;
       double zeta = runningOnRealRobot ? 0.7 : 0.8;
@@ -193,13 +190,10 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setIntegralGains(ki, maxIntegralError);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
       return gains;
    }
