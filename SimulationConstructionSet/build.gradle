@@ -73,7 +73,7 @@ dependencies {
 
 	compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
-	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+//	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
