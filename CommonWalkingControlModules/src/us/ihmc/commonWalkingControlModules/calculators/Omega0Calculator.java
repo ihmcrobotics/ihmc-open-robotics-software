@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.OriginAndPointFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,9 +16,9 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final OriginAndPointFrame copToCoPFrame = new OriginAndPointFrame("copToCoP", worldFrame);
    private final ReferenceFrame centerOfMassFrame;
    private final double totalMass;
-   private final SideDependentList<FramePoint> cops = new SideDependentList<>(); // Max of 2 CoPs assumed here
-   private final FramePoint2d pseudoCoP2d = new FramePoint2d();
-   private final FramePoint pseudoCoP = new FramePoint();
+   private final SideDependentList<FramePoint3D> cops = new SideDependentList<>(); // Max of 2 CoPs assumed here
+   private final FramePoint2D pseudoCoP2d = new FramePoint2D();
+   private final FramePoint3D pseudoCoP = new FramePoint3D();
    private final SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
 
    private double omega0;
@@ -31,12 +31,12 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       omega0 = initialOmega0;
 
       for (RobotSide robotSide : RobotSide.values) // Max of 2 CoPs assumed here
-         cops.put(robotSide, new FramePoint());
+         cops.put(robotSide, new FramePoint3D());
    }
 
-   private final FramePoint tempCoP3d = new FramePoint();
+   private final FramePoint3D tempCoP3d = new FramePoint3D();
 
-   public double computeOmega0(SideDependentList<FramePoint2d> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
+   public double computeOmega0(SideDependentList<FramePoint2D> cop2ds, SpatialForceVector newTotalGroundReactionWrench)
    {
       totalGroundReactionWrench.set(newTotalGroundReactionWrench);
       totalGroundReactionWrench.changeFrame(centerOfMassFrame);
@@ -51,7 +51,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d cop2d = cop2ds.get(robotSide);
+            FramePoint2D cop2d = cop2ds.get(robotSide);
             if (!cop2d.containsNaN())
             {
                tempCoP3d.setXYIncludingFrame(cop2d);
@@ -65,7 +65,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint2d cop2d = cop2ds.get(robotSide);
+            FramePoint2D cop2d = cop2ds.get(robotSide);
             cops.get(robotSide).setIncludingFrame(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
             cops.get(robotSide).changeFrame(copToCoPFrame.getParent());
          }

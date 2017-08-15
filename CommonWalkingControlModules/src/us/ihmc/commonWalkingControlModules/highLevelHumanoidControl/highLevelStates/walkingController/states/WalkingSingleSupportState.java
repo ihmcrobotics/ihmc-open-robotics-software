@@ -12,10 +12,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -33,7 +33,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
    private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
-   private final FramePoint nextExitCMP = new FramePoint();
+   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -54,7 +54,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean minimizeAngularMomentumRateZDuringSwing = new YoBoolean("minimizeAngularMomentumRateZDuringSwing", registry);
 
-   private final FrameVector touchdownErrorVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -286,11 +286,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       setYoVariablesToNaN();
    }
 
-   private final FramePoint2d filteredDesiredCoP = new FramePoint2d(worldFrame);
-   private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
-   private final FramePoint2d desiredCoP = new FramePoint2d(worldFrame);
-   private final FramePoint2d desiredICP = new FramePoint2d(worldFrame);
-   private final FramePoint2d currentICP = new FramePoint2d(worldFrame);
+   private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
+   private final FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
+   private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
+   private final FramePoint2D desiredICP = new FramePoint2D(worldFrame);
+   private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
       boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
@@ -316,7 +316,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */

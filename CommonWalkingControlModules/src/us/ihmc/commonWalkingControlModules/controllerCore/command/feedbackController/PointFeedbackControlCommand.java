@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -187,7 +187,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint desiredPosition)
+   public void set(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -216,7 +216,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
+   public void set(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
@@ -250,7 +250,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
+   public void setBodyFixedPointToControl(FramePoint3D bodyFixedPointInEndEffectorFrame)
    {
       bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
       bodyFixedPointInEndEffectorFrame.get(this.bodyFixedPointInEndEffectorFrame);
@@ -331,19 +331,19 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
-   public void getIncludingFrame(FramePoint desiredPositionToPack)
+   public void getIncludingFrame(FramePoint3D desiredPositionToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
    }
 
-   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
+   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);
       feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearAccelerationInWorld);
    }
 
-   public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControlToPack)
+   public void getBodyFixedPointIncludingFrame(FramePoint3D bodyFixedPointToControlToPack)
    {
       bodyFixedPointToControlToPack.setIncludingFrame(getEndEffector().getBodyFixedFrame(), this.bodyFixedPointInEndEffectorFrame);
    }

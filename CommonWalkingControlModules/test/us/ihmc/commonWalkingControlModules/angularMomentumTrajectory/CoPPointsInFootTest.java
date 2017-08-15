@@ -15,7 +15,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -70,7 +70,7 @@ public class CoPPointsInFootTest
    @Test
    public void testAddandSetIncludingFrame()
    {
-      FramePoint testLocation = new FramePoint(footSpoof.getSoleFrame(), 0.01, 0.0, 0.01);
+      FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), 0.01, 0.0, 0.01);
       assert (copPointsInFoot.getCoPPointList().isEmpty());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.0, testLocation);
       assert (copPointsInFoot.getCoPPointList().size() == 1);

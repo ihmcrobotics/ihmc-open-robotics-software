@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -20,7 +20,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
 
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
 
    public YoFramePoseUsingQuaternions(YoFramePoint position, YoFrameQuaternion orientation)
@@ -140,7 +140,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       position.set(yoFramePoint);
    }
 
-   public void setPosition(FramePoint framePoint)
+   public void setPosition(FramePoint3D framePoint)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -167,7 +167,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       orientation.set(quaternion);
    }
 
-   public void set(FramePoint framePoint, FrameOrientation frameOrientation)
+   public void set(FramePoint3D framePoint, FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -179,7 +179,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
    }
 
-   public void setAndMatchFrame(FramePoint framePoint, FrameOrientation frameOrientation)
+   public void setAndMatchFrame(FramePoint3D framePoint, FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       position.setAndMatchFrame(framePoint, notifyListeners);

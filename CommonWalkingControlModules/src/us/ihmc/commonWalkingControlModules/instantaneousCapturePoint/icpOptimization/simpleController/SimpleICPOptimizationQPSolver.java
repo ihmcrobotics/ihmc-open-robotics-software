@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -393,7 +393,7 @@ public class SimpleICPOptimizationQPSolver
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param weight weight on tracking the reference footstep location in the solver.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint2d referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint2D referenceFootstepLocation)
    {
       this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
    }
@@ -405,7 +405,7 @@ public class SimpleICPOptimizationQPSolver
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param weight weight on tracking the reference footstep location in the solver.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint2d referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint2D referenceFootstepLocation)
    {
       this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
    }
@@ -419,7 +419,7 @@ public class SimpleICPOptimizationQPSolver
     * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2d referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2D referenceFootstepLocation)
    {
       footstepRecursionMultiplier = recursionMultiplier;
       footstepAdjustmentSafetyFactor = safetyFactor;
@@ -472,7 +472,7 @@ public class SimpleICPOptimizationQPSolver
     *
     * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
     */
-   public void resetFootstepRegularization(FramePoint2d previousFootstepLocation)
+   public void resetFootstepRegularization(FramePoint2D previousFootstepLocation)
    {
       previousFootstepLocation.changeFrame(worldFrame);
       this.previousFootstepLocation.set(0, 0, previousFootstepLocation.getX());
@@ -568,12 +568,12 @@ public class SimpleICPOptimizationQPSolver
     * @param perfectCMP current desired value of the CMP based on the nominal ICP location.
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
-   public void compute(YoFrameVector2d currentICPError, FramePoint2d perfectCMP) throws NoConvergenceException
+   public void compute(YoFrameVector2d currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       compute(currentICPError.getFrameTuple2d(), perfectCMP);
    }
 
-   public void compute(FrameVector2d currentICPError, FramePoint2d perfectCMP) throws NoConvergenceException
+   public void compute(FrameVector2D currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
@@ -926,7 +926,7 @@ public class SimpleICPOptimizationQPSolver
     * @param footstepIndex index of footstep to get.
     * @param footstepLocationToPack location of the footstep in the world frame.
     */
-   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2d footstepLocationToPack)
+   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2D footstepLocationToPack)
    {
       footstepLocationToPack.setToZero(worldFrame);
       footstepLocationToPack.setX(footstepLocationSolution.get(2 * footstepIndex, 0));
@@ -938,7 +938,7 @@ public class SimpleICPOptimizationQPSolver
     *
     * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
     */
-   public void getCoPFeedbackDifference(FrameVector2d cmpFeedbackDifferenceToPack)
+   public void getCoPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
       cmpFeedbackDifferenceToPack.setX(feedbackDeltaSolution.get(0, 0));
@@ -951,7 +951,7 @@ public class SimpleICPOptimizationQPSolver
     *
     * @param differenceToPack difference between the two points. Modified.
     */
-   public void getCMPDifferenceFromCoP(FrameVector2d differenceToPack)
+   public void getCMPDifferenceFromCoP(FrameVector2D differenceToPack)
    {
       differenceToPack.setToZero(worldFrame);
       differenceToPack.setX(angularMomentumSolution.get(0, 0));

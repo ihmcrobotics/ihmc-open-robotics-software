@@ -20,10 +20,10 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -77,20 +77,20 @@ public class SwingState extends AbstractUnconstrainedState
    private final ReferenceFrame oppositeSoleZUpFrame;
 
    private final FramePose initialPose = new FramePose();
-   private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector initialLinearVelocity = new FrameVector();
+   private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameOrientation initialOrientation = new FrameOrientation();
-   private final FrameVector initialAngularVelocity = new FrameVector();
-   private final FramePoint finalPosition = new FramePoint();
-   private final FrameVector finalLinearVelocity = new FrameVector();
+   private final FrameVector3D initialAngularVelocity = new FrameVector3D();
+   private final FramePoint3D finalPosition = new FramePoint3D();
+   private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameOrientation finalOrientation = new FrameOrientation();
-   private final FrameVector finalAngularVelocity = new FrameVector();
-   private final FramePoint stanceFootPosition = new FramePoint();
+   private final FrameVector3D finalAngularVelocity = new FrameVector3D();
+   private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
    private final FrameOrientation tmpOrientation = new FrameOrientation();
-   private final FrameVector tmpVector = new FrameVector();
+   private final FrameVector3D tmpVector = new FrameVector3D();
 
-   private final RecyclingArrayList<FramePoint> positionWaypointsForSole;
+   private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
 
    private final YoDouble swingDuration;
@@ -135,7 +135,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final YoDouble velocityAdjustmentDamping;
    private final YoFrameVector adjustmentVelocityCorrection;
-   private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
+   private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
    private final FramePose footstepPose = new FramePose();
    private final FramePose lastFootstepPose = new FramePose();
@@ -162,7 +162,7 @@ public class SwingState extends AbstractUnconstrainedState
       controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       swingWaypoints = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints, FrameSE3TrajectoryPoint.class);
-      positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint.class);
+      positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint3D.class);
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
@@ -269,9 +269,9 @@ public class SwingState extends AbstractUnconstrainedState
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
-      FramePoint2d toeContactPoint2d = new FramePoint2d();
+      FramePoint2D toeContactPoint2d = new FramePoint2D();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
-      FramePoint toeContactPoint = new FramePoint();
+      FramePoint3D toeContactPoint = new FramePoint3D();
       toeContactPoint.setXYIncludingFrame(toeContactPoint2d);
       toeContactPoint.changeFrame(footFrame);
 
@@ -378,7 +378,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      FrameVector touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
+      FrameVector3D touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 
@@ -622,7 +622,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
       {
-         List<FramePoint> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
+         List<FramePoint3D> positionWaypointsForSole = footstep.getCustomPositionWaypoints();
          for (int i = 0; i < positionWaypointsForSole.size(); i++)
             this.positionWaypointsForSole.add().setIncludingFrame(positionWaypointsForSole.get(i));
       }

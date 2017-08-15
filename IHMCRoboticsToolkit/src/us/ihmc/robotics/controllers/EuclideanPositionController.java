@@ -5,9 +5,9 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,14 +25,14 @@ public class EuclideanPositionController implements PositionController
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private final ReferenceFrame bodyFrame;
-   private final FrameVector proportionalTerm;
-   private final FrameVector derivativeTerm;
-   private final FrameVector integralTerm;
+   private final FrameVector3D proportionalTerm;
+   private final FrameVector3D derivativeTerm;
+   private final FrameVector3D integralTerm;
 
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAction = new FrameVector();
-   private final FrameVector actionFromPositionController = new FrameVector();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
+   private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
@@ -62,9 +62,9 @@ public class EuclideanPositionController implements PositionController
       positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
       velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
 
-      proportionalTerm = new FrameVector(bodyFrame);
-      derivativeTerm = new FrameVector(bodyFrame);
-      integralTerm = new FrameVector(bodyFrame);
+      proportionalTerm = new FrameVector3D(bodyFrame);
+      derivativeTerm = new FrameVector3D(bodyFrame);
+      integralTerm = new FrameVector3D(bodyFrame);
 
       feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
@@ -84,7 +84,7 @@ public class EuclideanPositionController implements PositionController
    }
 
    @Override
-   public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
+   public void compute(FrameVector3D output, FramePoint3D desiredPosition, FrameVector3D desiredVelocity, FrameVector3D currentVelocity, FrameVector3D feedForward)
    {
       computeProportionalTerm(desiredPosition);
       if (currentVelocity != null)
@@ -146,7 +146,7 @@ public class EuclideanPositionController implements PositionController
       currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void computeProportionalTerm(FramePoint desiredPosition)
+   private void computeProportionalTerm(FramePoint3D desiredPosition)
    {
       desiredPosition.changeFrame(bodyFrame);
       positionError.set(desiredPosition);
@@ -164,7 +164,7 @@ public class EuclideanPositionController implements PositionController
       tempGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
+   private void computeDerivativeTerm(FrameVector3D desiredVelocity, FrameVector3D currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
       currentVelocity.changeFrame(bodyFrame);
@@ -238,7 +238,7 @@ public class EuclideanPositionController implements PositionController
       gains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void getPositionError(FrameVector positionErrorToPack)
+   public void getPositionError(FrameVector3D positionErrorToPack)
    {
       positionError.getFrameTuple(positionErrorToPack);
    }

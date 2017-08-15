@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -191,7 +191,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          footstepSnapper.snapFootstep(footstep, heightMap);
 
          RobotSide robotSide = footstep.getRobotSide();
-         FramePoint position = new FramePoint();
+         FramePoint3D position = new FramePoint3D();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());

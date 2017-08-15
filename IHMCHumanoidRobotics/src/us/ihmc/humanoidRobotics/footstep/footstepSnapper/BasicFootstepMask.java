@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
 /**
@@ -27,7 +27,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3D>
 
       footShapeWithBufferPolygon.clear();
 
-      for (FramePoint2d vertex : foot.getContactPoints2d())
+      for (FramePoint2D vertex : foot.getContactPoints2d())
       {
          footShapeWithBufferPolygon.addVertex(inflate(vertex.getX()), inflate(vertex.getY()));
       }

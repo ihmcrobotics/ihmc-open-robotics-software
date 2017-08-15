@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -17,14 +17,14 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
       parentRegistry.addChild(registry);
    }
 
-   public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
+   public void setDesiredVelocity(FrameVector2D newDesiredVelocity)
    {
       newDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
       desiredVelocity.set(newDesiredVelocity);
    }
 
    @Override
-   public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
+   public void getDesiredVelocity(FrameVector2D desiredVelocityToPack)
    {
       desiredVelocity.getFrameTuple2dIncludingFrame(desiredVelocityToPack);
    }
