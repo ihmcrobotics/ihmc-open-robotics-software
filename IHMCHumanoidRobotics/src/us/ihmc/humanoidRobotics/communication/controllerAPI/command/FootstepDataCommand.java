@@ -26,8 +26,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingHeight = 0.0;
    private final FramePoint3D position = new FramePoint3D();
    private final FrameOrientation orientation = new FrameOrientation();
-   private final FramePoint3D expectedInitialPosition = new FramePoint3D();
-   private final FrameOrientation expectedInitialOrientation = new FrameOrientation();
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
@@ -222,16 +220,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public FrameOrientation getOrientation()
    {
       return orientation;
-   }
-
-   public FramePoint3D getExpectedInitialPosition()
-   {
-      return expectedInitialPosition;
-   }
-
-   public FrameOrientation getExpectedInitialOrientation()
-   {
-      return expectedInitialOrientation;
    }
 
    public RecyclingArrayList<Point2D> getPredictedContactPoints()

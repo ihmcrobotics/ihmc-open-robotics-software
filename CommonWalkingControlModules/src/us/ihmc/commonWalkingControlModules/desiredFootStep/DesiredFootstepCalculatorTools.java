@@ -100,6 +100,71 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
+   public static FramePoint3D computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
+   {
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
+
+      ReferenceFrame bodyFrame = contactableBody.getFrameAfterParentJoint();
+
+      return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
+   }
+
+   public static FramePoint3D computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint3D> footPoints, ReferenceFrame bodyFrame,
+         ReferenceFrame frame)
+   {
+      FramePoint3D minFramePoint = new FramePoint3D(frame);
+      minFramePoint.setZ(Double.POSITIVE_INFINITY);
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+      boolean pointFound = false;
+      for (FramePoint3D footPoint : footPoints)
+      {
+         tempFramePoint.setIncludingFrame(footPoint);
+         tempFramePoint.changeFrame(bodyFrame);
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
+         tempFramePoint.changeFrame(frame);
+
+         if (tempFramePoint.getZ() < minFramePoint.getZ())
+         {
+            minFramePoint.set(tempFramePoint);
+            pointFound = true;
+         }
+      }
+
+      if (!pointFound)
+         throw new RuntimeException();
+
+      return minFramePoint;
+   }
+
+   public static FramePoint3D computeMaxXPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
+   {
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
+      FramePoint3D maxFramePoint = new FramePoint3D(frame);
+      maxFramePoint.setX(Double.NEGATIVE_INFINITY);
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+      boolean pointFound = false;
+      for (FramePoint3D footPoint : footPoints)
+      {
+         tempFramePoint.setIncludingFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
+         tempFramePoint.changeFrame(frame);
+
+         if (tempFramePoint.getX() > maxFramePoint.getX())
+         {
+            maxFramePoint.set(tempFramePoint);
+            pointFound = true;
+         }
+      }
+
+      if (!pointFound)
+         throw new RuntimeException();
+
+      return maxFramePoint;
+   }
+
    public static List<FramePoint3D> computeMaximumPointsInDirection(List<FramePoint3D> framePoints, FrameVector3D searchDirection, int nPoints)
    {
       if (framePoints.size() < nPoints)

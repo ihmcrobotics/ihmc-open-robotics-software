@@ -81,9 +81,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
-   private final FramePose expectedInitialPose = new FramePose();
-   private final FramePoint3D expectedInitialPosition = new FramePoint3D();
-   private final FrameOrientation expectedInitialOrientation = new FrameOrientation();
    private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameOrientation finalOrientation = new FrameOrientation();
