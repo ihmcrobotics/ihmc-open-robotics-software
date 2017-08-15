@@ -11,10 +11,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -185,7 +185,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    {
       if (centerOfMassPositionGains == null)
       {
-         centerOfMassPositionGains = new YoEuclideanPositionGains(centerOfMassName, registry);
+         centerOfMassPositionGains = new DefaultYoPID3DGains(centerOfMassName, GainCoupling.NONE, true, registry);
       }
       return centerOfMassPositionGains;
    }
@@ -484,7 +484,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
       if (gains == null)
       {
-         gains = new YoAxisAngleOrientationGains(endEffector.getName(), registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Orientation", GainCoupling.NONE, true, registry);
          endEffectorOrientationGains.put(endEffector, gains);
       }
       return gains;
@@ -503,7 +503,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
       if (gains == null)
       {
-         gains = new YoEuclideanPositionGains(endEffector.getName(), registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Position", GainCoupling.NONE, true, registry);
          endEffectorPositionGains.put(endEffector, gains);
       }
       return gains;
