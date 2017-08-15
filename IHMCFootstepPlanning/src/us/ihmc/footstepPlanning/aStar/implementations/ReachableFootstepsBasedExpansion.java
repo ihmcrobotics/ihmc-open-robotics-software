@@ -19,10 +19,10 @@ public abstract class ReachableFootstepsBasedExpansion implements FootstepNodeEx
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   ReferenceFrame stanceFrame;
-   RobotSide stepSide;
-   double yawStanceFoot;
-   HashSet<FootstepNode> neighbors;
+   private ReferenceFrame stanceFrame;
+   private RobotSide stepSide;
+   private double yawStanceFoot;
+   private HashSet<FootstepNode> neighbors;
 
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)

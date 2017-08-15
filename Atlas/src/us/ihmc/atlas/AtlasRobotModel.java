@@ -32,7 +32,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.PlanarRegionFootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -101,7 +101,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
-   private final FootstepPlannerParameters footstepPlannerParameters;
+   private final PlanarRegionFootstepPlannerParameters planarRegionFootstepPlannerParameters;
 
    private final RobotDescription robotDescription;
 
@@ -157,7 +157,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
 
-      footstepPlannerParameters = new AtlasFootstepPlannerParameters();
+      planarRegionFootstepPlannerParameters = new AtlasFootstepPlannerParameters();
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 
@@ -790,8 +790,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
     * Adds robot specific footstep parameters
     */
    @Override
-   public FootstepPlannerParameters getFootstepPlannerParameters()
+   public PlanarRegionFootstepPlannerParameters getPlanarRegionFootstepPlannerParameters()
    {
-      return footstepPlannerParameters;
+      return planarRegionFootstepPlannerParameters;
    }
 }

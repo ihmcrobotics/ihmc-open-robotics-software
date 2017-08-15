@@ -100,7 +100,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
        * Currently only supported in A-star planner for Atlas and Valkyrie.
        * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
        * */ 
-      this.expansion = drcRobotModel.getFootstepPlannerParameters().getReachableFootstepExpansion();
+      this.expansion = drcRobotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
