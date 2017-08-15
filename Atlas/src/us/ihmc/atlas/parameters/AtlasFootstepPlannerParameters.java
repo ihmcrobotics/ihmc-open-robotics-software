@@ -1,9 +1,9 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
 
-public class AtlasFootstepPlannerParameters implements PlanarRegionFootstepPlannerParameters
+public class AtlasFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
 {
    private final double timeout = Double.POSITIVE_INFINITY;
 
