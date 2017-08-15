@@ -223,12 +223,12 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       kpMap.get(Axis.X).set(proportionalGainX);
       kpMap.get(Axis.Y).set(proportionalGainY);
       kpMap.get(Axis.Z).set(proportionalGainZ);
-      updateDerivativeGains();
    }
 
    @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
+      updateFromDampingRatio.set(false);
       kdMap.get(Axis.X).set(derivativeGainX);
       kdMap.get(Axis.Y).set(derivativeGainY);
       kdMap.get(Axis.Z).set(derivativeGainZ);
@@ -237,21 +237,15 @@ public class DefaultYoPID3DGains implements YoPID3DGains
 
    public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
    {
+      updateFromDampingRatio.set(true);
       zetaMap.get(Axis.X).set(dampingRatioX);
       zetaMap.get(Axis.Y).set(dampingRatioY);
       zetaMap.get(Axis.Z).set(dampingRatioZ);
-      updateDerivativeGains();
    }
 
-   private void updateDerivativeGains()
+   public void setDampingRatios(double dampingRatio)
    {
-      for (int i = 0; i < Axis.values.length; i++)
-      {
-         YoDouble kp = kpMap.get(Axis.values[i]);
-         YoDouble kd = kdMap.get(Axis.values[i]);
-         YoDouble zeta = zetaMap.get(Axis.values[i]);
-         kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
-      }
+      setDampingRatios(dampingRatio, dampingRatio, dampingRatio);
    }
 
    private void updateDampingRatios()
