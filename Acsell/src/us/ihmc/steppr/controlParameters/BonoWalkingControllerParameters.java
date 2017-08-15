@@ -297,7 +297,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatios(zetaXYOrientation, zetaZOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
@@ -324,7 +323,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
@@ -351,7 +349,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }

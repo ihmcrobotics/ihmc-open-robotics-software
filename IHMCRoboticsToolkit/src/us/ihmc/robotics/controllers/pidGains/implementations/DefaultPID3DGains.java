@@ -110,6 +110,11 @@ public class DefaultPID3DGains implements PID3DGains
       updateDerivativeGains();
    }
 
+   public void setDampingRatios(double dampingRatio)
+   {
+      setDampingRatios(dampingRatio, dampingRatio, dampingRatio);
+   }
+
    private void updateDerivativeGains()
    {
       for (int i = 0; i < 3; i++)
