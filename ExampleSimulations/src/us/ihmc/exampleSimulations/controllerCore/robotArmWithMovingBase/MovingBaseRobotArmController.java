@@ -25,9 +25,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -172,7 +172,7 @@ public class MovingBaseRobotArmController implements RobotController
       handOrientationGains.setDampingRatio(1.0);
       handOrientationGains.createDerivativeGainUpdater(true);
 
-      FramePoint initialHandPosition = new FramePoint(robotArm.getHandControlFrame());
+      FramePoint3D initialHandPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialHandPosition.changeFrame(worldFrame);
       FrameOrientation initialHandOrientation = new FrameOrientation(robotArm.getHandControlFrame());
       initialHandOrientation.changeFrame(worldFrame);
@@ -180,7 +180,7 @@ public class MovingBaseRobotArmController implements RobotController
       handTargetPosition.setAndMatchFrame(initialHandPosition);
       handTargetOrientation.setAndMatchFrame(initialHandOrientation);
 
-      FramePoint initialBasePosition = new FramePoint(robotArm.getBase().getBodyFixedFrame());
+      FramePoint3D initialBasePosition = new FramePoint3D(robotArm.getBase().getBodyFixedFrame());
       initialBasePosition.changeFrame(worldFrame);
       sineGenerator.setOffset(initialBasePosition);
       sineGenerator.setAmplitude(0.2, 0.2, 0.1);
@@ -201,12 +201,12 @@ public class MovingBaseRobotArmController implements RobotController
       trajectory.showVisualization();
    }
 
-   private final FramePoint position = new FramePoint();
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearAcceleration = new FrameVector();
+   private final FramePoint3D position = new FramePoint3D();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearAcceleration = new FrameVector3D();
    private final FrameOrientation orientation = new FrameOrientation();
-   private final FrameVector angularVelocity = new FrameVector();
-   private final FrameVector angularAcceleration = new FrameVector();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private final FrameVector3D angularAcceleration = new FrameVector3D();
 
    @Override
    public void doControl()
@@ -260,9 +260,9 @@ public class MovingBaseRobotArmController implements RobotController
       basePointCommand.resetBodyFixedPoint();
       basePointCommand.setWeightForSolver(baseWeight.getDoubleValue());
       basePointCommand.setGains(basePositionGains);
-      FramePoint desiredPosition = new FramePoint();
-      FrameVector desiredLinearVelocity = new FrameVector();
-      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FramePoint3D desiredPosition = new FramePoint3D();
+      FrameVector3D desiredLinearVelocity = new FrameVector3D();
+      FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       sineGenerator.compute(yoTime.getDoubleValue());
       sineGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       basePointCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
@@ -290,12 +290,12 @@ public class MovingBaseRobotArmController implements RobotController
    {
       if (goToTarget.getBooleanValue())
       {
-         FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
+         FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
          initialPosition.changeFrame(worldFrame);
          FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
-         FramePoint finalPosition = new FramePoint();
+         FramePoint3D finalPosition = new FramePoint3D();
          FrameOrientation finalOrientation = new FrameOrientation();
          handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);

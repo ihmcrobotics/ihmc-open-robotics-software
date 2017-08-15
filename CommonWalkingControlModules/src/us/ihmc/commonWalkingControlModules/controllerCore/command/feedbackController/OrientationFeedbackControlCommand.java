@@ -10,7 +10,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -206,7 +206,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void set(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
@@ -228,7 +228,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardAngularAcceleration describes the desired linear acceleration of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
     */
-   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
@@ -304,8 +304,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
-   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
-                                 FrameVector feedForwardAngularAccelerationToPack)
+   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack,
+                                 FrameVector3D feedForwardAngularAccelerationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
       desiredAngularVelocityToPack.setIncludingFrame(worldFrame, desiredAngularVelocityInWorld);

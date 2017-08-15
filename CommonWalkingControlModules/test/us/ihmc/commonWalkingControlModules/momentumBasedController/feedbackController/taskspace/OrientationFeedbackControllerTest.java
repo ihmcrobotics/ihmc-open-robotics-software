@@ -24,7 +24,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -99,8 +99,8 @@ public class OrientationFeedbackControllerTest
          spatialFeedbackControlCommand.setOrientationGains(orientationGains);
 
          FrameOrientation desiredOrientation = new FrameOrientation(worldFrame, EuclidCoreRandomTools.generateRandomQuaternion(random));
-         FrameVector desiredAngularVelocity = new FrameVector(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
 
          orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);

@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
@@ -34,7 +34,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       setToZero(referenceFrame);
    }
 
-   public FrameSO3TrajectoryPoint(double time, FrameOrientation orientation, FrameVector angularVelocity)
+   public FrameSO3TrajectoryPoint(double time, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       this();
       setIncludingFrame(time, orientation, angularVelocity);
@@ -70,7 +70,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.setAngularVelocity(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.setAngularVelocity(angularVelocity.getVector());
@@ -87,14 +87,14 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.set(time, orientation, angularVelocity);
    }
 
-   public void set(double time, FrameOrientation orientation, FrameVector angularVelocity)
+   public void set(double time, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.set(time, orientation.getQuaternion(), angularVelocity.getVector());
    }
 
-   public void setIncludingFrame(double time, FrameOrientation orientation, FrameVector angularVelocity)
+   public void setIncludingFrame(double time, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       orientation.checkReferenceFrameMatch(angularVelocity);
       setToZero(orientation.getReferenceFrame());
@@ -207,20 +207,20 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
-   public FrameVector getAngularVelocityCopy()
+   public FrameVector3D getAngularVelocityCopy()
    {
-      FrameVector angularVelocityCopy = new FrameVector(getReferenceFrame());
+      FrameVector3D angularVelocityCopy = new FrameVector3D(getReferenceFrame());
       getAngularVelocity(angularVelocityCopy);
       return angularVelocityCopy;
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(getReferenceFrame());
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
@@ -233,14 +233,14 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       return getTime();
    }
 
-   public double get(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   public double get(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
       return getTime();
    }
 
-   public double getIncludingFrame(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   public double getIncludingFrame(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack)
    {
       getOrientationIncludingFrame(orientationToPack);
       getAngularVelocityIncludingFrame(angularVelocityToPack);

@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrient
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,8 +29,8 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
    private final FramePose homePose;
 

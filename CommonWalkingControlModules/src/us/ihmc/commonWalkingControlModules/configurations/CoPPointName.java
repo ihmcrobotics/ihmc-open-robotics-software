@@ -6,7 +6,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum CoPPointName
 {
-   MIDFEET_COP, HEEL_COP, BALL_COP, TOE_COP, START_COP;
+   MIDFEET_COP, HEEL_COP, BALL_COP, TOE_COP, START_COP, FINAL_COP;
 
    public static final EnumSet<CoPPointName> set = EnumSet.allOf(CoPPointName.class);
    public static final CoPPointName[] values = values();
@@ -23,6 +23,8 @@ public enum CoPPointName
          return "ToeCoP";
       case MIDFEET_COP:
          return "MidFeetCoP";
+      case FINAL_COP:
+         return "EndCoP";
       default:
          return "StartCoP";
       }

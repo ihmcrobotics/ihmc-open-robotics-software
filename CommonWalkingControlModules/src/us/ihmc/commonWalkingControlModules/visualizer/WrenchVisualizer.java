@@ -12,8 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,8 +37,8 @@ public class WrenchVisualizer
    private final Map<RigidBody, YoGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
 
    private final Wrench tempWrench = new Wrench();
-   private final FrameVector tempVector = new FrameVector();
-   private final FramePoint tempPoint = new FramePoint();
+   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
    
    public static WrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, List<? extends ContactableBody> contactableBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,

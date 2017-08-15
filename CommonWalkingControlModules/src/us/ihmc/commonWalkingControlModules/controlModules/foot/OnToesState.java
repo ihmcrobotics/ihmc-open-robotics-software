@@ -18,9 +18,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -33,7 +33,7 @@ public class OnToesState extends AbstractFootControlState
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final FramePoint desiredContactPointPosition = new FramePoint();
+   private final FramePoint3D desiredContactPointPosition = new FramePoint3D();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
 
    private final ToeOffCalculator toeOffCalculator;
@@ -43,7 +43,7 @@ public class OnToesState extends AbstractFootControlState
    private final FrameOrientation startOrientation = new FrameOrientation();
    private final double[] tempYawPitchRoll = new double[3];
 
-   private final FramePoint contactPointPosition = new FramePoint();
+   private final FramePoint3D contactPointPosition = new FramePoint3D();
 
    private final YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
@@ -53,7 +53,7 @@ public class OnToesState extends AbstractFootControlState
    private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
    private final TranslationReferenceFrame toeOffFrame;
@@ -201,7 +201,7 @@ public class OnToesState extends AbstractFootControlState
          toeSlippingDetector.update();
    }
 
-   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
+   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(desiredOrientation);
       desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
@@ -217,8 +217,8 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
-   private final FrameVector direction = new FrameVector();
-   private final FramePoint2d tmpPoint2d = new FramePoint2d();
+   private final FrameVector3D direction = new FrameVector3D();
+   private final FramePoint2D tmpPoint2d = new FramePoint2D();
    private void setupContactLine()
    {
       direction.setToZero(contactableFoot.getSoleFrame());

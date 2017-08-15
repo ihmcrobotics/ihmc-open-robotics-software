@@ -345,7 +345,7 @@ public class RotationTools
       }
    };
 
-   public static void integrateAngularVelocity(FrameVector angularVelocityToIntegrate, double integrationTime, FrameOrientation orientationResultToPack)
+   public static void integrateAngularVelocity(FrameVector3D angularVelocityToIntegrate, double integrationTime, FrameOrientation orientationResultToPack)
    {
       AxisAngle axisAngleResult = axisAngleForIntegrator.get();
       integrateAngularVelocity(angularVelocityToIntegrate.getVector(), integrationTime, axisAngleResult);

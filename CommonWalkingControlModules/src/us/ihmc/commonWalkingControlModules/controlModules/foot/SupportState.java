@@ -63,16 +63,16 @@ public class SupportState extends AbstractFootControlState
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
-   private final FramePoint2d cop2d = new FramePoint2d();
-   private final FramePoint framePosition = new FramePoint();
+   private final FramePoint2D cop2d = new FramePoint2D();
+   private final FramePoint3D framePosition = new FramePoint3D();
    private final FrameOrientation frameOrientation = new FrameOrientation();
    private final FramePose bodyFixedControlledPose = new FramePose();
-   private final FramePoint desiredCopPosition = new FramePoint();
+   private final FramePoint3D desiredCopPosition = new FramePoint3D();
 
-   private final FramePoint2d cop = new FramePoint2d();
-   private final FramePoint2d desiredCoP = new FramePoint2d();
+   private final FramePoint2D cop = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
-   private final FramePoint footPosition = new FramePoint();
+   private final FramePoint3D footPosition = new FramePoint3D();
    private final FrameOrientation footOrientation = new FrameOrientation();
 
    // For testing:
@@ -98,7 +98,7 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble toeLoadingDuration;
    private final YoDouble fullyLoadedMagnitude;
 
-   private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public SupportState(FootControlHelper footControlHelper, YoPIDSE3Gains holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -170,7 +170,7 @@ public class SupportState extends AbstractFootControlState
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
+      FrameVector3D fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       controllerToolbox.setFootContactStateNormalContactVector(robotSide, fullyConstrainedNormalContactVector);
 
       for (int i = 0; i < dofs; i++)

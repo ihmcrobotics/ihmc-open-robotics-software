@@ -12,7 +12,7 @@ import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -142,7 +142,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    private final Vector3D tempAngularWeightVector = new Vector3D();
    private final Vector3D tempLinearWeightVector = new Vector3D();
-   private final FramePoint desiredAnklePosition = new FramePoint();
+   private final FramePoint3D desiredAnklePosition = new FramePoint3D();
    private final FramePose desiredPose = new FramePose();
 
    @Override

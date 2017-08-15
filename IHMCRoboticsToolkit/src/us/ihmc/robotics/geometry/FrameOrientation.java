@@ -339,7 +339,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void setRotationVector(FrameVector rotationVector)
+   public void setRotationVector(FrameVector3D rotationVector)
    {
       checkReferenceFrameMatch(rotationVector);
       quaternion.set(rotationVector.getVector());
@@ -469,7 +469,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void getRotationVector(FrameVector frameRotationVectorToPack)
+   public void getRotationVector(FrameVector3D frameRotationVectorToPack)
    {
       checkReferenceFrameMatch(frameRotationVectorToPack);
       quaternion.get(frameRotationVectorToPack.getVector());
@@ -503,7 +503,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame it is expressed in are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       quaternion.get(frameRotationVectorToPack.getVector());

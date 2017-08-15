@@ -17,7 +17,7 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -545,7 +545,7 @@ public class ScrewTools
 
    private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, InverseDynamicsJoint parentJointOfClone)
    {
-      FramePoint comOffset = new FramePoint();
+      FramePoint3D comOffset = new FramePoint3D();
       original.getCoMOffset(comOffset);
       comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
       String nameOriginal = original.getName();

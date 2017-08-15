@@ -30,8 +30,8 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -64,12 +64,12 @@ public final class PointFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       ScrewTestTools.setRandomPositions(joints, random);
@@ -93,7 +93,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(50.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -105,8 +105,8 @@ public final class PointFeedbackControllerTest
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
-      FramePoint currentPosition = new FramePoint();
-      FrameVector errorVector = new FrameVector();
+      FramePoint3D currentPosition = new FramePoint3D();
+      FrameVector3D errorVector = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -153,12 +153,12 @@ public final class PointFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       ScrewTestTools.setRandomPositions(joints, random);
@@ -182,7 +182,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(5.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -212,8 +212,8 @@ public final class PointFeedbackControllerTest
 
       DenseMatrix64F tempJtW = new DenseMatrix64F(numberOfDoFs, 3);
 
-      FramePoint currentPosition = new FramePoint();
-      FrameVector errorVector = new FrameVector();
+      FramePoint3D currentPosition = new FramePoint3D();
+      FrameVector3D errorVector = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -320,10 +320,10 @@ public final class PointFeedbackControllerTest
          pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
-         FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
-         FramePoint desiredPosition = new FramePoint(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector desiredLinearVelocity = new FrameVector(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+         FramePoint3D desiredPosition = new FramePoint3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
 
          pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);

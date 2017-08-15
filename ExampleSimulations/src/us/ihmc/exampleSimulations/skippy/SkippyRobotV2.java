@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -255,8 +255,8 @@ public class SkippyRobotV2 extends Robot
       rootJoint.setPositionAndRotation(rootJointTransform);
 
       // update root joint velocity
-      FrameVector linearVelocity = new FrameVector();
-      FrameVector angularVelocity = new FrameVector();
+      FrameVector3D linearVelocity = new FrameVector3D();
+      FrameVector3D angularVelocity = new FrameVector3D();
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame rootBodyFrame = rootJoint.getFrameAfterJoint();
       scsRootJoint.getVelocity(linearVelocity);

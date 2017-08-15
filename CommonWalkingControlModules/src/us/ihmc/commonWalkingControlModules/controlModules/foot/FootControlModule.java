@@ -19,8 +19,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -196,7 +196,7 @@ public class FootControlModule
       setContactState(constraintType, null);
    }
 
-   public void setContactState(ConstraintType constraintType, FrameVector normalContactVector)
+   public void setContactState(ConstraintType constraintType, FrameVector3D normalContactVector)
    {
       if (constraintType == ConstraintType.FULL)
       {
@@ -268,7 +268,7 @@ public class FootControlModule
 
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
-      FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
+      FrameVector3D direction = new FrameVector3D(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
 
       int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPointsCopy(), direction, 2);
 
@@ -287,14 +287,14 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.update();
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
          double zCurrent, ReferenceFrame pelvisZUpFrame)
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
             pelvisZUpFrame, getCurrentConstraintType());
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
          ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,

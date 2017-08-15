@@ -20,9 +20,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -82,12 +82,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
-   private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
+   private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame);
 
    private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
@@ -102,11 +102,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final FramePose controlFramePose = new FramePose();
 
-   private final FramePoint controlPoint = new FramePoint();
+   private final FramePoint3D controlPoint = new FramePoint3D();
    private final YoFramePoint yoControlPoint;
    private final FrameOrientation controlOrientation = new FrameOrientation();
    private final YoFrameOrientation yoControlOrientation;
-   private final FramePoint desiredPoint = new FramePoint();
+   private final FramePoint3D desiredPoint = new FramePoint3D();
    private final YoFramePoint yoDesiredPoint;
 
    private final YoBoolean hybridModeActive;

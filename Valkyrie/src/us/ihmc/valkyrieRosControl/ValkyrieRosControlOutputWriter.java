@@ -4,7 +4,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -61,7 +61,7 @@ public class ValkyrieRosControlOutputWriter implements DRCOutputWriter, Controll
    }
 
    @Override
-   public void controllerFailed(FrameVector2d fallingDirection)
+   public void controllerFailed(FrameVector2D fallingDirection)
    {
       // TODO Auto-generated method stub
       
