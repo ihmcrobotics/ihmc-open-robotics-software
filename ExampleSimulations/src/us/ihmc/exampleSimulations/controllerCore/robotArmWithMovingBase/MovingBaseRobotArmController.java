@@ -23,7 +23,7 @@ import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizat
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
@@ -61,7 +61,7 @@ public class MovingBaseRobotArmController implements RobotController
    private final AtomicBoolean controllerCoreModeHasChanged = new AtomicBoolean(false);
    private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
    private final YoDouble baseWeight = new YoDouble("baseWeight", registry);
-   private final YoSymmetricSE3PIDGains basePositionGains = new YoSymmetricSE3PIDGains("basePosition", registry);
+   private final SymmetricYoPIDSE3Gains basePositionGains = new SymmetricYoPIDSE3Gains("basePosition", registry);
    private final PointFeedbackControlCommand basePointCommand = new PointFeedbackControlCommand();
    private final YoSineGenerator3D sineGenerator = new YoSineGenerator3D("baseTrajectory", worldFrame, registry);
 
@@ -71,8 +71,8 @@ public class MovingBaseRobotArmController implements RobotController
    private final WholeBodyControllerCore controllerCore;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
-   private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
-   private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
+   private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
+   private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
@@ -158,19 +158,16 @@ public class MovingBaseRobotArmController implements RobotController
 
       baseWeight.set(100.0);
 
-      basePositionGains.setProportionalGain(100.0);
-      basePositionGains.setDampingRatio(1.0);
-      basePositionGains.createDerivativeGainUpdater(true);
+      basePositionGains.setProportionalGains(100.0);
+      basePositionGains.setDampingRatios(1.0);
 
       handWeight.set(10.0);
 
-      handPositionGains.setProportionalGain(100.0);
-      handPositionGains.setDampingRatio(1.0);
-      handPositionGains.createDerivativeGainUpdater(true);
+      handPositionGains.setProportionalGains(100.0);
+      handPositionGains.setDampingRatios(1.0);
 
-      handOrientationGains.setProportionalGain(100.0);
-      handOrientationGains.setDampingRatio(1.0);
-      handOrientationGains.createDerivativeGainUpdater(true);
+      handOrientationGains.setProportionalGains(100.0);
+      handOrientationGains.setDampingRatios(1.0);
 
       FramePoint3D initialHandPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialHandPosition.changeFrame(worldFrame);

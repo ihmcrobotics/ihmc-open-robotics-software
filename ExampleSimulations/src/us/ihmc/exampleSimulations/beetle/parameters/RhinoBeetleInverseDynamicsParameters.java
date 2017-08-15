@@ -3,9 +3,9 @@ package us.ihmc.exampleSimulations.beetle.parameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,7 +23,7 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    //body spatial feeback controller params
    private final Vector3D linearWeight = new Vector3D(1.0, 1.0, 2.0);
    private final Vector3D angularWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final YoSymmetricSE3PIDGains bodySpatialGains;
+   private final SymmetricYoPIDSE3Gains bodySpatialGains;
    private final double bodyProportionalGains = 500.0;
    private final double bodyDampingRatio = 1.1;
    private final YoFrameVector bodySpatialLinearQPWeight;
@@ -32,10 +32,9 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
 
    public RhinoBeetleInverseDynamicsParameters(YoVariableRegistry parentRegistry)
    {
-      bodySpatialGains = new YoSymmetricSE3PIDGains("bodySpatialGains", registry);
-      bodySpatialGains.setProportionalGain(bodyProportionalGains);
-      bodySpatialGains.setDampingRatio(bodyDampingRatio);
-      bodySpatialGains.createDerivativeGainUpdater(true);
+      bodySpatialGains = new SymmetricYoPIDSE3Gains("bodySpatialGains", registry);
+      bodySpatialGains.setProportionalGains(bodyProportionalGains);
+      bodySpatialGains.setDampingRatios(bodyDampingRatio);
 
       bodySpatialLinearQPWeight = new YoFrameVector("bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
       bodySpatialAngularQPWeight = new YoFrameVector("bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
