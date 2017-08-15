@@ -20,7 +20,7 @@ public class YoPolynomial
    private final DenseMatrix64F constraintVector;
    private final DenseMatrix64F coefficientVector;
    private final double[] xPowers;
-   
+
    // Stores the (n-th order) derivative of the xPowers vector
    private final DenseMatrix64F xPowersDerivativeVector;
 
@@ -37,7 +37,7 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
-      
+
       xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
@@ -61,7 +61,7 @@ public class YoPolynomial
       constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       xPowers = new double[maximumNumberOfCoefficients];
-      
+
       xPowersDerivativeVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
    }
 
@@ -85,6 +85,9 @@ public class YoPolynomial
       return a[i].getDoubleValue();
    }
 
+   /**
+    * To be used only for testing. Garbage creating function
+    */
    public double[] getCoefficients()
    {
       double[] ret = new double[numberOfCoefficients.getIntegerValue()];
@@ -94,7 +97,7 @@ public class YoPolynomial
       }
       return ret;
    }
-   
+
    public DenseMatrix64F getCoefficientsVector()
    {
       return coefficientVector;
@@ -229,6 +232,24 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setPentic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal, double zddFinal)
+   {
+      reshape(6);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tFinal, zFinal);
+      setVelocityRow(2, t0, zd0);
+      setVelocityRow(3, tFinal, zdFinal);
+      setAccelerationRow(4, t0, zdd0);
+      setAccelerationRow(5, tFinal, zddFinal);
+      solveForCoefficients();
+      setYoVariables();      
+   }
+   
+   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      setPentic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
+   }
+   
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
                                       double zdf, double zddf)
    {
@@ -415,8 +436,8 @@ public class YoPolynomial
       reshape(4);
       setPositionRow(0, t0, z0);
       setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, t0, 3 * (zR1 - z0));
-      setVelocityRow(3, tFinal, 3 * (zFinal - zR2));
+      setVelocityRow(2, t0, 3 * (zR1 - z0) / (tFinal - t0));
+      setVelocityRow(3, tFinal, 3 * (zFinal - zR2) / (tFinal - t0));
       solveForCoefficients();
       setYoVariables();
    }
@@ -551,6 +572,15 @@ public class YoPolynomial
       solver.solve(constraintVector, coefficientVector);
    }
 
+   public void setDirectly(DenseMatrix64F coefficients)
+   {
+      reshape(coefficients.getNumRows());
+      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         this.a[i].set(coefficients.get(i, 0));
+      }
+   }
+   
    public void setDirectly(double[] coefficients)
    {
       reshape(coefficients.length);
@@ -578,17 +608,17 @@ public class YoPolynomial
       }
       a[power].set(coefficient);
    }
-   
+
    /**
     * Set a specific coefficient of the polynomial. A sequence of calls to this function should typically be followed by a call to {@code reshape(int)} later.
     * @param power
     * @param coefficient
-    */   
+    */
    public void setDirectlyFast(int power, double coefficient)
    {
-      if(power >= maximumNumberOfCoefficients)
+      if (power >= maximumNumberOfCoefficients)
          return;
-      if(power >= getNumberOfCoefficients())
+      if (power >= getNumberOfCoefficients())
          numberOfCoefficients.set(power + 1);
       a[power].set(coefficient);
    }
@@ -642,12 +672,12 @@ public class YoPolynomial
          xPowers[i] = xPowers[i - 1] * x;
       }
    }
-   
+
    // Returns the order-th derivative of the polynomial at x
    public double getDerivative(int order, double x)
    {
       setXPowers(xPowers, x);
-      
+
       dPos = 0.0;
       int derivativeCoefficient = 0;
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -673,18 +703,18 @@ public class YoPolynomial
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          derivativeCoefficient = getDerivativeCoefficient(order, i);
-         xPowersDerivativeVector.set(i, derivativeCoefficient*xPowers[i - order]);
+         xPowersDerivativeVector.set(i, derivativeCoefficient * xPowers[i - order]);
       }
-      
+
       return xPowersDerivativeVector;
    }
-   
+
    // Returns the constant coefficient at the exponent-th entry of the order-th derivative vector
    // Example: order = 4, exponent = 5 ==> returns 5*4*3*2
    public int getDerivativeCoefficient(int order, int exponent)
    {
       int coeff = 1;
-      for(int i = exponent; i > exponent - order; i--)
+      for (int i = exponent; i > exponent - order; i--)
       {
          coeff *= i;
       }
@@ -772,7 +802,6 @@ public class YoPolynomial
          if (a[i].getDoubleValue() >= 0)
             inString += "+";
          inString += a[i].getDoubleValue() + " x^" + i;
-
       }
       return inString;
    }

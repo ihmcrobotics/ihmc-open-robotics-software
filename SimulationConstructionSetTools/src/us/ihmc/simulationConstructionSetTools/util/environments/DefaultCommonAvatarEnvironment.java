@@ -394,20 +394,20 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       float rampHeight = 0.625f;
 
-      setUpRamp3D(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
-      setUpWall3D(combinedTerrainObject, new double[] {7.0f, 0.0f}, .5f, 1.0f, rampHeight, 0, color);
+      setUpRamp(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      setUpWall(combinedTerrainObject, new double[] {7.0f, 0.0f}, .5f, 1.0f, rampHeight, 0, color);
 
-      setUpWall3D(combinedTerrainObject, new double[] {7.75f, 0.0f}, 2f, .5f, rampHeight, 0, color);
-      setUpWall3D(combinedTerrainObject, new double[] {8.5f, 0f}, .5f, .75f, rampHeight - 0.1, 0, color);
+      setUpWall(combinedTerrainObject, new double[] {7.75f, 0.0f}, 2f, .5f, rampHeight, 0, color);
+      setUpWall(combinedTerrainObject, new double[] {8.5f, 0f}, .5f, .75f, rampHeight - 0.1, 0, color);
 
-      setUpWall3D(combinedTerrainObject, new double[] {8.5f, .75f}, .5f, .75f, rampHeight, 0, color);
+      setUpWall(combinedTerrainObject, new double[] {8.5f, .75f}, .5f, .75f, rampHeight, 0, color);
 
-      setUpWall3D(combinedTerrainObject, new double[] {8.5f, -0.66f}, .25f, 1f, rampHeight, 0, color);
+      setUpWall(combinedTerrainObject, new double[] {8.5f, -0.66f}, .25f, 1f, rampHeight, 0, color);
 
-      setUpWall3D(combinedTerrainObject, new double[] {8.5f, -1.045f}, .25f, 1f, rampHeight, 0, color);
+      setUpWall(combinedTerrainObject, new double[] {8.5f, -1.045f}, .25f, 1f, rampHeight, 0, color);
 
-      setUpWall3D(combinedTerrainObject, new double[] {9.25f, 0f}, 2.0f, 0.5f, rampHeight, 0, color);
-      setUpRamp3D(combinedTerrainObject, 11f, 0f, 2.0f, -3.0f, rampHeight, color);
+      setUpWall(combinedTerrainObject, new double[] {9.25f, 0f}, 2.0f, 0.5f, rampHeight, 0, color);
+      setUpRamp(combinedTerrainObject, 11f, 0f, 2.0f, -3.0f, rampHeight, color);
 
       // Do this for a long ramp for testing:
       // rampHeight = 1.0f;
@@ -435,7 +435,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       color = YoAppearance.Gray();
       float rampHeight = 0.625f;
 
-      setUpRamp3D(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      setUpRamp(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
 
       // setUpGround();
       // 45,200
@@ -719,6 +719,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
    public static CombinedTerrainObject3D setUpShortCinderBlockField(String name, double courseAngle, double startDistance)
    {
+      return setUpShortCinderBlockField(name, courseAngle, startDistance, 0.0);
+   }
+
+   public static CombinedTerrainObject3D setUpShortCinderBlockField(String name, double courseAngle, double startDistanceX, double startDistanceY)
+   {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       int nBlocksWide = 4;
@@ -752,14 +757,14 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                   {0.0, 0.0, 0.0, 0.0},
             };
 
-      startDistance += cinderBlockLength / 2;
+      startDistanceX += cinderBlockLength / 2;
 
       for (int i = 0; i < nBlocksLong; i++)
       {
          for (int j = 0; j < nBlocksWide; j++)
          {
-            double xCenter = startDistance + i * cinderBlockLength;
-            double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
+            double xCenter = startDistanceX + i * cinderBlockLength;
+            double yCenter = startDistanceY + (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
             double[] point = {xCenter, yCenter};
             double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
 
@@ -1125,7 +1130,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                stepLength = (sectionLength) / Math.sin(Math.toRadians(degreesOffset[i]));
             double[] point = {startDistance + sectionLength / 4 + sectionLength / 2 * i, -sectionLength / 2 + j * sectionLength / (numberOfStepOvers[i] - 1)};
             double[] newPoint = rotateAroundOrigin(point, courseAngle);
-            setUpWall3D(combinedTerrainObject, newPoint, stepWidth[i], stepLength, stepHeight[i], courseAngle + degreesOffset[i], color);
+            setUpWall(combinedTerrainObject, newPoint, stepWidth[i], stepLength, stepHeight[i], courseAngle + degreesOffset[i], color);
          }
       }
 
@@ -1284,7 +1289,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       float rampHeight = 0.3f;
 
       // ramp up and landing
-      setUpRamp3D(combinedTerrainObject, -5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
+      setUpRamp(combinedTerrainObject, -5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
       setUpWall(combinedTerrainObject, new double[] {-7.0f, 0.0f}, 3.0f, 1.0f, rampHeight, 0, color);
 
       // simple stepping stones, centered at x=-0.75m
@@ -1314,11 +1319,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
          // landing and ramp down
          setUpWall(combinedTerrainObject, new double[] {-15.5f, 0.5f}, 2.0f, 1.0f, rampHeight, 0, color);
-         setUpRamp3D(combinedTerrainObject, -17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);
+         setUpRamp(combinedTerrainObject, -17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);
       }
       else
       {
-         setUpRamp3D(combinedTerrainObject, -12.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);
+         setUpRamp(combinedTerrainObject, -12.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);
       }
 
       // Do this for a long ramp for testing:
@@ -1433,7 +1438,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       return vertices;
    }
 
-   private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
+   public static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
    {
       //      AppearanceDefinition rockAppearance = YoAppearance.DarkGray();
       YoAppearanceMaterial rockAppearance = new YoAppearanceMaterial();
@@ -1455,36 +1460,6 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, rockAppearance);
       combinedTerrainObject.addTerrainObject(rock);
-   }
-
-   private static void addRock(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
-   {
-      AppearanceDefinition color = YoAppearance.DarkGray();
-
-      ArrayList<Point2D> vertexPoints = new ArrayList<Point2D>();
-
-      for (double[] point : vertices)
-      {
-         Point2D point2d = new Point2D(point);
-         vertexPoints.add(point2d);
-      }
-
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
-      combinedTerrainObject.addTerrainObject(rock);
-   }
-
-   private static void setUpWall3D(CombinedTerrainObject3D combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
-         AppearanceDefinition app)
-   {
-      double x = xy[0];
-      double y = xy[1];
-      RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
-
-      location.setTranslation(new Vector3D(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
-      combinedTerrainObject.addTerrainObject(newBox);
    }
 
    private static void setUpWall(CombinedTerrainObject3D combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
@@ -1520,12 +1495,6 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    }
 
    private static void setUpRamp(CombinedTerrainObject3D combinedTerrainObject, double x, double y, double width, double length, double height,
-         AppearanceDefinition app)
-   {
-      combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);
-   }
-
-   private static void setUpRamp3D(CombinedTerrainObject3D combinedTerrainObject, double x, double y, double width, double length, double height,
          AppearanceDefinition app)
    {
       combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);

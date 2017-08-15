@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,12 +54,13 @@ public class LegConfigurationManager
 
       attemptToStraightenLegs.set(legConfigurationParameters.attemptToStraightenLegs());
 
-      this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
-      this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
+      this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
+      this.footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
+            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
 
       maxStepHeightForCollapse.set(stepHeightForCollapse);
       stepHeightForForcedCollapse.set(stepDownTooFar);
-      minStepLengthForCollapse.set(walkingControllerParameters.getFootLength());
+      minStepLengthForCollapse.set(walkingControllerParameters.getSteppingParameters().getFootLength());
 
       parentRegistry.addChild(registry);
    }
@@ -127,7 +130,10 @@ public class LegConfigurationManager
          if (isNextStepTooLow)
          {
             prepareForLegBracing(swingSide);
-            //useMediumWeight(swingSide);
+         }
+         else
+         {
+            doNotBrace(swingSide);
          }
       }
    }
@@ -145,6 +151,11 @@ public class LegConfigurationManager
    public void prepareForLegBracing(RobotSide robotSide)
    {
       legConfigurationControlModules.get(robotSide).prepareForLegBracing();
+   }
+
+   public void doNotBrace(RobotSide robotSide)
+   {
+      legConfigurationControlModules.get(robotSide).doNotBrace();
    }
 
    public void useLowWeight(RobotSide robotSide)

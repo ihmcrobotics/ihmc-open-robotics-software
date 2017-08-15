@@ -30,6 +30,7 @@ public class CenterOfMassTrajectoryHandler
    public CenterOfMassTrajectoryHandler(YoDouble yoTime)
    {
       this.yoTime = yoTime;
+      comTrajectoryPoints.clear();
    }
 
    /**

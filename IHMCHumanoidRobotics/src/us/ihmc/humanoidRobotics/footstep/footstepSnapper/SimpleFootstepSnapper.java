@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/14/15.
  */
-public class SimpleFootstepSnapper implements FootstepSnapper
+public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
 {
    // Generates Footsteps using grid without a mask
    private List<Point3D> pointList = new ArrayList<Point3D>();

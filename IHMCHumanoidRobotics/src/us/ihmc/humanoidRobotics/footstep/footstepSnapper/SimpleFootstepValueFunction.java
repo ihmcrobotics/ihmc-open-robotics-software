@@ -10,11 +10,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
  */
 public class SimpleFootstepValueFunction implements FootstepValueFunction
 {
-   private FootstepSnappingParameters parameters;
+   private QuadTreeFootstepSnappingParameters parameters;
    private double slopeGain = -0.25; //more slope is bad
    private double areaGain = 100; //more area is good
 
-   public SimpleFootstepValueFunction(FootstepSnappingParameters parameters)
+   public SimpleFootstepValueFunction(QuadTreeFootstepSnappingParameters parameters)
    {
       this.parameters = parameters;
       updateFunction();

@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPProportionalController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
@@ -69,7 +69,7 @@ public class SphereNewICPController implements GenericSphereController
    private final YoFramePoint yoDesiredCMP;
 
    private final ICPProportionalController icpController;
-   private final ICPControlGains icpGains;
+   private final YoICPControlGains icpGains;
    private final double omega0;
    private final double totalMass;
 
@@ -106,7 +106,7 @@ public class SphereNewICPController implements GenericSphereController
       icpPlanner.initializeParameters(controlToolbox.getNewCapturePointPlannerParameters());
       icpPlanner.setOmega0(omega0);
 
-      icpGains = new ICPControlGains("CoMController", registry);
+      icpGains = new YoICPControlGains("CoMController", registry);
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 

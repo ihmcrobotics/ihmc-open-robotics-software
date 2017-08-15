@@ -9,13 +9,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 // FIXME TODO Get me working please!
 public class BlindWalkingFootstepDataMessageGenerator
@@ -36,10 +36,10 @@ public class BlindWalkingFootstepDataMessageGenerator
       this.statusOutputManager = statusOutputManager;
 
       blindWalkingDesiredFootstepCalculator = new BlindWalkingDesiredFootstepCalculator(bipedFeet, registry);
-      blindWalkingDesiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      blindWalkingDesiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      blindWalkingDesiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      blindWalkingDesiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
+      blindWalkingDesiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+      blindWalkingDesiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      blindWalkingDesiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
+      blindWalkingDesiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
 
       walk.addVariableChangedListener(createVariableChangedListener());
 

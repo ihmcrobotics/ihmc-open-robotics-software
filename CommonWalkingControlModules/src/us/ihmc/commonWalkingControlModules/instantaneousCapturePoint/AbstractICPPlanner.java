@@ -250,17 +250,17 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void updateCurrentPlan()
+   public void updateCurrentPlan(boolean updateUpcomingCMPLocations)
    {
       if (isDoubleSupport.getBooleanValue())
       {
          if (isHoldingPosition.getBooleanValue())
             requestedHoldPosition.set(true);
-         updateTransferPlan();
+         updateTransferPlan(updateUpcomingCMPLocations);
       }
       else
       {
-         updateSingleSupportPlan();
+         updateSingleSupportPlan(updateUpcomingCMPLocations);
       }
    }
 
@@ -335,8 +335,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public abstract int getNumberOfFootstepsRegistered();
 
-   protected abstract void updateTransferPlan();
-   protected abstract void updateSingleSupportPlan();
+   protected abstract void updateTransferPlan(boolean updateUpcomingCMPs);
+   protected abstract void updateSingleSupportPlan(boolean updateUpcomingCMPs);
 
    private final FramePoint2D desiredICP2d = new FramePoint2D();
    private final FramePoint2D finalICP2d = new FramePoint2D();
@@ -670,6 +670,12 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       return isInitialTransfer.getBooleanValue();
    }
 
+   // This is a hack. Please remove in case of any issues.
+   public void setInInitialTransfer(boolean isInitialTransfer)
+   {
+      this.isInitialTransfer.set(isInitialTransfer);
+   }
+   
    @Override
    /** {@inheritDoc} */
    public boolean isDone()

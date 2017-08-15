@@ -164,7 +164,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       unachievedSwingAcceleration = new YoFrameVector("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
       maximumLegLength = new YoDouble(namePrefix + "MaxLegLength", registry);
-      maximumLegLength.set(walkingControllerParameters.getLegLength());
+      maximumLegLength.set(walkingControllerParameters.getMaximumLegLengthForSingularityAvoidance());
 
       minimumLegLength = new YoDouble(namePrefix + "MinLegLength", registry);
       minimumLegLength.set(walkingControllerParameters.getSwingTrajectoryParameters().getMinMechanicalLegLength());

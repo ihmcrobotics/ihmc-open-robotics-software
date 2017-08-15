@@ -237,7 +237,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
-      double xOffset = 1.5 * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double xOffset = 1.5 * getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -349,7 +349,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       // Foot position and orientation may change after stop command if the robot is currently in single support,
       // since the robot will complete the current step (to get back into double support) before actually stopping
-      double positionThreshold = getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      double positionThreshold = getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
       double orientationThreshold = Math.PI;
       for (RobotSide robotSide : RobotSide.values)
       {

@@ -55,7 +55,6 @@ public class HighLevelControlManagerFactory
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private ICPOptimizationParameters icpOptimizationParameters;
    private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
@@ -82,11 +81,6 @@ public class HighLevelControlManagerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
    }
 
-   public void setICPOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
-   {
-      this.icpOptimizationParameters = icpOptimizationParameters;
-   }
-
    public BalanceManager getOrCreateBalanceManager()
    {
       if (balanceManager != null)
@@ -101,8 +95,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters,
-                                          angularMomentumModifierParameters, registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
+                                          registry);
       Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
       Vector3D angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
@@ -225,7 +219,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
-      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
+      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();

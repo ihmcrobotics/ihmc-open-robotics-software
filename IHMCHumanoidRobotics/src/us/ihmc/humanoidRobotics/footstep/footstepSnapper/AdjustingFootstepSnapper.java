@@ -22,14 +22,14 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 /**
  * Created by agrabertilton on 1/28/15.
  */
-public class AdjustingFootstepSnapper implements FootstepSnapper
+public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 {
-   private FootstepSnappingParameters footstepSnappingParameters;
+   private QuadTreeFootstepSnappingParameters footstepSnappingParameters;
    private double distanceAdjustment;
    private double angleAdjustment;
    private ConvexHullFootstepSnapper convexHullFootstepSnapper;
 
-   public AdjustingFootstepSnapper(FootstepValueFunction valueFunction, FootstepSnappingParameters parameters)
+   public AdjustingFootstepSnapper(FootstepValueFunction valueFunction, QuadTreeFootstepSnappingParameters parameters)
    {
       convexHullFootstepSnapper = new ConvexHullFootstepSnapper(valueFunction, parameters);
       this.footstepSnappingParameters = parameters;
@@ -55,13 +55,13 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       return convexHullFootstepSnapper.getPointList();
    }
 
-   public void updateParameters(FootstepSnappingParameters newParameters)
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters)
    {
       this.footstepSnappingParameters = newParameters;
       convexHullFootstepSnapper.updateParameters(newParameters);
    }
 
-   public FootstepSnappingParameters getParameters()
+   public QuadTreeFootstepSnappingParameters getParameters()
    {
       return footstepSnappingParameters;
    }
