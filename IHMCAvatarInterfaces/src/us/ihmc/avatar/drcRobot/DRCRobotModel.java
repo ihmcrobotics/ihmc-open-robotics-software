@@ -7,7 +7,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -83,7 +83,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
    
-   public default PlanarRegionFootstepPlannerParameters getPlanarRegionFootstepPlannerParameters()
+   public default PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
    {
       return null;
    }
