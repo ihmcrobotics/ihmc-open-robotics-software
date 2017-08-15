@@ -11,14 +11,14 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.0"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.1"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
-task generateSubprojectSettings {
+task generateSettings {
    doLast {
       project.projectDir.list().each { childDir ->
          if (new File(project.projectDir, childDir + "/build.gradle").exists())
