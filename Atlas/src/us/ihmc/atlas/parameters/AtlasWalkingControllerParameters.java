@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
@@ -273,7 +272,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
 
       double kpXY = 80.0;
       double kpZ = 40.0;
@@ -281,13 +280,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
 
-      gains.setProportionalGains(kpXY, kpZ);
-      gains.setDampingRatio(zeta);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
+      gains.setProportionalGains(kpXY, kpXY, kpZ);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new DefaultYoPID3DGains("PelvisOrientation", gains, registry);
    }
 
    private YoPID3DGains createHeadOrientationControlGains(YoVariableRegistry registry)
@@ -661,7 +658,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
@@ -690,7 +686,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
@@ -719,7 +714,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
@@ -945,7 +939,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return steppingParameters;
    }
-   
+
    @Override
    public boolean alwaysAllowMomentum()
    {
