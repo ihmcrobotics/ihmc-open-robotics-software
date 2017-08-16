@@ -456,7 +456,7 @@ public class SphereICPPlannerVisualizer
       double minY = 0.5 * randomSupportPolygon.getMinY();
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
-      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, minY, maxX, maxY);
+      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
       FrameVector2D randomLineVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
