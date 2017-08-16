@@ -7,12 +7,13 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CaptureRegionMathToolsTest
 {
@@ -26,9 +27,9 @@ public class CaptureRegionMathToolsTest
       RotationMatrix rotationMatrix = new RotationMatrix();
       
       double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
-      FramePoint2D center = FramePoint2D.generateRandomFramePoint2d(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
+      FramePoint2D center = EuclidFrameRandomTools.generateRandomFramePoint2D(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
       
-      FrameVector2D directionToExpectedPoint = FrameVector2D.generateRandomFrameVector2d(random, worldFrame);
+      FrameVector2D directionToExpectedPoint = EuclidFrameRandomTools.generateRandomFrameVector2D(random, worldFrame);
       directionToExpectedPoint.normalize();
       FramePoint2D expectedPoint = new FramePoint2D();
       expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);

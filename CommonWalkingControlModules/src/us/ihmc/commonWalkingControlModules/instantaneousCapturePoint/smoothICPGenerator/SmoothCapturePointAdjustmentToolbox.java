@@ -5,14 +5,13 @@ import java.util.List;
 
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 
@@ -101,7 +100,7 @@ public class SmoothCapturePointAdjustmentToolbox
          YoTrajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getYoTrajectory(direction);
          YoTrajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getYoTrajectory(direction);
          
-         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.get(direction);
+         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.getElement(direction.getIndex());
                  
          int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
          int numberOfConstrainedDerivatives = cmpPolynomialSegment1.getNumberOfCoefficients() / 2;
@@ -129,7 +128,7 @@ public class SmoothCapturePointAdjustmentToolbox
       // TODO: check whether division always integer
       for(int i = 0; i < numberOfConstrainedDerivatives; i++)
       {
-         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).get(direction);
+         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).getElement(direction.getIndex());
          calculateGeneralizedICPMatricesOnCMPSegment1(omega0, i, cmpPolynomialSegment1);
          setGeneralizedBoundaryConstraints(i, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2,
                                            icpQuantityInitialConditionScalar, icpPositionFinalSegment2Scalar);

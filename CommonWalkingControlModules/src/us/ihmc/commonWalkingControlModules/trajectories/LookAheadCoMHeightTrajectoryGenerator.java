@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -23,15 +26,12 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -364,7 +364,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       else
          hasBeenInitializedWithNextStep.set(false);
 
-
       transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
       transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
 
@@ -553,7 +552,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
             tempFramePointForViz1.setToZero(transferFromContactFramePosition.getReferenceFrame());
             tempFramePointForViz1.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
-            tempFramePointForViz1.getPoint2d(queryPoint);
+            queryPoint.set(tempFramePointForViz1);
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
             coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());

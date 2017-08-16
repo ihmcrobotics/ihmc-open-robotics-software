@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.momentum;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.robotics.lists.Settable<TrajectoryPoint3D>, EpsilonComparable<TrajectoryPoint3D>
 {

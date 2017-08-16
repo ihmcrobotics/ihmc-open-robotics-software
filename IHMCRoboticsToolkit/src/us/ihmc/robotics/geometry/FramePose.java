@@ -9,6 +9,14 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -20,9 +28,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
+public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 {
    private final Pose3D pose;
 
@@ -84,18 +91,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin,
                                                    double[] yawPitchRollMax)
    {
-      FramePose randomFramePose = new FramePose(FramePoint3D.generateRandomFramePoint(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
+      FramePose randomFramePose = new FramePose(EuclidFrameRandomTools.generateRandomFramePoint3D(random, referenceFrame, xyzMin[0], xyzMax[0], xyzMin[1], xyzMax[1],
                                                                                     xyzMin[2], xyzMax[2]),
                                                 FrameOrientation.generateRandomFrameOrientation(random, referenceFrame, yawPitchRollMin[0], yawPitchRollMax[0],
                                                                                                 yawPitchRollMin[1], yawPitchRollMax[1], yawPitchRollMin[2],
                                                                                                 yawPitchRollMax[2]));
       return randomFramePose;
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
    }
 
    public void setX(double x)
@@ -148,7 +149,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
    public void setPoseIncludingFrame(FramePoint3D position, FrameOrientation orientation)
    {
       position.checkReferenceFrameMatch(orientation);
-      referenceFrame = position.referenceFrame;
+      referenceFrame = position.getReferenceFrame();
       setPose(position.getPoint(), orientation.getQuaternion());
    }
 
@@ -219,13 +220,6 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
    public void setXYFromPosition2d(FramePoint2D position2d)
    {
       pose.setPositionXY(position2d.getPoint());
-   }
-
-   @Override
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      super.setToZero();
-      this.referenceFrame = referenceFrame;
    }
 
    public void getPose(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
@@ -352,7 +346,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
 
    public void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle)
    {
-      ReferenceFrame frameWhoseZAxisIsRotationAxis = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
+      ReferenceFrame frameWhoseZAxisIsRotationAxis = GeometryTools.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);
 
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle);
@@ -576,7 +570,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
 
       RigidBodyTransform transformToOtherPose = getTransformFromThisToThat(otherPose);
       FrameVector3D ret = new FrameVector3D(referenceFrame);
-      transformToOtherPose.getTranslation(ret.tuple);
+      transformToOtherPose.getTranslation(ret);
 
       return ret;
    }
@@ -682,21 +676,8 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose3D>
       return TransformTools.getSizeOfTransformBetweenTwoWithRotationScaled(transformThis, transformThat, radiusOfRotation);
    }
 
-   @Override
-   public String toString()
-   {
-      return "Position: " + pose.getPosition().toString() + "\n" + pose.getOrientation().toString() + "  -- " + referenceFrame.getName();
-   }
-
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)
    {
       return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
    }
-
-   @Override
-   public boolean epsilonEquals(FramePose other, double epsilon)
-   {
-      return pose.epsilonEquals(other.pose, epsilon);
-   }
-
 }

@@ -5,19 +5,19 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine;
+import us.ihmc.robotics.geometry.FrameLine3D;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Theoretically finished but not unit tested or bug free. Have to abandon this
@@ -29,7 +29,7 @@ public class FrameConvexPolygon2dIntersector
 {
    private final FramePlane3d planeOne;
    private final FramePlane3d planeTwo;
-   private final FrameLine intersectionOfPlanes;
+   private final FrameLine3D intersectionOfPlanes;
    private final FrameLine2d planeIntersectionOnPolygonPlane;
    private final Pair<FramePoint2D, FramePoint2D> lineIntersectionOnPolygonPlane;
    private final Pair<FramePoint3D, FramePoint3D> intersectionWithPolygonOne;
@@ -43,7 +43,7 @@ public class FrameConvexPolygon2dIntersector
    {
       planeOne = new FramePlane3d();
       planeTwo = new FramePlane3d();
-      intersectionOfPlanes = new FrameLine();
+      intersectionOfPlanes = new FrameLine3D();
       planeIntersectionOnPolygonPlane = new FrameLine2d();
       lineIntersectionOnPolygonPlane = new Pair<FramePoint2D, FramePoint2D>(new FramePoint2D(), new FramePoint2D());
       intersectionWithPolygonOne = new Pair<FramePoint3D, FramePoint3D>(new FramePoint3D(), new FramePoint3D());
@@ -219,11 +219,11 @@ public class FrameConvexPolygon2dIntersector
       }
       if (!lineIntersectionOnPolygonPlane.getFirst().containsNaN())
       {
-         intersectionWithPolygon.getFirst().setXYIncludingFrame(lineIntersectionOnPolygonPlane.getFirst());
+         intersectionWithPolygon.getFirst().setIncludingFrame(lineIntersectionOnPolygonPlane.getFirst(), 0.0);
       }
       if (!lineIntersectionOnPolygonPlane.getSecond().containsNaN())
       {
-         intersectionWithPolygon.getSecond().setXYIncludingFrame(lineIntersectionOnPolygonPlane.getSecond());
+         intersectionWithPolygon.getSecond().setIncludingFrame(lineIntersectionOnPolygonPlane.getSecond(), 0.0);
       }
    }
 
@@ -309,7 +309,7 @@ public class FrameConvexPolygon2dIntersector
       }
    };
 
-   public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
+   public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine3D intersectionToPack)
    {
       ReferenceFrame previousPlaneTwoReferenceFrame = planeTwo.getReferenceFrame();
       planeTwo.changeFrame(planeOne.getReferenceFrame());
@@ -320,8 +320,8 @@ public class FrameConvexPolygon2dIntersector
       if (success)
       {
          intersectionToPack.setToZero(planeOne.getReferenceFrame());
-         intersectionToPack.setPointWithoutChecks(pointOnIntersection);
-         intersectionToPack.setVectorWithoutChecks(intersectionDirection);
+         intersectionToPack.setPoint(pointOnIntersection);
+         intersectionToPack.setDirection(intersectionDirection);
       }
       else
       {

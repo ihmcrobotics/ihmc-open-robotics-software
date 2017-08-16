@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class RectangularContactableBody extends ListOfPointsContactablePlaneBody

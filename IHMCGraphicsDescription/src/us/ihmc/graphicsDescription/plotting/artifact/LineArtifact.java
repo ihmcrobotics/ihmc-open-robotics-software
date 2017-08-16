@@ -6,6 +6,8 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -32,7 +34,7 @@ public class LineArtifact extends Artifact
       setLine(line);
    }
 
-   public LineArtifact(String id, Point2D point1, Point2D point2)
+   public LineArtifact(String id, Point2DReadOnly point1, Point2DReadOnly point2)
    {
       super(id);
       this.point1.set(point1);
@@ -44,13 +46,13 @@ public class LineArtifact extends Artifact
       line.getTwoPointsOnLine(point1, point2);
    }
 
-   public void setPoints(Point2D point1, Point2D point2)
+   public void setPoints(Point2DReadOnly point1, Point2DReadOnly point2)
    {
       this.point1.set(point1);
       this.point2.set(point2);
    }
 
-   public void setPoints(Point2D point, Vector2D vector)
+   public void setPoints(Point2DReadOnly point, Vector2DReadOnly vector)
    {
       point1.set(point);
       point2.add(point1, vector);

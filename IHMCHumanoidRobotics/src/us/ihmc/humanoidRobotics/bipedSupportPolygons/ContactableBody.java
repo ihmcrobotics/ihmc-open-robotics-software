@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
 import java.util.List;
 
-import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 

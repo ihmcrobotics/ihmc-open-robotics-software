@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FootstepAdjusterVisualizer
 {

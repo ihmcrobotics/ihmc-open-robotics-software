@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public interface BodyVelocityEstimator
 {

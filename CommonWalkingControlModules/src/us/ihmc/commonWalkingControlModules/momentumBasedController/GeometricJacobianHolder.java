@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

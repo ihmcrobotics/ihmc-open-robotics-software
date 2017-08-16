@@ -17,7 +17,10 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -30,14 +33,10 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -702,7 +701,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void convertToFramePointRetainingZ(FramePoint3D framePointToPack, FramePoint2D framePoint2dToCopy, ReferenceFrame referenceFrameToConvertTo)
    {
-      framePointToPack.setXYIncludingFrame(framePoint2dToCopy);
+      framePointToPack.setIncludingFrame(framePoint2dToCopy, 0.0);
       framePointToPack.changeFrame(referenceFrameToConvertTo);
    }
 
@@ -810,7 +809,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       if (supportFootPolygon.getArea() == 0.0)
       {
          framePointToPack.setToZero(supportFootPolygon.getReferenceFrame());
-         framePointToPack.setXY(supportFootPolygon.getVertex(0));
+         framePointToPack.set(supportFootPolygon.getVertex(0));
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
@@ -820,7 +819,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
          PrintTools.debug("Putting exit CoP on toes for stride length, stepLength: " + supportToSwingStepLength + " threshold: "
                + footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue());
-         framePointToPack.setXYIncludingFrame(supportFootPolygon.getCentroid());
+         framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
                               copOffsets.get(supportSide).get(exitCoPName).getY(), 0.0);
          framePointToPack.changeFrame(worldFrame);
@@ -834,7 +833,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          PrintTools.debug("Putting exit CoP on toes for stepping down, height:" + supportToSwingStepHeight + ", threshold: "
                + footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue() + "\n stepLength: " + supportToSwingStepLength + ", threshold: "
                + footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue());
-         framePointToPack.setXYIncludingFrame(supportFootPolygon.getCentroid());
+         framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX(), 0.0, 0.0);
          constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());
          framePointToPack.changeFrame(worldFrame);
@@ -920,9 +919,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
-      tempFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(copPointToConstrain);
+      tempFramePoint2d.setIncludingFrame(copPointToConstrain);
       tempPolygon.orthogonalProjection(tempFramePoint2d);
-      copPointToConstrain.setXYIncludingFrame(tempFramePoint2d);
+      copPointToConstrain.setIncludingFrame(tempFramePoint2d, 0.0);
    }
 
    /**
@@ -966,9 +965,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon, FrameConvexPolygon2d swingFootPolygon,
                                                 ReferenceFrame referenceFrameToStoreResultIn)
    {
-      tempFramePoint1.setXYIncludingFrame(swingFootPolygon.getCentroid());
+      tempFramePoint1.setIncludingFrame(swingFootPolygon.getCentroid(), 0.0);
       tempFramePoint1.changeFrame(referenceFrameToStoreResultIn);
-      tempFramePoint2.setXYIncludingFrame(supportFootPolygon.getCentroid());
+      tempFramePoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
       tempFramePoint2.changeFrame(referenceFrameToStoreResultIn);
       framePointToPack.interpolate(tempFramePoint1, tempFramePoint2, 0.5);
    }

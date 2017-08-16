@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder implements VariableChangedListener
+public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableChangedListener
 {
    private final ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
    private final YoInteger numVertices;

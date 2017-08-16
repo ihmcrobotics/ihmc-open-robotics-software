@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
 {

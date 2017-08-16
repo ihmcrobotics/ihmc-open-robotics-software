@@ -7,11 +7,11 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoSpline3DTest
 {
@@ -40,7 +40,7 @@ public class YoSpline3DTest
       
       for (Direction direction : Direction.values())
       {
-         assertEquals(expected.get(direction), actual.get(direction), EPSILON);
+         assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
       }
       
    }
@@ -69,7 +69,7 @@ public class YoSpline3DTest
 	      
 	   for (Direction direction : Direction.values())
 	   {
-	      assertEquals(expected.get(direction), actual.get(direction), EPSILON);
+	      assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
 	   }   
 	}
 
