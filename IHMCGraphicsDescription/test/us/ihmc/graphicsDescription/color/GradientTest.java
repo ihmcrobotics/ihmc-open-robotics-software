@@ -1,4 +1,4 @@
-package us.ihmc.tools.color;
+package us.ihmc.graphicsDescription.color;
 
 import static org.junit.Assert.assertTrue;
 
@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.graphicsDescription.color.Gradient;
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.IntegrationCategory;
