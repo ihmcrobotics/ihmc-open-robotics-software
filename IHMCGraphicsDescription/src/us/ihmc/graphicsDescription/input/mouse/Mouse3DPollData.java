@@ -1,4 +1,4 @@
-package us.ihmc.tools.inputDevices.mouse3DJoystick;
+package us.ihmc.graphicsDescription.input.mouse;
 
 public class Mouse3DPollData
 {
