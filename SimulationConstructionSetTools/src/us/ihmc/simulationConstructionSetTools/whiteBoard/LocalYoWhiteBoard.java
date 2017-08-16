@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.whiteBoard;
+package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 import java.io.IOException;
 import java.util.ArrayList;
