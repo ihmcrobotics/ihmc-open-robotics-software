@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.whiteBoard;
+package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 public interface YoWhiteBoardListener
 {
