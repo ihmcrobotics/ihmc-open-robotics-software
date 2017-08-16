@@ -2860,7 +2860,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public GraphicsDynamicGraphicsObject addYoGraphic(YoGraphic yoGraphic, boolean updateFromSimulationThread)
    {
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObject = new GraphicsDynamicGraphicsObject(yoGraphic, closeableAndDisposableRegistry);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObject = new GraphicsDynamicGraphicsObject(yoGraphic);
 
       if (updateFromSimulationThread)
       {
