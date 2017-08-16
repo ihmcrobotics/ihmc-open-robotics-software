@@ -1,5 +1,12 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -9,16 +16,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameTuple2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends AbstractReferenceFrameHolder
+public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements ReferenceFrameHolder
 {
    private final YoDouble x, y; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple2d; // This is only for assistance. The data is stored in the YoVariables, not in here!
@@ -61,7 +61,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
    public final void get(Tuple3DBasics tuple3dToPack)
    {
       putYoValuesIntoFrameTuple2d();
-      frameTuple2d.get(tuple3dToPack);
+      tuple3dToPack.set(frameTuple2d, 0.0);
    }
    
    public final Vector2D getVector2dCopy()
@@ -106,7 +106,12 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
 
    public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTupleToPack)
    {
-      frameTupleToPack.setXYIncludingFrame(getFrameTuple2d());
+      getFrameTupleIncludingFrame(0.0, frameTupleToPack);
+   }
+
+   public final void getFrameTupleIncludingFrame(double z, FrameTuple3D<?, ?> frameTupleToPack)
+   {
+      frameTupleToPack.setIncludingFrame(getFrameTuple2d(), z);
    }
 
    public final double getX()
@@ -201,7 +206,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
 
    public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
    {
-      this.frameTuple2d.setByProjectionOntoXYPlane(frameTuple);
+      this.frameTuple2d.set(frameTuple);
       getYoValuesFromFrameTuple2d(notifyListeners);
    }
 
@@ -332,12 +337,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> extends Ab
    {
       putYoValuesIntoFrameTuple2d();
       return this.frameTuple2d.epsilonEquals(frameTuple2d, threshold);
-   }
-
-   public final void checkForNaN()
-   {
-      putYoValuesIntoFrameTuple2d();
-      frameTuple2d.checkForNaN();
    }
 
    public final boolean containsNaN()

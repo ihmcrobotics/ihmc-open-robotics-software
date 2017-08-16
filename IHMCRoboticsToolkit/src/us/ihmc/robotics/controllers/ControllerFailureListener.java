@@ -1,6 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.geometry.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 
 public interface ControllerFailureListener
 {

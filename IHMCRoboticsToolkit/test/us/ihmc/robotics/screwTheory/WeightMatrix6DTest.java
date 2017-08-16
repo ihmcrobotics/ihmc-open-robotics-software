@@ -15,11 +15,12 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -116,7 +117,7 @@ public class WeightMatrix6DTest
          assertTrue(Double.isNaN(angularPart.getYAxisWeight()));
          assertTrue(Double.isNaN(angularPart.getZAxisWeight()));
 
-         ReferenceFrame randomFrame = ReferenceFrame.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
          weightMatrix6D.setWeightFrame(randomFrame);
          assertTrue(randomFrame == weightMatrix6D.getLinearWeightFrame());
          assertTrue(randomFrame == weightMatrix6D.getAngularWeightFrame());
@@ -177,7 +178,7 @@ public class WeightMatrix6DTest
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -271,7 +272,7 @@ public class WeightMatrix6DTest
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)

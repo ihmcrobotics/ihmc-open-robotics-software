@@ -21,16 +21,17 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -57,7 +58,7 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -163,7 +164,7 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = FramePoint3D.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

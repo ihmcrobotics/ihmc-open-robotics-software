@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -9,7 +10,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WalkToFiducialBehavior extends AbstractBehavior

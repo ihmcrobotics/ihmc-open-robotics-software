@@ -7,8 +7,8 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 
 /**
  * This class provides similar tools to {@link GeometricJacobian} but also support additional

@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePositionTrajectoryGenerator.defaultLeaveTimeInPercentOfTrajectoryTime;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {

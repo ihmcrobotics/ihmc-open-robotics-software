@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
 public class ConstantVectorProvider implements VectorProvider
 {

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
@@ -11,7 +12,6 @@ import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest

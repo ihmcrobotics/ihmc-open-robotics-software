@@ -1,11 +1,11 @@
 package us.ihmc.robotics.geometry.algorithms;
 
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphereWithConvexPolygonIntersector
 {
@@ -27,13 +27,13 @@ public class SphereWithConvexPolygonIntersector
       sphere.changeFrame(polygon.getReferenceFrame());
       
       sphere.getCenter(closestPointOnPolygon);
-      closestPointOnPolygon2d.setByProjectionOntoXYPlaneIncludingFrame(closestPointOnPolygon);
+      closestPointOnPolygon2d.setIncludingFrame(closestPointOnPolygon);
       
-      Point2D pointUnsafe = closestPointOnPolygon2d.getPoint();
+      Point2DBasics pointUnsafe = closestPointOnPolygon2d;
       polygon.getConvexPolygon2d().orthogonalProjection(pointUnsafe);
       closestPointOnPolygon2d.set(pointUnsafe.getX(), pointUnsafe.getY());
       
-      closestPointOnPolygon.setXY(closestPointOnPolygon2d);
+      closestPointOnPolygon.set(closestPointOnPolygon2d, 0.0);
       
       boolean isInsideOrOnSurface = sphere.getSphere3d().isInsideOrOnSurface(closestPointOnPolygon.getPoint());
       

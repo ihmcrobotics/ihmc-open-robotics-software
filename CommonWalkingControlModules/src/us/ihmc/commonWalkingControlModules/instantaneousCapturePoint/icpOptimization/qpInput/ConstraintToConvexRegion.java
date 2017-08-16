@@ -4,12 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Class that represents constraining a variable to lie in a convex region. This constraint has the form<br>
@@ -73,7 +73,7 @@ public class ConstraintToConvexRegion
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      convexPolygon.addVertex(vertex.getPoint());
+      convexPolygon.addVertex(vertex);
    }
 
    public void addPolygon(FrameConvexPolygon2d polygon)

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensors;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public interface ProcessedIMUSensorsReadOnlyInterface
 {

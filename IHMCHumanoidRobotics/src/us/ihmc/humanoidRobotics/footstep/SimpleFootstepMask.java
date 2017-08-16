@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.InclusionFunction;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SimpleFootstepMask implements InclusionFunction<Point3D>
 {
@@ -44,7 +44,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3D>
       if (DEBUG)
          System.out.printf("SimpleFootstepMask: testing point input is <%.2f,%.2f> in frame %s", test.getX(), test.getY(), test.getReferenceFrame());
       test.changeFrame(yawFrame2d);
-      boolean isPointInside = footPolygon.isPointInside(test.toFramePoint2d());
+      boolean isPointInside = footPolygon.isPointInside(new FramePoint2D(test));
       if (DEBUG)
          System.out.printf("SimpleFootstepMask: testing point <%.2f,%.2f> in frame %s. Point is in is %s.  ", test.getX(), test.getY(), test.getReferenceFrame(),isPointInside ? "true":"false");
 

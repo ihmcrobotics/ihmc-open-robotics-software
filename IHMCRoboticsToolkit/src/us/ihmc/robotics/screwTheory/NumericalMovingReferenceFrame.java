@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * {@code NumericalMovingReferenceFrame} can be used to extend a simple {@code ReferenceFrame} to a
@@ -80,9 +80,8 @@ public class NumericalMovingReferenceFrame extends MovingReferenceFrame
 
          transformToRoot.get(previousRotation, previousTranslation);
 
-         RigidBodyTransform inverseTransformToRoot = originalFrame.getInverseTransformToRoot();
-         inverseTransformToRoot.transform(angularVelocity);
-         inverseTransformToRoot.transform(linearVelocity);
+         transformToRoot.inverseTransform(angularVelocity);
+         transformToRoot.inverseTransform(linearVelocity);
       }
 
       twistRelativeToParentToPack.set(this, parentFrame, this, linearVelocity, angularVelocity);

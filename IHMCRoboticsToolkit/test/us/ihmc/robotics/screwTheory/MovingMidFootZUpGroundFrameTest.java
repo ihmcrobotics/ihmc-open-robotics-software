@@ -9,10 +9,10 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MovingMidFootZUpGroundFrameTest
 {

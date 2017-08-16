@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 
 public interface ContactableFoot extends ContactablePlaneBody
 {

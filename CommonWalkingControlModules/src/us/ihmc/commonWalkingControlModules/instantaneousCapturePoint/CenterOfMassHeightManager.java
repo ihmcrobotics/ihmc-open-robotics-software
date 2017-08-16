@@ -14,15 +14,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;

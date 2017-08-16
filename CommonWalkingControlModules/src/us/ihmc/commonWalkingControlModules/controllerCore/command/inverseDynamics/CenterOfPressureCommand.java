@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>
@@ -43,7 +44,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       this.weightInSoleFrame.set(weightInSoleFrame);
    }
 
-   public void setDesiredCoP(Point2D desiredCoPInSoleFrame)
+   public void setDesiredCoP(Point2DReadOnly desiredCoPInSoleFrame)
    {
       this.desiredCoPInSoleFrame.set(desiredCoPInSoleFrame);
    }

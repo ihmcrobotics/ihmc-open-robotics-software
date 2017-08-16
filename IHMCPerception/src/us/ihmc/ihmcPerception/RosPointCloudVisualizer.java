@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -12,7 +13,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarSpriteGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class RosPointCloudVisualizer

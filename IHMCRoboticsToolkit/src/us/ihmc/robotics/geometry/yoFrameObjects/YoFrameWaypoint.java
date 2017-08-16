@@ -1,21 +1,20 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends AbstractFrameObject<F, S>, S extends GeometryObject<S>>
-      extends AbstractReferenceFrameHolder implements YoMultipleFramesHolder, GeometryObject<Y>
+public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends FrameGeometryObject<F, S>, S extends GeometryObject<S>>
+      implements YoMultipleFramesHolder, GeometryObject<Y>
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -97,9 +96,9 @@ public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F exte
          frameWaypoint.applyTransform(referenceTf);
       }
 
-      if ((desiredTf = referenceFrame.getInverseTransformToRoot()) != null)
+      if ((desiredTf = referenceFrame.getTransformToRoot()) != null)
       {
-         frameWaypoint.applyTransform(desiredTf);
+         frameWaypoint.applyInverseTransform(desiredTf);
       }
 
       getYoValuesFromFrameWaypoint();

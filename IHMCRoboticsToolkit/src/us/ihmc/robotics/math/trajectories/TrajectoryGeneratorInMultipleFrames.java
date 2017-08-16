@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class TrajectoryGeneratorInMultipleFrames
 {
