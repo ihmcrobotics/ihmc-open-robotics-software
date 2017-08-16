@@ -194,7 +194,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    public void addVertex(FramePoint2D vertex)
    {
       vertex.checkReferenceFrameMatch(referenceFrame);
-      addVertex(vertex);
+      convexPolygon.addVertex(vertex);
    }
 
    public void addVertex(Point2DReadOnly vertex)
