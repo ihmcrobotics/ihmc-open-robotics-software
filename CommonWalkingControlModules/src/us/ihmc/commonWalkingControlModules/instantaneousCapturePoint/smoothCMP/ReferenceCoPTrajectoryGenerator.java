@@ -301,10 +301,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   public void holdPosition()
+   public void holdPosition(FramePoint3D desiredCoPPositionToHold)
    {
       holdDesiredState.set(true);
-      heldCoPPosition.setIncludingFrame(desiredCoPPosition);
+      heldCoPPosition.setIncludingFrame(desiredCoPPositionToHold);
+   }
+   
+   public void holdPosition()
+   {
+      holdPosition(desiredCoPPosition);
    }
 
    public void clearHeldPosition()
@@ -357,7 +362,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       desiredCoPPosition.setToNaN();
       desiredCoPVelocity.setToNaN();
       desiredCoPAcceleration.setToNaN();
-      clearHeldPosition();
       clearPlan();
    }
 
@@ -390,6 +394,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public void initializeForSwing(double currentTime)
    {
+      clearHeldPosition();
       this.initialTime = currentTime;
       this.activeTrajectory = swingCoPTrajectories.get(0);
    }
@@ -407,7 +412,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       else if (activeTrajectory != null)
       {
-         //PrintTools.debug(activeTrajectory.toString());
          activeTrajectory.update(currentTime - this.initialTime, desiredCoPPosition, desiredCoPVelocity, desiredCoPAcceleration);
       }
       else
@@ -450,7 +454,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          //TODO does this work
          isDoneWalking.set(true);
          if (holdDesiredState.getBooleanValue())
+         {
             tempPointForCoPCalculation.setIncludingFrame(heldCoPPosition);
+            clearHeldPosition();
+         }
          else
          {
             initializeFootPolygons(transferToSide);
@@ -468,7 +475,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          isDoneWalking.set(false);
          updateFootPolygons(null);
          if (holdDesiredState.getBooleanValue())
+         {
             tempPointForCoPCalculation.setIncludingFrame(heldCoPPosition);
+            clearHeldPosition();
+         }
          else
             computeMidFeetPointWithChickenSupportForInitialTransfer(tempPointForCoPCalculation);
          tempPointForCoPCalculation.changeFrame(worldFrame);
@@ -482,6 +492,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // Put first CoP at the exitCoP of the swing foot if not starting from rest 
       else if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
+         clearHeldPosition();
          isDoneWalking.set(true);
          initializeFootPolygons(transferToSide.getOppositeSide());
          computeCoPPointLocation(tempPointForCoPCalculation, exitCoPName, transferToSide.getOppositeSide());
@@ -494,6 +505,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       else
       {
+         clearHeldPosition();
          isDoneWalking.set(false);
          updateFootPolygons(null);
          computeCoPPointLocationForPreviousPlan(tempPointForCoPCalculation, exitCoPName, upcomingFootstepsData.get(footstepIndex).getSwingSide());
@@ -512,6 +524,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
+      clearHeldPosition();
       footstepIndex = 0;
       if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
@@ -899,11 +912,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   //   private double getStepLengthBasedOffset(FrameConvexPolygon2d supportPolygon, FrameConvexPolygon2d referencePolygon, double stepLengthToCoPOffsetFactor)
-   //   {
-   //      return stepLengthToCoPOffsetFactor * (referencePolygon.getCentroid().getX() - supportPolygon.getCentroid().getX());
-   //   }
-
    private double getStepLengthBasedOffset(FrameConvexPolygon2d supportPolygon, FramePoint3D referencePoint, double stepLengthToCoPOffsetFactor)
    {
       return stepLengthToCoPOffsetFactor * (referencePoint.getX() - supportPolygon.getCentroid().getX());
@@ -1214,6 +1222,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    public boolean isOnExitCoP()
    {
-      return (activeTrajectory.getTrajectoryType() == WalkingTrajectoryType.SWING && activeTrajectory.getCurrentSegmentIndex() == 2);
+      return (activeTrajectory.getTrajectoryType() == WalkingTrajectoryType.SWING && activeTrajectory.getCurrentSegmentIndex() == activeTrajectory.getNumberOfSegments() - 1);
    }
 }
