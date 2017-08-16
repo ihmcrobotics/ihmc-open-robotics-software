@@ -69,10 +69,4 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
       numberOfSegments.increment();
    }
-
-   public YoFrameTrajectory3D getTorqueTrajectory(int segmentIndex)
-   {
-      segments.get(segmentIndex).getDerivative(torqueTrajectory);
-      return torqueTrajectory;
-   }
 }

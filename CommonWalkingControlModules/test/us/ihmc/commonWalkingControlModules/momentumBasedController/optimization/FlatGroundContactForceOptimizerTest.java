@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FlatGroundContactForceOptimizerTest
 {
-   
+
    private static final boolean showSCS = false;
 
    @Test
@@ -32,7 +32,7 @@ public class FlatGroundContactForceOptimizerTest
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
 
       double friction = 0.8;
-      int vectorsPerContact = 4;
+      int vectorsPerContact = 3;
       double regWeight = 1.0e-6;
       FlatGroundContactForceOptimizer optimizer = new FlatGroundContactForceOptimizer(friction, vectorsPerContact, regWeight, graphicsListRegistry, registry);
 
@@ -44,12 +44,12 @@ public class FlatGroundContactForceOptimizerTest
 
       Point3D comPosition = new Point3D(0.0, 0.0, 0.6);
 
-      
+
       SimulationConstructionSet scs = null;
-      
+
       if (showSCS)
       {
-         new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
+         scs = new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.addYoVariableRegistry(registry);
       }
