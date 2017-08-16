@@ -56,7 +56,7 @@ public class ConvexPolygonToolsTest
 
          double alpha = random.nextDouble();
          //         FramePoint2d morphedPoint = FramePoint2d.morph(firstPoint, secondPoint, alpha);
-         FramePoint2D morphedPoint = new FramePoint2D();
+         FramePoint2D morphedPoint = new FramePoint2D(zUpFrame);
          morphedPoint.interpolate(firstPoint, secondPoint, alpha);
 
          pointsThatShouldBeInCombinedPolygon.add(morphedPoint);
@@ -112,14 +112,14 @@ public class ConvexPolygonToolsTest
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 - epsilon));
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 + epsilon));
 
-      FramePoint2D point1 = new FramePoint2D();
-      FramePoint2D point2 = new FramePoint2D();
-      FramePoint2D point3 = new FramePoint2D();
-      FramePoint2D point4 = new FramePoint2D();
-      FramePoint2D point5 = new FramePoint2D();
-      FramePoint2D point6 = new FramePoint2D();
-      FramePoint2D point7 = new FramePoint2D();
-      FramePoint2D point8 = new FramePoint2D();
+      FramePoint2D point1 = new FramePoint2D(zUpFrame);
+      FramePoint2D point2 = new FramePoint2D(zUpFrame);
+      FramePoint2D point3 = new FramePoint2D(zUpFrame);
+      FramePoint2D point4 = new FramePoint2D(zUpFrame);
+      FramePoint2D point5 = new FramePoint2D(zUpFrame);
+      FramePoint2D point6 = new FramePoint2D(zUpFrame);
+      FramePoint2D point7 = new FramePoint2D(zUpFrame);
+      FramePoint2D point8 = new FramePoint2D(zUpFrame);
 
       point1.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
       point2.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
