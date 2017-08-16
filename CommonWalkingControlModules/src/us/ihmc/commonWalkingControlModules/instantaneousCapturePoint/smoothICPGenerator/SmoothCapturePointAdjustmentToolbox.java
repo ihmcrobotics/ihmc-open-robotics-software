@@ -55,8 +55,8 @@ public class SmoothCapturePointAdjustmentToolbox
       }
    }
    
-   public void setICPInitialConditions(List<FramePoint3D> exitCornerPointsToPack, List<YoFrameTrajectory3D> cmpPolynomials3D, 
-                                        int numberOfSegmentsSwing0, boolean isInitialTransfer, double omega0)
+   public void setICPInitialConditions(double localTime, List<FramePoint3D> exitCornerPointsToPack, List<YoFrameTrajectory3D> cmpPolynomials3D, 
+                                       int numberOfSegmentsSwing0, boolean isInitialTransfer, double omega0)
    {
       if(isInitialTransfer)
       {
@@ -112,7 +112,7 @@ public class SmoothCapturePointAdjustmentToolbox
          computeAdjustedPolynomialCoefficientVectors1D(numberOfCoefficients);
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
       }
-      icpToolbox.computeDesiredCornerPoints(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
+      icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
    }   
    
    private void adjustCMPPolynomials(YoTrajectory cmpPolynomialSegment1, YoTrajectory cmpPolynomialSegment2)
