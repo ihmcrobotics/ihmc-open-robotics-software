@@ -46,7 +46,6 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import javafx.animation.AnimationTimer;
-import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -119,6 +118,7 @@ import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
@@ -3302,12 +3302,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return graphicsRobots.get(robot);
    }
 
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, ImageCallback imageCallback,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new CameraTrackAndDollyYoVariablesHolder(yoVariableHolder);
       new OffscreenBufferVideoServer(graphics3dAdapter, cameraMountList, cameraConfiguration, cameraTrackingAndDollyPositionHolder, width, height,
-            videoDataServer, timestampProvider, framesPerSecond);
+            imageCallback, timestampProvider, framesPerSecond);
 
    }
 
