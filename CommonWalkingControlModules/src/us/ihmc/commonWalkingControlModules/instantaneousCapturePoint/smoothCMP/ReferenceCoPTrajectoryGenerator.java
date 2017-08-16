@@ -586,6 +586,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonA, footPolygonB, referenceFrameToConvertTo);
       convertToFramePointRetainingZ(tempFramePoint1, framePolygonReference.getCentroid(), referenceFrameToConvertTo);
+      framePointToPack.changeFrame(referenceFrameToConvertTo);
       framePointToPack.interpolate(this.tempDoubleSupportPolygonCentroid, tempFramePoint1, this.tempDouble);
    }
 
@@ -977,6 +978,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       tempFramePoint1.changeFrame(referenceFrameToStoreResultIn);
       tempFramePoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
       tempFramePoint2.changeFrame(referenceFrameToStoreResultIn);
+      framePointToPack.changeFrame(referenceFrameToStoreResultIn);
       framePointToPack.interpolate(tempFramePoint1, tempFramePoint2, 0.5);
    }
 
