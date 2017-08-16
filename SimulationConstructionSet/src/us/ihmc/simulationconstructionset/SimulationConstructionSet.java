@@ -33,7 +33,6 @@ import javax.swing.JTextField;
 import com.jme3.renderer.Camera;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -52,19 +51,9 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.dataBuffer.*;
-import us.ihmc.yoVariables.listener.RewoundListener;
-import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
-import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
@@ -83,6 +72,7 @@ import us.ihmc.simulationconstructionset.commands.StepBackwardCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
+import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
@@ -101,7 +91,23 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
+import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.GotoOutPointCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
+import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -4485,12 +4491,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * 
     * Tags: publisher, communicator, video, viewport
     */
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, ImageCallback imageCallback,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       if (myGUI != null)
       {
-         myGUI.startStreamingVideoData(cameraConfiguration, width, height, videoDataServer, timestampProvider, framesPerSecond);
+         myGUI.startStreamingVideoData(cameraConfiguration, width, height, imageCallback, timestampProvider, framesPerSecond);
       }
    }
 

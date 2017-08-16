@@ -2,27 +2,24 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.producers.CompressedVideoDataServer;
-import us.ihmc.communication.producers.VideoDataServer;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.ImageCallback;
 
-public class OffscreenBufferVideoServer
+public class OffscreenBufferVideoServer   
 {
-   private final VideoDataServer videoDataServer;
+   private final ImageCallback imageCallback;
 
    private final CameraAdapter camera;
 
    private final TimestampProvider timestampProvider;
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, VideoDataServer videoDataServer, 
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, ImageCallback imageCallback, 
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
@@ -34,7 +31,7 @@ public class OffscreenBufferVideoServer
       viewport.setCameraController(cameraController);
 
       CameraUpdater cameraUpdater = new CameraUpdater();
-      this.videoDataServer = videoDataServer;
+      this.imageCallback = imageCallback;
       this.timestampProvider = timestampProvider;
       PrintTools.info(this, "Starting video stream");
       viewport.getCaptureDevice().streamTo(cameraUpdater, framesPerSecond);
@@ -43,10 +40,7 @@ public class OffscreenBufferVideoServer
 
    public void close()
    {
-      if (videoDataServer instanceof CompressedVideoDataServer)
-      {
-         ((CompressedVideoDataServer) videoDataServer).dispose();
-      }
+      imageCallback.dispose();
    }
 
    private class CameraUpdater implements CameraStreamer
@@ -54,10 +48,8 @@ public class OffscreenBufferVideoServer
       @Override
       public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov)
       {
-         double f = bufferedImage.getWidth() / 2 / Math.tan(fov / 2);
-         IntrinsicParameters intrinsicParameters = new IntrinsicParameters(f, f, 0, (bufferedImage.getWidth() - 1) / 2f, (bufferedImage.getHeight() - 1) / 2f, bufferedImage.getWidth(), bufferedImage.getHeight());
-
-         videoDataServer.onFrame(VideoSource.MULTISENSE_LEFT_EYE, bufferedImage, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
+         
+         imageCallback.onNewImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
       }
 
       @Override
@@ -81,7 +73,7 @@ public class OffscreenBufferVideoServer
       @Override
       public boolean isReadyForNewData()
       {
-         return videoDataServer.isConnected();
+         return imageCallback.isAvailable();
       }
 
       @Override
