@@ -140,11 +140,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
       this.state = CWBToolboxState.DO_NOTHING;
 
-      this.endeffectorPose = new YoFramePose("endeffectorFramePose", ReferenceFrame.getWorldFrame(), registry);
-      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPose", this.endeffectorPose, 0.15);
+      this.endeffectorPose = new YoFramePose("endeffectorPose", ReferenceFrame.getWorldFrame(), registry);
+      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPoseFrame", this.endeffectorPose, 0.15);
       this.endeffectorFrame.setVisible(true);
 
       yoGraphicsRegistry.registerYoGraphic("endeffectorPoseViz", this.endeffectorFrame);
+
+      state = CWBToolboxState.FIND_INITIAL_GUESS;
    }
 
    @Override
@@ -277,12 +279,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
       // ************************************************************************************************************** //
 
-      
-      
-      
       // ************************************************************************************************************** //
 
-      
       updateVisualizerRobotConfiguration(kinematicsSolver.getFullRobotModelCopy());
       updateVisualizers();
       updateYoVariables();
@@ -292,11 +290,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
    }
-   
-   
-   
-   
-   
 
    @Override
    protected boolean initialize()
@@ -304,9 +297,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       isDone.set(false);
       ConstrainedWholeBodyPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
-      {
          return false;
-      }
 
       PrintTools.info("initialize CWB toolbox");
 
@@ -314,6 +305,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * bring control parameters from request.
        */
       numberOfExpanding = request.numberOfExpanding;
+      numberOfInitialGuess = request.numberOfFindInitialGuess;
 
       initialOneDoFJoints = request.initialOneDoFJoints;
       initialTranslationOfRootJoint = request.initialTranslationOfRootJoint;
@@ -330,17 +322,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.holdCurrentTrajectoryMessages();
       kinematicsSolver.putTrajectoryMessages();
 
-      HumanoidReferenceFrames referenceFrames = (HumanoidReferenceFrames) kinematicsSolver.getReferenceFrames();
-
-      referenceFrames.updateFrames();
-      midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-      worldFrame = referenceFrames.getWorldFrame();
-
       /*
        * start toolbox
        */
-      state = CWBToolboxState.FIND_INITIAL_GUESS;
-
       rootNode = new GenericTaskNode();
       tree = new CTTaskNodeTree(rootNode);
       tree.setTaskRegion(constrainedEndEffectorTrajectory.getTaskRegion());
@@ -390,13 +374,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (node.getParentNode() != null)
       {
          PrintTools.warn("this node has parent node.");
-         PrintTools.info("node " + node.getParentNode().getNodeData(1));
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
                                                        node.getParentNode().getRootRotation());
-         for (int i = 0; i < node.getParentNode().getOneDoFJoints().length; i++)
-         {
-            double jointPosition = node.getParentNode().getOneDoFJoints()[i].getQ();
-         }
       }
       else
       {
@@ -419,16 +398,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * frame.
        */
       Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), configurationSpace);
-
-      endeffectorPose.setPosition(desiredPose.getPosition());
-      endeffectorPose.setOrientation(desiredPose.getOrientation());
+      setEndEffectorPose(desiredPose);
+      
       /*
        * for kinematics solver, append offset
        */
       desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
 
       kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPose);
-      //      kinematicsSolver.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));
@@ -482,7 +459,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
          FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
    }
-   
+
    /**
     * update visualizers.
     */
@@ -500,15 +477,24 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             treeVisualizer.update(visualizedNode);
       }
    }
-   
+
    /**
     * YoVariables.
-    */   
+    */
    private void updateYoVariables()
    {
       isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
+   }
+   
+   /**
+    * update end effector pose
+    */
+   private void setEndEffectorPose(Pose3D desiredPose)
+   {
+      endeffectorPose.setPosition(desiredPose.getPosition());
+      endeffectorPose.setOrientation(desiredPose.getOrientation());
    }
 }
