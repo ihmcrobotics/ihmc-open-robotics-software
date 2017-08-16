@@ -219,7 +219,7 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint3D comPositionDesiredInitial = new FramePoint3D(worldFrame, cmp0.getPoint());
          
          FramePoint3D icpPositionDesiredInitial = new FramePoint3D(worldFrame);
-         icpToolbox.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
+         icpToolbox.computeDesiredCapturePointPosition3D(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
          // Position
          FramePoint3D comPositionDesiredCurrent = new FramePoint3D(worldFrame);
