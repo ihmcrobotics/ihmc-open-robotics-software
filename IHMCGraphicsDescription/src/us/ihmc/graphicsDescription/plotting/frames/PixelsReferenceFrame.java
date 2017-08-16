@@ -1,8 +1,8 @@
 package us.ihmc.graphicsDescription.plotting.frames;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @SuppressWarnings("serial")
 public abstract class PixelsReferenceFrame extends PlotterReferenceFrame

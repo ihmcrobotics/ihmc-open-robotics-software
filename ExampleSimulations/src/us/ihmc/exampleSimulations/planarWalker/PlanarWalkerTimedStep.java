@@ -1,11 +1,11 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PlanarWalkerTimedStep implements TimeIntervalProvider
@@ -88,7 +88,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.setPoint(this.goalPosition);
+      goalPosition.set(this.goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 
@@ -101,7 +101,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.getPoint(this.goalPosition);
+      goalPosition.get(this.goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 

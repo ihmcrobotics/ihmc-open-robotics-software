@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,6 +9,12 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +26,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePoseTest
 {
@@ -413,7 +417,7 @@ public class FramePoseTest
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
          actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
 
-         thatPose.prependTranslation(actualTranslationNOTfromRotation.tuple);
+         thatPose.prependTranslation(actualTranslationNOTfromRotation);
 
          FrameVector3D translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
          FrameVector3D translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);
@@ -421,8 +425,8 @@ public class FramePoseTest
 
          shouldEqualTotalTranslation.add(translationDueToRotation, translationNOTfromRotation);
 
-         FrameVectorTest.assertFrameVectorEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
-         FrameVectorTest.assertFrameVectorEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
       }
    }
 
@@ -522,7 +526,7 @@ public class FramePoseTest
 
          String errorMsg = "Computed rotation axis, \n" + rotationAxisComputed + "\n is not parallel with actual rotation axis, \n" + rotationAxis
                + rotationAngleMsg + "\n Number of Passed Tests: " + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, rotationAxisComputed.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(rotationAxisComputed, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }
@@ -563,7 +567,7 @@ public class FramePoseTest
          String errorMsg = "Computed rotation axis origin must coincide with actual origin, or lie along rotation axis.\n Alignment error = "
                + Math.toDegrees(actualToComputedOrigin.angle(rotationAxis)) + " degrees" + rotationAngleMsg + "\n Number of Passed Tests: "
                + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, actualToComputedOrigin.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(actualToComputedOrigin, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }

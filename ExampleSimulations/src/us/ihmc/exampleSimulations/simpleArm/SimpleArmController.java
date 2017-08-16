@@ -4,7 +4,7 @@ package us.ihmc.exampleSimulations.simpleArm;
 import java.util.Random;
 
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;

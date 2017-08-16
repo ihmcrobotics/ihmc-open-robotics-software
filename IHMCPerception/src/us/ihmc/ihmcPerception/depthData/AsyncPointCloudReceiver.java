@@ -3,9 +3,9 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
 {

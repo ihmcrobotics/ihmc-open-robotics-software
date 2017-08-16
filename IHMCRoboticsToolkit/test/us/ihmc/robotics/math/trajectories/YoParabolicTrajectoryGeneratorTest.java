@@ -8,12 +8,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoParabolicTrajectoryGeneratorTest
 {
@@ -37,13 +37,13 @@ public class YoParabolicTrajectoryGeneratorTest
       FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
 
       trajectoryGenerator.getPosition(positionToPack, 0.0);
-      EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialPosition, positionToPack, delta);
 
       trajectoryGenerator.getPosition(positionToPack, intermediateParameter);
-      EuclidCoreTestTools.assertTuple3DEquals(intermediatePosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(intermediatePosition, positionToPack, delta);
 
       trajectoryGenerator.getPosition(positionToPack, 1.0);
-      EuclidCoreTestTools.assertTuple3DEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(finalPosition, positionToPack, delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -168,7 +168,7 @@ public class YoParabolicTrajectoryGeneratorTest
          trajectoryGenerator.getVelocity(velocityFromTrajectoryGenerator, parameter);
 
          double delta = 1e-4;
-         EuclidCoreTestTools.assertTuple3DEquals(numericalVelocity.getVectorCopy(), velocityFromTrajectoryGenerator.getVectorCopy(), delta);
+         EuclidCoreTestTools.assertTuple3DEquals(numericalVelocity, velocityFromTrajectoryGenerator, delta);
       }
    }
 

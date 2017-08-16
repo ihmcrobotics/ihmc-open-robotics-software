@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
 /**
  * @author twan

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -21,6 +21,9 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -38,11 +41,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -443,7 +443,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       footPosition.setZ(footPosition.getZ() + 0.1);
 
-      liftFootCommand.addTrajectoryPoint(1.0, footPosition.getPointCopy(), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+      liftFootCommand.addTrajectoryPoint(1.0, new Point3D(footPosition), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
       queuedControllerCommands.add(liftFootCommand);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
@@ -1028,7 +1028,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld.getPointCopy());
+      footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
 
@@ -1298,11 +1298,11 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
             for (int i = 0; i < contactPoints.size(); i++)
             {
-               point3d.setXYIncludingFrame(ankleFrame, contactPoints.get(i));
+               point3d.setIncludingFrame(ankleFrame, contactPoints.get(i), 0.0);
                point3d.changeFrame(soleFrame);
                point3d.setZ(0.0);
                point3d.changeFrame(worldFrame);
-               point3d.getFramePoint2d(point);
+               point.setIncludingFrame(point3d);
                footSupport.addVertex(point.getPoint());
             }
 
