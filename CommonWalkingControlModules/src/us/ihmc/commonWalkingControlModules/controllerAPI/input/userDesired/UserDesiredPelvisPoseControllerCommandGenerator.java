@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -16,7 +17,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class UserDesiredPelvisPoseControllerCommandGenerator

@@ -8,6 +8,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
@@ -20,13 +24,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
@@ -660,7 +660,7 @@ public class SkippyController implements RobotController
       else
          tempCMP.set(0.0, 0.0);
       tempCMP.add(com.getFramePoint2dCopy());
-      this.cmpFromParameterizedReaction.setXY(tempCMP);
+      this.cmpFromParameterizedReaction.set(tempCMP, 0.0);
    }
 
    /*

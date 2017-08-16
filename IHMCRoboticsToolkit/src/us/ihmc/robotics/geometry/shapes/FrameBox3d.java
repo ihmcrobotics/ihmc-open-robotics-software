@@ -3,13 +3,13 @@ package us.ihmc.robotics.geometry.shapes;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 {
@@ -115,17 +115,6 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
    public void setTransform(RigidBodyTransform transform3D)
    {
       box3d.setPose(transform3D);
-   }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(box3d.toString());
-
-      return builder.toString();
    }
 
    public void getFramePose(FramePose framePoseToPack)

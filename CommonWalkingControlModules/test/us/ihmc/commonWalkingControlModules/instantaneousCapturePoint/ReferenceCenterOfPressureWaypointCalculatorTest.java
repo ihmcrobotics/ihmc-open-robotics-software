@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,20 +16,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryGenerator;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -260,7 +258,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    public void testDoubleSupportFootstepPlanMoving()
    {
       sendFootStepMessages(10);
-      //testCoPGenerator.setInitialCoPPosition(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
+      //testCoPGenerator.setInitialCoPPosition(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       CoPPointName exitCoPName = plannerParameters.getExitCoPName();

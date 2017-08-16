@@ -14,13 +14,13 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobianTest
 {
@@ -96,7 +96,7 @@ public class CenterOfMassJacobianTest
       FrameVector3D velocityFromJacobianOutOrder = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobianOutOrder.getCenterOfMassVelocity(velocityFromJacobianOutOrder);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityFromJacobianInOrder.getVectorCopy(), velocityFromJacobianOutOrder.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityFromJacobianInOrder, velocityFromJacobianOutOrder, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -131,7 +131,7 @@ public class CenterOfMassJacobianTest
       RotationMatrix rotation = new RotationMatrix();
       sixDoFJoint.getRotation(rotation);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 4e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 4e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -246,7 +246,7 @@ public class CenterOfMassJacobianTest
       RigidBody rootBody = elevator;
       FrameVector3D velocityNumerical = computeCenterOfMassVelocityNumerically(null, joints, rootBody, rigidBodies, referenceFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 1e-5);
    }
 
    private ArrayList<RevoluteJoint> setUpSingleJoint()

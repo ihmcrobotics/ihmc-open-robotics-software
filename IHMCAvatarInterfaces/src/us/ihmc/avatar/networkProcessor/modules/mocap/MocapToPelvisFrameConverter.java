@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
 import optiTrack.MocapRigidBody;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 // SMcCrory 2/1/2017 - this module is specific to localization tests performed on Atlas given a certain marker configuration

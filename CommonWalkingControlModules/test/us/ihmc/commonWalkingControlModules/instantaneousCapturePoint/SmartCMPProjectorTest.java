@@ -29,6 +29,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -40,11 +43,8 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPProjectorTest
@@ -551,8 +551,10 @@ public class SmartCMPProjectorTest
 
    private boolean checkDirectionPreserved(FramePoint2D capturePoint, FramePoint2D desiredCMP, FramePoint2D projectedCMP)
    {
-      FrameVector2D desiredCMPToICP = new FrameVector2D(desiredCMP, capturePoint);
-      FrameVector2D projectedCMPToICP = new FrameVector2D(projectedCMP, capturePoint);
+      FrameVector2D desiredCMPToICP = new FrameVector2D(desiredCMP.getReferenceFrame());
+      desiredCMPToICP.sub(desiredCMP, capturePoint);
+      FrameVector2D projectedCMPToICP = new FrameVector2D(projectedCMP.getReferenceFrame());
+      projectedCMPToICP.sub(projectedCMP, capturePoint);
       double angleDifference = desiredCMPToICP.angle(projectedCMPToICP);
       return Math.abs(angleDifference) < 1.0e-7;
    }

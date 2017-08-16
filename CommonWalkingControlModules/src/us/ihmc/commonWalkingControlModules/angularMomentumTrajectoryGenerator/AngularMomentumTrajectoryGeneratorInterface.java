@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 

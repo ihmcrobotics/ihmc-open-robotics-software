@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
 public abstract class PelvisAndCenterOfMassHeightControlState extends FinishableState<PelvisHeightControlMode>

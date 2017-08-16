@@ -12,17 +12,17 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.MemoryTools;
 
@@ -145,7 +145,7 @@ public class CenterOfPressureResolverTest
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 
          // Forces should be the same, after rotated into the same frame:
-         EuclidCoreTestTools.assertTuple3DEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame.getVectorCopy(), 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame, 1e-7);
 
          // Torque should have no components in x and y resolved at the Center of Pressure:
          assertEquals(0.0, torqueResolvedInCenterOfPressureFrame.getX(), 1e-7);
@@ -187,7 +187,7 @@ public class CenterOfPressureResolverTest
 
       double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector,
             groundPlaneFrame);
-      FramePoint3D centerOfPressure = centerOfPressure2d.toFramePoint();
+      FramePoint3D centerOfPressure = new FramePoint3D(centerOfPressure2d);
       centerOfPressure.changeFrame(worldFrame);
       return new ImmutablePair<FramePoint3D, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }

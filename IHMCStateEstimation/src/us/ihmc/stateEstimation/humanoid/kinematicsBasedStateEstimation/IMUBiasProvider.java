@@ -1,7 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface IMUBiasProvider

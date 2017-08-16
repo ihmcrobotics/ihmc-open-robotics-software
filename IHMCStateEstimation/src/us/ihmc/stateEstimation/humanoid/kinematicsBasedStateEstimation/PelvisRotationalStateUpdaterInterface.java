@@ -1,7 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public interface PelvisRotationalStateUpdaterInterface
 {

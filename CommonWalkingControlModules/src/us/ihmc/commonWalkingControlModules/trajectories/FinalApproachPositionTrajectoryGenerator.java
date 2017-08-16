@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,13 +20,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -251,8 +251,10 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, xyPolynomial.getPosition());
-      currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
-      currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
+      currentVelocity.sub(finalPosition, initialPosition);
+      currentVelocity.scale(alphaDot);
+      currentAcceleration.sub(finalPosition, initialPosition);
+      currentAcceleration.scale(alphaDDot);
 
       time = MathTools.clamp(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       zPolynomial.compute(time);

@@ -20,6 +20,9 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -39,9 +42,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -49,7 +50,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
@@ -814,8 +814,8 @@ public class FootstepSnapperSimulationTest
 
          soleZ.set(solePosition.getZ());
 
-         Point3D planePosition = solePosition.getPointCopy();
-         Vector3D planeNormal = soleNormal.getVectorCopy();
+         Point3D planePosition = new Point3D(solePosition);
+         Vector3D planeNormal = new Vector3D(soleNormal);
 
          planePose.setPosition(planePosition);
 
