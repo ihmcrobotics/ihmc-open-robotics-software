@@ -5,8 +5,8 @@ import java.util.Arrays;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 

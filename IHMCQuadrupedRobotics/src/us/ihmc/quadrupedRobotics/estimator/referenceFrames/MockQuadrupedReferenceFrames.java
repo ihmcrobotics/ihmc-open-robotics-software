@@ -2,11 +2,11 @@ package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
 import us.ihmc.robotics.partNames.LegJointName;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;

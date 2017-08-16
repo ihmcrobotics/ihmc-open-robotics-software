@@ -4,6 +4,8 @@ import static us.ihmc.robotics.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -15,14 +17,12 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

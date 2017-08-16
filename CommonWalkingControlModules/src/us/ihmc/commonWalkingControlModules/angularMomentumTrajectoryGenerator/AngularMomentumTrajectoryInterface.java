@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3DInterface;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 
 public interface AngularMomentumTrajectoryInterface extends SegmentedFrameTrajectory3DInterface

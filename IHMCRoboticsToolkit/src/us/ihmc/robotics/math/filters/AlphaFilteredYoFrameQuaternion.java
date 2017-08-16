@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements ProcessingYoVariable
 {

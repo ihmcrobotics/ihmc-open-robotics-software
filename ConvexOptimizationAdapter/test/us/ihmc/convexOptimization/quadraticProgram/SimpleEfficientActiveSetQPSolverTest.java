@@ -5,6 +5,8 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
    @Override
    public SimpleActiveSetQPSolverInterface createSolverToTest()
    {
-      return new SimpleEfficientActiveSetQPSolver();
+      SimpleEfficientActiveSetQPSolver simpleEfficientActiveSetQPSolver = new SimpleEfficientActiveSetQPSolver();
+      simpleEfficientActiveSetQPSolver.setUseWarmStart(false);
+      return simpleEfficientActiveSetQPSolver;
    }
 }

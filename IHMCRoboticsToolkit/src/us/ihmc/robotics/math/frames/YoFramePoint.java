@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
@@ -44,22 +44,17 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> imple
 
    public double getXYPlaneDistance(FramePoint3D framePoint)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint);
+      return getFrameTuple().distanceXY(framePoint);
    }
 
    public double getXYPlaneDistance(FramePoint2D framePoint2d)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint2d);
+      return getFrameTuple().distanceXY(framePoint2d);
    }
 
    public double getXYPlaneDistance(YoFramePoint yoFramePoint)
    {
       return getXYPlaneDistance(yoFramePoint.getFrameTuple());
-   }
-
-   public double getXYPlaneDistance(YoFramePoint2d yoFramePoint2d)
-   {
-      return getXYPlaneDistance(yoFramePoint2d.getFrameTuple2d());
    }
 
    @Override

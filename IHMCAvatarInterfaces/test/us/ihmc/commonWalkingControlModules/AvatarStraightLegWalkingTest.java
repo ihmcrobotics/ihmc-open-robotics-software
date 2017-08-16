@@ -1,22 +1,30 @@
 package us.ihmc.commonWalkingControlModules;
 
+import static org.junit.Assert.*;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -28,13 +36,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInterface
 {
@@ -519,7 +520,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld.getPointCopy());
+      footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
 

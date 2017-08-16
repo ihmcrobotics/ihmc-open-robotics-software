@@ -3,6 +3,10 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -14,10 +18,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -128,10 +128,10 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          normalVector.setToNaN(plane.getReferenceFrame());
          plane.getNormal(normalVector);
          normalVector.changeFrame(WORLD_FRAME);
-         normalVector.getVector(normalToPack);
+         normalVector.get(normalToPack);
          
          xyPoint.setToNaN(planeFrame);
-         testPoint.getFramePoint2d(xyPoint);
+         xyPoint.setIncludingFrame(testPoint);
          double zHeight = plane.getZOnPlane(xyPoint);
          
          testPoint.changeFrame(WORLD_FRAME);
@@ -162,7 +162,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, x, y, z);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       v1.changeFrame(planeFrame);
@@ -186,7 +186,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, position);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       return currentZ - prevZ != 0;

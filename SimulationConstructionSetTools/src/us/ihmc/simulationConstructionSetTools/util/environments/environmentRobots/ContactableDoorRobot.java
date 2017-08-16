@@ -6,6 +6,9 @@ import java.util.List;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -19,13 +22,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
@@ -273,10 +273,10 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       }
       
       frameNormalToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      normalToPack.set(frameNormalToPack.getVectorCopy());
+      normalToPack.set(frameNormalToPack);
       
       frameIntersectionToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      intersectionToPack.set(frameIntersectionToPack.getPointCopy());
+      intersectionToPack.set(frameIntersectionToPack);
    }
    
    @Override

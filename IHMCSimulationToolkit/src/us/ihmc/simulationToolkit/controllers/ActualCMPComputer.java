@@ -2,6 +2,7 @@ package us.ihmc.simulationToolkit.controllers;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,7 +14,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

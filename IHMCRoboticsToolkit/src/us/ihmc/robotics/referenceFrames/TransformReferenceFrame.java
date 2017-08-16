@@ -1,5 +1,6 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class TransformReferenceFrame extends ReferenceFrame

@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -12,10 +15,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -168,14 +168,14 @@ public class PushRecoveryControlModule
          return;
       }
 
-      projectedCapturePoint.setXYIncludingFrame(this.capturePoint2d);
+      projectedCapturePoint.setIncludingFrame(this.capturePoint2d, 0.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame soleFrame = soleFrames.get(robotSide);
          projectedCapturePoint.changeFrame(soleFrame);
          footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
-         projectedCapturePoint2d.setByProjectionOntoXYPlaneIncludingFrame(projectedCapturePoint);
+         projectedCapturePoint2d.setIncludingFrame(projectedCapturePoint);
 
          distanceICPToFeet.get(robotSide).set(projectedCapturePoint2d.distance(footPolygon.getCentroid()));
          isRobotBackToSafeState.set(false);

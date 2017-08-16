@@ -1,15 +1,15 @@
 package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
  * since they contain YoVariables.
  */
-public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
+public class YoFrameLineSegment2d implements ReferenceFrameHolder
 {
    /** This is where the data is stored. All operations must act on these numbers. */
    private final YoDouble firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY;
@@ -148,7 +148,7 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
    public void getFrameLineSegment2d(FrameLineSegment2d lineSegmentToPack)
    {
       putYoValuesIntoFrameLineSegment();
-      lineSegmentToPack.setAndChangeFrame(frameLineSegment);
+      lineSegmentToPack.setIncludingFrame(frameLineSegment);
    }
 
    public FramePoint2D midpoint()

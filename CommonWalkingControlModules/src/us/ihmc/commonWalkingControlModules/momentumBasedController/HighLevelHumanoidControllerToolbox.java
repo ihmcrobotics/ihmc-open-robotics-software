@@ -19,6 +19,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -35,10 +40,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -49,7 +50,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -484,13 +484,13 @@ public class HighLevelHumanoidControllerToolbox
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
-      centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+      centerOfMassPosition2d.setIncludingFrame(centerOfMassPosition);
+      centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, omega0.getDoubleValue());
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
-      yoCapturePoint.setXY(capturePoint2d);
+      yoCapturePoint.set(capturePoint2d, 0.0);
    }
 
    private final FrameVector3D angularMomentum = new FrameVector3D();

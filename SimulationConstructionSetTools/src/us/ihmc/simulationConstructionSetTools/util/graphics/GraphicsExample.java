@@ -1,5 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.graphics;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -9,7 +10,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;

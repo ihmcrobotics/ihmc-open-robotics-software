@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -42,7 +43,12 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       
    public boolean epsilonEquals(FramePoint2D point, double threshold)
    {
-      return getPosition().epsilonEquals(point, threshold);
+      getPosition().checkReferenceFrameMatch(point);
+      if (!MathTools.epsilonEquals(getPosition().getX(), point.getX(), threshold))
+         return false;
+      if (!MathTools.epsilonEquals(getPosition().getY(), point.getY(), threshold))
+         return false;
+      return true;
    }
    
    /**

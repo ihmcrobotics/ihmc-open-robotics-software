@@ -2,12 +2,12 @@ package us.ihmc.manipulation.planning.robotcollisionmodel;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;

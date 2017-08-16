@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedStatus>

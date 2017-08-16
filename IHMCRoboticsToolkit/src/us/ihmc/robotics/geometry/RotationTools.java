@@ -4,6 +4,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;

@@ -11,11 +11,11 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -68,7 +68,7 @@ public class AngularVelocityMeasurementModelElementTest
       FrameVector3D measuredAngularVelocity = getAngularVelocity(twistCalculator, measurementLink, measurementFrame);
       FrameVector3D bias = new FrameVector3D(measurementFrame, RandomGeometry.nextVector3D(random));
       measuredAngularVelocity.add(bias);
-      angularVelocityMeasurementInputPort.setData(measuredAngularVelocity.getVectorCopy());
+      angularVelocityMeasurementInputPort.setData(new Vector3D(measuredAngularVelocity));
 
       biasStatePort.setData(bias);
       FrameVector3D angularVelocityOfEstimationLink = getAngularVelocity(twistCalculator, estimationLink, estimationFrame);
