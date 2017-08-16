@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 

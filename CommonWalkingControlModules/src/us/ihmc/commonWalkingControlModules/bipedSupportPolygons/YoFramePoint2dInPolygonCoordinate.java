@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 
 /**
@@ -42,7 +42,7 @@ public class YoFramePoint2dInPolygonCoordinate
    {
       FramePoint2D temp = new FramePoint2D(pointInAnyFrame);
       temp.changeFrame(polygon.getReferenceFrame());
-      updatePointAndPolygon(polygon, temp.getPoint());
+      updatePointAndPolygon(polygon, temp);
    }
 
    /**

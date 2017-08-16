@@ -8,10 +8,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -63,7 +63,7 @@ public class SimulatedIMURawSensorReaderTest
    public void setUp() throws Exception
    {
       transformIMUToJoint.setRotation(jointToIMURotation);
-      transformIMUToJoint.setTranslation(jointToIMUOffset.getVectorCopy());
+      transformIMUToJoint.setTranslation(jointToIMUOffset);
       transformJointToIMU.setAndInvert(transformIMUToJoint);
 
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
@@ -151,7 +151,7 @@ public class SimulatedIMURawSensorReaderTest
 
    private void generateExpectedAngularVelocity()
    {
-      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity.getVectorCopy()); // in joint/body frame
+      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity); // in joint/body frame
       transformJointToIMU.transform(expectedAngularVelocityInIMUFrame);
    }
 
@@ -173,11 +173,11 @@ public class SimulatedIMURawSensorReaderTest
       FrameVector3D angularAccelerationPart = new FrameVector3D(bodyFrame);
       angularAccelerationPart.cross(randomAngularAcceleration, jointToIMUOffset);
 
-      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart.getVectorCopy());
+      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart);
 
       transformJointToIMU.transform(expectedLinearAccelerationOfIMUInIMUFrame);
    }

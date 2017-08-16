@@ -14,16 +14,16 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class TwistTest extends SpatialMotionVectorTest
@@ -426,7 +426,7 @@ public class TwistTest extends SpatialMotionVectorTest
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, actual.getVectorCopy(), 1e-6);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, actual, 1e-6);
    }
 
    /**

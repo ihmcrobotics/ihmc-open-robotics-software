@@ -3,12 +3,12 @@ package us.ihmc.robotics.math.frames;
 import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
+public class YoMultipleFramesHelper implements ReferenceFrameHolder
 {
    private final YoLong currentFrameId;
    private final TLongObjectHashMap<ReferenceFrame> referenceFrames = new TLongObjectHashMap<ReferenceFrame>();

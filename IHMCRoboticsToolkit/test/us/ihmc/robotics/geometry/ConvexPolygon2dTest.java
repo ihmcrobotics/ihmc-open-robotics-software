@@ -14,12 +14,15 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConvexPolygon2dTest
 {
@@ -1070,7 +1073,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         FramePoint2D pointToTest = FramePoint2D.generateRandomFramePoint2d(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
+         FramePoint2D pointToTest = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
          @SuppressWarnings("unused")
          boolean isInside = polygon.isPointInside(pointToTest);
       }
@@ -1301,7 +1304,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < numLineOfSightTests; i++)
       {
-         FramePoint2D randomPoint = FramePoint2D.generateRandomFramePoint2d(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
+         FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
          if (!polygon.isPointInside(randomPoint))
          {
             randomOutsidePoints.add(randomPoint);
@@ -1422,14 +1425,14 @@ public class ConvexPolygon2dTest
 
             ConvexPolygon2D shrunkenPolygon = shrunkenPolygons[j];
 
-            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && shrunkenPolygon.isPointInside(testPoint.getPointCopy()));
+            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && shrunkenPolygon.isPointInside(testPoint));
             if (insideShrunkenPolygon)
                insideAnyShrunkenPolygon = true;
 
             // If point is inside, then polygonP when moved to this location should be fully inside Q.
             // Otherwise it shouldn't be fully inside Q.
 
-            Vector2D translation = new Vector2D(testPoint.getPointCopy());
+            Vector2D translation = new Vector2D(testPoint);
             translation.sub(referencePointForP);
             ConvexPolygon2D translatedPolygon = randomPPolygon.translateCopy(translation);
 
@@ -1568,7 +1571,7 @@ public class ConvexPolygon2dTest
                }
 
                boolean insideIntersection = ((intersectionPolygon != null)
-                     && (intersectionPolygon.isPointInside(testPoint.getPointCopy())));
+                     && (intersectionPolygon.isPointInside(testPoint)));
                if (insideIntersection)
                {
                   insideAnyIntersection = true;

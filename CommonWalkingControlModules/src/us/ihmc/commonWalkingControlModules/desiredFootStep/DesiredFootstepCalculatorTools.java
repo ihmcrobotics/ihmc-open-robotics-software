@@ -6,14 +6,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
@@ -120,7 +120,8 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(bodyFrame);
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
          tempFramePoint.changeFrame(frame);
 
          if (tempFramePoint.getZ() < minFramePoint.getZ())
@@ -147,7 +148,8 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
          tempFramePoint.changeFrame(frame);
 
          if (tempFramePoint.getX() > maxFramePoint.getX())
