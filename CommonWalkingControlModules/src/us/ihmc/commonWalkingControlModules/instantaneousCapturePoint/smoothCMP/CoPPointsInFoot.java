@@ -245,4 +245,9 @@ public class CoPPointsInFoot
    {
       copLocations.get(copPointsList.size() - 1).getPosition(tempFinalICP);
    }
+
+   public boolean isEmpty()
+   {
+      return copPointsList.isEmpty();
+   }
 }

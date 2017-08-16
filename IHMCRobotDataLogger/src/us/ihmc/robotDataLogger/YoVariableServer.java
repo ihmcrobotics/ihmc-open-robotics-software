@@ -3,6 +3,7 @@ package us.ihmc.robotDataLogger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -19,11 +20,14 @@ import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.CustomLogDataPublisherType;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
+import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
@@ -56,7 +60,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
    private volatile long latestTimestamp;
    
    private final SummaryProvider summaryProvider = new SummaryProvider();
-
+   private final PeriodicThreadScheduler timestampScheduler;
+   private final TimestampPublisher timestampPublisher;
+  
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadSchedulerFactory schedulerFactory, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this(mainClazz.getSimpleName(), schedulerFactory, logModelProvider, logSettings, dt);
@@ -80,8 +86,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       try
       {
          this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this, config.getPublicBroadcast());
-         dataProducerParticipant.setLog(logSettings.isLog());
+         this.dataProducerParticipant.setLog(logSettings.isLog());
          addCameras(config, logSettings);
+         
+         this.timestampScheduler = schedulerFactory.createPeriodicThreadScheduler("timestampPublisher");
+         this.timestampPublisher = new TimestampPublisher(dataProducerParticipant);
 
       }
       catch (IOException e)
@@ -175,6 +184,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
          
          dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
          dataProducerParticipant.announce();
+         
+         timestampScheduler.schedule(timestampPublisher, 100, TimeUnit.MICROSECONDS);
+         
+         
       }
       catch (IOException e)
       {
@@ -240,9 +253,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
       if (registry == mainRegistry)
       {
-         dataProducerParticipant.publishTimestamp(timestamp);
+         timestampPublisher.setTimestamp(timestamp);
          latestTimestamp = timestamp;
-
       }
 
       RegistryPublisher publisher = publishers.get(registry);
