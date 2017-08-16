@@ -1,10 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-
 import java.util.Random;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryCommand, PelvisTrajectoryMessage>
 {
@@ -17,8 +18,8 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
 
    public PelvisTrajectoryCommand(Random random)
    {
-      super(ReferenceFrame.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            ReferenceFrame.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+      super(EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override

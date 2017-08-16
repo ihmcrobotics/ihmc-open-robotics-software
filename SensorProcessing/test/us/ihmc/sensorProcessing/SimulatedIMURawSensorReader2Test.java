@@ -6,11 +6,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -60,8 +60,8 @@ public class SimulatedIMURawSensorReader2Test
       simulatedIMURawSensorReader.read();
       imuSensorProcessor.update();
 
-      Vector3D linearAccelerationFromRobot = robot.getBodyAcceleration().getVectorCopy();
-      Vector3D linearAccelerationFromIMU = processedSensors.getAcceleration(imuIndex).getVectorCopy();
+      Vector3D linearAccelerationFromRobot = new Vector3D(robot.getBodyAcceleration());
+      Vector3D linearAccelerationFromIMU = new Vector3D(processedSensors.getAcceleration(imuIndex));
 
 //      System.out.println("linear from robot: " + linearAccelerationFromRobot);
 //      System.out.println("linear from imu: " + linearAccelerationFromIMU);

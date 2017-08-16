@@ -11,6 +11,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -18,15 +21,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -270,12 +270,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.setIncludingFrame(linearProportionalFeedback);
       desiredLinearAcceleration.add(linearDerivativeFeedback);
       desiredLinearAcceleration.add(linearIntegralFeedback);
-      desiredLinearAcceleration.limitLength(positionGains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxLength(positionGains.getMaximumFeedback());
 
       desiredAngularAcceleration.setIncludingFrame(angularProportionalFeedback);
       desiredAngularAcceleration.add(angularDerivativeFeedback);
       desiredAngularAcceleration.add(angularIntegralFeedback);
-      desiredAngularAcceleration.limitLength(orientationGains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxLength(orientationGains.getMaximumFeedback());
 
       yoFeedbackAcceleration.setAndMatchFrame(desiredLinearAcceleration, desiredAngularAcceleration);
       rateLimitedFeedbackAcceleration.update();
@@ -308,11 +308,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredLinearVelocity.setIncludingFrame(linearProportionalFeedback);
       desiredLinearVelocity.add(linearIntegralFeedback);
-      desiredLinearVelocity.limitLength(positionGains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxLength(positionGains.getMaximumFeedback());
 
       desiredAngularVelocity.setIncludingFrame(angularProportionalFeedback);
       desiredAngularVelocity.add(angularIntegralFeedback);
-      desiredAngularVelocity.limitLength(orientationGains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxLength(orientationGains.getMaximumFeedback());
 
       yoFeedbackVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
       rateLimitedFeedbackVelocity.update();
@@ -382,8 +382,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.limitLength(positionGains.getMaximumProportionalError());
-      angularFeedbackTermToPack.limitLength(orientationGains.getMaximumProportionalError());
+      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumProportionalError());
+      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorVector.getYoAngularPart());
@@ -443,8 +443,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.limitLength(positionGains.getMaximumDerivativeError());
-      angularFeedbackTermToPack.limitLength(orientationGains.getMaximumDerivativeError());
+      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumDerivativeError());
+      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumDerivativeError());
       yoErrorVelocity.set(linearFeedbackTermToPack, angularFeedbackTermToPack);
 
       if (linearGainsFrame != null)
@@ -499,7 +499,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          linearFeedbackTermToPack.scale(dt);
          linearFeedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
          selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
-         linearFeedbackTermToPack.limitLength(maximumLinearIntegralError);
+         linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
 
          if (linearGainsFrame != null)
@@ -530,7 +530,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          errorOrientationCumulated.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(dt);
          selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
-         angularFeedbackTermToPack.limitLength(maximumAngularIntegralError);
+         angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.set(angularFeedbackTermToPack);
 
          if (angularGainsFrame != null)

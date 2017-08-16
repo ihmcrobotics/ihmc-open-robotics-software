@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ContactablePlaneBodyTools

@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -15,8 +24,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryTools
 {
@@ -709,23 +718,6 @@ public class GeometryTools
    }
 
    /**
-    * Calculates the distance on the xy-plane bewteen two 3D points.
-    * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * 
-    * @param firstPoint the first point. Not modified.
-    * @param secondPoint the second point. Not modified.
-    * @return the distance between the two points.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
-    */
-   public static double getXYDistance(FramePoint3D firstPoint, FramePoint3D secondPoint)
-   {
-      firstPoint.checkReferenceFrameMatch(secondPoint);
-      return EuclidGeometryTools.xyDistanceBetweenPoint3Ds(firstPoint.getPoint(), secondPoint.getPoint());
-   }
-
-   /**
     * Attempts to normalize the given 3D vector.
     * If the vector's length falls below {@value Epsilons#ONE_TRILLIONTH}, the vector is set to (0, 0, 1).
     *  
@@ -784,7 +776,7 @@ public class GeometryTools
          FramePoint3D framePoint = new FramePoint3D(points.get(i));
          framePoint.changeFrame(referenceFrame);
 
-         ret.add(framePoint.toFramePoint2d());
+         ret.add(new FramePoint2D(framePoint));
       }
 
       return ret;
@@ -844,5 +836,123 @@ public class GeometryTools
       if (!MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon))
          return false;
       return true;
+   }
+
+   /**
+    * Creates a new reference frame such that it is centered at the given {@code point} and with its
+    * z-axis aligned with the given {@code zAxis} vector.
+    * <p>
+    * Note that the parent frame is set to the reference frame the given {@code point} and
+    * {@code zAxis} are expressed in.
+    * </p>
+    *
+    * @param frameName the name of the new frame.
+    * @param point location of the reference frame's origin. Not modified.
+    * @param zAxis orientation the reference frame's z-axis. Not modified.
+    * @return the new reference frame.
+    * @throws ReferenceFrameMismatchException if {@code point} and {@code zAxis} are not expressed
+    *            in the same reference frame.
+    */
+   public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint3D point, FrameVector3D zAxis)
+   {
+      return constructReferenceFrameFromPointAndAxis(frameName, point, Axis.Z, zAxis);
+   }
+
+   /**
+    * Creates a new reference frame such that it is centered at the given {@code point} and with one
+    * of its axes aligned with the given {@code alignAxisWithThis} vector.
+    * <p>
+    * Note that the parent frame is set to the reference frame the given {@code point} and
+    * {@code alignAxisWithThis} are expressed in.
+    * </p>
+    *
+    * @param frameName the name of the new frame.
+    * @param point location of the reference frame's origin. Not modified.
+    * @param axisToAlign defines which axis of the new reference frame is to be aligned with the
+    *           given {@code alignAxisWithThis} vector.
+    * @param alignAxisWithThis the vector to which the reference frame chosen axis should be aligned
+    *           with. Not modified.
+    * @return the new reference frame.
+    * @throws ReferenceFrameMismatchException if {@code point} and {@code alignAxisWithThis} are not
+    *            expressed in the same reference frame.
+    */
+   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3D point, Axis axisToAlign, FrameVector3D alignAxisWithThis)
+   {
+      ReferenceFrame parentFrame = point.getReferenceFrame();
+      alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
+   
+      AxisAngle rotationToDesired = new AxisAngle();
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign.getAxisVector(), alignAxisWithThis.getVector(), rotationToDesired);
+   
+      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point.getPoint());
+   
+      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
+   }
+
+   public static void pitchAboutPoint(FramePoint3DReadOnly pointToTransform, FramePoint3DReadOnly pointToPitchAbout, double pitch, FramePoint3D resultToPack)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToPitchAbout);
+      double tempX = pointToTransform.getX() - pointToPitchAbout.getX();
+      double tempY = pointToTransform.getY() - pointToPitchAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToPitchAbout.getZ();
+   
+      double cosAngle = Math.cos(pitch);
+      double sinAngle = Math.sin(pitch);
+   
+      double x = cosAngle * tempX + sinAngle * tempZ;
+      tempZ = -sinAngle * tempX + cosAngle * tempZ;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToPitchAbout);
+      resultToPack.add(tempX, tempY, tempZ);
+   }
+
+   /**
+    * yawAboutPoint
+    *
+    * @param pointToYawAbout FramePoint
+    * @param yaw double
+    * @return CartesianPositionFootstep
+    */
+   public static void yawAboutPoint(FramePoint3DReadOnly pointToTransform, FramePoint3DReadOnly pointToYawAbout, double yaw, FramePoint3D resultToPack)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = pointToTransform.getX() - pointToYawAbout.getX();
+      double tempY = pointToTransform.getY() - pointToYawAbout.getY();
+      double tempZ = pointToTransform.getZ() - pointToYawAbout.getZ();
+   
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
+   
+      double x = cosAngle * tempX + -sinAngle * tempY;
+      tempY = sinAngle * tempX + cosAngle * tempY;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToYawAbout);
+      resultToPack.add(tempX, tempY, tempZ);
+   }
+
+   /**
+    * yawAboutPoint
+    *
+    * @param pointToYawAbout FramePoint2d
+    * @param yaw double
+    * @return CartesianPositionFootstep
+    */
+   public static void yawAboutPoint(FramePoint2DReadOnly pointToTransform, FramePoint2DReadOnly pointToYawAbout, double yaw, FramePoint2D resultToPack)
+   {
+      pointToTransform.checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = pointToTransform.getX() - pointToYawAbout.getX();
+      double tempY = pointToTransform.getY() - pointToYawAbout.getY();
+   
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
+   
+      double x = cosAngle * tempX + -sinAngle * tempY;
+      tempY = sinAngle * tempX + cosAngle * tempY;
+      tempX = x;
+   
+      resultToPack.setIncludingFrame(pointToYawAbout);
+      resultToPack.add(tempX, tempY);
    }
 }

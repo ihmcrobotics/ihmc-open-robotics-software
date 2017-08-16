@@ -5,22 +5,22 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 import java.io.Serializable;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -419,7 +419,7 @@ public class QuadrupedSupportPolygon implements Serializable
          if (containsFootstep(footstep))
          {
             FramePoint3D rotatedPoint = new FramePoint3D();
-            footstep.yawAboutPoint(temporaryFramePoint, rotatedPoint, yaw);
+            GeometryTools.yawAboutPoint(footstep, temporaryFramePoint, yaw, rotatedPoint);
             footstep.set(rotatedPoint);
          }
       }
@@ -1041,7 +1041,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public double getDistanceInsideInCircle2d(FramePoint3D point)
    {
       double inCircleRadius = getInCircle2d(tempInCircleCenter);
-      double distanceToInCircleCenter = point.getXYPlaneDistance(tempInCircleCenter);
+      double distanceToInCircleCenter = point.distanceXY(tempInCircleCenter);
       return (inCircleRadius - distanceToInCircleCenter);
    }
    
@@ -1347,7 +1347,7 @@ public class QuadrupedSupportPolygon implements Serializable
       int numberOfEqual = 0;
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if (getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
+         if (polygonToCompare.getFootstep(robotQuadrant) != null && getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
          {
             ++numberOfEqual;
          }
@@ -1729,9 +1729,9 @@ public class QuadrupedSupportPolygon implements Serializable
             Point2D tempA = tempPointsForCornerCircle[1];
             Point2D tempB = tempPointsForCornerCircle[2];
             
-            cornerPoint.getPoint2d(tempCorner);
-            pointA.getPoint2d(tempA);
-            pointB.getPoint2d(tempB);
+            tempCorner.set(cornerPoint);
+            tempA.set(pointA);
+            tempB.set(pointB);
    
             double bisectTheta = 0.5 * theta;
    
@@ -1769,7 +1769,7 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint3D thisFootstep = getFootstep(quadrant);
          FramePoint3D otherFootstep = polyTwo.getFootstep(quadrant);
          
-         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
+         if(otherFootstep == null || !thisFootstep.epsilonEquals(otherFootstep, 0.005))
          {
             return false;
          }

@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -14,12 +18,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -117,7 +117,7 @@ public class PlaneContactWrenchProcessor
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
-            tempCoP3d.setXYIncludingFrame(cop);
+            tempCoP3d.setIncludingFrame(cop, 0.0);
             centersOfPressureWorld.get(contactablePlaneBody).setAndMatchFrame(tempCoP3d);
             groundReactionForceMagnitudes.get(contactablePlaneBody).set(tempForce.length());
             normalTorques.get(contactablePlaneBody).set(normalTorque);

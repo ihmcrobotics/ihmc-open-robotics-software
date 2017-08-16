@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 
 public interface FootRotationCalculator
 {

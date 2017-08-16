@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class PointPositionDataObject

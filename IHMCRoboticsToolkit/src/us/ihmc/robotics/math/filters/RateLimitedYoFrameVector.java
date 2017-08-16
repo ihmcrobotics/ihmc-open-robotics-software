@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateLimitedYoFrameVector extends YoFrameVector
 {
@@ -116,7 +116,7 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       differenceVector.set(xUnfiltered, yUnfiltered, zUnfiltered);
       differenceVector.sub(getX(), getY(), getZ());
 
-      limited.set(differenceVector.limitLength(maxRateVariable.getDoubleValue() * dt));
+      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getDoubleValue() * dt));
       add(differenceVector);
    }
 }

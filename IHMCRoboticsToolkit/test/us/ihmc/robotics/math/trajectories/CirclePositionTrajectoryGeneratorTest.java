@@ -5,17 +5,16 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePointTest;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVectorTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 public class CirclePositionTrajectoryGeneratorTest
@@ -56,10 +55,10 @@ public class CirclePositionTrajectoryGeneratorTest
       circleTrajectory.getVelocity(velocity2);
 
       FrameVector3D numericallyDifferentiatedVelocity = numericallyDifferentiate(deltaT, position, position2);
-      FrameVectorTest.assertFrameVectorEquals(velocity, numericallyDifferentiatedVelocity, 1e-5);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(velocity, numericallyDifferentiatedVelocity, 1e-5);
 
       FrameVector3D numericallyDifferentiatedAcceleration = numericallyDifferentiate(deltaT, velocity, velocity2);
-      FrameVectorTest.assertFrameVectorEquals(acceleration, numericallyDifferentiatedAcceleration, 1e-4);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(acceleration, numericallyDifferentiatedAcceleration, 1e-4);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -86,17 +85,17 @@ public class CirclePositionTrajectoryGeneratorTest
       circleTrajectory.getPosition(position);
       circleTrajectory.getVelocity(velocity);
 
-      FramePointTest.assertFramePointEquals(offset, position, 1e-12);
-      FrameVectorTest.assertFrameVectorEquals(zero, velocity, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(offset, position, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(zero, velocity, 1e-12);
 
       circleTrajectory.compute(trajectoryTime);
       circleTrajectory.getPosition(position);
       circleTrajectory.getVelocity(velocity);
       circleTrajectory.getAcceleration(acceleration);
 
-      FramePointTest.assertFramePointEquals(offset, position, 1e-12);
-      FrameVectorTest.assertFrameVectorEquals(zero, velocity, 1e-12);
-      FrameVectorTest.assertFrameVectorEquals(zero, acceleration, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(offset, position, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(zero, velocity, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(zero, acceleration, 1e-12);
    }
 
    private FrameVector3D numericallyDifferentiate(double deltaT, FrameVector3D velocity, FrameVector3D velocity2)

@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
@@ -9,13 +12,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -295,14 +296,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }
 
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromHalfStride.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromHalfStride, -orientationDeltaWithBody);
+      GeometryTools.yawAboutPoint(desiredSwingFootPositionFromHalfStride, footPositionOppositeSideSameEnd, -orientationDeltaWithBody, desiredSwingFootPositionFromHalfStride);
       
       desiredSwingFootPositionFromHalfStride.changeFrame(ReferenceFrame.getWorldFrame());
 
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, desiredSwingFootPositionFromHalfStride, deltaYaw);
+      GeometryTools.yawAboutPoint(desiredSwingFootPositionFromHalfStride, centroid, deltaYaw, desiredSwingFootPositionFromHalfStride);
    }
 
    private void determineFootPositionFromOppositeSideFoot(QuadrupedSupportPolygon supportPolygon, RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double maxStepDistance, double deltaYaw,
@@ -342,14 +343,14 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);
       
       //compensate the angular diplacement if the footsepts of the side used as reference is not aligned with the body
-      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(footPositionOppositeSideSameEnd, desiredSwingFootPositionFromOppositeSideFoot, -orientationDeltaWithBody);
+      GeometryTools.yawAboutPoint(desiredSwingFootPositionFromOppositeSideFoot, footPositionOppositeSideSameEnd, -orientationDeltaWithBody, desiredSwingFootPositionFromOppositeSideFoot);
       
       desiredSwingFootPositionFromOppositeSideFoot.changeFrame(ReferenceFrame.getWorldFrame());
       
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
       supportPolygon.getCentroid(centroid);
-      desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, desiredSwingFootPositionFromOppositeSideFoot, deltaYaw);
+      GeometryTools.yawAboutPoint(desiredSwingFootPositionFromOppositeSideFoot, centroid, deltaYaw, desiredSwingFootPositionFromOppositeSideFoot);
    }
 
    private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)

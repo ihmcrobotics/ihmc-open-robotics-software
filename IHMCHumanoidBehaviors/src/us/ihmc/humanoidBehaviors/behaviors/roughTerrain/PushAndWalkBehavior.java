@@ -3,6 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,13 +23,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -192,7 +192,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       walking.set(true);
 
       FrameVector3D direction = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      direction.setXY(direction2dInWorld);
+      direction.set(direction2dInWorld);
       RobotSide swingSide = findStepSide(direction);
 
       FramePoint3D location = computeSteppingLocation(direction, swingSide);
@@ -288,7 +288,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       }
       
       FramePoint3D location = new FramePoint3D(stanceSoleFrame);
-      location.setXY(location2d[index]);
+      location.set(location2d[index], 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
 
       return location;

@@ -3,18 +3,23 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * @author Twan Koolen
  */
-public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, LineSegment2D>
+public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, LineSegment2D>
 {
    protected final LineSegment2D lineSegment;
 
@@ -53,14 +58,14 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
 
    public FrameLineSegment2d(FramePoint2D[] endpoints)
    {
-      this(endpoints[0].getReferenceFrame(), new LineSegment2D(endpoints[0].getPointCopy(), endpoints[1].getPointCopy()));
+      this(endpoints[0].getReferenceFrame(), new LineSegment2D(endpoints[0], endpoints[1]));
       
       endpoints[0].checkReferenceFrameMatch(endpoints[1]);
    }
 
    public FrameLineSegment2d(FramePoint2D firstEndpoint, FramePoint2D secondEndpoint)
    {
-      this(firstEndpoint.getReferenceFrame(), new LineSegment2D(firstEndpoint.getPointCopy(), secondEndpoint.getPointCopy()));
+      this(firstEndpoint.getReferenceFrame(), new LineSegment2D(firstEndpoint, secondEndpoint));
       firstEndpoint.checkReferenceFrameMatch(secondEndpoint);
    }
 
@@ -88,7 +93,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(vectorToSecondEndpoint);
-      this.lineSegment.set(firstEndpoint.getPoint(), vectorToSecondEndpoint.getVector());
+      this.lineSegment.set(firstEndpoint, vectorToSecondEndpoint);
    }
 
    public void setIncludingFrame(FramePoint2D firstEndpoint, FramePoint2D secondEndpoint)
@@ -210,26 +215,6 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
       this.lineSegment.set(firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY);
    }
 
-   @Override
-   public void set(FrameLineSegment2d lineSegment)
-   {
-      checkReferenceFrameMatch(lineSegment);
-      this.lineSegment.set(lineSegment.lineSegment);
-   }
-
-   // TODO change to setIncludingFrame
-   public void setAndChangeFrame(FrameLineSegment2d lineSegment)
-   {
-      this.referenceFrame = lineSegment.referenceFrame;
-      this.lineSegment.set(lineSegment.lineSegment);
-   }
-
-   public void set(ReferenceFrame referenceFrame, LineSegment2D lineSegment2d)
-   {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment.set(lineSegment2d);
-   }
-
    public void flipDirection()
    {
       this.lineSegment.flipDirection();
@@ -337,23 +322,17 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
       return copy;
    }
 
-   @Override
-   public String toString()
-   {
-      return "" + lineSegment;
-   }
-
    public void orthogonalProjection(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      lineSegment.orthogonalProjection(point.getPoint());
+      lineSegment.orthogonalProjection(point);
    }
 
    public void orthogonalProjection(FramePoint2D point, FramePoint2D projectedPointToPack)
    {
       checkReferenceFrameMatch(point);
       projectedPointToPack.setToZero(referenceFrame);
-      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack.getPoint());
+      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack);
    }
 
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
@@ -412,7 +391,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
       FramePoint2D[] ret = new FramePoint2D[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
-         ret[i] = new FramePoint2D(convexPolygon.referenceFrame, intersection[i]);
+         ret[i] = new FramePoint2D(convexPolygon.getReferenceFrame(), intersection[i]);
       }
 
       return ret;
@@ -437,7 +416,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
 
-      return this.lineSegment.isPointOnRightSideOfLineSegment(point.getPointCopy());
+      return this.lineSegment.isPointOnRightSideOfLineSegment(point);
    }
 
    public FrameLineSegment2d shiftToLeftCopy(double distanceToShift)
@@ -474,7 +453,7 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
       
-      lineSegment.orthogonalProjection(tempPoint2d, point.getPoint());
+      lineSegment.orthogonalProjection(tempPoint2d, point);
       framePoint2dToPack.setIncludingFrame(referenceFrame, tempPoint2d);
    }
    
@@ -486,15 +465,9 @@ public class FrameLineSegment2d extends AbstractFrameObject<FrameLineSegment2d, 
 
    public static FrameLineSegment2d generateRandomFrameLineSegment2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2D randomPoint1 = FramePoint2D.generateRandomFramePoint2d(random, zUpFrame, xMin, xMax, yMin, yMax);
-      FramePoint2D randomPoint2 = FramePoint2D.generateRandomFramePoint2d(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FramePoint2D randomPoint1 = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FramePoint2D randomPoint2 = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
 
       return new FrameLineSegment2d(randomPoint1, randomPoint2);
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      lineSegment.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    }
 }
