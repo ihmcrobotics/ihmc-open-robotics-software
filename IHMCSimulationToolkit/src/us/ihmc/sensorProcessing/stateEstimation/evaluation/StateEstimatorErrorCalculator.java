@@ -1,6 +1,9 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -8,12 +11,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -95,7 +95,7 @@ public class StateEstimatorErrorCalculator
    {
       orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocityFrameVector);
       
-      Vector3D estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedAngularVelocity = new Vector3D(estimatedAngularVelocityFrameVector);
       Vector3D actualAngularVelocity = new Vector3D();
       estimationJoint.physics.getAngularVelocityInBody(actualAngularVelocity);
 
@@ -118,7 +118,7 @@ public class StateEstimatorErrorCalculator
       
       Vector3D comError = new Vector3D();
       orientationEstimator.getEstimatedCoMPosition(estimatedCoMPosition);
-      comError.set(estimatedCoMPosition.getPointCopy());
+      comError.set(estimatedCoMPosition);
       comError.sub(comPoint);
 
       comZPositionError.set(comError.getZ());
@@ -140,7 +140,7 @@ public class StateEstimatorErrorCalculator
       perfectCoMVelocity.set(linearVelocity);
       
       orientationEstimator.getEstimatedCoMVelocity(estimatedCoMVelocityFrameVector);
-      Vector3D estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedCoMVelocity = new Vector3D(estimatedCoMVelocityFrameVector);
 
       estimatedCoMVelocity.sub(linearVelocity);
       comVelocityError.set(estimatedCoMVelocity.length());

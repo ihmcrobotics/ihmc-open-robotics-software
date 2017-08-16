@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -18,7 +19,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SixDoFJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {

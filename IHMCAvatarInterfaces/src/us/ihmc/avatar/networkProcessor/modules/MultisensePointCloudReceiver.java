@@ -6,6 +6,7 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class MultisensePointCloudReceiver extends RosPointCloudSubscriber 

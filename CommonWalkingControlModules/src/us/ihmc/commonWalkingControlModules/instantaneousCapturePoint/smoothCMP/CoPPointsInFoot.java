@@ -1,19 +1,17 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CoPPointsInFoot
@@ -183,7 +181,7 @@ public class CoPPointsInFoot
 
    public void setSwingFootLocation(FramePoint2D footLocation)
    {
-      this.swingFootCentroid.setXYIncludingFrame(footLocation);
+      this.swingFootCentroid.setIncludingFrame(footLocation, 0.0);
    }
 
    public void getSwingFootLocation(FramePoint3D footLocationToPack)
@@ -198,7 +196,7 @@ public class CoPPointsInFoot
 
    public void setSupportFootLocation(FramePoint2D footLocation)
    {
-      this.supportFootCentroid.setXYIncludingFrame(footLocation);
+      this.supportFootCentroid.setIncludingFrame(footLocation, 0.0);
    }
 
    public void getSupportFootLocation(FramePoint3D footLocationToPack)

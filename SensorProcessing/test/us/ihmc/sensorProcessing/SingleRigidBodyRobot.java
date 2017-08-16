@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;

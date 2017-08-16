@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class PelvisHeightTrajectoryCommand extends EuclideanTrajectoryControllerCommand<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>

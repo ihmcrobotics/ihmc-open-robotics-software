@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class AngularVelocitySensorConfiguration

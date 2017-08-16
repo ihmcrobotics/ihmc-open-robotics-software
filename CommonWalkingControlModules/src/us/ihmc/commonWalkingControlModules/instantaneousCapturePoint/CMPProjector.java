@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 
 public abstract class CMPProjector
 {

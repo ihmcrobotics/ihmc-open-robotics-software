@@ -1,9 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class TranslationReferenceFrame extends ReferenceFrame
 {

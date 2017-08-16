@@ -6,10 +6,10 @@ import java.util.Arrays;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidarScanPacket>
 {

@@ -1,11 +1,13 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
+public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
 {
    private final Pose2D pose;
 
@@ -134,11 +136,5 @@ public class FramePose2d extends AbstractFrameObject<FramePose2d, Pose2D>
    {
       checkReferenceFrameMatch(other);
       return pose.getOrientationDistance(other.pose);
-   }
-
-   @Override
-   public String toString()
-   {
-      return "FramePose2D: " + pose + "-" + referenceFrame;
    }
 }

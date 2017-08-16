@@ -10,6 +10,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+
 public class FrameGeometryTestFrame extends JFrame
 {
    private static final long serialVersionUID = 1211077223435215178L;

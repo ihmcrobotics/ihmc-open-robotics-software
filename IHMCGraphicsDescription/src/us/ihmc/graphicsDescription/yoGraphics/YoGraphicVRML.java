@@ -1,11 +1,11 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicVRML extends YoGraphicCoordinateSystem
 {

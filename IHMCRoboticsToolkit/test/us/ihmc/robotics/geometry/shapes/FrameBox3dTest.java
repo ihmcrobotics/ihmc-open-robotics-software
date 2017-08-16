@@ -12,16 +12,16 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameBox3dTest
 {
@@ -276,11 +276,11 @@ public class FrameBox3dTest
       assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
       box.getCenter(CenterBack);
-      assertTrue(vector.epsilonEquals(new Vector3D(CenterBack.getVectorCopy()), 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(CenterBack), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenterCopy()), 0.0));
 
-      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenter().getVectorCopy()), 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenter()), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenterCopy()), 0.0));
    }
 
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)

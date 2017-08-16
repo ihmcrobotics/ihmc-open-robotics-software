@@ -4,16 +4,16 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class Twist extends SpatialMotionVector
 {
@@ -206,7 +206,7 @@ public class Twist extends SpatialMotionVector
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
-      point2dFixedInBodyFrame.get(freeVector);
+      freeVector.set(point2dFixedInBodyFrame, 0.0);
 
       linearVelocityToPack.setToZero(expressedInFrame);
       linearVelocityToPack.cross(angularPart, freeVector);

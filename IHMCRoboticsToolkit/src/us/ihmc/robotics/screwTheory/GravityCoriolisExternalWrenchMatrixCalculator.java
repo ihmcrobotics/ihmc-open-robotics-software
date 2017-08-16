@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
 {

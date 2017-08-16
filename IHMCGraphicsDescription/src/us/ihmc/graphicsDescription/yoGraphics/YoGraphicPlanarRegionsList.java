@@ -10,6 +10,7 @@ import java.util.Random;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -34,7 +35,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * {@link YoGraphic} that can display {@link PlanarRegionsList} locally, with SCS for instance, and remotely, with SCSVisualizer for instance.

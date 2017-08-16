@@ -2,6 +2,11 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -13,13 +18,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
@@ -213,9 +213,9 @@ public class ICPOptimizationSolutionHandler
    private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2D currentSolutionLocation, FramePoint2D referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
-      solutionLocation.setXYIncludingFrame(solutionLocationToPack);
-      referenceLocation.setXYIncludingFrame(referenceLocation2d);
-      previousLocation.setXYIncludingFrame(currentSolutionLocation);
+      solutionLocation.setIncludingFrame(solutionLocationToPack, 0.0);
+      referenceLocation.setIncludingFrame(referenceLocation2d, 0.0);
+      previousLocation.setIncludingFrame(currentSolutionLocation, 0.0);
 
       solutionLocation.changeFrame(worldFrame);
       referenceLocation.changeFrame(worldFrame);
@@ -255,7 +255,7 @@ public class ICPOptimizationSolutionHandler
          wasAdjusted = true;
 
       solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
-      solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);
+      solutionLocationToPack.set(solutionLocation);
 
       return wasAdjusted;
    }
@@ -268,7 +268,7 @@ public class ICPOptimizationSolutionHandler
       ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
       FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
       FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
-      inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
+      tempPoint2d.setIncludingFrame(inputHandler.getFinalICP());
 
       stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, tempPoint2d, footstepSolutions, entryOffsets, exitOffsets,
             numberOfFootstepsToConsider);
@@ -293,7 +293,7 @@ public class ICPOptimizationSolutionHandler
          ArrayList<FrameVector2D> exitOffsets = inputHandler.getExitOffsets();
          FramePoint2D stanceEntryCMP = inputHandler.getStanceEntryCMP();
          FramePoint2D stanceExitCMP = inputHandler.getStanceExitCMP();
-         inputHandler.getFinalICP().getFrameTuple2d(tempPoint2d);
+         tempPoint2d.setIncludingFrame(inputHandler.getFinalICP());
 
          stateMultiplierCalculator
                .yoReconstructICPCornerPoint(tmpEndPoint, tempPoint2d, upcomingFootstepLocations, entryOffsets, exitOffsets,

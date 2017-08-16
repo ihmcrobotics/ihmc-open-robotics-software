@@ -13,11 +13,11 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

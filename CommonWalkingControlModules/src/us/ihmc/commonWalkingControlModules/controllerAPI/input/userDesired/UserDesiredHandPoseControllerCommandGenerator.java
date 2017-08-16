@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -14,7 +16,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class UserDesiredHandPoseControllerCommandGenerator
@@ -62,7 +63,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
                currentPose.changeFrame(referenceFrame);
 
-               userDesiredHandPose.setPosition(currentPose.getFramePointCopy().getPointCopy());
+               userDesiredHandPose.setPosition(new Point3D(currentPose.getFramePointCopy()));
                userDesiredHandPose.setOrientation(currentPose.getFrameOrientationCopy().getQuaternionCopy());
 
                userDesiredSetHandPoseToActual.set(false);

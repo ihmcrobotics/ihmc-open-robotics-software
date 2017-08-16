@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.robotics.geometry.AbstractFrameObject;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 
 public class FrameTrajectoryPoint<T extends FrameTrajectoryPoint<T, S>, S extends TrajectoryPointInterface<S>>
-      extends AbstractFrameObject<T, S> implements TrajectoryPointInterface<T>
+      extends FrameGeometryObject<T, S> implements TrajectoryPointInterface<T>
 {
    private final S geometryObject;
    

@@ -11,6 +11,7 @@ import java.util.List;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -24,7 +25,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

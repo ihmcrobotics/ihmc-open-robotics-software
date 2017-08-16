@@ -3,18 +3,18 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -158,8 +158,8 @@ public class HandCompliantControlHelper
       errorTorque.setIncludingFrame(controlFrame, desiredTorque.getX(), desiredTorque.getY(), desiredTorque.getZ());
       errorTorque.sub(measuredTorque);
 
-      linearCorrection.scale(linearGain.getDoubleValue(), errorForce);
-      angularCorrection.scale(angularGain.getDoubleValue(), errorTorque);
+      linearCorrection.setAndScale(linearGain.getDoubleValue(), errorForce);
+      angularCorrection.setAndScale(angularGain.getDoubleValue(), errorTorque);
 
       clipToVectorMagnitude(compliantControlMaxLinearCorrectionPerTick.getDoubleValue(), linearCorrection);
       clipToVectorMagnitude(compliantControlMaxAngularCorrectionPerTick.getDoubleValue(), angularCorrection);
