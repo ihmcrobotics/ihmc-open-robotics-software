@@ -17,6 +17,7 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -572,7 +573,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       calculateAngularMomentumTrajectory();
       transferAngularMomentumTrajectories.get(footstepIndex + 1).set(estimatedAngularMomentumTrajectory);
    }
-
+   
    private void calculateAngularMomentumTrajectory()
    {
       trajMathTools.subtract(swingFootTrajectory, swingFootTrajectory, segmentCoMTrajectory);

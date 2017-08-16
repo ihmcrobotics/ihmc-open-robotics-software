@@ -450,4 +450,13 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       return referenceICPGenerator.getTotalNumberOfSegments();
    }
+   
+   @Override
+   /** {@inheritDoc} */
+   public void holdCurrentICP(FramePoint3D icpPositionToHold)
+   {
+      super.holdCurrentICP(icpPositionToHold);
+      // Asking the CoP and ICP to be the same since we assume that holds can be requested in static conditions only
+      referenceCoPGenerator.holdPosition(icpPositionToHold);
+   }
 }
