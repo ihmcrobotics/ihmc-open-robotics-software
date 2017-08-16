@@ -1,19 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
+import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters.CoPSupportPolygonNames;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -289,15 +286,25 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.exitCoPForwardSafetyMarginOnToes.set(parameters.getExitCoPForwardSafetyMarginOnToes());
 
       EnumMap<CoPPointName, Vector2D> copOffsets = parameters.getCopOffsetsInFootFrame();
-      for (int waypointNumber = 0; waypointNumber < parameters.getCoPPointsToPlan().length; waypointNumber++)
-         setSymmetricCoPConstantOffsets(parameters.getCoPPointsToPlan()[waypointNumber], copOffsets.get(parameters.getCoPPointsToPlan()[waypointNumber]));
+      CoPPointName[] transferCoPNames = parameters.getTransferCoPPointsToPlan();
+      CoPPointName[] swingCoPNames = parameters.getSwingCoPPointsToPlan();
+      for (int waypointNumber = 0; waypointNumber < transferCoPNames.length; waypointNumber++)
+         setSymmetricCoPConstantOffsets(transferCoPNames[waypointNumber], copOffsets.get(transferCoPNames[waypointNumber]));
+      for (int waypointNumber = 0; waypointNumber < swingCoPNames.length; waypointNumber++)
+         setSymmetricCoPConstantOffsets(swingCoPNames[waypointNumber], copOffsets.get(swingCoPNames[waypointNumber]));
 
       EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds = parameters.getCoPForwardOffsetBoundsInFoot();
-      for (int waypointIndex = 0; waypointIndex < parameters.getCoPPointsToPlan().length; waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < transferCoPNames.length; waypointIndex++)
       {
-         Vector2D bounds = copForwardOffsetBounds.get(parameters.getCoPPointsToPlan()[waypointIndex]);
-         minCoPOffsets.get(parameters.getCoPPointsToPlan()[waypointIndex]).set(bounds.getX());
-         maxCoPOffsets.get(parameters.getCoPPointsToPlan()[waypointIndex]).set(bounds.getY());
+         Vector2D bounds = copForwardOffsetBounds.get(transferCoPNames[waypointIndex]);
+         minCoPOffsets.get(transferCoPNames[waypointIndex]).set(bounds.getX());
+         maxCoPOffsets.get(transferCoPNames[waypointIndex]).set(bounds.getY());
+      }
+      for (int waypointIndex = 0; waypointIndex < swingCoPNames.length; waypointIndex++)
+      {
+         Vector2D bounds = copForwardOffsetBounds.get(swingCoPNames[waypointIndex]);
+         minCoPOffsets.get(swingCoPNames[waypointIndex]).set(bounds.getX());
+         maxCoPOffsets.get(swingCoPNames[waypointIndex]).set(bounds.getY());
       }
    }
 
@@ -586,6 +593,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonA, footPolygonB, referenceFrameToConvertTo);
       convertToFramePointRetainingZ(tempFramePoint1, framePolygonReference.getCentroid(), referenceFrameToConvertTo);
+      framePointToPack.changeFrame(referenceFrameToConvertTo);
       framePointToPack.interpolate(this.tempDoubleSupportPolygonCentroid, tempFramePoint1, this.tempDouble);
    }
 
@@ -977,6 +985,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       tempFramePoint1.changeFrame(referenceFrameToStoreResultIn);
       tempFramePoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
       tempFramePoint2.changeFrame(referenceFrameToStoreResultIn);
+      framePointToPack.changeFrame(referenceFrameToStoreResultIn);
       framePointToPack.interpolate(tempFramePoint1, tempFramePoint2, 0.5);
    }
 
