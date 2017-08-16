@@ -1,4 +1,4 @@
-package us.ihmc.tools.inputDevices.mouse;
+package us.ihmc.graphicsDescription.input.mouse;
 
 public enum MousePressedOrReleased
 {

@@ -12,6 +12,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.MouseListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
@@ -19,9 +22,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.inputDevices.keyboard.KeyListener;
-import us.ihmc.tools.inputDevices.mouse.MouseListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {

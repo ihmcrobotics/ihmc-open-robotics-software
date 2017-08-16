@@ -1,4 +1,4 @@
-package us.ihmc.tools.inputDevices.keyboard;
+package us.ihmc.graphicsDescription.input.keyboard;
 
 import java.util.EnumMap;
 
