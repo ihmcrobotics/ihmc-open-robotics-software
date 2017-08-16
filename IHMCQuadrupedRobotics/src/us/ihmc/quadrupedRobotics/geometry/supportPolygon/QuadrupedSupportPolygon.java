@@ -1347,7 +1347,7 @@ public class QuadrupedSupportPolygon implements Serializable
       int numberOfEqual = 0;
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if (getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
+         if (polygonToCompare.getFootstep(robotQuadrant) != null && getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
          {
             ++numberOfEqual;
          }
@@ -1769,7 +1769,7 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint3D thisFootstep = getFootstep(quadrant);
          FramePoint3D otherFootstep = polyTwo.getFootstep(quadrant);
          
-         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
+         if(otherFootstep == null || !thisFootstep.epsilonEquals(otherFootstep, 0.005))
          {
             return false;
          }
