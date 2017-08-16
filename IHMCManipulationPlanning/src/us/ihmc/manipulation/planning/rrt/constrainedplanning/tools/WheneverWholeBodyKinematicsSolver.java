@@ -137,7 +137,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 200;
+   private static int maximumCntForUpdateInternal = 1000;
    private static int cntForUpdateInternal = 0;
 
    private static int numberOfTest = 0;
@@ -345,6 +345,8 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
+      
+      updateInternal();
       //      if (DEBUG)
       //         PrintTools.info("Initial posture ");
       //      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
@@ -427,12 +429,12 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal);
+            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
 
             return isSolved;
          }
       }
-      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal);
+      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
       return false;
    }
 
