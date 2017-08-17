@@ -138,12 +138,9 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 200;
+   private static int maximumCntForUpdateInternal = 120;
    private static int cntForUpdateInternal = 0;
    
-   private static int maximumCntForJointLimit = 30;
-   private static int cntForJointLimit = 0;
-
    private static int numberOfTest = 0;
 
    private boolean isSolved = false;
@@ -264,7 +261,6 @@ public class WheneverWholeBodyKinematicsSolver
       isSolved = false;
       isJointLimit = false;
       cntForUpdateInternal = 0;
-      cntForJointLimit = 0;
       solutionQualityOld.setToNaN();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
@@ -295,14 +291,6 @@ public class WheneverWholeBodyKinematicsSolver
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
       
-//      updateInternal();
-      //      if (DEBUG)
-      //         PrintTools.info("Initial posture ");
-      //      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      //      desiredReferenceFrames.updateFrames();
-      //      if (DEBUG)
-      //         printOutRobotModel(desiredFullRobotModel, desiredReferenceFrames.getMidFootZUpGroundFrame());
-
       return true;
    }
 
@@ -348,17 +336,16 @@ public class WheneverWholeBodyKinematicsSolver
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
 
-      if (true)
+      if (DEBUG)
          PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " old " + solutionQualityOld.getDoubleValue() + " "
                + isSolutionStable + " " + isSolutionGoodEnough + " " + isGoodSolutionCur);
 
       if (isGoodSolutionCur)
       {
          isSolved = true;
-
       }
       
-      double movementThreshold = 3.0e-5;
+      double movementThreshold = 2.0e-5;
       double errorThreshold = 1.0e-3;
       
       double rightHandMovement = handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT));
@@ -369,26 +356,19 @@ public class WheneverWholeBodyKinematicsSolver
       
       if(rightHandMovement < movementThreshold)
       {
-         PrintTools.info("Right Hand movement is stable");
          if(rightHandError > errorThreshold)
-            PrintTools.info("Right Hand cannot converged");
+         {
+            isJointLimit = true;
+         }  
       }
          
       if(leftHandMovement < movementThreshold)
       {
-         PrintTools.info("Left Hand movement is stable");
          if(leftHandError > errorThreshold)
          {
             isJointLimit = true;
-            PrintTools.info("Left Hand cannot converged");
-         }
-            
+         }  
       }
-      
-//      PrintTools.info(""+cntForUpdateInternal+" "+ RobotSide.RIGHT+" "+rightHandError +" "+rightHandMovement);
-//      PrintTools.info(""+cntForUpdateInternal+" "+ RobotSide.LEFT+" "+leftHandError +" "+leftHandMovement);
-            
-      
       
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;

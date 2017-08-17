@@ -205,7 +205,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
 
-//      @Test
+      @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
@@ -261,7 +261,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-      packet.setNumberOfExpanding(500);
+      packet.setNumberOfExpanding(400);
       packet.setNumberOfFindInitialGuess(50);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
@@ -329,7 +329,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   @Test
+//   @Test
    public void testForSolver() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
