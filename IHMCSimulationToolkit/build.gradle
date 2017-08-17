@@ -28,7 +28,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile "us.ihmc:IHMCRealtime:1.1.2"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
@@ -48,7 +48,7 @@ mainDependencies {
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: dependencyMode

@@ -56,7 +56,7 @@ mainDependencies {
    compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
    compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
    compile "org.boofcv:recognition:0.24.1"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: dependencyMode
    compile group: "us.ihmc", name: "vicon", version: dependencyMode
    compile group: "us.ihmc", name: "common-walking-control-modules", version: dependencyMode
@@ -88,7 +88,7 @@ testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
    compile group: "us.ihmc", name: "common-walking-control-modules-test", version: dependencyMode
