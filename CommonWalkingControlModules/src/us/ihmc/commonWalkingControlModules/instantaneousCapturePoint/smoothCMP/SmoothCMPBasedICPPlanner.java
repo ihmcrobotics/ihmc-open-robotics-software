@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -297,16 +298,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void compute(double time)
    {
       timeInCurrentState.set(time - initialTime.getDoubleValue());
-      if(timeInCurrentState.getDoubleValue() > referenceCoPGenerator.getCurrentStateFinalTime())
-         timeInCurrentState.set(referenceCoPGenerator.getCurrentStateFinalTime());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
-      
+
+      double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
+
       if (!isInStanding())
       {
-         referenceICPGenerator.compute(timeInCurrentState.getDoubleValue());
-         referenceCoPGenerator.update(timeInCurrentState.getDoubleValue());
-         referenceCMPGenerator.update(timeInCurrentState.getDoubleValue());
-         angularMomentumGenerator.update(timeInCurrentState.getDoubleValue());
+         referenceICPGenerator.compute(timeInCurrentState);
+         referenceCoPGenerator.update(timeInCurrentState);
+         referenceCMPGenerator.update(timeInCurrentState);
+         angularMomentumGenerator.update(timeInCurrentState);
          
          referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
          referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
