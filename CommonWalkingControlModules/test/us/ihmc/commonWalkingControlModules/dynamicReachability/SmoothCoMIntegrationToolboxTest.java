@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SmoothCoMIntegrationToolsTest
+public class SmoothCoMIntegrationToolboxTest
 {
    private static final int nTests = 20;
    private static final double omega0 = 3.4;
@@ -25,7 +25,7 @@ public class SmoothCoMIntegrationToolsTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random();
    
-   String namePrefix = "SmoothCoMIntegrationToolsTest";
+   String namePrefix = "SmoothCoMIntegrationToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
