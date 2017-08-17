@@ -208,13 +208,13 @@ public class YoVariableExporter extends YoVariableLogReader
       }
       else if (variable instanceof YoBoolean)
       {
-         return new DataHolder<Integer>(offset, new MLInt32(name, dims))
+         return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
 
             @Override
             public void set(long entryAsLong)
             {
-               set((Integer) (entryAsLong == 1L ? 1 : 0));
+               set((Long) (entryAsLong == 0L ? 0L : 1L));   // Force true to equal 1L in all cases
             }
 
          };
