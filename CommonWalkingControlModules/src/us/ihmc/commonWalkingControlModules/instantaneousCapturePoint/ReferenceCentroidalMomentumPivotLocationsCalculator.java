@@ -667,7 +667,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
       else if (putCMPOnToesWalking)
       {
-         putExitCMPOnToes(cmp2d, footSupportPolygon, exitCMPUserOffsets.get(robotSide).getY());
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, footSupportPolygon, centroidOfFootstepToConsider, exitCMPUserOffsets.get(robotSide),
+                                                             minForwardExitCMPOffset.getDoubleValue(), footSupportPolygon.getMaxX(),
+                                                             exitCMPForwardSafetyMarginOnToes.getDoubleValue());
       }
       else if (putCMPOnToesSteppingDown)
       {
@@ -699,7 +701,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    }
 
    private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2D cmpToPack, FrameConvexPolygon2d footSupportPolygon,
-         FramePoint2D centroidOfFootstepToConsider, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
+                                                                    FramePoint2D centroidOfFootstepToConsider, YoFrameVector2d cmpOffset,
+                                                                    double minForwardCMPOffset, double maxForwardCMPOffset)
+   {
+      constrainCMPAccordingToSupportPolygonAndUserOffsets(cmpToPack, footSupportPolygon, centroidOfFootstepToConsider, cmpOffset, minForwardCMPOffset,
+                                                          maxForwardCMPOffset, safeDistanceFromCMPToSupportEdges.getDoubleValue());
+   }
+
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2D cmpToPack, FrameConvexPolygon2d footSupportPolygon,
+                                                                    FramePoint2D centroidOfFootstepToConsider, YoFrameVector2d cmpOffset,
+                                                                    double minForwardCMPOffset, double maxForwardCMPOffset, double safeDistanceFromCMPToSupportEdges)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
       FramePoint2D footSupportCentroid = footSupportPolygon.getCentroid();
@@ -711,7 +722,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(footSupportPolygon);
-      convexPolygonShrinker.scaleConvexPolygon(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdges.getDoubleValue(), footSupportPolygon);
+      convexPolygonShrinker.scaleConvexPolygon(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdges, footSupportPolygon);
 
       footSupportPolygon.orthogonalProjection(cmpToPack);
    }
