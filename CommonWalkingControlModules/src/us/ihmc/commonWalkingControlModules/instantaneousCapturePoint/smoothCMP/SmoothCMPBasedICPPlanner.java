@@ -365,12 +365,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
-      else if(isInDoubleSupport())
-      {
-         tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
-         tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
-      }
       else
       {
          tempFinalICP.set(getFinalDesiredCapturePointPositions().get(referenceCMPGenerator.getTransferCMPTrajectories().get(0).getNumberOfSegments() - 1));
@@ -441,7 +435,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   //FIXME: to be changed
    public boolean isOnExitCMP()
    {
       return referenceCoPGenerator.isOnExitCoP();
