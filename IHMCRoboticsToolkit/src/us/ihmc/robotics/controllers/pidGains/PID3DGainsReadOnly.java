@@ -80,10 +80,7 @@ public interface PID3DGainsReadOnly
     * </p>
     * @return the coupling of the controller gains for the three axes.
     */
-   public default GainCoupling getGainCoupling()
-   {
-      return GainCoupling.NONE;
-   }
+   public abstract GainCoupling getGainCoupling();
 
    /**
     * Returns whether the PID controller used an I gain or not (if this
@@ -95,10 +92,7 @@ public interface PID3DGainsReadOnly
     * </p>
     * @return whether the gains include integrator gains.
     */
-   public default boolean isUseIntegrator()
-   {
-      return false;
-   }
+   public abstract boolean isUseIntegrator();
 
    /**
     * Will pack the proportional gain matrix. The matrix will be a diagonal
