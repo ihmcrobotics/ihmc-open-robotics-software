@@ -49,7 +49,7 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
       loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);

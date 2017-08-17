@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -13,6 +14,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.awt.*;
 
 public class TransferToStandingState extends WalkingState
 {
@@ -28,6 +31,7 @@ public class TransferToStandingState extends WalkingState
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final LegConfigurationManager legConfigurationManager;
 
    public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
@@ -43,6 +47,7 @@ public class TransferToStandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doFootExplorationInTransferToStanding.set(false);
    }
@@ -96,6 +101,21 @@ public class TransferToStandingState extends WalkingState
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForStanding(finalTransferTime);
+
+      if (previousSupportSide != null)
+      {
+         RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
+         legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
+         legConfigurationManager.beginStraightening(previousSwingSide);
+      }
+      else
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            legConfigurationManager.setFullyExtendLeg(robotSide, false);
+            legConfigurationManager.setStraight(robotSide);
+         }
+      }
    }
 
    @Override
