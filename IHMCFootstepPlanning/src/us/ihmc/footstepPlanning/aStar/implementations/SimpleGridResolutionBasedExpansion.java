@@ -4,7 +4,11 @@ import java.util.HashSet;
 
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeExpansion;
-
+/**
+ * This class expands nodes in a 8 connected way.
+ * It does not account for turn footsteps. Yaw angle of potential footstep neighbour by default would be zero.
+ * Very small 5cm steps. 
+ */
 public class SimpleGridResolutionBasedExpansion implements FootstepNodeExpansion
 {
    @Override
