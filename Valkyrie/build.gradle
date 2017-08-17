@@ -44,7 +44,7 @@ mainDependencies {
    compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.5.0', changing: true
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-system-identification", version: dependencyMode
@@ -72,7 +72,7 @@ mainDependencies {
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: dependencyMode

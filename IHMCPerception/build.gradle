@@ -62,7 +62,7 @@ mainDependencies {
    compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.4'
    compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
    compile "org.ddogleg:ddogleg:0.7"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: dependencyMode
@@ -80,7 +80,7 @@ mainDependencies {
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: dependencyMode
