@@ -1,7 +1,4 @@
-package us.ihmc.robotics.controllers;
-
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+package us.ihmc.robotics.controllers.pidGains;
 
 /**
  * An extension of the {@link PIDSE3Gains} interface that provides additional access
